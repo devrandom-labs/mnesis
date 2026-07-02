@@ -21,9 +21,6 @@ impl AsRef<[u8]> for AId {
         &self.0
     }
 }
-impl Id for AId {
-    const BYTE_LEN: usize = 8;
-}
 
 #[derive(Debug, thiserror::Error)]
 #[error("e")]

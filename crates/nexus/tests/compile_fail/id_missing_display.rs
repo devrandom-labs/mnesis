@@ -1,13 +1,19 @@
-/// Id trait requires Display. A type without Display cannot impl Id.
+//! `Id` requires `Display` (and `AsRef<[u8]>`). A type missing `Display` is
+//! therefore *not* covered by the blanket impl, so requiring `I: Id` fails.
 
 use nexus::Id;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 struct BadId(u64);
-// Missing: impl Display for BadId
-
-impl Id for BadId {
-    const BYTE_LEN: usize = 8;
+impl AsRef<[u8]> for BadId {
+    fn as_ref(&self) -> &[u8] {
+        &[]
+    }
 }
+// Missing: impl std::fmt::Display for BadId
 
-fn main() {}
+fn requires_id<I: Id>() {}
+
+fn main() {
+    requires_id::<BadId>();
+}

@@ -6,7 +6,7 @@
 
 use std::fmt;
 
-use nexus::{AggregateState, DomainEvent, Events, Handle, Id, events};
+use nexus::{AggregateState, DomainEvent, Events, Handle, events};
 use serde::{Deserialize, Serialize};
 
 // ── Id ──────────────────────────────────────────────────────────────────────
@@ -24,10 +24,6 @@ impl AsRef<[u8]> for AccountId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-
-impl Id for AccountId {
-    const BYTE_LEN: usize = 0;
 }
 
 // ── Events (serde-encodable so the built-in JsonCodec can persist them) ──────

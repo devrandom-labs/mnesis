@@ -65,9 +65,6 @@ impl AsRef<[u8]> for TodoId {
         self.0.as_bytes()
     }
 }
-impl Id for TodoId {
-    const BYTE_LEN: usize = 0;
-}
 
 #[derive(Debug, thiserror::Error)]
 #[error("todo error")]

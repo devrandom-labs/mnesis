@@ -24,7 +24,6 @@
 )]
 
 use futures::{StreamExt, TryStreamExt};
-use nexus::Id;
 use nexus::Version;
 use nexus_store::Store;
 use nexus_store::store::RawEventStore;
@@ -45,10 +44,6 @@ impl fmt::Display for TodoId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
-}
-
-impl Id for TodoId {
-    const BYTE_LEN: usize = 0;
 }
 
 impl AsRef<[u8]> for TodoId {

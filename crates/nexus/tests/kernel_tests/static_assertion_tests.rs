@@ -58,9 +58,10 @@ impl AsRef<[u8]> for StaticId {
         self.0.as_bytes()
     }
 }
-impl Id for StaticId {
-    const BYTE_LEN: usize = 0;
-}
+
+// #252: declaring an id is a newtype + `Display` + `AsRef<[u8]>` — the blanket
+// impl covers it with no hand-written `impl Id` and no associated const.
+assert_impl_all!(StaticId: Id);
 
 #[derive(Debug, Clone)]
 #[allow(dead_code, reason = "test-only event type used for static assertions")]

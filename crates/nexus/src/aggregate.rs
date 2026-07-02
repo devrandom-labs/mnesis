@@ -99,7 +99,6 @@ pub trait AggregateState: Send + Sync + Debug + 'static {
 /// # #[derive(Debug, Clone, Hash, PartialEq, Eq)] struct MyId(String);
 /// # impl std::fmt::Display for MyId { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "{}", self.0) } }
 /// # impl AsRef<[u8]> for MyId { fn as_ref(&self) -> &[u8] { self.0.as_bytes() } }
-/// # impl Id for MyId { const BYTE_LEN: usize = 0; }
 /// # #[derive(Debug, thiserror::Error)] #[error("e")] struct MyError;
 ///
 /// struct MyAggregate;
@@ -149,7 +148,6 @@ pub trait Aggregate: Sized {
 /// # #[derive(Debug, Clone, Hash, PartialEq, Eq)] struct TodoId(String);
 /// # impl std::fmt::Display for TodoId { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "{}", self.0) } }
 /// # impl AsRef<[u8]> for TodoId { fn as_ref(&self) -> &[u8] { self.0.as_bytes() } }
-/// # impl Id for TodoId { const BYTE_LEN: usize = 0; }
 /// # #[derive(Debug, thiserror::Error)] #[error("e")] struct TodoError;
 /// # struct Todo;
 /// # impl Aggregate for Todo { type State = TodoState; type Error = TodoError; type Id = TodoId; }
@@ -436,7 +434,6 @@ mod purist_dispatch_tests {
     use crate::event::DomainEvent;
     use crate::events;
     use crate::events::Events;
-    use crate::id::Id;
     use crate::message::Message;
     use crate::version::Version;
 
@@ -459,10 +456,6 @@ mod purist_dispatch_tests {
         fn as_ref(&self) -> &[u8] {
             &self.0
         }
-    }
-
-    impl Id for CtrId {
-        const BYTE_LEN: usize = 8;
     }
 
     #[derive(Debug, Clone, PartialEq, Eq)]

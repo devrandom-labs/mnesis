@@ -26,9 +26,6 @@ impl AsRef<[u8]> for PId {
         &self.0
     }
 }
-impl Id for PId {
-    const BYTE_LEN: usize = 8;
-}
 
 #[derive(Debug, Clone, PartialEq)]
 enum CountEvent {

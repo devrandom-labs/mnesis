@@ -14,7 +14,7 @@
 )]
 
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
-use nexus::{Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Id, Message};
+use nexus::{Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message};
 use nexus::{Version, VersionedEvent};
 use std::fmt;
 use std::hint::black_box;
@@ -39,9 +39,6 @@ impl AsRef<[u8]> for BId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-impl Id for BId {
-    const BYTE_LEN: usize = 0;
 }
 
 #[derive(Debug, Clone)]

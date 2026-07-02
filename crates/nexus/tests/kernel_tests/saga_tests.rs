@@ -5,8 +5,8 @@
 //! more than one own-event (`N > 0`).
 
 use nexus::{
-    Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Id, Message, React, Saga,
-    Version, events,
+    Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message, React, Saga, Version,
+    events,
 };
 
 // ── Saga identity ────────────────────────────────────────────────────────────
@@ -30,10 +30,6 @@ impl AsRef<[u8]> for OrderId {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
-}
-
-impl Id for OrderId {
-    const BYTE_LEN: usize = 8;
 }
 
 // ── The saga's OWN events (its history) ─────────────────────────────────────

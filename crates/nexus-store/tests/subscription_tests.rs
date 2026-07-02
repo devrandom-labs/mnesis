@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use nexus::{Id, Version};
+use nexus::Version;
 use nexus_store::store::RawEventStore;
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{Store, Subscription, pending_envelope};
@@ -30,9 +30,6 @@ impl AsRef<[u8]> for TestId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-impl Id for TestId {
-    const BYTE_LEN: usize = 0;
 }
 
 /// Helper: build a pending envelope with a given version and event type.

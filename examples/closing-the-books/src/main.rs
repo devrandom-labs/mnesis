@@ -85,10 +85,6 @@ impl fmt::Display for CashierShiftId {
     }
 }
 
-impl Id for CashierShiftId {
-    const BYTE_LEN: usize = 0;
-}
-
 impl AsRef<[u8]> for CashierShiftId {
     fn as_ref(&self) -> &[u8] {
         self.urn.as_bytes()
@@ -241,10 +237,6 @@ impl fmt::Display for RegisterId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
-}
-
-impl Id for RegisterId {
-    const BYTE_LEN: usize = 0;
 }
 
 impl AsRef<[u8]> for RegisterId {

@@ -24,9 +24,6 @@ impl AsRef<[u8]> for UserId {
         self.0.as_bytes()
     }
 }
-impl Id for UserId {
-    const BYTE_LEN: usize = 0;
-}
 
 #[derive(Debug, Clone)]
 struct UserCreated {

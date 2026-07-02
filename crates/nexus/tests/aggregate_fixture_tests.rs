@@ -9,12 +9,12 @@
 )]
 
 use nexus::testing::AggregateFixture;
-use nexus::{AggregateState, DomainEvent, Events, Handle, Id, Message, events};
+use nexus::{AggregateState, DomainEvent, Events, Handle, Message, events};
 
 // ── Sample domain ────────────────────────────────────────────────
 // Store the id as fixed bytes so `as_ref` can borrow them (the kernel's
-// own `Id` tests use the same `[u8; N]` pattern). `Id` requires the
-// associated `const BYTE_LEN` — the fixed storage width of `as_ref()`.
+// own `Id` tests use the same `[u8; N]` pattern). `Id` is satisfied for
+// free via the blanket impl — no hand-written `impl Id`.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 struct CounterId([u8; 8]);
 impl CounterId {
@@ -31,9 +31,6 @@ impl AsRef<[u8]> for CounterId {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
-}
-impl Id for CounterId {
-    const BYTE_LEN: usize = 8;
 }
 
 #[derive(Clone, Debug, PartialEq)]
