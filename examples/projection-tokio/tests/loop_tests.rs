@@ -36,7 +36,7 @@ use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
 
 use futures::StreamExt;
-use nexus::{DomainEvent, Message, Version};
+use nexus::{DomainEvent, Message, Version, version};
 use nexus_example_projection_tokio::run_projection;
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{
@@ -187,12 +187,13 @@ async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events:
         stream.count().await
     };
     let base_version = u64::try_from(current_len).unwrap();
+    let first = Version::new(base_version)
+        .map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
+    let run = Version::run(first, events.len()).expect("version overflow");
 
-    let envelopes: Vec<_> = events
-        .iter()
-        .enumerate()
-        .map(|(i, event)| {
-            let ver = Version::new(base_version + u64::try_from(i).unwrap() + 1).unwrap();
+    let envelopes: Vec<_> = run
+        .zip(events.iter())
+        .map(|(ver, event)| {
             let payload = codec.encode(event).unwrap();
             pending_envelope(ver)
                 .event_type(event.name())
@@ -257,7 +258,7 @@ async fn runner_processes_events_and_checkpoints() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(position, Version::new(3).unwrap());
+    assert_eq!(position, version!(3));
     assert_eq!(
         state,
         CountState {
@@ -330,7 +331,7 @@ async fn runner_resumes_from_checkpoint() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(position, Version::new(5).unwrap());
+    assert_eq!(position, version!(5));
     assert_eq!(
         state,
         CountState {
@@ -383,7 +384,7 @@ async fn runner_trigger_controls_checkpoint_frequency() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(position, Version::new(5).unwrap());
+    assert_eq!(position, version!(5));
     assert_eq!(
         state,
         CountState {
@@ -469,7 +470,7 @@ async fn runner_resumes_normally_after_rebuild_completes() {
             total: 60
         }
     );
-    assert_eq!(position, Version::new(3).unwrap());
+    assert_eq!(position, version!(3));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -549,7 +550,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(position, Version::new(3).unwrap());
+    assert_eq!(position, version!(3));
 
     // Phase 2: start with schema v2 but immediate shutdown.
     // tokio::select! is non-deterministic — the runner may process 0..N
@@ -651,7 +652,7 @@ async fn runner_graceful_shutdown_flushes_dirty_state() {
             total: 30
         }
     );
-    assert_eq!(position, Version::new(2).unwrap());
+    assert_eq!(position, version!(2));
 }
 
 #[tokio::test]
@@ -665,7 +666,7 @@ async fn runner_stale_state_falls_back_to_initial() {
         .commit(
             &stream_id,
             NonZeroU32::MIN,
-            Version::new(5).unwrap(),
+            version!(5),
             &CountState {
                 count: 99,
                 total: 999,
@@ -816,7 +817,7 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
     let stream_id = TestId("stream-1".into());
 
     // Append a raw event with garbage payload
-    let bad_envelope = pending_envelope(Version::new(1).unwrap())
+    let bad_envelope = pending_envelope(version!(1))
         .event_type("Added")
         .payload(vec![0xFF]) // invalid: too short
         .expect("valid payload")
@@ -900,7 +901,7 @@ async fn runner_catches_up_and_processes_all_existing_events() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(position, Version::new(5).unwrap());
+    assert_eq!(position, version!(5));
     assert_eq!(
         state,
         CountState {
@@ -951,7 +952,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(cp1, Version::new(1).unwrap());
+    assert_eq!(cp1, version!(1));
     assert_eq!(
         state1,
         CountState {
@@ -984,7 +985,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(cp2, Version::new(2).unwrap());
+    assert_eq!(cp2, version!(2));
     // count:2, total:15 — not count:1/total:5 (fresh) or count:2/total:20 (double-fold)
     assert_eq!(
         state2,
@@ -1051,7 +1052,7 @@ async fn schema_bump_resolves_to_fresh() {
         .await
         .unwrap()
         .unwrap();
-    assert_eq!(pos2, Version::new(1).unwrap());
+    assert_eq!(pos2, version!(1));
     assert_eq!(
         state2,
         CountState {

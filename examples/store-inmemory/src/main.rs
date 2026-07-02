@@ -24,7 +24,7 @@
 )]
 
 use futures::{StreamExt, TryStreamExt};
-use nexus::Version;
+use nexus::{Version, version};
 use nexus_store::Store;
 use nexus_store::store::RawEventStore;
 use nexus_store::testing::InMemoryStore;
@@ -160,7 +160,7 @@ fn rename_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, std::conver
     let upgraded = json.replace("TaskCreated", "TodoCreated");
     Ok(EventMorsel::new(
         "TodoCreated",
-        Version::new(2).expect("2 is non-zero"),
+        version!(2),
         upgraded.into_bytes(),
     ))
 }
@@ -216,9 +216,9 @@ async fn main() {
     // --- Step 3: Build PendingEnvelopes ---
     println!("Step 3: Build PendingEnvelopes (typestate builder)");
     let mut envelopes: Vec<nexus_store::envelope::PendingEnvelope> = Vec::new();
-    for (i, (payload, event_type)) in encoded.iter().enumerate() {
-        let version_num = u64::try_from(i + 1).expect("version should fit in u64");
-        let envelope = pending_envelope(Version::new(version_num).expect("version > 0"))
+    let versions = Version::run(Version::INITIAL, encoded.len()).expect("version overflow");
+    for (version, (payload, event_type)) in versions.zip(encoded.iter()) {
+        let envelope = pending_envelope(version)
             .event_type(event_type)
             .payload(payload.clone())
             .expect("valid payload")
@@ -263,7 +263,7 @@ async fn main() {
         let old_json = legacy_str.replace("TodoCreated", "TaskCreated");
         println!("  Raw JSON (old schema): {old_json}");
 
-        let legacy_envelope = pending_envelope(Version::new(4).expect("version > 0"))
+        let legacy_envelope = pending_envelope(version!(4))
             .event_type("TaskCreated")
             .payload(old_json.into_bytes())
             .expect("valid payload")
@@ -272,7 +272,7 @@ async fn main() {
         store
             .append(
                 &StreamKey::from_slice(stream_id.as_ref()),
-                Version::new(3),
+                Some(version!(3)),
                 &[legacy_envelope],
             )
             .await

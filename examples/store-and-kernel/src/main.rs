@@ -219,11 +219,11 @@ fn encode_decided(
     decided: &Events<AccountEvent>,
     base_version: u64,
 ) -> Vec<nexus_store::envelope::PendingEnvelope> {
-    decided
-        .iter()
-        .enumerate()
-        .map(|(i, event)| {
-            let ver = Version::new(base_version + u64::try_from(i).unwrap() + 1).unwrap();
+    let first = Version::new(base_version)
+        .map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
+    let run = Version::run(first, decided.len()).expect("version overflow");
+    run.zip(decided.iter())
+        .map(|(ver, event)| {
             let payload = codec.encode(event).expect("encode should succeed");
             pending_envelope(ver)
                 .event_type(event.name())
@@ -276,17 +276,17 @@ async fn main() {
             owner: "Alice Smith".to_owned(),
         })
         .expect("open should succeed");
-    account.commit_persisted(Version::new(1).unwrap(), &decided);
+    account.commit_persisted(version!(1), &decided);
 
     let decided = account
         .handle(Deposit { amount: 1000 })
         .expect("deposit should succeed");
-    account.commit_persisted(Version::new(2).unwrap(), &decided);
+    account.commit_persisted(version!(2), &decided);
 
     let decided = account
         .handle(Deposit { amount: 500 })
         .expect("deposit should succeed");
-    account.commit_persisted(Version::new(3).unwrap(), &decided);
+    account.commit_persisted(version!(3), &decided);
 
     println!(
         "State: owner={}, balance={}, version={:?}",
@@ -310,12 +310,12 @@ async fn main() {
         })
         .expect("open");
     let envelopes = encode_decided(&codec, &decided, 0);
-    fresh.commit_persisted(Version::new(1).unwrap(), &decided);
+    fresh.commit_persisted(version!(1), &decided);
 
     let decided = fresh.handle(Deposit { amount: 1000 }).expect("deposit");
     let mut more = encode_decided(&codec, &decided, 1);
     envelopes.len(); // keep envelopes alive
-    fresh.commit_persisted(Version::new(2).unwrap(), &decided);
+    fresh.commit_persisted(version!(2), &decided);
 
     let decided = fresh.handle(Deposit { amount: 500 }).expect("deposit");
     let mut even_more = encode_decided(&codec, &decided, 2);
@@ -377,7 +377,8 @@ async fn main() {
         .await
         .expect("append should succeed");
 
-    let new_ver = Version::new(base + 1).unwrap();
+    let new_ver =
+        expected_version.map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
     account.commit_persisted(new_ver, &decided);
 
     println!(
