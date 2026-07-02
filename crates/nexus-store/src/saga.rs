@@ -18,32 +18,8 @@ use core::option;
 use arrayvec::ArrayVec;
 use nexus::{AggregateRoot, DomainEvent, React, Saga, Version};
 
-use crate::error::StoreError;
+use crate::conflict::ConflictPredicate;
 use crate::repository::{Repository, first_persisted_version};
-
-mod sealed {
-    pub trait Sealed {}
-}
-
-/// Predicate over a repository error: is this an optimistic-concurrency
-/// conflict (and therefore retryable by reloading + re-reacting)?
-///
-/// Sealed: implemented inside this crate for [`StoreError`] only. Lets
-/// [`SagaError::is_conflict`] delegate without naming a concrete store error —
-/// `Snapshotting`'s `Repository::Error` is the inner `StoreError`, so one impl
-/// serves bare and snapshotted repositories alike.
-pub trait ConflictPredicate: sealed::Sealed {
-    /// `true` iff this error is an optimistic-concurrency conflict.
-    fn is_conflict(&self) -> bool;
-}
-
-impl<A, EncErr, DecErr> sealed::Sealed for StoreError<A, EncErr, DecErr> {}
-
-impl<A, EncErr, DecErr> ConflictPredicate for StoreError<A, EncErr, DecErr> {
-    fn is_conflict(&self) -> bool {
-        Self::is_conflict(self)
-    }
-}
 
 /// Error from a saga react+persist. Two failure domains plus a defensive
 /// overflow guard (CLAUDE.md rule 3 — one variant = one domain).
