@@ -94,6 +94,7 @@ pub mod codec;
 pub mod conflict;
 pub mod envelope;
 pub mod error;
+pub mod execute;
 #[cfg(feature = "export")]
 pub mod export;
 #[cfg(feature = "import")]
@@ -146,6 +147,7 @@ pub use envelope::{
 };
 pub use error::LoadWithError;
 pub use error::{AppendError, StoreError};
+pub use execute::{CommandRepository, ExecuteError};
 #[cfg(feature = "export")]
 pub use export::{EventExporter, StreamLister};
 #[cfg(feature = "import")]
