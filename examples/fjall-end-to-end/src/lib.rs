@@ -31,6 +31,17 @@
 //! annotation. (This example was the canary for #243; with that landed, the
 //! former `let acct: AggregateRoot<BankAccount> = repo.load(id)…` annotations
 //! are gone.)
+//!
+//! ## Deciding and persisting (#227, #251)
+//!
+//! The sanctioned one-call command path is `repo.execute(&mut root, cmd)` —
+//! it fuses `AggregateRoot::handle` (decide) and `Repository::save` (persist)
+//! so the decided events can never be forgotten or misthreaded between the
+//! two steps, and returns them for inspection. The manual two-step
+//! `root.handle(cmd)?` + `repo.save(&mut root, &decided).await?` remains
+//! available as the escape hatch when a caller needs to inspect the decided
+//! events *before* they land (e.g. to log or transform them ahead of the
+//! save).
 
 // Example code relaxes a handful of strict lints locally (production crates do
 // NOT) — same posture as `examples/closing-the-books` and `examples/inmemory`.
@@ -75,7 +86,7 @@ use nexus_store::export::{EventExporter, StreamLister};
 use nexus_store::import::{Atomicity, EventImporter, StreamOutcome};
 use nexus_store::repository::Repository;
 use nexus_store::store::{RawEventStore, Store};
-use nexus_store::{PersistedEnvelope, StreamKey, Subscription};
+use nexus_store::{CommandRepository, PersistedEnvelope, StreamKey, Subscription};
 
 use domain::{AccountEvent, AccountId, AccountState, BankAccount, Deposit, OpenAccount, Withdraw};
 
@@ -95,13 +106,15 @@ async fn seed_account<R: Repository<BankAccount>>(
     deposits: &[u64],
 ) -> Result<AccountState, BoxErr> {
     let mut account = repo.load(id.clone()).await?;
-    let decided = account.handle(OpenAccount {
-        owner: owner.to_owned(),
-    })?;
-    repo.save(&mut account, &decided).await?;
+    repo.execute(
+        &mut account,
+        OpenAccount {
+            owner: owner.to_owned(),
+        },
+    )
+    .await?;
     for &amount in deposits {
-        let decided = account.handle(Deposit { amount })?;
-        repo.save(&mut account, &decided).await?;
+        repo.execute(&mut account, Deposit { amount }).await?;
     }
     Ok(account.state().clone())
 }
@@ -137,8 +150,7 @@ pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState)
         // to `BankAccount` (named at `repository::<BankAccount>()`), so `load`
         // infers the aggregate — no annotation (#243).
         let mut account = repo.load(id.clone()).await?;
-        let decided = account.handle(Withdraw { amount: 300 })?;
-        repo.save(&mut account, &decided).await?;
+        repo.execute(&mut account, Withdraw { amount: 300 }).await?;
         account.state().clone()
     };
 
@@ -210,12 +222,9 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
         let repo = writer_store.repository::<BankAccount>().build();
         writer_barrier.wait().await;
         let mut account = repo.load(writer_id).await.expect("load for live append");
-        let decided = account
-            .handle(Deposit { amount: 250 })
-            .expect("live deposit decides");
-        repo.save(&mut account, &decided)
+        repo.execute(&mut account, Deposit { amount: 250 })
             .await
-            .expect("live append persists");
+            .expect("live deposit executes");
     });
 
     barrier.wait().await;

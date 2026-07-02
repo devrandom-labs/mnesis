@@ -36,3 +36,12 @@ then implements `Repository<BankAccount>` for exactly that aggregate, so
 `repo.load(id)` / `repo.save(..)` infer it with no per-call annotation. This
 example was the canary for #243 — with that landed, the former
 `let acct: AggregateRoot<BankAccount> = repo.load(id)…` annotations are gone.
+
+## Deciding and persisting (#227, #251)
+
+The sanctioned one-call command path is `repo.execute(&mut root, cmd)` — it
+fuses `AggregateRoot::handle` (decide) and `Repository::save` (persist) into
+one call, so the decided events can never be forgotten or misthreaded between
+the two steps. The manual two-step `root.handle(cmd)?` +
+`repo.save(&mut root, &decided).await?` remains available as the escape hatch
+when a caller needs to inspect the decided events before they land.

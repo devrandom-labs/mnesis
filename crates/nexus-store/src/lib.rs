@@ -91,8 +91,10 @@ pub(crate) mod catchup;
 #[cfg(feature = "cbor")]
 pub mod cbor;
 pub mod codec;
+pub mod conflict;
 pub mod envelope;
 pub mod error;
+pub mod execute;
 #[cfg(feature = "export")]
 pub mod export;
 #[cfg(feature = "import")]
@@ -139,11 +141,13 @@ pub use codec::serde::json::{Json, JsonCodec};
 #[cfg(feature = "serde")]
 pub use codec::serde::{SerdeCodec, SerdeFormat};
 pub use codec::{Decode, Encode};
+pub use conflict::ConflictPredicate;
 pub use envelope::{
     EnvelopeError, ForDecodeError, PendingEnvelope, PersistedEnvelope, pending_envelope,
 };
 pub use error::LoadWithError;
 pub use error::{AppendError, StoreError};
+pub use execute::{CommandRepository, ExecuteError};
 #[cfg(feature = "export")]
 pub use export::{EventExporter, StreamLister};
 #[cfg(feature = "import")]
@@ -156,8 +160,8 @@ pub use nexus::Version;
 pub use projection::Projector;
 pub use repository::{EventStore, Repository};
 pub use saga::{
-    ConflictPredicate, ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter, Reaction,
-    SagaError, SagaRepository,
+    ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter, Reaction, SagaError,
+    SagaRepository,
 };
 #[cfg(feature = "snapshot")]
 pub use snapshot::Snapshotting;
