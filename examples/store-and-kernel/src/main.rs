@@ -226,10 +226,10 @@ fn encode_decided(
         .map(|(ver, event)| {
             let payload = codec.encode(event).expect("encode should succeed");
             pending_envelope(ver)
-                .event_type(event.name())
+                .event(event)
                 .payload(payload)
-                .expect("valid payload")
                 .build()
+                .expect("valid envelope")
         })
         .collect()
 }

@@ -1054,8 +1054,8 @@ mod tests {
                 let pe = pending_envelope(Version::new(v).expect("nonzero"))
                     .event_type("E")
                     .payload(format!("{sid}-{v}").into_bytes())
-                    .expect("valid payload")
-                    .build();
+                    .build()
+                    .expect("valid envelope");
                 src.append(
                     &StreamKey::from_slice(sid.as_bytes()),
                     Version::new(v - 1),

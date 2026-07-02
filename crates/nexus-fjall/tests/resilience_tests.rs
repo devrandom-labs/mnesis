@@ -65,8 +65,8 @@ fn make_envelope(version: u64, event_type: &'static str, payload: &[u8]) -> Pend
     pending_envelope(Version::new(version).unwrap())
         .event_type(event_type)
         .payload(payload.to_vec())
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 fn temp_store() -> (FjallStore, tempfile::TempDir) {
@@ -313,8 +313,8 @@ proptest! {
                                 pending_envelope(Version::new(ver).unwrap())
                                     .event_type(leak(&format!("Tick_{stream}_{}", existing + i)))
                                     .payload(payload.clone())
-                                    .expect("valid payload")
-                                    .build(),
+                                    .build()
+                                    .expect("valid envelope"),
                             );
                         }
 
@@ -572,8 +572,8 @@ async fn attack_concurrent_append_storm_50_tasks() {
             let env = pending_envelope(Version::INITIAL)
                 .event_type(leak(&format!("Created_{i}")))
                 .payload(i.to_le_bytes().to_vec())
-                .expect("valid payload")
-                .build();
+                .build()
+                .expect("valid envelope");
             store_clone.append(&sid_val, None, &[env]).await
         });
         handles.push(handle);
@@ -624,8 +624,8 @@ async fn attack_concurrent_append_same_stream_conflict() {
             let env = pending_envelope(Version::INITIAL)
                 .event_type(leak(&format!("Contested_{i}")))
                 .payload(i.to_le_bytes().to_vec())
-                .expect("valid payload")
-                .build();
+                .build()
+                .expect("valid envelope");
             store_clone.append(&sid_val, None, &[env]).await
         });
         handles.push(handle);

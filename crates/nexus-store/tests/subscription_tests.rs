@@ -37,8 +37,8 @@ fn make_envelope(version: u64, event_type: &'static str) -> nexus_store::Pending
     pending_envelope(Version::new(version).unwrap())
         .event_type(event_type)
         .payload(format!("payload-{version}").into_bytes())
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 /// Helper: append a single event to a stream, with expected version.

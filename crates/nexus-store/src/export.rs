@@ -157,8 +157,8 @@ mod tests {
         pending_envelope(Version::new(v).expect("nonzero"))
             .event_type("E")
             .payload(payload.to_vec())
-            .expect("valid payload")
             .build()
+            .expect("valid envelope")
     }
 
     async fn append_one(store: &InMemoryStore, id: &StreamKey, v: u64, payload: &[u8]) {
@@ -259,10 +259,10 @@ mod tests {
         let pending = pending_envelope(Version::INITIAL)
             .event_type("Created")
             .payload(b"body".to_vec())
-            .expect("valid payload")
             .schema_version(crate::value::SchemaVersion::from_u32(7).expect("nonzero"))
-            .with_metadata(b"meta".to_vec())
-            .expect("valid metadata");
+            .metadata(b"meta".to_vec())
+            .build()
+            .expect("valid envelope");
         store.append(&id, None, &[pending]).await.expect("append");
 
         let exported = collect_export(&store, &id, Version::INITIAL).await;

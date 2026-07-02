@@ -481,10 +481,10 @@ where
         let schema_nz32 = version_to_nz32(schema_version).ok_or(StoreError::VersionOverflow)?;
 
         let envelope = pending_envelope(next_version)
-            .event_type(event_name)
-            .payload(payload)?
+            .event(event)
+            .payload(payload)
             .schema_version(SchemaVersion::new(schema_nz32))
-            .build();
+            .build()?;
 
         last_version = next_version;
         envelopes.push(envelope);

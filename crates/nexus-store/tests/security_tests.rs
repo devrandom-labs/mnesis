@@ -52,8 +52,8 @@ fn c2_builder_accepts_empty_event_type() {
     let envelope = pending_envelope(Version::INITIAL)
         .event_type("")
         .payload(vec![1])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     assert_eq!(envelope.event_type(), "");
 }
 
@@ -101,18 +101,18 @@ async fn h5_append_with_non_sequential_versions() {
         pending_envelope(Version::new(3).unwrap())
             .event_type("E")
             .payload(vec![])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(1).unwrap())
             .event_type("E")
             .payload(vec![])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(5).unwrap())
             .event_type("E")
             .payload(vec![])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
 
     // This should fail — versions must be sequential
@@ -139,13 +139,13 @@ async fn h5_append_with_duplicate_versions() {
         pending_envelope(Version::INITIAL)
             .event_type("E")
             .payload(vec![])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::INITIAL)
             .event_type("E")
             .payload(vec![])
-            .expect("valid payload")
-            .build(), // dup!
+            .build()
+            .expect("valid envelope"), // dup!
     ];
 
     let result = store
@@ -181,13 +181,13 @@ fn m2_pending_envelope_no_partial_eq() {
     let e1 = pending_envelope(Version::INITIAL)
         .event_type("E")
         .payload(vec![1])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     let e2 = pending_envelope(Version::INITIAL)
         .event_type("E")
         .payload(vec![1])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     // Can't do assert_eq!(e1, e2) — no PartialEq
     // So we compare field by field
     assert_eq!(e1.version(), e2.version());
@@ -227,15 +227,15 @@ async fn streams_are_isolated() {
         pending_envelope(Version::INITIAL)
             .event_type("EventA")
             .payload(vec![1])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
     let e2 = vec![
         pending_envelope(Version::INITIAL)
             .event_type("EventB")
             .payload(vec![2])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
 
     store

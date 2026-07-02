@@ -464,8 +464,8 @@ async fn all_append<S: RawEventStore>(store: &S, id: &str, version: u64, payload
     let env = pending_envelope(Version::new(version).expect("version must be > 0"))
         .event_type("E")
         .payload(payload.to_vec())
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     store
         .append(&StreamKey::from_slice(id.as_bytes()), expected, &[env])
         .await

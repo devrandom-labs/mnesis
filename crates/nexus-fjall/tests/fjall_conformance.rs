@@ -75,16 +75,16 @@ async fn fjall_event_stream_conforms() {
                     let event_type: &'static str = Box::leak(r.event_type.into_boxed_str());
                     let with_payload = pending_envelope(Version::new(r.version).unwrap())
                         .event_type(event_type)
-                        .payload(r.payload)
-                        .expect("valid payload");
+                        .payload(r.payload);
                     if r.schema_version == 1 {
-                        with_payload.build()
+                        with_payload.build().expect("valid envelope")
                     } else {
                         with_payload
                             .schema_version(SchemaVersion::new(
                                 NonZeroU32::new(r.schema_version).unwrap(),
                             ))
                             .build()
+                            .expect("valid envelope")
                     }
                 })
                 .collect();

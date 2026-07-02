@@ -66,16 +66,16 @@ fn row_to_envelope(r: &ConformanceRow) -> PendingEnvelope {
     let event_type: &'static str = Box::leak(r.event_type.clone().into_boxed_str());
     let with_payload = pending_envelope(version)
         .event_type(event_type)
-        .payload(r.payload.clone())
-        .expect("valid payload");
+        .payload(r.payload.clone());
     if r.schema_version == 1 {
-        with_payload.build()
+        with_payload.build().expect("valid envelope")
     } else {
         with_payload
             .schema_version(SchemaVersion::new(
                 NonZeroU32::new(r.schema_version).expect("schema_version > 0"),
             ))
             .build()
+            .expect("valid envelope")
     }
 }
 
@@ -164,8 +164,8 @@ async fn sequence_append_read_versions_123() {
         pending_envelope(Version::new(v).unwrap())
             .event_type("SeqEvent")
             .payload(payload)
-            .expect("valid payload")
             .build()
+            .expect("valid envelope")
     };
 
     let envs = [
@@ -208,8 +208,8 @@ async fn sequence_stale_expected_version_conflict() {
     let env1 = pending_envelope(Version::new(1).unwrap())
         .event_type("E")
         .payload(b"first".to_vec())
-        .expect("valid")
-        .build();
+        .build()
+        .expect("valid envelope");
     store
         .append(&id, None, &[env1])
         .await
@@ -219,8 +219,8 @@ async fn sequence_stale_expected_version_conflict() {
     let env2 = pending_envelope(Version::new(2).unwrap())
         .event_type("E")
         .payload(b"second".to_vec())
-        .expect("valid")
-        .build();
+        .build()
+        .expect("valid envelope");
     let result = store.append(&id, None, &[env2]).await;
     assert!(
         matches!(result, Err(AppendError::Conflict { .. })),
@@ -241,8 +241,8 @@ async fn sequence_multi_event_batch() {
             pending_envelope(Version::new(v).unwrap())
                 .event_type("BatchEvent")
                 .payload(vec![u8::try_from(v).unwrap()])
-                .expect("valid")
                 .build()
+                .expect("valid envelope")
         })
         .collect();
 
@@ -295,8 +295,8 @@ async fn lifecycle_write_close_reopen() {
         let env = pending_envelope(Version::new(1).unwrap())
             .event_type("LifecycleEvent")
             .payload(b"written-before-close".to_vec())
-            .expect("valid")
-            .build();
+            .build()
+            .expect("valid envelope");
         store
             .append(&id, None, &[env])
             .await
@@ -361,8 +361,8 @@ async fn defensive_read_stream_beyond_head_is_empty() {
     let env = pending_envelope(Version::new(1).unwrap())
         .event_type("E")
         .payload(b"only".to_vec())
-        .expect("valid")
-        .build();
+        .build()
+        .expect("valid envelope");
     store.append(&id, None, &[env]).await.expect("append");
 
     // Read from version 100 — beyond the head at version 1.
@@ -395,8 +395,8 @@ async fn defensive_corrupt_row_surfaces_error_not_panic() {
     let valid = pending_envelope(Version::new(1).unwrap())
         .event_type("GoodEvent")
         .payload(b"good".to_vec())
-        .expect("valid")
-        .build();
+        .build()
+        .expect("valid envelope");
     store
         .append(&id, None, &[valid])
         .await
@@ -468,8 +468,8 @@ async fn linearizability_concurrent_append_and_read() {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("LinEvent")
                 .payload(format!("p{v}").into_bytes())
-                .expect("valid")
-                .build();
+                .build()
+                .expect("valid envelope");
             writer_store
                 .append(&writer_id, expected, &[env])
                 .await

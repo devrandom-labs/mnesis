@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use bytes::Bytes;
-use nexus::Version;
+use nexus::{DomainEvent, Version};
 use thiserror::Error;
 
 use crate::value::{
@@ -203,13 +203,14 @@ pub struct WithEventType {
     event_type: EventType,
 }
 
-/// Step 3: has all core fields; optional `schema_version` override; finalize via `build`/`with_metadata`.
+/// Step 3: has all core fields; optional `schema_version`/`metadata`; finalize via `build`.
 #[derive(Debug)]
 pub struct WithPayload {
     version: Version,
     event_type: EventType,
-    payload: Payload,
+    payload: Bytes,
     schema_version: SchemaVersion,
+    metadata: Option<Bytes>,
 }
 
 impl WithVersion {
@@ -220,6 +221,12 @@ impl WithVersion {
             version: self.version,
             event_type: EventType::from_static_str(event_type),
         }
+    }
+
+    /// Derive the event type from a [`DomainEvent`] — no restating `name()`.
+    #[must_use]
+    pub fn event<E: DomainEvent + ?Sized>(self, event: &E) -> WithEventType {
+        self.event_type(event.name())
     }
 
     /// Set the event type from arbitrary bytes; validates UTF-8 and size cap.
@@ -238,21 +245,17 @@ impl WithVersion {
 }
 
 impl WithEventType {
-    /// Set the payload from any `Into<Bytes>` source. Fallible: validates
-    /// the size cap.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`EnvelopeError::Value`] if the payload exceeds
-    /// [`MAX_PAYLOAD_LEN`](crate::value::MAX_PAYLOAD_LEN).
-    pub fn payload(self, payload: impl Into<Bytes>) -> Result<WithPayload, EnvelopeError> {
-        let validated = Payload::from_bytes(payload.into())?;
-        Ok(WithPayload {
+    /// Stash the payload bytes from any `Into<Bytes>` source. Infallible —
+    /// validated in [`WithPayload::build`].
+    #[must_use]
+    pub fn payload(self, payload: impl Into<Bytes>) -> WithPayload {
+        WithPayload {
             version: self.version,
             event_type: self.event_type,
-            payload: validated,
+            payload: payload.into(),
             schema_version: SchemaVersion::INITIAL,
-        })
+            metadata: None,
+        }
     }
 }
 
@@ -264,35 +267,30 @@ impl WithPayload {
         self
     }
 
-    /// Build with no metadata. Infallible.
+    /// Stash metadata bytes from any `Into<Bytes>` source. Infallible —
+    /// validated in [`build`](Self::build).
     #[must_use]
-    pub fn build(self) -> PendingEnvelope {
-        PendingEnvelope {
-            version: self.version,
-            event_type: self.event_type,
-            schema_version: self.schema_version,
-            payload: self.payload,
-            metadata: None,
-        }
+    pub fn metadata(mut self, metadata: impl Into<Bytes>) -> Self {
+        self.metadata = Some(metadata.into());
+        self
     }
 
-    /// Build with metadata; fallible (validates non-empty + size cap).
+    /// Validate and finalize — the one fallible step.
     ///
     /// # Errors
     ///
-    /// Returns [`EnvelopeError::Value`] if the metadata is empty or
-    /// exceeds [`MAX_METADATA_LEN`](crate::value::MAX_METADATA_LEN).
-    pub fn with_metadata(
-        self,
-        metadata: impl Into<Bytes>,
-    ) -> Result<PendingEnvelope, EnvelopeError> {
-        let validated = Metadata::from_bytes(metadata.into())?;
+    /// Returns [`EnvelopeError::Value`] if the payload exceeds
+    /// [`MAX_PAYLOAD_LEN`](crate::value::MAX_PAYLOAD_LEN), or the metadata is
+    /// empty or exceeds [`MAX_METADATA_LEN`](crate::value::MAX_METADATA_LEN).
+    pub fn build(self) -> Result<PendingEnvelope, EnvelopeError> {
+        let payload = Payload::from_bytes(self.payload)?;
+        let metadata = self.metadata.map(Metadata::from_bytes).transpose()?;
         Ok(PendingEnvelope {
             version: self.version,
             event_type: self.event_type,
             schema_version: self.schema_version,
-            payload: self.payload,
-            metadata: Some(validated),
+            payload,
+            metadata,
         })
     }
 }
@@ -303,9 +301,13 @@ impl WithPayload {
 /// pending_envelope(version)
 ///     .event_type("UserCreated")
 ///     .payload(bytes)
-///     .build()
-/// // or
-///     .with_metadata(meta_bytes)
+///     .build()?
+/// // or, deriving the event type from a `DomainEvent`:
+/// pending_envelope(version)
+///     .event(&my_event)
+///     .payload(bytes)
+///     .metadata(meta_bytes)
+///     .build()?
 /// ```
 #[must_use]
 pub const fn pending_envelope(version: Version) -> WithVersion {
@@ -609,14 +611,26 @@ mod tests {
     use bytes::Bytes;
     use nexus::Version;
 
+    /// A minimal `DomainEvent` for exercising `.event(&e)`.
+    #[derive(Debug)]
+    struct TestEvent;
+
+    impl nexus::Message for TestEvent {}
+
+    impl DomainEvent for TestEvent {
+        fn name(&self) -> &'static str {
+            "TestEvent"
+        }
+    }
+
     #[test]
     fn pending_envelope_builds_with_metadata() {
         let env = pending_envelope(Version::INITIAL)
             .event_type("UserCreated")
             .payload(Bytes::from_static(b"payload-bytes"))
-            .expect("valid payload")
-            .with_metadata(Bytes::from_static(b"meta-bytes"))
-            .expect("valid metadata");
+            .metadata(Bytes::from_static(b"meta-bytes"))
+            .build()
+            .expect("valid envelope");
 
         assert_eq!(env.event_type(), "UserCreated");
         assert_eq!(env.payload(), b"payload-bytes");
@@ -629,8 +643,8 @@ mod tests {
         let env = pending_envelope(Version::INITIAL)
             .event_type("X")
             .payload(Bytes::from_static(b"p"))
-            .expect("valid payload")
-            .build();
+            .build()
+            .expect("valid envelope");
 
         assert_eq!(env.metadata(), None);
     }
@@ -640,9 +654,9 @@ mod tests {
         let env = pending_envelope(Version::INITIAL)
             .event_type("UserCreated")
             .payload(Bytes::from_static(b"payload-bytes"))
-            .expect("valid payload")
-            .with_metadata(Bytes::from_static(b"meta-bytes"))
-            .expect("valid metadata");
+            .metadata(Bytes::from_static(b"meta-bytes"))
+            .build()
+            .expect("valid envelope");
 
         assert_eq!(env.event_type_value().as_str(), "UserCreated");
         assert_eq!(env.payload_value().as_slice(), b"payload-bytes");
@@ -659,6 +673,45 @@ mod tests {
         let err = pending_envelope(Version::INITIAL)
             .event_type_bytes(Bytes::from(oversized))
             .expect_err("oversized must be rejected");
+        assert!(matches!(err, EnvelopeError::Value(_)));
+    }
+
+    #[test]
+    fn event_derives_same_event_type_as_event_type_name() {
+        let via_event = pending_envelope(Version::INITIAL)
+            .event(&TestEvent)
+            .payload(Bytes::from_static(b"p"))
+            .build()
+            .expect("valid envelope");
+        let via_name = pending_envelope(Version::INITIAL)
+            .event_type(TestEvent.name())
+            .payload(Bytes::from_static(b"p"))
+            .build()
+            .expect("valid envelope");
+
+        assert_eq!(via_event.event_type(), via_name.event_type());
+        assert_eq!(via_event.event_type(), "TestEvent");
+    }
+
+    #[test]
+    fn build_rejects_oversize_payload() {
+        let oversized = vec![0u8; crate::value::MAX_PAYLOAD_LEN + 1];
+        let err = pending_envelope(Version::INITIAL)
+            .event_type("X")
+            .payload(Bytes::from(oversized))
+            .build()
+            .expect_err("oversized payload must be rejected");
+        assert!(matches!(err, EnvelopeError::Value(_)));
+    }
+
+    #[test]
+    fn build_rejects_empty_metadata() {
+        let err = pending_envelope(Version::INITIAL)
+            .event_type("X")
+            .payload(Bytes::from_static(b"p"))
+            .metadata(Bytes::new())
+            .build()
+            .expect_err("empty metadata must be rejected");
         assert!(matches!(err, EnvelopeError::Value(_)));
     }
 

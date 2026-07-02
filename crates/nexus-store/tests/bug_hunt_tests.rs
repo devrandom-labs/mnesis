@@ -243,18 +243,18 @@ async fn append_rejects_backwards_versions() {
         pending_envelope(Version::new(3).unwrap())
             .event_type("E")
             .payload(vec![3])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(2).unwrap())
             .event_type("E")
             .payload(vec![2])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(1).unwrap())
             .event_type("E")
             .payload(vec![1])
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
 
     let result = store
@@ -295,8 +295,8 @@ proptest! {
         let envelope = pending_envelope(Version::INITIAL)
             .event_type("E")
             .payload(payload.clone())
-            .expect("valid payload")
-            .build();
+            .build()
+            .expect("valid envelope");
         prop_assert_eq!(envelope.payload(), payload.as_slice());
     }
 
@@ -315,8 +315,8 @@ proptest! {
                     pending_envelope(Version::new(v).unwrap())
                         .event_type("E")
                         .payload(vec![v as u8])
-                        .expect("valid payload")
                         .build()
+                        .expect("valid envelope")
                 })
                 .collect();
 
@@ -446,9 +446,9 @@ fn bug_probe_metadata_bytes_stored_correctly() {
     let envelope = pending_envelope(Version::INITIAL)
         .event_type("E")
         .payload(vec![])
-        .expect("valid payload")
-        .with_metadata(meta.clone())
-        .expect("valid metadata");
+        .metadata(meta.clone())
+        .build()
+        .expect("valid envelope");
 
     assert_eq!(envelope.version(), Version::INITIAL);
     assert_eq!(envelope.metadata(), Some(meta.as_slice()));

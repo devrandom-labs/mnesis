@@ -29,8 +29,8 @@ fn pending_envelope_accessors() {
     let envelope = pending_envelope(Version::new(1).unwrap())
         .event_type("UserCreated")
         .payload(vec![1, 2, 3])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
 
     assert_eq!(envelope.version(), Version::new(1).unwrap());
     assert_eq!(envelope.event_type(), "UserCreated");
@@ -44,9 +44,9 @@ fn pending_envelope_with_metadata() {
     let envelope = pending_envelope(Version::new(1).unwrap())
         .event_type("OrderPlaced")
         .payload(vec![4, 5, 6])
-        .expect("valid payload")
-        .with_metadata(meta.clone())
-        .expect("valid metadata");
+        .metadata(meta.clone())
+        .build()
+        .expect("valid envelope");
 
     assert_eq!(envelope.metadata(), Some(meta.as_slice()));
 }
@@ -101,8 +101,8 @@ fn pending_envelope_debug_output() {
     let envelope = pending_envelope(Version::new(7).unwrap())
         .event_type("UserCreated")
         .payload(vec![1, 2, 3])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     let debug = format!("{envelope:?}");
     assert!(
         debug.contains("PendingEnvelope"),
@@ -125,8 +125,8 @@ fn build_without_metadata_has_no_metadata() {
     let env = pending_envelope(Version::new(5).unwrap())
         .event_type("Evt")
         .payload(vec![9, 8, 7])
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
 
     assert!(env.metadata().is_none());
     assert_eq!(env.version(), Version::new(5).unwrap());

@@ -863,8 +863,8 @@ mod tests {
         pending_envelope(v(ver))
             .event_type("E")
             .payload(Bytes::copy_from_slice(payload))
-            .expect("valid payload")
             .build()
+            .expect("valid envelope")
     }
 
     fn planned(target: &str, expected: Option<u64>, versions: &[u64]) -> PlannedAppend {

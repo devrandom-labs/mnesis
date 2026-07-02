@@ -40,8 +40,8 @@ async fn setup_stream(store: &FjallStore, id: &StreamKey, event_count: u64) {
             pending_envelope(Version::new(i).unwrap())
                 .event_type("TestEvent")
                 .payload(format!("payload-{i}").into_bytes())
-                .expect("valid payload")
-                .build(),
+                .build()
+                .expect("valid envelope"),
         );
     }
     store.append(id, None, &envs).await.unwrap();

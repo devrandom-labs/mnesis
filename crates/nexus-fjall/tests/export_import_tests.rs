@@ -59,12 +59,12 @@ async fn append_one(
 ) {
     let builder = pending_envelope(Version::new(version).expect("nonzero"))
         .event_type(event_type)
-        .payload(payload.to_vec())
-        .expect("valid payload");
+        .payload(payload.to_vec());
     let env = match metadata {
-        Some(m) => builder.with_metadata(m.to_vec()).expect("valid metadata"),
+        Some(m) => builder.metadata(m.to_vec()).build(),
         None => builder.build(),
-    };
+    }
+    .expect("valid envelope");
     let expected = Version::new(version - 1);
     store.append(id, expected, &[env]).await.expect("append");
 }

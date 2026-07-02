@@ -573,8 +573,8 @@ pub mod read_test_helpers {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
                 .payload(b"payload".to_vec())
-                .unwrap()
-                .build();
+                .build()
+                .unwrap();
             store.append(id, Version::new(v - 1), &[env]).await.unwrap();
         }
     }
@@ -599,8 +599,8 @@ mod tests {
         pending_envelope(Version::new(version).expect("test version must be > 0"))
             .event_type(event_type)
             .payload(payload.to_vec())
-            .expect("valid payload")
             .build()
+            .expect("valid envelope")
     }
 
     fn temp_store() -> (FjallStore, tempfile::TempDir) {
@@ -724,8 +724,8 @@ mod tests {
         let env = pending_envelope(Version::new(1).unwrap())
             .event_type("Created")
             .payload(b"x".to_vec())
-            .unwrap()
-            .build();
+            .build()
+            .unwrap();
         store.append(&id, None, &[env]).await.unwrap();
 
         // The index holds exactly one row, keyed by [global_seq=1][version=1].
@@ -889,8 +889,8 @@ mod tests {
             pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
                 .payload(p.to_vec())
-                .unwrap()
                 .build()
+                .unwrap()
         };
         store.append(&a, None, &[mk(1, b"a1")]).await.unwrap();
         store.append(&b, None, &[mk(1, b"b1")]).await.unwrap();
@@ -929,8 +929,8 @@ mod tests {
             pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
                 .payload(vec![v as u8])
-                .unwrap()
                 .build()
+                .unwrap()
         };
         store.append(&a, None, &[mk(1)]).await.unwrap();
         store
@@ -1164,8 +1164,8 @@ mod tests {
                 let env = nexus_store::envelope::pending_envelope(Version::new(v).unwrap())
                     .event_type("E")
                     .payload(vec![v as u8])
-                    .unwrap()
-                    .build();
+                    .build()
+                    .unwrap();
                 writer
                     .append(&wid, Version::new(v - 1), &[env])
                     .await
@@ -1213,8 +1213,8 @@ mod tests {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("Reading")
                 .payload(b"p".to_vec())
-                .unwrap()
-                .build();
+                .build()
+                .unwrap();
             store
                 .append(&id, Version::new(v - 1), &[env])
                 .await
@@ -1254,8 +1254,8 @@ mod tests {
         let env = pending_envelope(Version::new(1).unwrap())
             .event_type("E")
             .payload(b"p".to_vec())
-            .unwrap()
-            .build();
+            .build()
+            .unwrap();
         store.append(&id, None, &[env]).await.unwrap();
         // Default (Denormalized) writes the $all index and read_all works.
         assert_eq!(store.partitions.events_global().inner().iter().count(), 1);
@@ -1289,8 +1289,8 @@ mod atomic_append_tests {
         pending_envelope(Version::new(version).unwrap())
             .event_type("E")
             .payload(payload.to_vec())
-            .unwrap()
             .build()
+            .unwrap()
     }
 
     fn planned(target: &str, expected: Option<u64>, versions: &[u64]) -> PlannedAppend {

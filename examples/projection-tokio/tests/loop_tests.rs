@@ -196,10 +196,10 @@ async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events:
         .map(|(ver, event)| {
             let payload = codec.encode(event).unwrap();
             pending_envelope(ver)
-                .event_type(event.name())
+                .event(event)
                 .payload(payload)
-                .expect("valid payload")
                 .build()
+                .expect("valid envelope")
         })
         .collect();
 
@@ -820,8 +820,8 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
     let bad_envelope = pending_envelope(version!(1))
         .event_type("Added")
         .payload(vec![0xFF]) // invalid: too short
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     store
         .raw()
         .append(

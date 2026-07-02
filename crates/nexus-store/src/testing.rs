@@ -785,8 +785,8 @@ mod bounded_read_tests {
         pending_envelope(Version::new(v).unwrap())
             .event_type("E")
             .payload(vec![v as u8])
-            .unwrap()
             .build()
+            .unwrap()
     }
 
     async fn seed(store: &InMemoryStore, id: &StreamKey, count: u64) {
@@ -898,8 +898,8 @@ mod global_read_tests {
         let env = pending_envelope(Version::new(version).unwrap())
             .event_type("E")
             .payload(payload.to_vec())
-            .unwrap()
-            .build();
+            .build()
+            .unwrap();
         store
             .append(&sk(id), expected.and_then(Version::new), &[env])
             .await
@@ -1043,8 +1043,8 @@ mod bounded_subscription_tests {
         pending_envelope(Version::new(v).unwrap())
             .event_type("E")
             .payload(vec![v as u8])
-            .unwrap()
             .build()
+            .unwrap()
     }
 
     #[tokio::test]
@@ -1104,8 +1104,8 @@ mod wake_source_tests {
         let env = pending_envelope(Version::INITIAL)
             .event_type("E")
             .payload(b"x".to_vec())
-            .unwrap()
-            .build();
+            .build()
+            .unwrap();
         store.append(&id, None, &[env]).await.unwrap();
         timeout(Duration::from_secs(5), wait)
             .await
