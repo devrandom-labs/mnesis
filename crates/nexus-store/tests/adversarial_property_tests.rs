@@ -271,7 +271,7 @@ async fn read_all_payloads(
     stream_id: &nexus_store::StreamKey,
 ) -> Vec<Vec<u8>> {
     let mut stream = store
-        .read_stream(&stream_id, Version::INITIAL)
+        .read_stream(stream_id, Version::INITIAL)
         .await
         .unwrap();
     let mut payloads = Vec::new();
@@ -284,7 +284,7 @@ async fn read_all_payloads(
 
 async fn read_all_versions(store: &InMemoryStore, stream_id: &nexus_store::StreamKey) -> Vec<u64> {
     let mut stream = store
-        .read_stream(&stream_id, Version::INITIAL)
+        .read_stream(stream_id, Version::INITIAL)
         .await
         .unwrap();
     let mut versions = Vec::new();
@@ -1066,7 +1066,7 @@ async fn attack_event_store_transforms_applied_on_load() {
     ];
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice("test-1".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"test-1"),
             None,
             &envelopes,
         )
@@ -1688,7 +1688,7 @@ async fn attack_concurrent_writers_exactly_one_wins() {
 
             store
                 .append(
-                    &nexus_store::StreamKey::from_slice("race-stream".as_bytes()),
+                    &nexus_store::StreamKey::from_slice(b"race-stream"),
                     None,
                     &[envelope],
                 )

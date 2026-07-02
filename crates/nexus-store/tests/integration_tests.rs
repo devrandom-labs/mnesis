@@ -69,7 +69,7 @@ async fn multi_batch_append_then_read_all() {
     let batch1 = make_envelopes(1, 3);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("multi-batch-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"multi-batch-stream"),
             None,
             &batch1,
         )
@@ -80,7 +80,7 @@ async fn multi_batch_append_then_read_all() {
     let batch2 = make_envelopes(4, 3);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("multi-batch-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"multi-batch-stream"),
             Version::new(3),
             &batch2,
         )
@@ -90,7 +90,7 @@ async fn multi_batch_append_then_read_all() {
     // Read all from the beginning (version 1 / INITIAL)
     let mut cursor = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("multi-batch-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"multi-batch-stream"),
             Version::INITIAL,
         )
         .await
@@ -109,7 +109,7 @@ async fn read_stream_from_version_filters_earlier() {
     let envelopes = make_envelopes(1, 5);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("filter-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"filter-stream"),
             None,
             &envelopes,
         )
@@ -119,7 +119,7 @@ async fn read_stream_from_version_filters_earlier() {
     // Read starting from version 3
     let mut cursor = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("filter-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"filter-stream"),
             Version::new(3).unwrap(),
         )
         .await
@@ -140,7 +140,7 @@ async fn concurrent_append_detects_conflict() {
     let seed = make_envelopes(1, 1);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("conflict-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"conflict-stream"),
             None,
             &seed,
         )
@@ -151,7 +151,7 @@ async fn concurrent_append_detects_conflict() {
     let writer_a = make_envelopes(2, 1);
     let result_a = store
         .append(
-            &nexus_store::StreamKey::from_slice("conflict-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"conflict-stream"),
             Version::new(1),
             &writer_a,
         )
@@ -162,7 +162,7 @@ async fn concurrent_append_detects_conflict() {
     let writer_b = make_envelopes(2, 1);
     let result_b = store
         .append(
-            &nexus_store::StreamKey::from_slice("conflict-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"conflict-stream"),
             Version::new(1),
             &writer_b,
         )
@@ -180,7 +180,7 @@ async fn concurrent_append_detects_conflict() {
     // Verify the stream only has the 2 events (seed + writer A)
     let mut cursor = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("conflict-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"conflict-stream"),
             Version::INITIAL,
         )
         .await
@@ -198,7 +198,7 @@ async fn large_batch_append_and_sequential_readback() {
     let envelopes = make_envelopes(1, count);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("large-batch-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"large-batch-stream"),
             None,
             &envelopes,
         )
@@ -207,7 +207,7 @@ async fn large_batch_append_and_sequential_readback() {
 
     let mut cursor = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("large-batch-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"large-batch-stream"),
             Version::INITIAL,
         )
         .await
@@ -247,7 +247,7 @@ async fn read_from_future_version_returns_empty() {
     let envelopes = make_envelopes(1, 3);
     store
         .append(
-            &nexus_store::StreamKey::from_slice("future-version-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"future-version-stream"),
             None,
             &envelopes,
         )
@@ -257,7 +257,7 @@ async fn read_from_future_version_returns_empty() {
     // Read from version 100 — no events exist at that version
     let mut cursor = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("future-version-stream".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"future-version-stream"),
             Version::new(100).unwrap(),
         )
         .await

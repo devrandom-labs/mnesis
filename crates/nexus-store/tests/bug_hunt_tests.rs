@@ -258,11 +258,7 @@ async fn append_rejects_backwards_versions() {
     ];
 
     let result = store
-        .append(
-            &nexus_store::StreamKey::from_slice("s1".as_bytes()),
-            None,
-            &envelopes,
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes)
         .await;
     assert!(
         result.is_err(),
@@ -324,7 +320,7 @@ proptest! {
                 })
                 .collect();
 
-            let result = store.append(&nexus_store::StreamKey::from_slice("s1".as_bytes()), None, &envelopes).await;
+            let result = store.append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes).await;
 
             // Check if versions are actually sequential from 1
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);

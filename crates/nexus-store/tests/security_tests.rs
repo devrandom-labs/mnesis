@@ -66,21 +66,14 @@ async fn h1_append_empty_envelopes_is_noop_or_error() {
     let store = InMemoryStore::new();
     // Appending zero events should either be rejected or be a safe no-op
     let result = store
-        .append(
-            &nexus_store::StreamKey::from_slice("s1".as_bytes()),
-            None,
-            &[],
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"s1"), None, &[])
         .await;
     // This should succeed (no-op) but version should not change
     assert!(result.is_ok());
 
     // Read should return empty stream
     let mut stream = store
-        .read_stream(
-            &nexus_store::StreamKey::from_slice("s1".as_bytes()),
-            Version::INITIAL,
-        )
+        .read_stream(&nexus_store::StreamKey::from_slice(b"s1"), Version::INITIAL)
         .await
         .unwrap();
     assert!(
@@ -124,11 +117,7 @@ async fn h5_append_with_non_sequential_versions() {
 
     // This should fail — versions must be sequential
     let result = store
-        .append(
-            &nexus_store::StreamKey::from_slice("s1".as_bytes()),
-            None,
-            &envelopes,
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes)
         .await;
     // Currently the test adapter accepts this — it should NOT
     // The EventStore facade (when built) should validate this
@@ -160,11 +149,7 @@ async fn h5_append_with_duplicate_versions() {
     ];
 
     let result = store
-        .append(
-            &nexus_store::StreamKey::from_slice("s1".as_bytes()),
-            None,
-            &envelopes,
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes)
         .await;
     assert!(result.is_err(), "Append should reject duplicate versions");
 }
@@ -219,7 +204,7 @@ async fn read_nonexistent_stream_returns_empty() {
     let store = InMemoryStore::new();
     let mut stream = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("does-not-exist".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"does-not-exist"),
             Version::INITIAL,
         )
         .await
@@ -254,26 +239,18 @@ async fn streams_are_isolated() {
     ];
 
     store
-        .append(
-            &nexus_store::StreamKey::from_slice("stream-a".as_bytes()),
-            None,
-            &e1,
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"stream-a"), None, &e1)
         .await
         .unwrap();
     store
-        .append(
-            &nexus_store::StreamKey::from_slice("stream-b".as_bytes()),
-            None,
-            &e2,
-        )
+        .append(&nexus_store::StreamKey::from_slice(b"stream-b"), None, &e2)
         .await
         .unwrap();
 
     // Read stream-a — should only see EventA
     let mut stream = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("stream-a".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"stream-a"),
             Version::INITIAL,
         )
         .await
@@ -287,7 +264,7 @@ async fn streams_are_isolated() {
     // Read stream-b — should only see EventB
     let mut stream = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("stream-b".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"stream-b"),
             Version::INITIAL,
         )
         .await

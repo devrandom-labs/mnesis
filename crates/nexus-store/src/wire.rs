@@ -920,7 +920,7 @@ mod tests {
             let v = &frame.value;
 
             let mut sv_buf = [0u8; 4];
-            sv_buf.copy_from_slice(&v[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4]);
+            sv_buf.copy_from_slice(&v[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET]);
             prop_assert_eq!(u32::from_le_bytes(sv_buf), schema_version.get());
 
             let mut et_len_buf = [0u8; 2];
@@ -1017,7 +1017,7 @@ mod tests {
         // (version byte 2) so the V2 fixed-field offsets/header size apply.
         let mut buf = vec![0u8; HEADER_FIXED_SIZE];
         buf[VERSION_OFFSET] = 2;
-        buf[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4].copy_from_slice(&1u32.to_le_bytes());
+        buf[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET].copy_from_slice(&1u32.to_le_bytes());
         buf[EVENT_TYPE_LEN_OFFSET..EVENT_TYPE_LEN_OFFSET + 2]
             .copy_from_slice(&100u16.to_le_bytes());
         buf[META_LEN_OFFSET..META_LEN_OFFSET + 4].copy_from_slice(&META_LEN_ABSENT.to_le_bytes());
@@ -1032,7 +1032,7 @@ mod tests {
         // Header claims meta_len = 100 but no metadata bytes follow. V2 frame.
         let mut buf = vec![0u8; HEADER_FIXED_SIZE];
         buf[VERSION_OFFSET] = 2;
-        buf[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4].copy_from_slice(&1u32.to_le_bytes());
+        buf[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET].copy_from_slice(&1u32.to_le_bytes());
         buf[EVENT_TYPE_LEN_OFFSET..EVENT_TYPE_LEN_OFFSET + 2].copy_from_slice(&0u16.to_le_bytes());
         buf[META_LEN_OFFSET..META_LEN_OFFSET + 4].copy_from_slice(&100u32.to_le_bytes());
         assert!(matches!(
@@ -1054,7 +1054,7 @@ mod tests {
         // bytes by hand-zeroing the header field.
         let frame = encode_frame(sv1(), &et("X"), &pl(b"p"), None).expect("encode");
         let mut bytes_vec = frame.value.to_vec();
-        bytes_vec[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4].fill(0);
+        bytes_vec[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET].fill(0);
         let tampered = Bytes::from(bytes_vec);
         assert!(matches!(
             decode_frame(&tampered),
@@ -1226,7 +1226,7 @@ mod tests {
         // in little-endian. Asserting all three catches mis-offset bugs
         // a spot check would miss.
         assert_eq!(
-            &buf[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4],
+            &buf[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET],
             &0x090A_0B0Cu32.to_le_bytes(),
         );
         assert_eq!(
@@ -1585,7 +1585,7 @@ mod tests {
         let sv_one = SchemaVersion::INITIAL;
         let frame = encode_frame(sv_one, &et_v, &payload, None).expect("valid frame for tamper");
         let mut bytes_vec = frame.value.to_vec();
-        bytes_vec[SCHEMA_VERSION_OFFSET..SCHEMA_VERSION_OFFSET + 4].fill(0);
+        bytes_vec[SCHEMA_VERSION_OFFSET..EVENT_TYPE_LEN_OFFSET].fill(0);
         let tampered = Bytes::from(bytes_vec);
         let err = decode_frame(&tampered).expect_err("schema_version=0 on wire rejected");
         assert!(matches!(err, DecodeError::CorruptSchemaVersion));

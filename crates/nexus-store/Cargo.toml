@@ -67,7 +67,12 @@ workspace-hack = { version = "0.1", path = "../workspace-hack" }
 criterion = { workspace = true }
 futures = { workspace = true }
 insta = { workspace = true }
-nexus-store = { path = ".", features = ["testing", "export", "import", "cbor"] }
+# Self dev-dependency unifies feature-gated integration tests into the
+# default-feature nextest gate (which builds no explicit features). Without
+# `snapshot-json` the `snapshot`-gated test files (snapshot_tests.rs,
+# snapshot_integration_tests.rs) never compiled or ran in CI — nothing in the
+# default workspace graph enables `snapshot`. See issue #262.
+nexus-store = { path = ".", features = ["testing", "export", "import", "cbor", "snapshot-json"] }
 nexus-store-testing = { version = "0.1.0", path = "../nexus-store-testing" }
 proptest = { workspace = true }
 serde = { workspace = true }
