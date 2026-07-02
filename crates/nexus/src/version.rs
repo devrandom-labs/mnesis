@@ -1,4 +1,5 @@
 use std::fmt;
+use std::iter::FusedIterator;
 use std::num::NonZeroU64;
 
 /// A compile-checked [`Version`] literal.
@@ -80,7 +81,75 @@ impl Version {
             None => None,
         }
     }
+
+    /// `len` consecutive versions `start, start+1, …, start+len-1`.
+    ///
+    /// The whole run is validated up front, so iteration is infallible and
+    /// never silently truncates on overflow — a lazy infinite iterator
+    /// zipped against a batch could drop items; this cannot. Returns `None`
+    /// if the run would overflow past `u64::MAX`, consistent with
+    /// [`Version::new`]/[`Version::next`] returning `Option`. `len == 0`
+    /// yields an empty run.
+    #[must_use]
+    pub fn run(start: Self, len: usize) -> Option<VersionRun> {
+        let Some(last_index) = len.checked_sub(1) else {
+            return Some(VersionRun {
+                next: start,
+                remaining: 0,
+            });
+        };
+        let last_offset = u64::try_from(last_index).ok()?;
+        let last_raw = start.as_u64().checked_add(last_offset)?;
+        // last_raw >= start.as_u64() >= 1, so it is a valid Version; this
+        // only confirms it does not exceed u64::MAX bounds (it always does
+        // not, by construction), keeping the overflow check symmetric with
+        // `new`/`next`.
+        Self::new(last_raw)?;
+        Some(VersionRun {
+            next: start,
+            remaining: len,
+        })
+    }
 }
+
+/// Iterator over a checked run of consecutive [`Version`]s.
+///
+/// Constructed by [`Version::run`], which validates up front that the whole
+/// run fits — so iteration is infallible and never silently truncates on
+/// overflow (a lazy infinite iterator zipped against a batch could drop
+/// items; this cannot).
+#[derive(Debug, Clone)]
+pub struct VersionRun {
+    next: Version,
+    remaining: usize,
+}
+
+impl Iterator for VersionRun {
+    type Item = Version;
+
+    fn next(&mut self) -> Option<Version> {
+        let remaining = self.remaining.checked_sub(1)?;
+        let current = self.next;
+        self.remaining = remaining;
+        // Advance only while more remain. On the final item the successor
+        // could overflow past MAX, but `run` length-checked the range so we
+        // never need it — this guard prevents ever computing it.
+        if remaining > 0
+            && let Some(n) = self.next.next()
+        {
+            self.next = n;
+        }
+        Some(current)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl ExactSizeIterator for VersionRun {}
+
+impl FusedIterator for VersionRun {}
 
 impl fmt::Display for Version {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
