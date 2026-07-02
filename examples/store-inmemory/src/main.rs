@@ -221,8 +221,8 @@ async fn main() {
         let envelope = pending_envelope(version)
             .event_type(event_type)
             .payload(payload.clone())
-            .expect("valid payload")
-            .build();
+            .build()
+            .expect("valid envelope");
         println!(
             "  Envelope: version={}, type={}",
             envelope.version(),
@@ -266,8 +266,8 @@ async fn main() {
         let legacy_envelope = pending_envelope(version!(4))
             .event_type("TaskCreated")
             .payload(old_json.into_bytes())
-            .expect("valid payload")
-            .build();
+            .build()
+            .expect("valid envelope");
 
         store
             .append(
@@ -354,8 +354,8 @@ async fn main() {
     let envelope = pending_envelope(Version::INITIAL)
         .event_type("TodoCreated")
         .payload(payload)
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     typed_store
         .raw()
         .append(&StreamKey::from_slice(b"todo-2"), None, &[envelope])

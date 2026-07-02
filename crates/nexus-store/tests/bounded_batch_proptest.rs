@@ -50,8 +50,8 @@ proptest! {
                 let env = pending_envelope(Version::new(v).unwrap())
                     .event_type("E")
                     .payload(vec![(v % 256) as u8])
-                    .unwrap()
-                    .build();
+                    .build()
+                    .unwrap();
                 store.append(&id, Version::new(v - 1), &[env]).await.unwrap();
             }
             let mut stream = store.read_stream(&id, Version::INITIAL).await.unwrap();

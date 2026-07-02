@@ -280,8 +280,8 @@ mod tests {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
                 .payload(format!("v{v}").into_bytes())
-                .unwrap()
-                .build();
+                .build()
+                .unwrap();
             store.append(id, Version::new(v - 1), &[env]).await.unwrap();
         }
     }

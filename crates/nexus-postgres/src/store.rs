@@ -607,8 +607,8 @@ mod tests {
         pending_envelope(v)
             .event_type("TestEvent")
             .payload(b"{}".as_slice())
-            .unwrap()
             .build()
+            .unwrap()
     }
 
     /// Build a `PendingEnvelope` with an explicit `schema_version`.
@@ -620,9 +620,9 @@ mod tests {
         pending_envelope(v)
             .event_type("TestEvent")
             .payload(b"{}".as_slice())
-            .unwrap()
             .schema_version(schema)
             .build()
+            .unwrap()
     }
 
     // 1. Sequence/protocol — happy paths

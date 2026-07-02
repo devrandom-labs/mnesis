@@ -187,8 +187,8 @@ mod tests {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
                 .payload(b"e".to_vec())
-                .unwrap()
-                .build();
+                .build()
+                .unwrap();
             store.append(id, Version::new(v - 1), &[env]).await.unwrap();
         }
     }
@@ -306,8 +306,8 @@ mod tests {
         let env = pending_envelope(Version::new(2).unwrap())
             .event_type("E")
             .payload(b"e".to_vec())
-            .unwrap()
-            .build();
+            .build()
+            .unwrap();
         store
             .append(&StreamKey::from_slice(b"a"), Version::new(1), &[env])
             .await

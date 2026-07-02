@@ -77,8 +77,8 @@ fn make_envelope(version: u64, event_type: &'static str, payload: &[u8]) -> Pend
     pending_envelope(Version::new(version).unwrap())
         .event_type(event_type)
         .payload(payload.to_vec())
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 fn make_envelope_with_schema(
@@ -91,9 +91,9 @@ fn make_envelope_with_schema(
     pending_envelope(Version::new(version).unwrap())
         .event_type(event_type)
         .payload(payload.to_vec())
-        .expect("valid payload")
         .schema_version(SchemaVersion::new(sv))
         .build()
+        .expect("valid envelope")
 }
 
 fn build_envelopes(payloads: &[Vec<u8>]) -> Vec<PendingEnvelope> {
@@ -104,8 +104,8 @@ fn build_envelopes(payloads: &[Vec<u8>]) -> Vec<PendingEnvelope> {
             pending_envelope(Version::new(u64::try_from(i).unwrap() + 1).unwrap())
                 .event_type(leak("TestEvent"))
                 .payload(p.clone())
-                .expect("valid payload")
                 .build()
+                .expect("valid envelope")
         })
         .collect()
 }
@@ -118,8 +118,8 @@ fn build_envelopes_from(start_version: u64, payloads: &[Vec<u8>]) -> Vec<Pending
             pending_envelope(Version::new(start_version + u64::try_from(i).unwrap()).unwrap())
                 .event_type(leak("TestEvent"))
                 .payload(p.clone())
-                .expect("valid payload")
                 .build()
+                .expect("valid envelope")
         })
         .collect()
 }
@@ -999,9 +999,9 @@ async fn attack_schema_version_zero_clamped_by_builder() {
     let env = pending_envelope(Version::INITIAL)
         .event_type("BadSchema")
         .payload(b"data".to_vec())
-        .expect("valid payload")
         .schema_version(SchemaVersion::INITIAL) // Minimum valid schema version
-        .build();
+        .build()
+        .expect("valid envelope");
 
     // schema_version should be 1
     assert_eq!(

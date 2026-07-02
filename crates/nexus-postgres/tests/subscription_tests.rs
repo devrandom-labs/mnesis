@@ -69,8 +69,8 @@ fn make_envelope(version: u64, event_type: &'static str, payload: Vec<u8>) -> Pe
     pending_envelope(Version::new(version).expect("version > 0"))
         .event_type(event_type)
         .payload(payload)
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 async fn append_one(

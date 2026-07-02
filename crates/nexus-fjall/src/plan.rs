@@ -155,8 +155,8 @@ mod tests {
         pending_envelope(Version::new(version).unwrap())
             .event_type("E")
             .payload(b"p".as_slice())
-            .unwrap()
             .build()
+            .unwrap()
     }
 
     // 1. Sequence/protocol — happy paths ------------------------------------

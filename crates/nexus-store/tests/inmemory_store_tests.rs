@@ -18,8 +18,8 @@ async fn append_conflict_truncates_overlong_stream_id_with_ellipsis() {
     let env = pending_envelope(Version::new(1).unwrap())
         .event_type("E")
         .payload(b"p".to_vec())
-        .unwrap()
-        .build();
+        .build()
+        .unwrap();
     // New stream + Some(expected) → conflict carrying the truncated id label.
     let err = store
         .append(&long, Version::new(1), &[env])
@@ -45,8 +45,8 @@ async fn append_and_read_back() {
     let envelope = pending_envelope(Version::INITIAL)
         .event_type("TestEvent")
         .payload(b"hello".to_vec())
-        .expect("valid payload")
-        .build();
+        .build()
+        .expect("valid envelope");
     store
         .append(&StreamKey::from_slice(b"stream-1"), None, &[envelope])
         .await
@@ -72,18 +72,18 @@ async fn read_from_version_filters_correctly() {
         pending_envelope(Version::new(1).unwrap())
             .event_type("E1")
             .payload(b"one".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(2).unwrap())
             .event_type("E2")
             .payload(b"two".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(3).unwrap())
             .event_type("E3")
             .payload(b"three".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
     store
         .append(&StreamKey::from_slice(b"s1"), None, &envelopes)
@@ -120,13 +120,13 @@ async fn append_assigns_monotonic_all_position_across_batches_and_streams() {
         pending_envelope(Version::new(1).unwrap())
             .event_type("A1")
             .payload(b"a1".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
         pending_envelope(Version::new(2).unwrap())
             .event_type("A2")
             .payload(b"a2".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
     store
         .append(&StreamKey::from_slice(b"a"), None, &batch_a)
@@ -139,8 +139,8 @@ async fn append_assigns_monotonic_all_position_across_batches_and_streams() {
         pending_envelope(Version::new(1).unwrap())
             .event_type("B1")
             .payload(b"b1".to_vec())
-            .expect("valid payload")
-            .build(),
+            .build()
+            .expect("valid envelope"),
     ];
     store
         .append(&StreamKey::from_slice(b"b"), None, &batch_b)

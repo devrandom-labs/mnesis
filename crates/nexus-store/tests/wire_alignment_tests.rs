@@ -36,8 +36,8 @@ fn build_envelope(version: u64, event_type: &'static str, payload_len: usize) ->
     pending_envelope(Version::new(version).expect("version > 0"))
         .event_type(event_type)
         .payload(payload)
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 fn assert_payload_aligned(env: &nexus_store::PersistedEnvelope) {

@@ -294,8 +294,8 @@ async fn all_noskip_via_store_api_ordering() {
         pending_envelope(Version::new(v).unwrap())
             .event_type(et)
             .payload(format!("{et}{v}").into_bytes())
-            .expect("valid")
             .build()
+            .expect("valid")
     };
 
     store

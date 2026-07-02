@@ -30,8 +30,8 @@ fn make_envelope(version: u64, event_type: &'static str, payload: &[u8]) -> Pend
     pending_envelope(Version::new(version).expect("test version must be > 0"))
         .event_type(event_type)
         .payload(payload.to_vec())
-        .expect("valid payload")
         .build()
+        .expect("valid envelope")
 }
 
 fn temp_store() -> (FjallStore, tempfile::TempDir) {
