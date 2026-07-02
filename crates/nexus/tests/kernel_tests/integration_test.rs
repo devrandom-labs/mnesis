@@ -23,9 +23,6 @@ impl AsRef<[u8]> for UserId {
         self.0.as_bytes()
     }
 }
-impl Id for UserId {
-    const BYTE_LEN: usize = 0;
-}
 
 // --- Events (using derive macro!) ---
 #[derive(Debug, Clone)]

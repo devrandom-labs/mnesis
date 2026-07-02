@@ -16,7 +16,7 @@ use nexus::Events;
 use nexus::KernelError;
 use nexus::Message;
 use nexus::Version;
-use nexus::{Aggregate, Id, events};
+use nexus::{Aggregate, events};
 use std::fmt;
 
 // --- Minimal test domain ---
@@ -40,10 +40,6 @@ impl AsRef<[u8]> for TId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-
-impl Id for TId {
-    const BYTE_LEN: usize = 0;
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -122,7 +122,6 @@ mod saga_dispatch_tests {
     use crate::event::DomainEvent;
     use crate::events;
     use crate::events::Events;
-    use crate::id::Id;
     use crate::message::Message;
     use crate::version::Version;
 
@@ -143,9 +142,6 @@ mod saga_dispatch_tests {
         fn as_ref(&self) -> &[u8] {
             &self.0
         }
-    }
-    impl Id for OrderId {
-        const BYTE_LEN: usize = 8;
     }
 
     // ── The saga's OWN events (its history) ──────────────────────────

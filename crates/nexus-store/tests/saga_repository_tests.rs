@@ -19,8 +19,7 @@ use std::sync::Arc;
 use bytes::Bytes;
 use futures::future::join_all;
 use nexus::{
-    Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Id, Message, React, Saga,
-    Version,
+    Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message, React, Saga, Version,
 };
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{
@@ -48,9 +47,6 @@ impl AsRef<[u8]> for OrderId {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
-}
-impl Id for OrderId {
-    const BYTE_LEN: usize = 8;
 }
 
 // ── The saga's OWN events (its history) ──────────────────────────────────

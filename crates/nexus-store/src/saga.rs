@@ -427,9 +427,7 @@ mod error_tests {
 #[cfg(test)]
 mod projected_intents_tests {
     use super::{ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter};
-    use nexus::{
-        Aggregate, AggregateState, DomainEvent, Events, Id, Message, React, Saga, Version,
-    };
+    use nexus::{Aggregate, AggregateState, DomainEvent, Events, Message, React, Saga, Version};
 
     // Minimal saga purely to instantiate the generic collection.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -443,9 +441,6 @@ mod projected_intents_tests {
         fn as_ref(&self) -> &[u8] {
             core::slice::from_ref(&self.0)
         }
-    }
-    impl Id for Sid {
-        const BYTE_LEN: usize = 1;
     }
 
     #[derive(Debug, Clone, PartialEq, Eq)]

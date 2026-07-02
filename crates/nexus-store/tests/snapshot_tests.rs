@@ -18,7 +18,7 @@ use std::fmt;
 
 use std::num::{NonZeroU32, NonZeroU64};
 
-use nexus::{Id, Version};
+use nexus::Version;
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
 use nexus_store::state::{AfterEventTypes, EveryNEvents, PersistTrigger, SnapshotStore};
@@ -36,9 +36,6 @@ impl AsRef<[u8]> for TestId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-impl Id for TestId {
-    const BYTE_LEN: usize = 0;
 }
 
 // ── EveryNEvents ────────────────────────────────────────────────────

@@ -67,16 +67,12 @@ impl AsRef<[u8]> for StreamKey {
     }
 }
 
-/// A `StreamKey` is itself a valid [`Id`](nexus::Id): it already carries every
-/// supertrait the trait requires (clone, send/sync, debug, hash, eq, display,
-/// `AsRef<[u8]>`, `'static`). This is purely additive — the byte-level store
-/// API stays concrete (`&StreamKey`), but a raw key can now flow through the
-/// typed convenience layers (`Subscription::subscribe`, a repository whose
-/// `Aggregate::Id` is `StreamKey`) without a domain-id newtype. `BYTE_LEN` is
-/// `0` by the workspace convention for variable-length ids.
-impl nexus::Id for StreamKey {
-    const BYTE_LEN: usize = 0;
-}
+// A `StreamKey` is itself a valid `nexus::Id` for free via the blanket impl: it
+// already carries every supertrait the trait requires (clone, send/sync, debug,
+// hash, eq, display below, `AsRef<[u8]>` above, `'static`). This is purely
+// additive — the byte-level store API stays concrete (`&StreamKey`), but a raw
+// key can flow through the typed convenience layers (`Subscription::subscribe`,
+// a repository whose `Aggregate::Id` is `StreamKey`) without a domain-id newtype.
 
 /// The string when the bytes are valid UTF-8, else `0x…` lowercase hex —
 /// faithful for binary ids, readable for the common string id, always

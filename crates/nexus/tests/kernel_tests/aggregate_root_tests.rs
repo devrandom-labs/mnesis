@@ -7,7 +7,6 @@ use nexus::AggregateState;
 use nexus::DomainEvent;
 use nexus::Events;
 use nexus::Handle;
-use nexus::Id;
 use nexus::KernelError;
 use nexus::Message;
 use nexus::Version;
@@ -30,9 +29,6 @@ impl AsRef<[u8]> for TestId {
     fn as_ref(&self) -> &[u8] {
         self.0.as_bytes()
     }
-}
-impl Id for TestId {
-    const BYTE_LEN: usize = 0;
 }
 
 #[derive(Debug, Clone)]

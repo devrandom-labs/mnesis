@@ -37,10 +37,6 @@ impl AsRef<[u8]> for TestId {
     }
 }
 
-impl nexus::Id for TestId {
-    const BYTE_LEN: usize = 0;
-}
-
 // ── EveryNEvents ────────────────────────────────────────────────────
 
 #[test]

@@ -1,13 +1,15 @@
 //! Private module: the `pub` items below are crate-local by containment (no
 //! external API leak). It exists so the per-stream `scan.rs` strategy has an
-//! owned [`OwnedStreamId`] satisfying the [`Id`] `'static` bound across the
-//! re-reads the generic subscription loop performs.
+//! owned [`OwnedStreamId`] satisfying the [`Id`](nexus::Id) `'static` bound
+//! across the re-reads the generic subscription loop performs.
 
-use nexus::Id;
 use nexus_store::StreamKey;
 
-/// Owned byte-key wrapper to satisfy the [`Id`] trait's `'static` bound
-/// when re-reading from the store during subscription refills.
+/// Owned byte-key wrapper to satisfy the [`Id`](nexus::Id) trait's `'static`
+/// bound when re-reading from the store during subscription refills.
+///
+/// It is an `Id` for free via the blanket impl — it carries `Clone`, `Debug`,
+/// `Hash`, `Eq`, `Display`, and `AsRef<[u8]>` below, with no `impl Id` block.
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct OwnedStreamId(Vec<u8>);
 
@@ -31,8 +33,4 @@ impl AsRef<[u8]> for OwnedStreamId {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
-}
-
-impl Id for OwnedStreamId {
-    const BYTE_LEN: usize = 0;
 }

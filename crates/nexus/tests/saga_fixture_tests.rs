@@ -11,7 +11,7 @@
 )]
 
 use nexus::testing::SagaFixture;
-use nexus::{AggregateState, DomainEvent, Events, Id, Message, React, Saga, events};
+use nexus::{AggregateState, DomainEvent, Events, Message, React, Saga, events};
 
 // ── Saga identity ────────────────────────────────────────────────
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
@@ -30,9 +30,6 @@ impl AsRef<[u8]> for OrderId {
     fn as_ref(&self) -> &[u8] {
         &self.0
     }
-}
-impl Id for OrderId {
-    const BYTE_LEN: usize = 8;
 }
 
 // ── The saga's OWN events (its history) ──────────────────────────
