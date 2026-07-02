@@ -1,6 +1,31 @@
 use std::fmt;
 use std::num::NonZeroU64;
 
+/// A compile-checked [`Version`] literal.
+///
+/// `version!(3)` evaluates to a `Version` (not `Option<Version>`) at compile
+/// time. `version!(0)` is a **compile error**, not a runtime panic — the check
+/// runs in an inline `const {}` block, so there is zero runtime cost even in
+/// debug builds.
+///
+/// ```
+/// use nexus::{Version, version};
+/// assert_eq!(version!(3), Version::new(3).unwrap());
+/// ```
+#[macro_export]
+macro_rules! version {
+    ($n:expr) => {
+        const {
+            match $crate::Version::new($n) {
+                ::core::option::Option::Some(v) => v,
+                ::core::option::Option::None => {
+                    ::core::panic!("version literal must be non-zero")
+                }
+            }
+        }
+    };
+}
+
 /// A monotonically increasing event version number.
 ///
 /// Wraps `NonZeroU64` — event versions are always >= 1.

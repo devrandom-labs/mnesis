@@ -1,4 +1,4 @@
-use nexus::Version;
+use nexus::{Version, version};
 
 // ---------------------------------------------------------------------------
 // Construction
@@ -176,6 +176,22 @@ fn versioned_event_clone() {
     let ve2 = ve.clone();
 
     assert_eq!(ve, ve2);
+}
+
+// ---------------------------------------------------------------------------
+// version! macro
+// ---------------------------------------------------------------------------
+
+#[test]
+fn version_macro_matches_new_unwrap() {
+    assert_eq!(version!(1), Version::new(1).unwrap());
+    assert_eq!(version!(3), Version::new(3).unwrap());
+    assert_eq!(version!(u64::MAX), Version::new(u64::MAX).unwrap());
+}
+
+#[test]
+fn version_macro_equals_initial_at_one() {
+    assert_eq!(version!(1), Version::INITIAL);
 }
 
 #[test]
