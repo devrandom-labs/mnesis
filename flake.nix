@@ -71,9 +71,14 @@
         checks = {
           nexus-clippy = craneLib.cargoClippy (commonArgs // {
             inherit cargoArtifacts;
-            # Whole-workspace clippy. nexus-framework is temporarily excluded
-            # until its projection-runner refactor clears its lint backlog.
-            cargoClippyExtraArgs = "--workspace --all-features --lib --exclude nexus-framework -- --deny warnings";
+            # Whole-workspace clippy across ALL targets (lib, tests, benches,
+            # examples) under the full feature set. `--all-targets` (not the
+            # old `--lib`) is load-bearing: test code is only compiled — and so
+            # only linted — when targets beyond the lib are built, and
+            # `--all-features` is only meaningful once those targets exist. The
+            # `--lib`-only gate let a test-code compile break slip in under
+            # `rkyv` (issue #262); this closes that hole.
+            cargoClippyExtraArgs = "--workspace --all-features --all-targets -- --deny warnings";
           });
 
           nexus-doc =

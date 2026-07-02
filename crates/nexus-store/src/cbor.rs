@@ -1274,7 +1274,7 @@ mod tests {
 
     #[tokio::test]
     async fn try_extend_surfaces_read_error_distinctly() {
-        let boom = std::io::Error::new(std::io::ErrorKind::Other, "boom");
+        let boom = std::io::Error::other("boom");
         let events = vec![Ok(persisted(1, 1, "E", None, b"x1")), Err(boom)];
         let mut w = ChunkWriter::new(Vec::new(), None).expect("new");
         let err = w

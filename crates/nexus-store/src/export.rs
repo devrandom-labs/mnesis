@@ -513,6 +513,11 @@ mod tests {
 
     #[tokio::test]
     async fn store_handle_lists_and_exports_without_raw() {
+        // Substitutable: generic `StreamLister`/`EventExporter`-bounded code
+        // accepts the handle directly (the structural win of #247).
+        fn assert_lister<L: StreamLister>(_: &L) {}
+        fn assert_exporter<E: EventExporter>(_: &E) {}
+
         // The handle itself appends, lists, and exports — never `.raw()`.
         let store = Store::new(InMemoryStore::new());
         store
@@ -531,7 +536,7 @@ mod tests {
             .collect();
         assert_eq!(
             ids,
-            [b"acct-1".to_vec()].into_iter().collect::<HashSet<_>>()
+            std::iter::once(b"acct-1".to_vec()).collect::<HashSet<_>>()
         );
 
         let exported: Vec<PersistedEnvelope> = store
@@ -544,10 +549,7 @@ mod tests {
         assert_eq!(exported.len(), 1);
         assert_eq!(exported[0].version(), Version::INITIAL);
 
-        // Substitutable: generic `StreamLister`/`EventExporter`-bounded code
-        // accepts the handle directly (the structural win of #247).
-        fn assert_lister<L: StreamLister>(_: &L) {}
-        fn assert_exporter<E: EventExporter>(_: &E) {}
+        // The generic bounds above accept the handle directly (the #247 win).
         assert_lister(&store);
         assert_exporter(&store);
     }

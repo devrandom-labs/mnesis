@@ -1509,6 +1509,11 @@ mod tests {
 
     #[tokio::test]
     async fn store_handle_imports_without_raw() {
+        // Substitutable: generic `EventImporter`/`AtomicAppend`-bounded code
+        // accepts the handle directly (the structural win of #247).
+        fn assert_importer<I: EventImporter>(_: &I) {}
+        fn assert_atomic<A: AtomicAppend>(_: &A) {}
+
         // The handle itself imports and atomic-appends — never `.raw()`.
         let store = Store::new(crate::testing::InMemoryStore::new());
         let sections = vec![section("a", vec![evt(1), evt(2)])];
@@ -1526,10 +1531,7 @@ mod tests {
             .await
             .expect("atomic append via the handle");
 
-        // Substitutable: generic `EventImporter`/`AtomicAppend`-bounded code
-        // accepts the handle directly (the structural win of #247).
-        fn assert_importer<I: EventImporter>(_: &I) {}
-        fn assert_atomic<A: AtomicAppend>(_: &A) {}
+        // The generic bounds above accept the handle directly (the #247 win).
         assert_importer(&store);
         assert_atomic(&store);
     }

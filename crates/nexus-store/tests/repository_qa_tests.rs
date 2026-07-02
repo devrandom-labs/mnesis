@@ -861,7 +861,7 @@ async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
         .build(); // schema_version defaults to 1
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice("counter-1".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"counter-1"),
             None,
             &[legacy],
         )
@@ -899,7 +899,7 @@ async fn d4_upcaster_must_not_double_apply_to_new_events() {
         .build(); // schema_version defaults to 1
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice("counter-1".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"counter-1"),
             None,
             &[legacy],
         )
@@ -1484,7 +1484,7 @@ async fn d11_schema_version_always_one() {
     ];
     store
         .append(
-            &nexus_store::StreamKey::from_slice("counter-1".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"counter-1"),
             None,
             &envelopes,
         )
@@ -1493,7 +1493,7 @@ async fn d11_schema_version_always_one() {
 
     let mut stream = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice("counter-1".as_bytes()),
+            &nexus_store::StreamKey::from_slice(b"counter-1"),
             Version::INITIAL,
         )
         .await
