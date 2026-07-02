@@ -79,7 +79,7 @@ use std::time::Duration;
 
 use futures::StreamExt;
 use futures::TryStreamExt;
-use nexus::Version;
+use nexus::{Version, version};
 use nexus_fjall::{AllIndex, FjallStore};
 use nexus_store::cbor::{ChunkWriter, decode_chunk};
 use nexus_store::export::{EventExporter, StreamLister};
@@ -238,7 +238,7 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
         .map_err(|e| format!("writer task panicked: {e}"))?;
 
     // Strict-after resume: a fresh cursor from Some(v3) must begin at v4.
-    let v3 = Version::new(3).ok_or("v3 is nonzero")?;
+    let v3 = version!(3);
     let resume = subscription.subscribe(&id, Some(v3))?;
     tokio::pin!(resume);
     let first = timeout_next(&mut resume, "resume").await?;

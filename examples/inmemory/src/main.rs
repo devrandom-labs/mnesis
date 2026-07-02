@@ -222,13 +222,15 @@ impl InMemoryStore {
     /// directly — the aggregate marker (`BankAccount`) carries no state.
     fn save(&mut self, account: &mut AggregateRoot<BankAccount>, decided: &Events<AccountEvent>) {
         let stream = self.streams.entry(account.id().clone()).or_default();
-        let base = account.version().map_or(0, |v| v.as_u64());
-        for (i, event) in decided.iter().enumerate() {
-            let ver = Version::new(base + u64::try_from(i).unwrap() + 1).unwrap();
+        let first = account
+            .version()
+            .map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
+        let run = Version::run(first, decided.len()).expect("version overflow");
+        let last = run.clone().last().unwrap_or(first);
+        for (ver, event) in run.zip(decided.iter()) {
             stream.push(VersionedEvent::new(ver, event.clone()));
         }
-        let new_version = Version::new(base + u64::try_from(decided.len()).unwrap()).unwrap();
-        account.commit_persisted(new_version, decided);
+        account.commit_persisted(last, decided);
     }
 
     fn load(&self, id: &AccountId) -> Option<AggregateRoot<BankAccount>> {

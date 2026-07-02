@@ -1,4 +1,4 @@
-use nexus::Version;
+use nexus::{Version, version};
 
 // ---------------------------------------------------------------------------
 // Construction
@@ -178,6 +178,22 @@ fn versioned_event_clone() {
     assert_eq!(ve, ve2);
 }
 
+// ---------------------------------------------------------------------------
+// version! macro
+// ---------------------------------------------------------------------------
+
+#[test]
+fn version_macro_matches_new_unwrap() {
+    assert_eq!(version!(1), Version::new(1).unwrap());
+    assert_eq!(version!(3), Version::new(3).unwrap());
+    assert_eq!(version!(u64::MAX), Version::new(u64::MAX).unwrap());
+}
+
+#[test]
+fn version_macro_equals_initial_at_one() {
+    assert_eq!(version!(1), Version::INITIAL);
+}
+
 #[test]
 fn versioned_event_equality() {
     use nexus::VersionedEvent;
@@ -190,4 +206,34 @@ fn versioned_event_equality() {
     assert_eq!(a, b);
     assert_ne!(a, c); // different version
     assert_ne!(a, d); // different event
+}
+
+// ---------------------------------------------------------------------------
+// Version::run
+// ---------------------------------------------------------------------------
+
+#[test]
+fn run_yields_exactly_len_consecutive_versions() {
+    let run = Version::run(version!(5), 3).expect("no overflow");
+    let got: Vec<u64> = run.map(Version::as_u64).collect();
+    assert_eq!(got, vec![5, 6, 7]);
+}
+
+#[test]
+fn run_len_zero_is_empty() {
+    let run = Version::run(version!(1), 0).expect("no overflow");
+    assert_eq!(run.count(), 0);
+}
+
+#[test]
+fn run_overflow_past_max_is_none() {
+    let max = Version::new(u64::MAX).unwrap();
+    assert!(Version::run(max, 2).is_none());
+    assert_eq!(Version::run(max, 1).map(Iterator::count), Some(1));
+}
+
+#[test]
+fn run_is_exact_size() {
+    let run = Version::run(version!(1), 4).unwrap();
+    assert_eq!(run.len(), 4);
 }
