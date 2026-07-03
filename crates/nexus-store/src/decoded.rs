@@ -120,7 +120,8 @@ where
     ///
     /// Owning codecs only — the `for<'a> Output<'a> = E` bound is unsatisfiable
     /// for a zero-copy codec (whose `Output` borrows the envelope), so the
-    /// compiler steers zero-copy consumers to `for_each_decoded` (a follow-up).
+    /// compiler steers zero-copy consumers to
+    /// [`for_each_decoded`](Self::for_each_decoded).
     /// Per-stream items become `Decoded<E>`; `$all` items become
     /// `(AllPosition, Decoded<E>)` (the tag is preserved beside the box).
     fn decoded<E, C>(
