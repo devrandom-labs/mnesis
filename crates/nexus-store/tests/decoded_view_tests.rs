@@ -10,8 +10,8 @@ use nexus::{DomainEvent, Message, Version};
 use nexus_store::store::RawEventStore;
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{
-    DecodeStreamError, DecodedStreamExt, Encode, JsonCodec, PersistedEnvelope, Store, StreamKey,
-    Subscription, pending_envelope,
+    Decode, DecodeStreamError, Decoded, DecodedStreamExt, Encode, FoldDecodedError, JsonCodec,
+    PersistedEnvelope, Store, StreamKey, Subscription, pending_envelope,
 };
 use serde::{Deserialize, Serialize};
 
@@ -193,4 +193,106 @@ async fn decoded_all_preserves_the_position_tag_beside_the_box() {
         .unwrap();
     assert_eq!(d.event, Money::Deposited { amount: 1 });
     assert_eq!(d.version, Version::new(1).unwrap());
+}
+
+// ═══ for_each_decoded: owning codec folds typed state ═══
+#[tokio::test]
+async fn for_each_decoded_folds_owning_events() {
+    let store = Store::new(InMemoryStore::new());
+    let id = AcctId("fe-1".to_owned());
+    append(&store, &id, 1, &Money::Deposited { amount: 1000 }).await;
+    append(&store, &id, 2, &Money::Withdrew { amount: 400 }).await;
+
+    // Bounded: read the finite history via read_stream (terminates), not the
+    // never-ending subscription.
+    let raw = std::pin::pin!(
+        store
+            .read_stream(&StreamKey::from_slice(id.as_ref()), Version::INITIAL)
+            .await
+            .unwrap()
+    );
+    let mut balance: i64 = 0;
+    let mut last = Version::INITIAL;
+    raw.for_each_decoded::<Money, _, _, std::convert::Infallible>(
+        JsonCodec::default(),
+        |d: Decoded<Money>| {
+            match d.event {
+                Money::Deposited { amount } => balance += i64::try_from(amount).unwrap(),
+                Money::Withdrew { amount } => balance -= i64::try_from(amount).unwrap(),
+            }
+            last = d.version;
+            Ok(())
+        },
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(balance, 600);
+    assert_eq!(last, Version::new(2).unwrap());
+}
+
+// ═══ for_each_decoded: BORROWING codec (zero-copy path, no rkyv feature) ═══
+// A codec whose Output borrows the envelope — the KERI rkyv shape, proven with
+// a dependency-free stand-in.
+struct RawBytesCodec;
+impl Decode<[u8]> for RawBytesCodec {
+    type Output<'a> = &'a [u8];
+    type Error = std::convert::Infallible;
+    fn decode<'a>(&'a self, env: &'a PersistedEnvelope) -> Result<&'a [u8], Self::Error> {
+        Ok(env.payload())
+    }
+}
+
+#[tokio::test]
+async fn for_each_decoded_folds_borrowed_windows() {
+    let store = Store::new(InMemoryStore::new());
+    let id = AcctId("fe-zc".to_owned());
+    append(&store, &id, 1, &Money::Deposited { amount: 1000 }).await;
+
+    let raw = std::pin::pin!(
+        store
+            .read_stream(&StreamKey::from_slice(id.as_ref()), Version::INITIAL)
+            .await
+            .unwrap()
+    );
+    let mut seen_len = 0usize;
+    raw.for_each_decoded::<[u8], _, _, std::convert::Infallible>(
+        RawBytesCodec,
+        |d: Decoded<&[u8]>| {
+            // `d.event` is a window borrowing the envelope — zero copy.
+            seen_len = d.event.len();
+            assert_eq!(d.version, Version::new(1).unwrap());
+            Ok(())
+        },
+    )
+    .await
+    .unwrap();
+
+    assert!(seen_len > 0);
+}
+
+// ═══ Handler error maps to the Handler variant (not Decode, not Read) ═══
+#[tokio::test]
+async fn for_each_decoded_surfaces_handler_error() {
+    #[derive(Debug, thiserror::Error)]
+    #[error("stop")]
+    struct Stop;
+
+    let store = Store::new(InMemoryStore::new());
+    let id = AcctId("fe-h".to_owned());
+    append(&store, &id, 1, &Money::Deposited { amount: 1 }).await;
+
+    let raw = std::pin::pin!(
+        store
+            .read_stream(&StreamKey::from_slice(id.as_ref()), Version::INITIAL)
+            .await
+            .unwrap()
+    );
+    let out = raw
+        .for_each_decoded::<Money, _, _, Stop>(JsonCodec::default(), |_d: Decoded<Money>| Err(Stop))
+        .await;
+    assert!(
+        matches!(out, Err(FoldDecodedError::Handler(Stop))),
+        "got {out:?}"
+    );
 }

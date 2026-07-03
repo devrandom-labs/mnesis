@@ -12,6 +12,8 @@
 //!   codecs (rkyv, bytemuck): an internal-iteration fold that hands the borrowed
 //!   window to a closure, so no lending stream is needed.
 
+use core::future::Future;
+
 use bytes::Bytes;
 use futures::{Stream, StreamExt};
 
@@ -146,6 +148,72 @@ where
             Ok(item.retag(decoded))
         })
     }
+
+    /// Fold each decoded event by handing your closure the borrowed window —
+    /// works for **owning and zero-copy** codecs, because the window lives only
+    /// for the call and never escapes (internal iteration; no lending stream).
+    /// This is the path a zero-copy codec (rkyv, bytemuck) must take: its
+    /// `Output` borrows the envelope and so cannot be carried away by
+    /// [`decoded`](Self::decoded)'s stream.
+    ///
+    /// `f` receives a [`Decoded<Output<'a>>`] valid only for that call. On a
+    /// never-ending [`Subscription`](crate::Subscription) this runs until the
+    /// first `Err`; over a finite
+    /// [`read_stream`](crate::RawEventStore::read_stream) it runs to completion.
+    ///
+    /// The closure argument is the concrete [`Decoded<Output<'a>>`] — the event
+    /// view plus its per-stream `version` and `metadata`. It is deliberately
+    /// **not** the `I::Typed<_>` shape [`decoded`](Self::decoded) yields: a bare
+    /// closure cannot be inferred higher-ranked over a lifetime hidden behind
+    /// the `I::Typed<_>` associated-type projection (rustc "implementation of
+    /// `FnMut` is not general enough"), so a concrete outer constructor is
+    /// required for the zero-copy path to type-check. Consequently, over an
+    /// `$all` stream the position tag is not surfaced to `f` (the per-stream
+    /// `Decoded::version` still is) — for a positioned `$all` fold, decode via
+    /// [`decoded`](Self::decoded) and fold the resulting stream.
+    fn for_each_decoded<E, C, F, H>(
+        self,
+        codec: C,
+        mut f: F,
+    ) -> impl Future<Output = Result<(), FoldDecodedError<R, C::Error, H>>>
+    where
+        E: ?Sized,
+        C: Decode<E>,
+        F: for<'a> FnMut(Decoded<<C as Decode<E>>::Output<'a>>) -> Result<(), H>,
+    {
+        async move {
+            let stream = self;
+            futures::pin_mut!(stream);
+            while let Some(res) = stream.next().await {
+                let item = res.map_err(FoldDecodedError::Read)?;
+                fold_one(&codec, &mut f, item.envelope())?;
+            }
+            Ok(())
+        }
+    }
+}
+
+/// One decode-then-fold step: decode `env` with `codec`, box it as [`Decoded`],
+/// and hand the (possibly borrowed) window to `f`. Kept a free, synchronous fn
+/// so the higher-ranked `f` call over the borrowed window's lifetime resolves
+/// in a plain fn body (see [`DecodedStreamExt::for_each_decoded`]).
+fn fold_one<R, E, C, F, H>(
+    codec: &C,
+    f: &mut F,
+    env: &PersistedEnvelope,
+) -> Result<(), FoldDecodedError<R, C::Error, H>>
+where
+    E: ?Sized,
+    C: Decode<E>,
+    F: for<'a> FnMut(Decoded<<C as Decode<E>>::Output<'a>>) -> Result<(), H>,
+{
+    let window = codec.decode(env).map_err(FoldDecodedError::Decode)?;
+    let decoded = Decoded {
+        event: window,
+        version: env.version(),
+        metadata: env.metadata_bytes(),
+    };
+    f(decoded).map_err(FoldDecodedError::Handler)
 }
 
 impl<St, I, R> DecodedStreamExt<I, R> for St
