@@ -13,7 +13,9 @@
 //!   window to a closure, so no lending stream is needed.
 
 use bytes::Bytes;
+use futures::{Stream, StreamExt};
 
+use crate::codec::Decode;
 use crate::envelope::PersistedEnvelope;
 use nexus::Version;
 
@@ -101,6 +103,56 @@ impl<P: Copy> RawItem for (P, PersistedEnvelope) {
     fn retag<T>(&self, decoded: Decoded<T>) -> (P, Decoded<T>) {
         (self.0, decoded)
     }
+}
+
+/// Adds a typed, codec-reusing view over any stream of raw envelope items.
+///
+/// Covers [`Subscription`](crate::Subscription),
+/// [`read_stream`](crate::RawEventStore::read_stream), and
+/// [`read_all`](crate::RawEventStore::read_all).
+pub trait DecodedStreamExt<I, R>: Stream<Item = Result<I, R>> + Sized
+where
+    I: RawItem,
+{
+    /// Decode each item with `codec`, reusing the codec configured elsewhere.
+    ///
+    /// Owning codecs only — the `for<'a> Output<'a> = E` bound is unsatisfiable
+    /// for a zero-copy codec (whose `Output` borrows the envelope), so the
+    /// compiler steers zero-copy consumers to `for_each_decoded` (a follow-up).
+    /// Per-stream items become `Decoded<E>`; `$all` items become
+    /// `(AllPosition, Decoded<E>)` (the tag is preserved beside the box).
+    fn decoded<E, C>(
+        self,
+        codec: C,
+    ) -> impl Stream<Item = Result<I::Typed<E>, DecodeStreamError<R, C::Error>>> + Send
+    where
+        for<'a> C: Decode<E, Output<'a> = E>,
+        E: Send + 'static,
+        I: Send + 'static,
+        R: Send + 'static,
+        Self: Send,
+    {
+        self.map(move |res| {
+            let item = res.map_err(DecodeStreamError::Read)?;
+            let event: E = codec
+                .decode(item.envelope())
+                .map_err(DecodeStreamError::Decode)?;
+            let env = item.envelope();
+            let decoded = Decoded {
+                event,
+                version: env.version(),
+                metadata: env.metadata_bytes(),
+            };
+            Ok(item.retag(decoded))
+        })
+    }
+}
+
+impl<St, I, R> DecodedStreamExt<I, R> for St
+where
+    St: Stream<Item = Result<I, R>>,
+    I: RawItem,
+{
 }
 
 #[cfg(test)]
