@@ -92,6 +92,7 @@ pub(crate) mod catchup;
 pub mod cbor;
 pub mod codec;
 pub mod conflict;
+pub mod decoded;
 pub mod envelope;
 pub mod error;
 pub mod execute;
@@ -142,6 +143,7 @@ pub use codec::serde::json::{Json, JsonCodec};
 pub use codec::serde::{SerdeCodec, SerdeFormat};
 pub use codec::{Decode, Encode};
 pub use conflict::ConflictPredicate;
+pub use decoded::{DecodeStreamError, Decoded, FoldDecodedError, RawItem};
 pub use envelope::{
     EnvelopeError, ForDecodeError, PendingEnvelope, PersistedEnvelope, pending_envelope,
 };
