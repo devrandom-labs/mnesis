@@ -168,9 +168,11 @@ where
     /// the `I::Typed<_>` associated-type projection (rustc "implementation of
     /// `FnMut` is not general enough"), so a concrete outer constructor is
     /// required for the zero-copy path to type-check. Consequently, over an
-    /// `$all` stream the position tag is not surfaced to `f` (the per-stream
-    /// `Decoded::version` still is) — for a positioned `$all` fold, decode via
-    /// [`decoded`](Self::decoded) and fold the resulting stream.
+    /// `$all` stream the `AllPosition` tag is **not** surfaced to `f` (the
+    /// per-stream `Decoded::version` still is) — a positioned `$all` consumer
+    /// must either use [`decoded`](Self::decoded) (owning codecs), or fold the
+    /// raw `subscribe_all` stream directly, calling `codec.decode(&env)` per
+    /// item (zero-copy; the tag rides beside the envelope on the raw tuple).
     fn for_each_decoded<E, C, F, H>(
         self,
         codec: C,
