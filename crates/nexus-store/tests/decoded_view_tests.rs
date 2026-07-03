@@ -296,3 +296,79 @@ async fn for_each_decoded_surfaces_handler_error() {
         "got {out:?}"
     );
 }
+
+// ═══ 2. Lifecycle ═══
+#[tokio::test]
+async fn decoded_resume_from_checkpoint_decodes_the_tail() {
+    let store = Store::new(InMemoryStore::new());
+    let id = AcctId("life-1".to_owned());
+    append(&store, &id, 1, &Money::Deposited { amount: 1 }).await;
+    append(&store, &id, 2, &Money::Deposited { amount: 2 }).await;
+    append(&store, &id, 3, &Money::Deposited { amount: 3 }).await;
+
+    // Resume strictly after v2 → the typed view must begin at v3.
+    let stream = Subscription::new(&store)
+        .subscribe(&id, Version::new(2))
+        .unwrap()
+        .decoded::<Money, _>(JsonCodec::default());
+    tokio::pin!(stream);
+
+    let d = tokio::time::timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert_eq!(d.version, Version::new(3).unwrap());
+    assert_eq!(d.event, Money::Deposited { amount: 3 });
+}
+
+// ═══ 4. Linearizability/Isolation ═══
+#[tokio::test]
+async fn decoded_observes_concurrent_writes_in_order_no_dup() {
+    use std::sync::Arc;
+    use tokio::sync::Barrier;
+
+    let store = Store::new(InMemoryStore::new());
+    let id = AcctId("lin-1".to_owned());
+    append(&store, &id, 1, &Money::Deposited { amount: 1 }).await;
+
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .decoded::<Money, _>(JsonCodec::default());
+    tokio::pin!(stream);
+
+    // Drain v1, then rendezvous with a writer that appends v2..=v6 concurrently.
+    let first = tokio::time::timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert_eq!(first.version, Version::new(1).unwrap());
+
+    let barrier = Arc::new(Barrier::new(2));
+    let wb = Arc::clone(&barrier);
+    let ws = store.clone();
+    let wid = id.clone();
+    let writer = tokio::spawn(async move {
+        wb.wait().await;
+        for v in 2..=6u64 {
+            append(&ws, &wid, v, &Money::Deposited { amount: v }).await;
+        }
+    });
+
+    barrier.wait().await;
+    let mut versions = Vec::new();
+    for _ in 0..5 {
+        let d = tokio::time::timeout(TIMEOUT, stream.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        versions.push(d.version.as_u64());
+    }
+    writer.await.unwrap();
+
+    // Strictly monotonic, no duplicates, exact set.
+    assert_eq!(versions, vec![2, 3, 4, 5, 6]);
+}
