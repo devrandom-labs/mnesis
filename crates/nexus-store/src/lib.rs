@@ -109,6 +109,7 @@ pub mod saga;
 #[cfg(feature = "snapshot")]
 pub mod snapshot;
 pub mod state;
+pub mod step;
 pub mod store;
 pub mod stream;
 pub mod stream_id;
@@ -173,6 +174,7 @@ pub use state::{
     AfterEventTypes, CodecSnapshotStore, CodecSnapshotStoreError, EveryNEvents, PersistTrigger,
     SnapshotStore,
 };
+pub use step::Step;
 pub use store::{AllPosition, RawEventStore, Store};
 pub use stream::EventStream;
 pub use stream_id::StreamKey;
