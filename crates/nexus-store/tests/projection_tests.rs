@@ -18,7 +18,7 @@ use std::num::{NonZeroU32, NonZeroU64};
 
 use nexus::Version;
 use nexus_store::Projector;
-use nexus_store::state::{AfterEventTypes, EveryNEvents, PersistTrigger, SnapshotStore};
+use nexus_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
 
@@ -130,7 +130,7 @@ mod in_memory_tests {
     async fn hydrate_returns_none_when_empty() {
         let store = InMemorySnapshotStore::<Vec<u8>, Version>::new();
         let result = store.hydrate(&TestId("proj-1".into()), SV1).await.unwrap();
-        assert!(result.is_none());
+        assert_eq!(result, Hydrated::Absent);
     }
 
     #[tokio::test]
@@ -143,7 +143,8 @@ mod in_memory_tests {
             .commit(&id, NonZeroU32::new(1).unwrap(), version, &vec![1, 2, 3])
             .await
             .unwrap();
-        let (loaded_version, loaded_state) = store.hydrate(&id, SV1).await.unwrap().unwrap();
+        let (loaded_version, loaded_state) =
+            store.hydrate(&id, SV1).await.unwrap().into_found().unwrap();
 
         assert_eq!(loaded_version, version);
         assert_eq!(loaded_state, vec![1, 2, 3]);
@@ -174,7 +175,8 @@ mod in_memory_tests {
             .await
             .unwrap();
 
-        let (loaded_version, loaded_state) = store.hydrate(&id, SV1).await.unwrap().unwrap();
+        let (loaded_version, loaded_state) =
+            store.hydrate(&id, SV1).await.unwrap().into_found().unwrap();
         assert_eq!(loaded_version, Version::new(20).unwrap());
         assert_eq!(loaded_state, vec![2]);
     }
@@ -207,11 +209,13 @@ mod in_memory_tests {
             .hydrate(&TestId("proj-1".into()), SV1)
             .await
             .unwrap()
+            .into_found()
             .unwrap();
         let (version2, _) = store
             .hydrate(&TestId("proj-2".into()), SV1)
             .await
             .unwrap()
+            .into_found()
             .unwrap();
         assert_eq!(version1, Version::new(5).unwrap());
         assert_eq!(version2, Version::new(10).unwrap());
@@ -232,19 +236,25 @@ mod in_memory_tests {
             .await
             .unwrap();
 
-        // Matching schema version returns state
+        // Matching schema version returns the found state.
         let loaded = store
             .hydrate(&id, NonZeroU32::new(1).unwrap())
             .await
             .unwrap();
-        assert!(loaded.is_some());
+        assert!(matches!(loaded, Hydrated::Found { .. }));
 
-        // Mismatched schema version returns None
+        // Mismatched schema version reports Stale (not Absent), carrying the
+        // stored schema version so a host can tell a rebuild from a fresh start.
         let loaded = store
             .hydrate(&id, NonZeroU32::new(2).unwrap())
             .await
             .unwrap();
-        assert!(loaded.is_none());
+        assert_eq!(
+            loaded,
+            Hydrated::Stale {
+                stored_schema: NonZeroU32::new(1).unwrap()
+            }
+        );
     }
 }
 

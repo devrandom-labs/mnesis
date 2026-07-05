@@ -20,7 +20,7 @@ use std::num::NonZeroU32;
 
 use nexus_fjall::{FjallStore, GlobalSeq};
 use nexus_store::StreamKey;
-use nexus_store::state::SnapshotStore;
+use nexus_store::state::{Hydrated, SnapshotStore};
 // Only the cross-partition collision test (both features) needs `Version`.
 #[cfg(feature = "snapshot")]
 use nexus::Version;
@@ -55,6 +55,7 @@ async fn commit_then_hydrate_roundtrips() {
     let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos, gs(7));
     assert_eq!(state, vec![1, 2, 3]);
@@ -77,6 +78,7 @@ async fn commit_overwrites_previous_projection() {
     let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, sv2)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos, gs(42));
     assert_eq!(state, vec![2, 3]);
@@ -86,6 +88,7 @@ async fn commit_overwrites_previous_projection() {
         SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
             .await
             .unwrap()
+            .into_found()
             .is_none()
     );
 }
@@ -112,6 +115,7 @@ async fn projection_persists_across_reopen() {
         let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
             .await
             .unwrap()
+            .into_found()
             .unwrap();
         assert_eq!(pos, gs(9));
         assert_eq!(state, vec![42, 43, 44]);
@@ -121,30 +125,30 @@ async fn projection_persists_across_reopen() {
 // ── 3. Defensive Boundary Tests ────────────────────────────────────
 
 #[tokio::test]
-async fn hydrate_unknown_id_returns_none() {
+async fn hydrate_unknown_id_is_absent() {
     let (store, _dir) = temp_store();
-    let result: Option<(GlobalSeq, Vec<u8>)> =
-        SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &pk("nope"), SV1)
-            .await
-            .unwrap();
-    assert!(result.is_none());
+    let result = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &pk("nope"), SV1)
+        .await
+        .unwrap();
+    assert_eq!(result, Hydrated::Absent);
 }
 
 #[tokio::test]
-async fn hydrate_schema_mismatch_returns_none() {
+async fn hydrate_schema_mismatch_is_stale_not_absent() {
     let (store, _dir) = temp_store();
     let id = pk("proj-1");
     SnapshotStore::<Vec<u8>, GlobalSeq>::commit(&store, &id, SV1, gs(3), &vec![9])
         .await
         .unwrap();
 
+    // A checkpoint at a *different* schema version reports `Stale` (carrying the
+    // stored schema), not `Absent` — so a host can tell a schema-bump rebuild
+    // from a fresh projection instead of silently re-folding all of `$all`.
     let other = NonZeroU32::new(2).unwrap();
-    assert!(
-        SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, other)
-            .await
-            .unwrap()
-            .is_none()
-    );
+    let result = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, other)
+        .await
+        .unwrap();
+    assert_eq!(result, Hydrated::Stale { stored_schema: SV1 });
 }
 
 #[tokio::test]
@@ -159,6 +163,7 @@ async fn commit_at_initial_global_seq_roundtrips() {
     let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos, GlobalSeq::INITIAL);
     assert_eq!(state, vec![0]);
@@ -176,6 +181,7 @@ async fn commit_at_max_global_seq_roundtrips() {
     let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos, gs(u64::MAX));
     assert_eq!(state, vec![7]);
@@ -192,6 +198,7 @@ async fn commit_empty_state_roundtrips() {
     let (pos, state) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos, gs(4));
     assert!(state.is_empty());
@@ -215,10 +222,12 @@ async fn different_projections_are_independent() {
     let (pos1, state1) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id1, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     let (pos2, state2) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id2, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
 
     assert_eq!((pos1, state1), (gs(5), vec![1]));
@@ -256,10 +265,12 @@ async fn snapshot_and_projection_with_same_id_do_not_collide() {
     let (v, snap) = SnapshotStore::<Vec<u8>, Version>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     let (g, proj) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
 
     assert_eq!((v, snap), (Version::new(5).unwrap(), vec![1, 2, 3]));

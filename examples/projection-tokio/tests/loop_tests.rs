@@ -294,6 +294,7 @@ async fn runner_processes_events_and_checkpoints() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(position, version!(3));
     assert_eq!(
@@ -367,6 +368,7 @@ async fn runner_resumes_from_checkpoint() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(position, version!(5));
     assert_eq!(
@@ -420,6 +422,7 @@ async fn runner_trigger_controls_checkpoint_frequency() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(position, version!(5));
     assert_eq!(
@@ -499,6 +502,7 @@ async fn runner_resumes_normally_after_rebuild_completes() {
         .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(
         state,
@@ -545,7 +549,7 @@ async fn runner_immediate_shutdown_with_no_events() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
-    assert!(loaded.is_none());
+    assert!(loaded.into_found().is_none());
 }
 
 #[tokio::test]
@@ -586,6 +590,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(position, version!(3));
 
@@ -634,6 +639,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
         .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(
         state,
@@ -681,6 +687,7 @@ async fn runner_graceful_shutdown_flushes_dirty_state() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(
         state,
@@ -741,6 +748,7 @@ async fn runner_stale_state_falls_back_to_initial() {
         .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(
         state,
@@ -776,7 +784,10 @@ async fn runner_first_run_with_state_persistence_is_not_rebuild() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
-    assert!(before.is_none(), "expected no snapshot before first run");
+    assert!(
+        before.into_found().is_none(),
+        "expected no snapshot before first run"
+    );
 
     run(
         stream_id.clone(),
@@ -797,6 +808,7 @@ async fn runner_first_run_with_state_persistence_is_not_rebuild() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(
         state,
@@ -937,6 +949,7 @@ async fn runner_catches_up_and_processes_all_existing_events() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(position, version!(5));
     assert_eq!(
@@ -988,6 +1001,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(cp1, version!(1));
     assert_eq!(
@@ -1021,6 +1035,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(cp2, version!(2));
     // count:2, total:15 — not count:1/total:5 (fresh) or count:2/total:20 (double-fold)
@@ -1064,7 +1079,7 @@ async fn schema_bump_resolves_to_fresh() {
         .hydrate(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
-    assert!(v1.is_some(), "expected v1 snapshot to exist");
+    assert!(v1.into_found().is_some(), "expected v1 snapshot to exist");
 
     // Second run with schema v2 — the schema-mismatched snapshot is invisible.
     // hydrate returns None → state starts from initial() → full replay.
@@ -1088,6 +1103,7 @@ async fn schema_bump_resolves_to_fresh() {
         .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
+        .into_found()
         .unwrap();
     assert_eq!(pos2, version!(1));
     assert_eq!(

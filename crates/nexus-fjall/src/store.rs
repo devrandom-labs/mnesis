@@ -222,7 +222,7 @@ mod snapshot_impl {
     use super::{ErrorId, FjallError, FjallStore, Version};
     use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
     use nexus::Id;
-    use nexus_store::state::SnapshotStore;
+    use nexus_store::state::{Hydrated, SnapshotStore};
     use std::num::NonZeroU32;
 
     impl SnapshotStore<Vec<u8>, Version> for FjallStore {
@@ -232,10 +232,10 @@ mod snapshot_impl {
             &self,
             id: &impl Id,
             schema_version: NonZeroU32,
-        ) -> Result<Option<(Version, Vec<u8>)>, FjallError> {
+        ) -> Result<Hydrated<Vec<u8>, Version>, FjallError> {
             // Snapshot key is the ID bytes directly.
             let Some(bytes) = self.partitions.read_snapshot(id.as_ref())? else {
-                return Ok(None);
+                return Ok(Hydrated::Absent);
             };
 
             let (schema_version_raw, version_raw, payload) = decode_snapshot_value(&bytes)
@@ -244,17 +244,26 @@ mod snapshot_impl {
                     version: None,
                 })?;
 
-            // Schema mismatch → treat as absent (avoids cloning a stale payload).
-            if schema_version_raw != schema_version.get() {
-                return Ok(None);
+            // A stored schema version is always >= 1 (commit writes a
+            // `NonZeroU32`); a zero is corruption, not a stale snapshot.
+            let stored_schema =
+                NonZeroU32::new(schema_version_raw).ok_or_else(|| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+            if stored_schema != schema_version {
+                return Ok(Hydrated::Stale { stored_schema });
             }
 
-            let version = Version::new(version_raw).ok_or_else(|| FjallError::CorruptValue {
+            let position = Version::new(version_raw).ok_or_else(|| FjallError::CorruptValue {
                 stream_id: ErrorId::from_display(id),
                 version: None,
             })?;
 
-            Ok(Some((version, payload.to_vec())))
+            Ok(Hydrated::Found {
+                position,
+                state: payload.to_vec(),
+            })
         }
 
         async fn commit(
@@ -292,7 +301,7 @@ mod projection_impl {
     use super::{ErrorId, FjallError, FjallStore, GlobalSeq};
     use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
     use nexus::Id;
-    use nexus_store::state::SnapshotStore;
+    use nexus_store::state::{Hydrated, SnapshotStore};
     use std::num::NonZeroU32;
 
     impl SnapshotStore<Vec<u8>, GlobalSeq> for FjallStore {
@@ -302,11 +311,11 @@ mod projection_impl {
             &self,
             id: &impl Id,
             schema_version: NonZeroU32,
-        ) -> Result<Option<(GlobalSeq, Vec<u8>)>, FjallError> {
+        ) -> Result<Hydrated<Vec<u8>, GlobalSeq>, FjallError> {
             // Projection key is the id bytes directly, in the `projections`
             // partition (never the `snapshots` one).
             let Some(bytes) = self.partitions.read_projection(id.as_ref())? else {
-                return Ok(None);
+                return Ok(Hydrated::Absent);
             };
 
             let (schema_version_raw, position_raw, payload) = decode_snapshot_value(&bytes)
@@ -315,10 +324,16 @@ mod projection_impl {
                     version: None,
                 })?;
 
-            // Schema mismatch → treat as absent (parity with the snapshot impl;
-            // avoids cloning a stale payload).
-            if schema_version_raw != schema_version.get() {
-                return Ok(None);
+            // A stored schema version is always >= 1 (commit writes a
+            // `NonZeroU32`); a zero is corruption, not a stale checkpoint. A
+            // mismatch is `Stale` — the host must re-fold from the beginning.
+            let stored_schema =
+                NonZeroU32::new(schema_version_raw).ok_or_else(|| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+            if stored_schema != schema_version {
+                return Ok(Hydrated::Stale { stored_schema });
             }
 
             // A stored `GlobalSeq` is always >= 1; a zero means corrupt bytes.
@@ -328,7 +343,10 @@ mod projection_impl {
                     version: None,
                 })?;
 
-            Ok(Some((position, payload.to_vec())))
+            Ok(Hydrated::Found {
+                position,
+                state: payload.to_vec(),
+            })
         }
 
         async fn commit(

@@ -173,8 +173,8 @@ pub use snapshot::Snapshotting;
 #[cfg(feature = "testing")]
 pub use state::InMemorySnapshotStore;
 pub use state::{
-    AfterEventTypes, CodecSnapshotStore, CodecSnapshotStoreError, EveryNEvents, PersistTrigger,
-    SnapshotStore,
+    AfterEventTypes, CodecSnapshotStore, CodecSnapshotStoreError, EveryNEvents, Hydrated,
+    PersistTrigger, SnapshotStore,
 };
 pub use step::Step;
 pub use store::{AllPosition, RawEventStore, Store};
