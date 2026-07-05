@@ -100,7 +100,7 @@ impl Aggregate for CounterAggregate {
 fn repo(trigger: impl PersistTrigger, snapshot_on_read: bool) -> impl Repository<CounterAggregate> {
     let raw = InMemoryStore::new();
     let store = Store::new(raw);
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
 
     Snapshotting::new(
         inner,
@@ -197,7 +197,7 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
     // Create a repo with schema_version=1, save events+snapshot
     let raw = InMemoryStore::new();
     let store = Store::new(raw);
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
 
     let repo_v1 = Snapshotting::new(
@@ -216,7 +216,7 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
         .unwrap();
 
     // Now create a new repo with schema_version=2 pointing to same stores
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo_v2 = Snapshotting::new(
         inner2,
         &snap_store,
@@ -264,7 +264,7 @@ async fn lazy_snapshot_on_read_after_full_replay() {
     let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
 
     // First, save events without snapshots (no trigger, just on-read)
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo_write = Snapshotting::new(
         inner,
         &snap_store,
@@ -289,7 +289,7 @@ async fn lazy_snapshot_on_read_after_full_replay() {
 
     // No snapshot yet (threshold too high).
     // Now create a repo with on-read enabled
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo_read = Snapshotting::new(
         inner2,
         &snap_store,
@@ -444,7 +444,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
     let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
 
     // Save with schema v1, triggers snapshot
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo_v1 = Snapshotting::new(
         inner,
         &snap_store,
@@ -460,7 +460,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
         .unwrap();
 
     // Switch to schema v2 — old snapshot ignored, full replay, new snapshot created
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo_v2 = Snapshotting::new(
         inner2,
         &snap_store,
@@ -535,7 +535,7 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
     let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
 
     // Save events without snapshot
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo_no_snap = Snapshotting::new(
         inner,
         &snap_store,
@@ -570,7 +570,7 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
     );
 
     // Load with on-read → creates lazy snapshot
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo_on_read = Snapshotting::new(
         inner2,
         &snap_store,
@@ -633,7 +633,7 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
 
     // Save events and snapshot with a good codec first
     let good_state_store = CodecSnapshotStore::new(&byte_store, nexus_store::JsonCodec::default());
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo_good = Snapshotting::new(
         inner,
         &good_state_store,
@@ -650,7 +650,7 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
 
     // Now load with the failing codec — should fall back to full replay
     let bad_state_store = CodecSnapshotStore::new(&byte_store, FailCodec);
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo_bad = Snapshotting::new(
         inner2,
         &bad_state_store,
@@ -694,7 +694,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
     let store = Store::new(raw);
 
     // Save some events first
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let good_repo = Snapshotting::new(
         inner,
         InMemorySnapshotStore::<CounterState, Version>::new(),
@@ -713,7 +713,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         .unwrap();
 
     // Now load with error store — should fall back to full replay
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let bad_repo = Snapshotting::new(
         inner2,
         ErrorStore,
@@ -754,7 +754,7 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
 
     let raw = InMemoryStore::new();
     let store = Store::new(raw);
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo = Snapshotting::new(
         inner,
         SaveErrorStore,
@@ -802,7 +802,7 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
     let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
 
     // Save 3 events, snapshot at v3
-    let inner = store.repository().build();
+    let inner = store.repository().json().build();
     let repo = Snapshotting::new(
         inner,
         &snap_store,
@@ -824,7 +824,7 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
     .unwrap();
 
     // Load two copies concurrently
-    let inner2 = store.repository().build();
+    let inner2 = store.repository().json().build();
     let repo2 = Snapshotting::new(
         inner2,
         &snap_store,
