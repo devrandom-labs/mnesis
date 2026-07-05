@@ -11,7 +11,7 @@ use nexus_store::store::RawEventStore;
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{
     Decode, DecodeStreamError, Decoded, DecodedStreamExt, Encode, FoldDecodedError, JsonCodec,
-    PersistedEnvelope, Store, StreamKey, Subscription, pending_envelope,
+    PersistedEnvelope, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
 };
 use serde::{Deserialize, Serialize};
 
@@ -79,6 +79,7 @@ async fn decoded_catchup_then_live_reuses_the_codec() {
     let stream = Subscription::new(&store)
         .subscribe(&id, None)
         .unwrap()
+        .events()
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 
@@ -125,6 +126,7 @@ async fn corrupt_payload_surfaces_decode_not_panic_not_read() {
     let stream = Subscription::new(&store)
         .subscribe(&id, None)
         .unwrap()
+        .events()
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 
@@ -183,6 +185,7 @@ async fn decoded_all_preserves_the_position_tag_beside_the_box() {
     let stream = Subscription::new(&store)
         .subscribe_all(None)
         .unwrap()
+        .events()
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 
@@ -310,6 +313,7 @@ async fn decoded_resume_from_checkpoint_decodes_the_tail() {
     let stream = Subscription::new(&store)
         .subscribe(&id, Version::new(2))
         .unwrap()
+        .events()
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 
@@ -335,6 +339,7 @@ async fn decoded_observes_concurrent_writes_in_order_no_dup() {
     let stream = Subscription::new(&store)
         .subscribe(&id, None)
         .unwrap()
+        .events()
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 

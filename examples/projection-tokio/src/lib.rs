@@ -19,7 +19,7 @@ use nexus::{DomainEvent, Id, Version};
 use nexus_store::state::{PersistTrigger, SnapshotStore};
 use nexus_store::store::RawEventStore;
 use nexus_store::wake::WakeSource;
-use nexus_store::{Decode, Projector, Subscription};
+use nexus_store::{Decode, Projector, StepStreamExt, Subscription};
 
 /// Run a projection loop until `shutdown` resolves or the stream errors.
 ///
@@ -67,7 +67,9 @@ where
 
     // 2. Subscribe from the checkpoint. The cursor is `!Unpin` (the generic
     //    live loop's `unfold`), so pin it before polling.
-    let stream = subscription.subscribe(&id, checkpoint)?;
+    // A projection consumes events; it does not need the catch-up→live phase
+    // marker, so `.events()` drops it and restores a bare-envelope stream.
+    let stream = subscription.subscribe(&id, checkpoint)?.events();
     tokio::pin!(stream);
 
     // 3. Drive until shutdown or stream end.

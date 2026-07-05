@@ -1,16 +1,22 @@
 //! Consumer-side typed view over the raw envelope streams (#249).
 //!
-//! [`Subscription`](crate::Subscription), [`read_stream`](crate::RawEventStore::read_stream)
-//! and [`read_all`](crate::RawEventStore::read_all) yield **raw**
-//! [`PersistedEnvelope`]s by design (the distributed multi-consumer contract:
-//! each consumer holds its own codec). This module adds an ergonomic layer on
-//! top — it does **not** make the core subscription typed.
+//! [`read_stream`](crate::RawEventStore::read_stream) and
+//! [`read_all`](crate::RawEventStore::read_all) yield **raw**
+//! [`PersistedEnvelope`]s, and [`Subscription`](crate::Subscription) yields
+//! them wrapped in a [`Step`] phase marker — by design (the distributed
+//! multi-consumer contract: each consumer holds its own codec). This module
+//! adds an ergonomic layer on top — it does **not** make the core subscription
+//! typed.
 //!
 //! - [`DecodedStreamExt::decoded`] — for **owning** codecs (JSON, bincode): a
 //!   stream of carry-away [`Decoded<E>`] items.
 //! - [`DecodedStreamExt::for_each_decoded`] — for **owning and zero-copy**
 //!   codecs (rkyv, bytemuck): an internal-iteration fold that hands the borrowed
 //!   window to a closure, so no lending stream is needed.
+//! - [`StepStreamExt`] — the phase-aware surface over a `Step`-tagged
+//!   subscription stream: [`.events()`](StepStreamExt::events) drops the phase
+//!   (then the two `DecodedStreamExt` methods apply), or
+//!   [`.decoded()`](StepStreamExt::decoded) decodes while **keeping** the phase.
 
 use core::future::Future;
 
@@ -19,6 +25,7 @@ use futures::{Stream, StreamExt};
 
 use crate::codec::Decode;
 use crate::envelope::PersistedEnvelope;
+use crate::step::Step;
 use nexus::Version;
 
 /// A raw envelope, un-packed: the decoded event plus its resume bookmark and
@@ -222,6 +229,93 @@ where
 impl<St, I, R> DecodedStreamExt<I, R> for St
 where
     St: Stream<Item = Result<I, R>>,
+    I: RawItem,
+{
+}
+
+/// Adds phase-aware views over a [`Step`]-tagged stream — what
+/// [`Subscription::subscribe`](crate::Subscription::subscribe) /
+/// [`subscribe_all`](crate::Subscription::subscribe_all) yield.
+///
+/// The `Step` phase marker (the catch-up→live boundary) is intrinsic to a
+/// subscription (a finite read has no such boundary), so it rides on the raw
+/// stream. This trait lets a consumer either **keep** the phase and decode
+/// (`.decoded()`), or **drop** it (`.events()`) and fall back to the plain
+/// [`DecodedStreamExt`] surface a finite read uses.
+///
+/// `Step<I>` is deliberately **not** a [`RawItem`] (the [`CaughtUp`](Step::CaughtUp)
+/// marker carries no envelope), so `.decoded()` here and `.decoded()` on
+/// [`DecodedStreamExt`] are two non-overlapping impls sharing one name.
+pub trait StepStreamExt<I, R>: Stream<Item = Result<Step<I>, R>> + Sized
+where
+    I: RawItem,
+{
+    /// Drop the phase: yield bare `I` items ([`CaughtUp`](Step::CaughtUp)
+    /// removed, [`Event`](Step::Event) unwrapped). The result is a plain raw
+    /// stream, so the full [`DecodedStreamExt`] surface (`.decoded()`,
+    /// `.for_each_decoded()`) applies to it — the path for a consumer that does
+    /// not care whether it is replaying or live.
+    fn events(self) -> impl Stream<Item = Result<I, R>> + Send
+    where
+        Self: Send,
+        I: Send,
+        R: Send,
+    {
+        self.filter_map(|res| async move {
+            match res {
+                Ok(Step::Event(item)) => Some(Ok(item)),
+                Ok(Step::CaughtUp) => None,
+                Err(e) => Some(Err(e)),
+            }
+        })
+    }
+
+    /// Decode each event with `codec`, **preserving** the phase marker: the
+    /// result is a stream of `Step<I::Typed<E>>` — replay events, then exactly
+    /// one [`CaughtUp`](Step::CaughtUp), then live events. Owning codecs only
+    /// (same `for<'a> Output<'a> = E` steer as [`DecodedStreamExt::decoded`]).
+    ///
+    /// This is the projection consumption path: it tells catch-up from live
+    /// *and* hands you typed events, reusing the codec — no magic count, no
+    /// hand-rolled timeout, nexus-owned error.
+    #[allow(
+        clippy::type_complexity,
+        reason = "the Step<Decoded>/DecodeStreamError item is intrinsic to the contract; an \
+                  alias would hide the `impl Stream` the API depends on"
+    )]
+    fn decoded<E, C>(
+        self,
+        codec: C,
+    ) -> impl Stream<Item = Result<Step<I::Typed<E>>, DecodeStreamError<R, C::Error>>> + Send
+    where
+        for<'a> C: Decode<E, Output<'a> = E>,
+        E: Send + 'static,
+        I: Send + 'static,
+        R: Send + 'static,
+        Self: Send,
+    {
+        self.map(move |res| {
+            let step = res.map_err(DecodeStreamError::Read)?;
+            match step {
+                Step::CaughtUp => Ok(Step::CaughtUp),
+                Step::Event(item) => {
+                    let env = item.envelope();
+                    let event: E = codec.decode(env).map_err(DecodeStreamError::Decode)?;
+                    let decoded = Decoded {
+                        event,
+                        version: env.version(),
+                        metadata: env.metadata_bytes(),
+                    };
+                    Ok(Step::Event(item.retag(decoded)))
+                }
+            }
+        })
+    }
+}
+
+impl<St, I, R> StepStreamExt<I, R> for St
+where
+    St: Stream<Item = Result<Step<I>, R>>,
     I: RawItem,
 {
 }

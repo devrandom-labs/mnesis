@@ -881,7 +881,7 @@ mod bounded_read_tests {
 mod global_read_tests {
     use super::*;
     use crate::envelope::pending_envelope;
-    use crate::{Store, Subscription};
+    use crate::{StepStreamExt, Store, Subscription};
     use futures::StreamExt;
 
     fn sk(s: &str) -> StreamKey {
@@ -977,7 +977,10 @@ mod global_read_tests {
         append_one(store.raw(), "a", 1, None, b"a1").await;
         append_one(store.raw(), "b", 1, None, b"b1").await;
 
-        let sub = Subscription::new(&store).subscribe_all(None).unwrap();
+        let sub = Subscription::new(&store)
+            .subscribe_all(None)
+            .unwrap()
+            .events();
         futures::pin_mut!(sub);
         assert_eq!(sub.next().await.unwrap().unwrap().0.as_u64(), 1);
         assert_eq!(sub.next().await.unwrap().unwrap().0.as_u64(), 2);
@@ -994,7 +997,10 @@ mod global_read_tests {
     #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
     async fn subscribe_all_sees_concurrent_appends_across_streams() {
         let store = Store::new(InMemoryStore::new());
-        let sub = Subscription::new(&store).subscribe_all(None).unwrap();
+        let sub = Subscription::new(&store)
+            .subscribe_all(None)
+            .unwrap()
+            .events();
         futures::pin_mut!(sub);
 
         let s1 = store.clone();
@@ -1034,9 +1040,9 @@ mod global_read_tests {
 mod bounded_subscription_tests {
     use super::*;
     use crate::Store;
-    use crate::Subscription;
     use crate::batch::BatchSize;
     use crate::envelope::pending_envelope;
+    use crate::{StepStreamExt, Subscription};
     use futures::StreamExt;
 
     fn env(v: u64) -> PendingEnvelope {
@@ -1060,7 +1066,10 @@ mod bounded_subscription_tests {
                 .unwrap();
         }
 
-        let sub = Subscription::new(&store).subscribe(&id, None).unwrap();
+        let sub = Subscription::new(&store)
+            .subscribe(&id, None)
+            .unwrap()
+            .events();
         futures::pin_mut!(sub);
 
         for expected in 1..=40u64 {

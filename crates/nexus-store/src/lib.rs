@@ -144,7 +144,9 @@ pub use codec::serde::json::{Json, JsonCodec};
 pub use codec::serde::{SerdeCodec, SerdeFormat};
 pub use codec::{Decode, Encode};
 pub use conflict::ConflictPredicate;
-pub use decoded::{DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem};
+pub use decoded::{
+    DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem, StepStreamExt,
+};
 pub use envelope::{
     EnvelopeError, ForDecodeError, PendingEnvelope, PersistedEnvelope, pending_envelope,
 };

@@ -9,7 +9,7 @@ use futures::StreamExt;
 use nexus::Version;
 use nexus_store::store::RawEventStore;
 use nexus_store::testing::InMemoryStore;
-use nexus_store::{Store, Subscription, pending_envelope};
+use nexus_store::{StepStreamExt, Store, Subscription, pending_envelope};
 use tokio::time::timeout;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -74,10 +74,16 @@ async fn subscribe_returns_a_reexported_stream() {
     let store = Store::new(InMemoryStore::new());
     let id = TestId::new("stream-static");
 
-    let per_stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let per_stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     assert_stream(&per_stream);
 
-    let all = Subscription::new(&store).subscribe_all(None).unwrap();
+    let all = Subscription::new(&store)
+        .subscribe_all(None)
+        .unwrap()
+        .events();
     assert_stream(&all);
 }
 
@@ -95,7 +101,10 @@ async fn subscribe_catchup_then_live() {
     append_one(&store, &id, 2, Version::new(1), "E2").await;
 
     // Subscribe from the beginning (None = start from version 1).
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Read catch-up event 1.
@@ -142,7 +151,8 @@ async fn subscribe_from_checkpoint() {
     // Subscribe from version 2 (should yield events AFTER version 2, i.e., event 3).
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(Version::new(2).unwrap()))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     let env = timeout(TIMEOUT, stream.next())
@@ -168,7 +178,10 @@ async fn drop_and_resubscribe_from_position() {
 
     // Subscribe, read event, capture position, drop.
     let position = {
-        let sub_stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+        let sub_stream = Subscription::new(&store)
+            .subscribe(&id, None)
+            .unwrap()
+            .events();
         futures::pin_mut!(sub_stream);
         let first_env = timeout(TIMEOUT, sub_stream.next())
             .await
@@ -187,7 +200,8 @@ async fn drop_and_resubscribe_from_position() {
     // Re-subscribe from the captured position.
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(position))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Should get events 2 and 3 (after the position).
@@ -218,7 +232,10 @@ async fn catchup_events_appended_before_subscribe() {
     append_one(&store, &id, 2, Version::new(1), "E2").await;
 
     // Subscribe and verify both arrive as catch-up.
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     let env1 = timeout(TIMEOUT, stream.next())
@@ -247,7 +264,10 @@ async fn subscribe_to_nonexistent_stream_waits() {
     let store = Store::new(InMemoryStore::new());
     let id = TestId::new("ghost-stream");
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // next() should block because the stream doesn't exist yet.
@@ -280,7 +300,8 @@ async fn subscribe_from_beyond_head() {
     // Subscribe from version 5 — beyond the current head.
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(Version::new(5).unwrap()))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Should block — no events at version 6+.
@@ -313,7 +334,10 @@ async fn concurrent_append_and_subscribe() {
     let id = TestId::new("concurrent-stream");
     let event_count: u64 = 50;
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Spawn a task that appends events sequentially.
@@ -363,7 +387,10 @@ async fn append_during_catchup_no_loss() {
         append_one(&store, &id, i, expected, "Prepop").await;
     }
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Read first 5 events (mid-catch-up).
@@ -397,8 +424,8 @@ async fn multiple_subscribers_same_stream() {
 
     // Two subscribers to the same stream.
     let sub = Subscription::new(&store);
-    let sub1 = sub.subscribe(&id, None).unwrap();
-    let sub2 = sub.subscribe(&id, None).unwrap();
+    let sub1 = sub.subscribe(&id, None).unwrap().events();
+    let sub2 = sub.subscribe(&id, None).unwrap().events();
     futures::pin_mut!(sub1, sub2);
 
     // Append one event.
@@ -434,6 +461,9 @@ async fn subscription_cursor_is_static() {
     fn assert_static<T: 'static>(_: &T) {}
     let store = Store::new(InMemoryStore::new());
     let id = TestId::new("s-1");
-    let sub = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let sub = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     assert_static(&sub);
 }

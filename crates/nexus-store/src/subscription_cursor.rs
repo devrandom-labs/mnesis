@@ -4,12 +4,13 @@
 //!
 //! [`live_stepped`] is the core loop: it yields a [`Step`] so callers can
 //! observe the exact backlog→live boundary (`Step::CaughtUp`, emitted exactly
-//! once). [`live`] is a thin events-only filter over it — it drops the
-//! `CaughtUp` marker and unwraps `Step::Event`, preserving the pre-`Step`
-//! item type, so existing consumers are unaffected.
+//! once). The phase marker is intrinsic to a subscription, so it rides all the
+//! way out to the consumer; dropping it (events-only) is a consumer-side
+//! combinator ([`StepStreamExt::events`](crate::StepStreamExt)), not a second
+//! loop here.
 //!
-//! The user-facing [`Subscription`](crate::Subscription) assembles [`live`]
-//! per call site over the [`catchup`](crate::catchup) seam.
+//! The user-facing [`Subscription`](crate::Subscription) assembles
+//! [`live_stepped`] per call site over the [`catchup`](crate::catchup) seam.
 
 use futures::StreamExt;
 
@@ -145,25 +146,6 @@ where
     })
 }
 
-/// Events-only view over [`live_stepped`]: drops the `CaughtUp` marker and the
-/// `Step` wrapper, yielding bare position-tagged items. `subscribe` /
-/// `subscribe_all` consume this, so their contract is unchanged.
-pub fn live<C: Catchup + 'static>(
-    c: C,
-    from: Option<C::Position>,
-) -> impl futures::Stream<Item = Result<(C::Position, PersistedEnvelope), C::Error>> + Send
-where
-    C::Scan: Unpin,
-{
-    live_stepped(c, from).filter_map(|item| async move {
-        match item {
-            Ok(Step::Event(ev)) => Some(Ok(ev)),
-            Ok(Step::CaughtUp) => None,
-            Err(e) => Some(Err(e)),
-        }
-    })
-}
-
 #[cfg(all(test, feature = "testing"))]
 #[allow(clippy::unwrap_used, reason = "test code")]
 #[allow(clippy::shadow_reuse, reason = "test code: env rebinds per loop turn")]
@@ -204,6 +186,27 @@ mod tests {
                 .unwrap();
             store.append(id, Version::new(v - 1), &[env]).await.unwrap();
         }
+    }
+
+    /// Events-only view over [`live_stepped`] — drops the `CaughtUp` marker and
+    /// unwraps `Event`. In production this is the consumer-side
+    /// [`StepStreamExt::events`](crate::StepStreamExt) combinator; here it is a
+    /// test helper so the core-loop tests below assert event ordering without
+    /// the phase marker in the way.
+    fn live<C: Catchup + 'static>(
+        c: C,
+        from: Option<C::Position>,
+    ) -> impl futures::Stream<Item = Result<(C::Position, PersistedEnvelope), C::Error>>
+    where
+        C::Scan: Unpin,
+    {
+        live_stepped(c, from).filter_map(|item| async move {
+            match item {
+                Ok(Step::Event(ev)) => Some(Ok(ev)),
+                Ok(Step::CaughtUp) => None,
+                Err(e) => Some(Err(e)),
+            }
+        })
     }
 
     /// Catch-up delivers the full backlog in strict version order.

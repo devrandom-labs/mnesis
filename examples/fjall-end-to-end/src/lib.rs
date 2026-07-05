@@ -86,7 +86,7 @@ use nexus_store::export::{EventExporter, StreamLister};
 use nexus_store::import::{Atomicity, EventImporter, StreamOutcome};
 use nexus_store::repository::Repository;
 use nexus_store::store::{RawEventStore, Store};
-use nexus_store::{CommandRepository, DecodedStreamExt, JsonCodec, StreamKey, Subscription};
+use nexus_store::{CommandRepository, JsonCodec, Step, StepStreamExt, StreamKey, Subscription};
 
 use domain::{AccountEvent, AccountId, AccountState, BankAccount, Deposit, OpenAccount, Withdraw};
 
@@ -195,23 +195,25 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
 
     let subscription = Subscription::new(&store);
 
-    // Catch-up: the cursor never returns `None`, and we seeded a known count,
-    // so drain exactly three. The stream is `!Unpin` → pin before polling.
-    // `.decoded()` reuses the repository's JSON codec instead of hand-decoding
-    // the payload (#249).
+    // Catch-up: the cursor never returns `None`, but it now emits `CaughtUp` at
+    // the backlog→live boundary — so drain until that marker instead of a magic
+    // count (#250). The stream is `!Unpin` → pin before polling. `.decoded()`
+    // reuses the repository's JSON codec and preserves the phase, yielding
+    // `Step<Decoded<AccountEvent>>` (#249 + #250).
     let stream = subscription
         .subscribe(&id, None)?
         .decoded::<AccountEvent, _>(JsonCodec::default());
     tokio::pin!(stream);
     let mut catchup_versions = Vec::new();
     let mut balance = 0u64;
-    for _ in 0..3 {
-        let d = stream
-            .next()
-            .await
-            .ok_or("subscription closed during catch-up")??;
-        catchup_versions.push(d.version.as_u64());
-        balance = apply_balance(balance, &d.event);
+    loop {
+        match timeout_step(&mut stream, "catch-up").await? {
+            Step::CaughtUp => break,
+            Step::Event(d) => {
+                catchup_versions.push(d.version.as_u64());
+                balance = apply_balance(balance, &d.event);
+            }
+        }
     }
     let catchup_balance = balance;
 
@@ -232,8 +234,15 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
 
     barrier.wait().await;
     // Bound the live observation with a timeout — the cursor would otherwise
-    // park forever waiting for the next event.
-    let d = timeout_next(&mut stream, "live tail").await?;
+    // park forever. We're already past the boundary, so the next `Event` is the
+    // live one (ignore any stray `CaughtUp`).
+    let d = loop {
+        // Already past the boundary; the next `Event` is the live one, a stray
+        // `CaughtUp` just means keep waiting.
+        if let Step::Event(d) = timeout_step(&mut stream, "live tail").await? {
+            break d;
+        }
+    };
     let live_version = d.version.as_u64();
     let live_balance = apply_balance(balance, &d.event);
     writer
@@ -246,7 +255,11 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
         .subscribe(&id, Some(v3))?
         .decoded::<AccountEvent, _>(JsonCodec::default());
     tokio::pin!(resume);
-    let first = timeout_next(&mut resume, "resume").await?;
+    let first = loop {
+        if let Step::Event(d) = timeout_step(&mut resume, "resume").await? {
+            break d;
+        }
+    };
     let resumed_first_version = first.version.as_u64();
 
     Ok(SubscriptionOutcome {
@@ -258,11 +271,12 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
     })
 }
 
-/// Poll the next item from a never-`None` subscription stream, bounded by a
-/// timeout so a stuck tail fails the example rather than hanging it.
-async fn timeout_next<S, T, E>(stream: &mut S, what: &str) -> Result<T, BoxErr>
+/// Poll the next [`Step`] from a never-`None` subscription stream, bounded by a
+/// timeout so a stuck tail fails the example rather than hanging it. The caller
+/// matches the `Step` to tell catch-up (`Event`) from the boundary (`CaughtUp`).
+async fn timeout_step<S, T, E>(stream: &mut S, what: &str) -> Result<Step<T>, BoxErr>
 where
-    S: futures::Stream<Item = Result<T, E>> + Unpin,
+    S: futures::Stream<Item = Result<Step<T>, E>> + Unpin,
     E: std::error::Error + Send + Sync + 'static,
 {
     let item = tokio::time::timeout(Duration::from_secs(5), stream.next())

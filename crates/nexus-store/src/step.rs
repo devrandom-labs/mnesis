@@ -36,6 +36,17 @@ impl<T> Step<T> {
     pub const fn is_caught_up(&self) -> bool {
         matches!(self, Self::CaughtUp)
     }
+
+    /// Map the carried payload, leaving [`CaughtUp`](Step::CaughtUp) untouched.
+    /// The phase marker flows through every transform (drop-the-tag in
+    /// `subscribe`, decode in `.decoded()`) so a boundary is never lost.
+    #[must_use]
+    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Step<U> {
+        match self {
+            Self::Event(t) => Step::Event(f(t)),
+            Self::CaughtUp => Step::CaughtUp,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -48,5 +59,14 @@ mod tests {
         assert_eq!(Step::<u8>::CaughtUp.event(), None);
         assert!(Step::<u8>::CaughtUp.is_caught_up());
         assert!(!Step::Event(7u8).is_caught_up());
+    }
+
+    #[test]
+    fn map_transforms_event_and_passes_caught_up_through() {
+        assert_eq!(
+            Step::Event(3u8).map(|n| u32::from(n) * 2),
+            Step::Event(6u32)
+        );
+        assert_eq!(Step::<u8>::CaughtUp.map(u32::from), Step::<u32>::CaughtUp);
     }
 }
