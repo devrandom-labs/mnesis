@@ -19,7 +19,7 @@ use nexus::Version;
 use nexus_fjall::FjallStore;
 use nexus_store::store::RawEventStore;
 use nexus_store::{
-    PendingEnvelope, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
+    PendingEnvelope, Step, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
 };
 use tokio::sync::Barrier;
 use tokio::time::timeout;
@@ -518,4 +518,124 @@ async fn subscription_cursor_is_static() {
         .unwrap()
         .events();
     assert_static(&sub);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. Phase marker on the real persistent adapter
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Lifecycle (category 2): write a backlog, **close** the keyspace (drop the
+/// store), **reopen** the same on-disk path, then subscribe. The persisted
+/// backlog must replay from disk in order, followed by exactly one `CaughtUp`
+/// at the boundary — the phase marker is derived live, so it must survive a full
+/// close/reopen of the LSM store, not just an in-process subscription.
+#[tokio::test]
+async fn subscribe_close_reopen_replays_backlog_then_one_caughtup() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("db");
+    let id = sk("persist");
+
+    // Write three events, then close (drop) the store to flush the keyspace.
+    {
+        let store = Store::new(FjallStore::builder(&path).open().unwrap());
+        append_one(&store, &id, 1, None, "E1").await;
+        append_one(&store, &id, 2, Version::new(1), "E2").await;
+        append_one(&store, &id, 3, Version::new(2), "E3").await;
+    }
+
+    // Reopen from scratch and subscribe — the backlog comes purely from disk.
+    let store = Store::new(FjallStore::builder(&path).open().unwrap());
+    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    tokio::pin!(stream);
+
+    for expected in 1..=3u64 {
+        match timeout(TIMEOUT, stream.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap()
+        {
+            Step::Event(env) => assert_eq!(env.version().as_u64(), expected),
+            Step::CaughtUp => panic!("CaughtUp before the persisted backlog drained"),
+        }
+    }
+    let marker = timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert!(
+        marker.is_caught_up(),
+        "CaughtUp after replaying the reopened backlog, got {marker:?}"
+    );
+
+    // A post-reopen live append then arrives as a further Event, no 2nd CaughtUp.
+    append_one(&store, &id, 4, Version::new(3), "E4").await;
+    match timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap()
+    {
+        Step::Event(env) => assert_eq!(env.version().as_u64(), 4),
+        Step::CaughtUp => panic!("CaughtUp must be emitted only once"),
+    }
+}
+
+/// Sequence (category 1) on the real adapter: a backlog larger than the live
+/// loop's internal scan-reopen granularity (`CATCHUP_CHUNK` = 1024) forces the
+/// fjall `ScanCursor` to be reopened several times mid-catch-up. Exactly one
+/// `CaughtUp` must still be emitted, and only after the final backlog event —
+/// the `caught_up` latch survives real adapter scan reopens.
+#[tokio::test]
+async fn subscribe_exactly_one_caughtup_across_a_large_backlog_on_fjall() {
+    const N: u64 = 1500; // > CATCHUP_CHUNK (1024)
+    let (store, _dir) = temp_store();
+    let store = Store::new(store);
+    let id = sk("big");
+
+    // One append of the whole backlog (a single fjall write_tx).
+    let envs: Vec<PendingEnvelope> = (1..=N)
+        .map(|v| make_envelope(v, "E", format!("p-{v}").as_bytes()))
+        .collect();
+    store.append(&id, None, &envs).await.unwrap();
+
+    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    tokio::pin!(stream);
+
+    let mut caughtup_count = 0u32;
+    let mut caughtup_after = None;
+    let mut last = 0u64;
+    for _ in 0..=N {
+        match timeout(TIMEOUT, stream.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap()
+        {
+            Step::Event(env) => {
+                let v = env.version().as_u64();
+                assert_eq!(v, last + 1, "fjall backlog must replay in strict order");
+                assert_eq!(
+                    caughtup_count, 0,
+                    "no event may follow CaughtUp during catch-up"
+                );
+                last = v;
+            }
+            Step::CaughtUp => {
+                caughtup_count += 1;
+                caughtup_after = Some(last);
+            }
+        }
+    }
+    assert_eq!(
+        caughtup_count, 1,
+        "exactly one CaughtUp across a multi-chunk fjall backlog"
+    );
+    assert_eq!(
+        caughtup_after,
+        Some(N),
+        "CaughtUp only after the final backlog event"
+    );
+    assert_eq!(last, N, "every backlog event delivered");
 }
