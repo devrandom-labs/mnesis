@@ -86,7 +86,7 @@ use nexus_store::export::{EventExporter, StreamLister};
 use nexus_store::import::{Atomicity, EventImporter, StreamOutcome};
 use nexus_store::repository::Repository;
 use nexus_store::store::{RawEventStore, Store};
-use nexus_store::{CommandRepository, PersistedEnvelope, StreamKey, Subscription};
+use nexus_store::{CommandRepository, DecodedStreamExt, JsonCodec, StreamKey, Subscription};
 
 use domain::{AccountEvent, AccountId, AccountState, BankAccount, Deposit, OpenAccount, Withdraw};
 
@@ -119,16 +119,15 @@ async fn seed_account<R: Repository<BankAccount>>(
     Ok(account.state().clone())
 }
 
-/// Fold a raw subscription envelope's payload into a running balance — the
-/// "consumer holds the codec" model: `Subscription` yields raw
-/// [`PersistedEnvelope`]s, the consumer decodes them.
-fn fold_balance(balance: u64, env: &PersistedEnvelope) -> Result<u64, BoxErr> {
-    let event: AccountEvent = serde_json::from_slice(env.payload())?;
-    Ok(match event {
+/// Fold a decoded account event into the running read-model balance. The
+/// `.decoded()` adapter reuses the repository's JSON codec, so the consumer no
+/// longer hand-decodes — this is pure domain arithmetic (#249).
+const fn apply_balance(balance: u64, event: &AccountEvent) -> u64 {
+    match event {
         AccountEvent::Opened(_) => balance,
         AccountEvent::Deposited(d) => balance + d.amount,
         AccountEvent::Withdrawn(w) => balance - w.amount,
-    })
+    }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -198,17 +197,21 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
 
     // Catch-up: the cursor never returns `None`, and we seeded a known count,
     // so drain exactly three. The stream is `!Unpin` → pin before polling.
-    let stream = subscription.subscribe(&id, None)?;
+    // `.decoded()` reuses the repository's JSON codec instead of hand-decoding
+    // the payload (#249).
+    let stream = subscription
+        .subscribe(&id, None)?
+        .decoded::<AccountEvent, _>(JsonCodec::default());
     tokio::pin!(stream);
     let mut catchup_versions = Vec::new();
     let mut balance = 0u64;
     for _ in 0..3 {
-        let env = stream
+        let d = stream
             .next()
             .await
             .ok_or("subscription closed during catch-up")??;
-        catchup_versions.push(env.version().as_u64());
-        balance = fold_balance(balance, &env)?;
+        catchup_versions.push(d.version.as_u64());
+        balance = apply_balance(balance, &d.event);
     }
     let catchup_balance = balance;
 
@@ -230,19 +233,21 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
     barrier.wait().await;
     // Bound the live observation with a timeout — the cursor would otherwise
     // park forever waiting for the next event.
-    let env = timeout_next(&mut stream, "live tail").await?;
-    let live_version = env.version().as_u64();
-    let live_balance = fold_balance(balance, &env)?;
+    let d = timeout_next(&mut stream, "live tail").await?;
+    let live_version = d.version.as_u64();
+    let live_balance = apply_balance(balance, &d.event);
     writer
         .await
         .map_err(|e| format!("writer task panicked: {e}"))?;
 
     // Strict-after resume: a fresh cursor from Some(v3) must begin at v4.
     let v3 = version!(3);
-    let resume = subscription.subscribe(&id, Some(v3))?;
+    let resume = subscription
+        .subscribe(&id, Some(v3))?
+        .decoded::<AccountEvent, _>(JsonCodec::default());
     tokio::pin!(resume);
     let first = timeout_next(&mut resume, "resume").await?;
-    let resumed_first_version = first.version().as_u64();
+    let resumed_first_version = first.version.as_u64();
 
     Ok(SubscriptionOutcome {
         catchup_versions,
@@ -255,9 +260,10 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
 
 /// Poll the next item from a never-`None` subscription stream, bounded by a
 /// timeout so a stuck tail fails the example rather than hanging it.
-async fn timeout_next<S>(stream: &mut S, what: &str) -> Result<PersistedEnvelope, BoxErr>
+async fn timeout_next<S, T, E>(stream: &mut S, what: &str) -> Result<T, BoxErr>
 where
-    S: futures::Stream<Item = Result<PersistedEnvelope, nexus_fjall::FjallError>> + Unpin,
+    S: futures::Stream<Item = Result<T, E>> + Unpin,
+    E: std::error::Error + Send + Sync + 'static,
 {
     let item = tokio::time::timeout(Duration::from_secs(5), stream.next())
         .await
