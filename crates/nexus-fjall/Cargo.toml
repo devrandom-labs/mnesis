@@ -13,6 +13,7 @@ categories = ["database"]
 
 [features]
 snapshot = ["nexus-store/snapshot"]
+projection = ["nexus-store/projection"]
 export = ["nexus-store/export"]
 import = ["nexus-store/import"]
 
@@ -36,7 +37,7 @@ insta = { workspace = true }
 # default features only). Same unification trick `nexus-store` uses for its
 # testing/export/import/cbor tests. `cargo add` refuses a self-dependency, so
 # this is a deliberate manual entry.
-nexus-fjall = { path = ".", features = ["export", "import"] }
+nexus-fjall = { path = ".", features = ["export", "import", "snapshot", "projection"] }
 # Pulls the CBOR backup box (`nexus_store::cbor`) into the test build; `cbor`
 # implies nexus-store's `export`+`import`, so the end-to-end round-trip tests
 # can encode/decode chunks. Separate from the line above because `cbor` is a

@@ -123,6 +123,8 @@ pub struct Partitions {
     global: SingleWriterTxKeyspace,
     #[cfg(feature = "snapshot")]
     snapshots: SingleWriterTxKeyspace,
+    #[cfg(feature = "projection")]
+    projections: SingleWriterTxKeyspace,
     /// Whether the `$all` index (`events_global`) is maintained — gates the
     /// second write in [`stage_event`](Self::stage_event) and `read_all`.
     mode: AllIndex,
@@ -132,12 +134,21 @@ impl Partitions {
     /// Assemble from the keyspaces the builder opened, with the default
     /// (`Denormalized`) `$all` index. Use [`with_all_index`](Self::with_all_index)
     /// to select a different mode.
-    pub const fn new(
+    ///
+    /// The two event-frame partitions are passed as one `(events, events_global)`
+    /// pair — they always travel together (normalized + `$all` denormalized copy,
+    /// configured from the same `events_config` closure), so grouping them keeps
+    /// the arity within the project's five-argument ceiling.
+    ///
+    /// Not `const`: destructuring the event-frame tuple would require dropping
+    /// the pair at compile time, which const eval forbids. `new` is only called
+    /// at runtime from the builder's `open`, so `const` bought nothing here.
+    pub fn new(
         streams: SingleWriterTxKeyspace,
-        events: SingleWriterTxKeyspace,
-        events_global: SingleWriterTxKeyspace,
+        (events, events_global): (SingleWriterTxKeyspace, SingleWriterTxKeyspace),
         global: SingleWriterTxKeyspace,
         #[cfg(feature = "snapshot")] snapshots: SingleWriterTxKeyspace,
+        #[cfg(feature = "projection")] projections: SingleWriterTxKeyspace,
     ) -> Self {
         Self {
             streams,
@@ -146,6 +157,8 @@ impl Partitions {
             global,
             #[cfg(feature = "snapshot")]
             snapshots,
+            #[cfg(feature = "projection")]
+            projections,
             mode: AllIndex::Denormalized,
         }
     }
@@ -266,6 +279,33 @@ impl Partitions {
             .map_err(FjallError::Io)
     }
 
+    // ----- projections (separate keyspace from snapshots) ---------------
+
+    /// Point-read a projection state blob by id from the `projections` keyspace
+    /// — a distinct partition from `snapshots`, so a projection id can never
+    /// collide with an aggregate-snapshot id that shares the same bytes.
+    #[cfg(feature = "projection")]
+    pub fn read_projection(&self, id: &[u8]) -> Result<Option<Slice>, FjallError> {
+        self.projections.get(id).map_err(FjallError::Io)
+    }
+
+    /// Write a projection state blob for id into the `projections` keyspace.
+    ///
+    /// The blob bundles `(schema_version, position, state)` into **one value
+    /// under one key**, so the state and the `GlobalSeq` it was folded up to are
+    /// never stored apart. The load-bearing guarantee is structural, not a claim
+    /// about fjall's fsync: because the two are one value, a persisted checkpoint
+    /// can **never be ahead of the state it describes**. So even if this write is
+    /// lost on a crash (`IoT` power-loss), the host resumes from the last *durable*
+    /// checkpoint and re-folds forward — idempotent, never skipping events. That
+    /// is why projection checkpointing needs no cross-partition transaction.
+    #[cfg(feature = "projection")]
+    pub fn write_projection(&self, id: &[u8], bytes: &[u8]) -> Result<(), FjallError> {
+        self.projections
+            .insert(id, Slice::from(bytes))
+            .map_err(FjallError::Io)
+    }
+
     // ----- white-box test access ----------------------------------------
 
     /// The `streams` keyspace. `#[cfg(test)]` — white-box tests inspect the
@@ -280,5 +320,12 @@ impl Partitions {
     #[cfg(test)]
     pub const fn global(&self) -> &SingleWriterTxKeyspace {
         &self.global
+    }
+
+    /// The `projections` keyspace. `#[cfg(test)]` — white-box tests write raw
+    /// (possibly corrupt) bytes directly to exercise the decode error path.
+    #[cfg(all(test, feature = "projection"))]
+    pub const fn projections(&self) -> &SingleWriterTxKeyspace {
+        &self.projections
     }
 }
