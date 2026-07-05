@@ -66,7 +66,7 @@ mod global_seq;
 mod partition;
 mod plan;
 mod scan;
-#[cfg(feature = "snapshot")]
+#[cfg(any(feature = "snapshot", feature = "projection"))]
 mod snapshot;
 mod store;
 mod subscription_id;

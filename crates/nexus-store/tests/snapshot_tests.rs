@@ -21,7 +21,7 @@ use std::num::{NonZeroU32, NonZeroU64};
 use nexus::Version;
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
-use nexus_store::state::{AfterEventTypes, EveryNEvents, PersistTrigger, SnapshotStore};
+use nexus_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 struct TestId(String);
@@ -136,7 +136,7 @@ mod in_memory_tests {
     async fn hydrate_returns_none_when_empty() {
         let store = InMemorySnapshotStore::<Vec<u8>, Version>::new();
         let result = store.hydrate(&TestId("agg-1".into()), SV1).await.unwrap();
-        assert!(result.is_none());
+        assert_eq!(result, Hydrated::Absent);
     }
 
     #[tokio::test]
@@ -149,7 +149,8 @@ mod in_memory_tests {
             .commit(&id, NonZeroU32::new(1).unwrap(), version, &vec![1, 2, 3])
             .await
             .unwrap();
-        let (loaded_version, loaded_state) = store.hydrate(&id, SV1).await.unwrap().unwrap();
+        let (loaded_version, loaded_state) =
+            store.hydrate(&id, SV1).await.unwrap().into_found().unwrap();
 
         assert_eq!(loaded_version, version);
         assert_eq!(loaded_state, vec![1, 2, 3]);
@@ -180,7 +181,8 @@ mod in_memory_tests {
             .await
             .unwrap();
 
-        let (loaded_version, loaded_state) = store.hydrate(&id, SV1).await.unwrap().unwrap();
+        let (loaded_version, loaded_state) =
+            store.hydrate(&id, SV1).await.unwrap().into_found().unwrap();
         assert_eq!(loaded_version, Version::new(20).unwrap());
         assert_eq!(loaded_state, vec![2]);
     }
@@ -213,11 +215,13 @@ mod in_memory_tests {
             .hydrate(&TestId("agg-1".into()), SV1)
             .await
             .unwrap()
+            .into_found()
             .unwrap();
         let (version2, _) = store
             .hydrate(&TestId("agg-2".into()), SV1)
             .await
             .unwrap()
+            .into_found()
             .unwrap();
         assert_eq!(version1, Version::new(5).unwrap());
         assert_eq!(version2, Version::new(10).unwrap());

@@ -1,4 +1,6 @@
 use crate::error::FjallError;
+#[cfg(feature = "projection")]
+use crate::partition::projection_defaults;
 use crate::partition::{AllIndex, KeyspaceConfig, Partitions, point_read_defaults, scan_defaults};
 use crate::store::FjallStore;
 use fjall::KeyspaceCreateOptions;
@@ -121,17 +123,27 @@ impl<S: KeyspaceConfig, E: KeyspaceConfig> FjallStoreBuilder<S, E> {
         #[cfg(feature = "snapshot")]
         let snapshots = db.keyspace("snapshots", point_read_defaults)?;
 
+        // Projection state lives in its own point-read keyspace, distinct from
+        // `snapshots`, so a projection id and an aggregate-snapshot id with the
+        // same bytes cannot collide. It adds all-levels LZ4 (see
+        // `projection_defaults`): projection state is larger and more compressible
+        // than a snapshot, and the measurement showed it shrinks 10–100× with no
+        // cost on incompressible data.
+        #[cfg(feature = "projection")]
+        let projections = db.keyspace("projections", projection_defaults)?;
+
         let global = db.keyspace("global", point_read_defaults)?;
 
         Ok(FjallStore {
             db,
             partitions: Partitions::new(
                 streams,
-                events,
-                events_global,
+                (events, events_global),
                 global,
                 #[cfg(feature = "snapshot")]
                 snapshots,
+                #[cfg(feature = "projection")]
+                projections,
             )
             .with_all_index(self.all_index),
             notifiers: StreamNotifiers::new(),

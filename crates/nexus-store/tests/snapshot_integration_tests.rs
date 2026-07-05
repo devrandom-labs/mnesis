@@ -27,7 +27,7 @@ fn sv2() -> NonZeroU32 {
 use nexus::*;
 use nexus_store::Store;
 use nexus_store::state::{
-    AfterEventTypes, EveryNEvents, InMemorySnapshotStore, PersistTrigger, SnapshotStore,
+    AfterEventTypes, EveryNEvents, Hydrated, InMemorySnapshotStore, PersistTrigger, SnapshotStore,
 };
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{Repository, Snapshotting};
@@ -303,9 +303,12 @@ async fn lazy_snapshot_on_read_after_full_replay() {
     assert_eq!(loaded.state().value, 3);
 
     // Verify snapshot was created by hydrating directly
-    let snap = snap_store.hydrate(&id, SV1).await.unwrap();
-    assert!(snap.is_some());
-    let (snap_version, _) = snap.unwrap();
+    let (snap_version, _) = snap_store
+        .hydrate(&id, SV1)
+        .await
+        .unwrap()
+        .into_found()
+        .expect("snapshot should exist");
     assert_eq!(snap_version, Version::new(3).unwrap());
 }
 
@@ -480,9 +483,21 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 
     // Verify the snapshot has schema v2: hydrating at v2 hits, at v1 misses.
-    let (snap_version, _) = snap_store.hydrate(&id, sv2()).await.unwrap().unwrap();
+    let (snap_version, _) = snap_store
+        .hydrate(&id, sv2())
+        .await
+        .unwrap()
+        .into_found()
+        .unwrap();
     assert_eq!(snap_version, Version::new(2).unwrap());
-    assert!(snap_store.hydrate(&id, SV1).await.unwrap().is_none());
+    assert!(
+        snap_store
+            .hydrate(&id, SV1)
+            .await
+            .unwrap()
+            .into_found()
+            .is_none()
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -545,7 +560,14 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
         .unwrap();
 
     // No snapshot yet
-    assert!(snap_store.hydrate(&id, SV1).await.unwrap().is_none());
+    assert!(
+        snap_store
+            .hydrate(&id, SV1)
+            .await
+            .unwrap()
+            .into_found()
+            .is_none()
+    );
 
     // Load with on-read → creates lazy snapshot
     let inner2 = store.repository().build();
@@ -559,7 +581,12 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
     let _loaded: AggregateRoot<CounterAggregate> = repo_on_read.load(id.clone()).await.unwrap();
 
     // Snapshot now exists
-    let (snap_version, _) = snap_store.hydrate(&id, SV1).await.unwrap().unwrap();
+    let (snap_version, _) = snap_store
+        .hydrate(&id, SV1)
+        .await
+        .unwrap()
+        .into_found()
+        .unwrap();
     assert_eq!(snap_version, Version::new(5).unwrap());
 
     // Second load uses snapshot (we can't directly prove partial replay,
@@ -646,7 +673,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
             &self,
             _id: &impl nexus::Id,
             _schema_version: NonZeroU32,
-        ) -> Result<Option<(Version, CounterState)>, Self::Error> {
+        ) -> Result<Hydrated<CounterState, Version>, Self::Error> {
             Err(std::io::Error::new(
                 std::io::ErrorKind::Other,
                 "disk on fire",
@@ -708,8 +735,8 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
             &self,
             _id: &impl nexus::Id,
             _schema_version: NonZeroU32,
-        ) -> Result<Option<(Version, CounterState)>, Self::Error> {
-            Ok(None)
+        ) -> Result<Hydrated<CounterState, Version>, Self::Error> {
+            Ok(Hydrated::Absent)
         }
         async fn commit(
             &self,

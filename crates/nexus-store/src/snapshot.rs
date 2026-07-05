@@ -129,11 +129,14 @@ where
         A: Aggregate,
         SS: state::SnapshotStore<A::State, Version>,
     {
+        // Aggregate snapshots treat absent and stale identically — replay the
+        // stream either way — so `into_found` collapses both to `None`.
         let (version, typed_state) = self
             .snapshot_store
             .hydrate(id, self.schema_version)
             .await
-            .ok()??;
+            .ok()?
+            .into_found()?;
         let root = AggregateRoot::<A>::restore(id.clone(), typed_state, version);
         let next = version.next()?;
         Some((root, next))

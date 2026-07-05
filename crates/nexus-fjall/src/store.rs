@@ -222,7 +222,7 @@ mod snapshot_impl {
     use super::{ErrorId, FjallError, FjallStore, Version};
     use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
     use nexus::Id;
-    use nexus_store::state::SnapshotStore;
+    use nexus_store::state::{Hydrated, SnapshotStore};
     use std::num::NonZeroU32;
 
     impl SnapshotStore<Vec<u8>, Version> for FjallStore {
@@ -232,10 +232,10 @@ mod snapshot_impl {
             &self,
             id: &impl Id,
             schema_version: NonZeroU32,
-        ) -> Result<Option<(Version, Vec<u8>)>, FjallError> {
+        ) -> Result<Hydrated<Vec<u8>, Version>, FjallError> {
             // Snapshot key is the ID bytes directly.
             let Some(bytes) = self.partitions.read_snapshot(id.as_ref())? else {
-                return Ok(None);
+                return Ok(Hydrated::Absent);
             };
 
             let (schema_version_raw, version_raw, payload) = decode_snapshot_value(&bytes)
@@ -244,17 +244,26 @@ mod snapshot_impl {
                     version: None,
                 })?;
 
-            // Schema mismatch → treat as absent (avoids cloning a stale payload).
-            if schema_version_raw != schema_version.get() {
-                return Ok(None);
+            // A stored schema version is always >= 1 (commit writes a
+            // `NonZeroU32`); a zero is corruption, not a stale snapshot.
+            let stored_schema =
+                NonZeroU32::new(schema_version_raw).ok_or_else(|| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+            if stored_schema != schema_version {
+                return Ok(Hydrated::Stale { stored_schema });
             }
 
-            let version = Version::new(version_raw).ok_or_else(|| FjallError::CorruptValue {
+            let position = Version::new(version_raw).ok_or_else(|| FjallError::CorruptValue {
                 stream_id: ErrorId::from_display(id),
                 version: None,
             })?;
 
-            Ok(Some((version, payload.to_vec())))
+            Ok(Hydrated::Found {
+                position,
+                state: payload.to_vec(),
+            })
         }
 
         async fn commit(
@@ -267,6 +276,89 @@ mod snapshot_impl {
             let mut buf = Vec::new();
             encode_snapshot_value(&mut buf, schema_version.get(), position.as_u64(), state);
             self.partitions.write_snapshot(id.as_ref(), &buf)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SnapshotStore<Vec<u8>, GlobalSeq> implementation — projection state
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Projection-state persistence: the projection's folded state plus the
+/// `$all` [`GlobalSeq`] it was folded up to, committed together into one value
+/// under one key in the dedicated `projections` partition.
+///
+/// A separate trait instantiation from the aggregate-snapshot impl
+/// (`P = GlobalSeq` vs `P = Version`), so both coexist on `FjallStore` with no
+/// coherence conflict. The value reuses the snapshot blob layout — `position`
+/// is the `GlobalSeq`'s underlying `u64` — so no new encoder shape is needed.
+///
+/// State and position ride in one value under one key, so the checkpoint is
+/// never ahead of the state it describes; a lost `commit` costs a re-fold, never
+/// a skipped event (the `write_projection` docs spell out why).
+#[cfg(feature = "projection")]
+mod projection_impl {
+    use super::{ErrorId, FjallError, FjallStore, GlobalSeq};
+    use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
+    use nexus::Id;
+    use nexus_store::state::{Hydrated, SnapshotStore};
+    use std::num::NonZeroU32;
+
+    impl SnapshotStore<Vec<u8>, GlobalSeq> for FjallStore {
+        type Error = FjallError;
+
+        async fn hydrate(
+            &self,
+            id: &impl Id,
+            schema_version: NonZeroU32,
+        ) -> Result<Hydrated<Vec<u8>, GlobalSeq>, FjallError> {
+            // Projection key is the id bytes directly, in the `projections`
+            // partition (never the `snapshots` one).
+            let Some(bytes) = self.partitions.read_projection(id.as_ref())? else {
+                return Ok(Hydrated::Absent);
+            };
+
+            let (schema_version_raw, position_raw, payload) = decode_snapshot_value(&bytes)
+                .map_err(|_| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+
+            // A stored schema version is always >= 1 (commit writes a
+            // `NonZeroU32`); a zero is corruption, not a stale checkpoint. A
+            // mismatch is `Stale` — the host must re-fold from the beginning.
+            let stored_schema =
+                NonZeroU32::new(schema_version_raw).ok_or_else(|| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+            if stored_schema != schema_version {
+                return Ok(Hydrated::Stale { stored_schema });
+            }
+
+            // A stored `GlobalSeq` is always >= 1; a zero means corrupt bytes.
+            let position =
+                GlobalSeq::new(position_raw).ok_or_else(|| FjallError::CorruptValue {
+                    stream_id: ErrorId::from_display(id),
+                    version: None,
+                })?;
+
+            Ok(Hydrated::Found {
+                position,
+                state: payload.to_vec(),
+            })
+        }
+
+        async fn commit(
+            &self,
+            id: &impl Id,
+            schema_version: NonZeroU32,
+            position: GlobalSeq,
+            state: &Vec<u8>,
+        ) -> Result<(), FjallError> {
+            let mut buf = Vec::new();
+            encode_snapshot_value(&mut buf, schema_version.get(), position.as_u64(), state);
+            self.partitions.write_projection(id.as_ref(), &buf)
         }
     }
 }
@@ -1260,6 +1352,71 @@ mod tests {
         // Default (Denormalized) writes the $all index and read_all works.
         assert_eq!(store.partitions.events_global().inner().iter().count(), 1);
         assert!(store.read_all(None).await.is_ok());
+    }
+
+    // ---- projection SnapshotStore<Vec<u8>, GlobalSeq> white-box tests ----
+
+    /// Defensive boundary (rule 7.3): a value in the `projections` partition
+    /// that is shorter than the 12-byte header must decode to a typed
+    /// `CorruptValue` error, never a panic or a silent wrong result. Written as
+    /// a white-box test because planting raw corrupt bytes needs direct access
+    /// to the `projections` keyspace, which the public API does not expose.
+    #[cfg(feature = "projection")]
+    #[tokio::test]
+    async fn projection_hydrate_corrupt_value_is_corrupt_not_panic() {
+        use nexus_store::state::SnapshotStore;
+        use std::num::NonZeroU32;
+
+        let (store, _dir) = temp_store();
+        let id = sk("proj-corrupt");
+
+        // Plant a too-short value (5 bytes < the 12-byte header) directly.
+        store
+            .partitions
+            .projections()
+            .insert(id.as_ref(), Slice::from(&b"short"[..]))
+            .unwrap();
+
+        let err = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, NonZeroU32::MIN)
+            .await
+            .expect_err("corrupt bytes must surface an error, not None or a panic");
+        assert!(
+            matches!(err, FjallError::CorruptValue { .. }),
+            "expected CorruptValue, got {err:?}"
+        );
+    }
+
+    /// A stored `GlobalSeq` position of 0 is impossible (`GlobalSeq >= 1`); a
+    /// well-formed header carrying a zero position is corruption, and must map
+    /// to `CorruptValue` rather than being resurrected as a valid position.
+    #[cfg(feature = "projection")]
+    #[tokio::test]
+    async fn projection_hydrate_zero_position_is_corrupt() {
+        use nexus_store::state::SnapshotStore;
+        use std::num::NonZeroU32;
+
+        let (store, _dir) = temp_store();
+        let id = sk("proj-zero");
+
+        // `[u32 LE schema_version=1][u64 BE position=0][payload]` — a valid
+        // header shape but an impossible GlobalSeq.
+        let mut value = Vec::new();
+        value.extend_from_slice(&1u32.to_le_bytes());
+        value.extend_from_slice(&0u64.to_be_bytes());
+        value.push(0xAB);
+        store
+            .partitions
+            .projections()
+            .insert(id.as_ref(), Slice::from(&value[..]))
+            .unwrap();
+
+        let err = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, NonZeroU32::MIN)
+            .await
+            .expect_err("zero GlobalSeq must be corruption");
+        assert!(
+            matches!(err, FjallError::CorruptValue { .. }),
+            "expected CorruptValue, got {err:?}"
+        );
     }
 }
 

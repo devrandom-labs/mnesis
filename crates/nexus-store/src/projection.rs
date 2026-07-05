@@ -4,7 +4,7 @@ use core::num::NonZeroU32;
 use nexus::{DomainEvent, Id, Version};
 
 use crate::decoded::Decoded;
-use crate::state::{PersistTrigger, SnapshotStore};
+use crate::state::{Hydrated, PersistTrigger, SnapshotStore};
 
 /// A pure fold function over domain events.
 ///
@@ -105,6 +105,11 @@ pub struct Projection<I, P: Projector, Trig, SS> {
     checkpoint: Option<Version>,
     /// Folded-but-not-yet-persisted tail position, flushed on shutdown.
     pending: Option<Version>,
+    /// `Some(old_schema)` iff `load` discarded a snapshot under a different
+    /// schema version — the projection is re-folding from scratch. Surfaced via
+    /// [`rebuilding_from`](Projection::rebuilding_from) so a host can distinguish
+    /// a costly schema-bump rebuild from an ordinary fresh start.
+    rebuilt_from: Option<NonZeroU32>,
 }
 
 impl<I, P, Trig, SS> Projection<I, P, Trig, SS>
@@ -117,12 +122,13 @@ where
     /// Assemble and hydrate the stepper, returning it alongside the starting
     /// state.
     ///
-    /// Resolves `(state, checkpoint)` from the snapshot store atomically. If a
-    /// snapshot exists for `id` at `schema_version`, its state and position are
-    /// restored; otherwise the state is [`Projector::initial`] and the
-    /// checkpoint is `None` (subscribe from the beginning). A snapshot saved
-    /// under a *different* schema version is invisible — a schema bump forces a
-    /// full replay from `initial()`.
+    /// Resolves `(state, checkpoint)` from the snapshot store atomically:
+    /// - [`Hydrated::Found`] → restore its state and position (resume).
+    /// - [`Hydrated::Absent`] → [`Projector::initial`], no checkpoint (fresh).
+    /// - [`Hydrated::Stale`] → `initial()`, no checkpoint, and
+    ///   [`rebuilding_from`](Self::rebuilding_from) reports the discarded schema
+    ///   version — a bump invalidated the saved state, so the projection re-folds
+    ///   the whole stream. The host sees that instead of a silent full replay.
     ///
     /// # Errors
     ///
@@ -134,9 +140,13 @@ where
         snapshot_store: SS,
         schema_version: NonZeroU32,
     ) -> Result<(Self, P::State), SS::Error> {
-        let (state, checkpoint) = match snapshot_store.hydrate(&id, schema_version).await? {
-            Some((position, state)) => (state, Some(position)),
-            None => (projector.initial(), None),
+        let (state, checkpoint, rebuilt_from) = match snapshot_store
+            .hydrate(&id, schema_version)
+            .await?
+        {
+            Hydrated::Found { position, state } => (state, Some(position), None),
+            Hydrated::Absent => (projector.initial(), None, None),
+            Hydrated::Stale { stored_schema } => (projector.initial(), None, Some(stored_schema)),
         };
         Ok((
             Self {
@@ -147,9 +157,21 @@ where
                 schema_version,
                 checkpoint,
                 pending: None,
+                rebuilt_from,
             },
             state,
         ))
+    }
+
+    /// `Some(old_schema)` when [`load`](Self::load) discarded a snapshot written
+    /// under a different schema version — i.e. this projection is re-folding
+    /// from the beginning because of a schema bump, not because it is new.
+    /// `None` means it resumed from a checkpoint or started genuinely fresh
+    /// (disambiguate those two via [`checkpoint`](Self::checkpoint)). A host on a
+    /// constrained device can use this to warn/defer/throttle the rebuild.
+    #[must_use]
+    pub const fn rebuilding_from(&self) -> Option<NonZeroU32> {
+        self.rebuilt_from
     }
 
     /// The id this projection is bound to — pass to `subscribe`.
@@ -261,7 +283,7 @@ mod tests {
 
     use super::{Projection, ProjectionError, Projector};
     use crate::decoded::Decoded;
-    use crate::state::{EveryNEvents, InMemorySnapshotStore, SnapshotStore};
+    use crate::state::{EveryNEvents, Hydrated, InMemorySnapshotStore, SnapshotStore};
 
     // ── fixtures ────────────────────────────────────────────────────────────
 
@@ -379,7 +401,12 @@ mod tests {
         );
 
         // Persisted together, atomically.
-        let (pos, st) = ss.hydrate(&id, NonZeroU32::MIN).await.unwrap().unwrap();
+        let (pos, st) = ss
+            .hydrate(&id, NonZeroU32::MIN)
+            .await
+            .unwrap()
+            .into_found()
+            .unwrap();
         assert_eq!(pos, version!(3));
         assert_eq!(
             st,
@@ -509,11 +536,19 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(p.checkpoint(), None, "trigger must not have fired");
-        assert!(ss.hydrate(&id, NonZeroU32::MIN).await.unwrap().is_none());
+        assert_eq!(
+            ss.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
+            Hydrated::Absent
+        );
 
         p.flush(&state).await.unwrap();
         assert_eq!(p.checkpoint(), Some(version!(2)));
-        let (pos, st) = ss.hydrate(&id, NonZeroU32::MIN).await.unwrap().unwrap();
+        let (pos, st) = ss
+            .hydrate(&id, NonZeroU32::MIN)
+            .await
+            .unwrap()
+            .into_found()
+            .unwrap();
         assert_eq!(pos, version!(2));
         assert_eq!(
             st,
@@ -541,13 +576,16 @@ mod tests {
         // Never advanced: flush must not write a spurious snapshot.
         p.flush(&state).await.unwrap();
         assert_eq!(p.checkpoint(), None);
-        assert!(ss.hydrate(&id, NonZeroU32::MIN).await.unwrap().is_none());
+        assert_eq!(
+            ss.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
+            Hydrated::Absent
+        );
     }
 
-    // ── defensive: a schema-mismatched snapshot is invisible → start fresh ───
+    // ── defensive: a schema-mismatched snapshot starts fresh, but flags a rebuild ─
 
     #[tokio::test]
-    async fn load_ignores_stale_schema_and_starts_from_initial() {
+    async fn load_stale_schema_starts_from_initial_and_signals_rebuild() {
         let ss = store();
         let id = TestId("s");
         // Pre-commit a v1 snapshot.
@@ -563,7 +601,7 @@ mod tests {
         .await
         .unwrap();
 
-        // Load with schema v2 — the v1 snapshot must be invisible.
+        // Load with schema v2 — the v1 snapshot must not be restored...
         let (p, state) = Projection::load(
             id,
             CountingProjector,
@@ -575,5 +613,25 @@ mod tests {
         .unwrap();
         assert_eq!(p.checkpoint(), None);
         assert_eq!(state, CountState { count: 0, total: 0 });
+        // ...but the rebuild is *visible*: a host can tell this apart from a
+        // fresh start (which reports `None`) — the whole point of the Stale
+        // signal. The invalidated schema version (v1) is reported.
+        assert_eq!(p.rebuilding_from(), Some(NonZeroU32::MIN));
+    }
+
+    #[tokio::test]
+    async fn load_fresh_does_not_signal_rebuild() {
+        let ss = store();
+        let (p, _state) = Projection::load(
+            TestId("s"),
+            CountingProjector,
+            EveryNEvents(NonZeroU64::MIN),
+            &ss,
+            NonZeroU32::MIN,
+        )
+        .await
+        .unwrap();
+        // A genuinely-new projection is not a rebuild.
+        assert_eq!(p.rebuilding_from(), None);
     }
 }

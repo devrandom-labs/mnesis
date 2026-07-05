@@ -1,8 +1,11 @@
-//! Snapshot value codec (feature `snapshot`).
+//! Snapshot / projection value codec (features `snapshot`, `projection`).
 //!
-//! The snapshot blob layout is fjall-private and distinct from the event
-//! wire format: `[u32 LE schema_version][u64 BE version][payload]`. Used only
-//! by the `SnapshotStore<Vec<u8>, Version>` impl in [`crate::store`].
+//! The blob layout is fjall-private and distinct from the event wire format:
+//! `[u32 LE schema_version][u64 BE position][payload]`. It backs both
+//! `SnapshotStore` impls in [`crate::store`] — the `u64` `position` field is an
+//! aggregate `Version` for `SnapshotStore<Vec<u8>, Version>` and a `GlobalSeq`
+//! for `SnapshotStore<Vec<u8>, GlobalSeq>` (the projection resume position); the
+//! codec sees only the underlying `u64`, so one shape serves both.
 
 use crate::wire_key::DecodeError;
 
