@@ -19,7 +19,11 @@ pub struct NeedsCodec(PhantomData<*const ()>);
 
 impl NeedsCodec {
     /// Create a new `NeedsCodec` marker.
-    #[cfg(not(any(feature = "json")))]
+    ///
+    /// Always available: [`Store::repository()`] returns a `NeedsCodec` builder
+    /// in every feature configuration (the `json` feature *adds* a
+    /// [`.json()`](RepositoryBuilder::json) convenience, it never changes
+    /// `repository()`'s return type — feature-additivity, issue #211).
     pub(crate) const fn new() -> Self {
         Self(PhantomData)
     }
@@ -51,9 +55,9 @@ pub struct WithSnapshot<SS, T> {
 /// Builder for creating an [`EventStore`] facade
 /// from a [`Store`].
 ///
-/// Obtained via [`Store::repository()`]. The builder starts with either a
-/// default codec (when the `json` feature is enabled) or [`NeedsCodec`]
-/// (requiring an explicit `.codec()` call).
+/// Obtained via [`Store::repository()`], which always starts the builder with
+/// [`NeedsCodec`]. Set a codec with [`.codec()`](RepositoryBuilder::codec) or,
+/// under the `json` feature, [`.json()`](RepositoryBuilder::json).
 ///
 /// Upcasting is not configured here — the resulting facade ships with
 /// the no-upcaster [`Repository::load`](crate::Repository::load) /
@@ -66,14 +70,14 @@ pub struct WithSnapshot<SS, T> {
 /// ```ignore
 /// let store = Store::new(backend);
 ///
-/// // With the `json` feature (default codec pre-filled):
-/// let repo = store.repository().build();
+/// // Built-in JSON codec (requires the `json` feature):
+/// let repo = store.repository::<Order>().json().build();
 ///
 /// // Custom codec:
-/// let repo = store.repository().codec(MyCodec).build();
+/// let repo = store.repository::<Order>().codec(MyCodec).build();
 ///
 /// // With upcasting (drop to the facade after build):
-/// let repo = store.repository().codec(MyCodec).build();
+/// let repo = store.repository::<Order>().codec(MyCodec).build();
 /// let root = repo.load_with(id, OrderTransforms::upcast).await?;
 /// ```
 pub struct RepositoryBuilder<S, C, A, Snap = NoSnapshot> {
@@ -100,6 +104,20 @@ impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
             snapshot: self.snapshot,
             aggregate: PhantomData,
         }
+    }
+}
+
+#[cfg(feature = "json")]
+impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
+    /// Use the built-in [`JsonCodec`](crate::JsonCodec) as this facade's codec.
+    ///
+    /// Convenience for `.codec(JsonCodec::default())`. This is *additive* API:
+    /// enabling the `json` feature only adds this method — it never changes
+    /// [`Store::repository()`]'s return type, which is always
+    /// [`NeedsCodec`] regardless of features (issue #211).
+    #[must_use]
+    pub fn json(self) -> RepositoryBuilder<S, crate::JsonCodec, A, Snap> {
+        self.codec(crate::JsonCodec::default())
     }
 }
 
@@ -144,13 +162,18 @@ const DEFAULT_SNAPSHOT_INTERVAL: u64 = 100;
 #[cfg(feature = "snapshot")]
 const DEFAULT_SCHEMA_VERSION: std::num::NonZeroU32 = std::num::NonZeroU32::MIN;
 
-#[cfg(all(feature = "snapshot-json", feature = "snapshot"))]
+#[cfg(feature = "snapshot-json")]
 impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
-    /// Configure a snapshot store with JSON codec (default).
+    /// Configure a snapshot store from a byte-level store, wrapping it in the
+    /// built-in [`JsonCodec`](crate::JsonCodec).
     ///
     /// Accepts a byte-level [`SnapshotStore<Vec<u8>, Version>`](state::SnapshotStore)
     /// and wraps it in [`CodecSnapshotStore`](state::CodecSnapshotStore) with
-    /// [`JsonCodec`](crate::JsonCodec).
+    /// [`JsonCodec`](crate::JsonCodec). This is the `snapshot-json` convenience
+    /// for [`.snapshot_store()`](RepositoryBuilder::snapshot_store) (which takes
+    /// an already-typed store); enabling `snapshot-json` *adds* this method
+    /// without altering `snapshot_store()`'s signature — feature-additivity
+    /// (issue #211).
     ///
     /// Pre-fills:
     /// - Trigger: [`EveryNEvents(100)`](state::EveryNEvents)
@@ -167,7 +190,7 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
         clippy::expect_used,
         reason = "DEFAULT_SNAPSHOT_INTERVAL is non-zero by inspection"
     )]
-    pub fn snapshot_store<SS>(
+    pub fn snapshot_store_json<SS>(
         self,
         snapshot_store: SS,
     ) -> RepositoryBuilder<
@@ -195,13 +218,20 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
     }
 }
 
-#[cfg(all(feature = "snapshot", not(feature = "snapshot-json")))]
+#[cfg(feature = "snapshot")]
 impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
     /// Configure a snapshot store.
     ///
     /// Accepts a pre-composed typed [`SnapshotStore<S, Version>`](state::SnapshotStore).
     /// If your store is byte-level, compose it with
-    /// [`CodecSnapshotStore`](state::CodecSnapshotStore) before passing it here.
+    /// [`CodecSnapshotStore`](state::CodecSnapshotStore) before passing it here —
+    /// or, under the `snapshot-json` feature, use the
+    /// [`.snapshot_store_json()`](RepositoryBuilder::snapshot_store_json)
+    /// convenience which wraps a byte-level store in [`JsonCodec`](crate::JsonCodec).
+    ///
+    /// This method's signature is the **same** in every feature configuration
+    /// (issue #211): `snapshot-json` adds `snapshot_store_json()` rather than
+    /// changing what `snapshot_store()` accepts.
     ///
     /// Pre-fills:
     /// - Trigger: [`EveryNEvents(100)`](state::EveryNEvents)
@@ -304,7 +334,6 @@ where
 // Store::repository() entry points
 // ═══════════════════════════════════════════════════════════════════════════
 
-#[cfg(feature = "json")]
 impl<S: RawEventStore> Store<S> {
     /// Start building a repository facade for aggregate `A` over this store.
     ///
@@ -314,49 +343,25 @@ impl<S: RawEventStore> Store<S> {
     /// per-call annotation. The store itself stays multi-aggregate — mint one
     /// facade per aggregate type.
     ///
-    /// When the `json` feature is enabled, the builder is pre-filled with
-    /// [`JsonCodec`](crate::JsonCodec) as the default codec. Override it
-    /// with [`.codec()`](RepositoryBuilder::codec) if needed.
+    /// The builder starts with [`NeedsCodec`] in **every** feature
+    /// configuration — set a codec with [`.codec()`](RepositoryBuilder::codec),
+    /// or, under the `json` feature, the [`.json()`](RepositoryBuilder::json)
+    /// convenience, before calling `.build()`. Keeping this return type feature
+    /// independent is what makes `json` purely *additive* (issue #211): a
+    /// transitive dependency enabling `json` can never flip this signature out
+    /// from under code that spelled `NeedsCodec`.
     ///
     /// # Example
     ///
     /// ```ignore
     /// let store = Store::new(backend);
     ///
-    /// // Use default JSON codec:
-    /// let orders = store.repository::<Order>().build();
+    /// // Custom codec:
+    /// let orders = store.repository::<Order>().codec(MyCodec).build();
     /// let order = orders.load(id).await?;        // AggregateRoot<Order> — inferred
     ///
-    /// // Override with a custom codec:
-    /// let orders = store.repository::<Order>().codec(MyCodec).build();
-    /// ```
-    #[must_use]
-    pub fn repository<A>(&self) -> RepositoryBuilder<S, crate::JsonCodec, A> {
-        RepositoryBuilder {
-            store: self.clone(),
-            codec: crate::JsonCodec::default(),
-            snapshot: NoSnapshot,
-            aggregate: PhantomData,
-        }
-    }
-}
-
-#[cfg(not(any(feature = "json")))]
-impl<S: RawEventStore> Store<S> {
-    /// Start building a repository facade for aggregate `A` over this store.
-    ///
-    /// Name the aggregate once here (`store.repository::<Order>()`); the
-    /// resulting facade implements `Repository<A>` for exactly that `A`, so
-    /// `load`/`save` infer the aggregate with no per-call annotation.
-    ///
-    /// No default codec is available — call [`.codec()`](RepositoryBuilder::codec)
-    /// to set one before calling `.build()`.
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// let store = Store::new(backend);
-    /// let orders = store.repository::<Order>().codec(MyCodec).build();
+    /// // Built-in JSON codec (requires the `json` feature):
+    /// let orders = store.repository::<Order>().json().build();
     /// ```
     #[must_use]
     pub fn repository<A>(&self) -> RepositoryBuilder<S, NeedsCodec, A> {

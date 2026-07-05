@@ -143,7 +143,7 @@ pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState)
     // flushing the keyspace before we reopen the same path.
     let before = {
         let store = FjallStore::builder(path).open()?.into_store();
-        let repo = store.repository::<BankAccount>().build();
+        let repo = store.repository::<BankAccount>().json().build();
         seed_account(&repo, &id, "Alice", &[1_000, 500]).await?;
         // One more command so the persisted stream isn't trivial. `repo` is bound
         // to `BankAccount` (named at `repository::<BankAccount>()`), so `load`
@@ -155,7 +155,7 @@ pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState)
 
     // Reopen from scratch and rehydrate purely from the on-disk event log.
     let store = FjallStore::builder(path).open()?.into_store();
-    let repo = store.repository::<BankAccount>().build();
+    let repo = store.repository::<BankAccount>().json().build();
     let reopened = repo.load(id).await?;
     let after = reopened.state().clone();
 
@@ -187,7 +187,7 @@ pub struct SubscriptionOutcome {
 /// demonstrate strict-after resume.
 pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr> {
     let store = FjallStore::builder(path).open()?.into_store();
-    let repo = store.repository::<BankAccount>().build();
+    let repo = store.repository::<BankAccount>().json().build();
     let id = AccountId("alice".to_owned());
 
     // Seed exactly three events (open + 2 deposits → v1, v2, v3).
@@ -224,7 +224,7 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
     let barrier = std::sync::Arc::new(tokio::sync::Barrier::new(2));
     let writer_barrier = std::sync::Arc::clone(&barrier);
     let writer = tokio::spawn(async move {
-        let repo = writer_store.repository::<BankAccount>().build();
+        let repo = writer_store.repository::<BankAccount>().json().build();
         writer_barrier.wait().await;
         let mut account = repo.load(writer_id).await.expect("load for live append");
         repo.execute(&mut account, Deposit { amount: 250 })
@@ -347,7 +347,7 @@ pub async fn run_export_import(work_dir: &Path) -> Result<RoundTripOutcome, BoxE
     let src = FjallStore::builder(work_dir.join("src"))
         .open()?
         .into_store();
-    let src_repo = src.repository::<BankAccount>().build();
+    let src_repo = src.repository::<BankAccount>().json().build();
     let specs: [(&str, &str, &[u64]); 3] = [
         ("alice", "Alice", &[1_000, 500]),
         ("bob", "Bob", &[200]),
@@ -377,7 +377,7 @@ pub async fn run_export_import(work_dir: &Path) -> Result<RoundTripOutcome, BoxE
         .await?;
 
     // 4. Rehydrate each aggregate from the destination and compare to source.
-    let dst_repo = dst.repository::<BankAccount>().build();
+    let dst_repo = dst.repository::<BankAccount>().json().build();
     let mut restored = Vec::new();
     for summary in &originals {
         let restored_root = dst_repo.load(AccountId(summary.id.clone())).await?;
@@ -456,7 +456,7 @@ pub async fn run_produce_and_sync(path: &Path) -> Result<ProduceSyncOutcome, Box
     let id = AccountId("device-1".to_owned());
 
     // The produce path is unaffected: append + per-stream rehydrate both work.
-    let repo = store.repository::<BankAccount>().build();
+    let repo = store.repository::<BankAccount>().json().build();
     seed_account(&repo, &id, "Device", &[10, 20, 30]).await?;
     let rehydrated_balance = repo.load(id).await?.state().balance;
 
