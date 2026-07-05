@@ -2,12 +2,20 @@
 //! Returned as `impl Stream` (RPIT) — no `Box<dyn>`. Holds the only copy of
 //! the arm-before-confirm-rescan lost-wakeup discipline, for every adapter.
 //!
-//! The user-facing [`Subscription`](crate::Subscription) assembles this loop
-//! per call site over the [`catchup`](crate::catchup) seam.
+//! [`live_stepped`] is the core loop: it yields a [`Step`] so callers can
+//! observe the exact backlog→live boundary (`Step::CaughtUp`, emitted exactly
+//! once). The phase marker is intrinsic to a subscription, so it rides all the
+//! way out to the consumer; dropping it (events-only) is a consumer-side
+//! combinator ([`StepStreamExt::events`](crate::StepStreamExt)), not a second
+//! loop here.
+//!
+//! The user-facing [`Subscription`](crate::Subscription) assembles
+//! [`live_stepped`] per call site over the [`catchup`](crate::catchup) seam.
 
 use futures::StreamExt;
 
 use crate::PersistedEnvelope;
+use crate::Step;
 use crate::catchup::Catchup;
 
 /// Reopen granularity: drop + reopen the bounded scan every `CATCHUP_CHUNK`
@@ -28,6 +36,8 @@ struct LiveState<C: Catchup> {
     /// The currently-open scan, or `None` when one must be opened.
     scan: Option<C::Scan>,
     drained_in_chunk: usize,
+    /// True once the first backlog drain has emitted `Step::CaughtUp`.
+    caught_up: bool,
 }
 
 /// Catch up over the backlog, then tail live forever, as one `impl Stream`.
@@ -50,10 +60,10 @@ struct LiveState<C: Catchup> {
 /// contract — the stream end is the consumer's decision, not the cursor's.
 // pub (not pub(crate)) to satisfy clippy::redundant_pub_crate inside a
 // pub(crate) module.
-pub fn live<C: Catchup + 'static>(
+pub fn live_stepped<C: Catchup + 'static>(
     c: C,
     from: Option<C::Position>,
-) -> impl futures::Stream<Item = Result<(C::Position, PersistedEnvelope), C::Error>> + Send
+) -> impl futures::Stream<Item = Result<Step<(C::Position, PersistedEnvelope)>, C::Error>> + Send
 where
     // `StreamExt::next` requires `Unpin`, and the scan is held by-value across
     // awaits in the `unfold` state — so the scan must be `Unpin`. Placed
@@ -68,6 +78,7 @@ where
         c,
         scan: None,
         drained_in_chunk: 0,
+        caught_up: false,
     };
     futures::stream::unfold(state, |mut s| async move {
         loop {
@@ -96,7 +107,7 @@ where
                     if s.drained_in_chunk >= CATCHUP_CHUNK {
                         s.scan = None; // reopen next iteration from the advanced read_from
                     }
-                    return Some((Ok((pos, env)), s));
+                    return Some((Ok(Step::Event((pos, env))), s));
                 }
                 Some(Err(e)) => {
                     s.scan = None;
@@ -113,11 +124,17 @@ where
                                 s.read_from = Some(pos);
                                 s.scan = Some(probe);
                                 s.drained_in_chunk = 1;
-                                return Some((Ok((pos, env)), s));
+                                return Some((Ok(Step::Event((pos, env))), s));
                             }
                             Some(Err(e)) => return Some((Err(e), s)),
                             None => {
                                 drop(probe);
+                                // Backlog genuinely drained: emit CaughtUp once,
+                                // BEFORE parking, then park on subsequent polls.
+                                if !s.caught_up {
+                                    s.caught_up = true;
+                                    return Some((Ok(Step::CaughtUp), s));
+                                }
                                 wait.await;
                             }
                         },
@@ -137,6 +154,10 @@ where
     reason = "test code: env rebinds per loop turn"
 )]
 #[allow(clippy::doc_markdown, reason = "test code: prose doc comments")]
+#[allow(
+    clippy::panic,
+    reason = "test code: unexpected Step variant is a test failure"
+)]
 mod tests {
     use std::sync::Arc;
     use std::time::Duration;
@@ -146,6 +167,7 @@ mod tests {
     use tokio::time::timeout;
 
     use super::*;
+    use crate::Step;
     use crate::catchup::{AllCatchup, Catchup, StreamCatchup};
     use crate::envelope::pending_envelope;
     use crate::store::RawEventStore;
@@ -164,6 +186,27 @@ mod tests {
                 .unwrap();
             store.append(id, Version::new(v - 1), &[env]).await.unwrap();
         }
+    }
+
+    /// Events-only view over [`live_stepped`] — drops the `CaughtUp` marker and
+    /// unwraps `Event`. In production this is the consumer-side
+    /// [`StepStreamExt::events`](crate::StepStreamExt) combinator; here it is a
+    /// test helper so the core-loop tests below assert event ordering without
+    /// the phase marker in the way.
+    fn live<C: Catchup + 'static>(
+        c: C,
+        from: Option<C::Position>,
+    ) -> impl futures::Stream<Item = Result<(C::Position, PersistedEnvelope), C::Error>>
+    where
+        C::Scan: Unpin,
+    {
+        live_stepped(c, from).filter_map(|item| async move {
+            match item {
+                Ok(Step::Event(ev)) => Some(Ok(ev)),
+                Ok(Step::CaughtUp) => None,
+                Err(e) => Some(Err(e)),
+            }
+        })
     }
 
     /// Catch-up delivers the full backlog in strict version order.
@@ -402,5 +445,55 @@ mod tests {
             second.is_err(),
             "scan error must be surfaced as Err, got {second:?}"
         );
+    }
+
+    /// `live_stepped` emits exactly one `Step::CaughtUp` after the backlog drains,
+    /// before parking; a post-subscribe append then arrives as a further
+    /// `Step::Event`.
+    #[tokio::test]
+    async fn live_stepped_emits_caught_up_at_the_boundary() {
+        let store = Arc::new(InMemoryStore::new());
+        let id = StreamKey::from_slice(b"s");
+        seed_range(&store, &id, 1, 2).await;
+
+        let catchup = StreamCatchup::new(Arc::clone(&store), b"s").unwrap();
+        let cursor = live_stepped(catchup, None);
+        tokio::pin!(cursor);
+
+        for expected in [1u64, 2] {
+            let step = timeout(MUST_DELIVER, cursor.next())
+                .await
+                .unwrap()
+                .unwrap()
+                .unwrap();
+            match step {
+                Step::Event((_pos, env)) => assert_eq!(env.version().as_u64(), expected),
+                Step::CaughtUp => panic!("caught up before draining the backlog"),
+            }
+        }
+        let marker = timeout(MUST_DELIVER, cursor.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert!(
+            marker.is_caught_up(),
+            "expected CaughtUp at the boundary, got {marker:?}"
+        );
+
+        let writer = Arc::clone(&store);
+        let appender = tokio::spawn(async move {
+            seed_range(&writer, &StreamKey::from_slice(b"s"), 3, 3).await;
+        });
+        let live = timeout(MUST_DELIVER, cursor.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        match live {
+            Step::Event((_pos, env)) => assert_eq!(env.version().as_u64(), 3),
+            Step::CaughtUp => panic!("CaughtUp must be emitted only once"),
+        }
+        appender.await.unwrap();
     }
 }

@@ -18,7 +18,9 @@ use futures::StreamExt;
 use nexus::Version;
 use nexus_fjall::FjallStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::{PendingEnvelope, Store, StreamKey, Subscription, pending_envelope};
+use nexus_store::{
+    PendingEnvelope, Step, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
+};
 use tokio::sync::Barrier;
 use tokio::time::timeout;
 
@@ -70,7 +72,10 @@ async fn subscribe_catchup_then_live() {
     append_one(&store, &id, 2, Version::new(1), "E2").await;
 
     // Subscribe from the beginning (None = start from version 1).
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Read catch-up event 1.
@@ -118,7 +123,8 @@ async fn subscribe_from_checkpoint() {
     // Subscribe from version 2 (should yield events AFTER version 2, i.e., event 3).
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(Version::new(2).unwrap()))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     let env = timeout(TIMEOUT, stream.next())
@@ -145,7 +151,10 @@ async fn drop_and_resubscribe() {
 
     // Subscribe, read event, note checkpoint version, drop.
     let checkpoint = {
-        let sub_stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+        let sub_stream = Subscription::new(&store)
+            .subscribe(&id, None)
+            .unwrap()
+            .events();
         futures::pin_mut!(sub_stream);
         let first_env = timeout(TIMEOUT, sub_stream.next())
             .await
@@ -163,7 +172,8 @@ async fn drop_and_resubscribe() {
     // Re-subscribe from saved checkpoint.
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(checkpoint))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Should get events 2 and 3 (after the checkpoint).
@@ -201,7 +211,10 @@ async fn write_close_reopen_subscribe() {
     // Phase 2: Reopen and subscribe — verify all events via catch-up.
     {
         let store = Store::new(FjallStore::builder(&db_path).open().unwrap());
-        let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+        let stream = Subscription::new(&store)
+            .subscribe(&id, None)
+            .unwrap()
+            .events();
         futures::pin_mut!(stream);
 
         let env1 = timeout(TIMEOUT, stream.next())
@@ -232,7 +245,10 @@ async fn subscribe_to_nonexistent_stream_waits() {
     let store = Store::new(store);
     let id = sk("ghost-stream");
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // next() should block because the stream doesn't exist yet.
@@ -265,7 +281,8 @@ async fn subscribe_from_beyond_head() {
     // Subscribe from version 5 — beyond the current head.
     let stream = Subscription::new(&store)
         .subscribe(&id, Some(Version::new(5).unwrap()))
-        .unwrap();
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Should block — no events at version 6+.
@@ -299,7 +316,10 @@ async fn concurrent_append_and_subscribe() {
     let id = sk("concurrent-stream");
     let event_count: u64 = 50;
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Spawn a task that appends events sequentially.
@@ -350,7 +370,10 @@ async fn append_during_catchup_no_loss() {
         append_one(&store, &id, i, expected, "Prepop").await;
     }
 
-    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let stream = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     futures::pin_mut!(stream);
 
     // Read first 5 events (mid-catch-up).
@@ -388,7 +411,10 @@ async fn subscribe_all_sees_concurrent_appends_across_streams() {
     let (store, _dir) = temp_store();
     let store = Store::new(store);
 
-    let sub = Subscription::new(&store).subscribe_all(None).unwrap();
+    let sub = Subscription::new(&store)
+        .subscribe_all(None)
+        .unwrap()
+        .events();
     futures::pin_mut!(sub);
 
     let barrier = Arc::new(Barrier::new(3));
@@ -449,8 +475,8 @@ async fn multiple_subscribers_same_stream() {
 
     // Two subscribers to the same stream.
     let sub = Subscription::new(&store);
-    let sub1 = sub.subscribe(&id, None).unwrap();
-    let sub2 = sub.subscribe(&id, None).unwrap();
+    let sub1 = sub.subscribe(&id, None).unwrap().events();
+    let sub2 = sub.subscribe(&id, None).unwrap().events();
     futures::pin_mut!(sub1, sub2);
 
     // Append one event.
@@ -487,6 +513,129 @@ async fn subscription_cursor_is_static() {
     let (store, _dir) = temp_store();
     let store = Store::new(store);
     let id = sk("s-1");
-    let sub = Subscription::new(&store).subscribe(&id, None).unwrap();
+    let sub = Subscription::new(&store)
+        .subscribe(&id, None)
+        .unwrap()
+        .events();
     assert_static(&sub);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. Phase marker on the real persistent adapter
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Lifecycle (category 2): write a backlog, **close** the keyspace (drop the
+/// store), **reopen** the same on-disk path, then subscribe. The persisted
+/// backlog must replay from disk in order, followed by exactly one `CaughtUp`
+/// at the boundary — the phase marker is derived live, so it must survive a full
+/// close/reopen of the LSM store, not just an in-process subscription.
+#[tokio::test]
+async fn subscribe_close_reopen_replays_backlog_then_one_caughtup() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("db");
+    let id = sk("persist");
+
+    // Write three events, then close (drop) the store to flush the keyspace.
+    {
+        let store = Store::new(FjallStore::builder(&path).open().unwrap());
+        append_one(&store, &id, 1, None, "E1").await;
+        append_one(&store, &id, 2, Version::new(1), "E2").await;
+        append_one(&store, &id, 3, Version::new(2), "E3").await;
+    }
+
+    // Reopen from scratch and subscribe — the backlog comes purely from disk.
+    let store = Store::new(FjallStore::builder(&path).open().unwrap());
+    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    tokio::pin!(stream);
+
+    for expected in 1..=3u64 {
+        match timeout(TIMEOUT, stream.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap()
+        {
+            Step::Event(env) => assert_eq!(env.version().as_u64(), expected),
+            Step::CaughtUp => panic!("CaughtUp before the persisted backlog drained"),
+        }
+    }
+    let marker = timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert!(
+        marker.is_caught_up(),
+        "CaughtUp after replaying the reopened backlog, got {marker:?}"
+    );
+
+    // A post-reopen live append then arrives as a further Event, no 2nd CaughtUp.
+    append_one(&store, &id, 4, Version::new(3), "E4").await;
+    match timeout(TIMEOUT, stream.next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap()
+    {
+        Step::Event(env) => assert_eq!(env.version().as_u64(), 4),
+        Step::CaughtUp => panic!("CaughtUp must be emitted only once"),
+    }
+}
+
+/// Sequence (category 1) on the real adapter: a backlog larger than the live
+/// loop's internal scan-reopen granularity (`CATCHUP_CHUNK` = 1024) forces the
+/// fjall `ScanCursor` to be reopened several times mid-catch-up. Exactly one
+/// `CaughtUp` must still be emitted, and only after the final backlog event —
+/// the `caught_up` latch survives real adapter scan reopens.
+#[tokio::test]
+async fn subscribe_exactly_one_caughtup_across_a_large_backlog_on_fjall() {
+    const N: u64 = 1500; // > CATCHUP_CHUNK (1024)
+    let (store, _dir) = temp_store();
+    let store = Store::new(store);
+    let id = sk("big");
+
+    // One append of the whole backlog (a single fjall write_tx).
+    let envs: Vec<PendingEnvelope> = (1..=N)
+        .map(|v| make_envelope(v, "E", format!("p-{v}").as_bytes()))
+        .collect();
+    store.append(&id, None, &envs).await.unwrap();
+
+    let stream = Subscription::new(&store).subscribe(&id, None).unwrap();
+    tokio::pin!(stream);
+
+    let mut caughtup_count = 0u32;
+    let mut caughtup_after = None;
+    let mut last = 0u64;
+    for _ in 0..=N {
+        match timeout(TIMEOUT, stream.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap()
+        {
+            Step::Event(env) => {
+                let v = env.version().as_u64();
+                assert_eq!(v, last + 1, "fjall backlog must replay in strict order");
+                assert_eq!(
+                    caughtup_count, 0,
+                    "no event may follow CaughtUp during catch-up"
+                );
+                last = v;
+            }
+            Step::CaughtUp => {
+                caughtup_count += 1;
+                caughtup_after = Some(last);
+            }
+        }
+    }
+    assert_eq!(
+        caughtup_count, 1,
+        "exactly one CaughtUp across a multi-chunk fjall backlog"
+    );
+    assert_eq!(
+        caughtup_after,
+        Some(N),
+        "CaughtUp only after the final backlog event"
+    );
+    assert_eq!(last, N, "every backlog event delivered");
 }

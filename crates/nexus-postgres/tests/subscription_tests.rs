@@ -26,6 +26,7 @@ use std::time::Duration;
 use futures::StreamExt;
 use nexus::Version;
 use nexus_postgres::PostgresStore;
+use nexus_store::StepStreamExt;
 use nexus_store::envelope::pending_envelope;
 use nexus_store::store::RawEventStore;
 use nexus_store::{PendingEnvelope, Store, StreamKey, Subscription};
@@ -105,7 +106,8 @@ async fn subscribe_per_stream_catchup_then_live() {
     // Subscribe from the beginning (None = start from version 1).
     let stream = Subscription::new(&handle)
         .subscribe(&id, None)
-        .expect("subscribe");
+        .expect("subscribe")
+        .events();
     futures::pin_mut!(stream);
 
     // Catch-up event 1.
@@ -154,7 +156,8 @@ async fn subscribe_per_stream_from_checkpoint() {
     // Subscribe from version 2 → events strictly after version 2, i.e. only E3.
     let stream = Subscription::new(&handle)
         .subscribe(&id, Some(Version::new(2).unwrap()))
-        .expect("subscribe from checkpoint");
+        .expect("subscribe from checkpoint")
+        .events();
     futures::pin_mut!(stream);
 
     let env = tokio::time::timeout(TIMEOUT, stream.next())
@@ -178,7 +181,8 @@ async fn subscribe_per_stream_nonexistent_blocks_then_live() {
 
     let stream = Subscription::new(&handle)
         .subscribe(&id, None)
-        .expect("subscribe");
+        .expect("subscribe")
+        .events();
     futures::pin_mut!(stream);
 
     // Must park — not yield None immediately.
@@ -223,7 +227,8 @@ async fn subscribe_all_catchup_then_live() {
     // Subscribe `$all` from the beginning.
     let stream = Subscription::new(&handle)
         .subscribe_all(None)
-        .expect("subscribe_all");
+        .expect("subscribe_all")
+        .events();
     futures::pin_mut!(stream);
 
     let mut prev_pos = None;
@@ -278,7 +283,8 @@ async fn subscribe_all_concurrent_writers_strictly_increasing() {
 
     let stream = Subscription::new(&handle)
         .subscribe_all(None)
-        .expect("subscribe_all");
+        .expect("subscribe_all")
+        .events();
     futures::pin_mut!(stream);
 
     let barrier = std::sync::Arc::new(tokio::sync::Barrier::new(3));

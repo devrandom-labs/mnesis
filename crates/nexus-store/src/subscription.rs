@@ -11,17 +11,20 @@
 //!
 //! `subscribe`/`subscribe_all` are **synchronous**: wake-registration can fail,
 //! so they return `Result<impl Stream, _>` eagerly; read errors stream in-band
-//! as `Err` items (see [`live`]). The returned stream is `!Unpin` (it is the
-//! `futures::stream::unfold` of the live loop), so consumers MUST `pin!` it
-//! before polling — the zero-cost (no-`Box`) tradeoff.
+//! as `Err` items. Items are [`Step`]-tagged so a consumer can tell catch-up
+//! from live; drop the phase with [`StepStreamExt::events`](crate::StepStreamExt)
+//! or decode-and-keep-it with [`StepStreamExt::decoded`](crate::StepStreamExt).
+//! The returned stream is `!Unpin` (it is the `futures::stream::unfold` of the
+//! live loop), so consumers MUST `pin!` it before polling — the zero-cost
+//! (no-`Box`) tradeoff.
 //!
 //! # Adapter authoring
 //!
 //! There is no adapter-facing subscription trait. An adapter need only
 //! implement [`RawEventStore`] (the bounded scans) and
 //! [`WakeSource`](crate::wake::WakeSource) (the live wake); the generic loop is
-//! assembled here from [`StreamCatchup`] / [`AllCatchup`] + [`live`], one
-//! monomorphized state machine per call site.
+//! assembled here from [`StreamCatchup`] / [`AllCatchup`] + the internal
+//! `live_stepped` loop, one monomorphized state machine per call site.
 
 use std::sync::Arc;
 
@@ -30,8 +33,9 @@ use nexus::{Id, Version};
 
 use crate::PersistedEnvelope;
 use crate::catchup::{AllCatchup, StreamCatchup};
+use crate::step::Step;
 use crate::store::{RawEventStore, Store};
-use crate::subscription_cursor::live;
+use crate::subscription_cursor::live_stepped;
 use crate::wake::WakeSource;
 
 /// User-facing subscription handle.
@@ -45,12 +49,19 @@ use crate::wake::WakeSource;
 /// ```ignore
 /// use std::pin::pin;
 /// use futures::StreamExt;
-/// use nexus_store::{Store, Subscription};
+/// use nexus_store::{Step, StepStreamExt, Store, Subscription};
 ///
 /// let store = Store::new(FjallStore::builder("path").open()?);
+/// // Items are `Step<PersistedEnvelope>`: tell catch-up from live directly.
 /// let cursor = Subscription::new(&store).subscribe(&account_id, None)?;
 /// let mut cursor = pin!(cursor);
-/// while let Some(item) = cursor.next().await { /* ... */ }
+/// while let Some(item) = cursor.next().await {
+///     match item? {
+///         Step::CaughtUp => { /* backlog drained — now live */ }
+///         Step::Event(env) => { /* handle the raw envelope */ }
+///     }
+/// }
+/// // …or `.events()` to drop the phase, `.decoded(codec)` to decode+keep it.
 /// ```
 pub struct Subscription<S> {
     store: Arc<S>,
@@ -73,25 +84,38 @@ impl<S> Subscription<S> {
 }
 
 impl<S: RawEventStore + WakeSource> Subscription<S> {
-    /// Open a per-stream catch-up + live-tail cursor.
+    /// Open a per-stream catch-up + live-tail subscription.
     ///
-    /// `from: None` starts from version 1; `from: Some(v)` starts from the
-    /// event *strictly after* version `v`. Items are bare
-    /// [`PersistedEnvelope`]s (a per-stream event carries no global position);
-    /// checkpoint by [`version()`](PersistedEnvelope::version). The returned
-    /// stream **never returns `None`** — it waits for new events when caught up
-    /// — and is `!Unpin`, so `pin!` it before polling.
+    /// `from: None` starts from version 1; `from: Some(v)` starts from the event
+    /// *strictly after* version `v`. Items are
+    /// [`Step<PersistedEnvelope>`](Step): the replay events, then exactly one
+    /// [`Step::CaughtUp`] at the backlog→live boundary, then live events — the
+    /// phase marker is intrinsic to a subscription (a finite read has none).
+    /// Checkpoint by [`version()`](PersistedEnvelope::version) on each event.
+    ///
+    /// Compose from here: [`.events()`](crate::StepStreamExt::events) drops the
+    /// phase for a consumer that only wants events (then the full
+    /// [`DecodedStreamExt`](crate::DecodedStreamExt) applies);
+    /// [`.decoded(codec)`](crate::StepStreamExt::decoded) keeps the phase and
+    /// hands you typed `Step<Decoded<E>>`. The returned stream **never returns
+    /// `None`** — it waits for new events when caught up — and is `!Unpin`, so
+    /// `pin!` it before polling.
     ///
     /// # Errors
     ///
     /// `<S as WakeSource>::Error` if wake-registration fails. Read errors are
-    /// surfaced as `Err` items in the stream (see [`live`]).
+    /// surfaced as `Err` items in the stream.
+    #[allow(
+        clippy::type_complexity,
+        reason = "the Step-tagged item is intrinsic to the contract; an alias would \
+                  hide the `impl Stream`/`use<>` capture the API depends on"
+    )]
     pub fn subscribe<I: Id>(
         &self,
         id: &I,
         from: Option<Version>,
     ) -> Result<
-        impl futures_core::Stream<Item = Result<PersistedEnvelope, <S as RawEventStore>::Error>>
+        impl futures_core::Stream<Item = Result<Step<PersistedEnvelope>, <S as RawEventStore>::Error>>
         + Send
         + use<S, I>,
         <S as WakeSource>::Error,
@@ -100,30 +124,36 @@ impl<S: RawEventStore + WakeSource> Subscription<S> {
         <S as RawEventStore>::Stream: Unpin,
     {
         let catchup = StreamCatchup::new(Arc::clone(&self.store), id.as_ref())?;
-        // The generic loop yields `(Version, env)`; the per-stream consumer API
-        // is unchanged (bare envelopes), so drop the tag here.
-        Ok(live(catchup, from).map(|item| item.map(|(_, env)| env)))
+        // The generic loop yields `Step<(Version, env)>`; a per-stream event's
+        // position rides inside the envelope, so drop the tag from each `Event`.
+        // `Step::map` carries the `CaughtUp` phase marker through untouched.
+        Ok(live_stepped(catchup, from).map(|item| item.map(|step| step.map(|(_, env)| env))))
     }
 
-    /// Open an all-streams (`$all`) catch-up + live-tail cursor in
+    /// Open an all-streams (`$all`) catch-up + live-tail subscription in
     /// [`AllPosition`](crate::AllPosition) order.
     ///
     /// `from: None` starts from the first event ever appended; `from: Some(p)`
     /// starts from the event *strictly after* position `p`. Items are
-    /// **position-tagged** `(AllPosition, PersistedEnvelope)`: the position is
-    /// no longer on the envelope, so the consumer checkpoints the tag and hands
-    /// it back here (or to [`read_all`](RawEventStore::read_all)) to resume. The
-    /// checkpoint type is adapter-defined and must be serializable. The returned
-    /// stream **never returns `None`** and is `!Unpin`, so `pin!` it before
-    /// polling.
+    /// [`Step<(AllPosition, PersistedEnvelope)>`](Step): the replay events, then
+    /// exactly one [`Step::CaughtUp`], then live events. The position is
+    /// **beside** the envelope (a `$all` event carries no per-store position on
+    /// the box), so the consumer checkpoints the tag and hands it back here (or
+    /// to [`read_all`](RawEventStore::read_all)) to resume; the checkpoint type
+    /// is adapter-defined and must be serializable.
+    ///
+    /// Compose with [`.events()`](crate::StepStreamExt::events) /
+    /// [`.decoded(codec)`](crate::StepStreamExt::decoded) exactly as
+    /// [`subscribe`](Self::subscribe). The returned stream **never returns
+    /// `None`** and is `!Unpin`, so `pin!` it before polling.
     ///
     /// # Errors
     ///
     /// `<S as WakeSource>::Error` if wake-registration fails. Read errors are
-    /// surfaced as `Err` items in the stream (see [`live`]).
+    /// surfaced as `Err` items in the stream.
     #[allow(
         clippy::type_complexity,
-        reason = "the position-tagged `$all` item is intrinsic to the contract; an \
+        reason = "the position-tagged `$all` Step item is intrinsic to the contract; an \
                   alias would hide the `impl Stream`/`use<>` capture the API depends on"
     )]
     pub fn subscribe_all(
@@ -132,7 +162,7 @@ impl<S: RawEventStore + WakeSource> Subscription<S> {
     ) -> Result<
         impl futures_core::Stream<
             Item = Result<
-                (<S as RawEventStore>::AllPosition, PersistedEnvelope),
+                Step<(<S as RawEventStore>::AllPosition, PersistedEnvelope)>,
                 <S as RawEventStore>::Error,
             >,
         > + Send
@@ -143,6 +173,6 @@ impl<S: RawEventStore + WakeSource> Subscription<S> {
         <S as RawEventStore>::AllStream: Unpin,
     {
         let catchup = AllCatchup::new(Arc::clone(&self.store))?;
-        Ok(live(catchup, from))
+        Ok(live_stepped(catchup, from))
     }
 }

@@ -109,6 +109,7 @@ pub mod saga;
 #[cfg(feature = "snapshot")]
 pub mod snapshot;
 pub mod state;
+pub mod step;
 pub mod store;
 pub mod stream;
 pub mod stream_id;
@@ -143,7 +144,9 @@ pub use codec::serde::json::{Json, JsonCodec};
 pub use codec::serde::{SerdeCodec, SerdeFormat};
 pub use codec::{Decode, Encode};
 pub use conflict::ConflictPredicate;
-pub use decoded::{DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem};
+pub use decoded::{
+    DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem, StepStreamExt,
+};
 pub use envelope::{
     EnvelopeError, ForDecodeError, PendingEnvelope, PersistedEnvelope, pending_envelope,
 };
@@ -173,6 +176,7 @@ pub use state::{
     AfterEventTypes, CodecSnapshotStore, CodecSnapshotStoreError, EveryNEvents, PersistTrigger,
     SnapshotStore,
 };
+pub use step::Step;
 pub use store::{AllPosition, RawEventStore, Store};
 pub use stream::EventStream;
 pub use stream_id::StreamKey;

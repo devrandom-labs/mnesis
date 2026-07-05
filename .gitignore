@@ -9,3 +9,8 @@ target
 .worktrees/
 mutants.out/
 mutants.out.old/
+
+# Local design/plan working docs — kept on disk for review + subagent execution,
+# never committed (design intent that matters lands in CLAUDE.md / the PR body).
+docs/plans/
+docs/prompts/
