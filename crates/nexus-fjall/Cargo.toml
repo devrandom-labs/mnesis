@@ -53,5 +53,12 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 name = "fjall_benchmarks"
 harness = false
 
+# Storage-cost measurement for the projection-state partition (#164 follow-up).
+# A deterministic reporting binary (not criterion): prints on-disk footprint
+# tables for the partition-config and separate-vs-prefixed forks.
+[[bench]]
+name = "projection_storage"
+harness = false
+
 [lints]
 workspace = true

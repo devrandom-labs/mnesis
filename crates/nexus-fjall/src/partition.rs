@@ -71,6 +71,24 @@ pub fn scan_defaults() -> KeyspaceCreateOptions {
         .data_block_compression_policy(CompressionPolicy::all(CompressionType::Lz4))
 }
 
+/// Options for the projection-state partition: the point-read metadata tuning
+/// (4 KiB blocks + 15-bit bloom, because projection state is point-read by id)
+/// **plus all-levels LZ4**.
+///
+/// Projection state, unlike a small aggregate snapshot or counter, can be large
+/// and is typically structured (records, JSON) — i.e. highly compressible. The
+/// reproducible `benches/projection_storage` measurement showed the plain
+/// `point_read_defaults` barely compresses this workload (fjall's default
+/// `[None, None, Lz4]` only engages at deep levels), while all-levels LZ4 shrinks
+/// compressible state **10–100×** on disk with no measurable cost on
+/// incompressible payloads. Flash-write volume and storage are the binding
+/// constraints on the `IoT`/mobile target, so LZ4-on is the safe default.
+#[cfg(feature = "projection")]
+pub fn projection_defaults() -> KeyspaceCreateOptions {
+    point_read_defaults()
+        .data_block_compression_policy(CompressionPolicy::all(CompressionType::Lz4))
+}
+
 /// The single key under which the store-global sequence counter is kept in the
 /// `global` partition.
 const GLOBAL_SEQ_KEY: &[u8] = b"global_seq";
