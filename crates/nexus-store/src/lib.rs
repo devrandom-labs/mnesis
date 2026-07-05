@@ -142,7 +142,7 @@ pub use cbor::{
 pub use codec::serde::json::{Json, JsonCodec};
 #[cfg(feature = "serde")]
 pub use codec::serde::{SerdeCodec, SerdeFormat};
-pub use codec::{Decode, Encode};
+pub use codec::{Decode, Encode, OwningCodec};
 pub use conflict::ConflictPredicate;
 pub use decoded::{
     DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem, StepStreamExt,
@@ -162,7 +162,7 @@ pub use import::{
 };
 pub use nexus::Version;
 #[cfg(feature = "projection")]
-pub use projection::Projector;
+pub use projection::{Projection, ProjectionError, Projector};
 pub use repository::{EventStore, Repository};
 pub use saga::{
     ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter, Reaction, SagaError,

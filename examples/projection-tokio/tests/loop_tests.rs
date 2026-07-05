@@ -1,11 +1,12 @@
-//! Integration tests that exercise the consumer-owned `run_projection` loop
-//! (these replace the former projection-runner tests).
+//! Integration tests that exercise the consumer-owned projection loop over the
+//! `nexus_store::Projection` stepper (issue #255).
 //!
 //! The loop itself lives in `examples/projection-tokio/src/lib.rs`; the
 //! nexus-framework typestate runner it supersedes has been retired. The four
 //! cross-cutting test categories (sequence/protocol, lifecycle,
-//! defensive-boundary, linearizability) are covered below against the plain
-//! `run_projection` function.
+//! defensive-boundary, linearizability) are covered below. Each test calls the
+//! `run` wrapper (test-only call-site sugar), which assembles the projection
+//! with `Projection::load` and drives it with `run_projection`.
 //!
 //! Conversion notes
 //! ────────────────
@@ -28,11 +29,13 @@
     clippy::as_conversions,
     clippy::use_self,
     clippy::too_many_lines,
+    clippy::too_many_arguments,
     clippy::no_effect_underscore_binding,
     reason = "test harness — relaxed lints for test code"
 )]
 
 use std::fmt;
+use std::future::Future;
 use std::num::{NonZeroU32, NonZeroU64};
 
 use futures::StreamExt;
@@ -40,8 +43,8 @@ use nexus::{DomainEvent, Message, Version, version};
 use nexus_example_projection_tokio::run_projection;
 use nexus_store::testing::InMemoryStore;
 use nexus_store::{
-    Decode, Encode, EveryNEvents, InMemorySnapshotStore, Projector, RawEventStore, SnapshotStore,
-    Store, Subscription, pending_envelope,
+    Decode, Encode, EveryNEvents, InMemorySnapshotStore, Projection, Projector, RawEventStore,
+    SnapshotStore, Store, Subscription, pending_envelope,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -172,6 +175,40 @@ fn snapshot_store() -> InMemorySnapshotStore<CountState, Version> {
     InMemorySnapshotStore::<CountState, Version>::new()
 }
 
+/// Test-only call-site sugar: assemble with [`Projection::load`], then drive
+/// with the real `run_projection`, so each test reads as one call. This
+/// wrapper — not the public API — is why the tests keep the old 8-input shape;
+/// the API itself is now the 5-input `Projection::load` + 5-input
+/// `run_projection` (issue #255).
+async fn run(
+    id: TestId,
+    subscription: Subscription<InMemoryStore>,
+    snapshots: &InMemorySnapshotStore<CountState, Version>,
+    projector: CountingProjector,
+    codec: TestEventCodec,
+    trigger: EveryNEvents,
+    schema: NonZeroU32,
+    shutdown: impl Future<Output = ()> + Send,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let (projection, state) = Projection::load(id, projector, trigger, snapshots, schema).await?;
+    run_projection(projection, state, subscription, codec, shutdown).await
+}
+
+/// True if `needle` appears in the error's `Display` or anywhere down its
+/// `#[source]` chain. The stepper now wraps leaf errors (`DecodeStreamError`,
+/// `ProjectionError`), so the leaf message lives in `source()`, not the top
+/// `to_string()` — walking the chain asserts the `#[source]` link survives.
+fn error_chain_contains(err: &dyn std::error::Error, needle: &str) -> bool {
+    let mut cur = Some(err);
+    while let Some(e) = cur {
+        if e.to_string().contains(needle) {
+            return true;
+        }
+        cur = e.source();
+    }
+    false
+}
+
 /// Append test events to the in-memory store.
 async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events: &[TestEvent]) {
     let codec = TestEventCodec;
@@ -237,7 +274,7 @@ async fn runner_processes_events_and_checkpoints() {
 
     // Run with delayed shutdown to let the runner process existing events.
     // Pass &snapshots so we can hydrate after the call.
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -286,7 +323,7 @@ async fn runner_resumes_from_checkpoint() {
     )
     .await;
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -310,7 +347,7 @@ async fn runner_resumes_from_checkpoint() {
     .await;
 
     // Run again — should resume from checkpoint (version 3)
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -362,7 +399,7 @@ async fn runner_trigger_controls_checkpoint_frequency() {
     .await;
 
     // Trigger every 3 events
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -408,7 +445,7 @@ async fn runner_resumes_normally_after_rebuild_completes() {
     )
     .await;
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -424,7 +461,7 @@ async fn runner_resumes_normally_after_rebuild_completes() {
     .unwrap();
 
     // Phase 2: restart with schema v2 — replays from the beginning
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -442,7 +479,7 @@ async fn runner_resumes_normally_after_rebuild_completes() {
     // Phase 3: append more events, restart with same schema v2 — normal resume
     append_events(&store, &stream_id, &[TestEvent::Added(30)]).await;
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -490,7 +527,7 @@ async fn runner_immediate_shutdown_with_no_events() {
         rx.await.ok();
     };
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -529,7 +566,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
     )
     .await;
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -560,7 +597,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
     let (tx, rx) = tokio::sync::oneshot::channel::<()>();
     tx.send(()).unwrap();
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -577,7 +614,7 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
 
     // Phase 3: restart with schema v2 — whether Phase 2 processed some
     // events or none, the final result must be correct (idempotent)
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -623,7 +660,7 @@ async fn runner_graceful_shutdown_flushes_dirty_state() {
 
     // Trigger every 100 events — so the trigger never fires during these 2 events.
     // Only the shutdown flush should persist state.
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -684,7 +721,7 @@ async fn runner_stale_state_falls_back_to_initial() {
     .await;
 
     // Runner with schema version 2 — stale state should be ignored
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -741,7 +778,7 @@ async fn runner_first_run_with_state_persistence_is_not_rebuild() {
         .unwrap();
     assert!(before.is_none(), "expected no snapshot before first run");
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -786,7 +823,7 @@ async fn runner_returns_projector_error_on_apply_failure() {
     )
     .await;
 
-    let result = run_projection(
+    let result = run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -801,12 +838,12 @@ async fn runner_returns_projector_error_on_apply_failure() {
     .await;
 
     assert!(result.is_err(), "expected projector error");
-    // The boxed error preserves the #[source] chain; TestProjectionError's
-    // Display is "projection overflow".
-    let msg = result.unwrap_err().to_string();
+    // ProjectionError::Apply wraps TestProjectionError ("projection overflow")
+    // under #[source]; assert the leaf survives down the chain.
+    let err = result.unwrap_err();
     assert!(
-        msg.contains("projection overflow"),
-        "expected 'projection overflow' in error: {msg}"
+        error_chain_contains(&*err, "projection overflow"),
+        "expected 'projection overflow' in error chain: {err}"
     );
 }
 
@@ -832,7 +869,7 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
         .await
         .unwrap();
 
-    let result = run_projection(
+    let result = run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -847,12 +884,12 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
     .await;
 
     assert!(result.is_err(), "expected codec error");
-    // TestEventCodec::decode returns io::Error with message "bad len"
-    // when payload.len() != 9.
-    let msg = result.unwrap_err().to_string();
+    // DecodeStreamError::Decode wraps TestEventCodec's io::Error ("bad len",
+    // when payload.len() != 9) under #[source]; assert it survives the chain.
+    let err = result.unwrap_err();
     assert!(
-        msg.contains("bad len"),
-        "expected 'bad len' in error: {msg}"
+        error_chain_contains(&*err, "bad len"),
+        "expected 'bad len' in error chain: {err}"
     );
 }
 
@@ -880,7 +917,7 @@ async fn runner_catches_up_and_processes_all_existing_events() {
     )
     .await;
 
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -931,7 +968,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
     append_events(&store, &stream_id, &[TestEvent::Added(10)]).await;
 
     // First run
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -965,7 +1002,7 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
     append_events(&store, &stream_id, &[TestEvent::Added(5)]).await;
 
     // Second run — must resume from v1, fold only the new event
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -1007,7 +1044,7 @@ async fn schema_bump_resolves_to_fresh() {
     append_events(&store, &stream_id, &[TestEvent::Added(10)]).await;
 
     // First run with schema v1
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,
@@ -1031,7 +1068,7 @@ async fn schema_bump_resolves_to_fresh() {
 
     // Second run with schema v2 — the schema-mismatched snapshot is invisible.
     // hydrate returns None → state starts from initial() → full replay.
-    run_projection(
+    run(
         stream_id.clone(),
         Subscription::new(&store),
         &snapshots,

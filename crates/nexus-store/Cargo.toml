@@ -72,7 +72,7 @@ insta = { workspace = true }
 # `snapshot-json` the `snapshot`-gated test files (snapshot_tests.rs,
 # snapshot_integration_tests.rs) never compiled or ran in CI — nothing in the
 # default workspace graph enables `snapshot`. See issue #262.
-nexus-store = { path = ".", features = ["testing", "export", "import", "cbor", "snapshot-json"] }
+nexus-store = { path = ".", features = ["testing", "export", "import", "cbor", "snapshot-json", "projection"] }
 nexus-store-testing = { version = "0.1.0", path = "../nexus-store-testing" }
 proptest = { workspace = true }
 serde = { workspace = true }

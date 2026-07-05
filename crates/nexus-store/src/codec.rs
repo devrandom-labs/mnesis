@@ -127,6 +127,25 @@ pub trait Decode<E: ?Sized>: Send + Sync + 'static {
     fn decode<'a>(&'a self, env: &'a PersistedEnvelope) -> Result<Self::Output<'a>, Self::Error>;
 }
 
+/// An **owning** codec: `decode` yields a fully-owned `E` that borrows nothing
+/// from the codec beyond the call.
+///
+/// This is the [`Decode`] analogue of serde's [`DeserializeOwned`] — a *name*
+/// for the higher-ranked bound `for<'a> Decode<E, Output<'a> = E>`, so a
+/// generic caller writes `C: OwningCodec<E>` instead of spelling the `for<'a>`
+/// itself. The blanket impl covers every codec that satisfies the bound, so it
+/// is a transparent alias, never something to implement by hand.
+///
+/// Zero-copy codecs (rkyv, bytemuck), whose `Output<'a>` borrows (`&'a E` /
+/// `&'a Archived<E>`), deliberately do **not** satisfy it — code bounded on
+/// `OwningCodec` accepts only carry-away decoding, the same steer as
+/// [`DecodedStreamExt::decoded`](crate::DecodedStreamExt::decoded).
+///
+/// [`DeserializeOwned`]: https://docs.rs/serde/latest/serde/de/trait.DeserializeOwned.html
+pub trait OwningCodec<E: ?Sized>: for<'a> Decode<E, Output<'a> = E> {}
+
+impl<C, E: ?Sized> OwningCodec<E> for C where C: for<'a> Decode<E, Output<'a> = E> {}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Serde adapter — feature-gated Encode/Decode impls driven by a SerdeFormat
 // ═══════════════════════════════════════════════════════════════════════════

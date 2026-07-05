@@ -3,7 +3,7 @@ use std::num::{NonZeroU32, NonZeroU64};
 
 use nexus::{Id, Version};
 
-use crate::codec::{Decode, Encode};
+use crate::codec::{Decode, Encode, OwningCodec};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SnapshotStore<S, P> — atomic state + position persistence
@@ -187,7 +187,7 @@ where
     S: Send + Sync + 'static,
     P: Send,
     SS: SnapshotStore<Vec<u8>, P>,
-    for<'a> C: Encode<S> + Decode<S, Output<'a> = S>,
+    C: Encode<S> + OwningCodec<S>,
 {
     type Error =
         CodecSnapshotStoreError<SS::Error, <C as Encode<S>>::Error, <C as Decode<S>>::Error>;

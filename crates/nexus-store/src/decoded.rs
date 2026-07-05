@@ -23,7 +23,7 @@ use core::future::Future;
 use bytes::Bytes;
 use futures::{Stream, StreamExt};
 
-use crate::codec::Decode;
+use crate::codec::{Decode, OwningCodec};
 use crate::envelope::PersistedEnvelope;
 use crate::step::Step;
 use nexus::Version;
@@ -136,7 +136,7 @@ where
         codec: C,
     ) -> impl Stream<Item = Result<I::Typed<E>, DecodeStreamError<R, C::Error>>> + Send
     where
-        for<'a> C: Decode<E, Output<'a> = E>,
+        C: OwningCodec<E>,
         E: Send + 'static,
         I: Send + 'static,
         R: Send + 'static,
@@ -288,7 +288,7 @@ where
         codec: C,
     ) -> impl Stream<Item = Result<Step<I::Typed<E>>, DecodeStreamError<R, C::Error>>> + Send
     where
-        for<'a> C: Decode<E, Output<'a> = E>,
+        C: OwningCodec<E>,
         E: Send + 'static,
         I: Send + 'static,
         R: Send + 'static,
