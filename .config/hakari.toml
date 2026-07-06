@@ -30,6 +30,9 @@ platforms = [
 # feature) into `workspace-hack`, which propagates into every member that
 # depends on `workspace-hack` regardless of feature selection.
 [final-excludes]
+# `nexus` is the no_std kernel — it must not depend on the (std) workspace-hack.
+# hakari removes the edge; `hakari verify` enforces its absence. (#279)
+workspace-members = ["nexus"]
 third-party = [
   { name = "futures-core" },
 ]

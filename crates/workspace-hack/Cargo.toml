@@ -30,6 +30,7 @@ sha2 = { version = "0.10" }
 smallvec = { version = "1", default-features = false, features = ["const_generics", "serde"] }
 sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
+thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
@@ -55,6 +56,7 @@ smallvec = { version = "1", default-features = false, features = ["const_generic
 sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
