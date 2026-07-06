@@ -7,3 +7,4 @@
 [toolchain]
 channel = "1.95.0"
 components = ["cargo", "rustc", "rust-std", "rustfmt", "clippy", "llvm-tools-preview"]
+targets = ["wasm32-unknown-unknown", "thumbv7em-none-eabihf"]
