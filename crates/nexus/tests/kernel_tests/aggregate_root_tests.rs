@@ -11,6 +11,7 @@ use nexus::KernelError;
 use nexus::Message;
 use nexus::Version;
 use nexus::events;
+use nexus::testing::AggregateFixture;
 
 // ---------------------------------------------------------------------------
 // Self-contained test domain
@@ -31,7 +32,9 @@ impl AsRef<[u8]> for TestId {
     }
 }
 
-#[derive(Debug, Clone)]
+// `PartialEq` lets the decide tests assert produced events via the fixture's
+// `then_expect_events` (which requires `EventOf<A>: PartialEq + Debug`).
+#[derive(Debug, Clone, PartialEq)]
 enum CounterEvent {
     Incremented,
     Decremented,
@@ -265,59 +268,57 @@ fn replay_does_not_mutate_state_on_version_gap() {
 }
 
 // ---------------------------------------------------------------------------
-// Tests: Handle trait (decide pattern)
+// Tests: Handle trait (decide pattern) — driven through `AggregateFixture`,
+// the canonical given/when/then surface for pure decide logic. The fixture
+// runs the real replay path for `given`, so these also prove decide behaves
+// correctly *after rehydration*, not just on a bare `new()` root.
+//
+// `CounterError` has no `PartialEq`, so rejection assertions use
+// `then_expect_error_matching` (predicate, no bound) rather than
+// `then_expect_error`.
 // ---------------------------------------------------------------------------
 
 #[test]
 fn handle_increment_returns_event() {
-    let counter = AggregateRoot::<Counter>::new(TestId("1".into()));
-    let decided = counter.handle(Increment).unwrap();
-    assert_eq!(decided.len(), 1);
-    assert!(matches!(
-        decided.iter().next(),
-        Some(CounterEvent::Incremented)
-    ));
+    AggregateFixture::<Counter>::with_id(TestId("1".into()))
+        .given([])
+        .when(Increment)
+        .then_expect_events([CounterEvent::Incremented]);
 }
 
 #[test]
 fn handle_increment_by_returns_event_with_amount() {
-    let counter = AggregateRoot::<Counter>::new(TestId("1".into()));
-    let decided = counter.handle(IncrementBy { amount: 42 }).unwrap();
-    assert_eq!(decided.len(), 1);
-    assert!(matches!(
-        decided.iter().next(),
-        Some(CounterEvent::IncrementedBy(42))
-    ));
+    AggregateFixture::<Counter>::with_id(TestId("1".into()))
+        .given([])
+        .when(IncrementBy { amount: 42 })
+        .then_expect_events([CounterEvent::IncrementedBy(42)]);
 }
 
 #[test]
 fn handle_rejects_invalid_command() {
-    let counter = AggregateRoot::<Counter>::new(TestId("1".into()));
-    let err = counter.handle(Decrement).unwrap_err();
-    assert!(matches!(err, CounterError::WouldGoNegative));
+    AggregateFixture::<Counter>::with_id(TestId("1".into()))
+        .given([])
+        .when(Decrement)
+        .then_expect_error_matching(|e| matches!(e, CounterError::WouldGoNegative));
 }
 
 #[test]
 fn handle_rejects_zero_increment() {
-    let counter = AggregateRoot::<Counter>::new(TestId("1".into()));
-    let err = counter.handle(IncrementBy { amount: 0 }).unwrap_err();
-    assert!(matches!(err, CounterError::ZeroIncrement));
+    AggregateFixture::<Counter>::with_id(TestId("1".into()))
+        .given([])
+        .when(IncrementBy { amount: 0 })
+        .then_expect_error_matching(|e| matches!(e, CounterError::ZeroIncrement));
 }
 
 #[test]
 fn handle_uses_current_state_for_decision() {
-    let mut counter = AggregateRoot::<Counter>::new(TestId("1".into()));
-    // Replay an increment so decrement becomes valid.
-    counter
-        .replay(Version::new(1).unwrap(), &CounterEvent::Incremented)
-        .unwrap();
-
-    let decided = counter.handle(Decrement).unwrap();
-    assert_eq!(decided.len(), 1);
-    assert!(matches!(
-        decided.iter().next(),
-        Some(CounterEvent::Decremented)
-    ));
+    // Prior history (a replayed increment) makes `Decrement` valid — the
+    // decision reads the rehydrated state, exactly what the fixture's real
+    // `given` -> `when` path exercises.
+    AggregateFixture::<Counter>::with_id(TestId("1".into()))
+        .given([CounterEvent::Incremented])
+        .when(Decrement)
+        .then_expect_events([CounterEvent::Decremented]);
 }
 
 // ---------------------------------------------------------------------------

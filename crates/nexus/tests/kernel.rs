@@ -7,7 +7,8 @@
     clippy::shadow_unrelated,
     clippy::as_conversions,
     clippy::str_to_string,
-    reason = "test harness — relaxed lints for test code"
+    unused_must_use,
+    reason = "test harness — relaxed lints for test code; terminal `then_expect_*` fixture assertions intentionally drop the returned fixture"
 )]
 
 #[path = "kernel_tests/aggregate_root_tests.rs"]

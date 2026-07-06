@@ -2,6 +2,7 @@
 //! Uses #[derive(DomainEvent)] macro + full aggregate lifecycle
 //! with the Handle/decide pattern.
 
+use nexus::testing::AggregateFixture;
 use nexus::*;
 use std::fmt;
 
@@ -25,15 +26,17 @@ impl AsRef<[u8]> for UserId {
 }
 
 // --- Events (using derive macro!) ---
-#[derive(Debug, Clone)]
+// `PartialEq` lets the fixture-driven tests assert produced events exactly via
+// `then_expect_events` (which requires `EventOf<A>: PartialEq + Debug`).
+#[derive(Debug, Clone, PartialEq)]
 struct UserCreated {
     name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct UserActivated;
 
-#[derive(Debug, Clone, nexus_macros::DomainEvent)]
+#[derive(Debug, Clone, PartialEq, nexus_macros::DomainEvent)]
 enum UserEvent {
     Created(UserCreated),
     Activated(UserActivated),
@@ -133,59 +136,48 @@ fn full_aggregate_lifecycle_with_handle() {
     assert_eq!(user.version(), Some(v2));
 }
 
+// Decide-after-rehydration, driven through `AggregateFixture`: `given` replays
+// the `Created` event (the real rehydration path), the chained `then_expect_state`
+// proves the rehydrated state, then `when(ActivateUser)` decides on top of it.
+// Version progression through `commit_persisted` is covered by the kept
+// `full_aggregate_lifecycle_with_handle` test and `aggregate_root_tests`.
 #[test]
 fn rehydrate_then_decide() {
-    let mut user = AggregateRoot::<User>::new(UserId::new(2));
-    user.replay(
-        Version::new(1).unwrap(),
-        &UserEvent::Created(UserCreated { name: "Bob".into() }),
-    )
-    .unwrap();
+    AggregateFixture::<User>::with_id(UserId::new(2))
+        .given([UserEvent::Created(UserCreated { name: "Bob".into() })])
+        .then_expect_state(|s| assert_eq!(s.name, "Bob"))
+        .when(ActivateUser)
+        .then_expect_events([UserEvent::Activated(UserActivated)])
+        .then_expect_state(|s| assert!(s.active));
+}
 
-    assert_eq!(user.version(), Some(Version::new(1).unwrap()));
-    assert_eq!(user.state().name, "Bob");
-
-    // Decide after rehydration
-    let events = user.handle(ActivateUser).unwrap();
-    assert_eq!(events.len(), 1);
-
-    // Persist and advance
-    let v2 = Version::new(2).unwrap();
-    user.commit_persisted(v2, &events);
-
-    assert!(user.state().active);
-    assert_eq!(user.version(), Some(v2));
+// Invariant rejections are pure decide logic: the prior history that makes a
+// command illegal is supplied via `given`, replacing the hand-rolled
+// create/commit setup. `UserError` has no `PartialEq`, so rejection is asserted
+// with `then_expect_error_matching`.
+#[test]
+fn duplicate_create_is_rejected() {
+    AggregateFixture::<User>::with_id(UserId::new(3))
+        .given([UserEvent::Created(UserCreated {
+            name: "Charlie".into(),
+        })])
+        .when(CreateUser {
+            name: "David".into(),
+        })
+        .then_expect_error_matching(|e| matches!(e, UserError::AlreadyExists));
 }
 
 #[test]
-fn invariant_violations_return_domain_errors() {
-    let mut user = AggregateRoot::<User>::new(UserId::new(3));
-
-    // Create the user
-    let events = user
-        .handle(CreateUser {
-            name: "Charlie".into(),
-        })
-        .unwrap();
-    user.commit_persisted(Version::new(1).unwrap(), &events);
-
-    // Duplicate creation rejected
-    assert!(matches!(
-        user.handle(CreateUser {
-            name: "David".into()
-        }),
-        Err(UserError::AlreadyExists)
-    ));
-
-    // Activate the user
-    let events = user.handle(ActivateUser).unwrap();
-    user.commit_persisted(Version::new(2).unwrap(), &events);
-
-    // Duplicate activation rejected
-    assert!(matches!(
-        user.handle(ActivateUser),
-        Err(UserError::AlreadyActive)
-    ));
+fn duplicate_activate_is_rejected() {
+    AggregateFixture::<User>::with_id(UserId::new(3))
+        .given([
+            UserEvent::Created(UserCreated {
+                name: "Charlie".into(),
+            }),
+            UserEvent::Activated(UserActivated),
+        ])
+        .when(ActivateUser)
+        .then_expect_error_matching(|e| matches!(e, UserError::AlreadyActive));
 }
 
 #[test]

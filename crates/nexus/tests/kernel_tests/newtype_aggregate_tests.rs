@@ -2,6 +2,7 @@
 //! generates. The aggregate is a bare marker; command handlers are pure
 //! associated functions on the marker, dispatched via `AggregateRoot::handle`.
 
+use nexus::testing::AggregateFixture;
 use nexus::*;
 use std::fmt;
 
@@ -132,48 +133,47 @@ fn marker_aggregate_lifecycle() {
     assert_eq!(user.version(), Some(v2));
 }
 
+// Invariant rejections are pure decide logic: the history that makes each
+// command illegal is supplied via `given` (replacing the hand-rolled
+// create/commit setup), then `when` decides on top of it. `UserError` has no
+// `PartialEq`, so rejection is asserted with `then_expect_error_matching`.
 #[test]
-fn marker_aggregate_invariant_enforcement() {
-    let mut user = AggregateRoot::<UserAggregate>::new(UserId::new(2));
-
-    let events = user.handle(CreateUser { name: "Bob".into() }).unwrap();
-    user.commit_persisted(Version::new(1).unwrap(), &events);
-
-    assert!(matches!(
-        user.handle(CreateUser {
-            name: "Charlie".into()
-        }),
-        Err(UserError::AlreadyExists)
-    ));
-
-    let events = user.handle(ActivateUser).unwrap();
-    user.commit_persisted(Version::new(2).unwrap(), &events);
-
-    assert!(matches!(
-        user.handle(ActivateUser),
-        Err(UserError::AlreadyActive)
-    ));
+fn marker_aggregate_rejects_duplicate_create() {
+    AggregateFixture::<UserAggregate>::with_id(UserId::new(2))
+        .given([UserEvent::Created(UserCreated { name: "Bob".into() })])
+        .when(CreateUser {
+            name: "Charlie".into(),
+        })
+        .then_expect_error_matching(|e| matches!(e, UserError::AlreadyExists));
 }
 
 #[test]
-fn marker_aggregate_rehydrate() {
-    let mut user = AggregateRoot::<UserAggregate>::new(UserId::new(3));
-    user.replay(
-        Version::new(1).unwrap(),
-        &UserEvent::Created(UserCreated {
-            name: "Dave".into(),
-        }),
-    )
-    .unwrap();
-    user.replay(
-        Version::new(2).unwrap(),
-        &UserEvent::Activated(UserActivated),
-    )
-    .unwrap();
+fn marker_aggregate_rejects_duplicate_activate() {
+    AggregateFixture::<UserAggregate>::with_id(UserId::new(2))
+        .given([
+            UserEvent::Created(UserCreated { name: "Bob".into() }),
+            UserEvent::Activated(UserActivated),
+        ])
+        .when(ActivateUser)
+        .then_expect_error_matching(|e| matches!(e, UserError::AlreadyActive));
+}
 
-    assert_eq!(user.state().name, "Dave");
-    assert!(user.state().active);
-    assert_eq!(user.version(), Some(Version::new(2).unwrap()));
+// Rehydration parity through the fixture: `given` replays the aggregate's own
+// history (the real replay path) and `then_expect_state` proves the folded state. Version
+// progression is covered by the kept `marker_aggregate_lifecycle` test.
+#[test]
+fn marker_aggregate_rehydrate() {
+    AggregateFixture::<UserAggregate>::with_id(UserId::new(3))
+        .given([
+            UserEvent::Created(UserCreated {
+                name: "Dave".into(),
+            }),
+            UserEvent::Activated(UserActivated),
+        ])
+        .then_expect_state(|s| {
+            assert_eq!(s.name, "Dave");
+            assert!(s.active);
+        });
 }
 
 #[test]
