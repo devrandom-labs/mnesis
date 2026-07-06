@@ -1144,7 +1144,6 @@ dependencies = [
  "static_assertions",
  "thiserror",
  "trybuild",
- "workspace-hack",
 ]
 
 [[package]]
@@ -2649,6 +2648,7 @@ dependencies = [
  "sqlx-core",
  "sqlx-postgres",
  "syn",
+ "thiserror",
  "tokio",
  "trybuild",
  "zerocopy",

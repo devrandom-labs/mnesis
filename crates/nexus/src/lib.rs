@@ -1,3 +1,10 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
+// The production kernel is pure `core` — no allocator required on-device.
+// `alloc` is pulled in only for the test fixture and unit tests.
+#[cfg(any(test, feature = "testing"))]
+extern crate alloc;
+
 mod aggregate;
 mod error;
 mod error_id;

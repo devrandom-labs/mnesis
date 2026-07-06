@@ -15,7 +15,6 @@ categories = ["data-structures"]
 arrayvec = { workspace = true }
 nexus-macros = { version = "0.1.0", path = "../nexus-macros", optional = true }
 thiserror = { workspace = true }
-workspace-hack = { version = "0.1", path = "../workspace-hack" }
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -31,7 +30,11 @@ thiserror = { workspace = true }
 trybuild = "1"
 
 [features]
-default = []
+default = ["std"]
+# Additive: enabling `std` only ADDS (the std::error::Error bridge via
+# thiserror); disabling it (`--no-default-features`) yields a no_std +
+# core::error::Error kernel. (#279)
+std = ["thiserror/std"]
 derive = ["dep:nexus-macros"]
 testing = []
 

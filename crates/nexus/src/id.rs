@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Display};
-use std::hash::Hash;
+use core::fmt::{Debug, Display};
+use core::hash::Hash;
 
 use crate::ErrorId;
 
