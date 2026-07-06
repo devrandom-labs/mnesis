@@ -126,6 +126,26 @@
             '';
             nativeBuildInputs = [ cargo-hakari ];
           };
+
+          # no_std gates — CI is just `nix flake check`, so these ride along.
+          # `nexus-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
+          # std-free bare-metal target. `wasm32-unknown-unknown` still ships std,
+          # so it alone would not catch a std leak. Both build --no-default-features.
+          nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
+            inherit cargoArtifacts;
+            pname = "nexus-wasm";
+            buildPhaseCargoCommand = ''
+              cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
+            '';
+          });
+
+          nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
+            inherit cargoArtifacts;
+            pname = "nexus-nostd";
+            buildPhaseCargoCommand = ''
+              cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
+            '';
+          });
         };
 
         packages = {
