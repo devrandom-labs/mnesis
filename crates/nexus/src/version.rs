@@ -1,6 +1,6 @@
-use std::fmt;
-use std::iter::FusedIterator;
-use std::num::NonZeroU64;
+use core::fmt;
+use core::iter::FusedIterator;
+use core::num::NonZeroU64;
 
 /// A compile-checked [`Version`] literal.
 ///

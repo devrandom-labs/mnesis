@@ -3,11 +3,11 @@ use crate::event::DomainEvent;
 use crate::events::Events;
 use crate::id::Id;
 use crate::version::Version;
-use std::error::Error;
-use std::fmt;
-use std::fmt::Debug;
-use std::mem;
-use std::num::NonZeroUsize;
+use core::error::Error;
+use core::fmt;
+use core::fmt::Debug;
+use core::mem;
+use core::num::NonZeroUsize;
 
 /// State of an event-sourced aggregate. Mutated by applying domain events.
 ///

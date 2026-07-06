@@ -32,6 +32,7 @@ use crate::event::DomainEvent;
 use crate::events::Events;
 use crate::saga::{React, Saga};
 use crate::version::Version;
+use alloc::vec::Vec;
 use core::fmt::Debug;
 
 /// Entry point. Carries the id used to construct the root for replay.
