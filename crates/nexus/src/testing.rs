@@ -5,6 +5,27 @@
 //! validation), then [`when`](Given::when) calls [`Handle::handle`].
 //! No store, codec, or serialization. See
 //! `docs/plans/2026-06-17-aggregate-test-fixture-design.md`.
+//!
+//! # When NOT to use the fixture
+//!
+//! The fixture is the surface for **pure decide/react logic** — asserting the
+//! events, error, or resulting state a command/event produces. It is a closed
+//! assertion DSL that never hands back the [`AggregateRoot`], so it is the wrong
+//! tool when a test needs the root itself. Keep these hand-rolled:
+//!
+//! - **`replay` / version-contract tests.** Version-gap rejection, duplicate
+//!   versions, `MAX_REHYDRATION_EVENTS`, and `restore` all test the very
+//!   machinery `given` is built on — routing them through the fixture would be
+//!   circular.
+//! - **Version / `commit_persisted` progression.** [`when`](Given::when) folds
+//!   decided events into state via `apply_events` but deliberately does *not*
+//!   advance the version (a decision never branches on persistence position). A
+//!   test that asserts `version() == Some(n)` after a commit is exercising the
+//!   persistence seam, not decide logic — drive it through `commit_persisted`
+//!   directly.
+//! - **Store-owned load/replay lifecycle.** Repository / store tests that own
+//!   the full load → decide → persist cycle assert against real persisted
+//!   state, which the store-free fixture cannot represent.
 
 use crate::aggregate::{Aggregate, AggregateRoot, EventOf, Handle};
 use crate::event::DomainEvent;

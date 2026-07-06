@@ -4,10 +4,8 @@
 //! not: `correlate` returning `None` (defensive boundary), and `react` producing
 //! more than one own-event (`N > 0`).
 
-use nexus::{
-    Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message, React, Saga, Version,
-    events,
-};
+use nexus::testing::SagaFixture;
+use nexus::{Aggregate, AggregateState, DomainEvent, Events, Message, React, Saga, events};
 
 // ── Saga identity ────────────────────────────────────────────────────────────
 
@@ -189,46 +187,36 @@ fn correlate_returns_none_for_unrouted_event() {
     );
 }
 
-/// `react` can produce more than one own-event when `N > 0`.
-/// Both events must survive the `AggregateRoot::react` dispatch path unchanged.
+/// `react` can produce more than one own-event when `N > 0`, and each produced
+/// event projects through `intent_for` to the outgoing intent vocabulary. Driven
+/// through `SagaFixture`, the canonical given/when/then surface for react logic:
+/// `PaymentRequested` -> `TakePayment`, `OrderCompleted` -> `None`, so the two
+/// events yield exactly one intent.
 #[test]
 fn react_produces_multiple_events_when_capacity_allows() {
-    let root = AggregateRoot::<OrderSaga>::new(OrderId::new(1));
-    let produced = root
-        .react::<OrderExpedited, 1>(&OrderExpedited { id: 1 })
-        .expect("react must succeed")
-        .expect("react must return Some events");
-    assert_eq!(
-        produced.into_iter().collect::<Vec<_>>(),
-        vec![SagaEvent::PaymentRequested, SagaEvent::OrderCompleted]
-    );
+    SagaFixture::<OrderSaga>::with_id(OrderId::new(1))
+        .given([])
+        .when(&OrderExpedited { id: 1 })
+        .then_expect_events([SagaEvent::PaymentRequested, SagaEvent::OrderCompleted])
+        .then_expect_commands([Intent::TakePayment]);
 }
 
-/// Smoke-test: the `react_ignores_when_no_op` path still works from the
-/// external test surface (i.e., `Ok(None)` from `UnrelatedEvent::react`).
+/// Smoke-test: the ignore path (`Ok(None)` from `UnrelatedEvent::react`) surfaces
+/// as `then_expect_ignored` through the fixture.
 #[test]
 fn react_returns_none_for_unrouted_event() {
-    let root = AggregateRoot::<OrderSaga>::new(OrderId::new(1));
-    let outcome = root
-        .react::<UnrelatedEvent, 0>(&UnrelatedEvent)
-        .expect("react must not error");
-    assert!(
-        outcome.is_none(),
-        "react for an unrouted event must yield None"
-    );
+    SagaFixture::<OrderSaga>::with_id(OrderId::new(1))
+        .given([])
+        .when(&UnrelatedEvent)
+        .then_expect_ignored();
 }
 
-/// Verify `Version` import is exercised: replaying a saga event advances the
-/// root correctly before the multi-event react path.
+/// React after prior history: the fixture's `given` replays the saga's own past
+/// event before the multi-event react path, so both produced events survive.
 #[test]
 fn react_multi_event_after_replay() {
-    let mut root = AggregateRoot::<OrderSaga>::new(OrderId::new(2));
-    root.replay(Version::INITIAL, &SagaEvent::PaymentRequested)
-        .expect("replay must succeed");
-    // Even with prior history, OrderExpedited always produces two events.
-    let produced = root
-        .react::<OrderExpedited, 1>(&OrderExpedited { id: 2 })
-        .expect("react must succeed")
-        .expect("react must return Some events");
-    assert_eq!(produced.into_iter().count(), 2);
+    SagaFixture::<OrderSaga>::with_id(OrderId::new(2))
+        .given([SagaEvent::PaymentRequested])
+        .when(&OrderExpedited { id: 2 })
+        .then_expect_events([SagaEvent::PaymentRequested, SagaEvent::OrderCompleted]);
 }
