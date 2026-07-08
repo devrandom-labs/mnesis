@@ -5,6 +5,7 @@ members = [
     "crates/nexus-fjall",
     "crates/nexus-macros",
     "crates/nexus-macros/tests/cross_crate_test",
+    "crates/nexus-nostd-smoketest",
     "crates/nexus-postgres",
     "crates/nexus-store",
     "crates/nexus-store-testing",

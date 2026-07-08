@@ -1271,6 +1271,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nexus-nostd-smoketest"
+version = "0.0.0"
+dependencies = [
+ "nexus",
+ "thiserror",
+]
+
+[[package]]
 name = "nexus-postgres"
 version = "0.1.0"
 dependencies = [

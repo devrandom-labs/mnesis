@@ -131,11 +131,16 @@
           # `nexus-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
           # std-free bare-metal target. `wasm32-unknown-unknown` still ships std,
           # so it alone would not catch a std leak. Both build --no-default-features.
+          # Each gate also builds `nexus-nostd-smoketest` (#304): a crate that
+          # uses `#[nexus::aggregate]` + `#[derive(DomainEvent)]`, so the macro
+          # OUTPUT — not just its source — is compiled for the target. A macro
+          # emitting a `std::` path fails the thumbv7em build here.
           nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
             pname = "nexus-wasm";
             buildPhaseCargoCommand = ''
               cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
+              cargo build -p nexus-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
             '';
           });
 
@@ -144,6 +149,7 @@
             pname = "nexus-nostd";
             buildPhaseCargoCommand = ''
               cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p nexus-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
             '';
           });
         };

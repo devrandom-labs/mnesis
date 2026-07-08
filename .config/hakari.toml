@@ -32,7 +32,10 @@ platforms = [
 [final-excludes]
 # `nexus` is the no_std kernel — it must not depend on the (std) workspace-hack.
 # hakari removes the edge; `hakari verify` enforces its absence. (#279)
-workspace-members = ["nexus"]
+#
+# `nexus-nostd-smoketest` is the no_std derive-macro compile-gate (#304): it is
+# built for thumbv7em/wasm32, so a std workspace-hack edge would break it.
+workspace-members = ["nexus", "nexus-nostd-smoketest"]
 third-party = [
   { name = "futures-core" },
 ]
