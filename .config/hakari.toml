@@ -35,7 +35,11 @@ platforms = [
 #
 # `nexus-nostd-smoketest` is the no_std derive-macro compile-gate (#304): it is
 # built for thumbv7em/wasm32, so a std workspace-hack edge would break it.
-workspace-members = ["nexus", "nexus-nostd-smoketest"]
+#
+# `nexus-store` is no_std (core+alloc) — workspace-hack force-enables
+# std-implying futures-util features (io/channel/sink) that feature
+# unification would leak into its --no-default-features build. (#301)
+workspace-members = ["nexus", "nexus-nostd-smoketest", "nexus-store"]
 third-party = [
   { name = "futures-core" },
 ]

@@ -19,9 +19,9 @@ import = ["nexus-store/import"]
 
 [dependencies]
 arrayvec = { workspace = true }
-bytes = { workspace = true }
+bytes = { workspace = true, features = ["std"] }
 fjall = { workspace = true }
-futures.workspace = true
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
 nexus = { version = "0.1.0", path = "../nexus" }
 nexus-store = { version = "0.1.0", path = "../nexus-store", features = ["subscription"] }
 nexus-wake = { version = "0.1.0", path = "../nexus-wake" }

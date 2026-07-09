@@ -12,6 +12,17 @@ keywords = ["event-sourcing", "event-store", "cqrs", "persistence"]
 categories = ["data-structures"]
 
 [features]
+default = ["std"]
+# Additive: enabling `std` only ADDS (the std::error::Error bridge via
+# thiserror + the deps' std impls); disabling it (`--no-default-features`)
+# yields a no_std + alloc + core::error::Error store. (#301, mirrors #279)
+std = [
+    "thiserror/std",
+    "nexus/std",
+    "futures/std",
+    "bytes/std",
+    "aligned-vec/std",
+]
 # Generic catch-up-then-live-tail subscription loop + the `wake` traits.
 # Dep-free: the loop is generic over `WakeSource`, so no runtime is pulled.
 # The in-process wake registry (`StreamNotifiers`, tokio-backed) lives in the
@@ -49,16 +60,15 @@ crc32c = { workspace = true, optional = true }
 futures = { workspace = true }
 futures-core = { workspace = true }
 minicbor = { workspace = true, features = ["derive"], optional = true }
-nexus = { version = "0.1.0", path = "../nexus" }
+nexus = { version = "0.1.0", path = "../nexus", default-features = false }
 rkyv = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
-thiserror = { workspace = true, features = ["std"] }
-workspace-hack = { version = "0.1", path = "../workspace-hack" }
+thiserror = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
-futures = { workspace = true }
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
 insta = { workspace = true }
 # Self dev-dependency unifies feature-gated integration tests into the
 # default-feature nextest gate (which builds no explicit features). Without

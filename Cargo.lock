@@ -1340,7 +1340,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "trybuild",
- "workspace-hack",
 ]
 
 [[package]]
@@ -2666,13 +2665,18 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 name = "workspace-hack"
 version = "0.1.0"
 dependencies = [
+ "aligned-vec",
  "bitflags",
+ "bytes",
  "crossbeam-utils",
  "crypto-common",
  "digest",
  "either",
+ "futures",
+ "futures-channel",
  "futures-io",
  "futures-sink",
+ "futures-task",
  "futures-util",
  "getrandom 0.3.4",
  "memchr",
@@ -2684,6 +2688,7 @@ dependencies = [
  "serde_core",
  "serde_json",
  "sha2",
+ "slab",
  "smallvec",
  "sqlx-core",
  "sqlx-postgres",

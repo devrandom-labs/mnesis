@@ -12,12 +12,17 @@ publish = false
 
 ### BEGIN HAKARI SECTION
 [dependencies]
+aligned-vec = { version = "0.6", default-features = false, features = ["std"] }
+bytes = { version = "1" }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
 digest = { version = "0.10", features = ["mac", "std"] }
 either = { version = "1", features = ["serde", "use_std"] }
+futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
+futures-channel = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-io = { version = "0.3" }
 futures-sink = { version = "0.3", default-features = false, features = ["std"] }
+futures-task = { version = "0.3", default-features = false, features = ["std"] }
 futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
 memchr = { version = "2" }
 num-traits = { version = "0.2" }
@@ -27,6 +32,7 @@ serde = { version = "1", features = ["alloc", "derive", "rc"] }
 serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
 serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
+slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_generics", "serde"] }
 sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
@@ -36,12 +42,17 @@ trybuild = { version = "1", default-features = false, features = ["diff"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
 
 [build-dependencies]
+aligned-vec = { version = "0.6", default-features = false, features = ["std"] }
+bytes = { version = "1" }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
 digest = { version = "0.10", features = ["mac", "std"] }
 either = { version = "1", features = ["serde", "use_std"] }
+futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
+futures-channel = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-io = { version = "0.3" }
 futures-sink = { version = "0.3", default-features = false, features = ["std"] }
+futures-task = { version = "0.3", default-features = false, features = ["std"] }
 futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
 memchr = { version = "2" }
 num-traits = { version = "0.2" }
@@ -52,6 +63,7 @@ serde = { version = "1", features = ["alloc", "derive", "rc"] }
 serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
 serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
+slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_generics", "serde"] }
 sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
