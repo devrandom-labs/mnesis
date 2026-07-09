@@ -1,0 +1,438 @@
+//! Relocated inline test mod of `src/export.rs` (nexus-inmemory is a
+//! dev-dependency; type unification with it requires an integration test).
+
+#![cfg(feature = "export")]
+
+use nexus::Version;
+use nexus_store::store::{RawEventStore, Store};
+use nexus_store::stream_id::StreamKey;
+
+#[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "test code asserts exact values"
+)]
+mod tests {
+    use super::*;
+    use futures::StreamExt;
+    use nexus_inmemory::{InMemoryStore, InMemoryStoreError};
+    use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
+    use nexus_store::export::*;
+    use proptest::prelude::*;
+    use static_assertions::assert_impl_all;
+    use std::collections::HashSet;
+    use std::sync::Arc;
+    use tokio::sync::Barrier;
+
+    // Every RawEventStore gains both capabilities — the blanket impl for
+    // EventExporter, the adapter impl for StreamLister.
+    assert_impl_all!(InMemoryStore: EventExporter, StreamLister, RawEventStore);
+
+    // ── test stream key ───────────────────────────────────────────────────────
+
+    fn sk(s: &str) -> StreamKey {
+        StreamKey::from_slice(s.as_bytes())
+    }
+
+    fn env(v: u64, payload: &[u8]) -> nexus_store::envelope::PendingEnvelope {
+        pending_envelope(Version::new(v).expect("nonzero"))
+            .event_type("E")
+            .payload(payload.to_vec())
+            .build()
+            .expect("valid envelope")
+    }
+
+    async fn append_one(store: &InMemoryStore, id: &StreamKey, v: u64, payload: &[u8]) {
+        let expected = Version::new(v - 1);
+        store
+            .append(id, expected, &[env(v, payload)])
+            .await
+            .expect("append succeeds");
+    }
+
+    async fn seed(store: &InMemoryStore, id: &StreamKey, count: u64) {
+        for v in 1..=count {
+            append_one(store, id, v, format!("payload-{v}").as_bytes()).await;
+        }
+    }
+
+    async fn collect_export(
+        store: &InMemoryStore,
+        id: &StreamKey,
+        from: Version,
+    ) -> Vec<PersistedEnvelope> {
+        let stream = store.export_stream(id, from).await.expect("export opens");
+        stream
+            .map(|r| r.expect("no read error"))
+            .collect::<Vec<_>>()
+            .await
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // EventExporter — Category 1: sequence / protocol
+    // ════════════════════════════════════════════════════════════════════════
+
+    #[tokio::test]
+    async fn export_stream_is_byte_for_byte_the_read_stream() {
+        // The core contract: export is a verbatim pass-through of read_stream.
+        // Same versions, schema, event_type, payload, metadata (a per-stream
+        // event carries no global position).
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 5).await;
+
+        let exported = collect_export(&store, &id, Version::INITIAL).await;
+
+        let read: Vec<PersistedEnvelope> = store
+            .read_stream(&id, Version::INITIAL)
+            .await
+            .expect("read opens")
+            .map(|r| r.expect("no read error"))
+            .collect()
+            .await;
+
+        assert_eq!(exported.len(), read.len());
+        for (e, r) in exported.iter().zip(read.iter()) {
+            assert_eq!(e.version(), r.version());
+            assert_eq!(e.schema_version(), r.schema_version());
+            assert_eq!(e.event_type(), r.event_type());
+            assert_eq!(e.payload(), r.payload());
+            assert_eq!(e.metadata(), r.metadata());
+        }
+    }
+
+    #[tokio::test]
+    async fn export_preserves_versions_and_payloads_in_order() {
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 5).await;
+
+        let exported = collect_export(&store, &id, Version::INITIAL).await;
+
+        let versions: Vec<u64> = exported.iter().map(|e| e.version().as_u64()).collect();
+        assert_eq!(versions, vec![1, 2, 3, 4, 5]);
+        for (i, e) in exported.iter().enumerate() {
+            let expected = format!("payload-{}", i + 1);
+            assert_eq!(e.payload(), expected.as_bytes());
+        }
+    }
+
+    #[tokio::test]
+    async fn exporting_the_same_stream_twice_is_identical() {
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 4).await;
+
+        let first = collect_export(&store, &id, Version::INITIAL).await;
+        let second = collect_export(&store, &id, Version::INITIAL).await;
+
+        assert_eq!(first.len(), second.len());
+        for (a, b) in first.iter().zip(second.iter()) {
+            assert_eq!(a.version(), b.version());
+            assert_eq!(a.payload(), b.payload());
+        }
+    }
+
+    #[tokio::test]
+    async fn export_carries_metadata_and_schema_verbatim() {
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        let pending = pending_envelope(Version::INITIAL)
+            .event_type("Created")
+            .payload(b"body".to_vec())
+            .schema_version(nexus_store::value::SchemaVersion::from_u32(7).expect("nonzero"))
+            .metadata(b"meta".to_vec())
+            .build()
+            .expect("valid envelope");
+        store.append(&id, None, &[pending]).await.expect("append");
+
+        let exported = collect_export(&store, &id, Version::INITIAL).await;
+
+        assert_eq!(exported.len(), 1);
+        let e = &exported[0];
+        assert_eq!(e.event_type(), "Created");
+        assert_eq!(e.payload(), b"body");
+        assert_eq!(e.metadata(), Some(b"meta".as_slice()));
+        assert_eq!(e.schema_version(), 7);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // EventExporter — Category 2: lifecycle
+    // ════════════════════════════════════════════════════════════════════════
+
+    #[tokio::test]
+    async fn export_empty_stream_terminates_and_does_not_hang() {
+        let store = InMemoryStore::new();
+        let id = sk("never-appended");
+        let mut stream = store
+            .export_stream(&id, Version::INITIAL)
+            .await
+            .expect("opens");
+        // Must terminate (None), not block forever.
+        assert!(stream.next().await.is_none());
+        // Stays terminated.
+        assert!(stream.next().await.is_none());
+    }
+
+    #[tokio::test]
+    async fn export_from_past_the_head_is_empty() {
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 3).await;
+
+        let exported = collect_export(&store, &id, Version::new(10).expect("nonzero")).await;
+        assert!(exported.is_empty(), "from past head yields nothing");
+    }
+
+    #[tokio::test]
+    async fn export_from_midstream_is_inclusive_of_from() {
+        // Pins the resolved semantics: `from` is INCLUSIVE (matches
+        // read_stream). from=3 on a 5-event stream yields [3,4,5].
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 5).await;
+
+        let exported = collect_export(&store, &id, Version::new(3).expect("nonzero")).await;
+        let versions: Vec<u64> = exported.iter().map(|e| e.version().as_u64()).collect();
+        assert_eq!(versions, vec![3, 4, 5]);
+    }
+
+    #[tokio::test]
+    async fn export_single_event_stream_yields_one() {
+        let store = InMemoryStore::new();
+        let id = sk("acct-1");
+        seed(&store, &id, 1).await;
+
+        let exported = collect_export(&store, &id, Version::INITIAL).await;
+        assert_eq!(exported.len(), 1);
+        assert_eq!(exported[0].version(), Version::INITIAL);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // EventExporter — Category 3: defensive boundary
+    // ════════════════════════════════════════════════════════════════════════
+
+    #[tokio::test]
+    async fn export_unknown_stream_is_empty_not_error() {
+        let store = InMemoryStore::new();
+        // Seed a different stream so the store is non-empty.
+        seed(&store, &sk("other"), 2).await;
+
+        let exported = collect_export(&store, &sk("does-not-exist"), Version::INITIAL).await;
+        assert!(exported.is_empty());
+    }
+
+    #[tokio::test]
+    async fn export_handles_empty_and_unusual_stream_ids() {
+        let store = InMemoryStore::new();
+        // Empty id and a long id are both structurally legal stream ids.
+        let empty = sk("");
+        let long = sk(&"x".repeat(300));
+        seed(&store, &empty, 2).await;
+        seed(&store, &long, 3).await;
+
+        assert_eq!(
+            collect_export(&store, &empty, Version::INITIAL).await.len(),
+            2
+        );
+        assert_eq!(
+            collect_export(&store, &long, Version::INITIAL).await.len(),
+            3
+        );
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // EventExporter — Category 4: linearizability / isolation
+    // ════════════════════════════════════════════════════════════════════════
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrent_append_and_export_sees_a_consistent_prefix() {
+        // A writer appends 1..=N on a stream while an exporter drains it. The
+        // exporter must see a contiguous prefix starting at v1, strictly
+        // increasing, each event well-formed (payload matches its version) —
+        // never a gap, never a torn event.
+        let store = Arc::new(InMemoryStore::new());
+        let id = sk("race");
+        let n = 200u64;
+
+        // Seed v1 BEFORE the race. Without this, the exporter can open and drain
+        // the stream before the writer commits its first event — a valid but
+        // empty prefix — making the `!exported.is_empty()` check below flaky
+        // (it raced pass-on-one-trigger, fail-on-another on identical commits).
+        // With v1 already committed, the exporter is guaranteed a non-empty
+        // prefix, so that assertion is a real, falsifiable guarantee rather than
+        // a timing coin-flip. The writer races 2..=n.
+        append_one(&store, &id, 1, b"payload-1").await;
+
+        let barrier = Arc::new(Barrier::new(2));
+
+        let writer_store = Arc::clone(&store);
+        let writer_id = id.clone();
+        let writer_barrier = Arc::clone(&barrier);
+        let writer = tokio::spawn(async move {
+            writer_barrier.wait().await;
+            for v in 2..=n {
+                append_one(
+                    &writer_store,
+                    &writer_id,
+                    v,
+                    format!("payload-{v}").as_bytes(),
+                )
+                .await;
+            }
+        });
+
+        barrier.wait().await;
+        let stream = store
+            .export_stream(&id, Version::INITIAL)
+            .await
+            .expect("opens");
+        let exported: Vec<PersistedEnvelope> =
+            stream.map(|r| r.expect("no read error")).collect().await;
+
+        writer.await.expect("writer task");
+
+        // Contiguous prefix from v1, strictly increasing, payload matches.
+        for (expected, e) in (1u64..).zip(exported.iter()) {
+            assert_eq!(
+                e.version().as_u64(),
+                expected,
+                "exported versions must be a gapless prefix from 1",
+            );
+            assert_eq!(e.payload(), format!("payload-{expected}").as_bytes());
+        }
+        // We may not have raced the full N in, but every event we saw is a
+        // valid, ordered prefix — and v1 was seeded before the race, so the
+        // exporter must have seen at least it.
+        assert!(
+            !exported.is_empty(),
+            "exporter must see at least the seeded v1"
+        );
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // StreamLister
+    // ════════════════════════════════════════════════════════════════════════
+
+    async fn collect_stream_ids(store: &InMemoryStore) -> HashSet<Vec<u8>> {
+        let stream = store.list_streams().await.expect("list opens");
+        stream
+            .map(|r| r.expect("no list error").as_bytes().to_vec())
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .collect()
+    }
+
+    #[tokio::test]
+    async fn list_streams_returns_exactly_the_appended_ids() {
+        let store = InMemoryStore::new();
+        seed(&store, &sk("alpha"), 1).await;
+        seed(&store, &sk("beta"), 2).await;
+        seed(&store, &sk("gamma"), 3).await;
+
+        let ids = collect_stream_ids(&store).await;
+        let expected: HashSet<Vec<u8>> = [b"alpha".to_vec(), b"beta".to_vec(), b"gamma".to_vec()]
+            .into_iter()
+            .collect();
+        assert_eq!(ids, expected);
+    }
+
+    #[tokio::test]
+    async fn list_streams_on_empty_store_is_empty() {
+        let store = InMemoryStore::new();
+        let ids = collect_stream_ids(&store).await;
+        assert!(ids.is_empty());
+    }
+
+    #[tokio::test]
+    async fn list_streams_lists_each_stream_once_regardless_of_event_count() {
+        let store = InMemoryStore::new();
+        seed(&store, &sk("busy"), 50).await;
+
+        let stream = store.list_streams().await.expect("opens");
+        let all: Vec<Vec<u8>> = stream
+            .map(|r| r.expect("no error").as_bytes().to_vec())
+            .collect::<Vec<_>>()
+            .await;
+        assert_eq!(all, vec![b"busy".to_vec()], "one entry, no per-event dupes");
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(32))]
+        #[test]
+        fn list_streams_matches_a_hashset_oracle(
+            ids in proptest::collection::hash_set("[a-z]{1,12}", 0..20),
+        ) {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .build()
+                .expect("runtime");
+            rt.block_on(async {
+                let store = InMemoryStore::new();
+                for s in &ids {
+                    append_one(&store, &sk(s), 1, b"p").await;
+                }
+                let listed = collect_stream_ids(&store).await;
+                let oracle: HashSet<Vec<u8>> =
+                    ids.iter().map(|s| s.as_bytes().to_vec()).collect();
+                prop_assert_eq!(listed, oracle);
+                Ok(())
+            })?;
+        }
+    }
+
+    // Surfaces a typed error from a successful no-event read path — pins that
+    // the StreamList item error type is the adapter error (not boxed).
+    #[tokio::test]
+    async fn stream_list_error_type_is_the_adapter_error() {
+        fn assert_err_type<S: StreamLister<Error = InMemoryStoreError>>(_: &S) {}
+        let store = InMemoryStore::new();
+        assert_err_type(&store);
+    }
+
+    // ── #247: the Store handle is the front door — list/export, no .raw() ────
+
+    #[tokio::test]
+    async fn store_handle_lists_and_exports_without_raw() {
+        // Substitutable: generic `StreamLister`/`EventExporter`-bounded code
+        // accepts the handle directly (the structural win of #247).
+        fn assert_lister<L: StreamLister>(_: &L) {}
+        fn assert_exporter<E: EventExporter>(_: &E) {}
+
+        // The handle itself appends, lists, and exports — never `.raw()`.
+        let store = Store::new(InMemoryStore::new());
+        store
+            .append(&sk("acct-1"), None, &[env(1, b"x")])
+            .await
+            .expect("append via the handle");
+
+        let ids: HashSet<Vec<u8>> = store
+            .list_streams()
+            .await
+            .expect("list via the handle")
+            .map(|r| r.expect("no list error").as_bytes().to_vec())
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .collect();
+        assert_eq!(
+            ids,
+            std::iter::once(b"acct-1".to_vec()).collect::<HashSet<_>>()
+        );
+
+        let exported: Vec<PersistedEnvelope> = store
+            .export_stream(&sk("acct-1"), Version::INITIAL)
+            .await
+            .expect("export via the handle")
+            .map(|r| r.expect("no read error"))
+            .collect()
+            .await;
+        assert_eq!(exported.len(), 1);
+        assert_eq!(exported[0].version(), Version::INITIAL);
+
+        // The generic bounds above accept the handle directly (the #247 win).
+        assert_lister(&store);
+        assert_exporter(&store);
+    }
+}

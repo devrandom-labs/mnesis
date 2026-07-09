@@ -41,10 +41,11 @@ use std::num::{NonZeroU32, NonZeroU64};
 use futures::StreamExt;
 use nexus::{DomainEvent, Message, Version, version};
 use nexus_example_projection_tokio::run_projection;
-use nexus_store::testing::InMemoryStore;
+use nexus_inmemory::InMemorySnapshotStore;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::{
-    Decode, Encode, EveryNEvents, InMemorySnapshotStore, Projection, Projector, RawEventStore,
-    SnapshotStore, Store, Subscription, pending_envelope,
+    Decode, Encode, EveryNEvents, Projection, Projector, RawEventStore, SnapshotStore, Store,
+    Subscription, pending_envelope,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -71,11 +71,11 @@ pub enum FjallError {
 
     /// Failed to register a per-stream subscription wake handle.
     ///
-    /// Surfaces [`NotifyError`](nexus_store::notify::NotifyError) from the
+    /// Surfaces [`NotifyError`](nexus_wake::NotifyError) from the
     /// wake registry — in practice only the unreachable subscriber-count
     /// overflow.
     #[error("subscription wake registration failed")]
-    Subscription(#[from] nexus_store::notify::NotifyError),
+    Subscription(#[from] nexus_wake::NotifyError),
 }
 
 #[cfg(test)]

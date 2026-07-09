@@ -1197,6 +1197,7 @@ dependencies = [
  "bytes",
  "futures",
  "nexus",
+ "nexus-inmemory",
  "nexus-store",
  "thiserror",
  "tokio",
@@ -1210,6 +1211,7 @@ dependencies = [
  "bytes",
  "futures",
  "nexus",
+ "nexus-inmemory",
  "nexus-store",
  "serde",
  "serde_json",
@@ -1225,6 +1227,7 @@ dependencies = [
  "bytes",
  "futures",
  "nexus",
+ "nexus-inmemory",
  "nexus-store",
  "serde",
  "serde_json",
@@ -1247,9 +1250,26 @@ dependencies = [
  "nexus-fjall",
  "nexus-store",
  "nexus-store-testing",
+ "nexus-wake",
  "proptest",
  "proptest-state-machine",
  "tempfile",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "nexus-inmemory"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "nexus",
+ "nexus-store",
+ "nexus-store-testing",
+ "nexus-wake",
+ "proptest",
  "thiserror",
  "tokio",
  "workspace-hack",
@@ -1287,6 +1307,7 @@ dependencies = [
  "nexus",
  "nexus-store",
  "nexus-store-testing",
+ "nexus-wake",
  "sqlx",
  "thiserror",
  "tokio",
@@ -1303,15 +1324,14 @@ dependencies = [
  "bytes",
  "crc32c",
  "criterion",
- "foldhash 0.2.0",
  "futures",
  "futures-core",
  "insta",
  "minicbor",
  "nexus",
+ "nexus-inmemory",
  "nexus-store",
  "nexus-store-testing",
- "parking_lot",
  "proptest",
  "rkyv",
  "serde",
@@ -1330,6 +1350,18 @@ dependencies = [
  "futures",
  "nexus",
  "nexus-store",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "nexus-wake"
+version = "0.1.0"
+dependencies = [
+ "foldhash 0.2.0",
+ "nexus-store",
+ "parking_lot",
+ "thiserror",
  "tokio",
  "workspace-hack",
 ]

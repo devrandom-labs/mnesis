@@ -12,8 +12,8 @@
 //! note). `Registration` and `Error` are therefore the registry's own
 //! [`WakeReg`] / [`NotifyError`] — no postgres-specific wake types are needed.
 
-use nexus_store::notify::{NotifyError, WakeReg};
 use nexus_store::wake::WakeSource;
+use nexus_wake::{NotifyError, WakeReg};
 
 use crate::store::PostgresStore;
 

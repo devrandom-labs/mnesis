@@ -11,9 +11,9 @@
 
 use std::num::NonZeroU32;
 
+use nexus_inmemory::InMemoryStore;
 use nexus_store::envelope::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::value::SchemaVersion;
 use nexus_store::{PendingEnvelope, StreamKey, Version};
 use nexus_store_testing::{

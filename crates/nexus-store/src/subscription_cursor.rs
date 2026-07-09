@@ -146,7 +146,7 @@ where
     })
 }
 
-#[cfg(all(test, feature = "testing"))]
+#[cfg(test)]
 #[allow(clippy::unwrap_used, reason = "test code")]
 #[allow(clippy::shadow_reuse, reason = "test code: env rebinds per loop turn")]
 #[allow(
@@ -172,12 +172,12 @@ mod tests {
     use crate::envelope::pending_envelope;
     use crate::store::RawEventStore;
     use crate::stream_id::StreamKey;
-    use crate::testing::InMemoryStore;
+    use crate::test_support::TestStore;
 
     const MUST_DELIVER: Duration = Duration::from_secs(5);
 
     /// Append events with versions `lo..=hi` to stream `id`.
-    async fn seed_range(store: &InMemoryStore, id: &StreamKey, lo: u64, hi: u64) {
+    async fn seed_range(store: &TestStore, id: &StreamKey, lo: u64, hi: u64) {
         for v in lo..=hi {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
@@ -212,7 +212,7 @@ mod tests {
     /// Catch-up delivers the full backlog in strict version order.
     #[tokio::test]
     async fn catch_up_yields_backlog_in_order() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed_range(&store, &id, 1, 5).await;
 
@@ -234,7 +234,7 @@ mod tests {
     /// This exercises the arm/park lost-wakeup path.
     #[tokio::test]
     async fn live_tail_sees_post_subscribe_append() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed_range(&store, &id, 1, 1).await;
 
@@ -274,7 +274,7 @@ mod tests {
     #[tokio::test]
     async fn chunk_boundary_no_duplicate_no_gap() {
         let total = u64::try_from(CATCHUP_CHUNK).unwrap() + 3;
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed_range(&store, &id, 1, total).await;
 
@@ -298,7 +298,7 @@ mod tests {
     /// stream must reach the parked cursor live (the `$all` wake path).
     #[tokio::test]
     async fn all_catchup_yields_global_order_then_live_append() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         // Interleave across two streams so global_seq spans both: a@1, b@1, a@2.
         seed_range(&store, &StreamKey::from_slice(b"a"), 1, 1).await;
         seed_range(&store, &StreamKey::from_slice(b"b"), 1, 1).await;
@@ -362,7 +362,7 @@ mod tests {
 
     // ── Error propagation ────────────────────────────────────────────────────
 
-    /// A test-only error so the mock `Catchup`'s scan can fail. `InMemoryStore`
+    /// A test-only error so the mock `Catchup`'s scan can fail. `TestStore`
     /// reads never fail, so the only way to exercise the loop's error path is to
     /// inject a failing dependency at the `Catchup` seam. The SUT under test is
     /// `live`; this is a failing dependency, NOT a reimplementation of the loop.
@@ -380,7 +380,7 @@ mod tests {
     /// A `Catchup` whose scan yields one `Ok(env)` then one `Err(BoomError)`.
     /// The scan never exhausts before the `Err`, so `arm` is never reached by
     /// the test; it returns a ready future for completeness. The `Ok` envelope
-    /// is a real [`PersistedEnvelope`] read back from an [`InMemoryStore`] (not
+    /// is a real [`PersistedEnvelope`] read back from an [`TestStore`] (not
     /// fabricated), so only the error is synthetic.
     struct FailingCatchup {
         ok_env: PersistedEnvelope,
@@ -417,7 +417,7 @@ mod tests {
     #[tokio::test]
     async fn scan_item_error_is_surfaced_in_order() {
         // Read back a real PersistedEnvelope to feed the mock's Ok item.
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         seed_range(&store, &StreamKey::from_slice(b"s"), 1, 1).await;
         let (_pos, ok_env) = store
             .read_all(None)
@@ -452,7 +452,7 @@ mod tests {
     /// `Step::Event`.
     #[tokio::test]
     async fn live_stepped_emits_caught_up_at_the_boundary() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed_range(&store, &id, 1, 2).await;
 

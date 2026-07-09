@@ -8,7 +8,7 @@
 //! items at arbitrary positions. End-to-end behaviour over a real `subscribe`
 //! lives in `phase_subscription_tests`.
 
-#![cfg(all(feature = "testing", feature = "json"))]
+#![cfg(feature = "json")]
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
@@ -20,8 +20,8 @@
 
 use futures::{StreamExt, stream};
 use nexus::{DomainEvent, Message, Version};
+use nexus_inmemory::InMemoryStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{
     DecodeStreamError, Decoded, Encode, JsonCodec, PersistedEnvelope, Step, StepStreamExt, Store,
     StreamKey, pending_envelope,

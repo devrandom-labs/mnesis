@@ -28,8 +28,8 @@
 )]
 
 use nexus::{ErrorId, Version};
+use nexus_inmemory::InMemoryStoreError;
 use nexus_store::AppendError;
-use nexus_store::InMemoryStoreError;
 use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope};
 use nexus_store::error::StoreError;
 use nexus_store::pending_envelope;
@@ -110,7 +110,7 @@ impl futures::Stream for ProbeStream {
 impl RawEventStore for ProbeStore {
     type Error = ProbeError;
     type Stream = ProbeStream;
-    type AllPosition = nexus_store::testing::InMemoryAllPos;
+    type AllPosition = nexus_inmemory::InMemoryAllPos;
     type AllStream =
         futures::stream::Empty<Result<(Self::AllPosition, PersistedEnvelope), ProbeError>>;
 

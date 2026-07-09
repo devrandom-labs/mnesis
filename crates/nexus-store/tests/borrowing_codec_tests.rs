@@ -12,9 +12,9 @@
 use std::fmt;
 
 use nexus::*;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::Repository;
 use nexus_store::Store;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{Decode, Encode, PersistedEnvelope};
 
 /// A test codec that "decodes" by reinterpreting bytes as a u32 slice.

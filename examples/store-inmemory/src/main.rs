@@ -25,9 +25,9 @@
 
 use futures::{StreamExt, TryStreamExt};
 use nexus::{Version, version};
+use nexus_inmemory::InMemoryStore;
 use nexus_store::Store;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::upcasting::EventMorsel;
 use nexus_store::{Decode, Encode, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};

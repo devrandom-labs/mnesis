@@ -45,13 +45,13 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use nexus::*;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::Repository;
 use nexus_store::Store;
 use nexus_store::codec::{Decode, Encode};
 use nexus_store::envelope::PersistedEnvelope;
 use nexus_store::error::StoreError;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::upcasting::EventMorsel;
 use proptest::prelude::*;
 

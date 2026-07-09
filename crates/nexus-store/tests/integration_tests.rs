@@ -19,9 +19,9 @@
 
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::{InMemoryStore, InMemoryStream};
 use nexus_store::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::{InMemoryStore, InMemoryStream};
 
 // =============================================================================
 // Helpers

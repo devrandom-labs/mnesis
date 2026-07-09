@@ -22,8 +22,8 @@
 
 use futures::StreamExt;
 use nexus::*;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{Decode, Encode, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
 use std::fmt;

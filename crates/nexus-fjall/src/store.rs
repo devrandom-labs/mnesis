@@ -9,9 +9,9 @@ use nexus::{ErrorId, Version};
 use nexus_store::PendingEnvelope;
 use nexus_store::StreamKey;
 use nexus_store::error::AppendError;
-use nexus_store::notify::{NotifyError, StreamNotifiers, WakeReg};
 use nexus_store::store::RawEventStore;
 use nexus_store::wake::WakeSource;
+use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
 use std::path::Path;
 use std::sync::Arc;
 

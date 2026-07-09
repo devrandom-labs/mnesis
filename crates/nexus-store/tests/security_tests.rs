@@ -28,11 +28,11 @@
 
 use futures::StreamExt;
 use nexus::{ErrorId, Version};
-use nexus_store::InMemoryStoreError;
+use nexus_inmemory::InMemoryStore;
+use nexus_inmemory::InMemoryStoreError;
 use nexus_store::error::StoreError;
 use nexus_store::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 
 /// Concrete `StoreError` for tests using `InMemoryStore` with no codec/upcaster.
 type TestStoreError = StoreError<InMemoryStoreError, std::io::Error, std::io::Error>;

@@ -1,19 +1,35 @@
-//! Test utilities for nexus-store. Gated behind the `testing` feature.
+//! In-memory event-store adapter for `nexus-store`.
+//!
+//! [`InMemoryStore`] implements the full adapter surface —
+//! [`RawEventStore`], [`WakeSource`] (via [`nexus_wake::StreamNotifiers`]),
+//! `StreamLister`/`AtomicAppend` behind the `export`/`import` features — and
+//! [`InMemorySnapshotStore`] implements `SnapshotStore`. Together they are the
+//! reference in-process adapter: business-logic tests, examples, and the
+//! white-box tests of `nexus-store` itself all run on them.
+//!
+//! Like every adapter, rows are built via `nexus_store::wire::encode_frame`,
+//! so the stored bytes are the canonical frame format (payload 16-byte
+//! aligned), not a shortcut representation.
 
-use crate::batch::BatchSize;
-use crate::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
-use crate::error::AppendError;
-#[cfg(feature = "import")]
-use crate::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
-use crate::notify::{NotifyError, StreamNotifiers, WakeReg};
-use crate::store::{AllPosition, RawEventStore};
-use crate::wake::WakeSource;
-use crate::wire::{self, FrameOffsets};
 use bytes::Bytes;
 use nexus::ErrorId;
 use nexus::Version;
+use nexus_store::batch::BatchSize;
+use nexus_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
+use nexus_store::error::AppendError;
+#[cfg(feature = "import")]
+use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use nexus_store::store::{AllPosition, RawEventStore};
+use nexus_store::value::SchemaVersion;
+use nexus_store::wake::WakeSource;
+use nexus_store::wire::{self, FrameOffsets};
+use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
 
-use crate::stream_id::StreamKey;
+mod snapshot;
+
+pub use snapshot::InMemorySnapshotStore;
+
+use nexus_store::stream_id::StreamKey;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::VecDeque;
@@ -51,18 +67,13 @@ pub enum InMemoryStoreError {
         source: EnvelopeError,
     },
 
-    /// Stored row carries `schema_version == 0` — structurally corrupt
-    /// (the write path uses `SchemaVersion`, which is `NonZeroU32`).
-    #[error("corrupt schema_version on stored row at version {version}: got 0, must be > 0")]
-    CorruptSchemaVersion { version: u64 },
-
     /// Failed to register a per-stream subscription wake handle.
     #[error("subscription wake registration failed")]
     Subscription(#[from] NotifyError),
 }
 
 /// [`InMemoryStore`]'s `$all` resume position — its
-/// [`AllPosition`](crate::AllPosition).
+/// [`AllPosition`](nexus_store::AllPosition).
 ///
 /// A monotonic-but-gappy `NonZeroU64`, the in-memory analogue of fjall's
 /// `GlobalSeq`. It is the key of the store's `$all` index (`global_index`), so
@@ -116,6 +127,10 @@ struct StoredFrame {
     /// Wire-format frame (see [`wire::encode_frame`]). Payload is 16-byte aligned.
     value: Bytes,
     offsets: FrameOffsets,
+    /// Captured typed at append time (like `offsets`), so the read path never
+    /// re-parses header bytes — the frame's byte layout stays private to
+    /// `nexus_store::wire`.
+    schema_version: SchemaVersion,
 }
 
 /// In-memory event store for testing. Implements [`RawEventStore`].
@@ -302,54 +317,37 @@ impl futures::Stream for InMemoryAllStream {
 /// Delegates to [`wire::encode_frame`], which produces a 16-byte-aligned
 /// payload inside the resulting [`Bytes`]. The `$all` position is **not**
 /// encoded into the frame — the store keys its `global_index` by it instead.
-fn encode_pending_to_frame(
-    env: &PendingEnvelope,
-) -> Result<StoredFrame, AppendError<InMemoryStoreError>> {
+fn encode_pending_to_frame(env: &PendingEnvelope) -> Result<StoredFrame, InMemoryStoreError> {
     let frame = wire::encode_frame(
         env.schema_version_value(),
         &env.event_type_value(),
         &env.payload_value(),
         env.metadata_value().as_ref(),
     )
-    .map_err(|e| AppendError::Store(InMemoryStoreError::Wire(e)))?;
+    .map_err(InMemoryStoreError::Wire)?;
 
     Ok(StoredFrame {
         version: env.version().as_u64(),
         value: frame.value,
         offsets: frame.offsets,
+        schema_version: env.schema_version_value(),
     })
 }
 
 /// Construct a [`PersistedEnvelope`] from a [`StoredFrame`].
 ///
-/// Reads `schema_version` from the wire-format header at the constant offset
-/// defined by [`wire`]. The `$all` position is not in the frame — callers that
-/// need it read it from the `global_index` key.
+/// `schema_version` comes from the frame's typed field (captured at append
+/// time), never by re-parsing header bytes. The `$all` position is not in the
+/// frame — callers that need it read it from the `global_index` key.
 fn frame_to_envelope(frame: &StoredFrame) -> Result<PersistedEnvelope, InMemoryStoreError> {
     let Some(version) = Version::new(frame.version) else {
         return Err(InMemoryStoreError::CorruptVersion);
     };
-    let value = &frame.value;
-    // Bytes are read individually so no fallible try_into sits in the
-    // cursor hot path. The wire::encode_frame invariant guarantees these
-    // offsets are present in any non-empty StoredFrame value.
-    let schema_version_raw = u32::from_le_bytes([
-        value[wire::SCHEMA_VERSION_OFFSET],
-        value[wire::SCHEMA_VERSION_OFFSET + 1],
-        value[wire::SCHEMA_VERSION_OFFSET + 2],
-        value[wire::SCHEMA_VERSION_OFFSET + 3],
-    ]);
-    let schema_version =
-        crate::value::SchemaVersion::from_u32(schema_version_raw).map_err(|_| {
-            InMemoryStoreError::CorruptSchemaVersion {
-                version: frame.version,
-            }
-        })?;
 
     PersistedEnvelope::try_new(
         version,
         frame.value.clone(),
-        schema_version,
+        frame.schema_version,
         frame.offsets.event_type.clone(),
         frame.offsets.payload.clone(),
         frame.offsets.metadata.clone(),
@@ -429,7 +427,10 @@ impl RawEventStore for InMemoryStore {
         let mut seq = *counter;
         let mut rows: Vec<(InMemoryAllPos, StoredFrame)> = Vec::with_capacity(envelopes.len());
         for env in envelopes {
-            rows.push((seq, encode_pending_to_frame(env)?));
+            rows.push((
+                seq,
+                encode_pending_to_frame(env).map_err(AppendError::Store)?,
+            ));
             seq = seq
                 .next()
                 .ok_or(AppendError::Store(InMemoryStoreError::GlobalSeqOverflow))?;
@@ -610,17 +611,17 @@ impl WakeSource for InMemoryStore {
 /// cursor. `InMemoryStore` is a test store, so materializing all ids at once
 /// is acceptable; a real adapter (fjall, postgres) streams them lazily.
 #[cfg(feature = "export")]
-impl crate::export::StreamLister for InMemoryStore {
+impl nexus_store::export::StreamLister for InMemoryStore {
     type StreamList = futures::stream::Iter<
-        std::vec::IntoIter<Result<crate::stream_id::StreamKey, InMemoryStoreError>>,
+        std::vec::IntoIter<Result<nexus_store::stream_id::StreamKey, InMemoryStoreError>>,
     >;
 
     async fn list_streams(&self) -> Result<Self::StreamList, Self::Error> {
-        let ids: Vec<Result<crate::stream_id::StreamKey, InMemoryStoreError>> = {
+        let ids: Vec<Result<nexus_store::stream_id::StreamKey, InMemoryStoreError>> = {
             let guard = self.streams.lock().await;
             guard
                 .keys()
-                .map(|k| Ok(crate::stream_id::StreamKey::from_slice(k.as_bytes())))
+                .map(|k| Ok(nexus_store::stream_id::StreamKey::from_slice(k.as_bytes())))
                 .collect()
         };
         Ok(futures::stream::iter(ids))
@@ -703,17 +704,7 @@ impl AtomicAppend for InMemoryStore {
         for w in writes {
             let mut frames = Vec::with_capacity(w.events.len());
             for env in &w.events {
-                let frame = encode_pending_to_frame(env).map_err(|e| match e {
-                    AppendError::Store(s) => AtomicAppendError::Store(s),
-                    // encode_pending_to_frame only ever returns AppendError::Store
-                    // (wire-format failure); it never does a head check and so can
-                    // never produce Conflict. Mapped defensively so the match is
-                    // exhaustive rather than relying on a private implementation
-                    // detail of encode_pending_to_frame.
-                    AppendError::Conflict { .. } => {
-                        AtomicAppendError::Store(InMemoryStoreError::VersionOverflow)
-                    }
-                })?;
+                let frame = encode_pending_to_frame(env).map_err(AtomicAppendError::Store)?;
                 staged_global.push((seq, frame.clone()));
                 frames.push(frame);
                 seq = seq.next().ok_or(AtomicAppendError::Store(
@@ -753,7 +744,7 @@ impl AtomicAppend for InMemoryStore {
 #[allow(clippy::unwrap_used, reason = "test code")]
 mod batch_config_tests {
     use super::*;
-    use crate::batch::{BatchSize, DEFAULT_BATCH};
+    use nexus_store::batch::{BatchSize, DEFAULT_BATCH};
 
     #[test]
     fn default_store_uses_default_batch() {
@@ -777,9 +768,9 @@ mod batch_config_tests {
 )]
 mod bounded_read_tests {
     use super::*;
-    use crate::batch::BatchSize;
-    use crate::envelope::pending_envelope;
     use futures::StreamExt;
+    use nexus_store::batch::BatchSize;
+    use nexus_store::envelope::pending_envelope;
 
     fn env(v: u64) -> PendingEnvelope {
         pending_envelope(Version::new(v).unwrap())
@@ -880,9 +871,9 @@ mod bounded_read_tests {
 )]
 mod global_read_tests {
     use super::*;
-    use crate::envelope::pending_envelope;
-    use crate::{StepStreamExt, Store, Subscription};
     use futures::StreamExt;
+    use nexus_store::envelope::pending_envelope;
+    use nexus_store::{StepStreamExt, Store, Subscription};
 
     fn sk(s: &str) -> StreamKey {
         StreamKey::from_slice(s.as_bytes())
@@ -1039,11 +1030,11 @@ mod global_read_tests {
 )]
 mod bounded_subscription_tests {
     use super::*;
-    use crate::Store;
-    use crate::batch::BatchSize;
-    use crate::envelope::pending_envelope;
-    use crate::{StepStreamExt, Subscription};
     use futures::StreamExt;
+    use nexus_store::Store;
+    use nexus_store::batch::BatchSize;
+    use nexus_store::envelope::pending_envelope;
+    use nexus_store::{StepStreamExt, Subscription};
 
     fn env(v: u64) -> PendingEnvelope {
         pending_envelope(Version::new(v).unwrap())
@@ -1096,8 +1087,8 @@ mod bounded_subscription_tests {
 #[allow(clippy::expect_used, reason = "test code")]
 mod wake_source_tests {
     use super::*;
-    use crate::envelope::pending_envelope;
-    use crate::wake::{WakeRegistration, WakeSource};
+    use nexus_store::envelope::pending_envelope;
+    use nexus_store::wake::{WakeRegistration, WakeSource};
     use std::time::Duration;
     use tokio::time::timeout;
 

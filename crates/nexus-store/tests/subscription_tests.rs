@@ -1,4 +1,4 @@
-#![cfg(feature = "testing")]
+#![cfg(feature = "subscription")]
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
@@ -7,8 +7,8 @@ use std::time::Duration;
 
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{StepStreamExt, Store, Subscription, pending_envelope};
 use tokio::time::timeout;
 

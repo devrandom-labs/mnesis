@@ -166,12 +166,11 @@ fn json_codec_is_constructible_via_new() {
 // Integration test — full EventStore round-trip
 // =============================================================================
 
-#[cfg(feature = "testing")]
 mod integration {
     use super::*;
+    use nexus_inmemory::InMemoryStore;
     use nexus_store::Repository;
     use nexus_store::Store;
-    use nexus_store::testing::InMemoryStore;
 
     #[tokio::test]
     async fn json_codec_works_with_event_store() {
