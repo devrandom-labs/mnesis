@@ -21,7 +21,7 @@ use futures::future::join_all;
 use nexus::{
     Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message, React, Saga, Version,
 };
-use nexus_store::testing::InMemoryStore;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::{
     Decode, Encode, PersistedEnvelope, Reaction, Repository, SagaError, SagaRepository, Store,
 };

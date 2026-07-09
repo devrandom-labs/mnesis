@@ -7,7 +7,6 @@
 //! invariant that `BytemuckCodec` and `RkyvCodec` (and any other
 //! `align_to`-based zero-copy decoder) rely on.
 
-#![cfg(feature = "testing")]
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::cast_possible_truncation, reason = "tests")]
@@ -25,8 +24,8 @@
 use bytes::Bytes;
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{PendingEnvelope, StreamKey, pending_envelope};
 
 const ALIGN: usize = 16;

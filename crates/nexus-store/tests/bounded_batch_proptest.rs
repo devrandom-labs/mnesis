@@ -9,11 +9,11 @@
 
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::StreamKey;
 use nexus_store::batch::BatchSize;
 use nexus_store::envelope::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use proptest::prelude::*;
 
 fn batch_strategy() -> impl Strategy<Value = usize> {

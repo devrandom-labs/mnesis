@@ -72,8 +72,7 @@
 //! | `snapshot-json` | `snapshot` + `json` |
 //! | `projection` | `Projector` trait |
 //! | `projection-json` | `projection` + `json` |
-//! | `subscription` | [`StreamNotifiers`](crate::notify) per-stream wake registry (pulls `tokio`, `foldhash`, `parking_lot`) |
-//! | `testing` | `InMemoryStore`, `InMemorySnapshotStore` for tests (implies `subscription`) |
+//! | `subscription` | [`Subscription`] catch-up-then-live-tail loop + [`wake`] traits (dep-free; in-process wake impl lives in `nexus-wake`) |
 //!
 //! # Design notes
 //!
@@ -100,8 +99,6 @@ pub mod execute;
 pub mod export;
 #[cfg(feature = "import")]
 pub mod import;
-#[cfg(feature = "subscription")]
-pub mod notify;
 #[cfg(feature = "projection")]
 pub mod projection;
 pub mod repository;
@@ -117,8 +114,8 @@ pub mod stream_id;
 pub mod subscription;
 #[cfg(feature = "subscription")]
 pub(crate) mod subscription_cursor;
-#[cfg(feature = "testing")]
-pub mod testing;
+#[cfg(all(test, feature = "subscription"))]
+pub(crate) mod test_support;
 pub mod upcasting;
 pub mod value;
 #[cfg(feature = "subscription")]
@@ -170,8 +167,6 @@ pub use saga::{
 };
 #[cfg(feature = "snapshot")]
 pub use snapshot::Snapshotting;
-#[cfg(feature = "testing")]
-pub use state::InMemorySnapshotStore;
 pub use state::{
     AfterEventTypes, CodecSnapshotStore, CodecSnapshotStoreError, EveryNEvents, Hydrated,
     PersistTrigger, SnapshotStore,
@@ -187,8 +182,6 @@ pub use stream_id::StreamKey;
 pub use futures_core::Stream;
 #[cfg(feature = "subscription")]
 pub use subscription::Subscription;
-#[cfg(feature = "testing")]
-pub use testing::InMemoryStoreError;
 pub use upcasting::EventMorsel;
 pub use value::{EventType, Metadata, Payload, SchemaVersion, ValueError};
 #[cfg(feature = "subscription")]

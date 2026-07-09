@@ -121,10 +121,9 @@ fn proj_after_event_types_does_not_trigger_on_empty_events() {
 
 // ── InMemorySnapshotStore ────────────────────────────────────────
 
-#[cfg(feature = "testing")]
 mod in_memory_tests {
     use super::*;
-    use nexus_store::state::InMemorySnapshotStore;
+    use nexus_inmemory::InMemorySnapshotStore;
 
     #[tokio::test]
     async fn hydrate_returns_none_when_empty() {

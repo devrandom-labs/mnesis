@@ -1,14 +1,13 @@
-#![cfg(feature = "testing")]
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
 
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::{InMemoryAllPos, InMemoryStore};
 use nexus_store::AppendError;
 use nexus_store::StreamKey;
 use nexus_store::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::{InMemoryAllPos, InMemoryStore};
 
 #[tokio::test]
 async fn append_conflict_truncates_overlong_stream_id_with_ellipsis() {

@@ -174,15 +174,15 @@ impl<S: RawEventStore + WakeSource> Catchup for AllCatchup<S> {
     }
 }
 
-#[cfg(all(test, feature = "testing"))]
+#[cfg(test)]
 #[allow(clippy::unwrap_used, reason = "test code")]
 mod tests {
     use super::*;
     use crate::envelope::pending_envelope;
-    use crate::testing::InMemoryStore;
+    use crate::test_support::TestStore;
     use futures::StreamExt;
 
-    async fn seed(store: &InMemoryStore, id: &StreamKey, lo: u64, hi: u64) {
+    async fn seed(store: &TestStore, id: &StreamKey, lo: u64, hi: u64) {
         for v in lo..=hi {
             let env = pending_envelope(Version::new(v).unwrap())
                 .event_type("E")
@@ -198,7 +198,7 @@ mod tests {
     /// the envelope's own version.
     #[tokio::test]
     async fn stream_catchup_reads_after_none() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed(&store, &id, 1, 3).await;
 
@@ -223,7 +223,7 @@ mod tests {
     /// seeding [1,2,3] and resuming after version 2 yields only [3].
     #[tokio::test]
     async fn stream_catchup_read_after_is_exclusive() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed(&store, &id, 1, 3).await;
 
@@ -245,7 +245,7 @@ mod tests {
     /// last-delivered position must NOT re-deliver event 3.
     #[tokio::test]
     async fn reopen_does_not_redeliver_last_event() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed(&store, &id, 1, 3).await;
 
@@ -281,7 +281,7 @@ mod tests {
     /// empty-scan branch that replaces the old `next_pos` overflow→park).
     #[tokio::test]
     async fn stream_catchup_read_after_max_is_empty() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         let id = StreamKey::from_slice(b"s");
         seed(&store, &id, 1, 1).await;
 
@@ -299,7 +299,7 @@ mod tests {
     /// `read_after(Some(p))` is exclusive (strictly after `p`).
     #[tokio::test]
     async fn all_catchup_reads_after_none_then_exclusive() {
-        let store = Arc::new(InMemoryStore::new());
+        let store = Arc::new(TestStore::new());
         // Interleave so `$all` order spans both streams: a@1, b@1, a@2.
         seed(&store, &StreamKey::from_slice(b"a"), 1, 1).await;
         seed(&store, &StreamKey::from_slice(b"b"), 1, 1).await;
@@ -314,7 +314,7 @@ mod tests {
             .unwrap();
 
         let catchup = AllCatchup::new(Arc::clone(&store)).unwrap();
-        let all: Vec<(crate::testing::InMemoryAllPos, PersistedEnvelope)> = catchup
+        let all: Vec<(crate::test_support::TestAllPos, PersistedEnvelope)> = catchup
             .read_after(None)
             .await
             .unwrap()

@@ -8,7 +8,8 @@ publish = false
 bytes.workspace = true
 futures.workspace = true
 nexus = { path = "../../crates/nexus", features = ["derive"] }
-nexus-store = { path = "../../crates/nexus-store", features = ["projection", "testing"] }
+nexus-inmemory = { path = "../../crates/nexus-inmemory" }
+nexus-store = { path = "../../crates/nexus-store", features = ["projection", "subscription"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }

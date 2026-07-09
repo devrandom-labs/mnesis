@@ -1,4 +1,4 @@
-#![cfg(all(feature = "snapshot", feature = "json", feature = "testing"))]
+#![cfg(all(feature = "snapshot", feature = "json"))]
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -25,11 +25,9 @@ fn sv2() -> NonZeroU32 {
 }
 
 use nexus::*;
+use nexus_inmemory::{InMemorySnapshotStore, InMemoryStore};
 use nexus_store::Store;
-use nexus_store::state::{
-    AfterEventTypes, EveryNEvents, Hydrated, InMemorySnapshotStore, PersistTrigger, SnapshotStore,
-};
-use nexus_store::testing::InMemoryStore;
+use nexus_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 use nexus_store::{Repository, Snapshotting};
 
 // ── Test domain ────────────────────────────────────────────────────

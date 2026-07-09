@@ -1,4 +1,4 @@
-#![cfg(all(feature = "testing", feature = "json"))]
+#![cfg(feature = "json")]
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
@@ -8,8 +8,8 @@ use std::time::Duration;
 
 use futures::{Stream, StreamExt};
 use nexus::{DomainEvent, Message, Version};
+use nexus_inmemory::InMemoryStore;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 use nexus_store::{
     DecodeStreamError, Decoded, DecodedStreamExt, Encode, JsonCodec, Step, StepStreamExt, Store,
     StreamKey, Subscription, pending_envelope,

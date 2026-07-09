@@ -33,11 +33,11 @@ use std::convert::Infallible;
 
 use futures::StreamExt;
 use nexus::Version;
+use nexus_inmemory::InMemoryStore;
 use nexus_store::StreamKey;
 use nexus_store::envelope::PendingEnvelope;
 use nexus_store::pending_envelope;
 use nexus_store::store::RawEventStore;
-use nexus_store::testing::InMemoryStore;
 
 use proptest::prelude::*;
 
