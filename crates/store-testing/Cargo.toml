@@ -6,17 +6,28 @@ rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Reusable trait conformance suites for nexus-store adapters"
+description = "Executable conformance kit for nexus-store adapters — the store contract as a runnable test suite"
 readme = "../../README.md"
 keywords = ["event-sourcing", "testing", "conformance"]
 categories = ["data-structures", "development-tools::testing"]
 
+[features]
+snapshot = ["nexus-store/snapshot"]
+atomic-append = ["nexus-store/import"]
+
 [dependencies]
+bytes = { workspace = true }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
 nexus = { version = "0.1.0", path = "../nexus" }
-nexus-store = { version = "0.1.0", path = "../store" }
-tokio = { workspace = true, features = ["macros", "rt"] }
+nexus-store = { version = "0.1.0", path = "../store", features = ["subscription"] }
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }
 workspace-hack = { version = "0.1", path = "../workspace-hack" }
+
+[dev-dependencies]
+# Path-only (no version) — stripped at publish; unifies kit features for the
+# self-check test target (flake nextest runs default features only).
+nexus-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
+nexus-store-testing = { path = ".", features = ["snapshot", "atomic-append"] }
 
 [lints]
 workspace = true

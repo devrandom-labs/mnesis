@@ -1492,9 +1492,12 @@ dependencies = [
 name = "nexus-store-testing"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "futures",
  "nexus",
+ "nexus-inmemory",
  "nexus-store",
+ "nexus-store-testing",
  "tokio",
  "workspace-hack",
 ]

@@ -76,38 +76,9 @@ use nexus_store::StreamKey;
 use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
 use nexus_store::store::RawEventStore;
 
-/// One row of test data fed into an adapter for the conformance suite to
-/// observe back out.
-///
-/// All fields must round-trip byte-for-byte through the adapter — the
-/// suite asserts each independently.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConformanceRow {
-    pub version: u64,
-    pub event_type: String,
-    pub schema_version: u32,
-    pub payload: Vec<u8>,
-}
+pub mod row;
 
-impl ConformanceRow {
-    /// Convenience constructor with `schema_version = 1`.
-    #[must_use]
-    pub fn new(version: u64, event_type: &str, payload: Vec<u8>) -> Self {
-        Self {
-            version,
-            event_type: event_type.to_owned(),
-            schema_version: 1,
-            payload,
-        }
-    }
-
-    /// Set the schema version (defaults to 1).
-    #[must_use]
-    pub fn with_schema_version(mut self, schema_version: u32) -> Self {
-        self.schema_version = schema_version;
-        self
-    }
-}
+pub use row::{ConformanceRow, SubId};
 
 /// Drain `stream` into an owned `Vec` so the borrow on each envelope ends
 /// before the next iteration starts.
@@ -123,6 +94,7 @@ where
             event_type: env.event_type().to_owned(),
             schema_version: env.schema_version(),
             payload: env.payload().to_vec(),
+            metadata: env.metadata().map(<[u8]>::to_vec),
         });
     }
     Ok(out)
