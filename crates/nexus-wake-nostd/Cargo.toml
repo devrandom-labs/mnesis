@@ -22,4 +22,9 @@ nexus-store = { version = "0.1.0", path = "../nexus-store", default-features = f
 workspace = true
 
 [dev-dependencies]
+embassy-executor = { workspace = true }
+futures = { workspace = true, features = ["std", "executor", "async-await"] }
+nexus = { path = "../nexus" }
+nexus-inmemory = { path = "../nexus-inmemory" }
+nexus-store = { path = "../nexus-store", features = ["std", "subscription"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time", "sync"] }
