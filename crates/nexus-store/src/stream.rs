@@ -42,13 +42,13 @@ pub trait EventStream:
     futures_core::Stream<Item = Result<PersistedEnvelope, <Self as EventStream>::Error>> + Send
 {
     /// The error type yielded by the stream's `Result` items.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 }
 
 impl<S, E> EventStream for S
 where
     S: futures_core::Stream<Item = Result<PersistedEnvelope, E>> + Send,
-    E: std::error::Error + Send + Sync + 'static,
+    E: core::error::Error + Send + Sync + 'static,
 {
     type Error = E;
 }

@@ -6,6 +6,7 @@
 //! followed by block arrays `[crc32c, body]`. See
 //! `docs/plans/2026-06-21-export-import-cbor-box-design.md`.
 
+use alloc::vec::Vec;
 use core::convert::Infallible;
 use core::ops::Range;
 

@@ -59,7 +59,7 @@ pub trait StreamLister: RawEventStore {
     /// guaranteed order, terminating when exhausted.
     fn list_streams(
         &self,
-    ) -> impl std::future::Future<Output = Result<Self::StreamList, Self::Error>> + Send;
+    ) -> impl core::future::Future<Output = Result<Self::StreamList, Self::Error>> + Send;
 }
 
 /// Export a single stream's events — a raw pass-through read.
@@ -93,7 +93,7 @@ pub trait EventExporter: RawEventStore {
         &self,
         id: &StreamKey,
         from: Version,
-    ) -> impl std::future::Future<Output = Result<Self::ExportStream, Self::Error>> + Send;
+    ) -> impl core::future::Future<Output = Result<Self::ExportStream, Self::Error>> + Send;
 }
 
 /// Every [`RawEventStore`] is an [`EventExporter`] — export is just a read.
@@ -109,7 +109,7 @@ impl<S: RawEventStore> EventExporter for S {
         &self,
         id: &StreamKey,
         from: Version,
-    ) -> impl std::future::Future<Output = Result<Self::ExportStream, Self::Error>> + Send {
+    ) -> impl core::future::Future<Output = Result<Self::ExportStream, Self::Error>> + Send {
         self.read_stream(id, from)
     }
 }

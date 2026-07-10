@@ -26,7 +26,7 @@
 //! assembled here from [`StreamCatchup`] / [`AllCatchup`] + the internal
 //! `live_stepped` loop, one monomorphized state machine per call site.
 
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use futures::StreamExt;
 use nexus::{Id, Version};
@@ -47,7 +47,7 @@ use crate::wake::WakeSource;
 /// # Example
 ///
 /// ```ignore
-/// use std::pin::pin;
+/// use core::pin::pin;
 /// use futures::StreamExt;
 /// use nexus_store::{Step, StepStreamExt, Store, Subscription};
 ///

@@ -1,4 +1,4 @@
-use std::ops::Range;
+use core::ops::Range;
 
 use bytes::Bytes;
 use nexus::{DomainEvent, Version};
@@ -37,7 +37,7 @@ pub enum EnvelopeError {
         start: u32,
         end: u32,
         #[source]
-        source: std::str::Utf8Error,
+        source: core::str::Utf8Error,
     },
 
     /// The `event_type` range length exceeds the wire-format cap.
@@ -397,7 +397,7 @@ impl PersistedEnvelope {
         // UTF-8 validation of event_type once at construction.
         let et_start = idx(event_type_range.start);
         let et_end = idx(event_type_range.end);
-        std::str::from_utf8(&value[et_start..et_end]).map_err(|e| EnvelopeError::InvalidUtf8 {
+        core::str::from_utf8(&value[et_start..et_end]).map_err(|e| EnvelopeError::InvalidUtf8 {
             start: event_type_range.start,
             end: event_type_range.end,
             source: e,
@@ -443,7 +443,7 @@ impl PersistedEnvelope {
             reason = "UTF-8 invariant established at construction; ranges validated"
         )]
         unsafe {
-            std::str::from_utf8_unchecked(&self.value[start..end])
+            core::str::from_utf8_unchecked(&self.value[start..end])
         }
     }
 
@@ -489,7 +489,7 @@ impl PersistedEnvelope {
     pub fn event_type_value(&self) -> EventType {
         // SAFETY: `from_validated_bytes` requires (1) valid UTF-8 and
         // (2) `bytes.len() <= MAX_EVENT_TYPE_LEN`. Both invariants are
-        // established by `try_new`: UTF-8 via `std::str::from_utf8`, and
+        // established by `try_new`: UTF-8 via `core::str::from_utf8`, and
         // the cap via the `EventTypeRangeTooLong` check on the range
         // length.
         #[allow(

@@ -135,6 +135,8 @@
           # uses `#[nexus::aggregate]` + `#[derive(DomainEvent)]`, so the macro
           # OUTPUT — not just its source — is compiled for the target. A macro
           # emitting a `std::` path fails the thumbv7em build here.
+          # `nexus-store-nostd` (#301) is the store-crate sibling gate — see its
+          # own comment below for what host vs thumbv7em each catch there.
           nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
             pname = "nexus-wasm";
@@ -150,6 +152,26 @@
             buildPhaseCargoCommand = ''
               cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
               cargo build -p nexus-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
+            '';
+          });
+
+          # nexus-store no_std gate (#301). The host build is the in-crate std-leak
+          # detector (with #![no_std] active a `std::` path fails to resolve even
+          # though the host ships std); thumbv7em is the STRONG dep-level gate — an
+          # rlib build links no allocator, so the alloc-dependent store builds
+          # bare-metal even though a *binary* would need a #[global_allocator].
+          # The features variant keeps the dep-free surface (subscription/export/
+          # import/snapshot/projection) no_std-clean; optional codec features
+          # (json/rkyv/cbor) are deliberately NOT gated — they cannot build no_std
+          # today (serde_json/rkyv/crc32c pull std).
+          nexus-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
+            inherit cargoArtifacts;
+            pname = "nexus-store-nostd";
+            buildPhaseCargoCommand = ''
+              cargo build -p nexus-store --no-default-features
+              cargo build -p nexus-store --target wasm32-unknown-unknown --no-default-features
+              cargo build -p nexus-store --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p nexus-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection
             '';
           });
         };

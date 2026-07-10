@@ -10,7 +10,7 @@
 //! `Bytes::from_static` path makes literal event-type names
 //! allocation-free, matching the previous `&'static str` ergonomics.
 
-use std::num::NonZeroU32;
+use core::num::NonZeroU32;
 
 use bytes::Bytes;
 use thiserror::Error;
@@ -47,7 +47,7 @@ pub enum ValueError {
     EventTypeInvalidUtf8 {
         valid_up_to: usize,
         #[source]
-        source: std::str::Utf8Error,
+        source: core::str::Utf8Error,
     },
     #[error("payload length {actual} exceeds maximum {MAX_PAYLOAD_LEN}")]
     PayloadTooLong { actual: usize },
@@ -108,7 +108,7 @@ impl EventType {
                 actual: bytes.len(),
             });
         }
-        std::str::from_utf8(&bytes).map_err(|e| ValueError::EventTypeInvalidUtf8 {
+        core::str::from_utf8(&bytes).map_err(|e| ValueError::EventTypeInvalidUtf8 {
             valid_up_to: e.valid_up_to(),
             source: e,
         })?;
@@ -135,7 +135,7 @@ impl EventType {
             "from_validated_bytes invariant: length ≤ MAX_EVENT_TYPE_LEN"
         );
         debug_assert!(
-            std::str::from_utf8(&bytes).is_ok(),
+            core::str::from_utf8(&bytes).is_ok(),
             "from_validated_bytes invariant: valid UTF-8"
         );
         Self { inner: bytes }
@@ -151,7 +151,7 @@ impl EventType {
             reason = "UTF-8 invariant established by every constructor"
         )]
         unsafe {
-            std::str::from_utf8_unchecked(&self.inner)
+            core::str::from_utf8_unchecked(&self.inner)
         }
     }
 

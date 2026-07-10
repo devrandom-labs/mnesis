@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use nexus::Version;
 
@@ -114,7 +114,7 @@ impl<S> Clone for Store<S> {
 /// calls this trait after encoding events into `PendingEnvelope`.
 pub trait RawEventStore: Send + Sync {
     /// The error type for store operations.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 
     /// The stream type for reading events.
     ///
@@ -191,7 +191,7 @@ pub trait RawEventStore: Send + Sync {
         id: &StreamKey,
         expected_version: Option<Version>,
         envelopes: &[PendingEnvelope],
-    ) -> impl std::future::Future<Output = Result<(), AppendError<Self::Error>>> + Send;
+    ) -> impl core::future::Future<Output = Result<(), AppendError<Self::Error>>> + Send;
 
     /// Open a stream of events.
     ///
@@ -219,7 +219,7 @@ pub trait RawEventStore: Send + Sync {
         &self,
         id: &StreamKey,
         from: Version,
-    ) -> impl std::future::Future<Output = Result<Self::Stream, Self::Error>> + Send;
+    ) -> impl core::future::Future<Output = Result<Self::Stream, Self::Error>> + Send;
 
     /// Open a one-shot read over **all** streams, ordered by
     /// [`AllPosition`](Self::AllPosition).
@@ -252,7 +252,7 @@ pub trait RawEventStore: Send + Sync {
     fn read_all(
         &self,
         from: Option<Self::AllPosition>,
-    ) -> impl std::future::Future<Output = Result<Self::AllStream, Self::Error>> + Send;
+    ) -> impl core::future::Future<Output = Result<Self::AllStream, Self::Error>> + Send;
 
     /// Wrap this backend in a shared [`Store`] handle.
     ///

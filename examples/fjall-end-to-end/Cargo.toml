@@ -5,8 +5,8 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-bytes.workspace = true
-futures.workspace = true
+bytes = { workspace = true, features = ["std"] }
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
 nexus = { path = "../../crates/nexus", features = ["derive"] }
 # json    → built-in JsonCodec + the `.json()` builder convenience
 # cbor    → the CBOR backup box (implies import + export)
