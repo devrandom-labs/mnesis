@@ -14,10 +14,12 @@ publish = false
 [dependencies]
 aligned-vec = { version = "0.6", default-features = false, features = ["std"] }
 bytes = { version = "1" }
+concurrent-queue = { version = "2", default-features = false, features = ["std"] }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
 digest = { version = "0.10", features = ["mac", "std"] }
 either = { version = "1", features = ["serde", "use_std"] }
+event-listener = { version = "5" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-io = { version = "0.3" }
@@ -44,10 +46,12 @@ zerocopy = { version = "0.8", default-features = false, features = ["derive", "s
 [build-dependencies]
 aligned-vec = { version = "0.6", default-features = false, features = ["std"] }
 bytes = { version = "1" }
+concurrent-queue = { version = "2", default-features = false, features = ["std"] }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
 digest = { version = "0.10", features = ["mac", "std"] }
 either = { version = "1", features = ["serde", "use_std"] }
+event-listener = { version = "5" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-io = { version = "0.3" }

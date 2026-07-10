@@ -137,12 +137,16 @@
           # emitting a `std::` path fails the thumbv7em build here.
           # `nexus-store-nostd` (#301) is the store-crate sibling gate — see its
           # own comment below for what host vs thumbv7em each catch there.
+          # `nexus-wake-nostd` (#302) also builds on both targets: the no_std
+          # WakeSource bridge, proving event-listener + the wake traits are
+          # core+alloc clean.
           nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
             pname = "nexus-wasm";
             buildPhaseCargoCommand = ''
               cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
               cargo build -p nexus-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
+              cargo build -p nexus-wake-nostd --target wasm32-unknown-unknown
             '';
           });
 
@@ -152,6 +156,7 @@
             buildPhaseCargoCommand = ''
               cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
               cargo build -p nexus-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
+              cargo build -p nexus-wake-nostd --target thumbv7em-none-eabihf
             '';
           });
 
