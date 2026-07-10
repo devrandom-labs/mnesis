@@ -8,6 +8,7 @@
 
 use nexus_inmemory::InMemoryStore;
 use nexus_store_testing::boundary;
+use nexus_store_testing::linearizability;
 use nexus_store_testing::sequence;
 
 #[allow(
@@ -58,4 +59,12 @@ async fn boundary_checks() {
     boundary::check_metadata_absent_vs_present_distinct(&factory).await;
     boundary::check_max_length_event_type_round_trips(&factory).await;
     boundary::check_prefix_stream_ids_isolated(&factory).await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn linearizability_checks() {
+    linearizability::check_concurrent_same_stream_single_winner(&factory).await;
+    linearizability::check_concurrent_distinct_streams_all_land(&factory).await;
+    linearizability::check_wake_after_idle(&factory).await;
+    linearizability::check_caught_up_boundary_race(&factory).await;
 }
