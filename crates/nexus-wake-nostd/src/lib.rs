@@ -160,7 +160,13 @@ impl WakeRegistration for GlobalWakeReg {
         async move {
             // Registered into the notify list at creation — BEFORE the
             // generation re-check — so a wake after the re-check is
-            // delivered to this listener, never lost.
+            // delivered to this listener, never lost. For the inverse race
+            // (a `notify` completing before `listen()` finished
+            // registering, so the listener misses it), the re-check below
+            // is what catches the wake: `wake` bumps the generation with
+            // `Release` BEFORE calling `notify`, whose `SeqCst` fence
+            // orders that store ahead of this load — so a notify this
+            // listener missed implies a generation bump this load sees.
             let listener = inner.event.listen();
             if inner.generation.load(Ordering::Acquire) != seen {
                 return;
