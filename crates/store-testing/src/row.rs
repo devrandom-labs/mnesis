@@ -2,7 +2,6 @@
 //! conformance module.
 
 use core::fmt;
-use std::num::NonZeroU32;
 
 use bytes::Bytes;
 use futures::StreamExt;
@@ -91,9 +90,9 @@ pub fn envelope_for(row: &ConformanceRow) -> PendingEnvelope {
         .event_type_bytes(Bytes::from(row.event_type.clone().into_bytes()))
         .expect("valid event type")
         .payload(row.payload.clone())
-        .schema_version(SchemaVersion::new(
-            NonZeroU32::new(row.schema_version).expect("schema_version must be >= 1"),
-        ));
+        .schema_version(
+            SchemaVersion::from_u32(row.schema_version).expect("schema_version must be >= 1"),
+        );
     if let Some(m) = &row.metadata {
         staged = staged.metadata(m.clone());
     }

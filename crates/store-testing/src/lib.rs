@@ -77,6 +77,7 @@ use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
 use nexus_store::store::RawEventStore;
 
 pub mod row;
+pub mod sequence;
 
 pub use row::{ConformanceRow, SubId};
 
