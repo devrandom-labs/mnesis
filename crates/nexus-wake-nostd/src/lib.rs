@@ -32,13 +32,15 @@
 //!
 //! # Lost-wakeup discipline
 //!
-//! [`arm`](WakeRegistration::arm) captures a seen-generation synchronously,
-//! then the returned future (1) creates a listener — registered into the
-//! notify list AT CREATION, before any check — (2) re-checks the
+//! [`arm`](WakeRegistration::arm) captures a seen-generation synchronously
+//! at the call — that capture is the generation only, NOT a listener. The
+//! listener is created when the returned future is FIRST POLLED: at that
+//! point the future (1) calls `listen()`, which registers the listener
+//! into the notify list immediately — before any check — (2) re-checks the
 //! generation, returning if it moved, and (3) otherwise awaits the
 //! listener. A wake between `arm` and the first poll bumps the generation
-//! (caught by 2); a wake after is delivered to the already-registered
-//! listener (caught by 3). No wake after `arm` is ever lost.
+//! (caught by 2); a wake after the listener is registered is delivered to
+//! it (caught by 3). No wake after `arm` is ever lost.
 //!
 //! [`wake`]: WakeSource::wake
 
@@ -158,9 +160,10 @@ impl WakeRegistration for GlobalWakeReg {
         // is caught by the re-check below.
         let seen = inner.generation.load(Ordering::Acquire);
         async move {
-            // Registered into the notify list at creation — BEFORE the
-            // generation re-check — so a wake after the re-check is
-            // delivered to this listener, never lost. For the inverse race
+            // On first poll, `listen()` registers this listener into the
+            // notify list immediately — BEFORE the generation re-check
+            // below — so a wake after the re-check is delivered to this
+            // listener, never lost. For the inverse race
             // (a `notify` completing before `listen()` finished
             // registering, so the listener misses it), the re-check below
             // is what catches the wake: `wake` bumps the generation with

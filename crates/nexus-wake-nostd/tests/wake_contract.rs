@@ -6,6 +6,9 @@
 #![allow(clippy::unwrap_used, reason = "test code")]
 #![allow(clippy::expect_used, reason = "test code")]
 
+use core::task::Poll;
+use std::future::poll_fn;
+use std::pin::pin;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -119,13 +122,30 @@ async fn all_registration_targets_are_equivalent() {
     let reg_empty = wake.register(Some(b"")).unwrap();
     let reg_named = wake.register(Some(b"some-stream")).unwrap();
 
-    let waits = [reg_all.arm(), reg_empty.arm(), reg_named.arm()];
-    wake.wake(b"a-completely-different-stream");
-    for wait in waits {
-        timeout(MUST_WAKE, wait)
-            .await
-            .expect("every registration target must wake on any stream's wake");
+    let mut wait_all = pin!(reg_all.arm());
+    let mut wait_empty = pin!(reg_empty.arm());
+    let mut wait_named = pin!(reg_named.arm());
+    // Park all three on the Event listener list BEFORE the wake, so this
+    // exercises notify's multi-listener fan-out (a notify(1) regression
+    // would leave two of them parked and fail the timeouts below).
+    for parked in [
+        poll_fn(|cx| Poll::Ready(wait_all.as_mut().poll(cx))).await,
+        poll_fn(|cx| Poll::Ready(wait_empty.as_mut().poll(cx))).await,
+        poll_fn(|cx| Poll::Ready(wait_named.as_mut().poll(cx))).await,
+    ] {
+        assert!(parked.is_pending(), "every wait must park before the wake");
     }
+
+    wake.wake(b"a-completely-different-stream");
+    timeout(MUST_WAKE, wait_all)
+        .await
+        .expect("$all registration must wake on any stream's wake");
+    timeout(MUST_WAKE, wait_empty)
+        .await
+        .expect("empty-key registration must wake on any stream's wake");
+    timeout(MUST_WAKE, wait_named)
+        .await
+        .expect("named-key registration must wake on any stream's wake");
 }
 
 /// A wake BEFORE `arm` must not satisfy the arm on its own (the seen
@@ -167,15 +187,32 @@ async fn trait_surface_wake_rouses_stream_and_all() {
 
 // ───────────────── Category 4: linearizability / isolation ─────────────────
 
-/// Ported from nexus-wake: a registration armed before a concurrent wake
-/// must never miss it. Repeated to shake out scheduling races.
+/// Ported from nexus-wake: a registration armed AND PARKED (polled to
+/// Pending, so its Event listener is registered) before a concurrent wake
+/// must never miss it — this races the notify-delivery path itself, not
+/// just the first-poll generation re-check. Repeated to shake out
+/// scheduling races.
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn armed_wait_never_loses_a_concurrent_wake() {
     for _ in 0..50 {
         let wake = GlobalWake::new();
         let reg = wake.register(Some(b"k")).unwrap();
-        let wait = reg.arm(); // armed BEFORE the race
         let start = Arc::new(Barrier::new(2));
+
+        let start_sub = Arc::clone(&start);
+        let sub = tokio::spawn(async move {
+            let mut wait = pin!(reg.arm());
+            // Poll once so the future parks on the Event listener BEFORE the
+            // producer is released — from here on, only a delivered notify (or
+            // an already-bumped generation) can resolve it.
+            let first = poll_fn(|cx| Poll::Ready(wait.as_mut().poll(cx))).await;
+            assert!(
+                first.is_pending(),
+                "wait must park on the listener before the race"
+            );
+            start_sub.wait().await; // signal: parked and registered
+            wait.await;
+        });
 
         let start_prod = Arc::clone(&start);
         let waker = wake.clone();
@@ -184,10 +221,10 @@ async fn armed_wait_never_loses_a_concurrent_wake() {
             waker.wake(b"k");
         });
 
-        start.wait().await;
-        timeout(MUST_WAKE, wait)
+        timeout(MUST_WAKE, sub)
             .await
-            .expect("an armed wait must not lose a concurrent wake");
+            .expect("an armed, parked wait must not lose a concurrent wake")
+            .expect("subscriber task must not panic");
         prod.await.unwrap();
     }
 }
