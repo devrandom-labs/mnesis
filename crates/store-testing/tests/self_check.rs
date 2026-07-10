@@ -30,3 +30,21 @@ async fn sequence_part1() {
     sequence::check_append_conflict_is_surfaced(&factory).await;
     sequence::check_append_retry_after_conflict_succeeds(&factory).await;
 }
+
+#[tokio::test]
+async fn sequence_all_reads() {
+    sequence::check_all_empty_store_yields_none(&factory).await;
+    sequence::check_all_global_order_across_streams(&factory).await;
+    sequence::check_all_from_is_exclusive(&factory).await;
+    sequence::check_all_multi_resume_cycles(&factory).await;
+    sequence::check_all_boundary_then_new_append(&factory).await;
+    sequence::check_read_stream_inclusive_read_all_exclusive_coexist(&factory).await;
+}
+
+#[tokio::test]
+async fn sequence_subscription() {
+    sequence::check_subscription_backlog_then_caught_up_then_live(&factory).await;
+    sequence::check_subscription_resume_strict_after(&factory).await;
+    sequence::check_subscription_all_backlog_then_caught_up_then_live(&factory).await;
+    sequence::check_subscription_large_backlog_crosses_chunk_seam(&factory).await;
+}

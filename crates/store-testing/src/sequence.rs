@@ -3,20 +3,24 @@
 //! resume, and the subscription catch-up→live protocol.
 
 use core::future::Future;
+use core::time::Duration;
 
 use futures::StreamExt;
 use futures::pin_mut;
 use nexus::Version;
 use nexus_store::store::RawEventStore;
 use nexus_store::wake::WakeSource;
-use nexus_store::{AppendError, StreamKey};
+use nexus_store::{AppendError, Step, StreamKey, Subscription};
+use tokio::time::timeout;
 
-use crate::row::{ConformanceRow, append_rows, drain_stream, envelope_for};
+use crate::row::{
+    ConformanceRow, SubId, append_event, append_rows, assert_strictly_increasing, drain_all,
+    drain_stream, envelope_for,
+};
 
-// Task 3 extends this import block with: core::time::Duration,
-// tokio::time::timeout, nexus_store::{Step, Subscription}, and
-// crate::row::{SubId, append_event, assert_strictly_increasing, drain_all} —
-// unused imports are DENIED, so add them only when their checks land.
+/// Upper bound on any single subscription wait — a hang here means a lost
+/// wake, which is exactly what the check exists to catch.
+const WAIT: Duration = Duration::from_secs(10);
 
 /// A fresh, empty stream reads back empty (absent stream = empty, not error).
 pub async fn check_empty_read_yields_none<S, C, F, Fut>(factory: &F)
@@ -231,4 +235,410 @@ where
     let got = drain_stream(&store, &id, Version::INITIAL).await;
     let versions: Vec<u64> = got.iter().map(|r| r.version).collect();
     assert_eq!(versions, vec![1, 2], "retry lands exactly one new event");
+}
+
+/// Empty store: `read_all(None)` yields nothing.
+pub async fn check_all_empty_store_yields_none<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let got = drain_all(&store, None).await;
+    assert!(
+        got.is_empty(),
+        "empty store: read_all(None) must yield nothing"
+    );
+}
+
+/// `read_all(None)` yields every event across streams in append (position)
+/// order, positions strictly increasing.
+pub async fn check_all_global_order_across_streams<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    append_event(&store, &a, 1, b"a1").await;
+    append_event(&store, &a, 2, b"a2").await;
+    append_event(&store, &b, 1, b"b1").await;
+    append_event(&store, &a, 3, b"a3").await;
+    append_event(&store, &a, 4, b"a4").await;
+
+    let got = drain_all(&store, None).await;
+    let payloads: Vec<Vec<u8>> = got.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![
+            b"a1".to_vec(),
+            b"a2".to_vec(),
+            b"b1".to_vec(),
+            b"a3".to_vec(),
+            b"a4".to_vec()
+        ],
+        "read_all(None) must yield every event across streams in append order",
+    );
+    assert_strictly_increasing(&got);
+}
+
+/// `read_all(Some(p))` is EXCLUSIVE: strictly after `p`.
+pub async fn check_all_from_is_exclusive<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    append_event(&store, &a, 1, b"a1").await;
+    append_event(&store, &a, 2, b"a2").await;
+    append_event(&store, &a, 3, b"a3").await;
+
+    let full = drain_all(&store, None).await;
+    assert_eq!(full.len(), 3);
+    let checkpoint = full[0].0;
+
+    let rest = drain_all(&store, Some(checkpoint)).await;
+    let payloads: Vec<Vec<u8>> = rest.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![b"a2".to_vec(), b"a3".to_vec()],
+        "read_all(Some(p)) is EXCLUSIVE",
+    );
+    assert!(
+        rest[0].0 > checkpoint,
+        "resumed position must be strictly after checkpoint"
+    );
+}
+
+/// Multi-resume cycles reconstruct the single-shot read exactly — no gap,
+/// duplicate, or skip across the seams.
+pub async fn check_all_multi_resume_cycles<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    let mut va = 0u64;
+    let mut vb = 0u64;
+    let mut expected: Vec<Vec<u8>> = Vec::new();
+    for i in 0..10u64 {
+        if i % 2 == 0 {
+            va += 1;
+            let p = format!("a{va}").into_bytes();
+            append_event(&store, &a, va, &p).await;
+            expected.push(p);
+        } else {
+            vb += 1;
+            let p = format!("b{vb}").into_bytes();
+            append_event(&store, &b, vb, &p).await;
+            expected.push(p);
+        }
+    }
+
+    let full = drain_all(&store, None).await;
+    let full_payloads: Vec<Vec<u8>> = full.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        full_payloads, expected,
+        "single-shot read_all(None) must match append order"
+    );
+
+    let mut acc: Vec<(S::AllPosition, Vec<u8>)> = Vec::new();
+    let mut checkpoint: Option<S::AllPosition> = None;
+    loop {
+        let stream = store
+            .read_all(checkpoint)
+            .await
+            .unwrap_or_else(|e| panic!("open read_all cycle failed: {e:?}"));
+        pin_mut!(stream);
+        let mut taken = 0;
+        let mut advanced = false;
+        while let Some(item) = stream.next().await {
+            let (pos, env) = item.unwrap_or_else(|e| panic!("cycle item errored: {e:?}"));
+            acc.push((pos, env.payload().to_vec()));
+            checkpoint = Some(pos);
+            advanced = true;
+            taken += 1;
+            if taken == 3 {
+                break;
+            }
+        }
+        if !advanced {
+            break;
+        }
+    }
+
+    let acc_payloads: Vec<Vec<u8>> = acc.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        acc_payloads, full_payloads,
+        "multi-resume cycles must reconstruct the full stream exactly",
+    );
+    assert_strictly_increasing(&acc);
+}
+
+/// `read_all(Some(last))` is empty at the boundary; a later append surfaces
+/// exactly the new event from the same checkpoint.
+pub async fn check_all_boundary_then_new_append<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    append_event(&store, &a, 1, b"a1").await;
+    append_event(&store, &b, 1, b"b1").await;
+
+    let full = drain_all(&store, None).await;
+    assert_eq!(full.len(), 2);
+    let last = full.last().expect("non-empty").0;
+
+    let empty = drain_all(&store, Some(last)).await;
+    assert!(
+        empty.is_empty(),
+        "nothing is strictly after the last position"
+    );
+
+    append_event(&store, &a, 2, b"a2").await;
+    let after = drain_all(&store, Some(last)).await;
+    let payloads: Vec<Vec<u8>> = after.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![b"a2".to_vec()],
+        "same checkpoint surfaces exactly the new event"
+    );
+    assert!(
+        after[0].0 > last,
+        "new position must be strictly after the prior last"
+    );
+}
+
+/// Inclusive `read_stream` and exclusive `read_all` coexist on one store —
+/// the intentional asymmetry (CLAUDE rule 4).
+pub async fn check_read_stream_inclusive_read_all_exclusive_coexist<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    append_event(&store, &a, 1, b"a1").await;
+    append_event(&store, &a, 2, b"a2").await;
+    append_event(&store, &a, 3, b"a3").await;
+
+    let got = drain_stream(&store, &a, Version::new(2).expect("v2")).await;
+    let versions: Vec<u64> = got.iter().map(|r| r.version).collect();
+    assert_eq!(versions, vec![2, 3], "read_stream(from=2) is INCLUSIVE");
+
+    let full = drain_all(&store, None).await;
+    assert_eq!(full.len(), 3);
+    let pos_of_a2 = full[1].0;
+    let after = drain_all(&store, Some(pos_of_a2)).await;
+    let payloads: Vec<Vec<u8>> = after.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![b"a3".to_vec()],
+        "read_all(from=pos(a2)) is EXCLUSIVE"
+    );
+}
+
+/// Take the next subscription item within `WAIT`, panicking on hang, stream
+/// end, or read error. Returns the `Step`.
+async fn next_step<St, T, E>(stream: &mut core::pin::Pin<&mut St>, what: &str) -> Step<T>
+where
+    St: futures::Stream<Item = Result<Step<T>, E>>,
+    E: core::fmt::Debug,
+{
+    timeout(WAIT, stream.next())
+        .await
+        .unwrap_or_else(|_| panic!("{what}: subscription hung (lost wake?)"))
+        .unwrap_or_else(|| panic!("{what}: subscription ended (must never return None)"))
+        .unwrap_or_else(|e| panic!("{what}: subscription item errored: {e:?}"))
+}
+
+/// Per-stream subscription protocol: backlog in order, then `CaughtUp`
+/// exactly once, then live events.
+pub async fn check_subscription_backlog_then_caught_up_then_live<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("sub-proto");
+    for v in 1..=3u64 {
+        append_event(&store, &id.key(), v, format!("p{v}").as_bytes()).await;
+    }
+
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe(&id, None)
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+
+    for want in 1..=3u64 {
+        match next_step(&mut stream, "backlog").await {
+            Step::Event(env) => assert_eq!(
+                env.version().as_u64(),
+                want,
+                "backlog must replay in version order",
+            ),
+            Step::CaughtUp => panic!("CaughtUp before the backlog drained (at v{want})"),
+        }
+    }
+    match next_step(&mut stream, "boundary").await {
+        Step::CaughtUp => {}
+        Step::Event(env) => panic!(
+            "expected CaughtUp after backlog, got Event v{}",
+            env.version()
+        ),
+    }
+
+    // Live phase: an append after CaughtUp is delivered.
+    append_event(&store, &id.key(), 4, b"p4").await;
+    match next_step(&mut stream, "live").await {
+        Step::Event(env) => assert_eq!(env.version().as_u64(), 4, "live event must be v4"),
+        Step::CaughtUp => panic!("CaughtUp must be emitted exactly once"),
+    }
+}
+
+/// `subscribe(Some(v))` resumes STRICTLY AFTER `v` — no duplicate of the
+/// checkpointed event.
+pub async fn check_subscription_resume_strict_after<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("sub-resume");
+    for v in 1..=5u64 {
+        append_event(&store, &id.key(), v, b"p").await;
+    }
+
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe(&id, Some(Version::new(3).expect("v3")))
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+
+    match next_step(&mut stream, "resume").await {
+        Step::Event(env) => assert_eq!(
+            env.version().as_u64(),
+            4,
+            "resume from Some(3) must deliver v4 first (strict-after, no dup)",
+        ),
+        Step::CaughtUp => panic!("expected v4 before CaughtUp"),
+    }
+}
+
+/// `$all` subscription protocol: cross-stream backlog in position order, then
+/// `CaughtUp` exactly once, then live events with strictly increasing tags.
+pub async fn check_subscription_all_backlog_then_caught_up_then_live<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::AllStream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    append_event(&store, &a, 1, b"a1").await;
+    append_event(&store, &b, 1, b"b1").await;
+    append_event(&store, &a, 2, b"a2").await;
+
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe_all(None)
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+
+    let mut backlog: Vec<(S::AllPosition, Vec<u8>)> = Vec::new();
+    while let Step::Event((pos, env)) = next_step(&mut stream, "all backlog").await {
+        backlog.push((pos, env.payload().to_vec()));
+    }
+    let payloads: Vec<Vec<u8>> = backlog.iter().map(|(_, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![b"a1".to_vec(), b"b1".to_vec(), b"a2".to_vec()],
+        "$all backlog must replay in position order",
+    );
+    assert_strictly_increasing(&backlog);
+    let last = backlog.last().expect("non-empty").0;
+
+    append_event(&store, &b, 2, b"b2").await;
+    match next_step(&mut stream, "all live").await {
+        Step::Event((pos, env)) => {
+            assert_eq!(
+                env.payload(),
+                b"b2",
+                "live $all event must be the new append"
+            );
+            assert!(
+                pos > last,
+                "live position must be strictly after the backlog"
+            );
+        }
+        Step::CaughtUp => panic!("CaughtUp must be emitted exactly once"),
+    }
+}
+
+/// A backlog larger than the catch-up chunk (1024) crosses the internal
+/// rescan seams with no gap or duplicate, and `CaughtUp` still arrives.
+pub async fn check_subscription_large_backlog_crosses_chunk_seam<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    const N: u64 = 2500; // > 2 × CATCHUP_CHUNK (1024)
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("sub-chunk");
+    let rows: Vec<_> = (1..=N)
+        .map(|v| ConformanceRow::new(v, "E", vec![]))
+        .collect();
+    append_rows(&store, &id.key(), &rows).await;
+
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe(&id, None)
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+
+    let mut versions = Vec::with_capacity(usize::try_from(N).unwrap_or(usize::MAX));
+    while let Step::Event(env) = next_step(&mut stream, "chunk backlog").await {
+        versions.push(env.version().as_u64());
+    }
+    let want: Vec<u64> = (1..=N).collect();
+    assert_eq!(
+        versions, want,
+        "backlog across chunk seams must be exactly 1..=N — no gap, no duplicate",
+    );
 }

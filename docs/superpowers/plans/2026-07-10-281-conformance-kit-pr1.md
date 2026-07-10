@@ -2513,4 +2513,9 @@ Record every divergence from this plan here (what, why, impact) as work proceeds
 
 | # | Task | Deviation | Why | Impact |
 |---|------|-----------|-----|--------|
+| 1 | 1 | `nexus-inmemory` dev-dep features are `["export","import"]`, no `snapshot` | inmemory has no `snapshot` feature — `InMemorySnapshotStore` is unconditional | none |
+| 2 | 1 | self-check factory is `async fn` + `#[allow(clippy::unused_async)]`, not the plan's `impl Future` fn | plan's form trips deny-level `clippy::manual_async_fn` | none; shape matches later adapter factories |
+| 3 | 2 | `envelope_for` uses `SchemaVersion::from_u32` (one step) | Task 1 quality review: don't re-derive validation the value type provides | none |
+| 4 | 2 | conflict checks match `AppendError` with a wildcard non-Conflict arm | `AppendError` gained `#[non_exhaustive]` after the plan's facts were pinned (freeze rule: error enums) | none; same panic behavior |
+| 5 | 3 | subscription checks add `S::Stream: Unpin` / `S::AllStream: Unpin` where-bounds not spelled out in the plan snippet | `Subscription::subscribe`/`subscribe_all` require these bounds on the real signature (verified in `crates/store/src/subscription.rs`) — the plan's check signatures omitted them | none; required for compilation, satisfied by `InMemoryStore` |
 ```
