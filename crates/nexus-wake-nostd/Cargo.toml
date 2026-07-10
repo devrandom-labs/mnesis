@@ -23,7 +23,7 @@ workspace = true
 
 [dev-dependencies]
 embassy-executor = { workspace = true }
-futures = { workspace = true, features = ["std", "executor", "async-await"] }
+futures = { workspace = true, features = ["std", "executor"] }
 nexus = { path = "../nexus" }
 nexus-inmemory = { path = "../nexus-inmemory" }
 nexus-store = { path = "../nexus-store", features = ["std", "subscription"] }

@@ -6,10 +6,10 @@
 #![allow(clippy::unwrap_used, reason = "test code")]
 #![allow(clippy::expect_used, reason = "test code")]
 
-use core::task::Poll;
 use std::future::poll_fn;
 use std::pin::pin;
 use std::sync::Arc;
+use std::task::Poll;
 use std::time::Duration;
 
 use nexus_store::wake::{WakeRegistration, WakeSource};
