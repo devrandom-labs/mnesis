@@ -1,0 +1,30 @@
+[package]
+name = "nexus-wake-nostd"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "no_std global-eventcount WakeSource for on-device live-tail subscriptions"
+readme = "../../README.md"
+keywords = ["event-sourcing", "subscription", "wake", "no-std", "embedded"]
+categories = ["embedded", "no-std", "asynchronous", "data-structures"]
+
+# Deliberately NO workspace-hack dependency (hakari final-excludes, see
+# .config/hakari.toml): this crate is built for thumbv7em/wasm32 by the
+# no_std flake gates, and a std workspace-hack edge would break them.
+[dependencies]
+event-listener = { workspace = true }
+nexus-store = { version = "0.1.0", path = "../store", default-features = false, features = ["subscription"] }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+embassy-executor = { workspace = true }
+futures = { workspace = true, features = ["std", "executor"] }
+nexus = { path = "../nexus" }
+nexus-inmemory = { path = "../../adapters/inmemory" }
+nexus-store = { path = "../store", features = ["std", "subscription"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time", "sync"] }

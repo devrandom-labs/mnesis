@@ -169,7 +169,7 @@ The 56 proptest tests above are just one tool. Below is the complete landscape o
 **Where to write it:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   state_machine_tests.rs
 ```
 
@@ -284,7 +284,7 @@ miri:
 **Where to write:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   kani_proofs.rs          ← proof harnesses, gated behind #[cfg(kani)]
 
 crates/nexus/tests/
@@ -373,7 +373,7 @@ async fn append(&self, ...) -> Result<(), Self::Error> { ... }
 **Where to write:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   fuzz_codec.rs           ← fuzz decode() with arbitrary bytes
   fuzz_upcaster.rs        ← fuzz upcaster chains with arbitrary payloads
   fuzz_envelope.rs        ← fuzz PersistedEnvelope construction
@@ -460,7 +460,7 @@ careful:
 **Where to write:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   snapshot_tests.rs
 ```
 
@@ -502,7 +502,7 @@ fn snapshot_store_error_display() {
 **Where to write:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   concurrency_shuttle.rs   ← Shuttle: randomized concurrent append/read
   concurrency_loom.rs      ← Loom: exhaustive check of lock ordering (if applicable)
 ```
@@ -563,7 +563,7 @@ Now any call site passing 0 is a **compile error**, not a runtime panic.
 **Where to write:**
 
 ```
-crates/nexus-fjall/tests/
+adapters/fjall/tests/
   simulation/
     mod.rs              ← DST harness with turmoil or madsim
     crash_recovery.rs   ← kill mid-append, verify stream
@@ -596,7 +596,7 @@ crates/nexus-fjall/tests/
 **Where to write:**
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   determinism_tests.rs
 ```
 
@@ -670,17 +670,17 @@ adapter:
 When an adapter lands:
 
 ```
-crates/nexus-store/tests/
+crates/store/tests/
   conformance/
     mod.rs              ← generic fn test_X<S: RawEventStore>(store: &S)
     raw_store.rs        ← Tier B tests as generic functions
     stream.rs           ← EventStream contract tests
     stress.rs           ← Tier C concurrent + model-based
 
-crates/nexus-fjall/tests/
+adapters/fjall/tests/
   conformance_tests.rs  ← conformance::test_X(FjallStore::new(...))
 
-crates/nexus-store/tests/
+crates/store/tests/
   state_machine_tests.rs  ← proptest-state-machine (Priority 1)
   fuzz_codec.rs            ← Bolero fuzzing (Priority 6)
   snapshot_tests.rs        ← insta snapshots (Priority 8)

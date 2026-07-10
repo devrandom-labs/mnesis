@@ -13,7 +13,7 @@ categories = ["data-structures"]
 
 [dependencies]
 arrayvec = { workspace = true }
-nexus-macros = { version = "0.1.0", path = "../nexus-macros", optional = true }
+nexus-macros = { version = "0.1.0", path = "../macros", optional = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
@@ -23,7 +23,7 @@ criterion = { workspace = true }
 # tests via Cargo feature unification (mirrors nexus-store's pattern). Without
 # this, the gate runs default features only and skips the fixture entirely.
 nexus = { version = "0.1.0", path = ".", features = ["testing", "derive"] }
-nexus-macros = { version = "0.1.0", path = "../nexus-macros" }
+nexus-macros = { version = "0.1.0", path = "../macros" }
 proptest = { workspace = true }
 static_assertions = { workspace = true }
 thiserror = { workspace = true }

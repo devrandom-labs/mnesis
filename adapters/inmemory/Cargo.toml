@@ -1,0 +1,34 @@
+[package]
+name = "nexus-inmemory"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "In-memory event-store adapter for the Nexus event-sourcing framework"
+readme = "../../README.md"
+keywords = ["event-sourcing", "event-store", "in-memory", "testing"]
+categories = ["data-structures", "development-tools::testing"]
+
+[features]
+export = ["nexus-store/export"]
+import = ["nexus-store/import"]
+
+[dependencies]
+bytes = { workspace = true, features = ["std"] }
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
+nexus = { version = "0.1.0", path = "../../crates/nexus" }
+nexus-store = { version = "0.1.0", path = "../../crates/store", features = ["subscription"] }
+nexus-wake = { version = "0.1.0", path = "../../crates/wake" }
+thiserror = { workspace = true, features = ["std"] }
+tokio = { workspace = true, features = ["sync"] }
+workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
+
+[dev-dependencies]
+nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing" }
+proptest = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[lints]
+workspace = true
