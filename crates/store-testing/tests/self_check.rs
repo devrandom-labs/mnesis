@@ -6,10 +6,12 @@
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus_inmemory::InMemoryStore;
+use nexus::Version;
+use nexus_inmemory::{InMemorySnapshotStore, InMemoryStore};
 use nexus_store_testing::boundary;
 use nexus_store_testing::linearizability;
 use nexus_store_testing::sequence;
+use nexus_store_testing::{atomic, lifecycle, snapshot};
 
 #[allow(
     clippy::unused_async,
@@ -67,4 +69,38 @@ async fn linearizability_checks() {
     linearizability::check_concurrent_distinct_streams_all_land(&factory).await;
     linearizability::check_wake_after_idle(&factory).await;
     linearizability::check_caught_up_boundary_race(&factory).await;
+}
+
+// Lifecycle against InMemoryStore is a self-check ONLY: "reopen" hands back
+// the same store (in-memory has nothing to close). It validates the kit's
+// closure plumbing, not real persistence — fjall/postgres prove that part.
+#[allow(
+    clippy::unused_async,
+    reason = "factory/reopen shape must stay async fn to match the lifecycle module's Future bound"
+)]
+#[tokio::test]
+async fn lifecycle_plumbing() {
+    let open = || async { (InMemoryStore::new(), ()) };
+    let reopen = |store: InMemoryStore, (): ()| async move { (store, ()) };
+    lifecycle::check_reopen_preserves_events(&open, &reopen).await;
+    lifecycle::check_reopen_preserves_position_watermark(&open, &reopen).await;
+    lifecycle::check_reopen_conflict_state_intact(&open, &reopen).await;
+    lifecycle::check_reopen_subscription_catches_up(&open, &reopen).await;
+}
+
+#[tokio::test]
+async fn atomic_checks() {
+    atomic::check_atomic_multi_stream_commits_all(&factory).await;
+    atomic::check_atomic_conflict_aborts_all(&factory).await;
+    atomic::check_atomic_empty_batch_is_noop(&factory).await;
+}
+
+#[tokio::test]
+async fn snapshot_checks() {
+    let sfactory = || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) };
+    let p1 = Version::new(5).expect("5 is non-zero");
+    let p2 = Version::new(9).expect("9 is non-zero");
+    snapshot::check_snapshot_absent_then_commit_then_found(&sfactory, p1, p2).await;
+    snapshot::check_snapshot_stale_on_schema_change(&sfactory, p1, p2).await;
+    snapshot::check_snapshot_overwrite_latest_wins(&sfactory, p1, p2).await;
 }

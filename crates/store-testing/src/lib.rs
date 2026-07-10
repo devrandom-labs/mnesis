@@ -77,9 +77,15 @@ use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
 use nexus_store::store::RawEventStore;
 
 pub mod boundary;
+pub mod lifecycle;
 pub mod linearizability;
 pub mod row;
 pub mod sequence;
+
+#[cfg(feature = "atomic-append")]
+pub mod atomic;
+#[cfg(feature = "snapshot")]
+pub mod snapshot;
 
 pub use row::{ConformanceRow, SubId};
 
