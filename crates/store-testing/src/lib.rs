@@ -732,3 +732,207 @@ where
     check_all_chained_none_then_after_last(&make).await;
     check_read_stream_inclusive_read_all_exclusive_coexist(&make).await;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// `conformance!` macro entry points (#281)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// One generated conformance test: skip-guard, factory, check call.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __conformance_case {
+    ($module:ident, $check:ident, $factory:expr, $skip:expr) => {
+        #[tokio::test]
+        async fn $check() {
+            if !($skip)() {
+                return;
+            }
+            $crate::$module::$check(&$factory).await;
+        }
+    };
+    (multi_thread: $module:ident, $check:ident, $factory:expr, $skip:expr) => {
+        #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+        async fn $check() {
+            if !($skip)() {
+                return;
+            }
+            $crate::$module::$check(&$factory).await;
+        }
+    };
+}
+
+/// Run the full core conformance matrix (sequence + boundary +
+/// linearizability) against a store factory.
+///
+/// The factory returns `(store, guard)`: the guard keeps any backing resource
+/// (a temp dir, a pool) alive for the check's duration — use `()` when the
+/// store owns everything.
+///
+/// ```ignore
+/// nexus_store_testing::conformance! {
+///     factory: || async { (InMemoryStore::new(), ()) },
+/// }
+/// ```
+///
+/// Requires `tokio` (with `macros`, `rt-multi-thread`) as a dev-dependency of
+/// the invoking crate.
+#[macro_export]
+macro_rules! conformance {
+    (factory: $factory:expr $(,)?) => {
+        $crate::conformance! { factory: $factory, skip_unless: || true }
+    };
+    (factory: $factory:expr, skip_unless: $skip:expr $(,)?) => {
+        mod conformance_sequence {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            $crate::__conformance_case!(sequence, check_empty_read_yields_none, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_append_then_read_round_trips, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_versions_strictly_monotonic_and_fused, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_large_stream_completes, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_read_stream_from_is_inclusive, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_append_conflict_is_surfaced, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_append_retry_after_conflict_succeeds, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_empty_store_yields_none, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_global_order_across_streams, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_from_is_exclusive, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_multi_resume_cycles, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_boundary_then_new_append, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_read_stream_inclusive_read_all_exclusive_coexist, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_backlog_then_caught_up_then_live, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_resume_strict_after, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_all_backlog_then_caught_up_then_live, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_large_backlog_crosses_chunk_seam, $factory, $skip);
+        }
+
+        mod conformance_boundary {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            $crate::__conformance_case!(boundary, check_conflict_leaves_store_unchanged, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_version_gap_batch_rejected, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_wrong_first_version_rejected, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_metadata_absent_vs_present_distinct, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_max_length_event_type_round_trips, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_prefix_stream_ids_isolated, $factory, $skip);
+        }
+
+        mod conformance_linearizability {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            $crate::__conformance_case!(multi_thread: linearizability, check_concurrent_same_stream_single_winner, $factory, $skip);
+            $crate::__conformance_case!(multi_thread: linearizability, check_concurrent_distinct_streams_all_land, $factory, $skip);
+            $crate::__conformance_case!(multi_thread: linearizability, check_wake_after_idle, $factory, $skip);
+            $crate::__conformance_case!(multi_thread: linearizability, check_caught_up_boundary_race, $factory, $skip);
+        }
+    };
+}
+
+/// Run the `AtomicAppend` capability conformance (feature `atomic-append`).
+#[cfg(feature = "atomic-append")]
+#[macro_export]
+macro_rules! conformance_atomic_append {
+    (factory: $factory:expr $(,)?) => {
+        $crate::conformance_atomic_append! { factory: $factory, skip_unless: || true }
+    };
+    (factory: $factory:expr, skip_unless: $skip:expr $(,)?) => {
+        mod conformance_atomic {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            $crate::__conformance_case!(
+                atomic,
+                check_atomic_multi_stream_commits_all,
+                $factory,
+                $skip
+            );
+            $crate::__conformance_case!(atomic, check_atomic_conflict_aborts_all, $factory, $skip);
+            $crate::__conformance_case!(atomic, check_atomic_empty_batch_is_noop, $factory, $skip);
+        }
+    };
+}
+
+/// Run the `SnapshotStore` capability conformance (feature `snapshot`).
+/// `positions` are two ascending sample positions of the store's `P`.
+#[cfg(feature = "snapshot")]
+#[macro_export]
+macro_rules! conformance_snapshot {
+    (factory: $factory:expr, positions: ($p1:expr, $p2:expr) $(,)?) => {
+        $crate::conformance_snapshot! { factory: $factory, positions: ($p1, $p2), skip_unless: || true }
+    };
+    (factory: $factory:expr, positions: ($p1:expr, $p2:expr), skip_unless: $skip:expr $(,)?) => {
+        mod conformance_snapshot {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            #[tokio::test]
+            async fn check_snapshot_absent_then_commit_then_found() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::snapshot::check_snapshot_absent_then_commit_then_found(&$factory, $p1, $p2)
+                    .await;
+            }
+            #[tokio::test]
+            async fn check_snapshot_stale_on_schema_change() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::snapshot::check_snapshot_stale_on_schema_change(&$factory, $p1, $p2).await;
+            }
+            #[tokio::test]
+            async fn check_snapshot_overwrite_latest_wins() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::snapshot::check_snapshot_overwrite_latest_wins(&$factory, $p1, $p2).await;
+            }
+        }
+    };
+}
+
+/// Run the lifecycle conformance (persistent adapters only): `open` yields a
+/// fresh `(store, ctx)`; `reopen` consumes both and reopens the SAME storage.
+#[macro_export]
+macro_rules! conformance_lifecycle {
+    (open: $open:expr, reopen: $reopen:expr $(,)?) => {
+        $crate::conformance_lifecycle! { open: $open, reopen: $reopen, skip_unless: || true }
+    };
+    (open: $open:expr, reopen: $reopen:expr, skip_unless: $skip:expr $(,)?) => {
+        mod conformance_lifecycle {
+            #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
+            use super::*;
+
+            #[tokio::test]
+            async fn check_reopen_preserves_events() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::lifecycle::check_reopen_preserves_events(&$open, &$reopen).await;
+            }
+            #[tokio::test]
+            async fn check_reopen_preserves_position_watermark() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::lifecycle::check_reopen_preserves_position_watermark(&$open, &$reopen)
+                    .await;
+            }
+            #[tokio::test]
+            async fn check_reopen_conflict_state_intact() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::lifecycle::check_reopen_conflict_state_intact(&$open, &$reopen).await;
+            }
+            #[tokio::test]
+            async fn check_reopen_subscription_catches_up() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::lifecycle::check_reopen_subscription_catches_up(&$open, &$reopen).await;
+            }
+        }
+    };
+}
