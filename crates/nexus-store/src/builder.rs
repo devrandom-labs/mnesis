@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use crate::repository::EventStore;
 use crate::store::{RawEventStore, Store};
@@ -44,7 +44,7 @@ pub struct NoSnapshot;
 pub struct WithSnapshot<SS, T> {
     store: SS,
     trigger: T,
-    schema_version: std::num::NonZeroU32,
+    schema_version: core::num::NonZeroU32,
     snapshot_on_read: bool,
 }
 
@@ -152,7 +152,7 @@ use super::snapshot::Snapshotting;
 #[cfg(feature = "snapshot")]
 use crate::state;
 #[cfg(feature = "snapshot")]
-use std::num::NonZeroU64;
+use core::num::NonZeroU64;
 
 /// Default snapshot interval.
 #[cfg(feature = "snapshot")]
@@ -160,7 +160,7 @@ const DEFAULT_SNAPSHOT_INTERVAL: u64 = 100;
 
 /// Default snapshot schema version.
 #[cfg(feature = "snapshot")]
-const DEFAULT_SCHEMA_VERSION: std::num::NonZeroU32 = std::num::NonZeroU32::MIN;
+const DEFAULT_SCHEMA_VERSION: core::num::NonZeroU32 = core::num::NonZeroU32::MIN;
 
 #[cfg(feature = "snapshot-json")]
 impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
@@ -292,7 +292,7 @@ impl<S, C, A, SS, T> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>> {
 
     /// Set the schema version for snapshot invalidation.
     #[must_use]
-    pub const fn snapshot_schema_version(mut self, version: std::num::NonZeroU32) -> Self {
+    pub const fn snapshot_schema_version(mut self, version: core::num::NonZeroU32) -> Self {
         self.snapshot.schema_version = version;
         self
     }

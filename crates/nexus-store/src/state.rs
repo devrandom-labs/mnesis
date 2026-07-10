@@ -1,5 +1,6 @@
-use std::future::Future;
-use std::num::{NonZeroU32, NonZeroU64};
+use alloc::vec::Vec;
+use core::future::Future;
+use core::num::{NonZeroU32, NonZeroU64};
 
 use nexus::{Id, Version};
 

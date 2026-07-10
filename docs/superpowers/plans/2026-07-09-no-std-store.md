@@ -17,6 +17,9 @@
 
 **Deviation log:** record divergences here as they happen (per project convention for multi-step plans).
 
+- **Task 7 (2026-07-10):** the issue card's premise "a bare `thumbv7em` build would need a `#[global_allocator]`" holds only for binaries — an rlib build links no allocator. Quality review *measured* it: `nexus-store --no-default-features` (and with the dep-free features) builds clean on `thumbv7em-none-eabihf`. The gate therefore includes thumbv7em lines — the strong target the kernel already uses — because wasm32/host ship std and structurally cannot catch a dependency-level std leak. Also confirmed empirically: optional codec features `json`/`rkyv`/`cbor` do NOT build on thumbv7em (serde_json→memchr/std, rkyv→ptr_meta/std, crc32c→std) — accepted per scope decision 3; a follow-up card can flip those deps no-default at the workspace root.
+- **Task 2 (2026-07-10):** the plan's "known consumers" list was incomplete — the mandated sweep found 5 more std consumers of `futures`/`bytes` (`nexus-store-testing` + examples `store-and-kernel`, `store-inmemory`, `projection-tokio`, `fjall-end-to-end`); all got the identical feature restore. Additionally, review caught that `nexus-fjall`'s `futures` line (not listed in the plan, which named only its `bytes`) also needed the restore — it compiled only via workspace-hack/dev-dep feature unification. Lesson recorded: `cargo check --workspace` cannot prove a restore is self-sufficient (features unify across the whole graph, dev-deps included); only a per-crate isolated check or removing the unification source can.
+
 ---
 
 ### Task 1: Branch setup

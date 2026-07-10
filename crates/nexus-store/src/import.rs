@@ -29,6 +29,9 @@
 //! the report, the error) and the [`EventImporter`] trait. The concrete
 //! ingest impl is a later card.
 
+use alloc::vec;
+use alloc::vec::Vec;
+
 use bytes::Bytes;
 use nexus::Version;
 use thiserror::Error;
@@ -265,7 +268,7 @@ pub trait AtomicAppend: RawEventStore {
     fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],
-    ) -> impl std::future::Future<Output = Result<(), AtomicAppendError<Self::Error>>> + Send;
+    ) -> impl core::future::Future<Output = Result<(), AtomicAppendError<Self::Error>>> + Send;
 }
 
 /// `Store<S>` forwards [`AtomicAppend`] to its inner backend (issue #247). With
@@ -308,7 +311,7 @@ pub trait EventImporter: RawEventStore + AtomicAppend {
         sections: &[StreamSection],
         route: R,
         atomicity: Atomicity,
-    ) -> impl std::future::Future<Output = Result<ImportReport, ImportError<Self::Error>>> + Send
+    ) -> impl core::future::Future<Output = Result<ImportReport, ImportError<Self::Error>>> + Send
     where
         R: Fn(&[u8]) -> StreamKey + Send;
 }

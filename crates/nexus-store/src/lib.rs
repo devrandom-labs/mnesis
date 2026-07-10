@@ -83,6 +83,12 @@
 //! (kernel-pure → store-persistence → adapters); the boundary that
 //! didn't matter was inside `nexus-store`.
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
+// The store is alloc-dependent by design (Bytes, Vec, Arc are its working
+// vocabulary) — unlike the pure-core kernel, `alloc` is unconditional.
+extern crate alloc;
+
 pub mod batch;
 pub mod builder;
 #[cfg(feature = "subscription")]

@@ -8,8 +8,8 @@
 //! [`subscription_cursor`](crate::subscription_cursor), which the user-facing
 //! [`Subscription`](crate::Subscription) assembles per call site.
 
+use alloc::sync::Arc;
 use core::future::Future;
-use std::sync::Arc;
 
 use futures::StreamExt;
 use nexus::Version;

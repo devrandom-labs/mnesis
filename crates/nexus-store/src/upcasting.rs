@@ -1,4 +1,5 @@
-use std::borrow::Cow;
+use alloc::borrow::{Cow, ToOwned};
+use alloc::vec::Vec;
 
 use nexus::Version;
 

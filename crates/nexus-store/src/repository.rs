@@ -7,11 +7,12 @@
     reason = "per-iteration Arc clones in try_fold closures intentionally re-bind"
 )]
 
-use std::borrow::Borrow;
-use std::future::Future;
-use std::marker::PhantomData;
-use std::num::NonZeroU32;
-use std::sync::Arc;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
+use core::borrow::Borrow;
+use core::future::Future;
+use core::marker::PhantomData;
+use core::num::NonZeroU32;
 
 use nexus::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
 
@@ -83,7 +84,7 @@ use crate::value::SchemaVersion;
 /// as `Self::Error` or define a custom error with `From` impls.
 pub trait Repository<A: Aggregate>: Send + Sync {
     /// The error type for repository operations.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 
     /// Load an aggregate by replaying its event stream.
     ///
@@ -123,7 +124,7 @@ pub trait Repository<A: Aggregate>: Send + Sync {
 /// replay logic. Not public API.
 pub(crate) trait ReplayFrom<A: Aggregate>: Send + Sync {
     /// The error type for replay operations.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 
     /// Replay events starting from `from` version (inclusive) into `root`.
     ///
@@ -360,7 +361,7 @@ impl<S, C, A> EventStore<S, C, A> {
         for<'a> C:
             Encode<EventOf<A>> + Decode<EventOf<A>, Output<'a>: Borrow<EventOf<A>>> + 'static,
         F: for<'a> Fn(EventMorsel<'a>) -> Result<EventMorsel<'a>, E> + Send + Sync + 'static,
-        E: std::error::Error + Send + Sync + 'static,
+        E: core::error::Error + Send + Sync + 'static,
         EventOf<A>: DomainEvent,
         S::Stream: Send,
     {

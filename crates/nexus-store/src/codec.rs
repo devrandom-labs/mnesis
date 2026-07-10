@@ -17,7 +17,7 @@
 //! ```ignore
 //! pub trait Decode<E: ?Sized>: Send + Sync + 'static {
 //!     type Output<'a> where Self: 'a;
-//!     type Error: std::error::Error + Send + Sync + 'static;
+//!     type Error: core::error::Error + Send + Sync + 'static;
 //!     fn decode<'a>(&'a self, env: &'a PersistedEnvelope)
 //!         -> Result<Self::Output<'a>, Self::Error>;
 //! }
@@ -53,7 +53,7 @@ use crate::envelope::PersistedEnvelope;
 /// `E: ?Sized` allows unsized event types (e.g. `Archived<MyEvent>`).
 pub trait Encode<E: ?Sized>: Send + Sync + 'static {
     /// The error type for serialization failures.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 
     /// Serialize a typed value to bytes.
     ///
@@ -111,7 +111,7 @@ pub trait Decode<E: ?Sized>: Send + Sync + 'static {
         Self: 'a;
 
     /// The error type for deserialization failures.
-    type Error: std::error::Error + Send + Sync + 'static;
+    type Error: core::error::Error + Send + Sync + 'static;
 
     /// Decode the envelope's payload to [`Output<'a>`](Self::Output).
     ///
@@ -152,6 +152,8 @@ impl<C, E: ?Sized> OwningCodec<E> for C where C: for<'a> Decode<E, Output<'a> = 
 
 #[cfg(feature = "serde")]
 pub mod serde {
+    use alloc::vec::Vec;
+
     use ::serde::{Serialize, de::DeserializeOwned};
 
     use super::{Decode, Encode};
@@ -170,7 +172,7 @@ pub mod serde {
     /// - Errors must accurately describe the failure (not erase the cause).
     pub trait SerdeFormat: Send + Sync + 'static {
         /// The error type for serialization/deserialization failures.
-        type Error: std::error::Error + Send + Sync + 'static;
+        type Error: core::error::Error + Send + Sync + 'static;
 
         /// Serialize a value to bytes.
         ///
@@ -260,16 +262,18 @@ pub mod serde {
     }
 
     /// Seal `Debug` — show the format type, not its internals.
-    impl<F> std::fmt::Debug for SerdeCodec<F> {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    impl<F> core::fmt::Debug for SerdeCodec<F> {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             f.debug_struct("SerdeCodec")
-                .field("format", &std::any::type_name::<F>())
+                .field("format", &core::any::type_name::<F>())
                 .finish()
         }
     }
 
     #[cfg(feature = "json")]
     pub mod json {
+        use alloc::vec::Vec;
+
         use ::serde::{Serialize, de::DeserializeOwned};
 
         use super::{SerdeCodec, SerdeFormat};
@@ -310,9 +314,9 @@ pub mod bytemuck {
     use super::{Decode, Encode};
     use crate::envelope::PersistedEnvelope;
 
-    /// Wrapper around [`PodCastError`] that satisfies the `std::error::Error` bound.
+    /// Wrapper around [`PodCastError`] that satisfies the `core::error::Error` bound.
     ///
-    /// Upstream `PodCastError` does not implement `std::error::Error`
+    /// Upstream `PodCastError` does not implement `core::error::Error`
     /// (`bytemuck` is `no_std` by default and skips the impl), so
     /// `Decode::Error` requires a wrapper.
     ///
