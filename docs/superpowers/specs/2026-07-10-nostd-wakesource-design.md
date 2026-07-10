@@ -57,6 +57,12 @@ workspace lints, `version.workspace = true`.
 
 ### The type: `GlobalWake`
 
+> **Superseded during implementation (`8e48f55`):** the generation counter is
+> `AtomicU32`, not `AtomicU64` — `thumbv7em` (Cortex-M4, the primary bare-metal
+> target) has no 64-bit atomics, so `AtomicU64` fails to compile there. The
+> wrap analysis holds at 32 bits (2^32 wakes inside the arm→first-poll window
+> is unreachable). Read `AtomicU64` below as `AtomicU32`.
+
 ```rust
 /// Shared wake state: one eventcount for the whole store.
 struct Inner {
