@@ -142,9 +142,14 @@ impl WakeSource for GlobalWake {
     }
 
     fn wake(&self, _stream: &[u8]) {
-        // Release pairs with the Acquire loads in `arm`: a registration
-        // that observes the bumped generation also observes everything
-        // the waker wrote before calling `wake` (the durable commit).
+        // Release pairs with the Acquire loads in `arm`. The load-bearing
+        // property is LIVENESS, not data visibility (the subscription loop
+        // re-reads from the store regardless): bumping the generation
+        // BEFORE `notify` — whose `SeqCst` fence orders this store ahead
+        // of `arm`'s re-check load — guarantees a registration whose
+        // listener registered too late to receive this notify still
+        // observes the bumped generation and returns instead of parking.
+        // See the re-check comment in `arm`.
         self.inner.generation.fetch_add(1, Ordering::Release);
         // Rouse every parked listener; `notify` provides its own fence.
         self.inner.event.notify(usize::MAX);
