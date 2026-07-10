@@ -8,8 +8,8 @@ publish = false
 bytes = { workspace = true, features = ["std"] }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
 nexus = { path = "../../crates/nexus", features = ["derive"] }
-nexus-inmemory = { path = "../../crates/nexus-inmemory" }
-nexus-store = { path = "../../crates/nexus-store", features = ["projection", "subscription"] }
+nexus-inmemory = { path = "../../adapters/inmemory" }
+nexus-store = { path = "../../crates/store", features = ["projection", "subscription"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }

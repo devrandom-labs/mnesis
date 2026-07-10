@@ -11,13 +11,13 @@ nexus = { path = "../../crates/nexus", features = ["derive"] }
 # json    → built-in JsonCodec + the `.json()` builder convenience
 # cbor    → the CBOR backup box (implies import + export)
 # subscription → the catch-up + live-tail cursor
-nexus-store = { path = "../../crates/nexus-store", features = [
+nexus-store = { path = "../../crates/store", features = [
     "json",
     "cbor",
     "subscription",
 ] }
 # export + import → FjallStore's StreamLister + AtomicAppend impls (#220)
-nexus-fjall = { path = "../../crates/nexus-fjall", features = [
+nexus-fjall = { path = "../../adapters/fjall", features = [
     "export",
     "import",
 ] }

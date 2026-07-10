@@ -35,6 +35,21 @@ nexus-postgres   --> nexus-store, nexus-wake
 nexus-macros    <-- nexus (kernel, optional via "derive" feature)
 ```
 
+**Workspace layout (#309)** — directory names drop the `nexus-` prefix; **published package names keep it** (paths and package names are independent in cargo). Two folders carry the architecture's load-bearing boundary:
+
+```
+crates/            # core: everything an adapter builds on
+  nexus/           → nexus            macros/          → nexus-macros
+  store/           → nexus-store      store-testing/   → nexus-store-testing
+  wake/            → nexus-wake       wake-nostd/      → nexus-wake-nostd
+  nostd-smoketest/ → nexus-nostd-smoketest              workspace-hack/
+adapters/          # infrastructure impls of the store seams
+  fjall/           → nexus-fjall      postgres/        → nexus-postgres
+  inmemory/        → nexus-inmemory
+```
+
+The wake crates live in `crates/` (core), not `adapters/`, **by dependency direction**: `nexus-wake` is a lib dependency of all three store adapters (their `WakeSource` impls delegate to `StreamNotifiers`), so it is something adapters build on — and `nexus-wake-nostd` stays beside its sibling. Decided explicitly per #309's classification call.
+
 `nexus-store` itself has **no** tokio/foldhash/parking_lot dependency (#300): the
 subscription loop is generic over the `WakeSource` trait, and the tokio-backed
 in-process impl (`StreamNotifiers`) lives in `nexus-wake`. `nexus-store`'s own
