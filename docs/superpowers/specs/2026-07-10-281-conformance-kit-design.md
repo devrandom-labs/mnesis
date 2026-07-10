@@ -106,8 +106,12 @@ nexus_store_testing::conformance_lifecycle! {                    // persistent a
 - conflict-rejected append leaves the store byte-identical (nothing lands)
 - version-gap append (first incoming version ≠ next-expected) is rejected
   without landing
-- metadata `None` vs `Some(empty)` round-trip as distinct values (the
-  `u32::MAX` absent-sentinel edge)
+- metadata `None` round-trips as `None`; present metadata round-trips
+  byte-for-byte, including the 1-byte minimum. (`Some(empty)` is
+  unrepresentable by construction — `Metadata::from_bytes` rejects empty with
+  `ValueError::MetadataEmpty`, and the wire reserves `u32::MAX` as the absent
+  sentinel — so the absent-vs-empty confusion the original design targeted is
+  already impossible at the type layer; finding from Task 4.)
 - max-length event_type (`u16::MAX` bytes) round-trips
 - binary (non-UTF-8) and Unicode stream ids round-trip; empty stream id is a
   documented carve-out (fjall rejects it), not asserted

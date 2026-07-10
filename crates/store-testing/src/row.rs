@@ -44,6 +44,9 @@ impl ConformanceRow {
     }
 
     /// Attach metadata (defaults to absent).
+    ///
+    /// `metadata` must be non-empty — empty metadata is unrepresentable
+    /// (`ValueError::MetadataEmpty`); use absent instead.
     #[must_use]
     pub fn with_metadata(mut self, metadata: Vec<u8>) -> Self {
         self.metadata = Some(metadata);

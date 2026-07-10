@@ -76,6 +76,7 @@ use nexus_store::StreamKey;
 use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
 use nexus_store::store::RawEventStore;
 
+pub mod boundary;
 pub mod row;
 pub mod sequence;
 

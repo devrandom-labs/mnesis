@@ -7,6 +7,7 @@
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
 use nexus_inmemory::InMemoryStore;
+use nexus_store_testing::boundary;
 use nexus_store_testing::sequence;
 
 #[allow(
@@ -47,4 +48,14 @@ async fn sequence_subscription() {
     sequence::check_subscription_resume_strict_after(&factory).await;
     sequence::check_subscription_all_backlog_then_caught_up_then_live(&factory).await;
     sequence::check_subscription_large_backlog_crosses_chunk_seam(&factory).await;
+}
+
+#[tokio::test]
+async fn boundary_checks() {
+    boundary::check_conflict_leaves_store_unchanged(&factory).await;
+    boundary::check_version_gap_batch_rejected(&factory).await;
+    boundary::check_wrong_first_version_rejected(&factory).await;
+    boundary::check_metadata_absent_vs_present_distinct(&factory).await;
+    boundary::check_max_length_event_type_round_trips(&factory).await;
+    boundary::check_prefix_stream_ids_isolated(&factory).await;
 }
