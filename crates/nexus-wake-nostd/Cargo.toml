@@ -1,0 +1,19 @@
+[package]
+name = "nexus-wake-nostd"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "no_std global-eventcount WakeSource for on-device live-tail subscriptions"
+readme = "../../README.md"
+keywords = ["event-sourcing", "subscription", "wake", "no-std", "embedded"]
+categories = ["embedded", "no-std", "asynchronous", "data-structures"]
+
+[dependencies]
+event-listener = { workspace = true }
+nexus-store = { version = "0.1.0", path = "../nexus-store", default-features = false, features = ["subscription"] }
+
+[lints]
+workspace = true

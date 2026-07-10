@@ -1366,6 +1366,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nexus-wake-nostd"
+version = "0.1.0"
+dependencies = [
+ "event-listener",
+ "nexus-store",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2668,10 +2676,12 @@ dependencies = [
  "aligned-vec",
  "bitflags",
  "bytes",
+ "concurrent-queue",
  "crossbeam-utils",
  "crypto-common",
  "digest",
  "either",
+ "event-listener",
  "futures",
  "futures-channel",
  "futures-io",
