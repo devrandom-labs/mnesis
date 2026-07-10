@@ -50,7 +50,7 @@ use alloc::sync::Arc;
 use core::convert::Infallible;
 use core::fmt;
 use core::future::Future;
-use core::sync::atomic::{AtomicU64, Ordering};
+use core::sync::atomic::{AtomicU32, Ordering};
 
 use event_listener::Event;
 use nexus_store::wake::{WakeRegistration, WakeSource};
@@ -59,10 +59,13 @@ use nexus_store::wake::{WakeRegistration, WakeSource};
 struct Inner {
     /// Wake generation. Bumped on every [`WakeSource::wake`]; `fetch_add`
     /// wraps on overflow BY DESIGN — the value is compared for inequality
-    /// only, and a false equality needs exactly 2^64 intervening wakes
-    /// between an `arm` and its first poll, unreachable in practice (the
-    /// same wrapping discipline as `StreamNotifiers`' generations).
-    generation: AtomicU64,
+    /// only, and a false equality needs exactly 2^32 intervening wakes
+    /// between an `arm` and its first poll, a window microseconds long in
+    /// practice, so still unreachable (the same wrapping discipline as
+    /// `StreamNotifiers`' generations). `AtomicU64` is deliberately NOT
+    /// used: thumbv7em (Cortex-M4, this crate's primary target class) has
+    /// no 64-bit atomics, and it would fail to compile there.
+    generation: AtomicU32,
     /// Multi-waiter eventcount. `listen()` registers the listener into the
     /// notify list at creation, which is what makes the arm-then-recheck
     /// sequence in [`WakeRegistration::arm`] lost-wakeup-safe.
@@ -87,7 +90,7 @@ impl GlobalWake {
     pub fn new() -> Self {
         Self {
             inner: Arc::new(Inner {
-                generation: AtomicU64::new(0),
+                generation: AtomicU32::new(0),
                 event: Event::new(),
             }),
         }
