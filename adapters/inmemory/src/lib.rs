@@ -873,7 +873,6 @@ mod global_read_tests {
     use super::*;
     use futures::StreamExt;
     use nexus_store::envelope::pending_envelope;
-    use nexus_store::{StepStreamExt, Store, Subscription};
 
     fn sk(s: &str) -> StreamKey {
         StreamKey::from_slice(s.as_bytes())
@@ -898,54 +897,6 @@ mod global_read_tests {
     }
 
     #[tokio::test]
-    async fn read_all_yields_global_order_across_streams() {
-        let store = InMemoryStore::new();
-        // Interleave appends across two streams: a@1, b@1, a@2.
-        append_one(&store, "a", 1, None, b"a1").await;
-        append_one(&store, "b", 1, None, b"b1").await;
-        append_one(&store, "a", 2, Some(1), b"a2").await;
-
-        let mut all = store.read_all(None).await.unwrap();
-        let mut seen = Vec::new();
-        while let Some(item) = all.next().await {
-            let (pos, env) = item.unwrap();
-            seen.push((pos.as_u64(), env.payload().to_vec()));
-        }
-        assert_eq!(
-            seen,
-            vec![
-                (1, b"a1".to_vec()),
-                (2, b"b1".to_vec()),
-                (3, b"a2".to_vec()),
-            ],
-            "read_all must yield every event across streams in position order"
-        );
-    }
-
-    #[tokio::test]
-    async fn read_all_from_is_exclusive_and_resumes() {
-        let store = InMemoryStore::new();
-        append_one(&store, "a", 1, None, b"a1").await;
-        append_one(&store, "a", 2, Some(1), b"a2").await;
-        append_one(&store, "a", 3, Some(2), b"a3").await;
-
-        // Exclusive: strictly after position 1 → [2, 3].
-        let mut all = store
-            .read_all(Some(InMemoryAllPos::new(1).unwrap()))
-            .await
-            .unwrap();
-        let mut seqs = Vec::new();
-        while let Some(item) = all.next().await {
-            seqs.push(item.unwrap().0.as_u64());
-        }
-        assert_eq!(
-            seqs,
-            vec![2, 3],
-            "from is exclusive; position 1 and below excluded"
-        );
-    }
-
-    #[tokio::test]
     async fn read_all_from_max_yields_empty() {
         // Defensive boundary (parity with fjall): nothing is strictly after
         // InMemoryAllPos::MAX, so the exclusive resume yields an empty stream —
@@ -960,64 +911,6 @@ mod global_read_tests {
             all.next().await.is_none(),
             "read_all(Some(MAX)) must yield nothing",
         );
-    }
-
-    #[tokio::test]
-    async fn subscribe_all_catches_up_then_sees_live_event() {
-        let store = Store::new(InMemoryStore::new());
-        append_one(store.raw(), "a", 1, None, b"a1").await;
-        append_one(store.raw(), "b", 1, None, b"b1").await;
-
-        let sub = Subscription::new(&store)
-            .subscribe_all(None)
-            .unwrap()
-            .events();
-        futures::pin_mut!(sub);
-        assert_eq!(sub.next().await.unwrap().unwrap().0.as_u64(), 1);
-        assert_eq!(sub.next().await.unwrap().unwrap().0.as_u64(), 2);
-
-        let store2 = store.clone();
-        tokio::spawn(async move {
-            append_one(store2.raw(), "a", 2, Some(1), b"a2").await;
-        });
-        let (live_pos, live_env) = sub.next().await.unwrap().unwrap();
-        assert_eq!(live_pos.as_u64(), 3);
-        assert_eq!(live_env.payload(), b"a2");
-    }
-
-    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-    async fn subscribe_all_sees_concurrent_appends_across_streams() {
-        let store = Store::new(InMemoryStore::new());
-        let sub = Subscription::new(&store)
-            .subscribe_all(None)
-            .unwrap()
-            .events();
-        futures::pin_mut!(sub);
-
-        let s1 = store.clone();
-        let s2 = store.clone();
-        let w1 = tokio::spawn(async move {
-            for v in 1..=10 {
-                append_one(s1.raw(), "x", v, (v > 1).then(|| v - 1), b"x").await;
-            }
-        });
-        let w2 = tokio::spawn(async move {
-            for v in 1..=10 {
-                append_one(s2.raw(), "y", v, (v > 1).then(|| v - 1), b"y").await;
-            }
-        });
-        w1.await.unwrap();
-        w2.await.unwrap();
-
-        let mut prev = 0u64;
-        for _ in 0..20 {
-            let g = sub.next().await.unwrap().unwrap().0.as_u64();
-            assert!(
-                g > prev,
-                "$all position must be strictly increasing: {g} after {prev}"
-            );
-            prev = g;
-        }
     }
 }
 

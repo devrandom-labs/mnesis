@@ -196,6 +196,9 @@ macro_rules! conformance {
             $crate::__conformance_case!(sequence, check_subscription_resume_strict_after, $factory, $skip);
             $crate::__conformance_case!(sequence, check_subscription_all_backlog_then_caught_up_then_live, $factory, $skip);
             $crate::__conformance_case!(sequence, check_subscription_large_backlog_crosses_chunk_seam, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_absent_stream_waits_then_delivers, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_beyond_head_filters_below_bound, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_two_subscribers_same_stream_both_receive, $factory, $skip);
         }
 
         mod conformance_boundary {
@@ -208,6 +211,7 @@ macro_rules! conformance {
             $crate::__conformance_case!(boundary, check_metadata_absent_vs_present_distinct, $factory, $skip);
             $crate::__conformance_case!(boundary, check_max_length_event_type_round_trips, $factory, $skip);
             $crate::__conformance_case!(boundary, check_prefix_stream_ids_isolated, $factory, $skip);
+            $crate::__conformance_case!(boundary, check_large_payload_round_trips, $factory, $skip);
         }
 
         mod conformance_linearizability {
@@ -261,19 +265,24 @@ macro_rules! conformance_atomic_append {
 /// `positions` are two ascending sample positions of the store's `P` — used
 /// to drive the hydrate/commit checks without hardcoding a position type.
 ///
+/// `extremes` are two ascending positions at the `P` type's representable
+/// edges (smallest and at/near the ceiling) — used to prove the position
+/// codec has no off-by-one at either edge.
+///
 /// ```ignore
 /// nexus_store_testing::conformance_snapshot! {
 ///     factory: || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) },
 ///     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
+///     extremes: (Version::new(1).unwrap(), Version::new(u64::MAX).unwrap()),
 /// }
 /// ```
 #[cfg(feature = "snapshot")]
 #[macro_export]
 macro_rules! conformance_snapshot {
-    (factory: $factory:expr, positions: ($p1:expr, $p2:expr) $(,)?) => {
-        $crate::conformance_snapshot! { factory: $factory, positions: ($p1, $p2), skip_unless: || true }
+    (factory: $factory:expr, positions: ($p1:expr, $p2:expr), extremes: ($pmin:expr, $pmax:expr) $(,)?) => {
+        $crate::conformance_snapshot! { factory: $factory, positions: ($p1, $p2), extremes: ($pmin, $pmax), skip_unless: || true }
     };
-    (factory: $factory:expr, positions: ($p1:expr, $p2:expr), skip_unless: $skip:expr $(,)?) => {
+    (factory: $factory:expr, positions: ($p1:expr, $p2:expr), extremes: ($pmin:expr, $pmax:expr), skip_unless: $skip:expr $(,)?) => {
         mod conformance_snapshot {
             #[allow(clippy::wildcard_imports, reason = "re-import the invocation scope")]
             use super::*;
@@ -299,6 +308,23 @@ macro_rules! conformance_snapshot {
                     return;
                 }
                 $crate::snapshot::check_snapshot_overwrite_latest_wins(&$factory, $p1, $p2).await;
+            }
+            #[tokio::test]
+            async fn check_snapshot_empty_state_round_trips() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::snapshot::check_snapshot_empty_state_round_trips(&$factory, $p1, $p2).await;
+            }
+            #[tokio::test]
+            async fn check_snapshot_extreme_positions_round_trip() {
+                if !($skip)() {
+                    return;
+                }
+                $crate::snapshot::check_snapshot_extreme_positions_round_trip(
+                    &$factory, $pmin, $pmax,
+                )
+                .await;
             }
         }
     };

@@ -51,10 +51,8 @@
 #![allow(clippy::panic, reason = "tests")]
 
 use futures::StreamExt;
-use nexus::Version;
 use nexus_postgres::{PgAllPos, PostgresStore};
 use nexus_store::StreamKey;
-use nexus_store::envelope::pending_envelope;
 use nexus_store::store::RawEventStore;
 use sqlx::PgPool;
 
@@ -267,65 +265,4 @@ async fn all_noskip_exclusive_resume_after_out_of_order_commits() {
         resumed[0].0 > pos_of_x,
         "resumed position must be strictly after the checkpoint"
     );
-}
-
-/// Sanity: `read_all(None)` on a completely empty store yields nothing.
-#[tokio::test]
-async fn all_noskip_empty_store_yields_nothing() {
-    let Some((store, _pool)) = setup().await else {
-        return;
-    };
-    let got = drain_all(&store, None).await;
-    assert!(got.is_empty(), "empty store: read_all must yield nothing");
-}
-
-/// Additional linearizability proof via the real `RawEventStore::append` API
-/// (not raw SQL): ordering and no-skip invariants hold for normal API usage too.
-#[tokio::test]
-async fn all_noskip_via_store_api_ordering() {
-    let Some((store, _pool)) = setup().await else {
-        return;
-    };
-
-    let a = StreamKey::from_slice(b"api-a");
-    let b_id = StreamKey::from_slice(b"api-b");
-
-    let mk = |v: u64, et: &'static str| {
-        pending_envelope(Version::new(v).unwrap())
-            .event_type(et)
-            .payload(format!("{et}{v}").into_bytes())
-            .build()
-            .expect("valid")
-    };
-
-    store
-        .append(&a, None, &[mk(1, "A")])
-        .await
-        .expect("append A1");
-    store
-        .append(&b_id, None, &[mk(1, "B")])
-        .await
-        .expect("append B1");
-    store
-        .append(&a, Version::new(1), &[mk(2, "A")])
-        .await
-        .expect("append A2");
-
-    let all = drain_all(&store, None).await;
-    assert_eq!(all.len(), 3, "must deliver all 3 events");
-
-    // Positions must be strictly increasing.
-    for w in all.windows(2) {
-        assert!(
-            w[1].0 > w[0].0,
-            "positions not strictly increasing: {:?} then {:?}",
-            w[0].0,
-            w[1].0
-        );
-    }
-
-    // Every appended event type must appear.
-    let types: Vec<&str> = all.iter().map(|(_, t)| t.as_str()).collect();
-    assert!(types.contains(&"A"), "A events must appear in $all");
-    assert!(types.contains(&"B"), "B events must appear in $all");
 }
