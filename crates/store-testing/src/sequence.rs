@@ -743,3 +743,53 @@ where
         "backlog across chunk seams must be exactly 1..=N — no gap, no duplicate",
     );
 }
+
+/// A subscription opened beyond the head filters below-bound live appends.
+///
+/// `subscribe(Some(v))` with `v` past the current head parks after an empty
+/// backlog; live appends at versions **at or below** `v` wake the loop but
+/// must never be delivered — the first delivered event is `v + 1`. A loop or
+/// adapter that rescans from the wrong position after a below-bound wake
+/// would surface one of the filtered events here.
+pub async fn check_subscription_beyond_head_filters_below_bound<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("beyond-head");
+    append_event(&store, &id.key(), 1, b"p1").await;
+    append_event(&store, &id.key(), 2, b"p2").await;
+
+    // Head is 2; subscribe strictly after 5 — the backlog is empty.
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe(&id, Some(Version::new(5).expect("v5")))
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+    match next_step(&mut stream, "beyond-head boundary").await {
+        Step::CaughtUp => {}
+        Step::Event(env) => panic!(
+            "subscribing beyond the head must have an empty backlog, got v{}",
+            env.version(),
+        ),
+    }
+
+    // Live appends at v3..=v5 are all <= from: each wakes the loop, none may
+    // be delivered. v6 is the first version strictly after `from`.
+    for v in 3..=6u64 {
+        append_event(&store, &id.key(), v, format!("p{v}").as_bytes()).await;
+    }
+    match next_step(&mut stream, "beyond-head first delivery").await {
+        Step::Event(env) => assert_eq!(
+            env.version().as_u64(),
+            6,
+            "the first delivered event must be from+1 (6) — below-bound live appends must be filtered, never delivered",
+        ),
+        Step::CaughtUp => panic!("CaughtUp must be emitted exactly once"),
+    }
+}

@@ -197,6 +197,7 @@ macro_rules! conformance {
             $crate::__conformance_case!(sequence, check_subscription_all_backlog_then_caught_up_then_live, $factory, $skip);
             $crate::__conformance_case!(sequence, check_subscription_large_backlog_crosses_chunk_seam, $factory, $skip);
             $crate::__conformance_case!(sequence, check_subscription_absent_stream_waits_then_delivers, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_subscription_beyond_head_filters_below_bound, $factory, $skip);
             $crate::__conformance_case!(sequence, check_two_subscribers_same_stream_both_receive, $factory, $skip);
         }
 
