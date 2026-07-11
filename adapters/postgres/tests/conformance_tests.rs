@@ -37,6 +37,9 @@ async fn open_fresh() -> (PostgresStore, ()) {
     (store, ())
 }
 
+// No `conformance_atomic_append!` / `conformance_snapshot!` here: PostgresStore
+// implements neither `AtomicAppend` nor `SnapshotStore` — their absence is by
+// design, not an omission.
 nexus_store_testing::conformance! {
     factory: open_fresh,
     skip_unless: have_db,

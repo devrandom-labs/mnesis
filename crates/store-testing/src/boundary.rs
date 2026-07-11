@@ -170,8 +170,10 @@ where
     );
 }
 
-/// Stream ids sharing a byte prefix ("a", "ab") are fully isolated — a
-/// prefix-collision in the adapter's key encoding would leak events across.
+/// Stream ids sharing a byte prefix ("a", "ab") are fully isolated.
+///
+/// A prefix-collision in the adapter's key encoding would leak events across
+/// streams; binary (non-UTF-8) and Unicode ids round-trip like any other id.
 pub async fn check_prefix_stream_ids_isolated<S, C, F, Fut>(factory: &F)
 where
     S: RawEventStore + WakeSource,
@@ -183,6 +185,7 @@ where
     let a = StreamKey::from_slice(b"a");
     let ab = StreamKey::from_slice(b"ab");
     let unicode = StreamKey::from_slice("поток-流".as_bytes());
+    let binary = StreamKey::from_slice(&[0x00, 0xff, 0x42]);
     append_rows(&store, &a, &[ConformanceRow::new(1, "E", vec![1])]).await;
     append_rows(
         &store,
@@ -194,6 +197,7 @@ where
     )
     .await;
     append_rows(&store, &unicode, &[ConformanceRow::new(1, "E", vec![4])]).await;
+    append_rows(&store, &binary, &[ConformanceRow::new(1, "E", vec![5])]).await;
 
     let got_a = drain_stream(&store, &a, Version::INITIAL).await;
     assert_eq!(got_a.len(), 1, "stream 'a' must not see 'ab' events");
@@ -205,4 +209,12 @@ where
     let got_u = drain_stream(&store, &unicode, Version::INITIAL).await;
     assert_eq!(got_u.len(), 1, "unicode stream id must round-trip");
     assert_eq!(got_u[0].payload, vec![4]);
+
+    let got_binary = drain_stream(&store, &binary, Version::INITIAL).await;
+    assert_eq!(
+        got_binary.len(),
+        1,
+        "binary (non-UTF-8) stream id must round-trip"
+    );
+    assert_eq!(got_binary[0].payload, vec![5]);
 }
