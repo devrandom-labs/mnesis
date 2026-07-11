@@ -38,6 +38,19 @@ enum ToyError {
     Envelope(#[from] EnvelopeError),
     #[error("$all position overflow")]
     PositionOverflow,
+    #[error("stream version overflow")]
+    VersionOverflow,
+}
+
+/// Why a batch failed sequential validation. Overflow is deliberately its
+/// own arm: it maps to the `Store` domain, never `Conflict` — a `Conflict`
+/// with `expected == actual` would be retry-eligible yet un-retryable by
+/// construction (rule 3; fjall documents the same mapping).
+enum SeqError {
+    /// Gap, duplicate, or out-of-order — the `Conflict` domain.
+    Malformed,
+    /// The version sequence would pass `u64::MAX`.
+    Overflow,
 }
 
 /// Store-local `$all` resume position: a scalar sequence, strictly monotonic
@@ -119,26 +132,25 @@ fn stage(env: &PendingEnvelope, pos: ToyPos) -> Result<StoredEvent, ToyError> {
 }
 
 /// Validate that `envelopes` runs strictly sequentially from
-/// `expected_version + 1` (from 1 when `None`). Returns `None` on a gap,
-/// duplicate, out-of-order batch, or version overflow.
+/// `expected_version + 1` (from 1 when `None`).
 fn versions_sequential(
     expected_version: Option<Version>,
     envelopes: &[PendingEnvelope],
-) -> Option<()> {
+) -> Result<(), SeqError> {
     let mut next = match expected_version {
         None => Version::INITIAL,
-        Some(v) => v.next()?,
+        Some(v) => v.next().ok_or(SeqError::Overflow)?,
     };
     let mut envs = envelopes.iter().peekable();
     while let Some(env) = envs.next() {
         if env.version() != next {
-            return None;
+            return Err(SeqError::Malformed);
         }
         if envs.peek().is_some() {
-            next = next.next()?;
+            next = next.next().ok_or(SeqError::Overflow)?;
         }
     }
-    Some(())
+    Ok(())
 }
 
 impl RawEventStore for ToyStore {
@@ -171,13 +183,20 @@ impl RawEventStore for ToyStore {
                 return Ok(());
             }
             // A gap/duplicate/out-of-order batch is rejected in the Conflict
-            // domain, and nothing lands.
-            if versions_sequential(expected_version, envelopes).is_none() {
-                return Err(AppendError::Conflict {
-                    stream_id: ErrorId::from_display(id),
-                    expected: expected_version,
-                    actual,
-                });
+            // domain, and nothing lands. Version overflow is a Store error —
+            // it is not a retry-eligible concurrency conflict.
+            match versions_sequential(expected_version, envelopes) {
+                Err(SeqError::Malformed) => {
+                    return Err(AppendError::Conflict {
+                        stream_id: ErrorId::from_display(id),
+                        expected: expected_version,
+                        actual,
+                    });
+                }
+                Err(SeqError::Overflow) => {
+                    return Err(AppendError::Store(ToyError::VersionOverflow));
+                }
+                Ok(()) => {}
             }
             // Stage everything before touching the map so a failed encode
             // leaves the store byte-identical.
@@ -284,12 +303,19 @@ impl AtomicAppend for ToyStore {
                 if write.events.is_empty() {
                     continue;
                 }
-                // Defensive contiguity validation at this boundary.
-                if versions_sequential(write.expected_version, &write.events).is_none() {
-                    return Err(AtomicAppendError::Conflict {
-                        index,
-                        actual: head,
-                    });
+                // Defensive contiguity validation at this boundary; overflow
+                // is a Store error, never a Conflict (rule 3).
+                match versions_sequential(write.expected_version, &write.events) {
+                    Err(SeqError::Malformed) => {
+                        return Err(AtomicAppendError::Conflict {
+                            index,
+                            actual: head,
+                        });
+                    }
+                    Err(SeqError::Overflow) => {
+                        return Err(AtomicAppendError::Store(ToyError::VersionOverflow));
+                    }
+                    Ok(()) => {}
                 }
                 let mut run = Vec::with_capacity(write.events.len());
                 for env in &write.events {
@@ -308,10 +334,17 @@ impl AtomicAppend for ToyStore {
                 inner.streams.entry(key).or_default().extend(run);
             }
         }
-        for write in writes {
+        // Wake only when something actually landed — same nobody-woken-on-
+        // empty discipline as `append` (spurious wakes are permitted, but the
+        // reference shouldn't teach them).
+        let mut woke_any = false;
+        for write in writes.iter().filter(|w| !w.events.is_empty()) {
             self.notifiers.wake(write.target.as_bytes());
+            woke_any = true;
         }
-        self.notifiers.wake_all();
+        if woke_any {
+            self.notifiers.wake_all();
+        }
         Ok(())
     }
 }
