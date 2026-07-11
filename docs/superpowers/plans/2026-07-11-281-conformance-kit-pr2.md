@@ -245,10 +245,10 @@ KEEP: the overflow-arithmetic white-box quartet, `attack_dual_instance_same_path
 
 ## Task 4: postgres deletions
 
-- [ ] **Step 4.1: `tests/all_noskip_tests.rs` — delete:** `all_noskip_empty_store_yields_nothing`, `all_noskip_via_store_api_ordering`. KEEP the two out-of-order-commit watermark proofs (the #213 design's raison d'être).
-- [ ] **Step 4.2: `tests/subscription_tests.rs` — delete:** `subscribe_per_stream_catchup_then_live`, `subscribe_per_stream_from_checkpoint`, `subscribe_per_stream_nonexistent_blocks_then_live` (now a kit check), `subscribe_all_catchup_then_live`, `subscribe_all_concurrent_writers_strictly_increasing`. If the file ends up empty, `git rm` it; if shared helpers remain used by all_noskip_tests, relocate minimally.
-- [ ] **Step 4.3: KEEP all inline src tests** (`prepare_inserts` unit tests run WITHOUT a database — the kit's postgres coverage skips locally; deleting them would leave the SQL batch-validation logic with zero local coverage — plus error/position/hex internals).
-- [ ] **Step 4.4:** `nix develop -c cargo nextest run -p nexus-postgres` green (vacuous conformance skips + surviving tests); fmt; commit `refactor(postgres): drop tests the conformance kit now owns (#281)`.
+- [x] **Step 4.1: `tests/all_noskip_tests.rs` — delete:** `all_noskip_empty_store_yields_nothing`, `all_noskip_via_store_api_ordering`. KEEP the two out-of-order-commit watermark proofs (the #213 design's raison d'être).
+- [x] **Step 4.2: `tests/subscription_tests.rs` — delete:** `subscribe_per_stream_catchup_then_live`, `subscribe_per_stream_from_checkpoint`, `subscribe_per_stream_nonexistent_blocks_then_live` (now a kit check), `subscribe_all_catchup_then_live`, `subscribe_all_concurrent_writers_strictly_increasing`. If the file ends up empty, `git rm` it; if shared helpers remain used by all_noskip_tests, relocate minimally.
+- [x] **Step 4.3: KEEP all inline src tests** (`prepare_inserts` unit tests run WITHOUT a database — the kit's postgres coverage skips locally; deleting them would leave the SQL batch-validation logic with zero local coverage — plus error/position/hex internals).
+- [x] **Step 4.4:** `nix develop -c cargo nextest run -p nexus-postgres` green (vacuous conformance skips + surviving tests); fmt; commit `refactor(postgres): drop tests the conformance kit now owns (#281)`.
 
 ---
 
