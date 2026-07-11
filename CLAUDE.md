@@ -26,13 +26,14 @@ cargo fmt --all
 ### Crate Dependency Graph
 
 ```
-nexus-store      --> nexus (kernel)
-nexus-wake       --> nexus-store            (in-process wake registry; owns tokio/foldhash/parking_lot)
-nexus-wake-nostd --> nexus-store            (no_std global-eventcount wake; owns event-listener; #302)
-nexus-inmemory   --> nexus-store, nexus-wake (in-memory adapter; nexus-store's test fixture via dev-dep cycle)
-nexus-fjall      --> nexus-store, nexus-wake
-nexus-postgres   --> nexus-store, nexus-wake
-nexus-macros    <-- nexus (kernel, optional via "derive" feature)
+nexus-store         --> nexus (kernel)
+nexus-store-testing --> nexus-store             (executable store-contract spec; every adapter's dev-dep; #281)
+nexus-wake          --> nexus-store             (in-process wake registry; owns tokio/foldhash/parking_lot)
+nexus-wake-nostd    --> nexus-store             (no_std global-eventcount wake; owns event-listener; #302)
+nexus-inmemory      --> nexus-store, nexus-wake (in-memory adapter; nexus-store's test fixture via dev-dep cycle)
+nexus-fjall         --> nexus-store, nexus-wake
+nexus-postgres      --> nexus-store, nexus-wake
+nexus-macros       <-- nexus (kernel, optional via "derive" feature)
 ```
 
 **Workspace layout (#309)** — directory names drop the `nexus-` prefix; **published package names keep it** (paths and package names are independent in cargo). Two folders carry the architecture's load-bearing boundary:
@@ -59,6 +60,31 @@ integration tests in `tests/`**; the lib-test target recompiles the crate under
 `cfg(test)` as a distinct crate, so inline white-box test mods that need a store
 (`catchup.rs`, `subscription_cursor.rs`) use the in-crate `test_support.rs`
 double instead.
+
+**`nexus-store-testing` — the executable store-contract spec (#281).** The
+adapter seam (`RawEventStore` + `WakeSource`, optionally `AtomicAppend` /
+`SnapshotStore`) has a contract far beyond "the trait compiles" — inclusive vs.
+exclusive read bounds, conflict rejection with nothing landing, catch-up→live
+ordering, lost-wakeup defense — and this crate pins it as **runnable checks**:
+the four rule-7 category modules (`sequence`, `boundary`, `linearizability`,
+`lifecycle`) plus two opt-in capability modules (`atomic` behind
+`atomic-append`, `snapshot` behind `snapshot`). Four macros invoke it —
+`conformance!` (the core matrix), `conformance_atomic_append!`,
+`conformance_snapshot!` (takes `positions`/`extremes` sample pairs),
+`conformance_lifecycle!` (`open`/`reopen` closures, persistent adapters only) —
+each generating one named `#[tokio::test]` per check over a shared **factory
+contract**: `|| async { (store, guard) }`, fresh store per test, the guard
+(e.g. `TempDir`, or `()`) keeping backing resources alive; `skip_unless:` gates
+environment-dependent adapters (postgres without `DATABASE_URL`). The crate
+docs carry the **writing-a-store-adapter guide** (what you implement, the
+append/read/wake contracts, running the kit, pinned contract notes), proven by
+the toy-adapter acceptance test (`tests/toy_adapter.rs`): a HashMap
+`RawEventStore + WakeSource + AtomicAppend` written against **only** the guide
+under an enforced no-adapter-source restriction, 34/34 first run. WHY: the
+freeze's executable spec — a third-party adapter is verifiable against the
+contract with no tribal knowledge and no reading of fjall/postgres source. All
+three shipped adapters consume the kit as a dev-dep (their local suites were
+deduped into it, PR #313).
 
 ### Kernel Crate (`nexus`) — Flat Module Layout
 

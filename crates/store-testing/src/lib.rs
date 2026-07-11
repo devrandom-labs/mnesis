@@ -60,7 +60,10 @@
 //!   [`AllPosition`](nexus_store::store::AllPosition). A scalar sequence
 //!   for an embedded store, a commit-ordered composite for a concurrent SQL
 //!   store. It is never carried on the envelope; it rides only on `$all`
-//!   items.
+//!   items. `nexus-store` ships no scalar impl, and the orphan rule blocks
+//!   `impl AllPosition for u64` in your crate — define a local newtype:
+//!   `struct MyPos(u64); impl AllPosition for MyPos {}` (plus the derives
+//!   the supertraits need).
 //! - `type AllStream` — the all-streams read cursor: an owned, `'static`,
 //!   `Send` `futures::Stream` with
 //!   `Item = Result<(Self::AllPosition, PersistedEnvelope), Self::Error>` —
@@ -138,7 +141,9 @@
 //!   Compare it against the stream's **actual** current head; on mismatch
 //!   return [`AppendError::Conflict`](nexus_store::error::AppendError)
 //!   carrying the stream id, the caller's expectation, and the actual head —
-//!   the caller reloads from `actual` and retries.
+//!   the caller reloads from `actual` and retries. The diagnostic id field
+//!   is `nexus::ErrorId`, built truncation-aware from the key's `Display`:
+//!   `stream_id: ErrorId::from_display(id)`.
 //! - The head check and the event insertion **must** be one atomic step (a
 //!   transaction, CAS, or a lock). A check-then-insert with a window between
 //!   lets a concurrent writer slip in and corrupt the stream; the kit's
@@ -147,7 +152,9 @@
 //!   `expected_version + 1` (from `1` when `None`). A gap, duplicate, or
 //!   out-of-order batch is rejected in the `Conflict` domain — and
 //!   **nothing** lands: a rejected append leaves the store byte-identical,
-//!   per-stream and `$all` alike.
+//!   per-stream and `$all` alike. In that `Conflict`, `expected` is the
+//!   caller's stated expectation and `actual` is the store's current head —
+//!   the fields describe the head disagreement, never the malformed batch.
 //! - Stamp every accepted event with the next `AllPosition`: strictly
 //!   monotonic across **all** streams in commit order, **not** required to
 //!   be gapless — an aborted append may burn positions, and readers
@@ -265,8 +272,10 @@
 //! the capability macros it needs) once, from one test file. Each generates
 //! one named `#[tokio::test]` per check, so nextest reports every contract
 //! rule as its own test — a failure names the exact rule that broke, not
-//! "some test in the suite." The invoking crate needs `tokio` (with
-//! `macros`, `rt-multi-thread`) as a dev-dependency.
+//! "some test in the suite." Dependencies you'll need: `tokio` with
+//! `macros` + `rt-multi-thread` (plus `sync`/`time` if your adapter uses
+//! tokio primitives), `thiserror` for your error enum (workspace rule), and
+//! `nexus-wake` for the in-process `WakeSource`.
 //!
 //! ## The factory contract
 //!

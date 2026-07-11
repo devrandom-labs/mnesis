@@ -49,3 +49,10 @@
 
 | # | Task | Deviation | Why | Impact |
 |---|------|-----------|-----|--------|
+| 1 | 1 | guide states `SnapshotStore` is UNGATED in nexus-store (plan said "behind `snapshot`") | the trait lives ungated in `state.rs`; only the KIT's snapshot checks sit behind the kit's `snapshot` feature | guide is accurate; plan prose was wrong |
+| 2 | 1 | "empty batch = Ok no-op" documented as contract guidance, attributed to shipped-adapter behavior, not trait text | `RawEventStore::append` trait docs don't state it; both adapters implement it; only the AtomicAppend variant has a kit check | candidate follow-up: make it trait-normative + add a core kit check |
+| 3 | 2 | guide gap: how to build `Conflict`'s diagnostic id | the toy author had to infer `ErrorId::from_display(id)` (constructor + that `StreamKey: Display`) from `nexus` source | guide amended: append section now shows the exact expression |
+| 4 | 2 | guide gap: `Conflict` field semantics when rejecting a malformed batch (gap/duplicate/wrong first version) | the toy author had to infer what `expected`/`actual` mean when the head check passed but the batch is malformed | guide amended: `expected` = caller's stated expectation, `actual` = store's current head — fields describe the head disagreement, never the batch |
+| 5 | 2 | guide gap: full dev-dependency list for an invoking crate | guide named only tokio `macros`+`rt-multi-thread`; the toy also needed tokio `sync`/`time`, `thiserror`, `nexus-wake` | guide amended: "dependencies you'll need" line in Running the kit |
+| 6 | 2 | guide gap: no shipped scalar `AllPosition` impl | the toy author had to discover the orphan rule blocks `impl AllPosition for u64` and a local newtype is required | guide amended: section 1 shows the `struct MyPos(u64); impl AllPosition for MyPos {}` recipe |
+| 7 | 2 | acceptance PASSED on the first run: 34/34 kit tests green for the toy HashMap adapter written against only the guide | the four gaps above were inference friction, not blockers — none required adapter-source access | #281 acceptance criterion met |
