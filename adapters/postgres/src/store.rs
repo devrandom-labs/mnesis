@@ -726,9 +726,10 @@ mod tests {
 
     /// The FULL `SchemaVersion` (`NonZeroU32`) range is accepted and widened to
     /// the BIGINT column — including `u32::MAX`, which exceeds `i32::MAX`. This
-    /// is a conformance requirement (the shared `assert_event_stream_conformance`
-    /// suite feeds a boundary `schema_version` near `u32::MAX`): the adapter must
-    /// persist every valid `SchemaVersion`, never reject one.
+    /// is a conformance requirement (the kit's
+    /// `sequence::check_append_then_read_round_trips` feeds a boundary
+    /// `schema_version` of `u32::MAX`): the adapter must persist every valid
+    /// `SchemaVersion`, never reject one.
     #[test]
     fn schema_version_full_u32_range_is_accepted() {
         let envs = [make_envelope_sv(1, u32::MAX)];
