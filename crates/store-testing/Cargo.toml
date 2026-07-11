@@ -28,6 +28,8 @@ workspace-hack = { version = "0.1", path = "../workspace-hack" }
 # self-check test target (flake nextest runs default features only).
 nexus-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
 nexus-store-testing = { path = ".", features = ["snapshot", "atomic-append"] }
+nexus-wake = { path = "../wake" }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
