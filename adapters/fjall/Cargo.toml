@@ -44,7 +44,10 @@ nexus-fjall = { path = ".", features = ["export", "import", "snapshot", "project
 # can encode/decode chunks. Separate from the line above because `cbor` is a
 # nexus-store feature, not a nexus-fjall one.
 nexus-store = { path = "../../crates/store", features = ["cbor"] }
-nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing" }
+nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+    "snapshot",
+    "atomic-append",
+] }
 proptest = { workspace = true }
 proptest-state-machine = { workspace = true }
 tempfile = { workspace = true }

@@ -1,133 +1,49 @@
-//! `nexus-fjall::FjallStore` conformance against the canonical
-//! [`EventStream`](nexus_store::stream::EventStream) trait contract.
+//! `nexus-fjall::FjallStore` conformance against the executable store
+//! contract — every check delegated to the `nexus-store-testing` kit (#281).
 //!
-//! Delegates every check to [`nexus_store_testing::assert_event_stream_conformance`].
-//!
-//! ## Lifetime note
-//!
-//! `read_stream` returns a `ScanCursor` holding a live `fjall::Iter` over the
-//! keyspace; that iterator becomes invalid when the `FjallStore` or its on-disk
-//! directory drops. The conformance suite calls `make_stream` and uses the
-//! returned stream after the closure returns, so we wrap the stream alongside
-//! its owning store and `TempDir` in [`OwnedFjallStream`] (generic over the
-//! opaque cursor type, which `nexus-fjall` does not export). The wrapper
-//! delegates `poll_next` and keeps the underlying resources alive for the
-//! stream's lifetime.
+//! `open_fresh` is shared by the base matrix and the lifecycle checks: the
+//! kit's context slot `C` carries the `TempDir` so the on-disk directory
+//! stays alive for exactly as long as the `FjallStore` that reads it, and
+//! the lifecycle `reopen` closure drops the store, then reopens the SAME
+//! `dir.path()` — proving real persistence (fjall is the kit's first
+//! persistent adapter; `InMemoryStore`'s "reopen" only exercises plumbing).
 
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use std::num::NonZeroU32;
-
 use nexus::Version;
-use nexus_fjall::{FjallError, FjallStore};
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
-use nexus_store::store::RawEventStore;
-use nexus_store::value::SchemaVersion;
-use nexus_store_testing::{
-    ConformanceRow, assert_all_stream_conformance, assert_event_stream_conformance,
-};
+use nexus_fjall::FjallStore;
+use tempfile::TempDir;
 
-/// The `read_stream` cursor plus the `FjallStore` and `TempDir` it depends on.
-/// The cursor holds a live `fjall::Iter` referencing data that becomes invalid
-/// when the keyspace closes or the on-disk dir is cleaned up, so we keep both
-/// alive for the stream's lifetime. Generic over the opaque cursor type (the
-/// concrete `ScanCursor<StreamScan>` is not exported by `nexus-fjall`).
-struct OwnedFjallStream<St> {
-    inner: St,
-    _store: FjallStore,
-    _tempdir: tempfile::TempDir,
+async fn open_fresh() -> (FjallStore, TempDir) {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = FjallStore::builder(dir.path().join("db"))
+        .open()
+        .expect("open fjall store");
+    (store, dir)
 }
 
-impl<St> futures::Stream for OwnedFjallStream<St>
-where
-    St: futures::Stream<Item = Result<PersistedEnvelope, FjallError>> + Unpin,
-{
-    type Item = Result<PersistedEnvelope, FjallError>;
-
-    fn poll_next(
-        mut self: core::pin::Pin<&mut Self>,
-        cx: &mut core::task::Context<'_>,
-    ) -> core::task::Poll<Option<Self::Item>> {
-        core::pin::Pin::new(&mut self.inner).poll_next(cx)
-    }
+nexus_store_testing::conformance! {
+    factory: open_fresh,
 }
 
-#[tokio::test]
-async fn fjall_event_stream_conforms() {
-    assert_event_stream_conformance(|rows: Vec<ConformanceRow>| async move {
-        let tempdir = tempfile::tempdir().expect("tempdir");
-        let store = FjallStore::builder(tempdir.path().join("db"))
+nexus_store_testing::conformance_atomic_append! {
+    factory: open_fresh,
+}
+
+nexus_store_testing::conformance_snapshot! {
+    factory: open_fresh,
+    positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
+}
+
+nexus_store_testing::conformance_lifecycle! {
+    open: open_fresh,
+    reopen: |store: FjallStore, dir: TempDir| async move {
+        drop(store);
+        let reopened = FjallStore::builder(dir.path().join("db"))
             .open()
-            .expect("open fjall store");
-        let stream_id = StreamKey::from_slice(b"conformance");
-
-        if !rows.is_empty() {
-            let envelopes: Vec<PendingEnvelope> = rows
-                .into_iter()
-                .map(|r| {
-                    // `PendingEnvelope::event_type` is `&'static str`; the
-                    // test process exits shortly after, so the per-row leak
-                    // here is intentional and bounded.
-                    let event_type: &'static str = Box::leak(r.event_type.into_boxed_str());
-                    let with_payload = pending_envelope(Version::new(r.version).unwrap())
-                        .event_type(event_type)
-                        .payload(r.payload);
-                    if r.schema_version == 1 {
-                        with_payload.build().expect("valid envelope")
-                    } else {
-                        with_payload
-                            .schema_version(SchemaVersion::new(
-                                NonZeroU32::new(r.schema_version).unwrap(),
-                            ))
-                            .build()
-                            .expect("valid envelope")
-                    }
-                })
-                .collect();
-            store
-                .append(&stream_id, None, &envelopes)
-                .await
-                .expect("append rows");
-        }
-
-        let inner = store
-            .read_stream(&stream_id, Version::INITIAL)
-            .await
-            .expect("open read_stream");
-
-        OwnedFjallStream {
-            inner,
-            _store: store,
-            _tempdir: tempdir,
-        }
-    })
-    .await;
-}
-
-/// `FjallStore` conformance against the canonical `$all` read-path contract
-/// (issue #266) — the same suite `InMemoryStore` runs, so the persistent
-/// adapter cannot silently diverge from the in-memory one on `read_all`
-/// ordering, exclusivity, or resume.
-///
-/// The suite calls the factory once per check and uses the store for the whole
-/// check, so each `FjallStore` must keep its on-disk dir alive for its lifetime.
-/// We leak the `TempDir` (`Box::leak`) — the test process exits shortly after,
-/// so the handful of leaked dirs are bounded, matching the harness's existing
-/// leak-for-`'static` philosophy.
-#[tokio::test]
-async fn fjall_all_stream_conforms() {
-    assert_all_stream_conformance(|| async {
-        let tempdir = tempfile::tempdir().expect("tempdir");
-        let store = FjallStore::builder(tempdir.path().join("db"))
-            .open()
-            .expect("open fjall store");
-        // Keep the on-disk dir alive for the store's whole lifetime.
-        Box::leak(Box::new(tempdir));
-        store
-    })
-    .await;
+            .expect("reopen fjall store");
+        (reopened, dir)
+    },
 }
