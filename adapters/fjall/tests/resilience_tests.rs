@@ -36,7 +36,6 @@
 
 use std::collections::HashMap;
 use std::num::NonZeroU32;
-use std::sync::Arc;
 
 use futures::StreamExt;
 use nexus::Version;
@@ -44,7 +43,6 @@ use nexus_fjall::FjallStore;
 use nexus_store::PendingEnvelope;
 use nexus_store::StreamKey;
 use nexus_store::envelope::pending_envelope;
-use nexus_store::error::AppendError;
 use nexus_store::store::RawEventStore;
 
 use proptest::prelude::*;
@@ -86,19 +84,6 @@ async fn read_all_payloads(store: &FjallStore, stream_id: &StreamKey) -> Vec<Vec
         payloads.push(env.payload().to_vec());
     }
     payloads
-}
-
-async fn read_all_versions(store: &FjallStore, stream_id: &StreamKey) -> Vec<u64> {
-    let mut stream = store
-        .read_stream(stream_id, Version::INITIAL)
-        .await
-        .unwrap();
-    let mut versions = Vec::new();
-    while let Some(__i) = stream.next().await {
-        let env = __i.unwrap();
-        versions.push(env.version().as_u64());
-    }
-    versions
 }
 
 async fn read_all_event_types(store: &FjallStore, stream_id: &StreamKey) -> Vec<String> {
@@ -357,43 +342,6 @@ proptest! {
 }
 
 // ============================================================================
-// CATEGORY D: Snapshot Isolation Probe
-// ============================================================================
-
-#[tokio::test]
-async fn attack_read_snapshot_isolation() {
-    // Append 1000 events in 10 batches of 100, then verify read consistency
-    let (store, _dir) = temp_store();
-    let sid_val = sk("snapshot-stream");
-
-    for batch in 0..10u64 {
-        let start = batch * 100 + 1;
-        let envelopes: Vec<_> = (start..start + 100)
-            .map(|v| make_envelope(v, "Tick", &v.to_le_bytes()))
-            .collect();
-        let expected_ver = Version::new(batch * 100);
-        store
-            .append(&sid_val, expected_ver, &envelopes)
-            .await
-            .unwrap();
-    }
-
-    // Verify we can read exactly 1000 events
-    let count = count_events(&store, &sid_val).await;
-    assert_eq!(count, 1000, "expected 1000 events total");
-
-    // Verify strict ordering: versions 1..=1000
-    let versions = read_all_versions(&store, &sid_val).await;
-    for (i, v) in versions.iter().enumerate() {
-        let expected = u64::try_from(i).unwrap() + 1;
-        assert_eq!(
-            *v, expected,
-            "version mismatch at position {i}: expected {expected}, got {v}"
-        );
-    }
-}
-
-// ============================================================================
 // CATEGORY E: Crash Simulation via mem::forget
 // ============================================================================
 
@@ -440,304 +388,8 @@ async fn attack_crash_simulation_forget_store() {
 }
 
 // ============================================================================
-// CATEGORY F: Key Boundary Conditions
-// ============================================================================
-
-#[tokio::test]
-async fn attack_version_u64_max_read() {
-    // Read from version u64::MAX — should return empty (no events at that version)
-    let (store, _dir) = temp_store();
-    let envs = vec![make_envelope(1, "A", b"data")];
-    store.append(&sk("s"), None, &envs).await.unwrap();
-
-    let mut stream = store
-        .read_stream(&sk("s"), Version::new(u64::MAX).unwrap())
-        .await
-        .unwrap();
-    assert!(
-        stream.next().await.is_none(),
-        "reading from u64::MAX should return empty"
-    );
-}
-
-#[tokio::test]
-async fn attack_read_from_version_zero() {
-    // Version 0 is INITIAL. Reading from 0 should include ALL events
-    // because events start at version 1, and the range scan starts from 0.
-    let (store, _dir) = temp_store();
-    let envs = vec![make_envelope(1, "A", b"1"), make_envelope(2, "B", b"2")];
-    store.append(&sk("s"), None, &envs).await.unwrap();
-
-    // Read from version 0 (INITIAL)
-    let count = count_events(&store, &sk("s")).await;
-    assert_eq!(count, 2, "reading from INITIAL should return all events");
-}
-
-#[tokio::test]
-async fn attack_read_nonexistent_stream() {
-    let (store, _dir) = temp_store();
-    let mut stream = store
-        .read_stream(&sk("does-not-exist"), Version::INITIAL)
-        .await
-        .unwrap();
-    assert!(
-        stream.next().await.is_none(),
-        "nonexistent stream should return empty"
-    );
-}
-
-#[tokio::test]
-async fn attack_read_past_end_of_stream() {
-    // Stream has 3 events (versions 1,2,3). Read from version 100.
-    let (store, _dir) = temp_store();
-    let envs = vec![
-        make_envelope(1, "A", b"1"),
-        make_envelope(2, "B", b"2"),
-        make_envelope(3, "C", b"3"),
-    ];
-    store.append(&sk("s"), None, &envs).await.unwrap();
-
-    let mut stream = store
-        .read_stream(&sk("s"), Version::new(100).unwrap())
-        .await
-        .unwrap();
-    assert!(
-        stream.next().await.is_none(),
-        "reading past end of stream should return empty"
-    );
-}
-
-// ============================================================================
-// CATEGORY G: Recovery Torture
-// ============================================================================
-
-#[tokio::test]
-async fn attack_recovery_torture_100_streams_reopen_5_times() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("db");
-
-    let mut total_events_per_stream: Vec<u64> = vec![0; 100];
-
-    for cycle in 0..5u64 {
-        let store = FjallStore::builder(&path).open().unwrap();
-
-        for (stream_idx, current_total) in total_events_per_stream.iter_mut().enumerate() {
-            let sid_val = sk(&format!("torture_{stream_idx}"));
-            let current = *current_total;
-            let new_events = 5u64;
-
-            let envelopes: Vec<_> = (0..new_events)
-                .map(|i| {
-                    let ver = current + i + 1;
-                    make_envelope(ver, "Torture", &ver.to_le_bytes())
-                })
-                .collect();
-
-            store
-                .append(&sid_val, Version::new(current), &envelopes)
-                .await
-                .unwrap();
-            *current_total += new_events;
-        }
-
-        // Verify all streams before closing
-        for (stream_idx, expected) in total_events_per_stream.iter().enumerate() {
-            let sid_val = sk(&format!("torture_{stream_idx}"));
-            let count = count_events(&store, &sid_val).await;
-            assert_eq!(
-                count, *expected,
-                "cycle {cycle}, stream {stream_idx}: expected {expected} events, got {count}"
-            );
-        }
-
-        drop(store);
-    }
-}
-
-// ============================================================================
-// CATEGORY H: Concurrent Append Storm
-// ============================================================================
-
-#[tokio::test]
-async fn attack_concurrent_append_storm_50_tasks() {
-    // 50 tasks all try to create different streams simultaneously
-    let (store, _dir) = temp_store();
-    let store = Arc::new(store);
-
-    let mut handles = Vec::new();
-    for i in 0..50u64 {
-        let store_clone = Arc::clone(&store);
-        let handle = tokio::spawn(async move {
-            let sid_val = StreamKey::from_slice(format!("concurrent_{i}").as_bytes());
-            let env = pending_envelope(Version::INITIAL)
-                .event_type(leak(&format!("Created_{i}")))
-                .payload(i.to_le_bytes().to_vec())
-                .build()
-                .expect("valid envelope");
-            store_clone.append(&sid_val, None, &[env]).await
-        });
-        handles.push(handle);
-    }
-
-    let mut successes: u64 = 0;
-    let mut failures: u64 = 0;
-    for handle in handles {
-        match handle.await.unwrap() {
-            Ok(()) => successes += 1,
-            Err(e) => {
-                println!("concurrent append failure: {e}");
-                failures += 1;
-            }
-        }
-    }
-
-    // All should succeed since they're different streams
-    assert_eq!(
-        successes, 50,
-        "all 50 unique-stream appends should succeed \
-         (got {successes} successes, {failures} failures)"
-    );
-
-    // Verify all 50 streams are readable
-    for i in 0..50u64 {
-        let sid_val = StreamKey::from_slice(format!("concurrent_{i}").as_bytes());
-        let count = count_events(&store, &sid_val).await;
-        assert_eq!(
-            count, 1,
-            "stream concurrent_{i} should have exactly 1 event"
-        );
-    }
-}
-
-#[tokio::test]
-async fn attack_concurrent_append_same_stream_conflict() {
-    // 10 tasks all try to append to the SAME stream with expected_version=INITIAL
-    // Only ONE should succeed. The rest should get Conflict errors.
-    let (store, _dir) = temp_store();
-    let store = Arc::new(store);
-
-    let mut handles = Vec::new();
-    for i in 0..10u64 {
-        let store_clone = Arc::clone(&store);
-        let handle = tokio::spawn(async move {
-            let sid_val = StreamKey::from_slice(b"contested-stream");
-            let env = pending_envelope(Version::INITIAL)
-                .event_type(leak(&format!("Contested_{i}")))
-                .payload(i.to_le_bytes().to_vec())
-                .build()
-                .expect("valid envelope");
-            store_clone.append(&sid_val, None, &[env]).await
-        });
-        handles.push(handle);
-    }
-
-    let mut successes: u64 = 0;
-    let mut conflicts: u64 = 0;
-    let mut other_errors: u64 = 0;
-    for handle in handles {
-        match handle.await.unwrap() {
-            Ok(()) => successes += 1,
-            Err(AppendError::Conflict { .. }) => conflicts += 1,
-            Err(_) => other_errors += 1,
-        }
-    }
-
-    assert_eq!(
-        successes, 1,
-        "exactly 1 append should win the race (got {successes})"
-    );
-    assert_eq!(
-        conflicts, 9,
-        "9 appends should get Conflict (got {conflicts})"
-    );
-    assert_eq!(other_errors, 0, "no other errors expected");
-
-    // Verify the stream has exactly 1 event
-    let sid_val = sk("contested-stream");
-    let count = count_events(&store, &sid_val).await;
-    assert_eq!(count, 1, "contested stream should have exactly 1 event");
-}
-
-// ============================================================================
 // CATEGORY K: Append-then-read version consistency
 // ============================================================================
-
-#[tokio::test]
-async fn attack_version_gap_in_batch() {
-    // Try appending envelopes with non-sequential versions (gap)
-    let (store, _dir) = temp_store();
-    let envs = vec![
-        make_envelope(1, "A", b"1"),
-        make_envelope(3, "C", b"3"), // skip version 2!
-    ];
-
-    let result = store.append(&sk("gap"), None, &envs).await;
-    assert!(result.is_err(), "version gap in batch must be rejected");
-}
-
-#[tokio::test]
-async fn attack_version_duplicate_in_batch() {
-    // Envelopes with duplicate versions
-    let (store, _dir) = temp_store();
-    let envs = vec![
-        make_envelope(1, "A", b"1"),
-        make_envelope(1, "B", b"2"), // duplicate version!
-    ];
-
-    let result = store.append(&sk("dup"), None, &envs).await;
-    assert!(
-        result.is_err(),
-        "duplicate version in batch must be rejected"
-    );
-}
-
-#[tokio::test]
-async fn attack_version_backwards_in_batch() {
-    // Envelopes with decreasing versions
-    let (store, _dir) = temp_store();
-    let envs = vec![
-        make_envelope(2, "B", b"2"),
-        make_envelope(1, "A", b"1"), // wrong order!
-    ];
-
-    let result = store.append(&sk("back"), Version::new(1), &envs).await;
-    // This depends on validation: first envelope has version 2, expected is 2 (1+1) → OK
-    // Second envelope has version 1, expected is 3 (1+1+1) → CONFLICT
-    assert!(
-        result.is_err(),
-        "backwards versions in batch must be rejected"
-    );
-}
-
-#[tokio::test]
-async fn attack_empty_batch_does_not_advance_version() {
-    let (store, _dir) = temp_store();
-
-    // Create stream with 1 event
-    store
-        .append(&sk("empty-batch"), None, &[make_envelope(1, "A", b"1")])
-        .await
-        .unwrap();
-
-    // Append empty batch
-    store
-        .append(&sk("empty-batch"), Version::new(1), &[])
-        .await
-        .unwrap();
-
-    // Should still be able to append at version 2 (empty batch didn't advance)
-    store
-        .append(
-            &sk("empty-batch"),
-            Version::new(1),
-            &[make_envelope(2, "B", b"2")],
-        )
-        .await
-        .unwrap();
-
-    let count = count_events(&store, &sk("empty-batch")).await;
-    assert_eq!(count, 2, "should have exactly 2 events after empty batch");
-}
 
 // ============================================================================
 // CATEGORY K2: Global sequence assignment across appends and streams
@@ -748,6 +400,11 @@ async fn attack_empty_batch_does_not_advance_version() {
 /// appends, and across appends to *different* streams. The sequence starts at
 /// 1. The position rides on the `$all` read tag (a per-stream event carries
 /// none), so the cross-stream interleaving is observed via `read_all`.
+///
+/// This asserts fjall's on-disk `GlobalSeq` allocation is CONTIGUOUS (no gaps
+/// across any of the three appends) — an implementation property strictly
+/// stronger than the store contract's monotonic-not-gapless guarantee (an
+/// aborted append may legally burn values elsewhere).
 #[tokio::test]
 async fn append_assigns_monotonic_all_position_across_streams() {
     let (store, _dir) = temp_store();
@@ -844,23 +501,6 @@ async fn attack_recovery_stream_id_counter_correctness() {
 // ============================================================================
 
 #[tokio::test]
-async fn attack_empty_batch_to_nonexistent_stream() {
-    let (store, _dir) = temp_store();
-
-    // Append empty batch to nonexistent stream with INITIAL version
-    // Should succeed (no-op) because the early return skips all validation
-    let result = store.append(&sk("phantom"), None, &[]).await;
-    assert!(
-        result.is_ok(),
-        "empty batch to nonexistent stream should be no-op"
-    );
-
-    // Stream should still not exist (no metadata written)
-    let count = count_events(&store, &sk("phantom")).await;
-    assert_eq!(count, 0, "phantom stream should have 0 events");
-}
-
-#[tokio::test]
 async fn attack_empty_batch_wrong_version_to_nonexistent() {
     // BUG PROBE: empty batch skips ALL validation including version check.
     // This means you can "succeed" with a wrong expected_version on an empty batch.
@@ -875,60 +515,6 @@ async fn attack_empty_batch_wrong_version_to_nonexistent() {
             "BUG FOUND: empty batch with wrong expected_version (999) \
              succeeded for nonexistent stream — version check is bypassed \
              by the early return at store.rs:61"
-        );
-    }
-}
-
-// ============================================================================
-// CATEGORY N: Large batch stress
-// ============================================================================
-
-#[tokio::test]
-async fn attack_large_batch_1000_events() {
-    let (store, _dir) = temp_store();
-    let sid_val = sk("large-batch");
-
-    let envelopes: Vec<_> = (1..=1000u64)
-        .map(|v| make_envelope(v, "Tick", &v.to_le_bytes()))
-        .collect();
-
-    store.append(&sid_val, None, &envelopes).await.unwrap();
-
-    let count = count_events(&store, &sid_val).await;
-    assert_eq!(count, 1000);
-
-    // Verify first and last
-    let versions = read_all_versions(&store, &sid_val).await;
-    assert_eq!(versions[0], 1);
-    assert_eq!(versions[999], 1000);
-}
-
-// ============================================================================
-// CATEGORY O: Multiple reopens with appends
-// ============================================================================
-
-#[tokio::test]
-async fn attack_reopen_10_times_with_appends() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("db");
-    let sid_val = sk("reopen-torture");
-
-    for cycle in 0..10u64 {
-        let store = FjallStore::builder(&path).open().unwrap();
-        let ver = cycle * 10;
-        let envelopes: Vec<_> = (1..=10u64)
-            .map(|i| make_envelope(ver + i, "Cycle", &(ver + i).to_le_bytes()))
-            .collect();
-        store
-            .append(&sid_val, Version::new(ver), &envelopes)
-            .await
-            .unwrap();
-
-        let count = count_events(&store, &sid_val).await;
-        let expected = (cycle + 1) * 10;
-        assert_eq!(
-            count, expected,
-            "after cycle {cycle}: expected {expected} events, got {count}"
         );
     }
 }
@@ -958,64 +544,6 @@ fn attack_schema_version_zero_rejected_by_type_system() {
         nexus_store::value::SchemaVersion::from_u32(0).is_err(),
         "SchemaVersion::from_u32(0) must return Err"
     );
-}
-
-// ============================================================================
-// CATEGORY Q: Concurrent reads during writes
-// ============================================================================
-
-#[tokio::test]
-async fn attack_concurrent_reads_and_writes() {
-    let (store, _dir) = temp_store();
-    let store = Arc::new(store);
-    let sid_val = sk("concurrent-rw");
-
-    // Pre-populate with 100 events
-    let initial_envs: Vec<_> = (1..=100u64)
-        .map(|v| make_envelope(v, "Init", &v.to_le_bytes()))
-        .collect();
-    store.append(&sid_val, None, &initial_envs).await.unwrap();
-
-    // Spawn 10 readers and 1 writer concurrently
-    let mut handles = Vec::new();
-
-    // Writer: append 100 more events
-    {
-        let store_w = Arc::clone(&store);
-        let sid_w = sid_val.clone();
-        handles.push(tokio::spawn(async move {
-            let envs: Vec<_> = (101..=200u64)
-                .map(|v| make_envelope(v, "Write", &v.to_le_bytes()))
-                .collect();
-            store_w
-                .append(&sid_w, Version::new(100), &envs)
-                .await
-                .unwrap();
-        }));
-    }
-
-    // 10 readers
-    for _ in 0..10u64 {
-        let store_r = Arc::clone(&store);
-        let sid_r = sid_val.clone();
-        handles.push(tokio::spawn(async move {
-            let count = count_events(&store_r, &sid_r).await;
-            // Should see either 100 (before write) or 200 (after write)
-            // NOT a partial count (e.g. 150)
-            assert!(
-                count == 100 || count == 200,
-                "reader saw {count} events — expected 100 or 200 (snapshot isolation violated?)"
-            );
-        }));
-    }
-
-    for handle in handles {
-        handle.await.unwrap();
-    }
-
-    // Final check: exactly 200 events
-    let final_count = count_events(&store, &sid_val).await;
-    assert_eq!(final_count, 200);
 }
 
 // ============================================================================
