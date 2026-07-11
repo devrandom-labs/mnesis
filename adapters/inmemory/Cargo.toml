@@ -26,7 +26,14 @@ tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
-nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing" }
+# Path-only self dev-dep (no version) unifies the `import` feature into the
+# crate's own test targets — `AtomicAppend` on `InMemoryStore` is gated
+# behind it (matches the pattern nexus-store uses for nexus-inmemory).
+nexus-inmemory = { path = ".", features = ["import"] }
+nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+    "snapshot",
+    "atomic-append",
+] }
 proptest = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
