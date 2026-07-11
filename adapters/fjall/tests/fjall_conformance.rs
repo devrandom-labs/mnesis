@@ -35,6 +35,7 @@ nexus_store_testing::conformance_atomic_append! {
 nexus_store_testing::conformance_snapshot! {
     factory: open_fresh,
     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
+    extremes: (Version::new(1).unwrap(), Version::new(u64::MAX).unwrap()),
 }
 
 nexus_store_testing::conformance_lifecycle! {

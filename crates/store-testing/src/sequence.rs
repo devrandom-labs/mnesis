@@ -607,6 +607,107 @@ where
     }
 }
 
+/// Subscribing to a stream that does not exist yet parks (after `CaughtUp`)
+/// and is woken by the stream's FIRST event — the producer-after-consumer
+/// startup order must work.
+pub async fn check_subscription_absent_stream_waits_then_delivers<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("ghost");
+
+    let sub = Subscription::new(&store);
+    let stream = sub
+        .subscribe(&id, None)
+        .unwrap_or_else(|e| panic!("register failed: {e:?}"));
+    pin_mut!(stream);
+
+    // An absent stream has an empty backlog: CaughtUp arrives first.
+    match next_step(&mut stream, "absent-stream boundary").await {
+        Step::CaughtUp => {}
+        Step::Event(env) => panic!("absent stream must have no backlog, got v{}", env.version()),
+    }
+
+    // The FIRST event ever written to the stream wakes the parked subscriber.
+    append_event(&store, &id.key(), 1, b"first").await;
+    match next_step(&mut stream, "absent-stream first event").await {
+        Step::Event(env) => {
+            assert_eq!(env.version().as_u64(), 1, "the first event must be v1");
+            assert_eq!(env.payload(), b"first");
+        }
+        Step::CaughtUp => panic!("CaughtUp must be emitted exactly once"),
+    }
+}
+
+/// Two simultaneous subscribers on ONE stream each receive the full event
+/// sequence — subscriptions are fan-out, never competing-consumer queues.
+pub async fn check_two_subscribers_same_stream_both_receive<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    S::Stream: Unpin,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (raw, _guard) = factory().await;
+    let store = raw.into_store();
+    let id = SubId::new("fanout");
+    append_event(&store, &id.key(), 1, b"p1").await;
+
+    let sub = Subscription::new(&store);
+    let stream_a = sub
+        .subscribe(&id, None)
+        .unwrap_or_else(|e| panic!("register a failed: {e:?}"));
+    let stream_b = sub
+        .subscribe(&id, None)
+        .unwrap_or_else(|e| panic!("register b failed: {e:?}"));
+    pin_mut!(stream_a);
+    pin_mut!(stream_b);
+
+    // Both drain the backlog and reach CaughtUp independently.
+    match next_step(&mut stream_a, "fanout backlog a").await {
+        Step::Event(env) => assert_eq!(env.version().as_u64(), 1, "subscriber a backlog"),
+        Step::CaughtUp => panic!("subscriber a: CaughtUp before backlog"),
+    }
+    match next_step(&mut stream_a, "fanout boundary a").await {
+        Step::CaughtUp => {}
+        Step::Event(env) => panic!("subscriber a: expected CaughtUp, got v{}", env.version()),
+    }
+    match next_step(&mut stream_b, "fanout backlog b").await {
+        Step::Event(env) => assert_eq!(env.version().as_u64(), 1, "subscriber b backlog"),
+        Step::CaughtUp => panic!("subscriber b: CaughtUp before backlog"),
+    }
+    match next_step(&mut stream_b, "fanout boundary b").await {
+        Step::CaughtUp => {}
+        Step::Event(env) => panic!("subscriber b: expected CaughtUp, got v{}", env.version()),
+    }
+
+    // One live append reaches BOTH subscribers.
+    append_event(&store, &id.key(), 2, b"p2").await;
+    match next_step(&mut stream_a, "fanout live a").await {
+        Step::Event(env) => assert_eq!(
+            env.version().as_u64(),
+            2,
+            "subscriber a must receive the live event — fan-out, not a queue",
+        ),
+        Step::CaughtUp => panic!("subscriber a: CaughtUp must be emitted exactly once"),
+    }
+    match next_step(&mut stream_b, "fanout live b").await {
+        Step::Event(env) => assert_eq!(
+            env.version().as_u64(),
+            2,
+            "subscriber b must receive the live event — fan-out, not a queue",
+        ),
+        Step::CaughtUp => panic!("subscriber b: CaughtUp must be emitted exactly once"),
+    }
+}
+
 /// A backlog larger than the catch-up chunk (1024) crosses the internal
 /// rescan seams with no gap or duplicate, and `CaughtUp` still arrives.
 pub async fn check_subscription_large_backlog_crosses_chunk_seam<S, C, F, Fut>(factory: &F)

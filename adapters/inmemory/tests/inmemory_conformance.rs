@@ -19,4 +19,5 @@ nexus_store_testing::conformance_atomic_append! {
 nexus_store_testing::conformance_snapshot! {
     factory: || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) },
     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
+    extremes: (Version::new(1).unwrap(), Version::new(u64::MAX).unwrap()),
 }

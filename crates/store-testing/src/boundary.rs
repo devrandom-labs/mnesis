@@ -170,6 +170,29 @@ where
     );
 }
 
+/// A 1 MiB payload round-trips byte-for-byte — well beyond any internal
+/// buffer/batch size (the round-trip check tops out at 4 KiB).
+pub async fn check_large_payload_round_trips<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let id = StreamKey::from_slice(b"large-payload");
+    let payload: Vec<u8> = (0..1_048_576u32)
+        .map(|i| u8::try_from(i % 251).unwrap_or(0)) // prime modulus: no 256-aligned repeats
+        .collect();
+    append_rows(&store, &id, &[ConformanceRow::new(1, "E", payload.clone())]).await;
+    let got = drain_stream(&store, &id, Version::INITIAL).await;
+    assert_eq!(got.len(), 1);
+    assert_eq!(
+        got[0].payload, payload,
+        "1 MiB payload must round-trip byte-for-byte"
+    );
+}
+
 /// Stream ids sharing a byte prefix ("a", "ab") are fully isolated.
 ///
 /// A prefix-collision in the adapter's key encoding would leak events across
