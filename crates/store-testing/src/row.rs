@@ -38,7 +38,7 @@ impl ConformanceRow {
 
     /// Set the schema version (defaults to 1).
     #[must_use]
-    pub fn with_schema_version(mut self, schema_version: u32) -> Self {
+    pub const fn with_schema_version(mut self, schema_version: u32) -> Self {
         self.schema_version = schema_version;
         self
     }
