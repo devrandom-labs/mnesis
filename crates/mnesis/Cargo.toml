@@ -29,6 +29,11 @@ criterion = { workspace = true }
 # this, the gate runs default features only and skips the fixture entirely.
 mnesis = { path = ".", features = ["testing", "derive"] }
 mnesis-macros = { path = "../macros" }
+# Shared toy test domains (#239). Path-only dev-dep cycle (this crate depends on
+# `mnesis`) unifies the canonical `Counter` domain into the `tests/` integration
+# targets — here, the kernel property tests. No `serde`: property tests drive the
+# domain through replay only.
+mnesis-test-domains = { path = "../test-domains" }
 proptest = { workspace = true }
 static_assertions = { workspace = true }
 thiserror = { workspace = true }

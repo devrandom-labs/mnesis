@@ -1,0 +1,29 @@
+[package]
+name = "mnesis-test-domains"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# Shared toy test domains for mnesis's `tests/` integration targets (#239).
+# `publish = false` — this is test scaffolding, never shipped to crates.io.
+# Consumed as a path-only dev-dependency (a legal dev-dep cycle: it depends on
+# `mnesis`, and `mnesis`/`mnesis-store` dev-depend back on it), which unifies the
+# domain type across each crate's `tests/` integration targets.
+
+[features]
+default = []
+# Adds serde derives to the Counter domain for the codec/snapshot paths that
+# round-trip events through `JsonCodec`. Off by default: the kernel's property
+# tests drive the domain through replay only and need no serialization.
+serde = ["dep:serde"]
+
+[dependencies]
+mnesis = { version = "0.1.0", path = "../mnesis", default-features = false }
+serde = { workspace = true, features = ["derive"], optional = true }
+thiserror = { workspace = true }
+workspace-hack = { version = "0.1", path = "../workspace-hack" }
+
+[lints]
+workspace = true

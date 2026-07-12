@@ -10,6 +10,7 @@ members = [
     "crates/nostd-smoketest",
     "crates/store",
     "crates/store-testing",
+    "crates/test-domains",
     "crates/wake",
     "crates/wake-nostd",
     "crates/workspace-hack",

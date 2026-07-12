@@ -14,94 +14,28 @@
 #![cfg(not(miri))]
 
 use mnesis::*;
+use mnesis_test_domains::Counter;
+use mnesis_test_domains::CounterEvent;
+use mnesis_test_domains::TestId;
 use proptest::prelude::*;
-use std::fmt;
 
 // =============================================================================
-// Test domain — minimal types for property testing
+// Strategies — random data over the shared canonical `Counter`
+// (mnesis-test-domains, #239)
 // =============================================================================
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
-struct PId(String);
-impl PId {
-    fn new(v: u64) -> Self {
-        Self(format!("p-{v}"))
-    }
-}
-impl fmt::Display for PId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-impl AsRef<[u8]> for PId {
-    fn as_ref(&self) -> &[u8] {
-        self.0.as_bytes()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-enum CountEvent {
-    Incremented,
-    Decremented,
-    Set(u64),
-}
-impl Message for CountEvent {}
-impl DomainEvent for CountEvent {
-    fn name(&self) -> &'static str {
-        match self {
-            Self::Incremented => "Incremented",
-            Self::Decremented => "Decremented",
-            Self::Set(_) => "Set",
-        }
-    }
-}
-
-#[derive(Default, Debug, PartialEq, Clone)]
-struct CountState {
-    value: i64,
-}
-impl AggregateState for CountState {
-    type Event = CountEvent;
-    fn initial() -> Self {
-        Self::default()
-    }
-    fn apply(mut self, event: &CountEvent) -> Self {
-        match event {
-            CountEvent::Incremented => self.value += 1,
-            CountEvent::Decremented => self.value -= 1,
-            CountEvent::Set(v) => self.value = (*v).cast_signed(),
-        }
-        self
-    }
-}
-
-#[derive(Debug)]
-struct CountAgg;
-#[derive(Debug, thiserror::Error)]
-#[error("count error")]
-struct CountErr;
-impl Aggregate for CountAgg {
-    type State = CountState;
-    type Error = CountErr;
-    type Id = PId;
-}
-
-// =============================================================================
-// Strategies — generate random valid data
-// =============================================================================
-
-/// Generate a random `CountEvent`
-fn arb_event() -> impl Strategy<Value = CountEvent> {
+/// Generate a random `CounterEvent`
+fn arb_event() -> impl Strategy<Value = CounterEvent> {
     prop_oneof![
-        Just(CountEvent::Incremented),
-        Just(CountEvent::Decremented),
-        (0..1000u64).prop_map(CountEvent::Set),
+        Just(CounterEvent::Incremented),
+        Just(CounterEvent::Decremented),
+        (0..1000i64).prop_map(CounterEvent::Set),
     ]
 }
 
 /// Helper: replay events into a fresh aggregate, returns the aggregate.
-fn replay_events(events: &[CountEvent]) -> AggregateRoot<CountAgg> {
-    let mut agg = AggregateRoot::<CountAgg>::new(PId::new(1));
+fn replay_events(events: &[CounterEvent]) -> AggregateRoot<Counter> {
+    let mut agg = AggregateRoot::<Counter>::new(TestId::numbered(1));
     for (i, e) in events.iter().enumerate() {
         let v = Version::new((i + 1) as u64).unwrap();
         agg.replay(v, e).unwrap();
@@ -110,8 +44,8 @@ fn replay_events(events: &[CountEvent]) -> AggregateRoot<CountAgg> {
 }
 
 /// Helper: fold events via `commit_persisted` (simulating post-persistence sync).
-fn apply_events_to(events: &[CountEvent]) -> AggregateRoot<CountAgg> {
-    let mut agg = AggregateRoot::<CountAgg>::new(PId::new(1));
+fn apply_events_to(events: &[CounterEvent]) -> AggregateRoot<Counter> {
+    let mut agg = AggregateRoot::<Counter>::new(TestId::numbered(1));
     for (i, e) in events.iter().enumerate() {
         let v = Version::new((i + 1) as u64).unwrap();
         let batch: Events<_, 0> = Events::new(e.clone());
@@ -177,7 +111,7 @@ proptest! {
     ) {
         let corrupt_idx = corrupt_idx % (events.len() - 1) + 1; // ensure valid index > 0
 
-        let mut agg = AggregateRoot::<CountAgg>::new(PId::new(1));
+        let mut agg = AggregateRoot::<Counter>::new(TestId::numbered(1));
         let mut found_error = false;
         for (i, event) in events.iter().enumerate() {
             // At corrupt_idx, skip a version to create a gap
@@ -223,7 +157,7 @@ proptest! {
         let mut agg = replay_events(&events);
         let last_version = agg.version().unwrap();
 
-        let result = agg.replay(last_version, &CountEvent::Incremented);
+        let result = agg.replay(last_version, &CounterEvent::Incremented);
         prop_assert!(result.is_err(), "Should reject duplicate version");
     }
 

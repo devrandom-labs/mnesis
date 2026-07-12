@@ -82,6 +82,10 @@ mnesis-store = { path = ".", features = ["subscription", "export", "import", "cb
 # path-only form is stripped at publish time.
 mnesis-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
 mnesis-store-testing = { path = "../store-testing" }
+# Shared toy test domains (#239). `serde` on: snapshot_integration_tests round-
+# trips the canonical `Counter` domain through `JsonCodec`. Path-only dev-dep
+# (legal cycle via mnesis); repository_qa uses its own hand-rolled codecs.
+mnesis-test-domains = { path = "../test-domains", features = ["serde"] }
 proptest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
