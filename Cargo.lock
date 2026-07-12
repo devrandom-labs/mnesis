@@ -1499,6 +1499,8 @@ dependencies = [
  "nexus-inmemory",
  "nexus-store",
  "nexus-store-testing",
+ "nexus-wake",
+ "thiserror",
  "tokio",
  "workspace-hack",
 ]

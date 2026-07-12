@@ -1,10 +1,11 @@
-//! The executable conformance kit for `nexus-store` adapters (issue #281).
-//!
-//! ## What this is
+//! The executable conformance kit for `nexus-store` adapters — and the guide
+//! to writing one (issue #281).
 //!
 //! Every store adapter (`nexus-inmemory`, `nexus-fjall`, `nexus-postgres`,
-//! and any future one) implements the same seam: `RawEventStore` +
-//! `WakeSource`, optionally `AtomicAppend` and `SnapshotStore`. That seam has
+//! and any future one) implements the same seam:
+//! [`RawEventStore`](nexus_store::store::RawEventStore) +
+//! [`WakeSource`](nexus_store::wake::WakeSource), optionally `AtomicAppend`
+//! and [`SnapshotStore`](nexus_store::state::SnapshotStore). That seam has
 //! a contract that goes well beyond "the trait compiles" — inclusive vs.
 //! exclusive read bounds, optimistic-conflict rejection, subscription
 //! catch-up→live ordering, concurrent-writer linearizability. This crate
@@ -29,11 +30,252 @@
 //!   commit/hydrate atomically together, and a schema bump reads back
 //!   `Stale`, never decode garbage.
 //!
+//! The rest of this page is the **writing-a-store-adapter guide**. Sections
+//! 1–4 restate the seam's contract in one place (the trait docs in
+//! `nexus-store` remain the normative source; follow the links); section 5
+//! shows how to prove an implementation with the kit; section 6 lists the
+//! pinned ambiguities that trip up new adapters. It assumes no knowledge of
+//! the shipped adapters — you never need to read `nexus-fjall` or
+//! `nexus-postgres` source.
+//!
+//! # What you implement
+//!
+//! One store type implements two mandatory traits.
+//!
+//! [`RawEventStore`](nexus_store::store::RawEventStore) — bytes in, bytes
+//! out. The adapter never sees typed events or codecs; the repository facade
+//! encodes into [`PendingEnvelope`](nexus_store::envelope::PendingEnvelope)s
+//! before calling you. You supply:
+//!
+//! - `type Error` — your own error type, bound
+//!   `core::error::Error + Send + Sync + 'static`. Keep it distinct from
+//!   `nexus-store`'s facade error types; the facade wraps yours, and a shared
+//!   type would double-wrap.
+//! - `type Stream` — the per-stream read cursor: an owned, `'static`,
+//!   `Send` `futures::Stream` with
+//!   `Item = Result<PersistedEnvelope, Self::Error>` (the
+//!   [`EventStream`](nexus_store::stream::EventStream) marker bound).
+//! - `type AllPosition` — your store-local `$all` resume position: any
+//!   `Copy + Ord + Send + Sync + Debug + 'static` type implementing
+//!   [`AllPosition`](nexus_store::store::AllPosition). A scalar sequence
+//!   for an embedded store, a commit-ordered composite for a concurrent SQL
+//!   store. It is never carried on the envelope; it rides only on `$all`
+//!   items. `nexus-store` ships no scalar impl, and the orphan rule blocks
+//!   `impl AllPosition for u64` in your crate — define a local newtype:
+//!   `struct MyPos(u64); impl AllPosition for MyPos {}` (plus the derives
+//!   the supertraits need).
+//! - `type AllStream` — the all-streams read cursor: an owned, `'static`,
+//!   `Send` `futures::Stream` with
+//!   `Item = Result<(Self::AllPosition, PersistedEnvelope), Self::Error>` —
+//!   every item tagged with its position.
+//! - Make both stream types `Unpin`. The trait imposes no such bound, but
+//!   the subscription path
+//!   ([`Subscription`](nexus_store::subscription::Subscription)) requires it.
+//! - Three methods — [`append`](nexus_store::store::RawEventStore::append),
+//!   [`read_stream`](nexus_store::store::RawEventStore::read_stream),
+//!   [`read_all`](nexus_store::store::RawEventStore::read_all) — whose
+//!   contracts are the next two sections.
+//!
+//! [`WakeSource`](nexus_store::wake::WakeSource) — how live subscriptions
+//! learn that a commit landed. See "The wake contract" below.
+//!
+//! Optional capability traits, each with its own kit module:
+//!
+//! - `AtomicAppend` (at `nexus_store::import::AtomicAppend`, behind
+//!   `nexus-store`'s `import` feature) — commit several per-stream runs in
+//!   **one** transaction, all-or-nothing; the primitive bulk import needs.
+//!   Each write's `expected_version` is validated against the target's
+//!   **running** head (counting earlier writes to the same target inside the
+//!   batch); any mismatch aborts the whole transaction with
+//!   `AtomicAppendError::Conflict { index, actual }`, and on any failure
+//!   **no** write is applied.
+//! - [`SnapshotStore<Vec<u8>, P>`](nexus_store::state::SnapshotStore) —
+//!   atomic persistence of derived state plus the position it was folded to
+//!   (`hydrate` / `commit`). Byte-level: `S = Vec<u8>`; typed state is a
+//!   codec bridge upstream, not your concern. Two useful instantiations:
+//!   `P = Version` (aggregate snapshots) and `P =` your `AllPosition`
+//!   (projection checkpoints). `hydrate` returns the three-state
+//!   [`Hydrated`](nexus_store::state::Hydrated) — `Absent` (never saved),
+//!   `Stale` (saved under a different schema version; the caller rebuilds),
+//!   `Found` (position + state). State and position commit **together**: the
+//!   trait has no "save state alone", and your implementation must persist
+//!   the pair atomically so a half-write is unrepresentable.
+//!
+//! Consumers never call you directly — they go through the `Store<S>`
+//! handle, repositories, and subscriptions, all generic over the seam.
+//! Implement the traits and everything above them works.
+//!
+//! ## Storing an event
+//!
+//! `append` hands you `&[PendingEnvelope]`; reads must hand back
+//! [`PersistedEnvelope`](nexus_store::envelope::PersistedEnvelope)s. The
+//! supported recipe is the canonical wire frame: persist, per event, the
+//! `Version` (from `PendingEnvelope::version()`) plus the output of
+//! [`encode_frame`](nexus_store::wire::encode_frame):
+//!
+//! ```ignore
+//! let frame = nexus_store::wire::encode_frame(
+//!     env.schema_version_value(),
+//!     &env.event_type_value(),
+//!     &env.payload_value(),
+//!     env.metadata_value().as_ref(),
+//! )?; // EncodedFrame { value: Bytes, offsets: FrameOffsets }
+//! ```
+//!
+//! Store `frame.value` (one contiguous `Bytes` buffer), `frame.offsets`,
+//! and the `SchemaVersion`; on read, rebuild with
+//! [`PersistedEnvelope::try_new`](nexus_store::envelope::PersistedEnvelope::try_new)
+//! `(version, value, schema_version, offsets.event_type, offsets.payload,
+//! offsets.metadata)`. The frame lands the payload on a 16-byte boundary
+//! inside the buffer — an invariant zero-copy codecs (rkyv, POD) rely on. A
+//! custom storage layout is allowed, but then payload alignment and field
+//! re-validation are on you.
+//!
+//! # The append contract
+//!
+//! [`append(id, expected_version, envelopes)`](nexus_store::store::RawEventStore::append)
+//! is optimistic concurrency:
+//!
+//! - `expected_version` is the stream head the caller last saw: `None` = a
+//!   fresh stream with no events, `Some(v)` = the head is exactly `v`.
+//!   Compare it against the stream's **actual** current head; on mismatch
+//!   return [`AppendError::Conflict`](nexus_store::error::AppendError)
+//!   carrying the stream id, the caller's expectation, and the actual head —
+//!   the caller reloads from `actual` and retries. The diagnostic id field
+//!   is `nexus::ErrorId`, built truncation-aware from the key's `Display`:
+//!   `stream_id: ErrorId::from_display(id)`.
+//! - The head check and the event insertion **must** be one atomic step (a
+//!   transaction, CAS, or a lock). A check-then-insert with a window between
+//!   lets a concurrent writer slip in and corrupt the stream; the kit's
+//!   linearizability checks race real writers at exactly this seam.
+//! - Envelope versions must run strictly sequentially from
+//!   `expected_version + 1` (from `1` when `None`). A gap, duplicate, or
+//!   out-of-order batch is rejected in the `Conflict` domain — and
+//!   **nothing** lands: a rejected append leaves the store byte-identical,
+//!   per-stream and `$all` alike. In that `Conflict`, `expected` is the
+//!   caller's stated expectation and `actual` is the store's current head —
+//!   the fields describe the head disagreement, never the malformed batch.
+//! - Stamp every accepted event with the next `AllPosition`: strictly
+//!   monotonic across **all** streams in commit order, **not** required to
+//!   be gapless — an aborted append may burn positions, and readers
+//!   tolerate the gaps.
+//! - An empty `envelopes` slice: run the head check first (a stale
+//!   `expected_version` is still a `Conflict`), then return `Ok` — nothing
+//!   written, nobody woken.
+//! - After the commit is durable — never before — fire your wake path (see
+//!   "The wake contract").
+//!
+//! # The read contract
+//!
+//! Two read methods, deliberately asymmetric.
+//!
+//! [`read_stream(id, from)`](nexus_store::store::RawEventStore::read_stream)
+//! — a bounded scan of one stream:
+//!
+//! - `from` is **inclusive**: yield every event with `version >= from`, in
+//!   ascending `Version` order, then terminate with `None`.
+//! - An absent stream is an **empty** stream, never an error.
+//! - After `None` the stream stays `None` (fused) — the kit polls again to
+//!   prove it.
+//! - Internal batching/pagination is allowed and must be invisible; bounding
+//!   resident memory is your concern (fjall, for instance, holds one lazy
+//!   LSM cursor rather than fixed-size batches).
+//!
+//! [`read_all(from: Option<AllPosition>)`](nexus_store::store::RawEventStore::read_all)
+//! — a bounded scan across all streams:
+//!
+//! - `from` is **exclusive**: `None` = from the very beginning, `Some(p)` =
+//!   strictly after `p`. Yield in ascending position order, each item tagged
+//!   `(position, envelope)`, then terminate with `None` when caught up.
+//! - Resume is `Ord`-based: the subscription loop reopens with the last
+//!   position it delivered, and there is deliberately no successor function.
+//!   Your scan must read "strictly greater than `from`" — tolerating gaps by
+//!   scanning a range, never by stepping `+1`.
+//!
+//! The asymmetry (inclusive `Version` vs. exclusive `AllPosition`) is
+//! intentional: a single stream's versions are a gapless successor sequence,
+//! so the resume seam computes `v + 1` itself and asks inclusively — while a
+//! composite `$all` position (e.g. postgres's transaction-ordered pair) has
+//! no natural `+1`, so resume must be "strictly after what I saw". Both
+//! reads serve the same strict-after resume; the difference is who computes
+//! the successor.
+//!
+//! What a scan opened *before* a concurrent commit observes is
+//! adapter-unspecified — see "Contract notes".
+//!
+//! # The wake contract
+//!
+//! A live subscription is a catch-up-then-park loop; the loop itself ships
+//! generically in `nexus-store` and works for any adapter. Your half is
+//! [`WakeSource`](nexus_store::wake::WakeSource): two methods and one
+//! call-site discipline.
+//!
+//! - [`register(stream: Option<&[u8]>)`](nexus_store::wake::WakeSource::register)
+//!   — called once, synchronously, when a subscription opens
+//!   (`None` registers for `$all`). Return a
+//!   [`WakeRegistration`](nexus_store::wake::WakeRegistration) that keeps
+//!   wake-routing alive until dropped.
+//! - [`arm`](nexus_store::wake::WakeRegistration::arm) — returns an owned
+//!   `'static` future. Contract: the future captures a "seen point" at the
+//!   moment `arm` is called and resolves once a wake is delivered **after**
+//!   that point — a wake landing between `arm` and the `.await` must NOT be
+//!   lost. The generic loop arms *before* its confirming re-scan whenever it
+//!   thinks it is caught up; that ordering plus your arm-time capture is the
+//!   entire lost-wakeup defense.
+//! - [`wake(stream)`](nexus_store::wake::WakeSource::wake) — call after
+//!   **every** durable commit to `stream`, never before (a woken subscriber
+//!   immediately re-reads and must see the data). A per-stream commit is
+//!   also an `$all` event: `$all` observers must be woken too.
+//! - Spurious wakes are permitted — each costs one empty re-scan. Lost wakes
+//!   are not — a lost wake is a subscription hung forever, and the kit's
+//!   `check_wake_after_idle` and `check_caught_up_boundary_race` exist to
+//!   catch exactly that.
+//!
+//! In-process adapters should not build this machinery: embed
+//! `nexus_wake::StreamNotifiers` and delegate — the exact shape
+//! `nexus-inmemory` and `nexus-fjall` ship:
+//!
+//! ```ignore
+//! use std::sync::Arc;
+//!
+//! use nexus_store::wake::WakeSource;
+//! use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
+//!
+//! struct MyStore {
+//!     // ... your storage ...
+//!     notifiers: Arc<StreamNotifiers>, // StreamNotifiers::new() -> Arc<StreamNotifiers>
+//! }
+//!
+//! impl WakeSource for MyStore {
+//!     type Registration = WakeReg;
+//!     type Error = NotifyError;
+//!
+//!     fn register(&self, stream: Option<&[u8]>) -> Result<WakeReg, NotifyError> {
+//!         self.notifiers.register(stream)
+//!     }
+//!
+//!     fn wake(&self, stream: &[u8]) {
+//!         self.notifiers.wake(stream); // per-stream subscribers + the `$all` generation
+//!         self.notifiers.wake_all(); // the store-wide `$all` notifier
+//!     }
+//! }
+//! ```
+//!
+//! …and at the end of a successful non-empty `append`, after the commit is
+//! durable: `self.notifiers.wake(id.as_ref()); self.notifiers.wake_all();`.
+//! A distributed adapter implements the same two traits over its own signal
+//! (postgres: `LISTEN`/`NOTIFY`).
+//!
+//! # Running the kit
+//!
 //! An adapter proves conformance by invoking the [`conformance!`] macro (and
 //! the capability macros it needs) once, from one test file. Each generates
 //! one named `#[tokio::test]` per check, so nextest reports every contract
 //! rule as its own test — a failure names the exact rule that broke, not
-//! "some test in the suite."
+//! "some test in the suite." Dependencies you'll need: `tokio` with
+//! `macros` + `rt-multi-thread` (plus `sync`/`time` if your adapter uses
+//! tokio primitives), `thiserror` for your error enum (workspace rule), and
+//! `nexus-wake` for the in-process `WakeSource`.
 //!
 //! ## The factory contract
 //!
@@ -56,11 +298,16 @@
 //! - [`conformance_atomic_append!`] — `AtomicAppend` checks; requires the
 //!   `atomic-append` feature and an `S: AtomicAppend` factory.
 //! - [`conformance_snapshot!`] — `SnapshotStore` checks; requires the
-//!   `snapshot` feature, an `S: SnapshotStore<_, P>` factory, and two
-//!   ascending sample `P` positions.
+//!   `snapshot` feature, an `S: SnapshotStore<_, P>` factory, and two pairs
+//!   of ascending sample `P` positions: `positions` (ordinary values) and
+//!   `extremes` (the representable edges, proving the position codec has no
+//!   off-by-one at either end).
 //! - [`conformance_lifecycle!`] — close/reopen checks against the SAME
 //!   backing storage; skipped entirely by in-memory adapters (nothing to
-//!   reopen), run by every persistent adapter (fjall, postgres).
+//!   reopen), run by every persistent adapter (fjall, postgres). Takes two
+//!   closures: `open` (the usual factory shape) and `reopen`
+//!   (`Fn(S, C) -> Fut<Output = (S, C)>`), which consumes the prior pair so
+//!   it can drop the store before reopening the same storage.
 //!
 //! ## `skip_unless:` for environment-gated adapters
 //!
@@ -71,7 +318,7 @@
 //! still running for real under the nixosTest CI attribute that supplies a
 //! live database.
 //!
-//! ## Contract notes
+//! # Contract notes
 //!
 //! Ambiguities pinned during this work, load-bearing for anyone writing a
 //! new adapter:
@@ -95,10 +342,11 @@
 //!   `u32::MAX` as the absent-metadata sentinel, so "empty but present"
 //!   would collide with "absent". The boundary check is
 //!   `check_metadata_absent_vs_present_distinct`, not …`_vs_empty_`.
-//!
-//! The full "writing a store adapter" guide (worked example, toy adapter,
-//! troubleshooting) is PR3 of #281 — this crate stays the executable
-//! contract, not the tutorial.
+//! - **Public error enums are `#[non_exhaustive]`.**
+//!   [`AppendError`](nexus_store::error::AppendError),
+//!   `AtomicAppendError`, and their siblings may grow variants without a
+//!   major bump — match the variant you handle (`Conflict`) plus a wildcard
+//!   arm, never exhaustively.
 
 #![allow(
     clippy::unwrap_used,
