@@ -1,7 +1,7 @@
 //! Adapter-pluggable wake mechanism for live subscriptions.
 //!
 //! The generic subscription loop parks on a [`WakeRegistration`] until new
-//! events may exist. In-process adapters use `nexus_wake::StreamNotifiers`;
+//! events may exist. In-process adapters use `mnesis_wake::StreamNotifiers`;
 //! distributed adapters (e.g. postgres) implement these traits over
 //! `LISTEN`/`NOTIFY`.
 //!

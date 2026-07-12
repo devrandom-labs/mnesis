@@ -1,4 +1,4 @@
-//! Adversarial property tests for `nexus-store`.
+//! Adversarial property tests for `mnesis-store`.
 //!
 //! Uses proptest to generate chaotic inputs and verify store invariants hold.
 //!
@@ -67,24 +67,24 @@ use std::sync::Arc;
 
 use bytes::Bytes;
 use futures::StreamExt;
-use nexus::{ErrorId, Version};
-use nexus_inmemory::InMemoryStore;
-use nexus_inmemory::InMemoryStoreError;
-use nexus_store::Repository;
-use nexus_store::Store;
-use nexus_store::codec::{Decode, Encode};
-use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope};
-use nexus_store::error::StoreError;
-use nexus_store::pending_envelope;
-use nexus_store::store::RawEventStore;
-use nexus_store::upcasting::EventMorsel;
-use nexus_store::value::{EventType, Metadata, Payload, SchemaVersion};
-use nexus_store::wire;
+use mnesis::{ErrorId, Version};
+use mnesis_inmemory::InMemoryStore;
+use mnesis_inmemory::InMemoryStoreError;
+use mnesis_store::Repository;
+use mnesis_store::Store;
+use mnesis_store::codec::{Decode, Encode};
+use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
+use mnesis_store::error::StoreError;
+use mnesis_store::pending_envelope;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::upcasting::EventMorsel;
+use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
+use mnesis_store::wire;
 
 use proptest::prelude::*;
 
 fn build_persisted(
-    version: nexus::Version,
+    version: mnesis::Version,
     event_type: &str,
     schema_version: u32,
     payload: &[u8],
@@ -95,7 +95,7 @@ fn build_persisted(
     let value = bytes::Bytes::from(buf);
     let et_end = u32::try_from(event_type.len()).expect("event_type fits u32");
     let pl_end = u32::try_from(event_type.len() + payload.len()).expect("payload fits u32");
-    let sv = nexus_store::value::SchemaVersion::from_u32(schema_version)
+    let sv = mnesis_store::value::SchemaVersion::from_u32(schema_version)
         .expect("test fixture schema_version nonzero");
     PersistedEnvelope::try_new(version, value, sv, 0..et_end, et_end..pl_end, None)
         .expect("test fixture envelope")
@@ -118,8 +118,8 @@ enum TestEvent {
     ValueSet(i64),
 }
 
-impl nexus::Message for TestEvent {}
-impl nexus::DomainEvent for TestEvent {
+impl mnesis::Message for TestEvent {}
+impl mnesis::DomainEvent for TestEvent {
     fn name(&self) -> &'static str {
         match self {
             TestEvent::Happened(_) => "Happened",
@@ -135,7 +135,7 @@ struct TestState {
     log: Vec<String>,
 }
 
-impl nexus::AggregateState for TestState {
+impl mnesis::AggregateState for TestState {
     type Event = TestEvent;
     fn initial() -> Self {
         Self::default()
@@ -168,7 +168,7 @@ impl AsRef<[u8]> for TestId {
 struct TestError;
 
 struct TestAggregate;
-impl nexus::Aggregate for TestAggregate {
+impl mnesis::Aggregate for TestAggregate {
     type State = TestState;
     type Error = TestError;
     type Id = TestId;
@@ -200,7 +200,7 @@ impl Decode<TestEvent> for JsonCodec {
     type Error = JsonCodecError;
     fn decode<'a>(
         &'a self,
-        env: &'a nexus_store::PersistedEnvelope,
+        env: &'a mnesis_store::PersistedEnvelope,
     ) -> Result<TestEvent, Self::Error> {
         let s = std::str::from_utf8(env.payload()).map_err(|e| JsonCodecError(e.to_string()))?;
         match env.event_type() {
@@ -265,7 +265,7 @@ fn build_envelopes_from(start_version: u64, payloads: &[Vec<u8>]) -> Vec<Pending
 
 async fn read_all_payloads(
     store: &InMemoryStore,
-    stream_id: &nexus_store::StreamKey,
+    stream_id: &mnesis_store::StreamKey,
 ) -> Vec<Vec<u8>> {
     let mut stream = store
         .read_stream(stream_id, Version::INITIAL)
@@ -279,7 +279,7 @@ async fn read_all_payloads(
     payloads
 }
 
-async fn read_all_versions(store: &InMemoryStore, stream_id: &nexus_store::StreamKey) -> Vec<u64> {
+async fn read_all_versions(store: &InMemoryStore, stream_id: &mnesis_store::StreamKey) -> Vec<u64> {
     let mut stream = store
         .read_stream(stream_id, Version::INITIAL)
         .await
@@ -296,10 +296,10 @@ async fn read_all_versions(store: &InMemoryStore, stream_id: &nexus_store::Strea
 // Strategies
 // ============================================================================
 
-fn stream_id_strategy() -> impl Strategy<Value = nexus_store::StreamKey> {
+fn stream_id_strategy() -> impl Strategy<Value = mnesis_store::StreamKey> {
     prop::string::string_regex("[a-z][a-z0-9_-]{0,29}")
         .unwrap()
-        .prop_map(|s| nexus_store::StreamKey::from_slice(s.as_bytes()))
+        .prop_map(|s| mnesis_store::StreamKey::from_slice(s.as_bytes()))
 }
 
 fn payloads_strategy() -> impl Strategy<Value = Vec<Vec<u8>>> {
@@ -342,7 +342,7 @@ fn schema_version_strategy() -> impl Strategy<Value = u32> {
 // `PersistedEnvelope::try_new` now takes `SchemaVersion` (NonZeroU32) — zero
 // can't be constructed, so the entire "ATTACK" surface lives on
 // `SchemaVersion::from_u32`. The wire-decode side is pinned in
-// `nexus_store::wire::tests::decode_frame_rejects_corrupt_schema_version_zero`.
+// `mnesis_store::wire::tests::decode_frame_rejects_corrupt_schema_version_zero`.
 
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(256))]
@@ -353,7 +353,7 @@ proptest! {
     ) {
         // SchemaVersion::from_u32(0) is the only construction surface for
         // raw u32 inputs. Verify rejection.
-        let result = nexus_store::value::SchemaVersion::from_u32(0);
+        let result = mnesis_store::value::SchemaVersion::from_u32(0);
         prop_assert!(result.is_err(), "SchemaVersion::from_u32(0) must return Err");
     }
 }
@@ -748,8 +748,8 @@ proptest! {
             let envelopes_a = build_envelopes(&payloads_a);
             let envelopes_b = build_envelopes(&payloads_b);
 
-            store.append(&nexus_store::StreamKey::from_slice(id_a.as_ref()), None, &envelopes_a).await.unwrap();
-            store.append(&nexus_store::StreamKey::from_slice(id_b.as_ref()), None, &envelopes_b).await.unwrap();
+            store.append(&mnesis_store::StreamKey::from_slice(id_a.as_ref()), None, &envelopes_a).await.unwrap();
+            store.append(&mnesis_store::StreamKey::from_slice(id_b.as_ref()), None, &envelopes_b).await.unwrap();
 
             let read_a = read_all_payloads(&store, &id_a).await;
             let read_b = read_all_payloads(&store, &id_b).await;
@@ -876,7 +876,7 @@ proptest! {
         let codec = JsonCodec;
         let event = TestEvent::Happened(s.clone());
         let encoded = codec.encode(&event).unwrap();
-        let env = nexus_store::PersistedEnvelope::for_decode("Happened", &encoded).unwrap();
+        let env = mnesis_store::PersistedEnvelope::for_decode("Happened", &encoded).unwrap();
         let decoded = codec.decode(&env).unwrap();
         prop_assert_eq!(decoded, event, "Happened roundtrip failed for: {:?}", s);
     }
@@ -886,7 +886,7 @@ proptest! {
         let codec = JsonCodec;
         let event = TestEvent::ValueSet(v);
         let encoded = codec.encode(&event).unwrap();
-        let env = nexus_store::PersistedEnvelope::for_decode("ValueSet", &encoded).unwrap();
+        let env = mnesis_store::PersistedEnvelope::for_decode("ValueSet", &encoded).unwrap();
         let decoded = codec.decode(&env).unwrap();
         prop_assert_eq!(decoded, event, "ValueSet roundtrip failed for: {}", v);
     }
@@ -898,7 +898,7 @@ proptest! {
     ) {
         prop_assume!(event_type != "Happened" && event_type != "ValueSet");
         let codec = JsonCodec;
-        let env = nexus_store::PersistedEnvelope::for_decode(&event_type, &payload).unwrap();
+        let env = mnesis_store::PersistedEnvelope::for_decode(&event_type, &payload).unwrap();
         let result = codec.decode(&env);
         prop_assert!(result.is_err(), "codec must reject unknown event type: {}", event_type);
     }
@@ -921,14 +921,14 @@ proptest! {
             let es = store.repository().codec(JsonCodec).build();
 
             // Build events for the aggregate
-            let mut root = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-42".into()));
+            let mut root = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-42".into()));
             let events: Vec<TestEvent> = values.iter().map(|&v| TestEvent::ValueSet(v)).collect();
 
             // Save
             es.save(&mut root, &save_events(&events)).await.unwrap();
 
             // Load into fresh aggregate
-            let loaded: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-42".into())).await.unwrap();
+            let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-42".into())).await.unwrap();
 
             // Verify state matches
             prop_assert_eq!(
@@ -959,11 +959,11 @@ proptest! {
             let store = Store::new(InMemoryStore::new());
             let es = store.repository().codec(JsonCodec).build();
 
-            let mut root = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
+            let mut root = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
             let events: Vec<TestEvent> = strings.iter().map(|s| TestEvent::Happened(s.clone())).collect();
 
             es.save(&mut root, &save_events(&events)).await.unwrap();
-            let loaded: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
 
             prop_assert_eq!(&loaded.state().log, &strings, "event log mismatch after roundtrip");
             Ok(())
@@ -986,7 +986,7 @@ async fn attack_event_store_load_empty_stream() {
     let store = Store::new(InMemoryStore::new());
     let es = store.repository().codec(JsonCodec).build();
 
-    let loaded: nexus::AggregateRoot<TestAggregate> =
+    let loaded: mnesis::AggregateRoot<TestAggregate> =
         es.load(TestId("test-1".into())).await.unwrap();
 
     assert_eq!(loaded.version(), None);
@@ -1012,13 +1012,13 @@ proptest! {
             let es = store.repository().codec(JsonCodec).build();
 
             // Seed the aggregate with n events
-            let mut root_a = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
+            let mut root_a = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
             let events: Vec<TestEvent> = (0..n).map(|i| TestEvent::ValueSet(i as i64)).collect();
             es.save(&mut root_a, &save_events(&events)).await.unwrap();
 
             // Load into two separate aggregates
-            let mut copy1: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
-            let mut copy2: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let mut copy1: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let mut copy2: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
 
             // First save succeeds
             es.save(&mut copy1, &save_events(&[TestEvent::ValueSet(100)])).await.unwrap();
@@ -1063,7 +1063,7 @@ async fn attack_event_store_transforms_applied_on_load() {
     ];
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice(b"test-1"),
+            &mnesis_store::StreamKey::from_slice(b"test-1"),
             None,
             &envelopes,
         )
@@ -1075,7 +1075,7 @@ async fn attack_event_store_transforms_applied_on_load() {
     let store = Store::new(raw_store);
     let es = store.repository().codec(JsonCodec).build();
 
-    let loaded: nexus::AggregateRoot<TestAggregate> = es
+    let loaded: mnesis::AggregateRoot<TestAggregate> = es
         .load_with(TestId("test-1".into()), happened_v1_to_v2_upcast)
         .await
         .unwrap();
@@ -1133,7 +1133,7 @@ proptest! {
             for op in &ops {
                 match op {
                     ModelOp::Append { stream_id, payloads } => {
-                        let id = nexus_store::StreamKey::from_slice(stream_id.clone().as_bytes());
+                        let id = mnesis_store::StreamKey::from_slice(stream_id.clone().as_bytes());
                         let model_stream = model.entry(stream_id.clone()).or_default();
                         let start_version = u64::try_from(model_stream.len()).unwrap();
                         let expected_version = Version::new(start_version);
@@ -1143,13 +1143,13 @@ proptest! {
                             payloads,
                         );
 
-                        let result = store.append(&nexus_store::StreamKey::from_slice(id.as_ref()), expected_version, &envelopes).await;
+                        let result = store.append(&mnesis_store::StreamKey::from_slice(id.as_ref()), expected_version, &envelopes).await;
                         prop_assert!(result.is_ok(), "append should succeed for model-valid operation");
 
                         model_stream.extend(payloads.iter().cloned());
                     }
                     ModelOp::Read { stream_id } => {
-                        let id = nexus_store::StreamKey::from_slice(stream_id.clone().as_bytes());
+                        let id = mnesis_store::StreamKey::from_slice(stream_id.clone().as_bytes());
                         let expected = model.get(stream_id).cloned().unwrap_or_default();
                         let actual = read_all_payloads(&store, &id).await;
 
@@ -1239,7 +1239,7 @@ proptest! {
         raw_stream_id in "[a-zA-Z0-9_./-]{0,100}",
     ) {
         // Any string can be used as an Id now. Test that evil IDs don't crash.
-        let stream_id = nexus_store::StreamKey::from_slice(raw_stream_id.as_bytes());
+        let stream_id = mnesis_store::StreamKey::from_slice(raw_stream_id.as_bytes());
 
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
@@ -1319,8 +1319,8 @@ proptest! {
 
             for (cycle_idx, values) in cycles.iter().enumerate() {
                 // Load current state
-                let mut root: nexus::AggregateRoot<TestAggregate> = if cycle_idx == 0 {
-                    nexus::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()))
+                let mut root: mnesis::AggregateRoot<TestAggregate> = if cycle_idx == 0 {
+                    mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()))
                 } else {
                     es.load(TestId("test-1".into())).await.unwrap()
                 };
@@ -1347,7 +1347,7 @@ proptest! {
                 total_events += u64::try_from(values.len()).unwrap();
 
                 // Verify by loading again
-                let loaded: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+                let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
                 prop_assert_eq!(
                     loaded.state().last_value, expected_last_value,
                     "last_value wrong after cycle {}", cycle_idx,
@@ -1393,7 +1393,7 @@ proptest! {
                 let sid = stream_id.clone();
                 let expected = payloads.clone();
                 handles.push(tokio::spawn(async move {
-                    let mut stream = store.read_stream(&nexus_store::StreamKey::from_slice(sid.as_ref()), Version::INITIAL).await.unwrap();
+                    let mut stream = store.read_stream(&mnesis_store::StreamKey::from_slice(sid.as_ref()), Version::INITIAL).await.unwrap();
                     let mut read = Vec::new();
                     while let Some(__i) = stream.next().await { let env = __i.unwrap();
                         read.push(env.payload().to_vec());
@@ -1423,7 +1423,7 @@ proptest! {
     ) {
         if schema_version == 0 {
             // SchemaVersion::from_u32(0) errors — try_new can't even be called.
-            let result = nexus_store::value::SchemaVersion::from_u32(schema_version);
+            let result = mnesis_store::value::SchemaVersion::from_u32(schema_version);
             prop_assert!(result.is_err(), "SchemaVersion::from_u32(0) must error");
         } else {
             // Must succeed
@@ -1548,7 +1548,7 @@ proptest! {
             let store = Store::new(InMemoryStore::new());
             let es = store.repository().codec(JsonCodec).build();
 
-            let mut root = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-7".into()));
+            let mut root = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-7".into()));
 
             // Interleave different event types
             let mut events: Vec<TestEvent> = Vec::new();
@@ -1571,7 +1571,7 @@ proptest! {
             }
 
             es.save(&mut root, &save_events(&events)).await.unwrap();
-            let loaded: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-7".into())).await.unwrap();
+            let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-7".into())).await.unwrap();
 
             prop_assert_eq!(loaded.state().last_value, expected_last_value);
             prop_assert_eq!(&loaded.state().log, &expected_log);
@@ -1623,7 +1623,7 @@ proptest! {
 
             // Create many streams with many events
             for stream_idx in 0..num_streams {
-                let stream_id = nexus_store::StreamKey::from_slice(format!("stress-{}", stream_idx).as_bytes());
+                let stream_id = mnesis_store::StreamKey::from_slice(format!("stress-{}", stream_idx).as_bytes());
                 let payloads: Vec<Vec<u8>> = (0..events_per_stream)
                     .map(|i| {
                         let mut p = vec![stream_idx as u8];
@@ -1638,7 +1638,7 @@ proptest! {
 
             // Verify each stream independently
             for stream_idx in 0..num_streams {
-                let stream_id = nexus_store::StreamKey::from_slice(format!("stress-{}", stream_idx).as_bytes());
+                let stream_id = mnesis_store::StreamKey::from_slice(format!("stress-{}", stream_idx).as_bytes());
                 let read = read_all_payloads(&store, &stream_id).await;
                 prop_assert_eq!(
                     read.len(), events_per_stream,
@@ -1685,7 +1685,7 @@ async fn attack_concurrent_writers_exactly_one_wins() {
 
             store
                 .append(
-                    &nexus_store::StreamKey::from_slice(b"race-stream"),
+                    &mnesis_store::StreamKey::from_slice(b"race-stream"),
                     None,
                     &[envelope],
                 )
@@ -1712,7 +1712,7 @@ async fn attack_concurrent_writers_exactly_one_wins() {
 
     // The stream should have exactly 1 event
     let payloads =
-        read_all_payloads(&store, &nexus_store::StreamKey::from_slice(b"race-stream")).await;
+        read_all_payloads(&store, &mnesis_store::StreamKey::from_slice(b"race-stream")).await;
     assert_eq!(payloads.len(), 1, "stream must have exactly 1 event");
 }
 
@@ -1811,7 +1811,7 @@ proptest! {
             let es = store.repository().codec(JsonCodec).build();
 
             // Batch 1: create, save events
-            let mut root = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
+            let mut root = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
             let events1: Vec<TestEvent> = batch1.iter().map(|&v| TestEvent::ValueSet(v)).collect();
             es.save(&mut root, &save_events(&events1)).await.unwrap();
             let v1 = root.version().unwrap().as_u64();
@@ -1824,13 +1824,13 @@ proptest! {
             prop_assert_eq!(v2, u64::try_from(batch1.len() + batch2.len()).unwrap());
 
             // Batch 3: load fresh, save more
-            let mut fresh: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let mut fresh: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
             prop_assert_eq!(fresh.version().unwrap().as_u64(), v2);
             let events3: Vec<TestEvent> = batch3.iter().map(|&v| TestEvent::ValueSet(v)).collect();
             es.save(&mut fresh, &save_events(&events3)).await.unwrap();
 
             // Final verification
-            let final_root: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let final_root: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
             let total = batch1.len() + batch2.len() + batch3.len();
             prop_assert_eq!(
                 final_root.version().unwrap().as_u64(),
@@ -1896,19 +1896,19 @@ proptest! {
         rt.block_on(async {
             // Store A: write X first, then Y
             let store_a = InMemoryStore::new();
-            let sid_x = nexus_store::StreamKey::from_slice(b"x");
-            let sid_y = nexus_store::StreamKey::from_slice(b"y");
+            let sid_x = mnesis_store::StreamKey::from_slice(b"x");
+            let sid_y = mnesis_store::StreamKey::from_slice(b"y");
             let env_x = build_envelopes(&payloads_x);
             let env_y = build_envelopes(&payloads_y);
-            store_a.append(&nexus_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x).await.unwrap();
-            store_a.append(&nexus_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y).await.unwrap();
+            store_a.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x).await.unwrap();
+            store_a.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y).await.unwrap();
 
             // Store B: write Y first, then X
             let store_b = InMemoryStore::new();
             let env_x2 = build_envelopes(&payloads_x);
             let env_y2 = build_envelopes(&payloads_y);
-            store_b.append(&nexus_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y2).await.unwrap();
-            store_b.append(&nexus_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x2).await.unwrap();
+            store_b.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y2).await.unwrap();
+            store_b.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x2).await.unwrap();
 
             // Both stores should yield identical data for each stream
             let a_x = read_all_payloads(&store_a, &sid_x).await;
@@ -1949,14 +1949,14 @@ struct TinyState {
     reason = "retained for potential future rehydration limit tests"
 )]
 struct Tick;
-impl nexus::Message for Tick {}
-impl nexus::DomainEvent for Tick {
+impl mnesis::Message for Tick {}
+impl mnesis::DomainEvent for Tick {
     fn name(&self) -> &'static str {
         "Tick"
     }
 }
 
-impl nexus::AggregateState for TinyState {
+impl mnesis::AggregateState for TinyState {
     type Event = Tick;
     fn initial() -> Self {
         Self::default()
@@ -1983,7 +1983,7 @@ proptest! {
             let store = Store::new(InMemoryStore::new());
             let es = store.repository().codec(JsonCodec).build();
 
-            let mut root = nexus::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
+            let mut root = mnesis::AggregateRoot::<TestAggregate>::new(TestId("test-1".into()));
             let events: Vec<TestEvent> = (0..n).map(|i| TestEvent::ValueSet(i as i64)).collect();
 
             // After save, version should advance
@@ -1993,7 +1993,7 @@ proptest! {
             // Can still save more events
             es.save(&mut root, &save_events(&[TestEvent::ValueSet(999)])).await.unwrap();
 
-            let loaded: nexus::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
+            let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
             prop_assert_eq!(loaded.state().last_value, 999);
             prop_assert_eq!(loaded.state().events_applied, u64::try_from(n + 1).unwrap());
             Ok(())
@@ -2056,11 +2056,11 @@ proptest! {
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn save_events<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

@@ -2,15 +2,15 @@ use std::num::NonZeroU32;
 use std::sync::Arc;
 
 use bytes::Bytes;
-use nexus::{ErrorId, Version};
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::envelope::PersistedEnvelope;
-use nexus_store::error::AppendError;
-use nexus_store::store::RawEventStore;
-use nexus_store::value::{EventType, Metadata, Payload, SchemaVersion};
-use nexus_store::wire;
-use nexus_wake::StreamNotifiers;
+use mnesis::{ErrorId, Version};
+use mnesis_store::PendingEnvelope;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::PersistedEnvelope;
+use mnesis_store::error::AppendError;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
+use mnesis_store::wire;
+use mnesis_wake::StreamNotifiers;
 use sqlx::PgPool;
 use sqlx::postgres::PgListener;
 use tokio::task::JoinHandle;
@@ -21,7 +21,7 @@ use crate::position::PgAllPos;
 
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
 /// (`notify_committed`) publishes on it; each store's listener task subscribes.
-const NOTIFY_CHANNEL: &str = "nexus_events";
+const NOTIFY_CHANNEL: &str = "mnesis_events";
 
 /// Shared, `Arc`-owned interior of a [`PostgresStore`].
 ///
@@ -55,8 +55,8 @@ impl Drop for Inner {
 
 /// PostgreSQL-backed event store.
 ///
-/// Implements [`RawEventStore`](nexus_store::RawEventStore) and
-/// [`WakeSource`](nexus_store::wake::WakeSource) (Tasks 4–7). Constructed via
+/// Implements [`RawEventStore`](mnesis_store::RawEventStore) and
+/// [`WakeSource`](mnesis_store::wake::WakeSource) (Tasks 4–7). Constructed via
 /// [`connect`](Self::connect) or [`from_pool`](Self::from_pool) in
 /// [`builder`](crate::builder).
 ///
@@ -107,7 +107,7 @@ impl PostgresStore {
 /// `PgListener` **auto-reconnects** on connection loss and, per the sqlx 0.8
 /// docs, *"any notifications received while the connection was lost will not be
 /// returned"* — a `NOTIFY` can be silently dropped. This is tolerable ONLY
-/// because [`StreamNotifiers`] drives nexus-store's arm-before-confirm-rescan
+/// because [`StreamNotifiers`] drives mnesis-store's arm-before-confirm-rescan
 /// discipline: every `wake()` (and every reopen of the generic live loop)
 /// re-scans the store via `read_stream`/`read_all`, so a dropped `NOTIFY` merely
 /// **delays** a wake until the next scan — it never loses the event. The
@@ -373,7 +373,7 @@ fn is_unique_violation(e: &sqlx::Error) -> bool {
 // ---------------------------------------------------------------------------
 
 impl PostgresStore {
-    /// Fire `pg_notify('nexus_events', <hex stream id>)` after a durable
+    /// Fire `pg_notify('mnesis_events', <hex stream id>)` after a durable
     /// commit. Best-effort — a failed `NOTIFY` must not fail an already-durable
     /// append (the catch-up scan will still pick the event up on the next poll).
     pub(crate) async fn notify_committed(&self, stream: &[u8]) {
@@ -588,12 +588,12 @@ impl RawEventStore for PostgresStore {
     reason = "test code"
 )]
 mod tests {
-    use nexus::Version;
-    use nexus_store::PendingEnvelope;
-    use nexus_store::StreamKey;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::error::AppendError;
-    use nexus_store::value::SchemaVersion;
+    use mnesis::Version;
+    use mnesis_store::PendingEnvelope;
+    use mnesis_store::StreamKey;
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::error::AppendError;
+    use mnesis_store::value::SchemaVersion;
 
     use super::prepare_inserts;
 

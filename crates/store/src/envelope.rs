@@ -1,7 +1,7 @@
 use core::ops::Range;
 
 use bytes::Bytes;
-use nexus::{DomainEvent, Version};
+use mnesis::{DomainEvent, Version};
 use thiserror::Error;
 
 use crate::value::{
@@ -10,11 +10,11 @@ use crate::value::{
 
 /// Cast `u32` index to `usize` for slice indexing.
 ///
-/// `u32 as usize` is lossless on all platforms Nexus supports (32-bit+).
+/// `u32 as usize` is lossless on all platforms Mnesis supports (32-bit+).
 /// 16-bit platforms are not supported; this is a deliberate architecture constraint.
 #[allow(
     clippy::as_conversions,
-    reason = "u32→usize is lossless on all Nexus target platforms (32-bit+)"
+    reason = "u32→usize is lossless on all Mnesis target platforms (32-bit+)"
 )]
 #[inline]
 const fn idx(n: u32) -> usize {
@@ -609,13 +609,13 @@ mod tests {
     use super::*;
     use crate::value::MAX_EVENT_TYPE_LEN;
     use bytes::Bytes;
-    use nexus::Version;
+    use mnesis::Version;
 
     /// A minimal `DomainEvent` for exercising `.event(&e)`.
     #[derive(Debug)]
     struct TestEvent;
 
-    impl nexus::Message for TestEvent {}
+    impl mnesis::Message for TestEvent {}
 
     impl DomainEvent for TestEvent {
         fn name(&self) -> &'static str {
@@ -933,7 +933,7 @@ mod persisted_exhaustive_tests {
     use super::{EnvelopeError, PersistedEnvelope};
     use crate::value::{MAX_EVENT_TYPE_LEN, Metadata, SchemaVersion};
     use bytes::Bytes;
-    use nexus::Version;
+    use mnesis::Version;
     use proptest::prelude::*;
     use static_assertions::assert_impl_all;
     use std::ops::Range;

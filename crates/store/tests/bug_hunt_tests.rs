@@ -1,4 +1,4 @@
-//! Bug hunting tests for `nexus-store`.
+//! Bug hunting tests for `mnesis-store`.
 //!
 //! These tests are written with ADVERSARIAL INTENT — each one probes a
 //! potential design flaw, contract violation, or edge case that could hide
@@ -27,13 +27,13 @@
     reason = "clarity over brevity in test assertions"
 )]
 
-use nexus::{ErrorId, Version};
-use nexus_inmemory::InMemoryStoreError;
-use nexus_store::AppendError;
-use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope};
-use nexus_store::error::StoreError;
-use nexus_store::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::{ErrorId, Version};
+use mnesis_inmemory::InMemoryStoreError;
+use mnesis_store::AppendError;
+use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
+use mnesis_store::error::StoreError;
+use mnesis_store::pending_envelope;
+use mnesis_store::store::RawEventStore;
 use std::collections::HashMap;
 use tokio::sync::Mutex;
 
@@ -47,7 +47,7 @@ fn build_persisted(version: Version, event_type: &str, payload: &[u8]) -> Persis
     PersistedEnvelope::try_new(
         version,
         value,
-        nexus_store::value::SchemaVersion::INITIAL,
+        mnesis_store::value::SchemaVersion::INITIAL,
         0..et_end,
         et_end..pl_end,
         None,
@@ -110,20 +110,20 @@ impl futures::Stream for ProbeStream {
 impl RawEventStore for ProbeStore {
     type Error = ProbeError;
     type Stream = ProbeStream;
-    type AllPosition = nexus_inmemory::InMemoryAllPos;
+    type AllPosition = mnesis_inmemory::InMemoryAllPos;
     type AllStream =
         futures::stream::Empty<Result<(Self::AllPosition, PersistedEnvelope), ProbeError>>;
 
     async fn append(
         &self,
-        id: &nexus_store::StreamKey,
+        id: &mnesis_store::StreamKey,
         expected_version: Option<Version>,
         envelopes: &[PendingEnvelope],
     ) -> Result<(), AppendError<Self::Error>> {
         let mut guard = self.streams.lock().await;
         let stream = guard.entry(id.to_string()).or_default();
         let current = u64::try_from(stream.len()).unwrap_or(u64::MAX);
-        let expected_u64 = expected_version.map_or(0, nexus::Version::as_u64);
+        let expected_u64 = expected_version.map_or(0, mnesis::Version::as_u64);
         if current != expected_u64 {
             return Err(AppendError::Store(ProbeError::Conflict));
         }
@@ -146,7 +146,7 @@ impl RawEventStore for ProbeStore {
 
     async fn read_stream(
         &self,
-        id: &nexus_store::StreamKey,
+        id: &mnesis_store::StreamKey,
         from: Version,
     ) -> Result<Self::Stream, Self::Error> {
         let events = self
@@ -214,7 +214,7 @@ fn bug_probe_codec_not_object_safe() {
     // This is a design trade-off, not necessarily a bug, but it limits flexibility.
 
     // We can verify the trait itself compiles with concrete types
-    use nexus_store::codec::{Decode, Encode};
+    use mnesis_store::codec::{Decode, Encode};
 
     fn _takes_codec<C: Encode<()> + Decode<()>>(c: &C) {
         // Fine — generic parameter
@@ -258,7 +258,11 @@ async fn append_rejects_backwards_versions() {
     ];
 
     let result = store
-        .append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes)
+        .append(
+            &mnesis_store::StreamKey::from_slice(b"s1"),
+            None,
+            &envelopes,
+        )
         .await;
     assert!(
         result.is_err(),
@@ -320,7 +324,7 @@ proptest! {
                 })
                 .collect();
 
-            let result = store.append(&nexus_store::StreamKey::from_slice(b"s1"), None, &envelopes).await;
+            let result = store.append(&mnesis_store::StreamKey::from_slice(b"s1"), None, &envelopes).await;
 
             // Check if versions are actually sequential from 1
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);
@@ -461,7 +465,7 @@ fn bug_probe_metadata_bytes_stored_correctly() {
 fn bug_probe_builder_intermediates_are_send_sync() {
     fn assert_send_sync<T: Send + Sync>() {}
 
-    use nexus_store::envelope::{WithEventType, WithPayload, WithVersion};
+    use mnesis_store::envelope::{WithEventType, WithPayload, WithVersion};
     assert_send_sync::<WithVersion>();
     assert_send_sync::<WithEventType>();
     assert_send_sync::<WithPayload>();

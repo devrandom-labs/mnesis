@@ -16,9 +16,9 @@
 use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
 
-use nexus::Version;
-use nexus_store::Projector;
-use nexus_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
+use mnesis::Version;
+use mnesis_store::Projector;
+use mnesis_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
 
@@ -123,7 +123,7 @@ fn proj_after_event_types_does_not_trigger_on_empty_events() {
 
 mod in_memory_tests {
     use super::*;
-    use nexus_inmemory::InMemorySnapshotStore;
+    use mnesis_inmemory::InMemorySnapshotStore;
 
     #[tokio::test]
     async fn hydrate_returns_none_when_empty() {
@@ -274,8 +274,8 @@ enum TestEvent {
     Removed(u64),
 }
 
-impl nexus::Message for TestEvent {}
-impl nexus::DomainEvent for TestEvent {
+impl mnesis::Message for TestEvent {}
+impl mnesis::DomainEvent for TestEvent {
     fn name(&self) -> &'static str {
         match self {
             TestEvent::Added(_) => "Added",

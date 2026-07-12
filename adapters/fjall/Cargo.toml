@@ -1,30 +1,31 @@
 [package]
-name = "nexus-fjall"
+name = "mnesis-fjall"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Fjall-backed event store adapter for the Nexus event-sourcing framework"
-readme = "../../README.md"
+homepage.workspace = true
+description = "Fjall-backed event store adapter for the Mnesis event-sourcing framework"
+readme = "README.md"
 keywords = ["event-sourcing", "event-store", "fjall", "embedded"]
 categories = ["database"]
 
 [features]
-snapshot = ["nexus-store/snapshot"]
-projection = ["nexus-store/projection"]
-export = ["nexus-store/export"]
-import = ["nexus-store/import"]
+snapshot = ["mnesis-store/snapshot"]
+projection = ["mnesis-store/projection"]
+export = ["mnesis-store/export"]
+import = ["mnesis-store/import"]
 
 [dependencies]
 arrayvec = { workspace = true }
 bytes = { workspace = true, features = ["std"] }
 fjall = { workspace = true }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-nexus = { version = "0.1.0", path = "../../crates/nexus" }
-nexus-store = { version = "0.1.0", path = "../../crates/store", features = ["subscription"] }
-nexus-wake = { version = "0.1.0", path = "../../crates/wake" }
+mnesis = { version = "0.1.0", path = "../../crates/mnesis" }
+mnesis-store = { version = "0.1.0", path = "../../crates/store", features = ["subscription"] }
+mnesis-wake = { version = "0.1.0", path = "../../crates/wake" }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
@@ -35,16 +36,16 @@ insta = { workspace = true }
 # Self dev-dependency: enables the `export`/`import` features for the crate's
 # own test + bench builds so the feature-gated impls and tests below actually
 # run under the default-feature `nix flake check` gate (which builds with
-# default features only). Same unification trick `nexus-store` uses for its
+# default features only). Same unification trick `mnesis-store` uses for its
 # testing/export/import/cbor tests. `cargo add` refuses a self-dependency, so
 # this is a deliberate manual entry.
-nexus-fjall = { path = ".", features = ["export", "import", "snapshot", "projection"] }
-# Pulls the CBOR backup box (`nexus_store::cbor`) into the test build; `cbor`
-# implies nexus-store's `export`+`import`, so the end-to-end round-trip tests
+mnesis-fjall = { path = ".", features = ["export", "import", "snapshot", "projection"] }
+# Pulls the CBOR backup box (`mnesis_store::cbor`) into the test build; `cbor`
+# implies mnesis-store's `export`+`import`, so the end-to-end round-trip tests
 # can encode/decode chunks. Separate from the line above because `cbor` is a
-# nexus-store feature, not a nexus-fjall one.
-nexus-store = { path = "../../crates/store", features = ["cbor"] }
-nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+# mnesis-store feature, not a mnesis-fjall one.
+mnesis-store = { path = "../../crates/store", features = ["cbor"] }
+mnesis-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
     "snapshot",
     "atomic-append",
 ] }
@@ -66,3 +67,6 @@ harness = false
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

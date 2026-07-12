@@ -1,11 +1,11 @@
-//! Relocated inline test mod of `src/export.rs` (nexus-inmemory is a
+//! Relocated inline test mod of `src/export.rs` (mnesis-inmemory is a
 //! dev-dependency; type unification with it requires an integration test).
 
 #![cfg(feature = "export")]
 
-use nexus::Version;
-use nexus_store::store::{RawEventStore, Store};
-use nexus_store::stream_id::StreamKey;
+use mnesis::Version;
+use mnesis_store::store::{RawEventStore, Store};
+use mnesis_store::stream_id::StreamKey;
 
 #[cfg(test)]
 #[allow(
@@ -16,9 +16,9 @@ use nexus_store::stream_id::StreamKey;
 mod tests {
     use super::*;
     use futures::StreamExt;
-    use nexus_inmemory::{InMemoryStore, InMemoryStoreError};
-    use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
-    use nexus_store::export::*;
+    use mnesis_inmemory::{InMemoryStore, InMemoryStoreError};
+    use mnesis_store::envelope::{PersistedEnvelope, pending_envelope};
+    use mnesis_store::export::*;
     use proptest::prelude::*;
     use static_assertions::assert_impl_all;
     use std::collections::HashSet;
@@ -35,7 +35,7 @@ mod tests {
         StreamKey::from_slice(s.as_bytes())
     }
 
-    fn env(v: u64, payload: &[u8]) -> nexus_store::envelope::PendingEnvelope {
+    fn env(v: u64, payload: &[u8]) -> mnesis_store::envelope::PendingEnvelope {
         pending_envelope(Version::new(v).expect("nonzero"))
             .event_type("E")
             .payload(payload.to_vec())
@@ -141,7 +141,7 @@ mod tests {
         let pending = pending_envelope(Version::INITIAL)
             .event_type("Created")
             .payload(b"body".to_vec())
-            .schema_version(nexus_store::value::SchemaVersion::from_u32(7).expect("nonzero"))
+            .schema_version(mnesis_store::value::SchemaVersion::from_u32(7).expect("nonzero"))
             .metadata(b"meta".to_vec())
             .build()
             .expect("valid envelope");

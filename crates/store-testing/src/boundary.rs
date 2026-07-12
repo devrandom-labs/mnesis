@@ -5,11 +5,11 @@
 use core::future::Future;
 
 use bytes::Bytes;
-use nexus::Version;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{AppendError, StreamKey};
+use mnesis::Version;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{AppendError, StreamKey};
 
 use crate::row::{ConformanceRow, append_rows, drain_all, drain_stream, envelope_for};
 

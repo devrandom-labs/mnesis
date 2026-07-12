@@ -26,24 +26,24 @@ platforms = [
 # Keep optional / feature-gated deps out of the unified workspace-hack dep
 # set so the "feature off → dep absent from dep tree" guarantee holds for
 # every workspace member, not just published consumers. Without this,
-# hakari pulls `futures-core` (used by nexus-store's `futures-bridge`
+# hakari pulls `futures-core` (used by mnesis-store's `futures-bridge`
 # feature) into `workspace-hack`, which propagates into every member that
 # depends on `workspace-hack` regardless of feature selection.
 [final-excludes]
-# `nexus` is the no_std kernel — it must not depend on the (std) workspace-hack.
+# `mnesis` is the no_std kernel — it must not depend on the (std) workspace-hack.
 # hakari removes the edge; `hakari verify` enforces its absence. (#279)
 #
-# `nexus-nostd-smoketest` is the no_std derive-macro compile-gate (#304): it is
+# `mnesis-nostd-smoketest` is the no_std derive-macro compile-gate (#304): it is
 # built for thumbv7em/wasm32, so a std workspace-hack edge would break it.
 #
-# `nexus-store` is no_std (core+alloc) — workspace-hack force-enables
+# `mnesis-store` is no_std (core+alloc) — workspace-hack force-enables
 # std-implying futures-util features (io/channel/sink) that feature
 # unification would leak into its --no-default-features build. (#301)
 #
-# `nexus-wake-nostd` is the no_std WakeSource bridge (#302): built for
+# `mnesis-wake-nostd` is the no_std WakeSource bridge (#302): built for
 # thumbv7em/wasm32 by the no_std gates, so a std workspace-hack edge would
-# break it — same reasoning as `nexus-nostd-smoketest`.
-workspace-members = ["nexus", "nexus-nostd-smoketest", "nexus-store", "nexus-wake-nostd"]
+# break it — same reasoning as `mnesis-nostd-smoketest`.
+workspace-members = ["mnesis", "mnesis-nostd-smoketest", "mnesis-store", "mnesis-wake-nostd"]
 third-party = [
   { name = "futures-core" },
 ]

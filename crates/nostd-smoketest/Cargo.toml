@@ -1,10 +1,10 @@
 [package]
-name = "nexus-nostd-smoketest"
+name = "mnesis-nostd-smoketest"
 version = "0.0.0"
 edition = "2024"
 publish = false
 
-# Compile-gate crate for #304: proves the `#[nexus::aggregate]` /
+# Compile-gate crate for #304: proves the `#[mnesis::aggregate]` /
 # `#[derive(DomainEvent)]` macro OUTPUT (not just its source) is `core`-clean by
 # building it for `thumbv7em-none-eabihf` + `wasm32-unknown-unknown` under
 # `nix flake check`. Deliberately excluded from `workspace-hack` (see
@@ -13,12 +13,12 @@ publish = false
 # it is a target-compile probe, exercised only through the two flake gates.
 
 [dependencies]
-nexus = { path = "../nexus", default-features = false, optional = true }
+mnesis = { path = "../mnesis", default-features = false, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [features]
 default = []
 # The gate builds `--no-default-features --features derive`: with `derive` off
 # this is an empty `#![no_std]` lib; with it on, the macro output is compiled for
-# the target. `nexus/derive` is additive and does NOT pull `nexus/std`.
-derive = ["dep:nexus", "nexus/derive", "dep:thiserror"]
+# the target. `mnesis/derive` is additive and does NOT pull `mnesis/std`.
+derive = ["dep:mnesis", "mnesis/derive", "dep:thiserror"]

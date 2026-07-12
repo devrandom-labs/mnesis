@@ -9,13 +9,13 @@
 use bytes::Bytes;
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use futures::StreamExt;
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::StreamKey;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::store::RawEventStore;
-use nexus_store::value::{EventType, Payload, SchemaVersion};
-use nexus_store::wire;
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::value::{EventType, Payload, SchemaVersion};
+use mnesis_store::wire;
 use tempfile::TempDir;
 use tokio::runtime::Runtime;
 
@@ -27,7 +27,7 @@ fn sk(s: &str) -> StreamKey {
     StreamKey::from_slice(s.as_bytes())
 }
 
-fn make_envelope(version: u64, payload: &[u8]) -> nexus_store::PendingEnvelope {
+fn make_envelope(version: u64, payload: &[u8]) -> mnesis_store::PendingEnvelope {
     pending_envelope(Version::new(version).unwrap())
         .event_type("BenchEvent")
         .payload(payload.to_vec())
@@ -35,7 +35,7 @@ fn make_envelope(version: u64, payload: &[u8]) -> nexus_store::PendingEnvelope {
         .expect("valid envelope")
 }
 
-fn make_envelopes(count: u64, payload: &[u8]) -> Vec<nexus_store::PendingEnvelope> {
+fn make_envelopes(count: u64, payload: &[u8]) -> Vec<mnesis_store::PendingEnvelope> {
     (1..=count).map(|v| make_envelope(v, payload)).collect()
 }
 
@@ -57,7 +57,7 @@ fn payload(size: usize) -> Vec<u8> {
 // 1. Wire-frame encoding benchmarks (pure computation, no I/O)
 //
 // Measures the REAL production value encoder/decoder
-// (`nexus_store::wire::encode_frame` / `decode_frame`) that `FjallStore::append`
+// (`mnesis_store::wire::encode_frame` / `decode_frame`) that `FjallStore::append`
 // and the read cursor drive — not an adapter-local test wrapper (CLAUDE.md
 // rule 8). The fjall key codecs (`encode_event_key`, `encode_stream_version`)
 // are crate-private; their cost is exercised end-to-end by the `append_*` and

@@ -19,10 +19,10 @@
 )]
 
 use futures::{StreamExt, stream};
-use nexus::{DomainEvent, Message, Version};
-use nexus_inmemory::InMemoryStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{
+use mnesis::{DomainEvent, Message, Version};
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{
     DecodeStreamError, Decoded, Encode, JsonCodec, PersistedEnvelope, Step, StepStreamExt, Store,
     StreamKey, pending_envelope,
 };
@@ -91,7 +91,7 @@ async fn corrupt_persisted() -> PersistedEnvelope {
     cursor.next().await.expect("one event").expect("ok")
 }
 
-fn money_env(version: u64, amount: u64) -> nexus_store::PendingEnvelope {
+fn money_env(version: u64, amount: u64) -> mnesis_store::PendingEnvelope {
     let bytes = JsonCodec::default()
         .encode(&Money::Deposited { amount })
         .unwrap();

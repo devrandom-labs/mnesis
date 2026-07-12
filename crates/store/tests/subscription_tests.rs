@@ -6,10 +6,10 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{StepStreamExt, Store, Subscription, pending_envelope};
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{StepStreamExt, Store, Subscription, pending_envelope};
 use tokio::time::timeout;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -33,7 +33,7 @@ impl AsRef<[u8]> for TestId {
 }
 
 /// Helper: build a pending envelope with a given version and event type.
-fn make_envelope(version: u64, event_type: &'static str) -> nexus_store::PendingEnvelope {
+fn make_envelope(version: u64, event_type: &'static str) -> mnesis_store::PendingEnvelope {
     pending_envelope(Version::new(version).unwrap())
         .event_type(event_type)
         .payload(format!("payload-{version}").into_bytes())
@@ -52,7 +52,7 @@ async fn append_one(
     let envelope = make_envelope(version, event_type);
     store
         .append(
-            &nexus_store::StreamKey::from_slice(id.as_ref()),
+            &mnesis_store::StreamKey::from_slice(id.as_ref()),
             expected,
             &[envelope],
         )
@@ -69,7 +69,7 @@ const TIMEOUT: Duration = Duration::from_secs(2);
 // that trait — a static guard on the public stream surface.
 #[tokio::test]
 async fn subscribe_returns_a_reexported_stream() {
-    fn assert_stream<T: nexus_store::Stream>(_: &T) {}
+    fn assert_stream<T: mnesis_store::Stream>(_: &T) {}
 
     let store = Store::new(InMemoryStore::new());
     let id = TestId::new("stream-static");

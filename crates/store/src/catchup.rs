@@ -12,7 +12,7 @@ use alloc::sync::Arc;
 use core::future::Future;
 
 use futures::StreamExt;
-use nexus::Version;
+use mnesis::Version;
 
 use crate::envelope::PersistedEnvelope;
 use crate::store::RawEventStore;

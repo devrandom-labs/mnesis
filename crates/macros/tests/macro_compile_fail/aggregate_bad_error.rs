@@ -1,6 +1,6 @@
 /// error type must implement std::error::Error.
 
-use nexus::*;
+use mnesis::*;
 
 #[derive(Debug, Clone)]
 enum Ev { A }
@@ -31,7 +31,7 @@ impl AsRef<[u8]> for MyId {
 #[derive(Debug)]
 struct NotAnError;
 
-#[nexus::aggregate(state = St, error = NotAnError, id = MyId)]
+#[mnesis::aggregate(state = St, error = NotAnError, id = MyId)]
 struct BadAggregate;
 
 fn main() {}

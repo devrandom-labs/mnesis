@@ -23,10 +23,10 @@
 
 use bytes::Bytes;
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{PendingEnvelope, StreamKey, pending_envelope};
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{PendingEnvelope, StreamKey, pending_envelope};
 
 const ALIGN: usize = 16;
 
@@ -39,7 +39,7 @@ fn build_envelope(version: u64, event_type: &'static str, payload_len: usize) ->
         .expect("valid envelope")
 }
 
-fn assert_payload_aligned(env: &nexus_store::PersistedEnvelope) {
+fn assert_payload_aligned(env: &mnesis_store::PersistedEnvelope) {
     let ptr = env.payload().as_ptr() as usize;
     assert!(
         ptr.is_multiple_of(ALIGN),

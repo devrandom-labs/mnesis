@@ -205,7 +205,7 @@ pub mod serde {
     /// # Examples
     ///
     /// ```ignore
-    /// use nexus_store::{JsonCodec, Json, SerdeCodec};
+    /// use mnesis_store::{JsonCodec, Json, SerdeCodec};
     ///
     /// // Via the JsonCodec alias:
     /// let codec = JsonCodec::default();
@@ -411,7 +411,7 @@ pub mod bytemuck {
             let sv = crate::value::SchemaVersion::INITIAL;
             let frame = wire::encode_frame(sv, &et, &pl, None).expect("wire encode_frame ok");
             PersistedEnvelope::try_new(
-                nexus::Version::INITIAL,
+                mnesis::Version::INITIAL,
                 frame.value,
                 sv,
                 frame.offsets.event_type,
@@ -565,7 +565,7 @@ pub mod rkyv {
             let sv = crate::value::SchemaVersion::INITIAL;
             let frame = wire::encode_frame(sv, &et, &pl, None).expect("wire encode_frame ok");
             PersistedEnvelope::try_new(
-                nexus::Version::INITIAL,
+                mnesis::Version::INITIAL,
                 frame.value,
                 sv,
                 frame.offsets.event_type,

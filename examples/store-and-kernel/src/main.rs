@@ -1,12 +1,12 @@
 //! Store-and-kernel example: full event-sourcing lifecycle.
 //!
-//! Demonstrates integrating the Nexus kernel (aggregates, events, state)
-//! with the nexus-store persistence layer (codec, raw event store, event stream).
+//! Demonstrates integrating the Mnesis kernel (aggregates, events, state)
+//! with the mnesis-store persistence layer (codec, raw event store, event stream).
 //!
 //! Flow:
-//! 1. Define a BankAccount aggregate using `#[nexus::aggregate]`
+//! 1. Define a BankAccount aggregate using `#[mnesis::aggregate]`
 //! 2. Use a JSON `Codec<AccountEvent>` for serialization
-//! 3. Use `InMemoryStore` from nexus-store for persistence
+//! 3. Use `InMemoryStore` from mnesis-store for persistence
 //! 4. Show: create aggregate -> handle command -> encode -> persist -> read back
 //!    -> decode -> rehydrate aggregate
 
@@ -21,10 +21,10 @@
 #![allow(clippy::shadow_unrelated, reason = "example shadows for readability")]
 
 use futures::StreamExt;
-use nexus::*;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{Decode, Encode, StreamKey, pending_envelope};
+use mnesis::*;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{Decode, Encode, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -120,7 +120,7 @@ enum AccountError {
 
 // --- Aggregate ---
 
-#[nexus::aggregate(state = AccountState, error = AccountError, id = AccountId)]
+#[mnesis::aggregate(state = AccountState, error = AccountError, id = AccountId)]
 struct BankAccount;
 
 // --- Commands ---
@@ -203,7 +203,7 @@ impl Decode<AccountEvent> for JsonCodec {
 
     fn decode<'a>(
         &'a self,
-        env: &'a nexus_store::PersistedEnvelope,
+        env: &'a mnesis_store::PersistedEnvelope,
     ) -> Result<AccountEvent, Self::Error> {
         serde_json::from_slice(env.payload())
     }
@@ -218,7 +218,7 @@ fn encode_decided(
     codec: &JsonCodec,
     decided: &Events<AccountEvent>,
     base_version: u64,
-) -> Vec<nexus_store::envelope::PendingEnvelope> {
+) -> Vec<mnesis_store::envelope::PendingEnvelope> {
     let first = Version::new(base_version)
         .map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
     let run = Version::run(first, decided.len()).expect("version overflow");

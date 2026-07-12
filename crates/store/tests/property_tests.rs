@@ -32,12 +32,12 @@
 use std::convert::Infallible;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::StreamKey;
-use nexus_store::envelope::PendingEnvelope;
-use nexus_store::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::PendingEnvelope;
+use mnesis_store::pending_envelope;
+use mnesis_store::store::RawEventStore;
 
 use proptest::prelude::*;
 
@@ -243,18 +243,18 @@ proptest! {
     fn upcaster_composition(
         payload in prop::collection::vec(any::<u8>(), 0..256),
     ) {
-        fn v1_to_v3_upcast(mut morsel: nexus_store::upcasting::EventMorsel<'_>) -> Result<nexus_store::upcasting::EventMorsel<'_>, Infallible> {
+        fn v1_to_v3_upcast(mut morsel: mnesis_store::upcasting::EventMorsel<'_>) -> Result<mnesis_store::upcasting::EventMorsel<'_>, Infallible> {
             loop {
                 morsel = match (morsel.event_type(), morsel.schema_version()) {
-                    ("E", v) if v == Version::INITIAL => nexus_store::upcasting::EventMorsel::new("E", Version::new(2).unwrap(), morsel.payload().to_vec()),
-                    ("E", v) if v == Version::new(2).unwrap() => nexus_store::upcasting::EventMorsel::new("E", Version::new(3).unwrap(), morsel.payload().to_vec()),
+                    ("E", v) if v == Version::INITIAL => mnesis_store::upcasting::EventMorsel::new("E", Version::new(2).unwrap(), morsel.payload().to_vec()),
+                    ("E", v) if v == Version::new(2).unwrap() => mnesis_store::upcasting::EventMorsel::new("E", Version::new(3).unwrap(), morsel.payload().to_vec()),
                     _ => break,
                 };
             }
             Ok(morsel)
         }
 
-        let morsel = nexus_store::EventMorsel::borrowed("E", Version::INITIAL, &payload);
+        let morsel = mnesis_store::EventMorsel::borrowed("E", Version::INITIAL, &payload);
         let result = v1_to_v3_upcast(morsel).unwrap();
 
         prop_assert_eq!(result.schema_version(), Version::new(3).unwrap(), "final version should be 3");

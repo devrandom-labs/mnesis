@@ -1,6 +1,6 @@
 //! Issue #281 acceptance: a toy adapter written against ONLY the published
-//! writing-a-store-adapter guide (the `nexus-store-testing` crate docs) and
-//! the `nexus-store` / `nexus-wake` public APIs — no shipped adapter source
+//! writing-a-store-adapter guide (the `mnesis-store-testing` crate docs) and
+//! the `mnesis-store` / `mnesis-wake` public APIs — no shipped adapter source
 //! was consulted. It must pass the full conformance matrix.
 
 #![allow(clippy::unwrap_used, reason = "tests")]
@@ -12,16 +12,16 @@ use std::sync::Arc;
 
 use bytes::Bytes;
 use futures::stream;
-use nexus::{ErrorId, Version};
-use nexus_store::StreamKey;
-use nexus_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
-use nexus_store::error::AppendError;
-use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
-use nexus_store::store::{AllPosition, RawEventStore};
-use nexus_store::value::SchemaVersion;
-use nexus_store::wake::WakeSource;
-use nexus_store::wire::{FrameOffsets, WireError, encode_frame};
-use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
+use mnesis::{ErrorId, Version};
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
+use mnesis_store::error::AppendError;
+use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::store::{AllPosition, RawEventStore};
+use mnesis_store::value::SchemaVersion;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::wire::{FrameOffsets, WireError, encode_frame};
+use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
 use thiserror::Error;
 use tokio::sync::Mutex;
 
@@ -349,10 +349,10 @@ impl AtomicAppend for ToyStore {
 // The kit
 // ═══════════════════════════════════════════════════════════════════════════
 
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: || async { (ToyStore::new(), ()) },
 }
 
-nexus_store_testing::conformance_atomic_append! {
+mnesis_store_testing::conformance_atomic_append! {
     factory: || async { (ToyStore::new(), ()) },
 }

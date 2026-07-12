@@ -38,12 +38,12 @@ use std::collections::HashMap;
 use std::num::NonZeroU32;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::PendingEnvelope;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::store::RawEventStore;
 
 use proptest::prelude::*;
 
@@ -538,10 +538,10 @@ fn attack_schema_version_zero_rejected_by_type_system() {
     // - PersistedEnvelope::try_new takes SchemaVersion, so 0 is unrepresentable
     //   at the type level (no test case can pass it).
     // - wire::decode_frame rejects on-disk schema_version=0 (corrupt-data path),
-    //   pinned in nexus_store::wire::tests::decode_frame_rejects_corrupt_schema_version_zero.
+    //   pinned in mnesis_store::wire::tests::decode_frame_rejects_corrupt_schema_version_zero.
     assert!(NonZeroU32::new(0).is_none(), "NonZeroU32 must reject 0");
     assert!(
-        nexus_store::value::SchemaVersion::from_u32(0).is_err(),
+        mnesis_store::value::SchemaVersion::from_u32(0).is_err(),
         "SchemaVersion::from_u32(0) must return Err"
     );
 }

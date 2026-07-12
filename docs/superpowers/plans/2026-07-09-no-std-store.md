@@ -1,24 +1,24 @@
-# no_std nexus-store (#301) Implementation Plan
+# no_std mnesis-store (#301) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Port `nexus-store` to `no_std` + `alloc` behind an additive default `std` feature, switching all public error bounds to `core::error::Error` (the freeze-critical, post-1.0-irreversible piece), mirroring the merged #279 kernel port.
+**Goal:** Port `mnesis-store` to `no_std` + `alloc` behind an additive default `std` feature, switching all public error bounds to `core::error::Error` (the freeze-critical, post-1.0-irreversible piece), mirroring the merged #279 kernel port.
 
-**Architecture:** `#![cfg_attr(not(feature = "std"), no_std)]` + unconditional `extern crate alloc` (the store always needs an allocator — `Vec`, `Arc`, `Bytes`). All production `std::` paths move to `core::`/`alloc::`; `#[cfg(test)]` code keeps `std::` freely (tests always build with the default `std` feature). Deps flip to `default-features = false` at the workspace root (Cargo cannot override `default-features` through workspace inheritance — verified against the Cargo reference, stated in #301); std consumers re-add the features they lose. `nexus-store` joins the hakari `[final-excludes]` because `workspace-hack` force-enables std-implying `futures-util` features (`io`, `channel`, `sink`), which feature-unification would silently leak into the no_std build.
+**Architecture:** `#![cfg_attr(not(feature = "std"), no_std)]` + unconditional `extern crate alloc` (the store always needs an allocator — `Vec`, `Arc`, `Bytes`). All production `std::` paths move to `core::`/`alloc::`; `#[cfg(test)]` code keeps `std::` freely (tests always build with the default `std` feature). Deps flip to `default-features = false` at the workspace root (Cargo cannot override `default-features` through workspace inheritance — verified against the Cargo reference, stated in #301); std consumers re-add the features they lose. `mnesis-store` joins the hakari `[final-excludes]` because `workspace-hack` force-enables std-implying `futures-util` features (`io`, `channel`, `sink`), which feature-unification would silently leak into the no_std build.
 
 **Tech Stack:** Rust stable (pinned via `rust-toolchain.toml`), `core::error::Error` (stable since 1.81), cargo-hakari, Nix flake CI gate (wasm32-unknown-unknown + host `--no-default-features`).
 
 **Non-breaking note:** `std::error::Error` has been a re-export of `core::error::Error` since Rust 1.81 — the bounds swap is semantically a no-op for std consumers. The PR still carries `!` (mirrors #303): the dependency default-feature flips can affect `--no-default-features` consumers of the workspace deps.
 
 **Scope decisions (flag at review):**
-1. The `std` feature forwards `thiserror/std`, `nexus/std`, `futures/std`, `bytes/std`, `aligned-vec/std` — strict additivity: the default build produces byte-identical dep configurations to today, so "no regression on the std path" holds by construction.
+1. The `std` feature forwards `thiserror/std`, `mnesis/std`, `futures/std`, `bytes/std`, `aligned-vec/std` — strict additivity: the default build produces byte-identical dep configurations to today, so "no regression on the std path" holds by construction.
 2. The wasm32 gate also builds the dep-free features (`subscription,export,import,snapshot,projection`) under `--no-default-features`, because this plan ports those modules' imports too and without a gate they'd rot. **Empirical checkpoint:** if `futures`' `alloc`-only combinator set (`unfold`, `try_fold`, …) turns out to need `std`, drop the features-variant from the gate and record the deviation here.
 3. Optional codec features (`serde`, `json`, `rkyv`, `bytemuck`, `cbor`) stay orthogonal to `std` — they are not in the gate and not claimed no_std-compatible. `crc32c` (behind `cbor`) exposes **no** feature toggles at all, so `cbor` cannot be no_std today; out of scope.
 
 **Deviation log:** record divergences here as they happen (per project convention for multi-step plans).
 
-- **Task 7 (2026-07-10):** the issue card's premise "a bare `thumbv7em` build would need a `#[global_allocator]`" holds only for binaries — an rlib build links no allocator. Quality review *measured* it: `nexus-store --no-default-features` (and with the dep-free features) builds clean on `thumbv7em-none-eabihf`. The gate therefore includes thumbv7em lines — the strong target the kernel already uses — because wasm32/host ship std and structurally cannot catch a dependency-level std leak. Also confirmed empirically: optional codec features `json`/`rkyv`/`cbor` do NOT build on thumbv7em (serde_json→memchr/std, rkyv→ptr_meta/std, crc32c→std) — accepted per scope decision 3; a follow-up card can flip those deps no-default at the workspace root.
-- **Task 2 (2026-07-10):** the plan's "known consumers" list was incomplete — the mandated sweep found 5 more std consumers of `futures`/`bytes` (`nexus-store-testing` + examples `store-and-kernel`, `store-inmemory`, `projection-tokio`, `fjall-end-to-end`); all got the identical feature restore. Additionally, review caught that `nexus-fjall`'s `futures` line (not listed in the plan, which named only its `bytes`) also needed the restore — it compiled only via workspace-hack/dev-dep feature unification. Lesson recorded: `cargo check --workspace` cannot prove a restore is self-sufficient (features unify across the whole graph, dev-deps included); only a per-crate isolated check or removing the unification source can.
+- **Task 7 (2026-07-10):** the issue card's premise "a bare `thumbv7em` build would need a `#[global_allocator]`" holds only for binaries — an rlib build links no allocator. Quality review *measured* it: `mnesis-store --no-default-features` (and with the dep-free features) builds clean on `thumbv7em-none-eabihf`. The gate therefore includes thumbv7em lines — the strong target the kernel already uses — because wasm32/host ship std and structurally cannot catch a dependency-level std leak. Also confirmed empirically: optional codec features `json`/`rkyv`/`cbor` do NOT build on thumbv7em (serde_json→memchr/std, rkyv→ptr_meta/std, crc32c→std) — accepted per scope decision 3; a follow-up card can flip those deps no-default at the workspace root.
+- **Task 2 (2026-07-10):** the plan's "known consumers" list was incomplete — the mandated sweep found 5 more std consumers of `futures`/`bytes` (`mnesis-store-testing` + examples `store-and-kernel`, `store-inmemory`, `projection-tokio`, `fjall-end-to-end`); all got the identical feature restore. Additionally, review caught that `mnesis-fjall`'s `futures` line (not listed in the plan, which named only its `bytes`) also needed the restore — it compiled only via workspace-hack/dev-dep feature unification. Lesson recorded: `cargo check --workspace` cannot prove a restore is self-sufficient (features unify across the whole graph, dev-deps included); only a per-crate isolated check or removing the unification source can.
 
 ---
 
@@ -44,10 +44,10 @@ Expected: `nothing to commit, working tree clean`, branch `feat/301-no-std-store
 
 **Files:**
 - Modify: `Cargo.toml` (workspace root, `[workspace.dependencies]` lines 24–32)
-- Modify: `crates/nexus-fjall/Cargo.toml` (line 22)
-- Modify: `crates/nexus-inmemory/Cargo.toml` (lines 19–20)
-- Modify: `crates/nexus-postgres/Cargo.toml` (lines 15–16)
-- Modify: `crates/nexus-store/Cargo.toml` (dev-dependency `futures`, line 61)
+- Modify: `crates/mnesis-fjall/Cargo.toml` (line 22)
+- Modify: `crates/mnesis-inmemory/Cargo.toml` (lines 19–20)
+- Modify: `crates/mnesis-postgres/Cargo.toml` (lines 15–16)
+- Modify: `crates/mnesis-store/Cargo.toml` (dev-dependency `futures`, line 61)
 
 - [ ] **Step 1: Flip workspace declarations to `default-features = false`**
 
@@ -65,24 +65,24 @@ futures = { version = "0.3", default-features = false, features = ["alloc"] }
 
 `futures`' default set is `["std", "async-await", "executor"]`; `bytes`' and `aligned-vec`'s is `["std"]`. Restore exactly that set so consumer builds are unchanged:
 
-`crates/nexus-fjall/Cargo.toml`:
+`crates/mnesis-fjall/Cargo.toml`:
 ```toml
 bytes = { workspace = true, features = ["std"] }
 ```
 
-`crates/nexus-inmemory/Cargo.toml`:
-```toml
-bytes = { workspace = true, features = ["std"] }
-futures = { workspace = true, features = ["std", "async-await", "executor"] }
-```
-
-`crates/nexus-postgres/Cargo.toml`:
+`crates/mnesis-inmemory/Cargo.toml`:
 ```toml
 bytes = { workspace = true, features = ["std"] }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
 ```
 
-`crates/nexus-store/Cargo.toml` `[dev-dependencies]` (tests always link std):
+`crates/mnesis-postgres/Cargo.toml`:
+```toml
+bytes = { workspace = true, features = ["std"] }
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
+```
+
+`crates/mnesis-store/Cargo.toml` `[dev-dependencies]` (tests always link std):
 ```toml
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
 ```
@@ -94,16 +94,16 @@ Expected: clean. If a crate fails on a missing futures/bytes item, that consumer
 
 ---
 
-### Task 3: nexus-store feature surface + hakari exclusion
+### Task 3: mnesis-store feature surface + hakari exclusion
 
 **Files:**
-- Modify: `crates/nexus-store/Cargo.toml` (`[features]` + `[dependencies]`)
+- Modify: `crates/mnesis-store/Cargo.toml` (`[features]` + `[dependencies]`)
 - Modify: `.config/hakari.toml` (`[final-excludes] workspace-members`)
 - Modify (generated): `crates/workspace-hack/Cargo.toml`, `Cargo.lock`
 
 - [ ] **Step 1: Add the additive `std` default feature**
 
-In `crates/nexus-store/Cargo.toml` `[features]`:
+In `crates/mnesis-store/Cargo.toml` `[features]`:
 
 ```toml
 default = ["std"]
@@ -112,7 +112,7 @@ default = ["std"]
 # yields a no_std + alloc + core::error::Error store. (#301, mirrors #279)
 std = [
   "thiserror/std",
-  "nexus/std",
+  "mnesis/std",
   "futures/std",
   "bytes/std",
   "aligned-vec/std",
@@ -124,23 +124,23 @@ std = [
 In `[dependencies]`:
 
 ```toml
-nexus = { version = "0.1.0", path = "../nexus", default-features = false }
+mnesis = { version = "0.1.0", path = "../mnesis", default-features = false }
 thiserror = { workspace = true }
 ```
 
 (`thiserror` loses its hardcoded `features = ["std"]`; `futures`/`bytes`/`aligned-vec` lines stay plain `{ workspace = true }` — the workspace decl is now no-default, and `std` forwards through the feature above.)
 
-- [ ] **Step 3: Exclude nexus-store from workspace-hack**
+- [ ] **Step 3: Exclude mnesis-store from workspace-hack**
 
 In `.config/hakari.toml`, extend the existing entry:
 
 ```toml
-workspace-members = ["nexus", "nexus-nostd-smoketest", "nexus-store"]
+workspace-members = ["mnesis", "mnesis-nostd-smoketest", "mnesis-store"]
 ```
 
 Add a comment line above mirroring the existing ones:
 ```toml
-# `nexus-store` is no_std (core+alloc) — workspace-hack force-enables
+# `mnesis-store` is no_std (core+alloc) — workspace-hack force-enables
 # std-implying futures-util features (io/channel/sink) that feature
 # unification would leak into its --no-default-features build. (#301)
 ```
@@ -152,7 +152,7 @@ cargo hakari generate
 cargo hakari manage-deps
 ```
 
-Expected: `workspace-hack = { … }` line removed from `crates/nexus-store/Cargo.toml`; `crates/workspace-hack/Cargo.toml` regenerated. Verify with `cargo hakari verify` → exit 0.
+Expected: `workspace-hack = { … }` line removed from `crates/mnesis-store/Cargo.toml`; `crates/workspace-hack/Cargo.toml` regenerated. Verify with `cargo hakari verify` → exit 0.
 
 - [ ] **Step 5: Workspace still builds**
 
@@ -162,8 +162,8 @@ Expected: clean.
 - [ ] **Step 6: Commit (workspace prep, green standalone)**
 
 ```bash
-git add Cargo.toml Cargo.lock .config/hakari.toml crates/workspace-hack crates/nexus-fjall/Cargo.toml crates/nexus-inmemory/Cargo.toml crates/nexus-postgres/Cargo.toml crates/nexus-store/Cargo.toml
-git commit -m "build(store): flip futures/bytes/aligned-vec to no-default workspace deps, hakari-exclude nexus-store (#301)"
+git add Cargo.toml Cargo.lock .config/hakari.toml crates/workspace-hack crates/mnesis-fjall/Cargo.toml crates/mnesis-inmemory/Cargo.toml crates/mnesis-postgres/Cargo.toml crates/mnesis-store/Cargo.toml
+git commit -m "build(store): flip futures/bytes/aligned-vec to no-default workspace deps, hakari-exclude mnesis-store (#301)"
 ```
 
 (The pre-commit hook runs `nix flake check` itself — do not pre-run it.)
@@ -173,11 +173,11 @@ git commit -m "build(store): flip futures/bytes/aligned-vec to no-default worksp
 ### Task 4: no_std attribute — make the build fail
 
 **Files:**
-- Modify: `crates/nexus-store/src/lib.rs` (top of file)
+- Modify: `crates/mnesis-store/src/lib.rs` (top of file)
 
 - [ ] **Step 1: Add the attribute + alloc**
 
-At the very top of `crates/nexus-store/src/lib.rs`, before the doc comment/attrs that exist today:
+At the very top of `crates/mnesis-store/src/lib.rs`, before the doc comment/attrs that exist today:
 
 ```rust
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -189,7 +189,7 @@ extern crate alloc;
 
 - [ ] **Step 2: Run the failing build (this is the port's "failing test")**
 
-Run: `cargo build -p nexus-store --no-default-features`
+Run: `cargo build -p mnesis-store --no-default-features`
 Expected: FAIL with many `error[E0433]: failed to resolve: use of unresolved module or unlinked crate 'std'` and missing-prelude errors (`Vec`, `String`, `format!`, `Box` not found). Save the error list — it is the authoritative worklist for Task 5.
 
 ---
@@ -197,23 +197,23 @@ Expected: FAIL with many `error[E0433]: failed to resolve: use of unresolved mod
 ### Task 5: Mechanical sweep — `std::` → `core::`/`alloc::`
 
 **Files (production code only — leave `#[cfg(test)]` modules untouched):**
-- Modify: `crates/nexus-store/src/builder.rs`
-- Modify: `crates/nexus-store/src/codec.rs`
-- Modify: `crates/nexus-store/src/envelope.rs`
-- Modify: `crates/nexus-store/src/value.rs`
-- Modify: `crates/nexus-store/src/store.rs`
-- Modify: `crates/nexus-store/src/state.rs`
-- Modify: `crates/nexus-store/src/catchup.rs`
-- Modify: `crates/nexus-store/src/subscription.rs`
-- Modify: `crates/nexus-store/src/subscription_cursor.rs`
-- Modify: `crates/nexus-store/src/repository.rs`
-- Modify: `crates/nexus-store/src/export.rs`
-- Modify: `crates/nexus-store/src/import.rs`
-- Modify: `crates/nexus-store/src/snapshot.rs`
-- Modify: `crates/nexus-store/src/stream.rs`
-- Modify: `crates/nexus-store/src/upcasting.rs`
-- Modify: `crates/nexus-store/src/wire.rs`
-- Modify: `crates/nexus-store/src/cbor.rs`
+- Modify: `crates/mnesis-store/src/builder.rs`
+- Modify: `crates/mnesis-store/src/codec.rs`
+- Modify: `crates/mnesis-store/src/envelope.rs`
+- Modify: `crates/mnesis-store/src/value.rs`
+- Modify: `crates/mnesis-store/src/store.rs`
+- Modify: `crates/mnesis-store/src/state.rs`
+- Modify: `crates/mnesis-store/src/catchup.rs`
+- Modify: `crates/mnesis-store/src/subscription.rs`
+- Modify: `crates/mnesis-store/src/subscription_cursor.rs`
+- Modify: `crates/mnesis-store/src/repository.rs`
+- Modify: `crates/mnesis-store/src/export.rs`
+- Modify: `crates/mnesis-store/src/import.rs`
+- Modify: `crates/mnesis-store/src/snapshot.rs`
+- Modify: `crates/mnesis-store/src/stream.rs`
+- Modify: `crates/mnesis-store/src/upcasting.rs`
+- Modify: `crates/mnesis-store/src/wire.rs`
+- Modify: `crates/mnesis-store/src/cbor.rs`
 - Modify (alloc imports only, as compiler demands): `error.rs`, `batch.rs`, `conflict.rs`, `step.rs`, `stream_id.rs`, `decoded.rs`, `projection.rs`, `saga.rs`, `execute.rs`
 
 - [ ] **Step 1: Apply the path mapping (exact substitutions)**
@@ -240,12 +240,12 @@ Rules while sweeping (project conventions):
 
 - [ ] **Step 2: Iterate until the no_std build is green**
 
-Run (repeat until clean): `cargo build -p nexus-store --no-default-features`
+Run (repeat until clean): `cargo build -p mnesis-store --no-default-features`
 Expected: PASS.
 
 - [ ] **Step 3: Verify no production `std::` remains**
 
-Run: `rg -n 'std::' crates/nexus-store/src --no-heading | rg -v 'cfg\(test\)' | rg -v '^\S+:\d+:\s*//'`
+Run: `rg -n 'std::' crates/mnesis-store/src --no-heading | rg -v 'cfg\(test\)' | rg -v '^\S+:\d+:\s*//'`
 Expected: hits only inside `#[cfg(test)]` modules (spot-check each survivor's enclosing cfg).
 
 ---
@@ -256,22 +256,22 @@ Expected: hits only inside `#[cfg(test)]` modules (spot-check each survivor's en
 
 - [ ] **Step 1: Host no_std**
 
-Run: `cargo build -p nexus-store --no-default-features`
+Run: `cargo build -p mnesis-store --no-default-features`
 Expected: PASS. (With `#![no_std]` active, any in-crate `std::` path fails to resolve even on a host with std — this is the leak detector.)
 
 - [ ] **Step 2: Host no_std + dep-free features** (scope decision 2's empirical checkpoint)
 
-Run: `cargo build -p nexus-store --no-default-features --features subscription,export,import,snapshot,projection`
+Run: `cargo build -p mnesis-store --no-default-features --features subscription,export,import,snapshot,projection`
 Expected: PASS. If `futures`' alloc-only set is missing a combinator the subscription loop needs (`unfold`, `try_fold`): record the deviation, drop this variant from the flake gate in Task 7, and open a follow-up card instead of forcing `futures/std` in.
 
 - [ ] **Step 3: wasm32 no_std**
 
-Run: `cargo build -p nexus-store --target wasm32-unknown-unknown --no-default-features`
+Run: `cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features`
 Expected: PASS (target is already installed — the kernel gate builds it).
 
 - [ ] **Step 4: std path regression check**
 
-Run: `cargo nextest run -p nexus-store`
+Run: `cargo nextest run -p mnesis-store`
 Expected: all tests pass, zero failures — the default `std` build is behaviorally unchanged.
 
 - [ ] **Step 5: Clippy under the full matrix** (project rule: clean under `--all-features --all-targets`)
@@ -284,25 +284,25 @@ Expected: zero warnings.
 ### Task 7: Flake CI gate
 
 **Files:**
-- Modify: `flake.nix` (checks section, next to the existing `nexus-wasm`/`nexus-nostd` derivations, ~line 140)
+- Modify: `flake.nix` (checks section, next to the existing `mnesis-wasm`/`mnesis-nostd` derivations, ~line 140)
 
 - [ ] **Step 1: Add the store gate as its own check**
 
 ```nix
-# nexus-store no_std gate (#301). The store needs an allocator, so there
+# mnesis-store no_std gate (#301). The store needs an allocator, so there
 # is no bare-metal thumbv7em build (that would require a
 # #[global_allocator]); wasm32 + host --no-default-features is the
 # pragmatic gate. The host build is the std-leak detector: with
 # #![no_std] active, an in-crate `std::` path fails to resolve even
 # though the host ships std. The features variant keeps the dep-free
 # feature set (subscription/export/import/snapshot/projection) honest.
-nexus-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
+mnesis-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
   inherit cargoArtifacts;
-  pname = "nexus-store-nostd";
+  pname = "mnesis-store-nostd";
   buildPhaseCargoCommand = ''
-    cargo build -p nexus-store --no-default-features
-    cargo build -p nexus-store --target wasm32-unknown-unknown --no-default-features
-    cargo build -p nexus-store --target wasm32-unknown-unknown --no-default-features --features subscription,export,import,snapshot,projection
+    cargo build -p mnesis-store --no-default-features
+    cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features
+    cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features --features subscription,export,import,snapshot,projection
   '';
 });
 ```
@@ -312,7 +312,7 @@ nexus-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
 - [ ] **Step 2: Verify the flake evaluates**
 
 Run: `nix flake show 2>/dev/null | head -40`
-Expected: `nexus-store-nostd` listed under checks, no eval errors.
+Expected: `mnesis-store-nostd` listed under checks, no eval errors.
 
 ---
 
@@ -330,7 +330,7 @@ nix develop -c cargo fmt --all
 
 ```bash
 git add -A
-git commit -m "feat(store)!: port nexus-store to no_std (core+alloc) (#301)"
+git commit -m "feat(store)!: port mnesis-store to no_std (core+alloc) (#301)"
 ```
 
 The pre-commit hook runs `nix flake check` (never bypass it; never pre-run it). Expect several minutes.
@@ -340,20 +340,20 @@ The pre-commit hook runs `nix flake check` (never bypass it; never pre-run it). 
 ```bash
 git push -u origin feat/301-no-std-store
 gh pr create \
-  --title "feat(store)!: port nexus-store to no_std (core+alloc) (#301)" \
+  --title "feat(store)!: port mnesis-store to no_std (core+alloc) (#301)" \
   --body "$(cat <<'EOF'
 ## Summary
 - `#![cfg_attr(not(feature = "std"), no_std)]` + unconditional `extern crate alloc` behind an additive default `std` feature (mirrors #279 / #303)
 - **Freeze gate:** all public error bounds `std::error::Error` → `core::error::Error` (stable since 1.81; a re-export, so no semantic change for std consumers — but irreversible post-1.0 in the other direction)
 - `futures`/`bytes`/`aligned-vec` flip to `default-features = false` at the workspace root (workspace inheritance cannot override `default-features`); std consumers restore their exact former feature sets
-- `nexus-store` joins hakari `[final-excludes]` — workspace-hack force-enables std-implying `futures-util` features that unification would leak into the no_std build
-- New flake check `nexus-store-nostd`: host + wasm32 `--no-default-features`, plus the dep-free feature set
+- `mnesis-store` joins hakari `[final-excludes]` — workspace-hack force-enables std-implying `futures-util` features that unification would leak into the no_std build
+- New flake check `mnesis-store-nostd`: host + wasm32 `--no-default-features`, plus the dep-free feature set
 
 Closes #301
 
 ## Test plan
 - [ ] `nix flake check` green (std path + new no_std gate)
-- [ ] `cargo nextest run -p nexus-store` unchanged
+- [ ] `cargo nextest run -p mnesis-store` unchanged
 - [ ] `cargo clippy --workspace --all-features --all-targets` clean
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -372,4 +372,4 @@ Expected: Nix Flake Check green. Merge with `gh pr merge --squash --delete-branc
 
 - **Spec coverage:** #301's five "What" bullets → Task 4 (attribute), Task 5 (bounds + core/alloc sweep), test-only HashMap bullet is obsolete (`test_support.rs` is `#[cfg(all(test, feature = "subscription"))]` — always std; verified), thiserror bullet → Tasks 2–3 (workspace already no-default from #279; the store's hardcoded `["std"]` becomes feature-forwarded), CI gate → Task 7, hakari → Task 3 (verified needed: workspace-hack enables std-implying futures-util features). Acceptance boxes → Task 5 Step 1 (bounds) + Tasks 6–7 (gates, no regression).
 - **Placeholder scan:** the Task 5 sweep intentionally uses a mapping table + compiler-driven worklist instead of per-line diffs — the exact sites are enumerated where known; prelude-import sites are discovered by the Task 4 failing build (deterministic, complete).
-- **Type consistency:** feature name `std`, check name `nexus-store-nostd`, branch `feat/301-no-std-store` used consistently throughout.
+- **Type consistency:** feature name `std`, check name `mnesis-store-nostd`, branch `feat/301-no-std-store` used consistently throughout.

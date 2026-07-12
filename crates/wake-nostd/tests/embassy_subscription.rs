@@ -17,16 +17,16 @@ use std::time::Duration;
 
 use embassy_executor::Executor;
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::{
+use mnesis::Version;
+use mnesis_inmemory::{
     InMemoryAllPos, InMemoryAllStream, InMemoryStore, InMemoryStoreError, InMemoryStream,
 };
-use nexus_store::wake::WakeSource;
-use nexus_store::{
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{
     AppendError, PendingEnvelope, RawEventStore, Step, Store, StreamKey, Subscription,
     pending_envelope,
 };
-use nexus_wake_nostd::GlobalWake;
+use mnesis_wake_nostd::GlobalWake;
 
 const MUST_DELIVER: Duration = Duration::from_secs(5);
 const STREAM: &[u8] = b"device";

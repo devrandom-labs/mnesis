@@ -7,10 +7,10 @@ use core::time::Duration;
 
 use futures::StreamExt;
 use futures::pin_mut;
-use nexus::Version;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{Step, StreamKey, Subscription};
+use mnesis::Version;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{Step, StreamKey, Subscription};
 use tokio::time::timeout;
 
 use crate::row::{

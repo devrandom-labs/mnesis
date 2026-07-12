@@ -1,26 +1,27 @@
 [package]
-name = "nexus-inmemory"
+name = "mnesis-inmemory"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "In-memory event-store adapter for the Nexus event-sourcing framework"
-readme = "../../README.md"
+homepage.workspace = true
+description = "In-memory event-store adapter for the Mnesis event-sourcing framework"
+readme = "README.md"
 keywords = ["event-sourcing", "event-store", "in-memory", "testing"]
 categories = ["data-structures", "development-tools::testing"]
 
 [features]
-export = ["nexus-store/export"]
-import = ["nexus-store/import"]
+export = ["mnesis-store/export"]
+import = ["mnesis-store/import"]
 
 [dependencies]
 bytes = { workspace = true, features = ["std"] }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-nexus = { version = "0.1.0", path = "../../crates/nexus" }
-nexus-store = { version = "0.1.0", path = "../../crates/store", features = ["subscription"] }
-nexus-wake = { version = "0.1.0", path = "../../crates/wake" }
+mnesis = { version = "0.1.0", path = "../../crates/mnesis" }
+mnesis-store = { version = "0.1.0", path = "../../crates/store", features = ["subscription"] }
+mnesis-wake = { version = "0.1.0", path = "../../crates/wake" }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
@@ -28,9 +29,9 @@ workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 [dev-dependencies]
 # Path-only self dev-dep (no version) unifies the `import` feature into the
 # crate's own test targets — `AtomicAppend` on `InMemoryStore` is gated
-# behind it (matches the pattern nexus-store uses for nexus-inmemory).
-nexus-inmemory = { path = ".", features = ["import"] }
-nexus-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+# behind it (matches the pattern mnesis-store uses for mnesis-inmemory).
+mnesis-inmemory = { path = ".", features = ["import"] }
+mnesis-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
     "snapshot",
     "atomic-append",
 ] }
@@ -39,3 +40,6 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

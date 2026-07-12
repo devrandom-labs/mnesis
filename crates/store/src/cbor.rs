@@ -21,7 +21,7 @@ use thiserror::Error;
 use crate::envelope::PersistedEnvelope;
 use crate::import::{ImportBlock, StreamSection};
 use crate::value::SchemaVersion;
-use nexus::Version;
+use mnesis::Version;
 
 const MAGIC: &[u8] = b"nxch";
 const FORMAT_VERSION: u32 = 1;

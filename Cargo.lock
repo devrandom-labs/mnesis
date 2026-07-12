@@ -1259,6 +1259,258 @@ dependencies = [
 ]
 
 [[package]]
+name = "mnesis"
+version = "0.1.0"
+dependencies = [
+ "arrayvec",
+ "criterion",
+ "mnesis",
+ "mnesis-macros",
+ "proptest",
+ "static_assertions",
+ "thiserror",
+ "trybuild",
+]
+
+[[package]]
+name = "mnesis-cross-crate-test"
+version = "0.0.0"
+dependencies = [
+ "mnesis",
+ "thiserror",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-closing-the-books"
+version = "0.0.0"
+dependencies = [
+ "mnesis",
+ "thiserror",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-fjall-end-to-end"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-fjall",
+ "mnesis-store",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-inmemory"
+version = "0.0.0"
+dependencies = [
+ "mnesis",
+ "thiserror",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-projection-tokio"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-store-and-kernel"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-example-store-inmemory"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-fjall"
+version = "0.1.0"
+dependencies = [
+ "arrayvec",
+ "bytes",
+ "criterion",
+ "fjall",
+ "futures",
+ "insta",
+ "mnesis",
+ "mnesis-fjall",
+ "mnesis-store",
+ "mnesis-store-testing",
+ "mnesis-wake",
+ "proptest",
+ "proptest-state-machine",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-inmemory"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "mnesis-store-testing",
+ "mnesis-wake",
+ "proptest",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-macros"
+version = "0.1.0"
+dependencies = [
+ "mnesis",
+ "mnesis-store",
+ "proc-macro2",
+ "proptest",
+ "quote",
+ "syn",
+ "thiserror",
+ "trybuild",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-nostd-smoketest"
+version = "0.0.0"
+dependencies = [
+ "mnesis",
+ "thiserror",
+]
+
+[[package]]
+name = "mnesis-postgres"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-store",
+ "mnesis-store-testing",
+ "mnesis-wake",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-store"
+version = "0.1.0"
+dependencies = [
+ "aligned-vec",
+ "arrayvec",
+ "bytemuck",
+ "bytes",
+ "crc32c",
+ "criterion",
+ "futures",
+ "futures-core",
+ "insta",
+ "minicbor",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "mnesis-store-testing",
+ "proptest",
+ "rkyv",
+ "serde",
+ "serde_json",
+ "static_assertions",
+ "thiserror",
+ "tokio",
+ "trybuild",
+]
+
+[[package]]
+name = "mnesis-store-testing"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "mnesis-store-testing",
+ "mnesis-wake",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-wake"
+version = "0.1.0"
+dependencies = [
+ "foldhash 0.2.0",
+ "mnesis-store",
+ "parking_lot",
+ "thiserror",
+ "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-wake-nostd"
+version = "0.1.0"
+dependencies = [
+ "embassy-executor",
+ "event-listener",
+ "futures",
+ "mnesis",
+ "mnesis-inmemory",
+ "mnesis-store",
+ "tokio",
+]
+
+[[package]]
 name = "munge"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1276,258 +1528,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "nexus"
-version = "0.1.0"
-dependencies = [
- "arrayvec",
- "criterion",
- "nexus",
- "nexus-macros",
- "proptest",
- "static_assertions",
- "thiserror",
- "trybuild",
-]
-
-[[package]]
-name = "nexus-cross-crate-test"
-version = "0.0.0"
-dependencies = [
- "nexus",
- "thiserror",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-closing-the-books"
-version = "0.0.0"
-dependencies = [
- "nexus",
- "thiserror",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-fjall-end-to-end"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-fjall",
- "nexus-store",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-inmemory"
-version = "0.0.0"
-dependencies = [
- "nexus",
- "thiserror",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-projection-tokio"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-store-and-kernel"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-example-store-inmemory"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-fjall"
-version = "0.1.0"
-dependencies = [
- "arrayvec",
- "bytes",
- "criterion",
- "fjall",
- "futures",
- "insta",
- "nexus",
- "nexus-fjall",
- "nexus-store",
- "nexus-store-testing",
- "nexus-wake",
- "proptest",
- "proptest-state-machine",
- "tempfile",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-inmemory"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "nexus-store-testing",
- "nexus-wake",
- "proptest",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-macros"
-version = "0.1.0"
-dependencies = [
- "nexus",
- "nexus-store",
- "proc-macro2",
- "proptest",
- "quote",
- "syn",
- "thiserror",
- "trybuild",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-nostd-smoketest"
-version = "0.0.0"
-dependencies = [
- "nexus",
- "thiserror",
-]
-
-[[package]]
-name = "nexus-postgres"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-store",
- "nexus-store-testing",
- "nexus-wake",
- "sqlx",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-store"
-version = "0.1.0"
-dependencies = [
- "aligned-vec",
- "arrayvec",
- "bytemuck",
- "bytes",
- "crc32c",
- "criterion",
- "futures",
- "futures-core",
- "insta",
- "minicbor",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "nexus-store-testing",
- "proptest",
- "rkyv",
- "serde",
- "serde_json",
- "static_assertions",
- "thiserror",
- "tokio",
- "trybuild",
-]
-
-[[package]]
-name = "nexus-store-testing"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "nexus-store-testing",
- "nexus-wake",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-wake"
-version = "0.1.0"
-dependencies = [
- "foldhash 0.2.0",
- "nexus-store",
- "parking_lot",
- "thiserror",
- "tokio",
- "workspace-hack",
-]
-
-[[package]]
-name = "nexus-wake-nostd"
-version = "0.1.0"
-dependencies = [
- "embassy-executor",
- "event-listener",
- "futures",
- "nexus",
- "nexus-inmemory",
- "nexus-store",
- "tokio",
 ]
 
 [[package]]

@@ -1,11 +1,11 @@
 //! The `no_std` aggregate whose macro output the flake gates compile.
 //!
-//! Mirrors `nexus-cross-crate-test` (the std cross-crate probe) but stays in
+//! Mirrors `mnesis-cross-crate-test` (the std cross-crate probe) but stays in
 //! `core`: `core::fmt` for `Display`, a fixed-size `[u8; 8]` id (no `String`),
 //! and `Events<TaskEvent>` at the default `N = 0` (single event, no allocator).
 
 use core::fmt;
-use nexus::{AggregateRoot, AggregateState, DomainEvent, Events, Handle, Version, events};
+use mnesis::{AggregateRoot, AggregateState, DomainEvent, Events, Handle, Version, events};
 
 // --- Id (core-only: fixed array, `core::fmt` Display) ---
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -69,7 +69,7 @@ pub enum TaskError {
 }
 
 // --- Aggregate (attribute macro output compiled for the target) ---
-#[nexus::aggregate(state = TaskState, error = TaskError, id = TaskId)]
+#[mnesis::aggregate(state = TaskState, error = TaskError, id = TaskId)]
 pub struct TaskAggregate;
 
 // --- Commands + decide (single-event `Events<_, 0>`, no allocator) ---

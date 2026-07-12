@@ -1,0 +1,349 @@
+//! Tests for `AggregateRoot::replay` — streaming rehydration.
+
+use std::fmt;
+use std::num::NonZeroUsize;
+
+use mnesis::Aggregate;
+use mnesis::AggregateRoot;
+use mnesis::AggregateState;
+use mnesis::DomainEvent;
+use mnesis::KernelError;
+use mnesis::Message;
+use mnesis::Version;
+
+// --- Minimal test domain ---
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+struct RId(String);
+impl RId {
+    fn new(v: u64) -> Self {
+        Self(format!("r-{v}"))
+    }
+}
+impl fmt::Display for RId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl AsRef<[u8]> for RId {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum REvent {
+    Added(String),
+}
+impl Message for REvent {}
+impl DomainEvent for REvent {
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Added(_) => "Added",
+        }
+    }
+}
+
+#[derive(Default, Debug, Clone)]
+struct RState {
+    items: Vec<String>,
+}
+impl AggregateState for RState {
+    type Event = REvent;
+    fn initial() -> Self {
+        Self::default()
+    }
+    fn apply(mut self, event: &REvent) -> Self {
+        match event {
+            REvent::Added(s) => self.items.push(s.clone()),
+        }
+        self
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("r error")]
+struct RErr;
+
+#[derive(Debug)]
+struct RAgg;
+impl Aggregate for RAgg {
+    type State = RState;
+    type Error = RErr;
+    type Id = RId;
+}
+
+// --- Helper: unwrap Version::new ---
+
+const fn v(n: u64) -> Version {
+    match Version::new(n) {
+        Some(v) => v,
+        None => panic!("test version must be non-zero"),
+    }
+}
+
+// =============================================================================
+// 1. replay single event advances version
+// =============================================================================
+
+#[test]
+fn replay_single_event_advances_version() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+    assert_eq!(agg.version(), None, "fresh aggregate has no version");
+
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+
+    assert_eq!(agg.version(), Some(v(1)));
+    assert_eq!(agg.state().items, vec!["a"]);
+}
+
+// =============================================================================
+// 2. replay sequential events
+// =============================================================================
+
+#[test]
+fn replay_sequential_events() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+    agg.replay(v(2), &REvent::Added("b".into())).unwrap();
+    agg.replay(v(3), &REvent::Added("c".into())).unwrap();
+
+    assert_eq!(agg.version(), Some(v(3)));
+    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+}
+
+// =============================================================================
+// 3. replay rejects wrong first version
+// =============================================================================
+
+#[test]
+fn replay_rejects_wrong_first_version() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+
+    let err = agg.replay(v(5), &REvent::Added("a".into())).unwrap_err();
+
+    match err {
+        KernelError::VersionMismatch { expected, actual } => {
+            assert_eq!(expected, v(1), "first replay must expect Version::INITIAL");
+            assert_eq!(actual, v(5));
+        }
+        other => panic!("expected VersionMismatch, got {other:?}"),
+    }
+}
+
+// =============================================================================
+// 4. replay rejects duplicate version
+// =============================================================================
+
+#[test]
+fn replay_rejects_duplicate_version() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+
+    let err = agg.replay(v(1), &REvent::Added("b".into())).unwrap_err();
+
+    match err {
+        KernelError::VersionMismatch { expected, actual } => {
+            assert_eq!(expected, v(2));
+            assert_eq!(actual, v(1));
+        }
+        other => panic!("expected VersionMismatch, got {other:?}"),
+    }
+}
+
+// =============================================================================
+// 5. replay rejects version gap
+// =============================================================================
+
+#[test]
+fn replay_rejects_version_gap() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+
+    let err = agg.replay(v(3), &REvent::Added("b".into())).unwrap_err();
+
+    match err {
+        KernelError::VersionMismatch { expected, actual } => {
+            assert_eq!(expected, v(2));
+            assert_eq!(actual, v(3));
+        }
+        other => panic!("expected VersionMismatch, got {other:?}"),
+    }
+}
+
+// =============================================================================
+// 6. replay does not change version on error
+// =============================================================================
+
+#[test]
+fn replay_does_not_change_version_on_error() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+
+    // Attempt a bad replay — version should remain at 1
+    let _ = agg.replay(v(5), &REvent::Added("bad".into()));
+
+    assert_eq!(
+        agg.version(),
+        Some(v(1)),
+        "version must not change on error"
+    );
+    assert_eq!(
+        agg.state().items,
+        vec!["a"],
+        "state must not change on error"
+    );
+}
+
+// =============================================================================
+// 7. replay enforces rehydration limit
+// =============================================================================
+
+#[test]
+fn replay_enforces_rehydration_limit() {
+    #[derive(Debug)]
+    struct SmallLimitAgg;
+    #[derive(Debug, thiserror::Error)]
+    #[error("e")]
+    struct SmallErr;
+    #[allow(clippy::unwrap_used, reason = "3 is non-zero by inspection")]
+    impl Aggregate for SmallLimitAgg {
+        type State = RState;
+        type Error = SmallErr;
+        type Id = RId;
+        const MAX_REHYDRATION_EVENTS: NonZeroUsize = NonZeroUsize::new(3).unwrap();
+    }
+
+    let mut agg = AggregateRoot::<SmallLimitAgg>::new(RId::new(1));
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+    agg.replay(v(2), &REvent::Added("b".into())).unwrap();
+    agg.replay(v(3), &REvent::Added("c".into())).unwrap();
+
+    // 4th event exceeds the limit of 3
+    let err = agg.replay(v(4), &REvent::Added("d".into())).unwrap_err();
+
+    match err {
+        KernelError::RehydrationLimitExceeded { max } => {
+            assert_eq!(max, 3);
+        }
+        other => panic!("expected RehydrationLimitExceeded, got {other:?}"),
+    }
+
+    // State and version are unchanged after the rejected replay
+    assert_eq!(agg.version(), Some(v(3)));
+    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+}
+
+// =============================================================================
+// 8. replay then commit_persisted continues correctly
+// =============================================================================
+
+#[test]
+fn replay_then_commit_persisted_continues_correctly() {
+    let mut agg = AggregateRoot::<RAgg>::new(RId::new(1));
+
+    // Rehydrate from two persisted events
+    agg.replay(v(1), &REvent::Added("a".into())).unwrap();
+    agg.replay(v(2), &REvent::Added("b".into())).unwrap();
+    assert_eq!(agg.version(), Some(v(2)));
+
+    // Simulate: command handler decided two new events, repository persisted them
+    let new_events: mnesis::Events<_, 1> =
+        mnesis::events![REvent::Added("c".into()), REvent::Added("d".into())];
+
+    // Repository syncs the root after the durable write: version advances to the
+    // last persisted event and state folds the events, atomically.
+    agg.commit_persisted(v(4), &new_events);
+    assert_eq!(agg.version(), Some(v(4)));
+    assert_eq!(agg.state().items, vec!["a", "b", "c", "d"]);
+}
+
+// =============================================================================
+// 9. replay panic safety — panicking apply leaves initial() (no partial mutation)
+// =============================================================================
+
+#[test]
+fn replay_panic_safety_no_partial_mutation() {
+    // A domain whose apply panics on a specific event
+    #[derive(Debug, Clone, PartialEq)]
+    enum PanicEvent {
+        Normal(String),
+        Bomb,
+    }
+    impl Message for PanicEvent {}
+    impl DomainEvent for PanicEvent {
+        fn name(&self) -> &'static str {
+            match self {
+                Self::Normal(_) => "Normal",
+                Self::Bomb => "Bomb",
+            }
+        }
+    }
+
+    #[derive(Default, Debug, Clone)]
+    struct PanicState {
+        items: Vec<String>,
+    }
+    impl AggregateState for PanicState {
+        type Event = PanicEvent;
+        fn initial() -> Self {
+            Self::default()
+        }
+        #[allow(clippy::panic, reason = "intentional panic for test")]
+        fn apply(mut self, event: &PanicEvent) -> Self {
+            match event {
+                PanicEvent::Normal(s) => self.items.push(s.clone()),
+                PanicEvent::Bomb => panic!("intentional panic in apply"),
+            }
+            self
+        }
+    }
+
+    #[derive(Debug, thiserror::Error)]
+    #[error("e")]
+    struct PanicErr;
+
+    #[derive(Debug)]
+    struct PanicAgg;
+    impl Aggregate for PanicAgg {
+        type State = PanicState;
+        type Error = PanicErr;
+        type Id = RId;
+    }
+
+    let mut agg = AggregateRoot::<PanicAgg>::new(RId::new(42));
+    agg.replay(v(1), &PanicEvent::Normal("before".into()))
+        .unwrap();
+
+    // The Bomb event causes apply to panic — catch it
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        agg.replay(v(2), &PanicEvent::Bomb)
+    }));
+
+    assert!(result.is_err(), "apply(Bomb) must panic");
+
+    // Contract: `replay` moves the state out via `mem::replace` (no clone)
+    // and folds it through `apply`. On an apply-panic the version is NOT
+    // advanced (no store desync), and the state is left at `initial()` — a
+    // valid, COMPLETE state, never a partially-mutated one. The pre-panic
+    // "before" item is gone precisely because the old state was moved out
+    // before `apply` panicked; what remains is the clean `initial()`
+    // placeholder, proving no half-applied corruption.
+    assert_eq!(
+        agg.version(),
+        Some(v(1)),
+        "version must not advance after panic"
+    );
+    assert!(
+        agg.state().items.is_empty(),
+        "state must be left at initial() (no partial mutation), got {:?}",
+        agg.state().items
+    );
+
+    // The aggregate is still structurally usable — replay continues from the
+    // correct next version, rebuilding state from the placeholder.
+    agg.replay(v(2), &PanicEvent::Normal("after".into()))
+        .unwrap();
+    assert_eq!(agg.version(), Some(v(2)));
+    assert_eq!(agg.state().items, vec!["after"]);
+}

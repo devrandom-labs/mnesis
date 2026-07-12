@@ -6,7 +6,7 @@
 
 use std::fmt;
 
-use nexus::{AggregateState, DomainEvent, Events, Handle, events};
+use mnesis::{AggregateState, DomainEvent, Events, Handle, events};
 use serde::{Deserialize, Serialize};
 
 // ── Id ──────────────────────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ pub enum AccountError {
 
 // ── Aggregate marker + commands ─────────────────────────────────────────────
 
-#[nexus::aggregate(state = AccountState, error = AccountError, id = AccountId)]
+#[mnesis::aggregate(state = AccountState, error = AccountError, id = AccountId)]
 pub struct BankAccount;
 
 pub struct OpenAccount {

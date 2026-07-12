@@ -1,4 +1,4 @@
-//! `PgAllPos` — postgres's [`AllPosition`](nexus_store::AllPosition).
+//! `PgAllPos` — postgres's [`AllPosition`](mnesis_store::AllPosition).
 //!
 //! The composite `(txid, seq)` commit-ordered position. `txid` is the writing
 //! transaction's `xid8` (`pg_current_xact_id()`); `seq` is the row's
@@ -55,7 +55,7 @@ impl PgAllPos {
     }
 }
 
-impl nexus_store::AllPosition for PgAllPos {}
+impl mnesis_store::AllPosition for PgAllPos {}
 
 #[cfg(test)]
 mod tests {

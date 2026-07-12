@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Expand `nexus-store-testing` into the full 4-category conformance kit with `conformance!` macro entry points, and switch the three adapters onto it.
+**Goal:** Expand `mnesis-store-testing` into the full 4-category conformance kit with `conformance!` macro entry points, and switch the three adapters onto it.
 
 **Architecture:** Public generic async check fns organized into `sequence` / `boundary` / `linearizability` / `lifecycle` modules (plus `atomic` / `snapshot` capability modules), driven by a factory contract `Fn() -> Fut<Output = (S, C)>` where `S: RawEventStore + WakeSource` and `C` is an adapter-chosen keep-alive guard (fjall's `TempDir`; `()` for in-memory). `macro_rules!` entry points generate one `#[tokio::test]` per check so nextest reports each contract rule as its own named test. The existing two suites stay as a legacy shim until each adapter ports (every commit must pass the pre-commit `nix flake check`), then die.
 
-**Tech Stack:** Rust 2024, tokio (`macros, rt, rt-multi-thread, sync, time`), futures, nexus-store (`subscription` feature; `snapshot`/`import` behind kit features).
+**Tech Stack:** Rust 2024, tokio (`macros, rt, rt-multi-thread, sync, time`), futures, mnesis-store (`subscription` feature; `snapshot`/`import` behind kit features).
 
 **Branch:** `feat/281-conformance-kit` (already created off `origin/main`).
 
@@ -25,8 +25,8 @@ Do NOT re-derive these; they were read from the current code.
 - `WakeSource::register(&self, stream: Option<&[u8]>) -> Result<Self::Registration, Self::Error>`; `wake(&self, stream: &[u8])`.
 - `Subscription::new(&Store<S>)`; `subscribe<I: Id>(&self, id: &I, from: Option<Version>) -> Result<impl Stream<Item = Result<Step<PersistedEnvelope>, S::Error>> + Send + use<S, I>, <S as WakeSource>::Error>` — the stream is OWNED (`use<S, I>`, no `&self` borrow) but `!Unpin` (needs `pin_mut!`). `subscribe_all(Option<AllPosition>)` yields `Step<(AllPosition, PersistedEnvelope)>`.
 - `Step<T> = Event(T) | CaughtUp` — `CaughtUp` emitted exactly once at backlog→live.
-- `AtomicAppend::atomic_append_many(&self, writes: &[PlannedAppend]) -> Result<(), AtomicAppendError<Self::Error>>`; `PlannedAppend { target: StreamKey, expected_version: Option<Version>, events: Vec<PendingEnvelope> }`; `AtomicAppendError::Conflict { index, actual } | Store(E)`. Empty `writes` is a no-op `Ok(())`. Gated behind nexus-store feature `import`.
-- `SnapshotStore<S, P>::hydrate(&self, id: &impl Id, schema_version: NonZeroU32) -> Result<Hydrated<S, P>, Self::Error>`; `commit(&self, id: &impl Id, schema_version: NonZeroU32, position: P, state: &S)`. `Hydrated = Absent | Stale { stored_schema: NonZeroU32 } | Found { position, state }`. `InMemorySnapshotStore<S, P>` is generic over `P`. Gated behind nexus-store feature `snapshot`.
+- `AtomicAppend::atomic_append_many(&self, writes: &[PlannedAppend]) -> Result<(), AtomicAppendError<Self::Error>>`; `PlannedAppend { target: StreamKey, expected_version: Option<Version>, events: Vec<PendingEnvelope> }`; `AtomicAppendError::Conflict { index, actual } | Store(E)`. Empty `writes` is a no-op `Ok(())`. Gated behind mnesis-store feature `import`.
+- `SnapshotStore<S, P>::hydrate(&self, id: &impl Id, schema_version: NonZeroU32) -> Result<Hydrated<S, P>, Self::Error>`; `commit(&self, id: &impl Id, schema_version: NonZeroU32, position: P, state: &S)`. `Hydrated = Absent | Stale { stored_schema: NonZeroU32 } | Found { position, state }`. `InMemorySnapshotStore<S, P>` is generic over `P`. Gated behind mnesis-store feature `snapshot`.
 - Envelope builder: `pending_envelope(Version) -> NeedsEventType`; `.event_type(&'static str)` (infallible) or `.event_type_bytes(Bytes) -> Result<WithEventType, EnvelopeError>` (dynamic); `.payload(impl Into<Bytes>)`; then optional `.schema_version(SchemaVersion)` / `.metadata(impl Into<Bytes>)`; `.build() -> Result<PendingEnvelope, EnvelopeError>`.
 - `SchemaVersion::new(NonZeroU32)` (infallible) and `SchemaVersion::from_u32(u32) -> Result<_, ValueError>`.
 - `Id` has a blanket impl for any `Clone + Send + Sync + Debug + Hash + Eq + Display + AsRef<[u8]> + 'static` type — `crates/store/tests/subscription_tests.rs` defines `TestId(String)` with only those impls and passes it to `subscribe`.
@@ -34,13 +34,13 @@ Do NOT re-derive these; they were read from the current code.
 - `CATCHUP_CHUNK` = 1024 (`crates/store/src/subscription_cursor.rs`) — the subscription loop reopens its scan every 1024 delivered rows.
 - fjall rejects an EMPTY stream id (adapter limitation) — the kit only uses non-empty ids.
 - Postgres tests skip when `DATABASE_URL` is unset and run serially (nixosTest passes `--test-threads=1`); each test TRUNCATEs first.
-- Dev-dep cycles are legal when path-only (no `version =`): the workspace already runs `nexus-store (dev)→ nexus-inmemory (lib)→ nexus-store`.
+- Dev-dep cycles are legal when path-only (no `version =`): the workspace already runs `mnesis-store (dev)→ mnesis-inmemory (lib)→ mnesis-store`.
 
 ## File structure
 
 ```
 crates/store-testing/
-  Cargo.toml            — modify: features (snapshot, atomic-append), deps (bytes, tokio features), dev-deps (self, nexus-inmemory)
+  Cargo.toml            — modify: features (snapshot, atomic-append), deps (bytes, tokio features), dev-deps (self, mnesis-inmemory)
   src/lib.rs            — modify: becomes docs + mod decls + macros + legacy shim (old assert_* fns kept until adapters port, deleted in Task 11)
   src/row.rs            — create: ConformanceRow (+metadata field), SubId, envelope_for/append/drain helpers
   src/sequence.rs       — create: 17 Sequence/Protocol checks (absorbs both legacy suites)
@@ -73,41 +73,41 @@ adapters/postgres/tests/conformance_tests.rs    — rewrite onto macros (skip_un
 
 ```toml
 [package]
-name = "nexus-store-testing"
+name = "mnesis-store-testing"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Executable conformance kit for nexus-store adapters — the store contract as a runnable test suite"
+description = "Executable conformance kit for mnesis-store adapters — the store contract as a runnable test suite"
 readme = "../../README.md"
 keywords = ["event-sourcing", "testing", "conformance"]
 categories = ["data-structures", "development-tools::testing"]
 
 [features]
-snapshot = ["nexus-store/snapshot"]
-atomic-append = ["nexus-store/import"]
+snapshot = ["mnesis-store/snapshot"]
+atomic-append = ["mnesis-store/import"]
 
 [dependencies]
 bytes = { workspace = true }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-nexus = { version = "0.1.0", path = "../nexus" }
-nexus-store = { version = "0.1.0", path = "../store", features = ["subscription"] }
+mnesis = { version = "0.1.0", path = "../mnesis" }
+mnesis-store = { version = "0.1.0", path = "../store", features = ["subscription"] }
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }
 workspace-hack = { version = "0.1", path = "../workspace-hack" }
 
 [dev-dependencies]
 # Path-only (no version) — stripped at publish; unifies kit features for the
 # self-check test target (flake nextest runs default features only).
-nexus-store-testing = { path = ".", features = ["snapshot", "atomic-append"] }
-nexus-inmemory = { path = "../../adapters/inmemory" }
+mnesis-store-testing = { path = ".", features = ["snapshot", "atomic-append"] }
+mnesis-inmemory = { path = "../../adapters/inmemory" }
 
 [lints]
 workspace = true
 ```
 
-Check whether `nexus-inmemory` gates `InMemorySnapshotStore` / `AtomicAppend` behind features (`rg "feature" adapters/inmemory/Cargo.toml`); if so add those features to the dev-dep.
+Check whether `mnesis-inmemory` gates `InMemorySnapshotStore` / `AtomicAppend` behind features (`rg "feature" adapters/inmemory/Cargo.toml`); if so add those features to the dev-dep.
 
 - [ ] **Step 1.2: Verify the `PersistedEnvelope` metadata accessor name**
 
@@ -125,11 +125,11 @@ use core::fmt;
 use bytes::Bytes;
 use futures::StreamExt;
 use futures::pin_mut;
-use nexus::Version;
-use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope, pending_envelope};
-use nexus_store::store::RawEventStore;
-use nexus_store::value::SchemaVersion;
-use nexus_store::StreamKey;
+use mnesis::Version;
+use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope, pending_envelope};
+use mnesis_store::store::RawEventStore;
+use mnesis_store::value::SchemaVersion;
+use mnesis_store::StreamKey;
 use std::num::NonZeroU32;
 
 /// One row of test data fed into an adapter for the conformance suite to
@@ -337,7 +337,7 @@ pub use row::{ConformanceRow, SubId};
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus_inmemory::InMemoryStore;
+use mnesis_inmemory::InMemoryStore;
 
 fn factory() -> impl std::future::Future<Output = (InMemoryStore, ())> + Send {
     async { (InMemoryStore::new(), ()) }
@@ -353,7 +353,7 @@ async fn factory_compiles() {
 
 - [ ] **Step 1.6: Verify compile**
 
-Run: `nix develop -c cargo check -p nexus-store-testing --all-features && nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo check -p mnesis-store-testing --all-features && nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: clean check; `factory_compiles` passes.
 
 - [ ] **Step 1.7: Format + commit**
@@ -388,15 +388,15 @@ use core::future::Future;
 
 use futures::StreamExt;
 use futures::pin_mut;
-use nexus::Version;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{AppendError, StreamKey};
+use mnesis::Version;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{AppendError, StreamKey};
 
 use crate::row::{ConformanceRow, append_rows, drain_stream, envelope_for};
 
 // Task 3 extends this import block with: core::time::Duration,
-// tokio::time::timeout, nexus_store::{Step, Subscription}, and
+// tokio::time::timeout, mnesis_store::{Step, Subscription}, and
 // crate::row::{SubId, append_event, assert_strictly_increasing, drain_all} —
 // unused imports are DENIED, so add them only when their checks land.
 
@@ -595,7 +595,7 @@ lib.rs: add `pub mod sequence;` next to `pub mod row;`.
 self_check.rs: replace the `factory_compiles` test with direct calls (temporary until Task 7):
 
 ```rust
-use nexus_store_testing::sequence;
+use mnesis_store_testing::sequence;
 
 #[tokio::test]
 async fn sequence_part1() {
@@ -613,7 +613,7 @@ async fn sequence_part1() {
 
 - [ ] **Step 2.3: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: `sequence_part1` PASSES. If a check fails against `InMemoryStore`, STOP — that is either a kit bug or a genuine reference-adapter contract violation; diagnose before proceeding (do not weaken the assertion).
 
 - [ ] **Step 2.4: Format + commit**
@@ -639,7 +639,7 @@ Append to `sequence.rs`. First extend the file's top import block (all imports s
 ```rust
 use core::time::Duration;
 
-use nexus_store::{Step, Subscription};
+use mnesis_store::{Step, Subscription};
 use tokio::time::timeout;
 
 use crate::row::{SubId, append_event, assert_strictly_increasing, drain_all};
@@ -1048,7 +1048,7 @@ async fn sequence_subscription() {
 
 - [ ] **Step 3.4: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: all three self-check tests PASS.
 
 - [ ] **Step 3.5: Format + commit**
@@ -1078,11 +1078,11 @@ git commit -m "feat(store-testing): sequence checks — \$all reads + subscripti
 use core::future::Future;
 
 use bytes::Bytes;
-use nexus::Version;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{AppendError, StreamKey};
+use mnesis::Version;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{AppendError, StreamKey};
 
 use crate::row::{ConformanceRow, append_rows, drain_all, drain_stream, envelope_for};
 
@@ -1259,7 +1259,7 @@ where
 - [ ] **Step 4.2: Wire in (lib.rs `pub mod boundary;`; self_check test)**
 
 ```rust
-use nexus_store_testing::boundary;
+use mnesis_store_testing::boundary;
 
 #[tokio::test]
 async fn boundary_checks() {
@@ -1274,7 +1274,7 @@ async fn boundary_checks() {
 
 - [ ] **Step 4.3: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: PASS. If `check_version_gap_batch_rejected` or `check_wrong_first_version_rejected` fails on `InMemoryStore`, the reference behavior diverges from the pinned facts — STOP and re-read `adapters/inmemory/src/lib.rs:402`; report the divergence to the user rather than weakening the check.
 
 - [ ] **Step 4.4: Format + commit**
@@ -1308,10 +1308,10 @@ use core::time::Duration;
 use std::sync::Arc;
 
 use futures::pin_mut;
-use nexus::Version;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{AppendError, Step, StreamKey, Subscription};
+use mnesis::Version;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{AppendError, Step, StreamKey, Subscription};
 use tokio::sync::Barrier;
 use tokio::time::timeout;
 
@@ -1530,7 +1530,7 @@ where
 - [ ] **Step 5.2: Wire in (lib.rs; self_check with multi_thread flavor)**
 
 ```rust
-use nexus_store_testing::linearizability;
+use mnesis_store_testing::linearizability;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn linearizability_checks() {
@@ -1573,10 +1573,10 @@ Factory shape here: `open() -> (S, C)` plus `reopen(S, C) -> (S, C)` — reopen 
 
 use core::future::Future;
 
-use nexus::Version;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::StreamKey;
+use mnesis::Version;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::StreamKey;
 
 use crate::row::{ConformanceRow, append_event, append_rows, drain_all, drain_stream};
 
@@ -1680,7 +1680,7 @@ where
     use core::time::Duration;
 
     use futures::pin_mut;
-    use nexus_store::{Step, Subscription};
+    use mnesis_store::{Step, Subscription};
     use tokio::time::timeout;
 
     let (store, ctx) = open().await;
@@ -1721,9 +1721,9 @@ NOTE (violates "no inline use" only apparently): the `use` items inside `check_r
 
 use core::future::Future;
 
-use nexus::Version;
-use nexus_store::wake::WakeSource;
-use nexus_store::{AtomicAppend, AtomicAppendError, PlannedAppend, StreamKey};
+use mnesis::Version;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{AtomicAppend, AtomicAppendError, PlannedAppend, StreamKey};
 // NOTE: RawEventStore is NOT imported — `AtomicAppend: RawEventStore` is a
 // supertrait, and nothing here names the trait directly (unused imports deny).
 
@@ -1836,7 +1836,7 @@ where
 }
 ```
 
-Verify the import paths (`AtomicAppend`, `AtomicAppendError`, `PlannedAppend` re-exported at `nexus_store::` root?) with `rg "pub use.*import" crates/store/src/lib.rs` — adjust to the actual re-export paths.
+Verify the import paths (`AtomicAppend`, `AtomicAppendError`, `PlannedAppend` re-exported at `mnesis_store::` root?) with `rg "pub use.*import" crates/store/src/lib.rs` — adjust to the actual re-export paths.
 
 - [ ] **Step 6.3: Write `src/snapshot.rs`**
 
@@ -1849,7 +1849,7 @@ use core::fmt::Debug;
 use core::future::Future;
 use std::num::NonZeroU32;
 
-use nexus_store::state::{Hydrated, SnapshotStore};
+use mnesis_store::state::{Hydrated, SnapshotStore};
 
 use crate::row::SubId;
 
@@ -1964,7 +1964,7 @@ pub mod snapshot;
 - [ ] **Step 6.5: Extend self-check**
 
 ```rust
-use nexus_store_testing::{atomic, lifecycle, snapshot};
+use mnesis_store_testing::{atomic, lifecycle, snapshot};
 
 // Lifecycle against InMemoryStore is a self-check ONLY: "reopen" hands back
 // the same store (in-memory has nothing to close). It validates the kit's
@@ -1988,8 +1988,8 @@ async fn atomic_checks() {
 
 #[tokio::test]
 async fn snapshot_checks() {
-    use nexus::Version;
-    use nexus_inmemory::InMemorySnapshotStore;
+    use mnesis::Version;
+    use mnesis_inmemory::InMemorySnapshotStore;
     let sfactory = || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) };
     let p1 = Version::new(5).unwrap();
     let p2 = Version::new(9).unwrap();
@@ -2003,7 +2003,7 @@ async fn snapshot_checks() {
 
 - [ ] **Step 6.6: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: PASS (self dev-dep unifies the `snapshot`/`atomic-append` features into the test build).
 
 - [ ] **Step 6.7: Format + commit**
@@ -2057,7 +2057,7 @@ macro_rules! __conformance_case {
 /// store owns everything.
 ///
 /// ```ignore
-/// nexus_store_testing::conformance! {
+/// mnesis_store_testing::conformance! {
 ///     factory: || async { (InMemoryStore::new(), ()) },
 /// }
 /// ```
@@ -2219,25 +2219,25 @@ macro_rules! conformance_lifecycle {
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus::Version;
-use nexus_inmemory::{InMemorySnapshotStore, InMemoryStore};
+use mnesis::Version;
+use mnesis_inmemory::{InMemorySnapshotStore, InMemoryStore};
 
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: || async { (InMemoryStore::new(), ()) },
 }
 
-nexus_store_testing::conformance_atomic_append! {
+mnesis_store_testing::conformance_atomic_append! {
     factory: || async { (InMemoryStore::new(), ()) },
 }
 
-nexus_store_testing::conformance_snapshot! {
+mnesis_store_testing::conformance_snapshot! {
     factory: || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) },
     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
 }
 
 // In-memory "reopen" hands back the same store — validates the kit's closure
 // plumbing only; fjall/postgres prove real persistence.
-nexus_store_testing::conformance_lifecycle! {
+mnesis_store_testing::conformance_lifecycle! {
     open: || async { (InMemoryStore::new(), ()) },
     reopen: |store: InMemoryStore, (): ()| async move { (store, ()) },
 }
@@ -2245,7 +2245,7 @@ nexus_store_testing::conformance_lifecycle! {
 
 - [ ] **Step 7.3: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-store-testing`
+Run: `nix develop -c cargo nextest run -p mnesis-store-testing`
 Expected: ~30 individually-named tests, e.g. `self_check::conformance_sequence::check_append_conflict_is_surfaced`, all PASS.
 
 - [ ] **Step 7.4: Format + commit**
@@ -2258,7 +2258,7 @@ git commit -m "feat(store-testing): conformance! macro entry points (#281)"
 
 ---
 
-### Task 8: Port `nexus-inmemory`
+### Task 8: Port `mnesis-inmemory`
 
 **Files:**
 - Modify: `adapters/inmemory/tests/inmemory_conformance.rs` (full rewrite)
@@ -2268,34 +2268,34 @@ git commit -m "feat(store-testing): conformance! macro entry points (#281)"
 
 ```rust
 //! `InMemoryStore` conformance against the executable store contract —
-//! every check delegated to the `nexus-store-testing` kit (#281).
+//! every check delegated to the `mnesis-store-testing` kit (#281).
 
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus::Version;
-use nexus_inmemory::{InMemorySnapshotStore, InMemoryStore};
+use mnesis::Version;
+use mnesis_inmemory::{InMemorySnapshotStore, InMemoryStore};
 
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: || async { (InMemoryStore::new(), ()) },
 }
 
-nexus_store_testing::conformance_atomic_append! {
+mnesis_store_testing::conformance_atomic_append! {
     factory: || async { (InMemoryStore::new(), ()) },
 }
 
-nexus_store_testing::conformance_snapshot! {
+mnesis_store_testing::conformance_snapshot! {
     factory: || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) },
     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
 }
 ```
 
-Update the dev-dep: `nexus-store-testing = { path = "../../crates/store-testing", features = ["snapshot", "atomic-append"] }` — match the existing dev-dep form (path-only vs versioned) already in the file. If inmemory's `AtomicAppend` impl is behind its own `import` feature, the atomic macro invocation needs `#![cfg(feature = "import")]`-style gating consistent with how `inmemory_store_tests.rs` handles it AND a self dev-dep unifying the feature (check `rg "features" adapters/inmemory/Cargo.toml` first; mirror the existing pattern).
+Update the dev-dep: `mnesis-store-testing = { path = "../../crates/store-testing", features = ["snapshot", "atomic-append"] }` — match the existing dev-dep form (path-only vs versioned) already in the file. If inmemory's `AtomicAppend` impl is behind its own `import` feature, the atomic macro invocation needs `#![cfg(feature = "import")]`-style gating consistent with how `inmemory_store_tests.rs` handles it AND a self dev-dep unifying the feature (check `rg "features" adapters/inmemory/Cargo.toml` first; mirror the existing pattern).
 
 - [ ] **Step 8.2: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-inmemory`
+Run: `nix develop -c cargo nextest run -p mnesis-inmemory`
 Expected: the macro-generated matrix passes alongside the existing `inmemory_store_tests`. The old `inmemory_event_stream_conforms`/`inmemory_all_stream_conforms` tests are gone (superseded by the matrix).
 
 - [ ] **Step 8.3: Format + commit**
@@ -2308,7 +2308,7 @@ git commit -m "refactor(inmemory): consume the conformance kit matrix (#281)"
 
 ---
 
-### Task 9: Port `nexus-fjall`
+### Task 9: Port `mnesis-fjall`
 
 **Files:**
 - Modify: `adapters/fjall/tests/fjall_conformance.rs` (full rewrite — the `OwnedFjallStream` wrapper dies)
@@ -2330,7 +2330,7 @@ Use exactly that call shape below (async vs sync `open`, error handling).
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus_fjall::FjallStore;
+use mnesis_fjall::FjallStore;
 use tempfile::TempDir;
 
 async fn open_fresh() -> (FjallStore, TempDir) {
@@ -2339,11 +2339,11 @@ async fn open_fresh() -> (FjallStore, TempDir) {
     (store, dir)
 }
 
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: open_fresh,
 }
 
-nexus_store_testing::conformance_lifecycle! {
+mnesis_store_testing::conformance_lifecycle! {
     open: open_fresh,
     reopen: |store: FjallStore, dir: TempDir| async move {
         drop(store); // release the keyspace lock before reopening the same path
@@ -2353,13 +2353,13 @@ nexus_store_testing::conformance_lifecycle! {
 }
 ```
 
-Add `conformance_atomic_append!`/`conformance_snapshot!` invocations gated exactly like fjall's existing feature-gated test files (`rg -l "cfg(feature" adapters/fjall/tests` and mirror: fjall's `AtomicAppend` sits behind its `import` feature, `SnapshotStore<Vec<u8>, Version>` behind `snapshot`). If fjall's dev-deps don't already unify those features for its test targets, follow the workspace's self-dev-dep pattern (`nexus-fjall = { path = ".", features = [...] }`) — check whether `snapshot_tests.rs`/`export_import_tests.rs` already established it and copy that mechanism. Snapshot positions: `(Version::new(5).unwrap(), Version::new(9).unwrap())`.
+Add `conformance_atomic_append!`/`conformance_snapshot!` invocations gated exactly like fjall's existing feature-gated test files (`rg -l "cfg(feature" adapters/fjall/tests` and mirror: fjall's `AtomicAppend` sits behind its `import` feature, `SnapshotStore<Vec<u8>, Version>` behind `snapshot`). If fjall's dev-deps don't already unify those features for its test targets, follow the workspace's self-dev-dep pattern (`mnesis-fjall = { path = ".", features = [...] }`) — check whether `snapshot_tests.rs`/`export_import_tests.rs` already established it and copy that mechanism. Snapshot positions: `(Version::new(5).unwrap(), Version::new(9).unwrap())`.
 
 If `FjallStore::builder(...).open()` is async (`rg` from Step 9.1 tells you), add `.await`.
 
 - [ ] **Step 9.3: Run**
 
-Run: `nix develop -c cargo nextest run -p nexus-fjall --test fjall_conformance`
+Run: `nix develop -c cargo nextest run -p mnesis-fjall --test fjall_conformance`
 Expected: full matrix + lifecycle PASS. Any failure here is a REAL FINDING (fjall diverging from the contract InMemoryStore satisfies) — report it, do not weaken the kit.
 
 - [ ] **Step 9.4: Format + commit**
@@ -2372,7 +2372,7 @@ git commit -m "refactor(fjall): consume the conformance kit matrix + lifecycle (
 
 ---
 
-### Task 10: Port `nexus-postgres`
+### Task 10: Port `mnesis-postgres`
 
 **Files:**
 - Modify: `adapters/postgres/tests/conformance_tests.rs` (rewrite onto the macros; keep the `setup` truncate discipline)
@@ -2396,7 +2396,7 @@ Invoke only the capability macros postgres actually implements.
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use nexus_postgres::PostgresStore;
+use mnesis_postgres::PostgresStore;
 
 fn have_db() -> bool {
     std::env::var("DATABASE_URL").is_ok()
@@ -2414,13 +2414,13 @@ async fn open_fresh() -> (PostgresStore, ()) {
     (store, ())
 }
 
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: open_fresh,
     skip_unless: have_db,
 }
 
 // "Reopen" = a brand-new pool + store over the same database (no truncate!).
-nexus_store_testing::conformance_lifecycle! {
+mnesis_store_testing::conformance_lifecycle! {
     open: open_fresh,
     reopen: |store: PostgresStore, (): ()| async move {
         drop(store);
@@ -2437,7 +2437,7 @@ Add `conformance_atomic_append!` (with `skip_unless: have_db`) if Step 10.1 show
 
 - [ ] **Step 10.3: Compile-check (no local DB)**
 
-Run: `nix develop -c cargo nextest run -p nexus-postgres`
+Run: `nix develop -c cargo nextest run -p mnesis-postgres`
 Expected: all conformance tests PASS vacuously (skip). CI's nixosTest runs them for real.
 
 - [ ] **Step 10.4: Format + commit**
@@ -2487,7 +2487,7 @@ git commit -m "refactor(store-testing)!: retire legacy assert_* suites — the m
 git push -u origin feat/281-conformance-kit
 gh pr create --title "feat(store-testing): adapter conformance kit — executable store contract (PR1 of #281)" --body "$(cat <<'EOF'
 ## Summary
-- Expands nexus-store-testing into the 4-category conformance kit (#281 PR1 of 3): sequence/protocol, defensive boundary, linearizability, lifecycle + atomic-append & snapshot capability modules
+- Expands mnesis-store-testing into the 4-category conformance kit (#281 PR1 of 3): sequence/protocol, defensive boundary, linearizability, lifecycle + atomic-append & snapshot capability modules
 - `conformance!` / `conformance_atomic_append!` / `conformance_snapshot!` / `conformance_lifecycle!` macros generate one named test per contract rule
 - All three adapters (inmemory, fjall, postgres) now run the matrix; legacy assert_* suites retired
 - Kit self-checks against InMemoryStore via its own test target
@@ -2496,7 +2496,7 @@ Refs #281. PR2 dedupes adapter-local tests; PR3 adds the adapter-guide rustdoc +
 
 ## Test plan
 - [ ] nix flake check (pre-commit hook, every commit)
-- [ ] cargo nextest run -p nexus-store-testing / -p nexus-inmemory / -p nexus-fjall
+- [ ] cargo nextest run -p mnesis-store-testing / -p mnesis-inmemory / -p mnesis-fjall
 - [ ] postgres matrix runs in the nixosTest CI attribute
 - [ ] cargo clippy --workspace --all-features --all-targets clean
 
@@ -2513,7 +2513,7 @@ Record every divergence from this plan here (what, why, impact) as work proceeds
 
 | # | Task | Deviation | Why | Impact |
 |---|------|-----------|-----|--------|
-| 1 | 1 | `nexus-inmemory` dev-dep features are `["export","import"]`, no `snapshot` | inmemory has no `snapshot` feature — `InMemorySnapshotStore` is unconditional | none |
+| 1 | 1 | `mnesis-inmemory` dev-dep features are `["export","import"]`, no `snapshot` | inmemory has no `snapshot` feature — `InMemorySnapshotStore` is unconditional | none |
 | 2 | 1 | self-check factory is `async fn` + `#[allow(clippy::unused_async)]`, not the plan's `impl Future` fn | plan's form trips deny-level `clippy::manual_async_fn` | none; shape matches later adapter factories |
 | 3 | 2 | `envelope_for` uses `SchemaVersion::from_u32` (one step) | Task 1 quality review: don't re-derive validation the value type provides | none |
 | 4 | 2 | conflict checks match `AppendError` with a wildcard non-Conflict arm | `AppendError` gained `#[non_exhaustive]` after the plan's facts were pinned (freeze rule: error enums) | none; same panic behavior |
@@ -2521,11 +2521,11 @@ Record every divergence from this plan here (what, why, impact) as work proceeds
 | 6 | 4 | **CONTRACT FINDING**: `check_metadata_absent_vs_empty_distinct` becomes `check_metadata_absent_vs_present_distinct` | `Some(empty)` metadata is unrepresentable by construction (`Metadata::from_bytes` rejects empty with `ValueError::MetadataEmpty`; wire reserves `u32::MAX` as absent sentinel) — the spec's absent-vs-empty premise was false; the type layer already prevents the confusion | check asserts the real adapter contract: `None` reads back `None`, present metadata (incl. the 1-byte minimum) byte-faithful; design spec boundary section updated |
 | 7 | 5 | single-winner check's non-Conflict arm is a wildcard; `Arc<S>` call sites use `.as_ref()` | `AppendError` non_exhaustive (as #4); `Arc<S>` is not itself `RawEventStore` (only `Store<S>` is) | none |
 | 8 | 5 | **PLAN BUG FIX**: `check_caught_up_boundary_race` loop waits on `versions.len() < total \|\| caught_up == 0` (plan's version waited on event count alone) | when the writer outpaces catch-up, all events arrive as backlog and `CaughtUp` lands after them — the plan's loop exited without consuming it (deterministic 5/5 repro); production loop verified correct against `subscription_cursor.rs` | check is strictly stronger: genuinely awaits the boundary marker |
-| 9 | 6 | `atomic.rs` imports `AtomicAppend`/`AtomicAppendError`/`PlannedAppend` from `nexus_store::import::*`, not the crate root | these three are not re-exported at `nexus_store::` root (only `AbortReason`/`Atomicity`/`EventImporter`/`ImportBlock`/`ImportError`/`ImportReport`/`StreamOutcome`/`StreamReport`/`StreamSection` are) — verified against `crates/store/src/lib.rs` | none; same types, correct import path |
+| 9 | 6 | `atomic.rs` imports `AtomicAppend`/`AtomicAppendError`/`PlannedAppend` from `mnesis_store::import::*`, not the crate root | these three are not re-exported at `mnesis_store::` root (only `AbortReason`/`Atomicity`/`EventImporter`/`ImportBlock`/`ImportError`/`ImportReport`/`StreamOutcome`/`StreamReport`/`StreamSection` are) — verified against `crates/store/src/lib.rs` | none; same types, correct import path |
 | 10 | 6 | `check_atomic_conflict_aborts_all`'s error match uses a wildcard non-Conflict arm | `AtomicAppendError` is `#[non_exhaustive]` (same freeze rule as #4/#7) | none |
 | 11 | 6 | `lifecycle.rs` renames post-reopen bindings (`opened`/`reopened` instead of reusing `store`) and the plan's inline `use` block (in `check_reopen_subscription_catches_up`) moved to the file top | strict `clippy::shadow_reuse`/`clippy::shadow_unrelated` (deny) reject rebinding `store`/`ctx` across the reopen call; "no inline use" is a standing repo rule the plan's own NOTE flagged | none; same logic, different local names |
 | 12 | 6 | `check_reopen_subscription_catches_up`'s catch-up loop is `while let Step::Event(env) = ...` instead of the plan's `loop { match .. { Event => .., CaughtUp => break } }` | `clippy::while_let_loop` (deny, part of `all`) flags the loop-with-only-a-match shape; `sequence.rs`'s equivalent `$all` backlog check already uses this same pattern | none; identical control flow |
 | 13 | 6 | `snapshot.rs`'s three `Hydrated` matches keep the plan's `other => panic!` wildcard arm even though `Hydrated` is NOT `#[non_exhaustive]` (confirmed by reading `state.rs`) | consistency with `atomic.rs`'s mandatory wildcard is harmless; the plan's own text already used wildcards here | none; exhaustiveness was never relied on |
-| 14 | 8 | inmemory adds a path-only self dev-dep `nexus-inmemory = { path = ".", features = ["import"] }` | `AtomicAppend for InMemoryStore` is `#[cfg(feature = "import")]` and no existing dev-dep unified it into test targets (flake nextest = default features); `export` deliberately omitted (unused by the kit macros) | atomic macro compiles in CI; established nexus-store self-dev-dep pattern |
+| 14 | 8 | inmemory adds a path-only self dev-dep `mnesis-inmemory = { path = ".", features = ["import"] }` | `AtomicAppend for InMemoryStore` is `#[cfg(feature = "import")]` and no existing dev-dep unified it into test targets (flake nextest = default features); `export` deliberately omitted (unused by the kit macros) | atomic macro compiles in CI; established mnesis-store self-dev-dep pattern |
 | 15 | final review | binary (non-UTF-8) stream id `[0x00, 0xff, 0x42]` added to `check_prefix_stream_ids_isolated`; postgres file gained a comment stating atomic/snapshot macros are absent by design | whole-branch review found the spec's binary-id bullet uncovered and unlogged | spec §boundary fully covered; passes on all three adapters |
 ```

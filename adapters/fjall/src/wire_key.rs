@@ -332,7 +332,7 @@ mod tests {
     // Golden `.snap` files (adapters/fjall/src/snapshots/) pin the exact
     // byte layout of fjall's OWN key codecs (event key + stream-version value).
     // The event *value* format is owned and snapshot-tested by
-    // `nexus_store::wire`, so it is not re-pinned here. cargo-insta is not in
+    // `mnesis_store::wire`, so it is not re-pinned here. cargo-insta is not in
     // the nix dev shell, so these are maintained by hand; when a key codec
     // changes, regenerate with `cargo insta review`.
 

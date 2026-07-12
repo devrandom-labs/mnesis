@@ -12,21 +12,21 @@ release = false
 
 # Examples are not published
 [[package]]
-name = "nexus-example-inmemory"
+name = "mnesis-example-inmemory"
 publish = false
 release = false
 
 [[package]]
-name = "nexus-example-store-and-kernel"
+name = "mnesis-example-store-and-kernel"
 publish = false
 release = false
 
 [[package]]
-name = "nexus-example-store-inmemory"
+name = "mnesis-example-store-inmemory"
 publish = false
 release = false
 
 [[package]]
-name = "nexus-cross-crate-test"
+name = "mnesis-cross-crate-test"
 publish = false
 release = false

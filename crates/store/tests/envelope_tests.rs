@@ -2,10 +2,10 @@
 #![allow(clippy::expect_used, reason = "tests")]
 
 use bytes::Bytes;
-use nexus::Version;
-use nexus_store::envelope::{EnvelopeError, PersistedEnvelope};
-use nexus_store::pending_envelope;
-use nexus_store::value::SchemaVersion;
+use mnesis::Version;
+use mnesis_store::envelope::{EnvelopeError, PersistedEnvelope};
+use mnesis_store::pending_envelope;
+use mnesis_store::value::SchemaVersion;
 
 fn make_persisted(
     version: Version,

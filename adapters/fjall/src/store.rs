@@ -5,13 +5,13 @@ use crate::partition::{AllIndex, Partitions};
 use crate::plan;
 use crate::scan::{GlobalScan, ScanCursor, StreamScan};
 use crate::subscription_id::OwnedStreamId;
-use nexus::{ErrorId, Version};
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::error::AppendError;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
+use mnesis::{ErrorId, Version};
+use mnesis_store::PendingEnvelope;
+use mnesis_store::StreamKey;
+use mnesis_store::error::AppendError;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
 use std::path::Path;
 use std::sync::Arc;
 
@@ -198,7 +198,7 @@ impl RawEventStore for FjallStore {
         // (None = from the first position). At the `GlobalSeq::MAX` ceiling
         // there is no successor — nothing is strictly after it — so the resume
         // anchor collapses to `None` and the cursor is empty, never a re-read of
-        // the ceiling event. Mirrors `StreamCatchup::read_after` in nexus-store.
+        // the ceiling event. Mirrors `StreamCatchup::read_after` in mnesis-store.
         from.map_or(Some(GlobalSeq::INITIAL), GlobalSeq::next)
             .map_or_else(
                 || {
@@ -220,8 +220,8 @@ impl RawEventStore for FjallStore {
 mod snapshot_impl {
     use super::{ErrorId, FjallError, FjallStore, Version};
     use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
-    use nexus::Id;
-    use nexus_store::state::{Hydrated, SnapshotStore};
+    use mnesis::Id;
+    use mnesis_store::state::{Hydrated, SnapshotStore};
     use std::num::NonZeroU32;
 
     impl SnapshotStore<Vec<u8>, Version> for FjallStore {
@@ -299,8 +299,8 @@ mod snapshot_impl {
 mod projection_impl {
     use super::{ErrorId, FjallError, FjallStore, GlobalSeq};
     use crate::snapshot::{decode_snapshot_value, encode_snapshot_value};
-    use nexus::Id;
-    use nexus_store::state::{Hydrated, SnapshotStore};
+    use mnesis::Id;
+    use mnesis_store::state::{Hydrated, SnapshotStore};
     use std::num::NonZeroU32;
 
     impl SnapshotStore<Vec<u8>, GlobalSeq> for FjallStore {
@@ -379,7 +379,7 @@ mod projection_impl {
 mod atomic_append_impl {
     use super::{ErrorId, FjallError, FjallStore, StreamKey, Version};
     use crate::plan;
-    use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+    use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
     use std::collections::HashMap;
 
     type Tx<'a> = fjall::SingleWriterWriteTx<'a>;
@@ -561,8 +561,8 @@ mod stream_lister_impl {
     use bytes::Bytes;
     use core::pin::Pin;
     use core::task::{Context, Poll};
-    use nexus_store::StreamKey;
-    use nexus_store::export::StreamLister;
+    use mnesis_store::StreamKey;
+    use mnesis_store::export::StreamLister;
 
     /// A lazy cursor over the `streams` partition's keys — each key is one
     /// stream id. Wraps a single snapshot-pinned `fjall::Iter` (a lazy k-way LSM
@@ -618,7 +618,7 @@ mod stream_lister_impl {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // WakeSource impl — adapter-pluggable live wake for the generic subscription
-// loop assembled in `nexus_store::subscription::Subscription`.
+// loop assembled in `mnesis_store::subscription::Subscription`.
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Delegates wake-routing to the store's [`StreamNotifiers`]. `append` already
@@ -642,7 +642,7 @@ impl WakeSource for FjallStore {
 #[allow(clippy::unwrap_used, reason = "test code")]
 pub mod read_test_helpers {
     use super::*;
-    use nexus_store::envelope::pending_envelope;
+    use mnesis_store::envelope::pending_envelope;
 
     /// Build a [`StreamKey`] for the in-crate tests — the byte-level store API
     /// speaks `StreamKey` directly (issue #245).
@@ -678,8 +678,8 @@ mod tests {
     use crate::wire_key::encode_global_key;
     use fjall::Slice;
     use futures::StreamExt;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::wire;
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::wire;
 
     fn sk(s: &str) -> StreamKey {
         StreamKey::from_slice(s.as_bytes())
@@ -703,12 +703,12 @@ mod tests {
     /// white-box insertion into the `events_global` partition — used by the
     /// corruption / burned-position tests that need to plant rows directly.
     fn frame_value(event_type: &str, payload: &[u8]) -> Slice {
-        let sv = nexus_store::value::SchemaVersion::from_u32(1).unwrap();
-        let et = nexus_store::value::EventType::from_bytes(bytes::Bytes::copy_from_slice(
+        let sv = mnesis_store::value::SchemaVersion::from_u32(1).unwrap();
+        let et = mnesis_store::value::EventType::from_bytes(bytes::Bytes::copy_from_slice(
             event_type.as_bytes(),
         ))
         .unwrap();
-        let pl = nexus_store::value::Payload::from_bytes(bytes::Bytes::copy_from_slice(payload))
+        let pl = mnesis_store::value::Payload::from_bytes(bytes::Bytes::copy_from_slice(payload))
             .unwrap();
         Slice::from(wire::encode_frame(sv, &et, &pl, None).unwrap().value)
     }
@@ -1251,7 +1251,7 @@ mod tests {
         let handle = tokio::spawn(async move {
             wbarrier.wait().await;
             for v in 5..=20u64 {
-                let env = nexus_store::envelope::pending_envelope(Version::new(v).unwrap())
+                let env = mnesis_store::envelope::pending_envelope(Version::new(v).unwrap())
                     .event_type("E")
                     .payload(vec![v as u8])
                     .build()
@@ -1362,7 +1362,7 @@ mod tests {
     #[cfg(feature = "projection")]
     #[tokio::test]
     async fn projection_hydrate_corrupt_value_is_corrupt_not_panic() {
-        use nexus_store::state::SnapshotStore;
+        use mnesis_store::state::SnapshotStore;
         use std::num::NonZeroU32;
 
         let (store, _dir) = temp_store();
@@ -1390,7 +1390,7 @@ mod tests {
     #[cfg(feature = "projection")]
     #[tokio::test]
     async fn projection_hydrate_zero_position_is_corrupt() {
-        use nexus_store::state::SnapshotStore;
+        use mnesis_store::state::SnapshotStore;
         use std::num::NonZeroU32;
 
         let (store, _dir) = temp_store();
@@ -1435,8 +1435,8 @@ mod atomic_append_tests {
     use crate::store::read_test_helpers::{sk, temp_store};
     use crate::wire_key::decode_stream_version;
     use futures::StreamExt;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
     use std::sync::Arc as StdArc;
     use tokio::sync::Barrier;
 
@@ -1797,7 +1797,7 @@ mod stream_lister_tests {
     use super::*;
     use crate::store::read_test_helpers::{seed, sk, temp_store};
     use futures::StreamExt;
-    use nexus_store::export::StreamLister;
+    use mnesis_store::export::StreamLister;
     use std::collections::HashSet;
 
     async fn list_ids(store: &FjallStore) -> HashSet<Vec<u8>> {

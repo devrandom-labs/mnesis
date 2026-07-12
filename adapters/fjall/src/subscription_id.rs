@@ -1,11 +1,11 @@
 //! Private module: the `pub` items below are crate-local by containment (no
 //! external API leak). It exists so the per-stream `scan.rs` strategy has an
-//! owned [`OwnedStreamId`] satisfying the [`Id`](nexus::Id) `'static` bound
+//! owned [`OwnedStreamId`] satisfying the [`Id`](mnesis::Id) `'static` bound
 //! across the re-reads the generic subscription loop performs.
 
-use nexus_store::StreamKey;
+use mnesis_store::StreamKey;
 
-/// Owned byte-key wrapper to satisfy the [`Id`](nexus::Id) trait's `'static`
+/// Owned byte-key wrapper to satisfy the [`Id`](mnesis::Id) trait's `'static`
 /// bound when re-reading from the store during subscription refills.
 ///
 /// It is an `Id` for free via the blanket impl — it carries `Clone`, `Debug`,

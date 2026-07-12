@@ -14,7 +14,7 @@ use bytes::Bytes;
 /// [`export_stream`](crate::export::EventExporter::export_stream),
 /// [`list_streams`](crate::export::StreamLister::list_streams), and the
 /// [`import`](crate::import::EventImporter::import) target) speak `StreamKey`,
-/// not the kernel's [`Id`](nexus::Id) — honestly separating "a stream key" from
+/// not the kernel's [`Id`](mnesis::Id) — honestly separating "a stream key" from
 /// "a domain identity" (issue #245). A consumer's typed domain id lives at the
 /// repository layer; the repository translates it to a `StreamKey` (its job).
 ///
@@ -67,7 +67,7 @@ impl AsRef<[u8]> for StreamKey {
     }
 }
 
-// A `StreamKey` is itself a valid `nexus::Id` for free via the blanket impl: it
+// A `StreamKey` is itself a valid `mnesis::Id` for free via the blanket impl: it
 // already carries every supertrait the trait requires (clone, send/sync, debug,
 // hash, eq, display below, `AsRef<[u8]>` above, `'static`). This is purely
 // additive — the byte-level store API stays concrete (`&StreamKey`), but a raw

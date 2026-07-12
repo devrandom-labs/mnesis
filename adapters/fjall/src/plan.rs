@@ -2,26 +2,26 @@
 //! write path.
 //!
 //! Both [`RawEventStore::append`](crate::store) and the
-//! [`AtomicAppend`](nexus_store::import::AtomicAppend) impl reduce to the same
+//! [`AtomicAppend`](mnesis_store::import::AtomicAppend) impl reduce to the same
 //! per-stream work: validate that a run's versions are strictly sequential from
 //! the stream's current version, then encode each event's primary key, `$all`
 //! key, and 16-byte-aligned wire frame while assigning a running
 //! [`GlobalSeq`](crate::GlobalSeq). None of that touches fjall — it is a pure
 //! function of `(current_version, current_global, id, envelopes)`, so it lives
-//! here, unit-tested with no database, exactly as `nexus-postgres` factors its
+//! here, unit-tested with no database, exactly as `mnesis-postgres` factors its
 //! `prepare_inserts` out of `append`.
 //!
 //! The two public methods differ only in their *error domain* and in the
 //! single-stream-vs-cross-run validation that wraps this core: `append` maps a
-//! [`PlanError`] into [`AppendError`](nexus_store::error::AppendError); the
+//! [`PlanError`] into [`AppendError`](mnesis_store::error::AppendError); the
 //! atomic path owns its own cross-run head/projected-head/non-injective-route
 //! check (index-based conflicts) and then calls [`plan_run`] purely to stage.
 
 use bytes::Bytes;
-use nexus::{ErrorId, Version};
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::wire;
+use mnesis::{ErrorId, Version};
+use mnesis_store::PendingEnvelope;
+use mnesis_store::StreamKey;
+use mnesis_store::wire;
 
 use crate::error::reason_label;
 use crate::wire_key::{encode_event_key, encode_global_key};
@@ -144,7 +144,7 @@ pub fn plan_run(
 #[allow(clippy::panic, reason = "test code")]
 mod tests {
     use super::*;
-    use nexus_store::envelope::pending_envelope;
+    use mnesis_store::envelope::pending_envelope;
 
     fn sk() -> StreamKey {
         StreamKey::from_slice(b"s")

@@ -6,11 +6,11 @@ use core::fmt;
 use bytes::Bytes;
 use futures::StreamExt;
 use futures::pin_mut;
-use nexus::Version;
-use nexus_store::StreamKey;
-use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope, pending_envelope};
-use nexus_store::store::RawEventStore;
-use nexus_store::value::SchemaVersion;
+use mnesis::Version;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope, pending_envelope};
+use mnesis_store::store::RawEventStore;
+use mnesis_store::value::SchemaVersion;
 
 /// One row of test data fed into an adapter for the conformance suite to
 /// observe back out. All fields must round-trip byte-for-byte.

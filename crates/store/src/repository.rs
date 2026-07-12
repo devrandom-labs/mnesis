@@ -14,7 +14,7 @@ use core::future::Future;
 use core::marker::PhantomData;
 use core::num::NonZeroU32;
 
-use nexus::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
+use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
 
 use futures::TryStreamExt;
 
@@ -51,8 +51,8 @@ use crate::value::SchemaVersion;
 /// # Save contract
 ///
 /// `save()` takes a mutable reference to the aggregate and the
-/// non-empty [`Events<E, N>`](nexus::Events) decided by
-/// [`Handle::handle()`](nexus::Handle::handle). It encodes the events,
+/// non-empty [`Events<E, N>`](mnesis::Events) decided by
+/// [`Handle::handle()`](mnesis::Handle::handle). It encodes the events,
 /// appends them atomically using `aggregate.version()` as the expected
 /// version, and on success calls `commit_persisted` to advance the version
 /// and fold the events into in-memory state atomically.
@@ -77,7 +77,7 @@ use crate::value::SchemaVersion;
 /// - [`RawEventStore`](crate::RawEventStore) errors (I/O, conflicts)
 /// - [`Encode`](crate::Encode) errors (serialization failures on write)
 /// - [`Decode`](crate::Decode) errors (deserialization failures on read)
-/// - [`KernelError`](nexus::KernelError) (version mismatch during replay)
+/// - [`KernelError`](mnesis::KernelError) (version mismatch during replay)
 ///
 /// [`StoreError`](crate::StoreError) can represent all four via its
 /// `Adapter`, `Encode`, `Decode`, and `Kernel` variants. Use `StoreError`
@@ -96,8 +96,8 @@ pub trait Repository<A: Aggregate>: Send + Sync {
 
     /// Persist decided events and advance the aggregate's in-memory state.
     ///
-    /// `events` is the non-empty [`Events<E, N>`](nexus::Events) decided by
-    /// [`Handle::handle()`](nexus::Handle::handle). The aggregate's
+    /// `events` is the non-empty [`Events<E, N>`](mnesis::Events) decided by
+    /// [`Handle::handle()`](mnesis::Handle::handle). The aggregate's
     /// current [`version()`](AggregateRoot::version) is used as the
     /// expected version for optimistic concurrency.
     ///
@@ -176,7 +176,7 @@ pub(crate) const fn first_persisted_version(current: Option<Version>) -> Option<
 /// `#[repr(C)]` POD reinterpret — zero allocation) are unified on the load
 /// path by the bound `Output<'a>: Borrow<E>` (`std`'s `Borrow<T> for T` and
 /// `Borrow<T> for &T` cover both), and the decoded value is fed to
-/// [`replay`](nexus::AggregateRoot::replay) via `out.borrow()` in either case.
+/// [`replay`](mnesis::AggregateRoot::replay) via `out.borrow()` in either case.
 ///
 /// # Construction
 ///
@@ -330,7 +330,7 @@ impl<S, C, A> EventStore<S, C, A> {
     /// before decoding it.
     ///
     /// `upcast` is the schema-evolution function — typically the
-    /// associated function the `#[nexus::transforms]` macro emits
+    /// associated function the `#[mnesis::transforms]` macro emits
     /// (e.g. `OrderTransforms::upcast`). Pass it directly as a function
     /// pointer; the `'static` bound on `F` and the `+ Send + Sync` bounds
     /// are required by the `try_fold` combinator chain (see the doc
@@ -411,7 +411,7 @@ impl<S, C, A> EventStore<S, C, A> {
     /// `current_version`.
     ///
     /// `current_version` is typically the associated function the
-    /// `#[nexus::transforms]` macro emits (e.g.
+    /// `#[mnesis::transforms]` macro emits (e.g.
     /// `OrderTransforms::current_version`). For event types it doesn't
     /// know about, it returns `None` and the schema version falls back
     /// to [`Version::INITIAL`] (the same default as the no-upcaster
@@ -523,7 +523,7 @@ where
 #[cfg(test)]
 mod version_helper_tests {
     use super::first_persisted_version;
-    use nexus::Version;
+    use mnesis::Version;
 
     #[test]
     fn fresh_stream_starts_at_initial() {

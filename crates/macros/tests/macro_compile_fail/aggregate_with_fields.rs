@@ -1,6 +1,6 @@
 /// aggregate macro must reject structs with fields.
 
-#[nexus::aggregate(state = (), error = (), id = ())]
+#[mnesis::aggregate(state = (), error = (), id = ())]
 struct HasFields {
     name: String,
 }

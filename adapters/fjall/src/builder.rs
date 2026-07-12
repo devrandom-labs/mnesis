@@ -4,7 +4,7 @@ use crate::partition::projection_defaults;
 use crate::partition::{AllIndex, KeyspaceConfig, Partitions, point_read_defaults, scan_defaults};
 use crate::store::FjallStore;
 use fjall::KeyspaceCreateOptions;
-use nexus_wake::StreamNotifiers;
+use mnesis_wake::StreamNotifiers;
 use std::path::{Path, PathBuf};
 
 /// Builder for [`FjallStore`].

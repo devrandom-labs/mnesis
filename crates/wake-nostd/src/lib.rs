@@ -3,14 +3,14 @@
 //!
 //! # What this is
 //!
-//! The `no_std` counterpart to `nexus-wake`'s tokio-backed `StreamNotifiers`:
+//! The `no_std` counterpart to `mnesis-wake`'s tokio-backed `StreamNotifiers`:
 //! a [`WakeSource`] built on `core` atomics plus [`event_listener::Event`]
 //! (an eventcount — `no_std` + alloc), so the generic catch-up-then-live-tail
-//! loop in `nexus-store` can park on a device with no tokio and no OS.
+//! loop in `mnesis-store` can park on a device with no tokio and no OS.
 //!
 //! **Optional and executor-dependent.** The primary device model is
 //! append-and-sync: events are produced locally and synced to a server,
-//! where subscriptions run under tokio via `nexus-wake`. Reach for this
+//! where subscriptions run under tokio via `mnesis-wake`. Reach for this
 //! crate only when a device genuinely runs an *on-device* live-tail —
 //! driving the subscription then also needs a `no_std` executor (e.g.
 //! embassy). Any executor works: the only requirement is polling the
@@ -55,7 +55,7 @@ use core::future::Future;
 use core::sync::atomic::{AtomicU32, Ordering};
 
 use event_listener::Event;
-use nexus_store::wake::{WakeRegistration, WakeSource};
+use mnesis_store::wake::{WakeRegistration, WakeSource};
 
 /// Shared eventcount state — one per store, shared by every registration.
 struct Inner {
@@ -80,7 +80,7 @@ struct Inner {
 /// calls [`WakeSource::wake`] after each durable commit; every parked
 /// registration — any stream, `$all` — wakes on every commit. See the
 /// crate docs for why this is correct (spurious wakes are permitted) and
-/// when to prefer `nexus-wake`'s routed `StreamNotifiers` instead.
+/// when to prefer `mnesis-wake`'s routed `StreamNotifiers` instead.
 #[derive(Clone)]
 pub struct GlobalWake {
     inner: Arc<Inner>,

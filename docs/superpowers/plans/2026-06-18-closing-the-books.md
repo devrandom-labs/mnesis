@@ -4,9 +4,9 @@
 
 **Goal:** Close issue #139 (last Tier 1 card) by shipping a doc-only kernel rustdoc module documenting the "Closing the Books" pattern as the preferred alternative to snapshots, plus a runnable `examples/closing-the-books` crate that contrasts a long-lived aggregate against bounded `CashierShift` streams.
 
-**Architecture:** Two artifacts. (1) `crates/nexus/src/closing_the_books.rs` — a `//!`-only module (no code) shipped on docs.rs. (2) `examples/closing-the-books/` — a pure-kernel example (no store/codec/fjall) that drives both aggregates and prints how many events each must replay to read the current float. A one-line intra-doc pointer in `nexus-store`'s `snapshot.rs` links *down* to the kernel guide (the kernel can't link up to the store).
+**Architecture:** Two artifacts. (1) `crates/mnesis/src/closing_the_books.rs` — a `//!`-only module (no code) shipped on docs.rs. (2) `examples/closing-the-books/` — a pure-kernel example (no store/codec/fjall) that drives both aggregates and prints how many events each must replay to read the current float. A one-line intra-doc pointer in `mnesis-store`'s `snapshot.rs` links *down* to the kernel guide (the kernel can't link up to the store).
 
-**Tech Stack:** Rust 2024, `nexus` kernel (`derive` + `testing` features), `thiserror`, `nexus::testing::AggregateFixture`, the Nix flake gate (runs automatically on every commit via the pre-commit hook).
+**Tech Stack:** Rust 2024, `mnesis` kernel (`derive` + `testing` features), `thiserror`, `mnesis::testing::AggregateFixture`, the Nix flake gate (runs automatically on every commit via the pre-commit hook).
 
 ---
 
@@ -15,7 +15,7 @@
 - **Every commit triggers the full `nix flake check` gate** via the pre-commit hook (clippy god-mode, fmt, nextest, doc, hakari, deny, audit). Therefore **every commit must be fully green** — never commit a red/failing test. The TDD "watch it fail" step is done with a local `cargo test` run and is **not** committed; only the green result is committed. **Do not run `nix flake check` by hand** — the hook runs it.
 - **New source files must be `git add`-ed** before the commit, or the gate (which operates on the git tree) won't see them and will fail on a missing module.
 - **Example crates are still subject to god-mode clippy.** Existing examples suppress the restriction lints locally with `#![allow(..., reason = "...")]` (the `reason` is mandatory — `allow_attributes_without_reason` is denied). The new example mirrors `examples/inmemory`'s allow-header verbatim.
-- **Intra-doc link direction:** `nexus-store` may link to `nexus::closing_the_books` (it depends on `nexus`). `nexus` must **not** link to anything in `nexus-store` (no reverse dependency) — reference the snapshot decorator as a plain code span there.
+- **Intra-doc link direction:** `mnesis-store` may link to `mnesis::closing_the_books` (it depends on `mnesis`). `mnesis` must **not** link to anything in `mnesis-store` (no reverse dependency) — reference the snapshot decorator as a plain code span there.
 - If a commit's gate surfaces a minor clippy nit in the example (pedantic/nursery), fix it inline and re-commit; the code below mirrors proven patterns from `examples/inmemory` but the gate is the source of truth.
 
 ---
@@ -34,13 +34,13 @@
 
 ```toml
 [package]
-name = "nexus-example-closing-the-books"
+name = "mnesis-example-closing-the-books"
 version = "0.0.0"
 edition.workspace = true
 publish = false
 
 [dependencies]
-nexus = { path = "../../crates/nexus", features = ["derive", "testing"] }
+mnesis = { path = "../../crates/mnesis", features = ["derive", "testing"] }
 thiserror = { workspace = true }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 ```
@@ -53,7 +53,7 @@ workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 //! Closing the Books — bounded streams vs. a long-lived aggregate.
 //!
 //! Builds the same cash-register domain two ways and prints how many events
-//! each must replay to read the current float. See the `nexus::closing_the_books`
+//! each must replay to read the current float. See the `mnesis::closing_the_books`
 //! module for the narrative.
 
 fn main() {}
@@ -65,12 +65,12 @@ In `Cargo.toml`, add the new example to `members` (keep the list alphabetical wi
 
 ```toml
 members = [
-    "crates/nexus",
-    "crates/nexus-fjall",
-    "crates/nexus-macros",
-    "crates/nexus-macros/tests/cross_crate_test",
-    "crates/nexus-store",
-    "crates/nexus-store-testing",
+    "crates/mnesis",
+    "crates/mnesis-fjall",
+    "crates/mnesis-macros",
+    "crates/mnesis-macros/tests/cross_crate_test",
+    "crates/mnesis-store",
+    "crates/mnesis-store-testing",
     "crates/workspace-hack",
     "examples/closing-the-books",
     "examples/inmemory",
@@ -87,7 +87,7 @@ Expected: exits 0; may or may not modify `crates/workspace-hack/Cargo.toml`. If 
 
 - [ ] **Step 5: Verify the crate builds**
 
-Run: `nix develop -c cargo build -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo build -p mnesis-example-closing-the-books`
 Expected: compiles with no warnings.
 
 - [ ] **Step 6: Commit** (the pre-commit hook runs the full gate)
@@ -119,7 +119,7 @@ build fails — that is the "red" step.)
 //! Closing the Books — bounded streams vs. a long-lived aggregate.
 //!
 //! Builds the same cash-register domain two ways and prints how many events
-//! each must replay to read the current float. See the `nexus::closing_the_books`
+//! each must replay to read the current float. See the `mnesis::closing_the_books`
 //! module for the narrative.
 
 // Relaxed lints for example code — production crates should NOT do this.
@@ -134,7 +134,7 @@ build fails — that is the "red" step.)
     reason = "explicit compare-then-subtract is the project's underflow guard; saturating_sub is banned (CLAUDE.md rule 2)"
 )]
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // =============================================================================
@@ -272,7 +272,7 @@ impl AggregateState for ShiftState {
     }
 }
 
-#[nexus::aggregate(state = ShiftState, error = ShiftError, id = CashierShiftId)]
+#[mnesis::aggregate(state = ShiftState, error = ShiftError, id = CashierShiftId)]
 struct CashierShift;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -419,7 +419,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nexus::testing::AggregateFixture;
+    use mnesis::testing::AggregateFixture;
 
     fn fixture() -> AggregateFixture<CashierShift> {
         AggregateFixture::with_id(CashierShiftId::new("till-1", 1))
@@ -493,12 +493,12 @@ mod tests {
 
 - [ ] **Step 2: Run the tests to verify they pass**
 
-Run: `nix develop -c cargo test -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo test -p mnesis-example-closing-the-books`
 Expected: 4 tests pass (`close_with_exact_tender_has_no_discrepancy`, `close_with_surplus_reports_overage`, `close_with_deficit_reports_shortage`, `close_before_open_is_rejected`).
 
 - [ ] **Step 3: Run the example to eyeball the demo**
 
-Run: `nix develop -c cargo run -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo run -p mnesis-example-closing-the-books`
 Expected output (numbers exact): a `=== Closing the Books: CashierShift (bounded streams) ===` header, `shift #1 closed: stream length = 12, final_float = 110`, `shift #2 urn:cashier_shift:till-1:2 opened from carried float 110`, and `replaying ONLY the current shift (11 events) recovers registered total = 10`.
 
 - [ ] **Step 4: Commit** (pre-commit hook runs the full gate; fix any clippy nit it reports, then re-commit)
@@ -590,7 +590,7 @@ impl AggregateState for RegisterState {
     }
 }
 
-#[nexus::aggregate(state = RegisterState, error = RegisterError, id = RegisterId)]
+#[mnesis::aggregate(state = RegisterState, error = RegisterError, id = RegisterId)]
 struct CashRegister;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -687,10 +687,10 @@ fn main() {
 
 - [ ] **Step 3: Verify tests still pass and the example runs**
 
-Run: `nix develop -c cargo test -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo test -p mnesis-example-closing-the-books`
 Expected: the same 4 tests pass.
 
-Run: `nix develop -c cargo run -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo run -p mnesis-example-closing-the-books`
 Expected: prints `=== Anti-pattern: one long-lived CashRegister stream ===` then `long-lived CashRegister -> replaying all 5001 events recovers current float = 5100`, then the CashierShift demo block (`replaying ONLY the current shift (11 events) recovers registered total = 10`), then the takeaway lines.
 
 - [ ] **Step 4: Commit** (gate runs; fix any clippy nit and re-commit)
@@ -705,13 +705,13 @@ git commit -m "feat(example): long-lived CashRegister contrast + replay-count ou
 ## Task 4: Kernel rustdoc guide module
 
 **Files:**
-- Create: `crates/nexus/src/closing_the_books.rs`
-- Modify: `crates/nexus/src/lib.rs` (add `pub mod closing_the_books;`)
+- Create: `crates/mnesis/src/closing_the_books.rs`
+- Modify: `crates/mnesis/src/lib.rs` (add `pub mod closing_the_books;`)
 
 - [ ] **Step 1: Create the doc-only module**
 
-`crates/nexus/src/closing_the_books.rs` (note: `//!` docs only, no code items; all intra-doc
-links point *within* the `nexus` crate — never to `nexus-store`):
+`crates/mnesis/src/closing_the_books.rs` (note: `//!` docs only, no code items; all intra-doc
+links point *within* the `mnesis` crate — never to `mnesis-store`):
 
 ```rust
 //! # Closing the Books — bounded streams instead of snapshots
@@ -719,7 +719,7 @@ links point *within* the `nexus` crate — never to `nexus-store`):
 //! "Closing the Books" is a way to model a long-running process so the
 //! aggregate's stream stays short — short enough that you never need a snapshot
 //! to load it quickly. It is the **preferred** alternative to snapshots in
-//! Nexus whenever the domain has a natural cycle.
+//! Mnesis whenever the domain has a natural cycle.
 //!
 //! ## The idea
 //!
@@ -758,16 +758,16 @@ links point *within* the `nexus` crate — never to `nexus-store`):
 //!   snapshots are silently ignored — every aggregate falls back to a full
 //!   replay until a fresh snapshot is written. There is no upcasting path for
 //!   snapshot bytes. A summary event has none of this; you evolve it with the
-//!   same `#[nexus::transforms]` upcasters you already use for events.
+//!   same `#[mnesis::transforms]` upcasters you already use for events.
 //! - It carries the *minimum* state the next period needs, chosen by the
 //!   domain — not a dump of whatever happens to sit in the aggregate struct.
 //!
 //! So reach for `CashierShift` before you reach for the snapshot decorator
-//! (`Snapshotting`, in the `nexus-store` crate).
+//! (`Snapshotting`, in the `mnesis-store` crate).
 //!
-//! ## What Nexus gives you (and what it does not)
+//! ## What Mnesis gives you (and what it does not)
 //!
-//! Closing the Books is a **modeling discipline**, not an API. Nexus ships no
+//! Closing the Books is a **modeling discipline**, not an API. Mnesis ships no
 //! "close stream", "archive", or "delete" operation, and needs none:
 //!
 //! - Starting the next period is just constructing a fresh
@@ -808,7 +808,7 @@ links point *within* the `nexus` crate — never to `nexus-store`):
 
 - [ ] **Step 2: Declare the module in `lib.rs`**
 
-In `crates/nexus/src/lib.rs`, add the module declaration after the `testing` module block. The
+In `crates/mnesis/src/lib.rs`, add the module declaration after the `testing` module block. The
 edit changes:
 
 ```rust
@@ -831,13 +831,13 @@ pub use aggregate::{
 
 - [ ] **Step 3: Verify docs build with no broken intra-doc links**
 
-Run: `nix develop -c cargo doc -p nexus --no-deps`
+Run: `nix develop -c cargo doc -p mnesis --no-deps`
 Expected: exits 0 with no warnings (broken intra-doc links would warn and, under the gate, fail).
 
-- [ ] **Step 4: Commit** (gate runs `nexus-doc`)
+- [ ] **Step 4: Commit** (gate runs `mnesis-doc`)
 
 ```bash
-git add crates/nexus/src/closing_the_books.rs crates/nexus/src/lib.rs
+git add crates/mnesis/src/closing_the_books.rs crates/mnesis/src/lib.rs
 git commit -m "docs(kernel): add closing_the_books guide module (#139)"
 ```
 
@@ -846,12 +846,12 @@ git commit -m "docs(kernel): add closing_the_books guide module (#139)"
 ## Task 5: Cross-link from the snapshot decorator + refresh the snapshot design doc
 
 **Files:**
-- Modify: `crates/nexus-store/src/snapshot.rs` (add intra-doc pointer on `Snapshotting`)
+- Modify: `crates/mnesis-store/src/snapshot.rs` (add intra-doc pointer on `Snapshotting`)
 - Modify: `docs/plans/2026-04-10-snapshot-design.md` (point its three #139 references at the shipped guide)
 
 - [ ] **Step 1: Add the intra-doc pointer in `snapshot.rs`**
 
-Open `crates/nexus-store/src/snapshot.rs`. Find the `Snapshotting` decorator's doc comment, which
+Open `crates/mnesis-store/src/snapshot.rs`. Find the `Snapshotting` decorator's doc comment, which
 begins:
 
 ```rust
@@ -864,12 +864,12 @@ Insert this paragraph immediately after that first line (before the existing bla
 /// Snapshot-aware repository decorator.
 ///
 /// **Before reaching for snapshots, consider the
-/// [Closing the Books](nexus::closing_the_books) pattern** — modeling the
+/// [Closing the Books](mnesis::closing_the_books) pattern** — modeling the
 /// aggregate as bounded, lifecycle-scoped streams often removes the need for
 /// snapshots entirely.
 ```
 
-(The `nexus::closing_the_books` link resolves because `nexus-store` depends on `nexus`.)
+(The `mnesis::closing_the_books` link resolves because `mnesis-store` depends on `mnesis`.)
 
 - [ ] **Step 2: Point the snapshot design doc's #139 references at the guide**
 
@@ -881,7 +881,7 @@ Replace:
 ```
 with:
 ```
-| 10,000+ | Essential — but first consider the "Closing the Books" pattern (see the `nexus::closing_the_books` guide module and `examples/closing-the-books`) |
+| 10,000+ | Essential — but first consider the "Closing the Books" pattern (see the `mnesis::closing_the_books` guide module and `examples/closing-the-books`) |
 ```
 
 Replace:
@@ -890,7 +890,7 @@ Replace:
 ```
 with:
 ```
-**Preferred alternative:** Short-lived streams with natural lifecycle boundaries (e.g., `CashierShift` instead of `CashRegister`) eliminate the need for snapshots entirely. See the `nexus::closing_the_books` guide module and the runnable `examples/closing-the-books` crate.
+**Preferred alternative:** Short-lived streams with natural lifecycle boundaries (e.g., `CashierShift` instead of `CashRegister`) eliminate the need for snapshots entirely. See the `mnesis::closing_the_books` guide module and the runnable `examples/closing-the-books` crate.
 ```
 
 Replace:
@@ -899,18 +899,18 @@ Replace:
 ```
 with:
 ```
-**Alternative: "Closing the Books":** Design aggregates with natural lifecycle boundaries (e.g., `CashierShift` per shift vs. `CashRegister` forever). When an aggregate completes its lifecycle, archive its stream and start a new one. This eliminates the need for snapshots entirely and is the preferred approach when domain semantics allow it. Documented in the `nexus::closing_the_books` guide module with a runnable contrast in `examples/closing-the-books`.
+**Alternative: "Closing the Books":** Design aggregates with natural lifecycle boundaries (e.g., `CashierShift` per shift vs. `CashRegister` forever). When an aggregate completes its lifecycle, archive its stream and start a new one. This eliminates the need for snapshots entirely and is the preferred approach when domain semantics allow it. Documented in the `mnesis::closing_the_books` guide module with a runnable contrast in `examples/closing-the-books`.
 ```
 
 - [ ] **Step 3: Verify the store docs build**
 
-Run: `nix develop -c cargo doc -p nexus-store --no-deps --features snapshot`
+Run: `nix develop -c cargo doc -p mnesis-store --no-deps --features snapshot`
 Expected: exits 0 with no warnings (the new intra-doc link resolves).
 
 - [ ] **Step 4: Commit** (gate runs)
 
 ```bash
-git add crates/nexus-store/src/snapshot.rs docs/plans/2026-04-10-snapshot-design.md
+git add crates/mnesis-store/src/snapshot.rs docs/plans/2026-04-10-snapshot-design.md
 git commit -m "docs(store): link snapshot decorator to closing_the_books guide (#139)"
 ```
 
@@ -920,7 +920,7 @@ git commit -m "docs(store): link snapshot decorator to closing_the_books guide (
 
 - [ ] **Run the whole example once more end-to-end**
 
-Run: `nix develop -c cargo run -p nexus-example-closing-the-books`
+Run: `nix develop -c cargo run -p mnesis-example-closing-the-books`
 Expected: long-lived line shows `all 5001 events ... current float = 5100`, shift line shows `ONLY the current shift (11 events) ... registered total = 10`, takeaway lines present.
 
 - [ ] **Confirm the branch is clean and all five commits landed**

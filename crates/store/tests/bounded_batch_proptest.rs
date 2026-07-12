@@ -8,12 +8,12 @@
 )]
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::StreamKey;
-use nexus_store::batch::BatchSize;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::StreamKey;
+use mnesis_store::batch::BatchSize;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::store::RawEventStore;
 use proptest::prelude::*;
 
 fn batch_strategy() -> impl Strategy<Value = usize> {

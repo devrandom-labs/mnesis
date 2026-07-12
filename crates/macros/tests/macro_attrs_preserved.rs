@@ -1,6 +1,6 @@
 //! Test that user attributes are preserved through the aggregate macro.
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -58,7 +58,7 @@ struct AttrError;
 
 /// This is a documented aggregate.
 /// It should appear in cargo doc output.
-#[nexus::aggregate(state = AttrState, error = AttrError, id = AttrId)]
+#[mnesis::aggregate(state = AttrState, error = AttrError, id = AttrId)]
 struct DocumentedAggregate;
 
 #[test]
@@ -74,7 +74,7 @@ fn doc_attribute_preserved() {
 // =============================================================================
 
 #[cfg(test)]
-#[nexus::aggregate(state = AttrState, error = AttrError, id = AttrId)]
+#[mnesis::aggregate(state = AttrState, error = AttrError, id = AttrId)]
 struct TestOnlyAggregate;
 
 #[test]
@@ -89,7 +89,7 @@ fn cfg_attribute_preserved() {
 // =============================================================================
 
 #[allow(dead_code, reason = "testing attribute preservation")]
-#[nexus::aggregate(state = AttrState, error = AttrError, id = AttrId)]
+#[mnesis::aggregate(state = AttrState, error = AttrError, id = AttrId)]
 struct UnusedAggregate;
 
 #[test]

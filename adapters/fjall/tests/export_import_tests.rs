@@ -1,5 +1,5 @@
 //! End-to-end export → CBOR-box → file → import coverage on the **persistent**
-//! fjall adapter (issue #220). The nexus-store contract (`export.rs`,
+//! fjall adapter (issue #220). The mnesis-store contract (`export.rs`,
 //! `import.rs`, `cbor.rs`) is exercised everywhere against `InMemoryStore`;
 //! this proves the same pipeline on disk, where the cross-partition
 //! transactional guarantees actually have teeth (CLAUDE rule 1).
@@ -11,7 +11,7 @@
 //! store — plus the corruption-on-disk distinctions a restore must surface.
 //!
 //! Gated on `export`+`import`; the crate's self dev-dependency turns those on
-//! under the default-feature `nix flake check` gate, and the `nexus-store`
+//! under the default-feature `nix flake check` gate, and the `mnesis-store`
 //! `cbor` dev-dependency supplies the box codec.
 
 #![cfg(all(feature = "export", feature = "import"))]
@@ -26,14 +26,14 @@
 use std::collections::BTreeSet;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::StreamKey;
-use nexus_store::cbor::{ChunkError, ChunkWriter, decode_chunk};
-use nexus_store::envelope::{PersistedEnvelope, pending_envelope};
-use nexus_store::export::{EventExporter, StreamLister};
-use nexus_store::import::{AbortReason, Atomicity, EventImporter, ImportError, StreamOutcome};
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::StreamKey;
+use mnesis_store::cbor::{ChunkError, ChunkWriter, decode_chunk};
+use mnesis_store::envelope::{PersistedEnvelope, pending_envelope};
+use mnesis_store::export::{EventExporter, StreamLister};
+use mnesis_store::import::{AbortReason, Atomicity, EventImporter, ImportError, StreamOutcome};
+use mnesis_store::store::RawEventStore;
 
 fn sk(s: &str) -> StreamKey {
     StreamKey::from_slice(s.as_bytes())

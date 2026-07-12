@@ -1,6 +1,6 @@
 //! In-memory event-sourced bank account example.
 //!
-//! Demonstrates the full Nexus pattern without any persistence layer:
+//! Demonstrates the full Mnesis pattern without any persistence layer:
 //! - Domain events as enums with `#[derive(DomainEvent)]`
 //! - Aggregate state with exhaustive event handling
 //! - Command handling via `Handle<C>` trait
@@ -19,7 +19,7 @@
     reason = "example code uses to_string for readability"
 )]
 
-use nexus::*;
+use mnesis::*;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -123,7 +123,7 @@ enum AccountError {
 
 // --- Aggregate ---
 
-#[nexus::aggregate(state = AccountState, error = AccountError, id = AccountId)]
+#[mnesis::aggregate(state = AccountState, error = AccountError, id = AccountId)]
 struct BankAccount;
 
 // --- Commands ---
@@ -203,7 +203,7 @@ impl Handle<CloseAccount> for BankAccount {
 }
 
 // =============================================================================
-// In-Memory Event Store (not part of nexus — just for this example)
+// In-Memory Event Store (not part of mnesis — just for this example)
 // =============================================================================
 
 struct InMemoryStore {

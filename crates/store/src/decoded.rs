@@ -26,7 +26,7 @@ use futures::{Stream, StreamExt};
 use crate::codec::{Decode, OwningCodec};
 use crate::envelope::PersistedEnvelope;
 use crate::step::Step;
-use nexus::Version;
+use mnesis::Version;
 
 /// A raw envelope, un-packed: the decoded event plus its resume bookmark and
 /// metadata. `T` is the owned event (`E`) on the stream path, or the borrowed
@@ -277,7 +277,7 @@ where
     ///
     /// This is the projection consumption path: it tells catch-up from live
     /// *and* hands you typed events, reusing the codec — no magic count, no
-    /// hand-rolled timeout, nexus-owned error.
+    /// hand-rolled timeout, mnesis-owned error.
     #[allow(
         clippy::type_complexity,
         reason = "the Step<Decoded>/DecodeStreamError item is intrinsic to the contract; an \

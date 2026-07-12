@@ -2,12 +2,12 @@
 
 The executable proof that the freeze-ready public API **composes** on the real
 persistent adapter. Every other example uses `InMemoryStore`; this one runs the
-complete path on `nexus-fjall`, exercising three surfaces that previously had
+complete path on `mnesis-fjall`, exercising three surfaces that previously had
 zero example coverage — composed over one bank-account domain.
 
 ```bash
-cargo run -p nexus-example-fjall-end-to-end     # narrate the three phases
-cargo test -p nexus-example-fjall-end-to-end    # the gate-checked proofs
+cargo run -p mnesis-example-fjall-end-to-end     # narrate the three phases
+cargo test -p mnesis-example-fjall-end-to-end    # the gate-checked proofs
 ```
 
 ## What it proves

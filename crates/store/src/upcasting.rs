@@ -1,7 +1,7 @@
 use alloc::borrow::{Cow, ToOwned};
 use alloc::vec::Vec;
 
-use nexus::Version;
+use mnesis::Version;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EventMorsel — data unit flowing through the transform pipeline
@@ -14,7 +14,7 @@ use nexus::Version;
 ///
 /// `EventMorsel` is the parameter and return type of upcast functions —
 /// the plain-function shape that replaced the prior `Upcaster` trait. The
-/// `#[nexus::transforms]` macro emits a `pub fn upcast` matching this
+/// `#[mnesis::transforms]` macro emits a `pub fn upcast` matching this
 /// signature; hand-rolled upcasters write the same shape. Pass the
 /// resulting function to [`EventStore::load_with`](crate::EventStore::load_with)
 /// to plug it into the facade's read path.

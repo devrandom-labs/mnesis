@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use std::convert::Infallible;
 use std::num::NonZeroU32;
 
-use nexus::Id;
-use nexus_store::state::{Hydrated, SnapshotStore};
+use mnesis::Id;
+use mnesis_store::state::{Hydrated, SnapshotStore};
 use tokio::sync::RwLock;
 
 /// In-memory snapshot store for tests.

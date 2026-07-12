@@ -1,15 +1,15 @@
-# no_std WakeSource bridge — `nexus-wake-nostd` (#302)
+# no_std WakeSource bridge — `mnesis-wake-nostd` (#302)
 
 **Date:** 2026-07-10
-**Issue:** [#302 — [freeze] no_std WakeSource bridge — on-device live-tail subscriptions](https://github.com/devrandom-labs/nexus/issues/302)
+**Issue:** [#302 — [freeze] no_std WakeSource bridge — on-device live-tail subscriptions](https://github.com/devrandom-labs/mnesis/issues/302)
 **Status:** Approved design, pre-implementation
 **Depends on:** #300 (WakeSource trait standalone, merged), #301 (store no_std, merged `7d75a78`)
 
 ## Problem
 
-`WakeSource` (`nexus-store/src/wake.rs`) is the adapter-pluggable wake seam the
+`WakeSource` (`mnesis-store/src/wake.rs`) is the adapter-pluggable wake seam the
 generic catch-up-then-live-tail loop parks on. The only in-process impl is
-`StreamNotifiers` in `nexus-wake` — tokio-backed (`Notify` + `watch`
+`StreamNotifiers` in `mnesis-wake` — tokio-backed (`Notify` + `watch`
 generations), so a no_std device cannot run an on-device live-tail
 subscription. The primary device model is append-and-sync (subscriptions live
 server-side), so this bridge is **optional and additive** — scheduled pre-freeze
@@ -22,10 +22,10 @@ assert.
 
 ## Decisions (settled during brainstorming)
 
-1. **Home: new sibling crate `crates/nexus-wake-nostd`** (publishable).
+1. **Home: new sibling crate `crates/mnesis-wake-nostd`** (publishable).
    Mirrors the #300 split — one crate per wake backend, each owning its own
-   deps. `nexus-wake` keeps owning tokio; `nexus-store`'s `subscription`
-   feature stays dep-free. Name follows the `nexus-nostd-smoketest` convention.
+   deps. `mnesis-wake` keeps owning tokio; `mnesis-store`'s `subscription`
+   feature stays dep-free. Name follows the `mnesis-nostd-smoketest` convention.
 2. **Scope: global eventcount, no per-stream routing.** The
    `WakeRegistration::arm` contract explicitly permits spurious wakes, and the
    loop's response to one is a single empty re-scan. Per-stream routing is a
@@ -42,11 +42,11 @@ assert.
 
 ## Design
 
-### Crate: `nexus-wake-nostd`
+### Crate: `mnesis-wake-nostd`
 
 `#![no_std]` + `extern crate alloc`. Dependencies:
 
-- `nexus-store` — `default-features = false, features = ["subscription"]`
+- `mnesis-store` — `default-features = false, features = ["subscription"]`
   (the `wake` traits; dep-free gate since #300, no_std since #301)
 - `event-listener` — `default-features = false` (no_std + alloc mode;
   verified against the v5 source: `default = ["std"]`, `listen()` boxes the
@@ -112,23 +112,23 @@ pub struct GlobalWakeReg { inner: Arc<Inner> }
 ### Compile gates (rule 9 — measure, don't assert)
 
 Extend the flake's existing bare-metal gates (`thumbv7em-none-eabihf`,
-`wasm32-unknown-unknown`, the #304 pattern) to build `nexus-wake-nostd`.
+`wasm32-unknown-unknown`, the #304 pattern) to build `mnesis-wake-nostd`.
 Building it transitively compiles
-`nexus-store --no-default-features --features subscription` — i.e.
+`mnesis-store --no-default-features --features subscription` — i.e.
 `subscription_cursor.rs`, `wake.rs`, `catchup.rs` — for a bare-metal target
 for the first time, which is the card's explicit verification item. During
 planning, check whether the #301 gate already enables `subscription`; if a
 std-only combinator snuck into the loop, that gate failure is the finding.
 
-Hakari: exclude `nexus-wake-nostd` from `workspace-hack` (the
-`nexus-nostd-smoketest` precedent in `.config/hakari.toml`) so no std
+Hakari: exclude `mnesis-wake-nostd` from `workspace-hack` (the
+`mnesis-nostd-smoketest` precedent in `.config/hakari.toml`) so no std
 workspace-hack edge poisons the bare-metal build. Confirm how #301 handled
-this for `nexus-store` itself and follow the same mechanism.
+this for `mnesis-store` itself and follow the same mechanism.
 
 ### Testing (4 cross-cutting categories first)
 
-All in `nexus-wake-nostd` (dev-deps: tokio, embassy-executor +
-`critical-section` with its `std` feature, `nexus-inmemory`, `futures`).
+All in `mnesis-wake-nostd` (dev-deps: tokio, embassy-executor +
+`critical-section` with its `std` feature, `mnesis-inmemory`, `futures`).
 
 1. **Sequence/protocol:** register → arm → wake resolves; resolve → re-arm →
    needs a *fresh* wake to resolve again; an armed future with no wake stays
@@ -141,7 +141,7 @@ All in `nexus-wake-nostd` (dev-deps: tokio, embassy-executor +
 3. **Defensive boundary:** `register(None)`, `register(Some(b""))`, and
    arbitrary keys behave identically (the global impl's contract);
    wake-before-arm does not satisfy a later arm on its own.
-4. **Linearizability:** port `nexus-wake`'s
+4. **Linearizability:** port `mnesis-wake`'s
    `armed_wait_never_loses_a_concurrent_wake` (50-iteration barrier race,
    tokio multi-thread) and a concurrent arm/wake churn test. These exercise
    `Send` on the arm future across real threads.
@@ -154,7 +154,7 @@ that delegates `RawEventStore` to `inner` and `WakeSource` to `wake`, with
 returns (the MUST-wake-after-durable-commit ordering). The subscriber task
 sees the seeded backlog, `Step::CaughtUp`, then a post-subscribe live append;
 results reported back to the test thread over a channel with a timeout. This
-is delegation, not a reimplementation of store logic (rule 8 / nexus addendum:
+is delegation, not a reimplementation of store logic (rule 8 / mnesis addendum:
 reuse `InMemoryStore`).
 
 ### Documentation
@@ -166,9 +166,9 @@ reuse `InMemoryStore`).
   trade (every commit wakes every parked subscription; cost = one empty
   re-scan per false wake) and the additive upgrade path (a routed sibling
   type) if a real device workload ever shows herd cost.
-- CLAUDE.md architecture section: add the `nexus-wake-nostd` entry to the
+- CLAUDE.md architecture section: add the `mnesis-wake-nostd` entry to the
   crate graph and the subscription-machinery notes.
-- #280 (crates.io reservation): add `nexus-wake-nostd` to the names list.
+- #280 (crates.io reservation): add `mnesis-wake-nostd` to the names list.
 - Close-out comment on #302 mapping each acceptance checkbox to the artifact.
 
 ## Out of scope
@@ -177,4 +177,4 @@ reuse `InMemoryStore`).
   necessary).
 - Any no_std *store adapter* (the subscription loop still needs a
   `RawEventStore`; on-device that's a future embedded adapter's concern).
-- Changes to `nexus-wake` (tokio impl) or the `WakeSource` trait itself.
+- Changes to `mnesis-wake` (tokio impl) or the `WakeSource` trait itself.

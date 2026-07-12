@@ -1,6 +1,6 @@
 //! `WakeSource` for [`PostgresStore`] via `LISTEN/NOTIFY` → [`StreamNotifiers`].
 //!
-//! The generic subscription loop in `nexus_store::subscription` parks on a
+//! The generic subscription loop in `mnesis_store::subscription` parks on a
 //! [`WakeRegistration`] until new events may exist. Postgres drives that loop by
 //! reusing the audited in-process [`StreamNotifiers`] registry as the wake
 //! machinery: a single background `PgListener` task (spawned in
@@ -12,14 +12,14 @@
 //! note). `Registration` and `Error` are therefore the registry's own
 //! [`WakeReg`] / [`NotifyError`] — no postgres-specific wake types are needed.
 
-use nexus_store::wake::WakeSource;
-use nexus_wake::{NotifyError, WakeReg};
+use mnesis_store::wake::WakeSource;
+use mnesis_wake::{NotifyError, WakeReg};
 
 use crate::store::PostgresStore;
 
 /// Delegates wake-routing to the store's [`StreamNotifiers`], which the shared
 /// `PgListener` task drives from `LISTEN/NOTIFY`. Mirrors the trait mechanics of
-/// `nexus-fjall`'s `impl WakeSource` (delegate to an `Arc<StreamNotifiers>`),
+/// `mnesis-fjall`'s `impl WakeSource` (delegate to an `Arc<StreamNotifiers>`),
 /// the difference being the wake *source*: fjall's `append` calls `wake`
 /// in-process, whereas postgres routes it through `NOTIFY` so a writer in
 /// *another* process (or connection) still rouses this process's subscribers.

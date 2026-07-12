@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
-use nexus::{DomainEvent, Message};
+use mnesis::{DomainEvent, Message};
 
 // Test with all variant shapes: tuple, struct, and unit
-#[derive(Debug, Clone, nexus::DomainEvent)]
+#[derive(Debug, Clone, mnesis::DomainEvent)]
 enum TestEvent {
     Created(Created),
     Updated(Updated),

@@ -1,13 +1,14 @@
 [package]
-name = "nexus-macros"
+name = "mnesis-macros"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Derive macros for the Nexus event-sourcing framework"
-readme = "../../README.md"
+homepage.workspace = true
+description = "Derive macros for the Mnesis event-sourcing framework"
+readme = "README.md"
 keywords = ["event-sourcing", "cqrs", "derive", "macro"]
 categories = ["data-structures"]
 
@@ -17,12 +18,20 @@ proc-macro = true
 [dependencies]
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
 quote = "1.0.45"
-syn = { version = "2.0.117", features = ["extra-traits", "parsing", "derive"] }
+# `full` is load-bearing: the `#[mnesis::aggregate]` / `#[mnesis::transforms]`
+# attribute macros parse `ItemImpl` / `ImplItem` / `ImplItemFn`, all gated behind
+# syn's `full` feature. Omitting it only compiles inside the workspace because
+# feature unification (via workspace-hack) enables `full` transitively; a
+# standalone publish fails without it. Caught by `cargo publish --dry-run` (#280).
+syn = { version = "2.0.117", features = ["extra-traits", "parsing", "derive", "full"] }
 workspace-hack = { version = "0.1.0", path = "../workspace-hack" }
 
 [dev-dependencies]
-nexus = { path = "../nexus", features = ["derive"] }
-nexus-store = { path = "../store" }
+mnesis = { path = "../mnesis", features = ["derive"] }
+mnesis-store = { path = "../store" }
 proptest = { workspace = true }
 thiserror = { workspace = true }
 trybuild = "1"
+
+[package.metadata.docs.rs]
+all-features = true

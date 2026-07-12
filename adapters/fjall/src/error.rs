@@ -1,5 +1,5 @@
-use nexus::ErrorId;
-use nexus_store::envelope::EnvelopeError;
+use mnesis::ErrorId;
+use mnesis_store::envelope::EnvelopeError;
 use thiserror::Error;
 
 /// Format a `Display` value into a stack-allocated reason label, truncating
@@ -71,11 +71,11 @@ pub enum FjallError {
 
     /// Failed to register a per-stream subscription wake handle.
     ///
-    /// Surfaces [`NotifyError`](nexus_wake::NotifyError) from the
+    /// Surfaces [`NotifyError`](mnesis_wake::NotifyError) from the
     /// wake registry — in practice only the unreachable subscriber-count
     /// overflow.
     #[error("subscription wake registration failed")]
-    Subscription(#[from] nexus_wake::NotifyError),
+    Subscription(#[from] mnesis_wake::NotifyError),
 }
 
 #[cfg(test)]

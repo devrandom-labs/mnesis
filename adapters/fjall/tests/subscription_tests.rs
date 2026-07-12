@@ -14,10 +14,10 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{
     PendingEnvelope, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
 };
 use tokio::time::timeout;

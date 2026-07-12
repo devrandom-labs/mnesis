@@ -1,11 +1,11 @@
-//! The executable conformance kit for `nexus-store` adapters — and the guide
+//! The executable conformance kit for `mnesis-store` adapters — and the guide
 //! to writing one (issue #281).
 //!
-//! Every store adapter (`nexus-inmemory`, `nexus-fjall`, `nexus-postgres`,
+//! Every store adapter (`mnesis-inmemory`, `mnesis-fjall`, `mnesis-postgres`,
 //! and any future one) implements the same seam:
-//! [`RawEventStore`](nexus_store::store::RawEventStore) +
-//! [`WakeSource`](nexus_store::wake::WakeSource), optionally `AtomicAppend`
-//! and [`SnapshotStore`](nexus_store::state::SnapshotStore). That seam has
+//! [`RawEventStore`](mnesis_store::store::RawEventStore) +
+//! [`WakeSource`](mnesis_store::wake::WakeSource), optionally `AtomicAppend`
+//! and [`SnapshotStore`](mnesis_store::state::SnapshotStore). That seam has
 //! a contract that goes well beyond "the trait compiles" — inclusive vs.
 //! exclusive read bounds, optimistic-conflict rejection, subscription
 //! catch-up→live ordering, concurrent-writer linearizability. This crate
@@ -32,35 +32,35 @@
 //!
 //! The rest of this page is the **writing-a-store-adapter guide**. Sections
 //! 1–4 restate the seam's contract in one place (the trait docs in
-//! `nexus-store` remain the normative source; follow the links); section 5
+//! `mnesis-store` remain the normative source; follow the links); section 5
 //! shows how to prove an implementation with the kit; section 6 lists the
 //! pinned ambiguities that trip up new adapters. It assumes no knowledge of
-//! the shipped adapters — you never need to read `nexus-fjall` or
-//! `nexus-postgres` source.
+//! the shipped adapters — you never need to read `mnesis-fjall` or
+//! `mnesis-postgres` source.
 //!
 //! # What you implement
 //!
 //! One store type implements two mandatory traits.
 //!
-//! [`RawEventStore`](nexus_store::store::RawEventStore) — bytes in, bytes
+//! [`RawEventStore`](mnesis_store::store::RawEventStore) — bytes in, bytes
 //! out. The adapter never sees typed events or codecs; the repository facade
-//! encodes into [`PendingEnvelope`](nexus_store::envelope::PendingEnvelope)s
+//! encodes into [`PendingEnvelope`](mnesis_store::envelope::PendingEnvelope)s
 //! before calling you. You supply:
 //!
 //! - `type Error` — your own error type, bound
 //!   `core::error::Error + Send + Sync + 'static`. Keep it distinct from
-//!   `nexus-store`'s facade error types; the facade wraps yours, and a shared
+//!   `mnesis-store`'s facade error types; the facade wraps yours, and a shared
 //!   type would double-wrap.
 //! - `type Stream` — the per-stream read cursor: an owned, `'static`,
 //!   `Send` `futures::Stream` with
 //!   `Item = Result<PersistedEnvelope, Self::Error>` (the
-//!   [`EventStream`](nexus_store::stream::EventStream) marker bound).
+//!   [`EventStream`](mnesis_store::stream::EventStream) marker bound).
 //! - `type AllPosition` — your store-local `$all` resume position: any
 //!   `Copy + Ord + Send + Sync + Debug + 'static` type implementing
-//!   [`AllPosition`](nexus_store::store::AllPosition). A scalar sequence
+//!   [`AllPosition`](mnesis_store::store::AllPosition). A scalar sequence
 //!   for an embedded store, a commit-ordered composite for a concurrent SQL
 //!   store. It is never carried on the envelope; it rides only on `$all`
-//!   items. `nexus-store` ships no scalar impl, and the orphan rule blocks
+//!   items. `mnesis-store` ships no scalar impl, and the orphan rule blocks
 //!   `impl AllPosition for u64` in your crate — define a local newtype:
 //!   `struct MyPos(u64); impl AllPosition for MyPos {}` (plus the derives
 //!   the supertraits need).
@@ -70,32 +70,32 @@
 //!   every item tagged with its position.
 //! - Make both stream types `Unpin`. The trait imposes no such bound, but
 //!   the subscription path
-//!   ([`Subscription`](nexus_store::subscription::Subscription)) requires it.
-//! - Three methods — [`append`](nexus_store::store::RawEventStore::append),
-//!   [`read_stream`](nexus_store::store::RawEventStore::read_stream),
-//!   [`read_all`](nexus_store::store::RawEventStore::read_all) — whose
+//!   ([`Subscription`](mnesis_store::subscription::Subscription)) requires it.
+//! - Three methods — [`append`](mnesis_store::store::RawEventStore::append),
+//!   [`read_stream`](mnesis_store::store::RawEventStore::read_stream),
+//!   [`read_all`](mnesis_store::store::RawEventStore::read_all) — whose
 //!   contracts are the next two sections.
 //!
-//! [`WakeSource`](nexus_store::wake::WakeSource) — how live subscriptions
+//! [`WakeSource`](mnesis_store::wake::WakeSource) — how live subscriptions
 //! learn that a commit landed. See "The wake contract" below.
 //!
 //! Optional capability traits, each with its own kit module:
 //!
-//! - `AtomicAppend` (at `nexus_store::import::AtomicAppend`, behind
-//!   `nexus-store`'s `import` feature) — commit several per-stream runs in
+//! - `AtomicAppend` (at `mnesis_store::import::AtomicAppend`, behind
+//!   `mnesis-store`'s `import` feature) — commit several per-stream runs in
 //!   **one** transaction, all-or-nothing; the primitive bulk import needs.
 //!   Each write's `expected_version` is validated against the target's
 //!   **running** head (counting earlier writes to the same target inside the
 //!   batch); any mismatch aborts the whole transaction with
 //!   `AtomicAppendError::Conflict { index, actual }`, and on any failure
 //!   **no** write is applied.
-//! - [`SnapshotStore<Vec<u8>, P>`](nexus_store::state::SnapshotStore) —
+//! - [`SnapshotStore<Vec<u8>, P>`](mnesis_store::state::SnapshotStore) —
 //!   atomic persistence of derived state plus the position it was folded to
 //!   (`hydrate` / `commit`). Byte-level: `S = Vec<u8>`; typed state is a
 //!   codec bridge upstream, not your concern. Two useful instantiations:
 //!   `P = Version` (aggregate snapshots) and `P =` your `AllPosition`
 //!   (projection checkpoints). `hydrate` returns the three-state
-//!   [`Hydrated`](nexus_store::state::Hydrated) — `Absent` (never saved),
+//!   [`Hydrated`](mnesis_store::state::Hydrated) — `Absent` (never saved),
 //!   `Stale` (saved under a different schema version; the caller rebuilds),
 //!   `Found` (position + state). State and position commit **together**: the
 //!   trait has no "save state alone", and your implementation must persist
@@ -108,13 +108,13 @@
 //! ## Storing an event
 //!
 //! `append` hands you `&[PendingEnvelope]`; reads must hand back
-//! [`PersistedEnvelope`](nexus_store::envelope::PersistedEnvelope)s. The
+//! [`PersistedEnvelope`](mnesis_store::envelope::PersistedEnvelope)s. The
 //! supported recipe is the canonical wire frame: persist, per event, the
 //! `Version` (from `PendingEnvelope::version()`) plus the output of
-//! [`encode_frame`](nexus_store::wire::encode_frame):
+//! [`encode_frame`](mnesis_store::wire::encode_frame):
 //!
 //! ```ignore
-//! let frame = nexus_store::wire::encode_frame(
+//! let frame = mnesis_store::wire::encode_frame(
 //!     env.schema_version_value(),
 //!     &env.event_type_value(),
 //!     &env.payload_value(),
@@ -124,7 +124,7 @@
 //!
 //! Store `frame.value` (one contiguous `Bytes` buffer), `frame.offsets`,
 //! and the `SchemaVersion`; on read, rebuild with
-//! [`PersistedEnvelope::try_new`](nexus_store::envelope::PersistedEnvelope::try_new)
+//! [`PersistedEnvelope::try_new`](mnesis_store::envelope::PersistedEnvelope::try_new)
 //! `(version, value, schema_version, offsets.event_type, offsets.payload,
 //! offsets.metadata)`. The frame lands the payload on a 16-byte boundary
 //! inside the buffer — an invariant zero-copy codecs (rkyv, POD) rely on. A
@@ -133,16 +133,16 @@
 //!
 //! # The append contract
 //!
-//! [`append(id, expected_version, envelopes)`](nexus_store::store::RawEventStore::append)
+//! [`append(id, expected_version, envelopes)`](mnesis_store::store::RawEventStore::append)
 //! is optimistic concurrency:
 //!
 //! - `expected_version` is the stream head the caller last saw: `None` = a
 //!   fresh stream with no events, `Some(v)` = the head is exactly `v`.
 //!   Compare it against the stream's **actual** current head; on mismatch
-//!   return [`AppendError::Conflict`](nexus_store::error::AppendError)
+//!   return [`AppendError::Conflict`](mnesis_store::error::AppendError)
 //!   carrying the stream id, the caller's expectation, and the actual head —
 //!   the caller reloads from `actual` and retries. The diagnostic id field
-//!   is `nexus::ErrorId`, built truncation-aware from the key's `Display`:
+//!   is `mnesis::ErrorId`, built truncation-aware from the key's `Display`:
 //!   `stream_id: ErrorId::from_display(id)`.
 //! - The head check and the event insertion **must** be one atomic step (a
 //!   transaction, CAS, or a lock). A check-then-insert with a window between
@@ -169,7 +169,7 @@
 //!
 //! Two read methods, deliberately asymmetric.
 //!
-//! [`read_stream(id, from)`](nexus_store::store::RawEventStore::read_stream)
+//! [`read_stream(id, from)`](mnesis_store::store::RawEventStore::read_stream)
 //! — a bounded scan of one stream:
 //!
 //! - `from` is **inclusive**: yield every event with `version >= from`, in
@@ -181,7 +181,7 @@
 //!   resident memory is your concern (fjall, for instance, holds one lazy
 //!   LSM cursor rather than fixed-size batches).
 //!
-//! [`read_all(from: Option<AllPosition>)`](nexus_store::store::RawEventStore::read_all)
+//! [`read_all(from: Option<AllPosition>)`](mnesis_store::store::RawEventStore::read_all)
 //! — a bounded scan across all streams:
 //!
 //! - `from` is **exclusive**: `None` = from the very beginning, `Some(p)` =
@@ -206,23 +206,23 @@
 //! # The wake contract
 //!
 //! A live subscription is a catch-up-then-park loop; the loop itself ships
-//! generically in `nexus-store` and works for any adapter. Your half is
-//! [`WakeSource`](nexus_store::wake::WakeSource): two methods and one
+//! generically in `mnesis-store` and works for any adapter. Your half is
+//! [`WakeSource`](mnesis_store::wake::WakeSource): two methods and one
 //! call-site discipline.
 //!
-//! - [`register(stream: Option<&[u8]>)`](nexus_store::wake::WakeSource::register)
+//! - [`register(stream: Option<&[u8]>)`](mnesis_store::wake::WakeSource::register)
 //!   — called once, synchronously, when a subscription opens
 //!   (`None` registers for `$all`). Return a
-//!   [`WakeRegistration`](nexus_store::wake::WakeRegistration) that keeps
+//!   [`WakeRegistration`](mnesis_store::wake::WakeRegistration) that keeps
 //!   wake-routing alive until dropped.
-//! - [`arm`](nexus_store::wake::WakeRegistration::arm) — returns an owned
+//! - [`arm`](mnesis_store::wake::WakeRegistration::arm) — returns an owned
 //!   `'static` future. Contract: the future captures a "seen point" at the
 //!   moment `arm` is called and resolves once a wake is delivered **after**
 //!   that point — a wake landing between `arm` and the `.await` must NOT be
 //!   lost. The generic loop arms *before* its confirming re-scan whenever it
 //!   thinks it is caught up; that ordering plus your arm-time capture is the
 //!   entire lost-wakeup defense.
-//! - [`wake(stream)`](nexus_store::wake::WakeSource::wake) — call after
+//! - [`wake(stream)`](mnesis_store::wake::WakeSource::wake) — call after
 //!   **every** durable commit to `stream`, never before (a woken subscriber
 //!   immediately re-reads and must see the data). A per-stream commit is
 //!   also an `$all` event: `$all` observers must be woken too.
@@ -232,14 +232,14 @@
 //!   catch exactly that.
 //!
 //! In-process adapters should not build this machinery: embed
-//! `nexus_wake::StreamNotifiers` and delegate — the exact shape
-//! `nexus-inmemory` and `nexus-fjall` ship:
+//! `mnesis_wake::StreamNotifiers` and delegate — the exact shape
+//! `mnesis-inmemory` and `mnesis-fjall` ship:
 //!
 //! ```ignore
 //! use std::sync::Arc;
 //!
-//! use nexus_store::wake::WakeSource;
-//! use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
+//! use mnesis_store::wake::WakeSource;
+//! use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
 //!
 //! struct MyStore {
 //!     // ... your storage ...
@@ -275,7 +275,7 @@
 //! "some test in the suite." Dependencies you'll need: `tokio` with
 //! `macros` + `rt-multi-thread` (plus `sync`/`time` if your adapter uses
 //! tokio primitives), `thiserror` for your error enum (workspace rule), and
-//! `nexus-wake` for the in-process `WakeSource`.
+//! `mnesis-wake` for the in-process `WakeSource`.
 //!
 //! ## The factory contract
 //!
@@ -288,7 +288,7 @@
 //! state across tests.
 //!
 //! ```ignore
-//! nexus_store_testing::conformance! {
+//! mnesis_store_testing::conformance! {
 //!     factory: || async { (InMemoryStore::new(), ()) },
 //! }
 //! ```
@@ -313,7 +313,7 @@
 //!
 //! Every macro accepts an optional `skip_unless: <fn() -> bool>` that guards
 //! each generated test: when it returns `false` the test returns
-//! immediately (a vacuous pass, not a failure). `nexus-postgres` uses this
+//! immediately (a vacuous pass, not a failure). `mnesis-postgres` uses this
 //! to skip the whole matrix when `DATABASE_URL` is unset locally, while
 //! still running for real under the nixosTest CI attribute that supplies a
 //! live database.
@@ -343,7 +343,7 @@
 //!   would collide with "absent". The boundary check is
 //!   `check_metadata_absent_vs_present_distinct`, not …`_vs_empty_`.
 //! - **Public error enums are `#[non_exhaustive]`.**
-//!   [`AppendError`](nexus_store::error::AppendError),
+//!   [`AppendError`](mnesis_store::error::AppendError),
 //!   `AtomicAppendError`, and their siblings may grow variants without a
 //!   major bump — match the variant you handle (`Conflict`) plus a wildcard
 //!   arm, never exhaustively.
@@ -410,7 +410,7 @@ macro_rules! __conformance_case {
 /// store owns everything.
 ///
 /// ```ignore
-/// nexus_store_testing::conformance! {
+/// mnesis_store_testing::conformance! {
 ///     factory: || async { (InMemoryStore::new(), ()) },
 /// }
 /// ```
@@ -480,7 +480,7 @@ macro_rules! conformance {
 /// with `S: AtomicAppend`.
 ///
 /// ```ignore
-/// nexus_store_testing::conformance_atomic_append! {
+/// mnesis_store_testing::conformance_atomic_append! {
 ///     factory: || async { (InMemoryStore::new(), ()) },
 /// }
 /// ```
@@ -518,7 +518,7 @@ macro_rules! conformance_atomic_append {
 /// codec has no off-by-one at either edge.
 ///
 /// ```ignore
-/// nexus_store_testing::conformance_snapshot! {
+/// mnesis_store_testing::conformance_snapshot! {
 ///     factory: || async { (InMemorySnapshotStore::<Vec<u8>, Version>::new(), ()) },
 ///     positions: (Version::new(5).unwrap(), Version::new(9).unwrap()),
 ///     extremes: (Version::new(1).unwrap(), Version::new(u64::MAX).unwrap()),
@@ -587,7 +587,7 @@ macro_rules! conformance_snapshot {
 /// backing storage.
 ///
 /// ```ignore
-/// nexus_store_testing::conformance_lifecycle! {
+/// mnesis_store_testing::conformance_lifecycle! {
 ///     open: open_fresh,
 ///     reopen: |store: FjallStore, dir: TempDir| async move {
 ///         drop(store);

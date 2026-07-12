@@ -33,7 +33,7 @@
 //! #145 §5.
 
 use futures::Stream;
-use nexus::Version;
+use mnesis::Version;
 
 use crate::store::{RawEventStore, Store};
 use crate::stream::EventStream;
