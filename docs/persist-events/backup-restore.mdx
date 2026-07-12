@@ -5,8 +5,87 @@ description: Export a store to a CBOR box and import it back — the supported c
 
 # Backup & Restore
 
-<Info>This page is coming soon.</Info>
+mnesis has a first-class export/import path: read every stream out of a store,
+pack it into a portable **CBOR box**, and import it back into any store. It is how
+you back up, move data between adapters, and — beyond one major version — migrate
+(see [Stability](/reference/stability)).
 
-Export a store to a CBOR box and import it back — the supported cross-version interchange path.
+The whole pipeline is defined against `RawEventStore` only, so it works uniformly
+across the in-memory store, fjall, and postgres.
 
-**In the meantime:** read the [`mnesis-store` export/import API docs](https://docs.rs/mnesis-store) and the [`fjall-end-to-end` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/fjall-end-to-end).
+## The read side — export
+
+Two traits, both blanket-impl'd:
+
+- **`StreamLister::list_streams`** — lazily enumerates a store's stream ids
+  (backed by whatever index the adapter already keeps).
+- **`EventExporter::export_stream(id, from)`** — a verbatim pass-through read of a
+  stream. Events are **not** rewritten and the store-local `global_seq` is **not**
+  stripped — the caller already named the stream, and import re-stamps a fresh
+  `global_seq` on re-append, so doing either would be work import redoes for free.
+
+`export_all` (list ∘ export) and live export are consumer-side combinators over
+these.
+
+## The travel format — the CBOR box
+
+`ChunkWriter<W>` writes the box, and its typestate makes malformed output
+*un-nameable*:
+
+```rust
+let mut writer = ChunkWriter::new(sink, header)?;   // header emitted in the constructor
+let mut section = writer.section(stream_id)?;       // opens a per-stream section
+section.try_extend(export_stream).await?;           // drains an export Stream into blocks
+let bytes = writer.into_sink();                     // recover the buffer
+```
+
+The header is written *in the constructor*, so it can never be forgotten or
+misordered; and blocks can only be written *through* a section, so "a block before
+its heading" is a compile error, not a runtime bug. Each block carries a per-block
+**crc32c** checksum, checked on decode before the body is trusted — a checksum
+failure becomes a non-error `ImportBlock::Corrupt`, not a hard error.
+
+The box deliberately **omits `global_seq`** (store-local, re-stamped on import)
+but preserves each event's `version` and `schema_version` — it is a separate
+format from the on-disk [wire frame](/reference/stability).
+
+## The write side — import
+
+`EventImporter::import(sections, route, atomicity)` places decoded sections onto
+caller-routed target streams:
+
+- **`route`** — a closure mapping each section's origin stream id to a target id
+  (events carry no per-event id, so *you* say where each stream lands).
+- **Picky per stream** — a stream's first incoming version must equal its
+  next-expected; nothing is silently trimmed.
+- **Halt-not-skip** — a bad block stops *its* stream at the last good version,
+  never punches a gap.
+- **Idempotent** — re-importing is a no-op, a side-effect of the sequential
+  version check.
+
+### Atomicity is your choice
+
+```rust
+pub enum Atomicity {
+    WholeChunk,   // all-or-nothing — server bulk restore (needs AtomicAppend)
+    PerStream,    // a bad block stops only its stream — mobile resilience
+}
+```
+
+`WholeChunk` uses the **`AtomicAppend`** capability (fjall's cross-partition
+`write_tx`, postgres `BEGIN..COMMIT`, the in-memory mutex): any conflict or
+failure drops the transaction so **nothing lands anywhere**.
+
+Results come back as a per-stream `ImportReport` of `StreamOutcome`
+(`Complete`/`Corrupt`/`Mismatch`) — with "where the stream sits" living *inside*
+each variant, so a `Complete` always carries a real `Version`. Whole-operation
+failures are the separate `ImportError`.
+
+## Where to next
+
+- **[Adapters](/go-live/adapters)** — which stores support `AtomicAppend` /
+  `StreamLister`.
+- **[Stability](/reference/stability)** — the CBOR box is the durable interchange
+  format and the cross-major migration path.
+- **[`fjall-end-to-end` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/fjall-end-to-end)**
+  — export → box → file → import, proven on the persistent adapter.

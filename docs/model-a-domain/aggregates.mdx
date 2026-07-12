@@ -5,8 +5,100 @@ description: AggregateRoot, AggregateState, and the version-tracked container th
 
 # Aggregates
 
-<Info>This page is coming soon.</Info>
+An aggregate is your domain's unit of consistency. In mnesis it is assembled from
+three pieces: a **marker type**, an **`AggregateState`**, and one or more
+decision handlers. This page covers the first two and the runtime container,
+`AggregateRoot`. Decisions get their own page, [Handle &
+Decide](/model-a-domain/handle-decide).
 
-AggregateRoot, AggregateState, and the version-tracked container that folds events into state.
+## The three traits
 
-**In the meantime:** read the [`mnesis` API docs](https://docs.rs/mnesis) and the [Quickstart](/getting-started).
+**`AggregateState`** — the data plus the fold.
+
+```rust
+pub trait AggregateState: Send + Sync + Debug + 'static {
+    type Event: DomainEvent;
+    fn initial() -> Self;
+    fn apply(self, event: &Self::Event) -> Self;
+}
+```
+
+`apply` takes `self` **by value** on purpose: a transition either completes and
+returns a whole valid state, or it panics and the old state is consumed — there
+is no half-mutated state. It is infallible; validation happens when deciding, not
+when applying.
+
+**`Aggregate`** — binds the three associated types together.
+
+```rust
+pub trait Aggregate: Sized {
+    type State: AggregateState;
+    type Error: Error + Send + Sync + Debug + 'static;
+    type Id: Id;
+}
+```
+
+You rarely write this by hand — `#[mnesis::aggregate]` generates it.
+
+**The marker.** The aggregate itself is a bare unit struct. It is *never
+instantiated* — all state lives in `AggregateRoot`. The marker exists only to
+carry the trait impls.
+
+```rust
+#[mnesis::aggregate(state = AccountState, error = AccountError, id = AccountId)]
+struct BankAccount;   // a marker — never constructed
+```
+
+## AggregateRoot — the runtime container
+
+`AggregateRoot<A>` is the loaded aggregate at runtime: it holds the current
+`state` and the current `version`, and nothing else.
+
+```rust
+let mut account = AggregateRoot::<BankAccount>::new(id);   // version = None (fresh)
+account.state();      // &AccountState
+account.version();    // Option<Version> — None until the first event is committed
+account.id();         // &AccountId
+```
+
+It exposes exactly two ways to move state forward, and both keep version and
+state in lockstep **by construction**:
+
+- **`replay(version, &event)`** — rehydration. Replays persisted events in strict
+  version order (must start at 1, strictly sequential; enforces
+  `MAX_REHYDRATION_EVENTS`, default 1M). This is also the supported path for
+  manual, no-store event sourcing.
+- **`commit_persisted(version, &events)`** — the single post-persist sync.
+  Advances the version *and* folds the events into state **atomically**, so a
+  "version ahead of state" desync is unrepresentable.
+
+```rust
+// Rehydrate by replaying history:
+let mut account = AggregateRoot::<BankAccount>::new(id);
+for e in stored_events {                       // VersionedEvent<AccountEvent>
+    account.replay(e.version(), e.event())?;
+}
+```
+
+There is no public `set_state` or `bump_version` — the desync bug is designed
+out. (A [repository](/persist-events/repository) does this dance for you against
+a real store; you touch `replay`/`commit_persisted` directly only for manual
+event sourcing.)
+
+## Deciding on a loaded aggregate
+
+Because a loaded `AggregateRoot<A>` carries the state, it is directly decidable —
+`handle` dispatches to the right `Handle<C>` impl:
+
+```rust
+let decided = account.handle(Deposit { amount: 100 })?;   // Events<AccountEvent>
+```
+
+That is the subject of the next page.
+
+## Where to next
+
+- **[Handle & Decide](/model-a-domain/handle-decide)** — the decision functions.
+- **[Sagas](/model-a-domain/sagas)** — the aggregate's dual.
+- **[Repository](/persist-events/repository)** — load and save against a store.
+- **[Quickstart](/getting-started)** — the whole thing running.

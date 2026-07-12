@@ -5,8 +5,68 @@ description: The pure kernel at the centre, storage adapters at the edge — mne
 
 # Hexagonal Architecture
 
-<Info>This page is coming soon.</Info>
+Hexagonal architecture (a.k.a. ports and adapters) puts your **domain logic at
+the centre**, talking to the outside world only through well-defined interfaces
+("ports"). Concrete infrastructure ("adapters") plugs into those ports from the
+outside. The domain never depends on a database, a framework, or an I/O library —
+those depend on *it*.
 
-The pure kernel at the centre, storage adapters at the edge — mnesis' crate boundary is the port/adapter seam.
+mnesis is built exactly this way, and the architecture is enforced by the **crate
+boundary** — not by convention.
 
-**In the meantime:** the seam is the `RawEventStore` + `WakeSource` traits — see [Writing a Store Adapter](/go-live/writing-a-store-adapter).
+## The layers
+
+```text
+        pure kernel                 persistence edge              infrastructure
+   ┌──────────────────┐        ┌──────────────────────┐      ┌───────────────────┐
+   │ mnesis           │  <───  │ mnesis-store         │ <──  │ mnesis-fjall      │
+   │ aggregates,      │        │ codecs, envelopes,   │      │ mnesis-postgres   │
+   │ events, sagas    │  the   │ repository, the      │ the  │ mnesis-inmemory   │
+   │ (no I/O, no std  │  ports │ subscription loop,   │ adap-│ (concrete stores) │
+   │  alloc required) │        │ the store *traits*   │ ters │                   │
+   └──────────────────┘        └──────────────────────┘      └───────────────────┘
+```
+
+Dependencies point **inwards**. `mnesis-fjall` depends on `mnesis-store` depends
+on `mnesis`; never the reverse. You can compile and test the kernel with no store
+at all, and swap the store without touching a line of domain code.
+
+## The ports are two traits
+
+In mnesis the "port" an adapter plugs into is deliberately tiny — just two
+traits:
+
+- **`RawEventStore`** — byte-level `append`, `read_stream`, `read_all`. The store
+  knows nothing about your events; it moves opaque bytes and stamps versions.
+- **`WakeSource`** — the notify half: `register` a subscriber and `wake` it after
+  a durable commit, so a live subscription can tail new events.
+
+Everything richer — the typed repository, codecs, subscriptions, snapshots,
+backup/restore — is built *generically* on top of those two traits inside
+`mnesis-store`. An adapter implements the two ports and inherits the rest for
+free. (Optional capability ports — `AtomicAppend`, `SnapshotStore`,
+`StreamLister` — add features when an adapter can support them.)
+
+## Why the boundary is load-bearing here
+
+This is not decoration. Because the seam is two small traits:
+
+- The **kernel is `no_std`-capable** — no adapter can drag `std` or an allocator
+  into your domain.
+- The **subscription loop is written once, generically**, and every adapter
+  reuses it — there is no per-adapter copy to drift.
+- A **third party can write a new store** against a short contract, with no
+  access to mnesis internals, and verify it with the [conformance
+  kit](/go-live/writing-a-store-adapter).
+
+The port/adapter boundary is *why* mnesis can promise a stable kernel while
+letting adapters evolve independently (see [Stability](/reference/stability)).
+
+## Where to next
+
+- **[Writing a Store Adapter](/go-live/writing-a-store-adapter)** — implement the
+  ports yourself.
+- **[Adapters](/go-live/adapters)** — the stores mnesis ships.
+- **[Repository](/persist-events/repository)** — the typed façade built on the
+  ports.
+- **[Domain-Driven Design](/concepts/ddd)** — what lives in the centre.

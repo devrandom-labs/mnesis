@@ -5,8 +5,84 @@ description: State as a fold over an append-only log of events, not a mutable ro
 
 # Event Sourcing
 
-<Info>This page is coming soon.</Info>
+Most systems store the **current state** of a thing and overwrite it on every
+change. An event-sourced system stores the **changes themselves** — an
+append-only log of facts — and derives current state by folding over that log.
+Nothing is ever overwritten; you only ever append.
 
-State as a fold over an append-only log of events, not a mutable row.
+## State is a fold
 
-**In the meantime:** walk the [Quickstart](/getting-started) to see the decide → persist → fold → replay loop in code.
+The core equation of event sourcing is a left fold:
+
+```text
+state = events.fold(initial, apply)
+```
+
+In mnesis that fold is `AggregateState`: `initial()` is the seed, and `apply`
+takes the current state plus one event and returns the next state.
+
+```rust
+impl AggregateState for AccountState {
+    type Event = AccountEvent;
+    fn initial() -> Self { Self::default() }
+
+    fn apply(mut self, event: &AccountEvent) -> Self {
+        match event {
+            AccountEvent::Opened(e)    => { self.owner = e.owner.clone(); self.is_open = true; }
+            AccountEvent::Deposited(e) => { self.balance += e.amount; }
+            AccountEvent::Withdrawn(e) => { self.balance -= e.amount; }
+            AccountEvent::Closed(_)    => { self.is_open = false; }
+        }
+        self
+    }
+}
+```
+
+`apply` is **infallible by design**. An event is a fact that has *already
+happened* — you cannot reject history. All validation happens *before* an event
+exists, when you decide whether to produce it (see [Handle &
+Decide](/model-a-domain/handle-decide)).
+
+## Why keep the log instead of the state?
+
+- **A full audit trail, for free.** The log *is* the history. You never ask "how
+  did the balance get here?" — you replay and watch it happen.
+- **Time travel.** Fold up to any point and you have the state as of then.
+- **New read models retroactively.** A projection you invent tomorrow can be
+  built from events recorded years ago — you already have the raw facts.
+- **The compiler checks your domain.** Events are a plain Rust enum; every
+  `apply` and every command handler `match`es it exhaustively, so a new event
+  variant is a compile error everywhere it must be handled — not a runtime
+  surprise.
+
+## The two moving parts
+
+Event sourcing splits every state change into two steps mnesis keeps strictly
+separate:
+
+1. **Decide** — a pure function of `(state, command)` that *validates* and
+   produces new events, or returns a domain error. It changes nothing.
+2. **Apply** — the infallible fold that folds a produced (or replayed) event
+   into state.
+
+Deciding can fail ("insufficient funds"); applying cannot. Keeping them apart is
+what makes rehydration trivial: to reload an aggregate you replay its events
+through `apply` only — no command, no validation, no side effects.
+
+## Versions and optimistic concurrency
+
+Every event in a stream has a `Version` (a `NonZeroU64`, starting at 1, strictly
+sequential). The version is how mnesis detects a conflict: an append says "I
+expect this stream to be at version N," and the store rejects it if someone else
+already wrote N. That is **optimistic concurrency** — no locks, just a version
+check at commit time.
+
+## Where to next
+
+- **[Domain-Driven Design](/concepts/ddd)** — how aggregates draw the
+  consistency boundary around a stream.
+- **[CQRS](/concepts/cqrs)** — separating the write model from read models.
+- **[Quickstart](/getting-started)** — the whole decide → persist → fold → replay
+  loop in runnable code.
+- **[Closing the Books](/concepts/closing-the-books)** — keeping streams short so
+  the fold stays fast.

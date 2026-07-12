@@ -1,12 +1,85 @@
 ---
 title: Repository
-description: The EventStore facade: load and save aggregates against a real store, one terminal for owning and zero-copy codecs.
+description: The EventStore façade — load and save aggregates against a real store, one terminal for owning and zero-copy codecs.
 ---
 
 # Repository
 
-<Info>This page is coming soon.</Info>
+The repository is the typed front door to persistence. Where the raw store moves
+bytes, the repository moves **aggregates**: `load` rehydrates an
+`AggregateRoot<A>` from its stream, and `save` persists decided events and folds
+them back in. It ties together the [store](/go-live/adapters), a
+[codec](/persist-events/envelopes-codecs), and (optionally) an upcaster and a
+snapshot store.
 
-The EventStore facade: load and save aggregates against a real store, one terminal for owning and zero-copy codecs.
+## Building one
 
-**In the meantime:** read the [`mnesis-store` API docs](https://docs.rs/mnesis-store) and the [`store-and-kernel` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/store-and-kernel).
+Start from a `Store<S>` handle, name the aggregate once, choose a codec, and
+build:
+
+```rust
+let store = FjallStore::builder(path).open()?.into_store();
+let repo  = store.repository::<BankAccount>().json().build();
+```
+
+- **`.into_store()`** wraps any `RawEventStore` in the clone-cheap `Store<S>`
+  handle (the multi-aggregate substrate).
+- **`.repository::<BankAccount>()`** names the aggregate **once** — from here on
+  `load`/`save` infer it, no per-call type annotations.
+- **`.json()`** picks the built-in `JsonCodec`; `.codec(my_codec)` plugs in any
+  `Encode`/`Decode` pair.
+- **`.build()`** produces an `EventStore<S, C, A>` — the `Repository<A>` impl.
+
+## Load and save
+
+```rust
+// Rehydrate: read the stream, decode each event, replay in version order.
+let mut account = repo.load(id.clone()).await?;
+
+// Decide on the loaded aggregate:
+let decided = account.handle(Deposit { amount: 100 })?;
+
+// Persist decided events and fold them back in (advances the version):
+repo.save(&mut account, &decided).await?;
+```
+
+`load` does the whole rehydration dance — open the stream, decode with the
+configured codec, `replay` each event — and hands you a ready aggregate. `save`
+appends the decided events (version-checked, so a concurrent writer is rejected)
+and then `commit_persisted`s them into your in-memory root. The two error domains
+stay distinct: store errors (I/O, conflict) versus codec errors (decode failures).
+
+## One façade for owning *and* zero-copy codecs
+
+`EventStore` is a **single** terminal for both kinds of codec — there is no
+separate "zero-copy repository." The trick is that the owning-vs-borrowing
+distinction is *inferred from the `Decode::Output` GAT*, not restated:
+
+- an owning codec (serde, `Output = E`) works — one allocation per event;
+- a zero-copy codec (rkyv/bytemuck, `Output = &E`) works — no allocation.
+
+Both are fed to `replay` via `out.borrow()`, consumed in place. You never spell
+the bound; the builder and `load`/`save` handle it.
+
+## `CommandRepository` — decide + save in one call
+
+For the common load → decide → save cycle, the `CommandRepository<A>` extension
+trait (blanket-impl'd on every repository) offers `execute`, so you don't hand-write
+the three steps each time. Use `Repository::load`/`save` when you need the steps
+apart (e.g. inspecting decided events before persisting).
+
+## Snapshots, transparently
+
+Add `.snapshot_store(..)` (or `.snapshot_store_json(..)`) before `.build()` and
+the repository is wrapped in a `Snapshotting` decorator: it hydrates from a
+snapshot on `load` and commits one per a `PersistTrigger` on `save` — with **no
+change to your call sites**. See [Snapshots](/persist-events/snapshots).
+
+## Where to next
+
+- **[Envelopes & Codecs](/persist-events/envelopes-codecs)** — what `.json()` /
+  `.codec()` plug in.
+- **[Snapshots](/persist-events/snapshots)** — speed up `load` on long streams.
+- **[Adapters](/go-live/adapters)** — the stores you build a repository over.
+- **[`store-and-kernel` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/store-and-kernel)**
+  — the full lifecycle end to end.
