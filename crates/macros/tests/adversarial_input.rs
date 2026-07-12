@@ -1,6 +1,6 @@
 //! Adversarial input tests — weird edge cases the macro must handle.
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // Shared helpers
@@ -52,7 +52,7 @@ impl AggregateState for SingleState {
     }
 }
 
-#[nexus::aggregate(state = SingleState, error = AError, id = AId)]
+#[mnesis::aggregate(state = SingleState, error = AError, id = AId)]
 struct SingleAggregate;
 
 #[test]
@@ -130,7 +130,7 @@ impl AggregateState for VeryLongStateNameThatShouldStillWorkCorrectlyWithTheMacr
     }
 }
 
-#[nexus::aggregate(
+#[mnesis::aggregate(
     state = VeryLongStateNameThatShouldStillWorkCorrectlyWithTheMacro,
     error = AError,
     id = AId
@@ -186,7 +186,7 @@ mod inner {
     pub struct InnerError;
 }
 
-#[nexus::aggregate(state = inner::InnerState, error = inner::InnerError, id = AId)]
+#[mnesis::aggregate(state = inner::InnerState, error = inner::InnerError, id = AId)]
 struct PathTypeAggregate;
 
 #[test]
@@ -237,7 +237,7 @@ fn mixed_shape_event_names() {
 // Test: aggregate name that is a Rust keyword contextual identifier
 // =============================================================================
 
-#[nexus::aggregate(state = SingleState, error = AError, id = AId)]
+#[mnesis::aggregate(state = SingleState, error = AError, id = AId)]
 struct r#Type; // `Type` is not a keyword but r# prefix works
 
 #[test]

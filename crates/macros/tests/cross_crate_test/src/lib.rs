@@ -1,7 +1,7 @@
 //! Cross-crate test — verifies macros work from an external crate.
-//! This is the real user scenario: nexus is a dependency, not the current crate.
+//! This is the real user scenario: mnesis is a dependency, not the current crate.
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // --- ID ---
@@ -72,7 +72,7 @@ pub enum TaskError {
 }
 
 // --- Aggregate (attribute macro from external crate) ---
-#[nexus::aggregate(state = TaskState, error = TaskError, id = TaskId)]
+#[mnesis::aggregate(state = TaskState, error = TaskError, id = TaskId)]
 pub struct TaskAggregate;
 
 // --- Commands ---

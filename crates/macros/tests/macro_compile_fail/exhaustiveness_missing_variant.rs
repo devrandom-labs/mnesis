@@ -2,9 +2,9 @@
 /// the user to handle it in AggregateState::apply().
 /// This is the core type safety guarantee of concrete event enums.
 
-use nexus::*;
+use mnesis::*;
 
-#[derive(Debug, Clone, nexus::DomainEvent)]
+#[derive(Debug, Clone, mnesis::DomainEvent)]
 enum OrderEvent {
     Created(String),
     Shipped,

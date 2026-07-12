@@ -1,9 +1,9 @@
-//! `no_std` compile smoke-test for the nexus derive macros (#304).
+//! `no_std` compile smoke-test for the mnesis derive macros (#304).
 //!
-//! #279 (PR #303) made the `nexus` kernel `no_std` and added flake gates that
+//! #279 (PR #303) made the `mnesis` kernel `no_std` and added flake gates that
 //! build the kernel **bare** (`--no-default-features`). Those gates prove the
 //! *core* compiles `no_std`, but they never compile the **output** of
-//! `#[nexus::aggregate]` / `#[derive(DomainEvent)]` for a `no_std` target — the
+//! `#[mnesis::aggregate]` / `#[derive(DomainEvent)]` for a `no_std` target — the
 //! macro source was only grepped for `std::` paths, which is weak.
 //!
 //! This crate closes that gap: it defines a real aggregate using BOTH macros
@@ -12,7 +12,7 @@
 //! `thumbv7em-none-eabihf` and `wasm32-unknown-unknown`; if a macro ever emits a
 //! `std::` path, the generated code fails to compile for `thumbv7em` and the
 //! gate goes red. Logic correctness is already covered on the host by the
-//! `nexus-cross-crate-test` nextest suite — this crate is a *compile* probe.
+//! `mnesis-cross-crate-test` nextest suite — this crate is a *compile* probe.
 #![no_std]
 
 // The whole probe lives behind `derive`: with the feature off this is an empty

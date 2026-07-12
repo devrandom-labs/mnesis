@@ -29,7 +29,7 @@
 //!
 //! An entry exists *iff* at least one live per-stream registration (a
 //! [`WakeReg`] holding an internal drop-guard) for that stream is alive.
-//! [`register`](nexus_store::wake::WakeSource::register) creates-or-reuses the
+//! [`register`](mnesis_store::wake::WakeSource::register) creates-or-reuses the
 //! entry and increments a subscriber count; dropping the registration
 //! decrements it and removes the entry when it reaches zero. The map therefore
 //! holds an entry per *currently-active* stream, not per stream ever seen —
@@ -46,7 +46,7 @@
 //!
 //! # Ordering contract
 //!
-//! Callers MUST [`arm`](nexus_store::wake::WakeRegistration::arm) the wait
+//! Callers MUST [`arm`](mnesis_store::wake::WakeRegistration::arm) the wait
 //! *before* performing the read that could miss the event, and producers MUST
 //! call [`wake`](StreamNotifiers::wake) *after* the commit is durable. Together
 //! these close the lost-wakeup race: `arm` pins the seen generation to the
@@ -64,7 +64,7 @@ use parking_lot::Mutex;
 use thiserror::Error;
 use tokio::sync::watch;
 
-use nexus_store::wake::{WakeRegistration, WakeSource};
+use mnesis_store::wake::{WakeRegistration, WakeSource};
 
 /// Errors produced by [`StreamNotifiers`].
 #[derive(Debug, Error)]
@@ -356,7 +356,7 @@ impl WakeSource for StreamNotifiers {
 )]
 mod tests {
     use super::{Arc, StreamNotifiers};
-    use nexus_store::wake::{WakeRegistration, WakeSource};
+    use mnesis_store::wake::{WakeRegistration, WakeSource};
     use std::time::Duration;
     use tokio::sync::Barrier;
     use tokio::time::timeout;

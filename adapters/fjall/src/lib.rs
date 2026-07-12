@@ -1,12 +1,12 @@
-//! Embedded LSM-tree event store adapter for `nexus-store`, backed by
+//! Embedded LSM-tree event store adapter for `mnesis-store`, backed by
 //! [`fjall`](https://docs.rs/fjall).
 //!
 //! [`FjallStore`] implements the storage traits the kernel depends on:
-//! [`nexus_store::RawEventStore`] (byte-level `append` + `read_stream` +
-//! `read_all`), [`nexus_store::WakeSource`](nexus_store::wake::WakeSource)
-//! (the live wake the generic [`nexus_store::Subscription`] loop parks on),
+//! [`mnesis_store::RawEventStore`] (byte-level `append` + `read_stream` +
+//! `read_all`), [`mnesis_store::WakeSource`](mnesis_store::wake::WakeSource)
+//! (the live wake the generic [`mnesis_store::Subscription`] loop parks on),
 //! and — under the `snapshot` feature —
-//! [`nexus_store::SnapshotStore<Vec<u8>, Version>`].
+//! [`mnesis_store::SnapshotStore<Vec<u8>, Version>`].
 //!
 //! # Partitions
 //!
@@ -28,7 +28,7 @@
 //! `From<Slice> for Bytes` conversions. Without it, every fjall read on
 //! the hot path would pay one alloc + memcpy to materialize a `Bytes`
 //! envelope. With it, the [`bytes::Bytes`] in
-//! [`nexus_store::PersistedEnvelope`] is the same Arc-counted buffer
+//! [`mnesis_store::PersistedEnvelope`] is the same Arc-counted buffer
 //! fjall handed us — zero copy from disk LSM block to the envelope's
 //! payload bytes.
 //!
@@ -39,19 +39,19 @@
 //! one lazy `fjall::Iter` (no GAT lending cursor, no bespoke combinator
 //! trait). Consumers get the full [`futures::StreamExt`] / `TryStreamExt`
 //! combinator surface for free. The catch-up-then-live-tail subscription loop
-//! is assembled generically in `nexus_store` over `RawEventStore` +
-//! [`WakeSource`](nexus_store::wake::WakeSource); fjall ships only those two
+//! is assembled generically in `mnesis_store` over `RawEventStore` +
+//! [`WakeSource`](mnesis_store::wake::WakeSource); fjall ships only those two
 //! pieces, not a bespoke subscription cursor.
 //!
 //! # Wire format
 //!
-//! Every frame is built by [`nexus_store::wire::encode_frame`]. That helper
+//! Every frame is built by [`mnesis_store::wire::encode_frame`]. That helper
 //! guarantees the payload bytes land on a 16-byte boundary inside the
 //! `Bytes` buffer the cursor hands out — the wire-format invariant that
 //! zero-copy decoders (rkyv, flatbuffers, `#[repr(C)]` POD) rely on for
 //! sound `&T` reads. Encoding/decoding of the *key* (stream id + version)
 //! lives in the crate-private `wire_key` module; the *value* layout is owned
-//! entirely by [`nexus_store::wire`].
+//! entirely by [`mnesis_store::wire`].
 //!
 //! [`GlobalSeq`]: crate::GlobalSeq
 

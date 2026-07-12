@@ -1,15 +1,15 @@
-//! `GlobalSeq` — fjall's [`AllPosition`](nexus_store::AllPosition).
+//! `GlobalSeq` — fjall's [`AllPosition`](mnesis_store::AllPosition).
 //!
 //! A store-local global sequence number: every event a producer appends —
 //! across *all* of its streams — receives the next `GlobalSeq` at append time,
 //! stamped inside fjall's single serialized write-tx and stored as the
 //! `events_global` index key. It is the position an all-streams subscription
-//! resumes from, the analogue of [`Version`](nexus::Version) within one stream.
+//! resumes from, the analogue of [`Version`](mnesis::Version) within one stream.
 //!
-//! It lives in `nexus-fjall` (not `nexus-store`) because the `$all` resume
+//! It lives in `mnesis-fjall` (not `mnesis-store`) because the `$all` resume
 //! position is **adapter-defined** (#266): an embedded store uses a monotonic
-//! scalar; a concurrent SQL store needs a commit-ordered composite. `nexus-store`
-//! owns only the [`AllPosition`](nexus_store::AllPosition) trait.
+//! scalar; a concurrent SQL store needs a commit-ordered composite. `mnesis-store`
+//! owns only the [`AllPosition`](mnesis_store::AllPosition) trait.
 //!
 //! The sequence is **monotonic but not gapless**: an aborted append may burn
 //! values, so consumers must tolerate gaps and never assume `next == prev + 1`.
@@ -57,7 +57,7 @@ impl fmt::Display for GlobalSeq {
 }
 
 /// fjall's `$all` resume position is its `GlobalSeq` scalar.
-impl nexus_store::AllPosition for GlobalSeq {}
+impl mnesis_store::AllPosition for GlobalSeq {}
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used, reason = "test code")]

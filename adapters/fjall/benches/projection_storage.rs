@@ -4,7 +4,7 @@
 //! Run:
 //!
 //! ```sh
-//! nix develop -c cargo bench -p nexus-fjall --bench projection_storage
+//! nix develop -c cargo bench -p mnesis-fjall --bench projection_storage
 //! ```
 //!
 //! It is deterministic (seeded xorshift for "random" payloads, fixed sizes and
@@ -15,7 +15,7 @@
 //!
 //! ## Fork 1 — projection-partition config
 //!
-//! `nexus_fjall`'s `projections` partition uses `point_read_defaults`: 4 KiB
+//! `mnesis_fjall`'s `projections` partition uses `point_read_defaults`: 4 KiB
 //! data blocks + a 15-bit bloom filter, and — because it sets no compression
 //! policy — fjall's default `[None, None, Lz4]` (L0/L1 uncompressed, L2+ LZ4).
 //! It is tuned for small point-read metadata, but projection *state* can be
@@ -73,7 +73,7 @@ const MEMTABLE_BYTES: u64 = 256 * 1024;
 /// the same shape the real `write_projection` stores.
 const VALUE_HEADER: usize = 12;
 
-// ── partition configs (mirror `nexus_fjall::partition`) ─────────────────────
+// ── partition configs (mirror `mnesis_fjall::partition`) ─────────────────────
 
 fn bloom() -> FilterPolicy {
     FilterPolicy::all(FilterPolicyEntry::Bloom(

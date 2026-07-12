@@ -1,4 +1,4 @@
-//! `nexus-store` benchmarks.
+//! `mnesis-store` benchmarks.
 //!
 //! Measures the hot paths in the store layer:
 //! - `PendingEnvelope` builder throughput
@@ -7,7 +7,7 @@
 //! - `read_stream` throughput at various sizes
 //! - upcaster chain throughput
 //!
-//! Run: `cargo bench --bench store_bench -p nexus-store`
+//! Run: `cargo bench --bench store_bench -p mnesis-store`
 //! Reports: `target/criterion/report/index.html`
 #![allow(clippy::unwrap_used, reason = "benchmarks use unwrap for brevity")]
 #![allow(clippy::expect_used, reason = "benchmarks use expect for brevity")]
@@ -37,12 +37,12 @@ use std::hint::black_box;
 use bytes::Bytes;
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use futures::StreamExt;
-use nexus::Version;
-use nexus_store::AppendError;
-use nexus_store::StreamKey;
-use nexus_store::envelope::{PendingEnvelope, PersistedEnvelope};
-use nexus_store::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_store::AppendError;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
+use mnesis_store::pending_envelope;
+use mnesis_store::store::RawEventStore;
 use tokio::sync::Mutex;
 
 /// The bench adapter's `$all` position. Its `read_all` is a no-op (empty), so
@@ -50,7 +50,7 @@ use tokio::sync::Mutex;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct BenchAllPos(u64);
 
-impl nexus_store::AllPosition for BenchAllPos {}
+impl mnesis_store::AllPosition for BenchAllPos {}
 
 fn build_persisted(version: u64, event_type: &str, payload: &[u8]) -> PersistedEnvelope {
     let mut buf = Vec::with_capacity(event_type.len() + payload.len());
@@ -60,9 +60,9 @@ fn build_persisted(version: u64, event_type: &str, payload: &[u8]) -> PersistedE
     let et_end = u32::try_from(event_type.len()).expect("fits u32");
     let pl_end = u32::try_from(event_type.len() + payload.len()).expect("fits u32");
     PersistedEnvelope::try_new(
-        nexus::Version::new(version).expect("non-zero version"),
+        mnesis::Version::new(version).expect("non-zero version"),
         value,
-        nexus_store::value::SchemaVersion::INITIAL,
+        mnesis_store::value::SchemaVersion::INITIAL,
         0..et_end,
         et_end..pl_end,
         None,
@@ -129,7 +129,7 @@ impl RawEventStore for InMemoryRawStore {
         let mut guard = self.streams.lock().await;
         let stream = guard.entry(id.to_string()).or_default();
         let current_version = u64::try_from(stream.len()).unwrap_or(u64::MAX);
-        let expected_u64 = expected_version.map_or(0, nexus::Version::as_u64);
+        let expected_u64 = expected_version.map_or(0, mnesis::Version::as_u64);
         if current_version != expected_u64 {
             return Err(AppendError::Store(BenchError::Conflict));
         }
@@ -178,40 +178,40 @@ impl RawEventStore for InMemoryRawStore {
 // =============================================================================
 
 fn noop_v1_to_v6_upcast(
-    mut morsel: nexus_store::upcasting::EventMorsel<'_>,
-) -> Result<nexus_store::upcasting::EventMorsel<'_>, Infallible> {
+    mut morsel: mnesis_store::upcasting::EventMorsel<'_>,
+) -> Result<mnesis_store::upcasting::EventMorsel<'_>, Infallible> {
     loop {
         morsel = match (morsel.event_type(), morsel.schema_version()) {
             ("UserCreated", v) if v == Version::new(1).unwrap() => {
-                nexus_store::upcasting::EventMorsel::new(
+                mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
                     Version::new(2).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
             ("UserCreated", v) if v == Version::new(2).unwrap() => {
-                nexus_store::upcasting::EventMorsel::new(
+                mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
                     Version::new(3).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
             ("UserCreated", v) if v == Version::new(3).unwrap() => {
-                nexus_store::upcasting::EventMorsel::new(
+                mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
                     Version::new(4).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
             ("UserCreated", v) if v == Version::new(4).unwrap() => {
-                nexus_store::upcasting::EventMorsel::new(
+                mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
                     Version::new(5).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
             ("UserCreated", v) if v == Version::new(5).unwrap() => {
-                nexus_store::upcasting::EventMorsel::new(
+                mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
                     Version::new(6).unwrap(),
                     morsel.payload().to_vec(),
@@ -336,7 +336,7 @@ fn bench_upcaster(c: &mut Criterion) {
 
     c.bench_function("upcaster (5 noop steps)", |b| {
         b.iter(|| {
-            let morsel = nexus_store::EventMorsel::borrowed(
+            let morsel = mnesis_store::EventMorsel::borrowed(
                 "UserCreated",
                 Version::new(1).unwrap(),
                 black_box(&payload),

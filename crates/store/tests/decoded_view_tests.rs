@@ -6,10 +6,10 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use nexus::{DomainEvent, Message, Version};
-use nexus_inmemory::InMemoryStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::{
+use mnesis::{DomainEvent, Message, Version};
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::{
     Decode, DecodeStreamError, Decoded, DecodedStreamExt, Encode, FoldDecodedError, JsonCodec,
     PersistedEnvelope, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
 };
@@ -46,7 +46,7 @@ impl AsRef<[u8]> for AcctId {
     }
 }
 
-fn money_envelope(version: u64, event: &Money) -> nexus_store::PendingEnvelope {
+fn money_envelope(version: u64, event: &Money) -> mnesis_store::PendingEnvelope {
     let bytes = JsonCodec::default().encode(event).unwrap();
     pending_envelope(Version::new(version).unwrap())
         .event_type(event.name())

@@ -1,12 +1,12 @@
-# no_std WakeSource Bridge (`nexus-wake-nostd`, #302) Implementation Plan
+# no_std WakeSource Bridge (`mnesis-wake-nostd`, #302) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** A no_std+alloc `WakeSource` impl (`GlobalWake`, one global eventcount) in a new `nexus-wake-nostd` crate, proven by the 4-category test suite, an embassy-executor end-to-end subscription test, and bare-metal compile gates.
+**Goal:** A no_std+alloc `WakeSource` impl (`GlobalWake`, one global eventcount) in a new `mnesis-wake-nostd` crate, proven by the 4-category test suite, an embassy-executor end-to-end subscription test, and bare-metal compile gates.
 
 **Architecture:** One `Arc<Inner { AtomicU64 generation, event_listener::Event }>` shared by all registrations; `wake` bumps the generation and notifies all listeners; `arm` captures the generation synchronously, then (listener-register → generation-recheck → await) closes the lost-wakeup window. Spurious wakes are contract-permitted, so no per-stream routing, no map, no mutex.
 
-**Tech Stack:** Rust (pinned stable via `rust-toolchain.toml`, edition 2024), `event-listener` 5 (no_std mode), dev-only: tokio (race tests), embassy-executor 0.10 `platform-std` (acceptance test), `nexus-inmemory` (store double).
+**Tech Stack:** Rust (pinned stable via `rust-toolchain.toml`, edition 2024), `event-listener` 5 (no_std mode), dev-only: tokio (race tests), embassy-executor 0.10 `platform-std` (acceptance test), `mnesis-inmemory` (store double).
 
 **Spec:** `docs/superpowers/specs/2026-07-10-nostd-wakesource-design.md`
 **Branch:** `feat/302-nostd-wake-bridge` (already created off `origin/main`; spec committed as `265c03f`)
@@ -14,14 +14,14 @@
 **Facts already verified (do not re-derive):**
 - `core::convert::Infallible` satisfies `core::error::Error + Send + Sync + 'static` on the pinned toolchain (compile-probed 2026-07-10) → `type Error = Infallible` is legal for `WakeSource`.
 - `event_listener::Event::listen()` registers the listener into the notify list **at creation** (verified in the v5 source), and `notify()` emits a `SeqCst` fence when needed. no_std mode = `default-features = false` (requires alloc; `listen()` boxes).
-- The flake's `nexus-store-nostd` gate **already** builds `nexus-store --no-default-features --features subscription,export,import,snapshot,projection` for `thumbv7em-none-eabihf` (#301) — the card's "verify the generic loop compiles bare-metal" item is already covered. New gate work = building `nexus-wake-nostd` itself for the two targets.
-- `Id` has a blanket impl (`nexus/src/id.rs:42`); `StreamKey` (derives `Clone, Debug, Hash, PartialEq, Eq`, has `Display` + `AsRef<[u8]>`) is an `Id` — usable directly as the subscribe id in tests.
+- The flake's `mnesis-store-nostd` gate **already** builds `mnesis-store --no-default-features --features subscription,export,import,snapshot,projection` for `thumbv7em-none-eabihf` (#301) — the card's "verify the generic loop compiles bare-metal" item is already covered. New gate work = building `mnesis-wake-nostd` itself for the two targets.
+- `Id` has a blanket impl (`mnesis/src/id.rs:42`); `StreamKey` (derives `Clone, Debug, Hash, PartialEq, Eq`, has `Display` + `AsRef<[u8]>`) is an `Id` — usable directly as the subscribe id in tests.
 - embassy-executor newest published version is **0.10.0**; host features are `platform-std` + `executor-thread` (the pre-0.10 name `arch-std` is gone). `Spawner::spawn(token)` returns `()`; the `#[embassy_executor::task]` fn itself returns a `Result` (main-branch std example: `spawner.spawn(run().unwrap())`).
-- `InMemoryStore` assoc types: `Error = InMemoryStoreError`, `Stream = InMemoryStream`, `AllPosition = InMemoryAllPos`, `AllStream = InMemoryAllStream`; constructor `InMemoryStore::new()`. Its `RawEventStore` impl uses `async fn` for the `-> impl Future` trait methods (allowed; precedent at `nexus-inmemory/src/lib.rs:379`).
+- `InMemoryStore` assoc types: `Error = InMemoryStoreError`, `Stream = InMemoryStream`, `AllPosition = InMemoryAllPos`, `AllStream = InMemoryAllStream`; constructor `InMemoryStore::new()`. Its `RawEventStore` impl uses `async fn` for the `-> impl Future` trait methods (allowed; precedent at `mnesis-inmemory/src/lib.rs:379`).
 - `tokio::sync` primitives (used inside `InMemoryStore`) do not need a tokio runtime — awaiting them under embassy works.
 
 **Conventions that bite (from memories/CLAUDE.md):**
-- NEVER run the full `nix flake check` by hand before committing — the pre-commit hook runs it. Targeted verification only (`nix develop -c cargo nextest run -p nexus-wake-nostd`).
+- NEVER run the full `nix flake check` by hand before committing — the pre-commit hook runs it. Targeted verification only (`nix develop -c cargo nextest run -p mnesis-wake-nostd`).
 - `git add` new files BEFORE committing triggers the hook correctly (`nix flake check` ignores untracked files — an untracked module makes the gate fail on a missing file).
 - Run `nix develop -c cargo fmt --all` after substantial edits, before staging.
 - Use `cargo add` for new deps (never hand-write versions), then hoist the resolved version to root `[workspace.dependencies]` and set `workspace = true` in the crate (repo convention: versions declared once at the root).
@@ -34,45 +34,45 @@
 ## File Structure
 
 ```
-crates/nexus-wake-nostd/
-  Cargo.toml                      # no_std crate: nexus-store(subscription) + event-listener
+crates/mnesis-wake-nostd/
+  Cargo.toml                      # no_std crate: mnesis-store(subscription) + event-listener
   src/lib.rs                      # GlobalWake + GlobalWakeReg (~150 lines incl. docs)
   tests/wake_contract.rs          # 4-category suite (tokio dev-dep)
   tests/embassy_subscription.rs   # acceptance: embassy drives a real Subscription
-Cargo.toml                        # members += nexus-wake-nostd; workspace dep event-listener
-.config/hakari.toml               # final-excludes += nexus-wake-nostd
-flake.nix                         # nexus-nostd + nexus-wasm gates build the new crate
+Cargo.toml                        # members += mnesis-wake-nostd; workspace dep event-listener
+.config/hakari.toml               # final-excludes += mnesis-wake-nostd
+flake.nix                         # mnesis-nostd + mnesis-wasm gates build the new crate
 CLAUDE.md                         # crate graph + subscription-machinery entry
 ```
 
 ---
 
-### Task 1: Scaffold the `nexus-wake-nostd` crate
+### Task 1: Scaffold the `mnesis-wake-nostd` crate
 
 **Files:**
-- Create: `crates/nexus-wake-nostd/Cargo.toml`
-- Create: `crates/nexus-wake-nostd/src/lib.rs` (skeleton)
+- Create: `crates/mnesis-wake-nostd/Cargo.toml`
+- Create: `crates/mnesis-wake-nostd/src/lib.rs` (skeleton)
 - Modify: `Cargo.toml` (root: `members`, `[workspace.dependencies]`)
 - Modify: `.config/hakari.toml` (`final-excludes`)
 
 - [ ] **Step 1: Add the crate to the workspace members**
 
-In root `Cargo.toml`, insert into `members` (alphabetical, after `"crates/nexus-store-testing"`):
+In root `Cargo.toml`, insert into `members` (alphabetical, after `"crates/mnesis-store-testing"`):
 
 ```toml
-    "crates/nexus-wake",
-    "crates/nexus-wake-nostd",
+    "crates/mnesis-wake",
+    "crates/mnesis-wake-nostd",
 ```
 
-(The `"crates/nexus-wake",` line already exists — add only the `nexus-wake-nostd` line after it.)
+(The `"crates/mnesis-wake",` line already exists — add only the `mnesis-wake-nostd` line after it.)
 
 - [ ] **Step 2: Create the crate manifest and skeleton**
 
-Create `crates/nexus-wake-nostd/Cargo.toml`:
+Create `crates/mnesis-wake-nostd/Cargo.toml`:
 
 ```toml
 [package]
-name = "nexus-wake-nostd"
+name = "mnesis-wake-nostd"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -85,15 +85,15 @@ keywords = ["event-sourcing", "subscription", "wake", "no-std", "embedded"]
 categories = ["embedded", "no-std", "asynchronous", "data-structures"]
 
 [dependencies]
-nexus-store = { version = "0.1.0", path = "../nexus-store", default-features = false, features = ["subscription"] }
+mnesis-store = { version = "0.1.0", path = "../mnesis-store", default-features = false, features = ["subscription"] }
 
 [lints]
 workspace = true
 ```
 
-(No `workspace-hack` dep — this crate is hakari-excluded in Step 4, the `nexus-nostd-smoketest`/`nexus-store` precedent: a std workspace-hack edge would poison the bare-metal build.)
+(No `workspace-hack` dep — this crate is hakari-excluded in Step 4, the `mnesis-nostd-smoketest`/`mnesis-store` precedent: a std workspace-hack edge would poison the bare-metal build.)
 
-Create `crates/nexus-wake-nostd/src/lib.rs`:
+Create `crates/mnesis-wake-nostd/src/lib.rs`:
 
 ```rust
 //! Global-eventcount [`WakeSource`] for no_std on-device live-tail
@@ -101,14 +101,14 @@ Create `crates/nexus-wake-nostd/src/lib.rs`:
 //!
 //! # What this is
 //!
-//! The no_std counterpart to `nexus-wake`'s tokio-backed `StreamNotifiers`:
+//! The no_std counterpart to `mnesis-wake`'s tokio-backed `StreamNotifiers`:
 //! a [`WakeSource`] built on `core` atomics plus [`event_listener::Event`]
 //! (an eventcount — no_std + alloc), so the generic catch-up-then-live-tail
-//! loop in `nexus-store` can park on a device with no tokio and no OS.
+//! loop in `mnesis-store` can park on a device with no tokio and no OS.
 //!
 //! **Optional and executor-dependent.** The primary device model is
 //! append-and-sync: events are produced locally and synced to a server,
-//! where subscriptions run under tokio via `nexus-wake`. Reach for this
+//! where subscriptions run under tokio via `mnesis-wake`. Reach for this
 //! crate only when a device genuinely runs an *on-device* live-tail —
 //! driving the subscription then also needs a no_std executor (e.g.
 //! embassy). Any executor works: the only requirement is polling the
@@ -148,11 +148,11 @@ extern crate alloc;
 - [ ] **Step 3: Add the `event-listener` dependency via cargo add, then hoist to the workspace**
 
 ```bash
-cd /Users/joel/Code/devrandom/nexus
-nix develop -c cargo add -p nexus-wake-nostd event-listener --no-default-features
+cd /Users/joel/Code/devrandom/mnesis
+nix develop -c cargo add -p mnesis-wake-nostd event-listener --no-default-features
 ```
 
-Expected: cargo resolves and writes `event-listener = { version = "5.4.1", default-features = false }` (or newer 5.x) into `crates/nexus-wake-nostd/Cargo.toml`.
+Expected: cargo resolves and writes `event-listener = { version = "5.4.1", default-features = false }` (or newer 5.x) into `crates/mnesis-wake-nostd/Cargo.toml`.
 
 Then hoist: move the resolved version spec into root `Cargo.toml` `[workspace.dependencies]` (alphabetical, after `criterion`):
 
@@ -173,10 +173,10 @@ event-listener = { workspace = true }
 In `.config/hakari.toml`, extend `final-excludes` `workspace-members` and its comment block:
 
 ```toml
-# `nexus-wake-nostd` is the no_std WakeSource bridge (#302): built for
+# `mnesis-wake-nostd` is the no_std WakeSource bridge (#302): built for
 # thumbv7em/wasm32 by the no_std gates, so a std workspace-hack edge would
-# break it — same reasoning as `nexus-nostd-smoketest`.
-workspace-members = ["nexus", "nexus-nostd-smoketest", "nexus-store", "nexus-wake-nostd"]
+# break it — same reasoning as `mnesis-nostd-smoketest`.
+workspace-members = ["mnesis", "mnesis-nostd-smoketest", "mnesis-store", "mnesis-wake-nostd"]
 ```
 
 (Keep the existing comment lines for the other three members; add the new comment above the list.)
@@ -192,10 +192,10 @@ Expected: exits 0; `crates/workspace-hack/Cargo.toml` may or may not change (com
 - [ ] **Step 5: Verify the empty crate builds and commit**
 
 ```bash
-nix develop -c cargo check -p nexus-wake-nostd
+nix develop -c cargo check -p mnesis-wake-nostd
 nix develop -c cargo fmt --all
 git add -A
-git commit -m "feat(wake-nostd): scaffold nexus-wake-nostd crate (#302)
+git commit -m "feat(wake-nostd): scaffold mnesis-wake-nostd crate (#302)
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -207,21 +207,21 @@ Expected: check passes; the pre-commit hook runs `nix flake check` and passes.
 ### Task 2: `GlobalWake` — TDD the core contract
 
 **Files:**
-- Create: `crates/nexus-wake-nostd/tests/wake_contract.rs`
-- Modify: `crates/nexus-wake-nostd/src/lib.rs`
-- Modify: `crates/nexus-wake-nostd/Cargo.toml` (dev-deps)
+- Create: `crates/mnesis-wake-nostd/tests/wake_contract.rs`
+- Modify: `crates/mnesis-wake-nostd/src/lib.rs`
+- Modify: `crates/mnesis-wake-nostd/Cargo.toml` (dev-deps)
 
 - [ ] **Step 1: Add tokio dev-dependency**
 
 ```bash
-nix develop -c cargo add -p nexus-wake-nostd --dev tokio --features macros,rt-multi-thread,time,sync
+nix develop -c cargo add -p mnesis-wake-nostd --dev tokio --features macros,rt-multi-thread,time,sync
 ```
 
 Expected: tokio is already a workspace dependency, so cargo writes `tokio = { workspace = true, features = [...] }`. If it writes a concrete version instead, rewrite the entry by hand to `tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time", "sync"] }` (the workspace already declares tokio's version).
 
 - [ ] **Step 2: Write the first failing tests**
 
-Create `crates/nexus-wake-nostd/tests/wake_contract.rs`:
+Create `crates/mnesis-wake-nostd/tests/wake_contract.rs`:
 
 ```rust
 //! Contract tests for `GlobalWake` — the 4 cross-cutting categories.
@@ -234,8 +234,8 @@ Create `crates/nexus-wake-nostd/tests/wake_contract.rs`:
 
 use std::time::Duration;
 
-use nexus_store::wake::{WakeRegistration, WakeSource};
-use nexus_wake_nostd::GlobalWake;
+use mnesis_store::wake::{WakeRegistration, WakeSource};
+use mnesis_wake_nostd::GlobalWake;
 use tokio::time::timeout;
 
 /// Generous upper bound on "a wake must arrive". A timeout here means a
@@ -300,14 +300,14 @@ async fn armed_without_wake_stays_pending() {
 - [ ] **Step 3: Run the tests to verify they fail**
 
 ```bash
-nix develop -c cargo nextest run -p nexus-wake-nostd
+nix develop -c cargo nextest run -p mnesis-wake-nostd
 ```
 
 Expected: compile error — `GlobalWake` does not exist. (In Rust TDD, failure-to-compile is the red step.)
 
 - [ ] **Step 4: Implement `GlobalWake`**
 
-Append to `crates/nexus-wake-nostd/src/lib.rs` (after the `extern crate alloc;` line):
+Append to `crates/mnesis-wake-nostd/src/lib.rs` (after the `extern crate alloc;` line):
 
 ```rust
 use alloc::sync::Arc;
@@ -317,7 +317,7 @@ use core::future::Future;
 use core::sync::atomic::{AtomicU64, Ordering};
 
 use event_listener::Event;
-use nexus_store::wake::{WakeRegistration, WakeSource};
+use mnesis_store::wake::{WakeRegistration, WakeSource};
 
 /// Shared eventcount state — one per store, shared by every registration.
 struct Inner {
@@ -339,7 +339,7 @@ struct Inner {
 /// calls [`WakeSource::wake`] after each durable commit; every parked
 /// registration — any stream, `$all` — wakes on every commit. See the
 /// crate docs for why this is correct (spurious wakes are permitted) and
-/// when to prefer `nexus-wake`'s routed `StreamNotifiers` instead.
+/// when to prefer `mnesis-wake`'s routed `StreamNotifiers` instead.
 #[derive(Clone)]
 pub struct GlobalWake {
     inner: Arc<Inner>,
@@ -435,7 +435,7 @@ impl WakeRegistration for GlobalWakeReg {
 - [ ] **Step 5: Run the tests to verify they pass**
 
 ```bash
-nix develop -c cargo nextest run -p nexus-wake-nostd
+nix develop -c cargo nextest run -p mnesis-wake-nostd
 ```
 
 Expected: 3 tests PASS.
@@ -460,11 +460,11 @@ Expected: hook passes.
 ### Task 3: Complete the 4-category test suite
 
 **Files:**
-- Modify: `crates/nexus-wake-nostd/tests/wake_contract.rs`
+- Modify: `crates/mnesis-wake-nostd/tests/wake_contract.rs`
 
 - [ ] **Step 1: Add the remaining tests**
 
-Append to `crates/nexus-wake-nostd/tests/wake_contract.rs`:
+Append to `crates/mnesis-wake-nostd/tests/wake_contract.rs`:
 
 ```rust
 // ───────────────── Category 2: lifecycle ─────────────────
@@ -562,7 +562,7 @@ async fn trait_surface_wake_rouses_stream_and_all() {
 
 // ───────────────── Category 4: linearizability / isolation ─────────────────
 
-/// Ported from nexus-wake: a registration armed before a concurrent wake
+/// Ported from mnesis-wake: a registration armed before a concurrent wake
 /// must never miss it. Repeated to shake out scheduling races.
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn armed_wait_never_loses_a_concurrent_wake() {
@@ -627,7 +627,7 @@ async fn concurrent_arm_wake_churn_completes() {
 - [ ] **Step 2: Run the full suite**
 
 ```bash
-nix develop -c cargo nextest run -p nexus-wake-nostd
+nix develop -c cargo nextest run -p mnesis-wake-nostd
 ```
 
 Expected: 10 tests PASS (3 from Task 2 + 7 new).
@@ -647,16 +647,16 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 4: Acceptance test — embassy-executor drives a real `Subscription`
 
 **Files:**
-- Create: `crates/nexus-wake-nostd/tests/embassy_subscription.rs`
-- Modify: `crates/nexus-wake-nostd/Cargo.toml` (dev-deps)
+- Create: `crates/mnesis-wake-nostd/tests/embassy_subscription.rs`
+- Modify: `crates/mnesis-wake-nostd/Cargo.toml` (dev-deps)
 
 - [ ] **Step 1: Add the dev-dependencies**
 
 ```bash
-nix develop -c cargo add -p nexus-wake-nostd --dev embassy-executor --features platform-std,executor-thread
-nix develop -c cargo add -p nexus-wake-nostd --dev nexus-inmemory --path crates/nexus-inmemory
-nix develop -c cargo add -p nexus-wake-nostd --dev futures --features std,executor,async-await
-nix develop -c cargo add -p nexus-wake-nostd --dev nexus --path crates/nexus
+nix develop -c cargo add -p mnesis-wake-nostd --dev embassy-executor --features platform-std,executor-thread
+nix develop -c cargo add -p mnesis-wake-nostd --dev mnesis-inmemory --path crates/mnesis-inmemory
+nix develop -c cargo add -p mnesis-wake-nostd --dev futures --features std,executor,async-await
+nix develop -c cargo add -p mnesis-wake-nostd --dev mnesis --path crates/mnesis
 ```
 
 Then hoist `embassy-executor`'s resolved version to root `[workspace.dependencies]` (alphabetical, after `criterion`):
@@ -665,18 +665,18 @@ Then hoist `embassy-executor`'s resolved version to root `[workspace.dependencie
 embassy-executor = { version = "0.10.0", features = ["platform-std", "executor-thread"] }
 ```
 
-and set the crate entry to `embassy-executor = { workspace = true }`. For `futures` and `nexus`/`nexus-inmemory`, cargo add should emit `workspace = true` / path entries automatically (they're existing workspace deps); fix by hand to the workspace form if not. Also give the test access to nexus-store's std surface — the dev-dependency unifies features for test builds only, the lib build stays no_std:
+and set the crate entry to `embassy-executor = { workspace = true }`. For `futures` and `mnesis`/`mnesis-inmemory`, cargo add should emit `workspace = true` / path entries automatically (they're existing workspace deps); fix by hand to the workspace form if not. Also give the test access to mnesis-store's std surface — the dev-dependency unifies features for test builds only, the lib build stays no_std:
 
 ```toml
 [dev-dependencies]
-nexus-store = { path = "../nexus-store", features = ["std", "subscription"] }
+mnesis-store = { path = "../mnesis-store", features = ["std", "subscription"] }
 ```
 
-**Contingency (only if hit):** if the test build fails at link time with an undefined `_critical_section_1_0_acquire`, embassy's std platform needs a critical-section provider — run `nix develop -c cargo add -p nexus-wake-nostd --dev critical-section --features std` and retry. Do not add it preemptively.
+**Contingency (only if hit):** if the test build fails at link time with an undefined `_critical_section_1_0_acquire`, embassy's std platform needs a critical-section provider — run `nix develop -c cargo add -p mnesis-wake-nostd --dev critical-section --features std` and retry. Do not add it preemptively.
 
 - [ ] **Step 2: Write the acceptance test**
 
-Create `crates/nexus-wake-nostd/tests/embassy_subscription.rs`:
+Create `crates/mnesis-wake-nostd/tests/embassy_subscription.rs`:
 
 ```rust
 //! #302 acceptance: `GlobalWake` drives a real `Subscription` under a
@@ -698,16 +698,16 @@ use std::time::Duration;
 
 use embassy_executor::Executor;
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::{
+use mnesis::Version;
+use mnesis_inmemory::{
     InMemoryAllPos, InMemoryAllStream, InMemoryStore, InMemoryStoreError, InMemoryStream,
 };
-use nexus_store::wake::WakeSource;
-use nexus_store::{
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{
     AppendError, PendingEnvelope, RawEventStore, Step, Store, StreamKey, Subscription,
     pending_envelope,
 };
-use nexus_wake_nostd::GlobalWake;
+use mnesis_wake_nostd::GlobalWake;
 
 const MUST_DELIVER: Duration = Duration::from_secs(5);
 const STREAM: &[u8] = b"device";
@@ -843,7 +843,7 @@ Note on the spawn line: embassy 0.10's `Spawner::spawn` takes a `SpawnToken` and
 - [ ] **Step 3: Run the acceptance test**
 
 ```bash
-nix develop -c cargo nextest run -p nexus-wake-nostd
+nix develop -c cargo nextest run -p mnesis-wake-nostd
 ```
 
 Expected: 11 tests PASS (10 prior + `embassy_executor_drives_catch_up_then_live_tail`).
@@ -866,44 +866,44 @@ Expected: hook passes (cargo-deny will vet embassy-executor: MIT OR Apache-2.0, 
 ### Task 5: Bare-metal compile gates
 
 **Files:**
-- Modify: `flake.nix` (the `nexus-wasm` and `nexus-nostd` checks, ~lines 140–156)
+- Modify: `flake.nix` (the `mnesis-wasm` and `mnesis-nostd` checks, ~lines 140–156)
 
 - [ ] **Step 1: Add the new crate to both no_std gates**
 
-In `flake.nix`, `nexus-wasm` check — append one line to `buildPhaseCargoCommand`:
+In `flake.nix`, `mnesis-wasm` check — append one line to `buildPhaseCargoCommand`:
 
 ```nix
-          nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-wasm";
+            pname = "mnesis-wasm";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
-              cargo build -p nexus-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
-              cargo build -p nexus-wake-nostd --target wasm32-unknown-unknown
+              cargo build -p mnesis --target wasm32-unknown-unknown --no-default-features
+              cargo build -p mnesis-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
+              cargo build -p mnesis-wake-nostd --target wasm32-unknown-unknown
             '';
           });
 ```
 
-And `nexus-nostd` (the STRONG bare-metal gate):
+And `mnesis-nostd` (the STRONG bare-metal gate):
 
 ```nix
-          nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-nostd = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-nostd";
+            pname = "mnesis-nostd";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
-              cargo build -p nexus-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
-              cargo build -p nexus-wake-nostd --target thumbv7em-none-eabihf
+              cargo build -p mnesis --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p mnesis-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
+              cargo build -p mnesis-wake-nostd --target thumbv7em-none-eabihf
             '';
           });
 ```
 
-(No `--no-default-features` flag needed — the crate has no features. `-p nexus-wake-nostd` builds only the lib and its normal deps; dev-deps — tokio, embassy — never enter a `cargo build` of the lib target.)
+(No `--no-default-features` flag needed — the crate has no features. `-p mnesis-wake-nostd` builds only the lib and its normal deps; dev-deps — tokio, embassy — never enter a `cargo build` of the lib target.)
 
-Also update the gate comment block above `nexus-wasm` (the `# no_std gates …` comment, flake.nix:130–139) — append one line:
+Also update the gate comment block above `mnesis-wasm` (the `# no_std gates …` comment, flake.nix:130–139) — append one line:
 
 ```nix
-          # `nexus-wake-nostd` (#302) also builds on both targets: the no_std
+          # `mnesis-wake-nostd` (#302) also builds on both targets: the no_std
           # WakeSource bridge, proving event-listener + the wake traits are
           # core+alloc clean.
 ```
@@ -911,7 +911,7 @@ Also update the gate comment block above `nexus-wasm` (the `# no_std gates …` 
 - [ ] **Step 2: Build both gates directly (measure, don't assert)**
 
 ```bash
-nix build .#checks.aarch64-darwin.nexus-nostd .#checks.aarch64-darwin.nexus-wasm
+nix build .#checks.aarch64-darwin.mnesis-nostd .#checks.aarch64-darwin.mnesis-wasm
 ```
 
 Expected: both build. **If `event-listener` fails on thumbv7em** (e.g. missing atomics support), that is a design finding, not something to paper over — surface it to the user before choosing between the `portable-atomic` or `critical-section` feature of event-listener (each has target implications).
@@ -920,7 +920,7 @@ Expected: both build. **If `event-listener` fails on thumbv7em** (e.g. missing a
 
 ```bash
 git add -A
-git commit -m "ci(flake): build nexus-wake-nostd in the thumbv7em/wasm32 no_std gates (#302)
+git commit -m "ci(flake): build mnesis-wake-nostd in the thumbv7em/wasm32 no_std gates (#302)
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -934,26 +934,26 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Update the CLAUDE.md crate dependency graph**
 
-In `CLAUDE.md`, "Crate Dependency Graph" section, add a line to the graph after the `nexus-wake` line:
+In `CLAUDE.md`, "Crate Dependency Graph" section, add a line to the graph after the `mnesis-wake` line:
 
 ```
-nexus-wake       --> nexus-store            (in-process wake registry; owns tokio/foldhash/parking_lot)
-nexus-wake-nostd --> nexus-store            (no_std global-eventcount wake; owns event-listener; #302)
+mnesis-wake       --> mnesis-store            (in-process wake registry; owns tokio/foldhash/parking_lot)
+mnesis-wake-nostd --> mnesis-store            (no_std global-eventcount wake; owns event-listener; #302)
 ```
 
 - [ ] **Step 2: Update the subscription-machinery notes**
 
-In `CLAUDE.md`, inside the "Subscription machinery" bullet (the `nexus-wake` crate paragraph), append after the existing `**nexus-wake crate**` sub-bullet:
+In `CLAUDE.md`, inside the "Subscription machinery" bullet (the `mnesis-wake` crate paragraph), append after the existing `**mnesis-wake crate**` sub-bullet:
 
 ```markdown
-  - **`nexus-wake-nostd` crate** (#302) — `GlobalWake`, the *no_std+alloc* `WakeSource`: ONE global eventcount (`AtomicU64` generation + `event_listener::Event`) shared by every registration, per-stream and `$all` alike — every commit wakes every parked subscription, and each false wake costs one empty re-scan (spurious wakes are contract-permitted, so routing is an optimization, not correctness; a routed impl can be added later as an additive sibling type). `arm` captures the seen generation synchronously, then listener-register (at `listen()` creation) → generation-recheck → await closes the lost-wakeup window. `register` is `Infallible`. **Optional and executor-dependent**: the primary device model is append-and-sync (subscriptions run server-side under `nexus-wake`); this exists for genuine on-device live-tail under a no_std executor (embassy), proven by the embassy-executor acceptance test. Built for `thumbv7em`/`wasm32` by the flake's no_std gates; hakari-excluded like `nexus-store`.
+  - **`mnesis-wake-nostd` crate** (#302) — `GlobalWake`, the *no_std+alloc* `WakeSource`: ONE global eventcount (`AtomicU64` generation + `event_listener::Event`) shared by every registration, per-stream and `$all` alike — every commit wakes every parked subscription, and each false wake costs one empty re-scan (spurious wakes are contract-permitted, so routing is an optimization, not correctness; a routed impl can be added later as an additive sibling type). `arm` captures the seen generation synchronously, then listener-register (at `listen()` creation) → generation-recheck → await closes the lost-wakeup window. `register` is `Infallible`. **Optional and executor-dependent**: the primary device model is append-and-sync (subscriptions run server-side under `mnesis-wake`); this exists for genuine on-device live-tail under a no_std executor (embassy), proven by the embassy-executor acceptance test. Built for `thumbv7em`/`wasm32` by the flake's no_std gates; hakari-excluded like `mnesis-store`.
 ```
 
 - [ ] **Step 3: Format check and commit**
 
 ```bash
 git add -A
-git commit -m "docs: nexus-wake-nostd in crate graph and subscription notes (#302)
+git commit -m "docs: mnesis-wake-nostd in crate graph and subscription notes (#302)
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
@@ -961,7 +961,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - [ ] **Step 4: Note the new crate name on #280 (crates.io reservation)**
 
 ```bash
-gh issue comment 280 --repo devrandom-labs/nexus --body "#302 adds a new publishable crate: \`nexus-wake-nostd\` (no_std WakeSource bridge). Add it to the crates.io reservation list."
+gh issue comment 280 --repo devrandom-labs/mnesis --body "#302 adds a new publishable crate: \`mnesis-wake-nostd\` (no_std WakeSource bridge). Add it to the crates.io reservation list."
 ```
 
 Expected: comment posted (gh must be on the joeldsouzax account — verify with `gh auth status` if unsure).
@@ -975,5 +975,5 @@ Expected: comment posted (gh must be on the joeldsouzax account — verify with 
 - [ ] **Step 2: Hand off to the finishing skill** — use superpowers:finishing-a-development-branch: push `feat/302-nostd-wake-bridge`, open the PR (`gh pr create`) titled `feat(wake-nostd): no_std WakeSource bridge — GlobalWake (#302)`, body maps the two #302 acceptance checkboxes to artifacts:
   - "a no_std `WakeSource` impl drives `Subscription` under a no_std executor in a test" → `tests/embassy_subscription.rs`
   - "documented as optional / executor-dependent" → crate-level docs + CLAUDE.md entry
-  - plus the finding that the loop's bare-metal compile was already gated by #301 (`nexus-store-nostd` builds `--features subscription,…` for thumbv7em); the new gates add `nexus-wake-nostd` itself.
+  - plus the finding that the loop's bare-metal compile was already gated by #301 (`mnesis-store-nostd` builds `--features subscription,…` for thumbv7em); the new gates add `mnesis-wake-nostd` itself.
   - Merge policy: squash via `gh pr merge --squash --delete-branch` after CI (user merges or approves merge).

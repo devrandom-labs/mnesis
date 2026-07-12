@@ -1,8 +1,8 @@
 //! Integration tests that exercise the consumer-owned projection loop over the
-//! `nexus_store::Projection` stepper (issue #255).
+//! `mnesis_store::Projection` stepper (issue #255).
 //!
 //! The loop itself lives in `examples/projection-tokio/src/lib.rs`; the
-//! nexus-framework typestate runner it supersedes has been retired. The four
+//! mnesis-framework typestate runner it supersedes has been retired. The four
 //! cross-cutting test categories (sequence/protocol, lifecycle,
 //! defensive-boundary, linearizability) are covered below. Each test calls the
 //! `run` wrapper (test-only call-site sugar), which assembles the projection
@@ -39,11 +39,11 @@ use std::future::Future;
 use std::num::{NonZeroU32, NonZeroU64};
 
 use futures::StreamExt;
-use nexus::{DomainEvent, Message, Version, version};
-use nexus_example_projection_tokio::run_projection;
-use nexus_inmemory::InMemorySnapshotStore;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::{
+use mnesis::{DomainEvent, Message, Version, version};
+use mnesis_example_projection_tokio::run_projection;
+use mnesis_inmemory::InMemorySnapshotStore;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::{
     Decode, Encode, EveryNEvents, Projection, Projector, RawEventStore, SnapshotStore, Store,
     Subscription, pending_envelope,
 };
@@ -150,7 +150,7 @@ impl Decode<TestEvent> for TestEventCodec {
 
     fn decode<'a>(
         &'a self,
-        env: &'a nexus_store::PersistedEnvelope,
+        env: &'a mnesis_store::PersistedEnvelope,
     ) -> Result<TestEvent, Self::Error> {
         let payload = env.payload();
         if payload.len() != 9 {
@@ -217,7 +217,7 @@ async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events:
     let current_len = {
         let stream = raw
             .read_stream(
-                &nexus_store::StreamKey::from_slice(stream_id.as_ref()),
+                &mnesis_store::StreamKey::from_slice(stream_id.as_ref()),
                 Version::INITIAL,
             )
             .await
@@ -243,7 +243,7 @@ async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events:
 
     let expected = Version::new(base_version).filter(|_| base_version > 0);
     raw.append(
-        &nexus_store::StreamKey::from_slice(stream_id.as_ref()),
+        &mnesis_store::StreamKey::from_slice(stream_id.as_ref()),
         expected,
         &envelopes,
     )
@@ -875,7 +875,7 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
     store
         .raw()
         .append(
-            &nexus_store::StreamKey::from_slice(stream_id.as_ref()),
+            &mnesis_store::StreamKey::from_slice(stream_id.as_ref()),
             None,
             &[bad_envelope],
         )

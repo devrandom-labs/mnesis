@@ -41,7 +41,7 @@
     reason = "tests compare exact f64 values through serde roundtrip"
 )]
 
-use nexus::{DomainEvent, Message};
+use mnesis::{DomainEvent, Message};
 use serde::{Deserialize, Serialize};
 
 /// A test event enum with three variant shapes to exercise serde's enum representation.

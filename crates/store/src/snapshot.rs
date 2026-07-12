@@ -1,6 +1,6 @@
 use core::num::NonZeroU32;
 
-use nexus::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, KernelError, Version};
+use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, KernelError, Version};
 
 use crate::repository::{ReplayFrom, Repository};
 use crate::state;
@@ -8,7 +8,7 @@ use crate::state;
 /// Snapshot-aware repository decorator.
 ///
 /// **Before reaching for snapshots, consider the
-/// [Closing the Books](nexus::closing_the_books) pattern** — modeling the
+/// [Closing the Books](mnesis::closing_the_books) pattern** — modeling the
 /// aggregate as bounded, lifecycle-scoped streams often removes the need for
 /// snapshots entirely.
 ///

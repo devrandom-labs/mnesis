@@ -12,7 +12,7 @@ use core::fmt::Debug;
 use core::future::Future;
 use std::num::NonZeroU32;
 
-use nexus_store::state::{Hydrated, SnapshotStore};
+use mnesis_store::state::{Hydrated, SnapshotStore};
 
 use crate::row::SubId;
 

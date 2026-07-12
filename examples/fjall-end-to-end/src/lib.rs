@@ -1,5 +1,5 @@
 //! End-to-end demonstration of the **complete persistent path** on the real
-//! `nexus-fjall` adapter — the three about-to-freeze surfaces that previously
+//! `mnesis-fjall` adapter — the three about-to-freeze surfaces that previously
 //! had zero example coverage, composed over one domain:
 //!
 //! 1. **Persistence lifecycle** ([`run_persistence`]) — persist an aggregate to
@@ -79,14 +79,14 @@ use std::time::Duration;
 
 use futures::StreamExt;
 use futures::TryStreamExt;
-use nexus::{Version, version};
-use nexus_fjall::{AllIndex, FjallStore};
-use nexus_store::cbor::{ChunkWriter, decode_chunk};
-use nexus_store::export::{EventExporter, StreamLister};
-use nexus_store::import::{Atomicity, EventImporter, StreamOutcome};
-use nexus_store::repository::Repository;
-use nexus_store::store::{RawEventStore, Store};
-use nexus_store::{CommandRepository, JsonCodec, Step, StepStreamExt, StreamKey, Subscription};
+use mnesis::{Version, version};
+use mnesis_fjall::{AllIndex, FjallStore};
+use mnesis_store::cbor::{ChunkWriter, decode_chunk};
+use mnesis_store::export::{EventExporter, StreamLister};
+use mnesis_store::import::{Atomicity, EventImporter, StreamOutcome};
+use mnesis_store::repository::Repository;
+use mnesis_store::store::{RawEventStore, Store};
+use mnesis_store::{CommandRepository, JsonCodec, Step, StepStreamExt, StreamKey, Subscription};
 
 use domain::{AccountEvent, AccountId, AccountState, BankAccount, Deposit, OpenAccount, Withdraw};
 
@@ -416,7 +416,7 @@ pub async fn run_export_import(work_dir: &Path) -> Result<RoundTripOutcome, BoxE
     // 5b. Unparseable framing is a *decode* error, a distinct failure domain.
     let malformed_detected = matches!(
         decode_chunk(b"not a valid nxch chunk"),
-        Err(nexus_store::cbor::ChunkError::Malformed(_))
+        Err(mnesis_store::cbor::ChunkError::Malformed(_))
     );
 
     Ok(RoundTripOutcome {
@@ -444,7 +444,7 @@ pub struct ProduceSyncOutcome {
 
 /// A produce-and-sync `IoT` device: it appends per-stream and would export/sync
 /// upward, but never reads `$all` locally. Built with
-/// [`AllIndex::Disabled`](nexus_fjall::AllIndex::Disabled), it **skips the
+/// [`AllIndex::Disabled`](mnesis_fjall::AllIndex::Disabled), it **skips the
 /// `events_global` frame copy** on every append (a smaller on-disk store, less
 /// flash write) — and `read_all` says so explicitly rather than silently
 /// returning nothing. Append + per-stream rehydrate still work exactly as before.
@@ -463,7 +463,7 @@ pub async fn run_produce_and_sync(path: &Path) -> Result<ProduceSyncOutcome, Box
     // The `$all` index is not maintained — `read_all` surfaces that explicitly.
     let all_index_disabled = matches!(
         store.read_all(None).await,
-        Err(nexus_fjall::FjallError::AllIndexDisabled)
+        Err(mnesis_fjall::FjallError::AllIndexDisabled)
     );
 
     Ok(ProduceSyncOutcome {

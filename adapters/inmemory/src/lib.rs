@@ -1,35 +1,35 @@
-//! In-memory event-store adapter for `nexus-store`.
+//! In-memory event-store adapter for `mnesis-store`.
 //!
 //! [`InMemoryStore`] implements the full adapter surface —
-//! [`RawEventStore`], [`WakeSource`] (via [`nexus_wake::StreamNotifiers`]),
+//! [`RawEventStore`], [`WakeSource`] (via [`mnesis_wake::StreamNotifiers`]),
 //! `StreamLister`/`AtomicAppend` behind the `export`/`import` features — and
 //! [`InMemorySnapshotStore`] implements `SnapshotStore`. Together they are the
 //! reference in-process adapter: business-logic tests, examples, and the
-//! white-box tests of `nexus-store` itself all run on them.
+//! white-box tests of `mnesis-store` itself all run on them.
 //!
-//! Like every adapter, rows are built via `nexus_store::wire::encode_frame`,
+//! Like every adapter, rows are built via `mnesis_store::wire::encode_frame`,
 //! so the stored bytes are the canonical frame format (payload 16-byte
 //! aligned), not a shortcut representation.
 
 use bytes::Bytes;
-use nexus::ErrorId;
-use nexus::Version;
-use nexus_store::batch::BatchSize;
-use nexus_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
-use nexus_store::error::AppendError;
+use mnesis::ErrorId;
+use mnesis::Version;
+use mnesis_store::batch::BatchSize;
+use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
+use mnesis_store::error::AppendError;
 #[cfg(feature = "import")]
-use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
-use nexus_store::store::{AllPosition, RawEventStore};
-use nexus_store::value::SchemaVersion;
-use nexus_store::wake::WakeSource;
-use nexus_store::wire::{self, FrameOffsets};
-use nexus_wake::{NotifyError, StreamNotifiers, WakeReg};
+use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::store::{AllPosition, RawEventStore};
+use mnesis_store::value::SchemaVersion;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::wire::{self, FrameOffsets};
+use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
 
 mod snapshot;
 
 pub use snapshot::InMemorySnapshotStore;
 
-use nexus_store::stream_id::StreamKey;
+use mnesis_store::stream_id::StreamKey;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::VecDeque;
@@ -73,7 +73,7 @@ pub enum InMemoryStoreError {
 }
 
 /// [`InMemoryStore`]'s `$all` resume position — its
-/// [`AllPosition`](nexus_store::AllPosition).
+/// [`AllPosition`](mnesis_store::AllPosition).
 ///
 /// A monotonic-but-gappy `NonZeroU64`, the in-memory analogue of fjall's
 /// `GlobalSeq`. It is the key of the store's `$all` index (`global_index`), so
@@ -129,7 +129,7 @@ struct StoredFrame {
     offsets: FrameOffsets,
     /// Captured typed at append time (like `offsets`), so the read path never
     /// re-parses header bytes — the frame's byte layout stays private to
-    /// `nexus_store::wire`.
+    /// `mnesis_store::wire`.
     schema_version: SchemaVersion,
 }
 
@@ -390,7 +390,7 @@ impl RawEventStore for InMemoryStore {
         // actual_version_raw is the number of events in the stream (0 = empty).
         // expected_version: None = new stream (expect 0 events), Some(v) = expect v events.
         let actual_version_raw = u64::try_from(stream.len()).unwrap_or(u64::MAX);
-        let expected_raw = expected_version.map_or(0, nexus::Version::as_u64);
+        let expected_raw = expected_version.map_or(0, mnesis::Version::as_u64);
         if actual_version_raw != expected_raw {
             return Err(AppendError::Conflict {
                 stream_id: ErrorId::from_display(id),
@@ -610,17 +610,17 @@ impl WakeSource for InMemoryStore {
 /// cursor. `InMemoryStore` is a test store, so materializing all ids at once
 /// is acceptable; a real adapter (fjall, postgres) streams them lazily.
 #[cfg(feature = "export")]
-impl nexus_store::export::StreamLister for InMemoryStore {
+impl mnesis_store::export::StreamLister for InMemoryStore {
     type StreamList = futures::stream::Iter<
-        std::vec::IntoIter<Result<nexus_store::stream_id::StreamKey, InMemoryStoreError>>,
+        std::vec::IntoIter<Result<mnesis_store::stream_id::StreamKey, InMemoryStoreError>>,
     >;
 
     async fn list_streams(&self) -> Result<Self::StreamList, Self::Error> {
-        let ids: Vec<Result<nexus_store::stream_id::StreamKey, InMemoryStoreError>> = {
+        let ids: Vec<Result<mnesis_store::stream_id::StreamKey, InMemoryStoreError>> = {
             let guard = self.streams.lock().await;
             guard
                 .keys()
-                .map(|k| Ok(nexus_store::stream_id::StreamKey::from_slice(k.as_bytes())))
+                .map(|k| Ok(mnesis_store::stream_id::StreamKey::from_slice(k.as_bytes())))
                 .collect()
         };
         Ok(futures::stream::iter(ids))
@@ -743,7 +743,7 @@ impl AtomicAppend for InMemoryStore {
 #[allow(clippy::unwrap_used, reason = "test code")]
 mod batch_config_tests {
     use super::*;
-    use nexus_store::batch::{BatchSize, DEFAULT_BATCH};
+    use mnesis_store::batch::{BatchSize, DEFAULT_BATCH};
 
     #[test]
     fn default_store_uses_default_batch() {
@@ -768,8 +768,8 @@ mod batch_config_tests {
 mod bounded_read_tests {
     use super::*;
     use futures::StreamExt;
-    use nexus_store::batch::BatchSize;
-    use nexus_store::envelope::pending_envelope;
+    use mnesis_store::batch::BatchSize;
+    use mnesis_store::envelope::pending_envelope;
 
     fn env(v: u64) -> PendingEnvelope {
         pending_envelope(Version::new(v).unwrap())
@@ -871,7 +871,7 @@ mod bounded_read_tests {
 mod global_read_tests {
     use super::*;
     use futures::StreamExt;
-    use nexus_store::envelope::pending_envelope;
+    use mnesis_store::envelope::pending_envelope;
 
     fn sk(s: &str) -> StreamKey {
         StreamKey::from_slice(s.as_bytes())
@@ -923,10 +923,10 @@ mod global_read_tests {
 mod bounded_subscription_tests {
     use super::*;
     use futures::StreamExt;
-    use nexus_store::Store;
-    use nexus_store::batch::BatchSize;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::{StepStreamExt, Subscription};
+    use mnesis_store::Store;
+    use mnesis_store::batch::BatchSize;
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::{StepStreamExt, Subscription};
 
     fn env(v: u64) -> PendingEnvelope {
         pending_envelope(Version::new(v).unwrap())
@@ -979,8 +979,8 @@ mod bounded_subscription_tests {
 #[allow(clippy::expect_used, reason = "test code")]
 mod wake_source_tests {
     use super::*;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::wake::{WakeRegistration, WakeSource};
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::wake::{WakeRegistration, WakeSource};
     use std::time::Duration;
     use tokio::time::timeout;
 

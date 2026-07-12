@@ -1,6 +1,6 @@
 //! Macro hygiene tests — verify macros don't clash with user names.
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // Shared test domain
@@ -56,7 +56,7 @@ struct HError;
 // Test: user has local variable called `root` — no conflict
 // =============================================================================
 
-#[nexus::aggregate(state = HState, error = HError, id = HId)]
+#[mnesis::aggregate(state = HState, error = HError, id = HId)]
 struct AggWithRoot;
 
 #[test]
@@ -72,10 +72,10 @@ fn user_variable_named_root_no_conflict() {
 // Test: two aggregates in the same module — no interference
 // =============================================================================
 
-#[nexus::aggregate(state = HState, error = HError, id = HId)]
+#[mnesis::aggregate(state = HState, error = HError, id = HId)]
 struct FirstAggregate;
 
-#[nexus::aggregate(state = HState, error = HError, id = HId)]
+#[mnesis::aggregate(state = HState, error = HError, id = HId)]
 struct SecondAggregate;
 
 #[test]
@@ -127,7 +127,7 @@ fn aggregate_inside_function_body() {
     #[error("e")]
     struct LocalError;
 
-    #[nexus::aggregate(state = LocalState, error = LocalError, id = HId)]
+    #[mnesis::aggregate(state = LocalState, error = LocalError, id = HId)]
     struct LocalAggregate;
 
     let mut agg = AggregateRoot::<LocalAggregate>::new(HId::new(1));
@@ -141,7 +141,7 @@ fn aggregate_inside_function_body() {
 
 // =============================================================================
 // Test: user has their own trait called `Aggregate` in scope — no ambiguity
-// because macro uses fully qualified ::nexus:: paths
+// because macro uses fully qualified ::mnesis:: paths
 // =============================================================================
 
 mod user_has_own_aggregate_trait {
@@ -152,7 +152,7 @@ mod user_has_own_aggregate_trait {
         fn custom_method(&self) -> &str;
     }
 
-    #[nexus::aggregate(state = HState, error = HError, id = HId)]
+    #[mnesis::aggregate(state = HState, error = HError, id = HId)]
     struct MyAgg;
 
     // User can still implement their own `Aggregate` on the marker type
@@ -173,7 +173,7 @@ mod user_has_own_aggregate_trait {
 
 // =============================================================================
 // Test: user has a type called `AggregateRoot` — no conflict because
-// macro uses ::nexus::AggregateRoot (fully qualified)
+// macro uses ::mnesis::AggregateRoot (fully qualified)
 // =============================================================================
 
 mod user_has_own_aggregate_root_type {
@@ -184,7 +184,7 @@ mod user_has_own_aggregate_root_type {
         data: String,
     }
 
-    #[nexus::aggregate(state = HState, error = HError, id = HId)]
+    #[mnesis::aggregate(state = HState, error = HError, id = HId)]
     struct MyAgg;
 
     #[test]
@@ -192,7 +192,7 @@ mod user_has_own_aggregate_root_type {
         let user_root = AggregateRoot {
             data: "user".into(),
         };
-        let mut agg = ::nexus::AggregateRoot::<MyAgg>::new(HId::new(1));
+        let mut agg = ::mnesis::AggregateRoot::<MyAgg>::new(HId::new(1));
         agg.replay(Version::INITIAL, &HEvent::A).unwrap();
 
         assert_eq!(user_root.data, "user");
@@ -217,7 +217,7 @@ fn id() -> u64 {
     999
 }
 
-#[nexus::aggregate(state = HState, error = HError, id = HId)]
+#[mnesis::aggregate(state = HState, error = HError, id = HId)]
 struct FnConflictAgg;
 
 #[test]

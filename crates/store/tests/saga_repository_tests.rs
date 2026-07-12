@@ -18,11 +18,11 @@ use std::sync::Arc;
 
 use bytes::Bytes;
 use futures::future::join_all;
-use nexus::{
+use mnesis::{
     Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message, React, Saga, Version,
 };
-use nexus_inmemory::InMemoryStore;
-use nexus_store::{
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::{
     Decode, Encode, PersistedEnvelope, Reaction, Repository, SagaError, SagaRepository, Store,
 };
 use tokio::sync::Barrier;
@@ -202,7 +202,7 @@ impl Decode<SagaEvent> for SagaCodec {
     }
 }
 
-type Repo = nexus_store::EventStore<InMemoryStore, SagaCodec, OrderSaga>;
+type Repo = mnesis_store::EventStore<InMemoryStore, SagaCodec, OrderSaga>;
 
 fn new_repo() -> Repo {
     Store::new(InMemoryStore::new())

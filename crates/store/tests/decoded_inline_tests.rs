@@ -1,9 +1,9 @@
-//! Relocated inline test mod of `src/decoded.rs` (nexus-inmemory is a
+//! Relocated inline test mod of `src/decoded.rs` (mnesis-inmemory is a
 //! dev-dependency; type unification with it requires an integration test).
 
-use nexus::Version;
+use mnesis::Version;
 
-use nexus_store::envelope::PersistedEnvelope;
+use mnesis_store::envelope::PersistedEnvelope;
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used, reason = "tests")]
@@ -11,12 +11,12 @@ use nexus_store::envelope::PersistedEnvelope;
 mod tests {
     use super::*;
     use futures::StreamExt;
-    use nexus_inmemory::InMemoryStore;
-    use nexus_store::Store;
-    use nexus_store::decoded::*;
-    use nexus_store::pending_envelope;
-    use nexus_store::store::RawEventStore;
-    use nexus_store::stream_id::StreamKey;
+    use mnesis_inmemory::InMemoryStore;
+    use mnesis_store::Store;
+    use mnesis_store::decoded::*;
+    use mnesis_store::pending_envelope;
+    use mnesis_store::store::RawEventStore;
+    use mnesis_store::stream_id::StreamKey;
 
     /// Build a real `PersistedEnvelope` by round-tripping through
     /// `InMemoryStore`: append a `PendingEnvelope`, then read it back. There is

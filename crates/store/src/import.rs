@@ -33,7 +33,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use bytes::Bytes;
-use nexus::Version;
+use mnesis::Version;
 use thiserror::Error;
 
 use crate::envelope::{PendingEnvelope, PersistedEnvelope};

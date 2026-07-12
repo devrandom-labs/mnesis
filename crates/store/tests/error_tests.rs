@@ -2,8 +2,8 @@
 
 #![allow(clippy::unwrap_used, reason = "tests")]
 
-use nexus::{ErrorId, KernelError, Version};
-use nexus_store::{LoadWithError, StoreError};
+use mnesis::{ErrorId, KernelError, Version};
+use mnesis_store::{LoadWithError, StoreError};
 
 /// Concrete `StoreError` for tests: adapter = `std::io::Error`, codec = `std::io::Error`.
 type TestStoreError = StoreError<std::io::Error, std::io::Error, std::io::Error>;
@@ -166,7 +166,7 @@ fn load_with_upcast_display_contains_inner_message() {
 
 // ── Defensive boundary (PR2 #208): over-long stream ids are truncated and
 //    visually signalled with a trailing `…` in error Display output. The
-//    `stream_id` field is now `nexus::ErrorId`, whose `from_display`
+//    `stream_id` field is now `mnesis::ErrorId`, whose `from_display`
 //    constructor caps at 64 bytes on a char boundary and appends the marker.
 
 #[test]

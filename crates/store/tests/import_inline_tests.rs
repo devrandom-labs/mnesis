@@ -1,17 +1,17 @@
-//! Relocated inline test mod of `src/import.rs` (nexus-inmemory is a
+//! Relocated inline test mod of `src/import.rs` (mnesis-inmemory is a
 //! dev-dependency; type unification with it requires an integration test).
 //! The store-free planner tests over the private `plan_section`/`SectionPlan`
 //! stayed inline as `import::plan_tests`.
 
 #![cfg(feature = "import")]
 
-use nexus::Version;
+use mnesis::Version;
 use thiserror::Error;
 
-use nexus_store::envelope::PersistedEnvelope;
-use nexus_store::error::AppendError;
-use nexus_store::store::{RawEventStore, Store};
-use nexus_store::stream_id::StreamKey;
+use mnesis_store::envelope::PersistedEnvelope;
+use mnesis_store::error::AppendError;
+use mnesis_store::store::{RawEventStore, Store};
+use mnesis_store::stream_id::StreamKey;
 
 #[cfg(test)]
 #[allow(
@@ -24,10 +24,10 @@ mod tests {
     use super::*;
     use bytes::Bytes;
     use futures::StreamExt;
-    use nexus_store::envelope::{PendingEnvelope, pending_envelope};
-    use nexus_store::export::EventExporter;
-    use nexus_store::import::*;
-    use nexus_store::value::SchemaVersion;
+    use mnesis_store::envelope::{PendingEnvelope, pending_envelope};
+    use mnesis_store::export::EventExporter;
+    use mnesis_store::import::*;
+    use mnesis_store::value::SchemaVersion;
     use proptest::prelude::*;
     use static_assertions::assert_impl_all;
     use std::error::Error as _;
@@ -325,7 +325,7 @@ mod tests {
         }
     }
 
-    async fn head_len(store: &nexus_inmemory::InMemoryStore, id: &StreamKey) -> usize {
+    async fn head_len(store: &mnesis_inmemory::InMemoryStore, id: &StreamKey) -> usize {
         store
             .read_stream(id, Version::INITIAL)
             .await
@@ -337,7 +337,7 @@ mod tests {
 
     #[tokio::test]
     async fn atomic_append_many_commits_all_writes() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let writes = vec![planned("a", None, &[1, 2]), planned("b", None, &[1])];
         store.atomic_append_many(&writes).await.expect("commits");
         assert_eq!(head_len(&store, &sk("a")).await, 2);
@@ -346,7 +346,7 @@ mod tests {
 
     #[tokio::test]
     async fn atomic_append_many_rolls_back_all_on_one_conflict() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         // Pre-seed "b" to v1 so the second write (expecting fresh) conflicts.
         store
             .append(&sk("b"), None, &[pending(1, b"seed")])
@@ -377,7 +377,7 @@ mod tests {
         StreamKey::from_slice(origin)
     }
 
-    async fn versions(store: &nexus_inmemory::InMemoryStore, id: &StreamKey) -> Vec<u64> {
+    async fn versions(store: &mnesis_inmemory::InMemoryStore, id: &StreamKey) -> Vec<u64> {
         store
             .read_stream(id, Version::INITIAL)
             .await
@@ -389,7 +389,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_clean_multi_stream_all_complete() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("a", vec![evt(1), evt(2), evt(3)]),
             section("b", vec![evt(1), evt(2)]),
@@ -411,7 +411,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_partial_overlap_is_picky_rejected() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=3 {
             store
                 .append(&sk("a"), Version::new(n - 1), &[pending(n, b"seed")])
@@ -436,7 +436,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_internal_gap_applies_prefix_then_halts() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![evt(1), evt(2), evt(4)])];
         let report = store
             .import(&sections, identity_route, Atomicity::PerStream)
@@ -455,7 +455,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_mid_section_corrupt_applies_prefix_then_corrupt() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section(
             "a",
             vec![evt(1), evt(2), ImportBlock::Corrupt, evt(3)],
@@ -476,7 +476,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_first_block_corrupt_reaches_none() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![ImportBlock::Corrupt, evt(1)])];
         let report = store
             .import(&sections, identity_route, Atomicity::PerStream)
@@ -491,7 +491,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_empty_chunk_is_empty_report() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let report = store
             .import(&[], identity_route, Atomicity::PerStream)
             .await
@@ -502,7 +502,7 @@ mod tests {
 
     #[tokio::test]
     async fn per_stream_version_overflow_surfaces_error() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![evt(u64::MAX), evt(1)])];
         let err = store
             .import(&sections, identity_route, Atomicity::PerStream)
@@ -518,25 +518,25 @@ mod tests {
     /// `import_per_stream`'s `AppendError::Store` arm, which `InMemoryStore`
     /// alone cannot produce.
     struct FailingAppendStore {
-        inner: nexus_inmemory::InMemoryStore,
+        inner: mnesis_inmemory::InMemoryStore,
         fail_on: String,
     }
 
-    impl nexus_store::store::RawEventStore for FailingAppendStore {
-        type Error = nexus_inmemory::InMemoryStoreError;
-        type Stream = nexus_inmemory::InMemoryStream;
-        type AllPosition = nexus_inmemory::InMemoryAllPos;
-        type AllStream = nexus_inmemory::InMemoryAllStream;
+    impl mnesis_store::store::RawEventStore for FailingAppendStore {
+        type Error = mnesis_inmemory::InMemoryStoreError;
+        type Stream = mnesis_inmemory::InMemoryStream;
+        type AllPosition = mnesis_inmemory::InMemoryAllPos;
+        type AllStream = mnesis_inmemory::InMemoryAllStream;
 
         async fn append(
             &self,
             id: &StreamKey,
             expected_version: Option<Version>,
-            envelopes: &[nexus_store::envelope::PendingEnvelope],
+            envelopes: &[mnesis_store::envelope::PendingEnvelope],
         ) -> Result<(), AppendError<Self::Error>> {
             if id.to_string() == self.fail_on {
                 return Err(AppendError::Store(
-                    nexus_inmemory::InMemoryStoreError::VersionOverflow,
+                    mnesis_inmemory::InMemoryStoreError::VersionOverflow,
                 ));
             }
             self.inner.append(id, expected_version, envelopes).await
@@ -558,11 +558,11 @@ mod tests {
         }
     }
 
-    impl nexus_store::import::AtomicAppend for FailingAppendStore {
+    impl mnesis_store::import::AtomicAppend for FailingAppendStore {
         async fn atomic_append_many(
             &self,
-            writes: &[nexus_store::import::PlannedAppend],
-        ) -> Result<(), nexus_store::import::AtomicAppendError<Self::Error>> {
+            writes: &[mnesis_store::import::PlannedAppend],
+        ) -> Result<(), mnesis_store::import::AtomicAppendError<Self::Error>> {
             self.inner.atomic_append_many(writes).await
         }
     }
@@ -570,7 +570,7 @@ mod tests {
     #[tokio::test]
     async fn per_stream_store_error_propagates_and_keeps_prior_commits() {
         let store = FailingAppendStore {
-            inner: nexus_inmemory::InMemoryStore::new(),
+            inner: mnesis_inmemory::InMemoryStore::new(),
             fail_on: "b".to_owned(),
         };
         let sections = vec![
@@ -590,7 +590,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_clean_commits_all_complete() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("a", vec![evt(1), evt(2)]),
             section("b", vec![evt(1)]),
@@ -606,7 +606,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_corrupt_block_aborts_nothing_lands() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("a", vec![evt(1), evt(2)]),               // would be fine
             section("b", vec![evt(1), ImportBlock::Corrupt]), // bad block
@@ -629,7 +629,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_internal_gap_aborts_mismatch() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![evt(1), evt(2), evt(4)])];
         let err = store
             .import(&sections, identity_route, Atomicity::WholeChunk)
@@ -653,7 +653,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_head_conflict_aborts_mismatch() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=2 {
             store
                 .append(&sk("a"), Version::new(n - 1), &[pending(n, b"seed")])
@@ -684,7 +684,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_first_block_corrupt_aborts() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![ImportBlock::Corrupt])];
         let err = store
             .import(&sections, identity_route, Atomicity::WholeChunk)
@@ -698,7 +698,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_conflict_on_later_section_reports_that_section() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         // Pre-seed "b" to v1 so the SECOND write conflicts (index 1), while "a"
         // (index 0) would be fine — exercises index > 0 in the Conflict arm.
         store
@@ -738,7 +738,7 @@ mod tests {
 
     #[tokio::test]
     async fn whole_chunk_empty_section_skipped_others_commit() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("empty", vec![]), section("b", vec![evt(1), evt(2)])];
         let report = store
             .import(&sections, identity_route, Atomicity::WholeChunk)
@@ -757,7 +757,7 @@ mod tests {
     async fn whole_chunk_non_injective_route_aborts_no_corruption() {
         // A non-injective route maps BOTH origin sections to the same target.
         // WholeChunk must abort with nothing landed — never a [1,2,1,2] stream.
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("o1", vec![evt(1), evt(2)]),
             section("o2", vec![evt(1), evt(2)]),
@@ -776,7 +776,7 @@ mod tests {
     async fn per_stream_non_injective_route_second_rejected_no_corruption() {
         // PerStream: the first section commits the target; the second (same
         // target) is picky-rejected — the stream is [1,2], never [1,2,1,2].
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("o1", vec![evt(1), evt(2)]),
             section("o2", vec![evt(1), evt(2)]),
@@ -814,7 +814,7 @@ mod tests {
         fn assert_atomic<A: AtomicAppend>(_: &A) {}
 
         // The handle itself imports and atomic-appends — never `.raw()`.
-        let store = Store::new(nexus_inmemory::InMemoryStore::new());
+        let store = Store::new(mnesis_inmemory::InMemoryStore::new());
         let sections = vec![section("a", vec![evt(1), evt(2)])];
         let report = store
             .import(&sections, identity_route, Atomicity::PerStream)
@@ -837,7 +837,7 @@ mod tests {
 
     // ── Round-trip + idempotency (Card-1 export ↔ Card-2 import) ────────────
 
-    async fn export_section(store: &nexus_inmemory::InMemoryStore, origin: &str) -> StreamSection {
+    async fn export_section(store: &mnesis_inmemory::InMemoryStore, origin: &str) -> StreamSection {
         let blocks = store
             .export_stream(&sk(origin), Version::INITIAL)
             .await
@@ -851,7 +851,7 @@ mod tests {
     #[tokio::test]
     async fn export_then_import_round_trips_byte_equal_modulo_all_position() {
         // Source store with two streams.
-        let source = nexus_inmemory::InMemoryStore::new();
+        let source = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=3 {
             source
                 .append(&sk("acct-1"), Version::new(n - 1), &[pending(n, b"a")])
@@ -869,7 +869,7 @@ mod tests {
         ];
 
         // Import into a FRESH store, identity routing.
-        let target = nexus_inmemory::InMemoryStore::new();
+        let target = mnesis_inmemory::InMemoryStore::new();
         // Pre-seed a warmup event so the target's `$all` counter is already
         // advanced — imported events must get FRESH positions (2..) rather than
         // copying the source's (which started at 1), making the restamp
@@ -930,7 +930,7 @@ mod tests {
 
     #[tokio::test]
     async fn reimport_same_chunk_is_idempotent_per_stream() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![evt(1), evt(2), evt(3)])];
 
         let first = store
@@ -955,7 +955,7 @@ mod tests {
 
     #[tokio::test]
     async fn reimport_same_chunk_whole_chunk_aborts() {
-        let store = nexus_inmemory::InMemoryStore::new();
+        let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![section("a", vec![evt(1), evt(2)])];
         store
             .import(&sections, identity_route, Atomicity::WholeChunk)
@@ -990,7 +990,7 @@ mod tests {
         // Exactly one wins the v1 slot; the other must surface a Mismatch (a
         // conflict, never a silent retry — CLAUDE rule 5). The stream must end
         // as a gapless prefix from v1, never torn.
-        let store = Arc::new(nexus_inmemory::InMemoryStore::new());
+        let store = Arc::new(mnesis_inmemory::InMemoryStore::new());
         let n = 50u64;
         let barrier = Arc::new(Barrier::new(2));
 
@@ -1068,7 +1068,7 @@ mod tests {
                 .build()
                 .expect("runtime");
             rt.block_on(async {
-                let store = nexus_inmemory::InMemoryStore::new();
+                let store = mnesis_inmemory::InMemoryStore::new();
                 let id = sk("m");
                 // Model: next expected version (1 = fresh).
                 let mut next: u64 = 1;

@@ -1,7 +1,7 @@
-//! Consumer-owned projection loop over `nexus_store` primitives.
+//! Consumer-owned projection loop over `mnesis_store` primitives.
 //!
-//! nexus deliberately ships **no** event-loop runner — that is runtime,
-//! and the runtime is the consumer's. nexus ships the pure primitives: a
+//! mnesis deliberately ships **no** event-loop runner — that is runtime,
+//! and the runtime is the consumer's. mnesis ships the pure primitives: a
 //! [`Projector`] (how to fold), a [`PersistTrigger`] (when to persist), a
 //! [`Subscription`] (the cursor), a [`SnapshotStore`] (atomic
 //! `(state, position)` commit), and — assembling the last three around the
@@ -28,11 +28,11 @@
 use std::future::Future;
 
 use futures::StreamExt;
-use nexus::{Id, Version};
-use nexus_store::state::SnapshotStore;
-use nexus_store::store::RawEventStore;
-use nexus_store::wake::WakeSource;
-use nexus_store::{
+use mnesis::{Id, Version};
+use mnesis_store::state::SnapshotStore;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::wake::WakeSource;
+use mnesis_store::{
     DecodedStreamExt, OwningCodec, PersistTrigger, Projection, Projector, StepStreamExt,
     Subscription,
 };

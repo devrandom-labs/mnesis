@@ -1,6 +1,6 @@
 # Stability
 
-What pinning a `1.x` nexus crate buys you. This document takes effect at the
+What pinning a `1.x` mnesis crate buys you. This document takes effect at the
 1.0 release of the core crates; until that release every crate is 0.x and this
 is the policy being frozen, not yet a promise in force.
 
@@ -8,17 +8,17 @@ is the policy being frozen, not yet a promise in force.
 
 | Tier | Crates | Promise |
 |------|--------|---------|
-| **1.0 (frozen)** | `nexus`, `nexus-macros`, `nexus-store`, `nexus-wake`, `nexus-wake-nostd` | Full semver: breaking changes only at a major release |
-| **0.x (evolving)** | `nexus-inmemory`, `nexus-fjall`, `nexus-postgres`, `nexus-store-testing` | Breaking changes allowed in any `0.(x+1)` release, called out in release notes |
-| **Unpublished** | `workspace-hack`, `nexus-nostd-smoketest`, examples | No promise |
+| **1.0 (frozen)** | `mnesis`, `mnesis-macros`, `mnesis-store`, `mnesis-wake`, `mnesis-wake-nostd` | Full semver: breaking changes only at a major release |
+| **0.x (evolving)** | `mnesis-inmemory`, `mnesis-fjall`, `mnesis-postgres`, `mnesis-store-testing` | Breaking changes allowed in any `0.(x+1)` release, called out in release notes |
+| **Unpublished** | `workspace-hack`, `mnesis-nostd-smoketest`, examples | No promise |
 
 Coupling rules across the tiers:
 
-- `nexus-macros` is version-locked to `nexus` (the serde/serde_derive
+- `mnesis-macros` is version-locked to `mnesis` (the serde/serde_derive
   pattern): they release together, always at the same version.
-- A `nexus` major forces a `nexus-store` major — kernel types (`Version`,
+- A `mnesis` major forces a `mnesis-store` major — kernel types (`Version`,
   `Events`, the aggregate traits) appear in store APIs.
-- A `nexus-store` major forces a major of both wake crates — they implement
+- A `mnesis-store` major forces a major of both wake crates — they implement
   its public `WakeSource` contract in their public API.
 - Adapters are consumers: a core major forces nothing on a 0.x crate beyond a
   routine dependency bump.
@@ -37,7 +37,7 @@ The public API of the 1.0-tier crates is:
   bound — an intentional asymmetry — strict-after subscription resume,
   `CaughtUp` emitted exactly once,
   conflicting appends rejected with nothing landing, spurious wakes
-  permitted) are API; the `nexus-store-testing` conformance kit is their
+  permitted) are API; the `mnesis-store-testing` conformance kit is their
   executable form. Changing one is a breaking change even if every signature
   still compiles.
 - Documented `Send`/`Sync` bounds on public types and on returned streams and
@@ -60,7 +60,7 @@ Explicitly **not** public API:
 
 Three external crates appear in 1.0-tier public APIs; their major version is
 part of our contract, so a semver-incompatible bump of any of them is a
-nexus major:
+mnesis major:
 
 - `bytes` (1.x) — `Bytes` in envelope and codec APIs.
 - `futures-core` (0.3) — `Stream` in stream and subscription bounds. It is
@@ -76,7 +76,7 @@ fjall, sqlx, …) is an implementation detail and may change in any release
 
 ## On-disk format
 
-The event frame (`nexus-store`'s `wire` module) carries a leading
+The event frame (`mnesis-store`'s `wire` module) carries a leading
 format-version byte (#205); the CBOR backup box carries a `format_version`
 header field. The promise, for both:
 

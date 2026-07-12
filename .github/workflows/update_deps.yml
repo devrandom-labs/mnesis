@@ -51,7 +51,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GH_PAT_FOR_PRS }}
-          commit-message: "chore(nexus): update dependencies"
+          commit-message: "chore(mnesis): update dependencies"
           title: "Update Nix and Rust Dependencies"
           body: |
             Automated weekly dependency update.

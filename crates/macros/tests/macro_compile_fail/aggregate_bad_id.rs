@@ -1,6 +1,6 @@
-/// id type must implement nexus::Id.
+/// id type must implement mnesis::Id.
 
-use nexus::*;
+use mnesis::*;
 
 #[derive(Debug, Clone)]
 enum Ev { A }
@@ -19,8 +19,8 @@ impl AggregateState for St {
 #[error("e")]
 struct MyError;
 
-// u64 does NOT implement nexus::Id
-#[nexus::aggregate(state = St, error = MyError, id = u64)]
+// u64 does NOT implement mnesis::Id
+#[mnesis::aggregate(state = St, error = MyError, id = u64)]
 struct BadAggregate;
 
 fn main() {}

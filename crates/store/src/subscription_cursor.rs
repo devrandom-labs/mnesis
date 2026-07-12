@@ -163,7 +163,7 @@ mod tests {
     use std::time::Duration;
 
     use futures::StreamExt;
-    use nexus::Version;
+    use mnesis::Version;
     use tokio::time::timeout;
 
     use super::*;

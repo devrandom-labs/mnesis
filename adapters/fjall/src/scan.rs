@@ -2,18 +2,18 @@
 //! that differ between the per-stream (Version-keyed) and $all (GlobalSeq-keyed)
 //! reads — the keyset bound bytes and how a stored row decodes into a
 //! [`PersistedEnvelope`]. NOT exported; no other adapter shares fjall's on-disk
-//! key layout, so this stays inside `nexus-fjall`.
+//! key layout, so this stays inside `mnesis-fjall`.
 
 use bytes::Bytes;
 use fjall::Slice;
-use nexus::{ErrorId, Version};
-use nexus_store::PersistedEnvelope;
+use mnesis::{ErrorId, Version};
+use mnesis_store::PersistedEnvelope;
 
 use crate::error::{FjallError, reason_label};
 use crate::global_seq::GlobalSeq;
 use crate::subscription_id::OwnedStreamId;
 use crate::wire_key::{decode_event_key, decode_global_key, encode_event_key, encode_global_key};
-use nexus_store::wire;
+use mnesis_store::wire;
 
 /// The differing parts of a bounded keyset scan, factored so one cursor can
 /// drive both the per-stream and `$all` reads.
@@ -230,7 +230,7 @@ impl<S: ScanStrategy> ScanCursor<S> {
 
 // `get_mut()` in `poll_next` requires `Self: Unpin`; `fjall::Iter` is already
 // `Unpin`, so `S` is the only field that isn't `Unpin` by default — hence the
-// `S: Unpin` bound (also relied on by the generic live loop in `nexus-store`).
+// `S: Unpin` bound (also relied on by the generic live loop in `mnesis-store`).
 impl<S: ScanStrategy + Unpin> futures::Stream for ScanCursor<S> {
     type Item = Result<S::Item, FjallError>;
 
@@ -250,14 +250,14 @@ mod tests {
     use crate::store::FjallStore;
     use crate::store::read_test_helpers::{sk, temp_store};
     use futures::StreamExt;
-    use nexus_store::StreamKey;
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::store::RawEventStore;
-    use nexus_store::value::{EventType, Payload, SchemaVersion};
-    use nexus_store::wire;
+    use mnesis_store::StreamKey;
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::store::RawEventStore;
+    use mnesis_store::value::{EventType, Payload, SchemaVersion};
+    use mnesis_store::wire;
 
     /// Build a wire-frame event-value row via the real production encoder
-    /// (`wire::encode_frame` + the `nexus_store::value` newtypes), for the
+    /// (`wire::encode_frame` + the `mnesis_store::value` newtypes), for the
     /// row-decode tests below. `schema_version` is always 1 and there is no
     /// metadata — the cases this test mod exercises. The `$all` position is not
     /// in the value (V2); the `events_global` key carries it.

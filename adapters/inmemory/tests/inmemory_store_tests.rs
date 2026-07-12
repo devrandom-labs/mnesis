@@ -1,12 +1,12 @@
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
 
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::AppendError;
-use nexus_store::StreamKey;
-use nexus_store::pending_envelope;
-use nexus_store::store::RawEventStore;
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::AppendError;
+use mnesis_store::StreamKey;
+use mnesis_store::pending_envelope;
+use mnesis_store::store::RawEventStore;
 
 #[tokio::test]
 async fn append_conflict_truncates_overlong_stream_id_with_ellipsis() {

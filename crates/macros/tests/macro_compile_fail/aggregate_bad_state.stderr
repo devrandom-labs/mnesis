@@ -1,7 +1,7 @@
-warning: unused import: `nexus::*`
+warning: unused import: `mnesis::*`
  --> tests/macro_compile_fail/aggregate_bad_state.rs:3:5
   |
-3 | use nexus::*;
+3 | use mnesis::*;
   |     ^^^^^^^^
   |
   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
@@ -9,7 +9,7 @@ warning: unused import: `nexus::*`
 error[E0277]: the trait bound `NotAState: AggregateState` is not satisfied
   --> tests/macro_compile_fail/aggregate_bad_state.rs:25:28
    |
-25 | #[nexus::aggregate(state = NotAState, error = MyError, id = MyId)]
+25 | #[mnesis::aggregate(state = NotAState, error = MyError, id = MyId)]
    |                            ^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `AggregateState` is not implemented for `NotAState`
@@ -17,8 +17,8 @@ help: the trait `AggregateState` is not implemented for `NotAState`
    |
 19 | struct NotAState;
    | ^^^^^^^^^^^^^^^^
-note: required by a bound in `nexus::Aggregate::State`
-  --> $WORKSPACE/crates/nexus/src/aggregate.rs
+note: required by a bound in `mnesis::Aggregate::State`
+  --> $WORKSPACE/crates/mnesis/src/aggregate.rs
    |
    |     type State: AggregateState;
    |                 ^^^^^^^^^^^^^^ required by this bound in `Aggregate::State`

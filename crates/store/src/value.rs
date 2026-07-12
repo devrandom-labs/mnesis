@@ -316,7 +316,7 @@ impl Metadata {
 }
 
 /// Validated schema version — the wire-format-sized sibling of the kernel's
-/// [`nexus::Version`].
+/// [`mnesis::Version`].
 ///
 /// Invariant: nonzero, fits in `u32` (the wire format's schema-version field).
 ///
@@ -356,7 +356,7 @@ impl SchemaVersion {
     }
 }
 
-impl From<SchemaVersion> for nexus::Version {
+impl From<SchemaVersion> for mnesis::Version {
     /// Widen to the kernel's `Version` (`NonZeroU64`). Total — `NonZeroU32`
     /// always fits in `NonZeroU64`.
     #[allow(
@@ -528,7 +528,7 @@ mod schema_version_tests {
     #[test]
     fn into_version_widens_to_nonzero_u64() {
         let sv = SchemaVersion::from_u32(7).expect("nonzero");
-        let v: nexus::Version = sv.into();
+        let v: mnesis::Version = sv.into();
         assert_eq!(v.as_u64(), 7);
     }
 }
@@ -584,7 +584,7 @@ mod property_tests {
         #[test]
         fn schema_version_widens_to_version(value in 1u32..) {
             let sv = SchemaVersion::from_u32(value).expect("nonzero");
-            let v: nexus::Version = sv.into();
+            let v: mnesis::Version = sv.into();
             prop_assert_eq!(v.as_u64(), u64::from(value));
         }
 
@@ -620,7 +620,7 @@ mod property_tests {
 
     #[test]
     fn schema_version_initial_widens_to_version_one() {
-        let v: nexus::Version = SchemaVersion::INITIAL.into();
+        let v: mnesis::Version = SchemaVersion::INITIAL.into();
         assert_eq!(v.as_u64(), 1);
     }
 

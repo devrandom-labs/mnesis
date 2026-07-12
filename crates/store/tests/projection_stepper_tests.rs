@@ -1,4 +1,4 @@
-//! Relocated inline test mod of `src/projection.rs` (nexus-inmemory is a
+//! Relocated inline test mod of `src/projection.rs` (mnesis-inmemory is a
 //! dev-dependency; type unification with it requires an integration test).
 
 #![cfg(feature = "projection")]
@@ -14,12 +14,12 @@ mod tests {
 
     use core::num::{NonZeroU32, NonZeroU64};
 
-    use nexus::{DomainEvent, Message, Version, version};
+    use mnesis::{DomainEvent, Message, Version, version};
 
-    use nexus_inmemory::InMemorySnapshotStore;
-    use nexus_store::decoded::Decoded;
-    use nexus_store::projection::{Projection, ProjectionError, Projector};
-    use nexus_store::state::{EveryNEvents, Hydrated, SnapshotStore};
+    use mnesis_inmemory::InMemorySnapshotStore;
+    use mnesis_store::decoded::Decoded;
+    use mnesis_store::projection::{Projection, ProjectionError, Projector};
+    use mnesis_store::state::{EveryNEvents, Hydrated, SnapshotStore};
 
     // ── fixtures ────────────────────────────────────────────────────────────
 

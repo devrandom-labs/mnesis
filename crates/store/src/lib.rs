@@ -1,7 +1,7 @@
-//! Persistence edge layer for the nexus event-sourcing kernel.
+//! Persistence edge layer for the mnesis event-sourcing kernel.
 //!
-//! `nexus-store` sits between the pure-domain kernel (`nexus`) and the
-//! storage adapters (`nexus-fjall`, future postgres, etc.). It owns the
+//! `mnesis-store` sits between the pure-domain kernel (`mnesis`) and the
+//! storage adapters (`mnesis-fjall`, future postgres, etc.). It owns the
 //! shapes that cross the kernel↔storage boundary — envelopes, codecs,
 //! event streams, repositories, and snapshot stores — and the wire-format
 //! row builder every adapter is required to use.
@@ -57,7 +57,7 @@
 //!   hydrate from a [`SnapshotStore`] on read and commit on write per a
 //!   [`PersistTrigger`].
 //! - [`projection`] (feature-gated) — [`Projector`] trait (pure fallible
-//!   fold). nexus ships no runner; the loop is consumer-owned (see
+//!   fold). mnesis ships no runner; the loop is consumer-owned (see
 //!   `examples/projection-tokio`).
 //!
 //! # Feature flags
@@ -72,7 +72,7 @@
 //! | `snapshot-json` | `snapshot` + `json` |
 //! | `projection` | `Projector` trait |
 //! | `projection-json` | `projection` + `json` |
-//! | `subscription` | [`Subscription`] catch-up-then-live-tail loop + [`wake`] traits (dep-free; in-process wake impl lives in `nexus-wake`) |
+//! | `subscription` | [`Subscription`] catch-up-then-live-tail loop + [`wake`] traits (dep-free; in-process wake impl lives in `mnesis-wake`) |
 //!
 //! # Design notes
 //!
@@ -81,7 +81,7 @@
 //! single files because each held only a handful of small files with no
 //! cohesion benefit. The boundary that matters is the crate boundary
 //! (kernel-pure → store-persistence → adapters); the boundary that
-//! didn't matter was inside `nexus-store`.
+//! didn't matter was inside `mnesis-store`.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -132,7 +132,7 @@ pub use batch::{BatchSize, BatchSizeError, DEFAULT_BATCH, MAX_BATCH};
 #[cfg(feature = "snapshot")]
 pub use builder::WithSnapshot;
 pub use builder::{NeedsCodec, NoSnapshot, RepositoryBuilder};
-// Re-export `bytes` so downstreams name `nexus_store::bytes::Bytes` to feed
+// Re-export `bytes` so downstreams name `mnesis_store::bytes::Bytes` to feed
 // `Encode` / the value newtypes, sharing *our* version rather than coupling to
 // theirs. Additive (non-breaking).
 pub use bytes;
@@ -163,7 +163,7 @@ pub use import::{
     AbortReason, Atomicity, EventImporter, ImportBlock, ImportError, ImportReport, StreamOutcome,
     StreamReport, StreamSection,
 };
-pub use nexus::Version;
+pub use mnesis::Version;
 #[cfg(feature = "projection")]
 pub use projection::{Projection, ProjectionError, Projector};
 pub use repository::{EventStore, Repository};

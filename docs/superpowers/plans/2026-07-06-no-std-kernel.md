@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make `crates/nexus` (the kernel) build for `no_std` targets (bare-metal ARM + WASM) behind an additive `std` default feature, and move its public error bounds from `std::error::Error` to `core::error::Error` before the 1.0 freeze.
+**Goal:** Make `crates/mnesis` (the kernel) build for `no_std` targets (bare-metal ARM + WASM) behind an additive `std` default feature, and move its public error bounds from `std::error::Error` to `core::error::Error` before the 1.0 freeze.
 
-**Architecture:** The kernel is already heap-free in production and depends only on `arrayvec` + `thiserror` (both no_std-capable). The port is: add `#![cfg_attr(not(feature = "std"), no_std)]`, swap `std::` → `core::` in 4 files, make `thiserror` no_std at the workspace, drop the `workspace-hack` edge from `nexus` (it drags std in), and add two `nix flake check` gates that build the kernel for `thumbv7em-none-eabihf` + `wasm32-unknown-unknown`. Nothing outside `crates/nexus` changes behavior; store/adapter no_std is out of scope (#300/#301/#302).
+**Architecture:** The kernel is already heap-free in production and depends only on `arrayvec` + `thiserror` (both no_std-capable). The port is: add `#![cfg_attr(not(feature = "std"), no_std)]`, swap `std::` → `core::` in 4 files, make `thiserror` no_std at the workspace, drop the `workspace-hack` edge from `mnesis` (it drags std in), and add two `nix flake check` gates that build the kernel for `thumbv7em-none-eabihf` + `wasm32-unknown-unknown`. Nothing outside `crates/mnesis` changes behavior; store/adapter no_std is out of scope (#300/#301/#302).
 
 **Tech Stack:** Rust 2024 (pinned stable 1.95), `fenix` toolchain via `rust-toolchain.toml`, `crane` flake checks, `cargo-hakari` (workspace-hack), `thiserror` 2.0.
 
@@ -40,7 +40,7 @@ targets = ["wasm32-unknown-unknown", "thumbv7em-none-eabihf"]
 
 - [ ] **Step 2: Confirm the target resolves and the no_std build is currently RED**
 
-Run: `nix develop -c cargo build -p nexus --no-default-features --target thumbv7em-none-eabihf`
+Run: `nix develop -c cargo build -p mnesis --no-default-features --target thumbv7em-none-eabihf`
 
 Expected: **FAIL** with errors like `` error[E0463]: can't find crate for `std` `` (the kernel still implicitly links std — `lib.rs` is not yet `#![no_std]`). This is the red baseline the port turns green.
 
@@ -50,7 +50,7 @@ Expected: **FAIL** with errors like `` error[E0463]: can't find crate for `std` 
 
 ```bash
 git add rust-toolchain.toml
-git commit -m "build(nexus): add wasm32 + thumbv7em targets to pinned toolchain (#279)
+git commit -m "build(mnesis): add wasm32 + thumbv7em targets to pinned toolchain (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
@@ -59,14 +59,14 @@ Expected: pre-commit `nix flake check` passes (the std build is unaffected by ad
 
 ---
 
-## Task 2: Make `thiserror` no_std at the workspace and add the `std` feature to `nexus`
+## Task 2: Make `thiserror` no_std at the workspace and add the `std` feature to `mnesis`
 
 **Files:**
 - Modify: `Cargo.toml` (root, line 42)
-- Modify: `crates/nexus/Cargo.toml` (`[features]`)
-- Modify: `crates/nexus-store/Cargo.toml` (line 62)
-- Modify: `crates/nexus-fjall/Cargo.toml` (line 27)
-- Modify: `crates/nexus-postgres/Cargo.toml` (line 20)
+- Modify: `crates/mnesis/Cargo.toml` (`[features]`)
+- Modify: `crates/mnesis-store/Cargo.toml` (line 62)
+- Modify: `crates/mnesis-fjall/Cargo.toml` (line 27)
+- Modify: `crates/mnesis-postgres/Cargo.toml` (line 20)
 
 **Why the ripple:** Cargo workspace inheritance cannot override `default-features` (only `optional`/`features` are inheritable). To let the kernel take `thiserror` without std, the *workspace* declaration must be `default-features = false`; the three std crates then opt back into std explicitly so their behavior is unchanged.
 
@@ -84,14 +84,14 @@ to:
 thiserror = { version = "2.0.18", default-features = false }
 ```
 
-- [ ] **Step 2: Give `nexus` an additive `std` feature that re-enables `thiserror/std`**
+- [ ] **Step 2: Give `mnesis` an additive `std` feature that re-enables `thiserror/std`**
 
-In `crates/nexus/Cargo.toml`, replace the `[features]` block:
+In `crates/mnesis/Cargo.toml`, replace the `[features]` block:
 
 ```toml
 [features]
 default = []
-derive = ["dep:nexus-macros"]
+derive = ["dep:mnesis-macros"]
 testing = []
 ```
 
@@ -103,13 +103,13 @@ default = ["std"]
 # Additive: enabling `std` only ADDS (the std::error::Error bridge via thiserror);
 # disabling it (`--no-default-features`) yields a no_std + core::error::Error kernel.
 std = ["thiserror/std"]
-derive = ["dep:nexus-macros"]
+derive = ["dep:mnesis-macros"]
 testing = []
 ```
 
 - [ ] **Step 3: Keep the three std crates on std (behavior-preserving)**
 
-In each of `crates/nexus-store/Cargo.toml` (line 62), `crates/nexus-fjall/Cargo.toml` (line 27), `crates/nexus-postgres/Cargo.toml` (line 20), change:
+In each of `crates/mnesis-store/Cargo.toml` (line 62), `crates/mnesis-fjall/Cargo.toml` (line 27), `crates/mnesis-postgres/Cargo.toml` (line 20), change:
 
 ```toml
 thiserror = { workspace = true }
@@ -130,8 +130,8 @@ Expected: **PASS** (no behavior change; every std crate still has `thiserror/std
 - [ ] **Step 5: Commit**
 
 ```bash
-git add Cargo.toml crates/nexus/Cargo.toml crates/nexus-store/Cargo.toml crates/nexus-fjall/Cargo.toml crates/nexus-postgres/Cargo.toml
-git commit -m "build: make thiserror no_std at workspace, add nexus std feature (#279)
+git add Cargo.toml crates/mnesis/Cargo.toml crates/mnesis-store/Cargo.toml crates/mnesis-fjall/Cargo.toml crates/mnesis-postgres/Cargo.toml
+git commit -m "build: make thiserror no_std at workspace, add mnesis std feature (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
@@ -140,15 +140,15 @@ Expected: pre-commit `nix flake check` passes, commit succeeds.
 
 ---
 
-## Task 3: Drop the `workspace-hack` edge from `nexus`
+## Task 3: Drop the `workspace-hack` edge from `mnesis`
 
 **Files:**
 - Modify: `.config/hakari.toml`
-- Modify (by tooling): `crates/nexus/Cargo.toml`, `crates/workspace-hack/Cargo.toml`
+- Modify (by tooling): `crates/mnesis/Cargo.toml`, `crates/workspace-hack/Cargo.toml`
 
 **Why:** `workspace-hack` unifies std deps (tokio, sqlx) and every member depends on it — that would drag std into the no_std kernel build. hakari's `final-excludes` removes the edge and the `hakari verify` gate then enforces its *absence*.
 
-- [ ] **Step 1: Exclude `nexus` from workspace-hack**
+- [ ] **Step 1: Exclude `mnesis` from workspace-hack**
 
 In `.config/hakari.toml`, change the existing `[final-excludes]` table from:
 
@@ -163,9 +163,9 @@ to:
 
 ```toml
 [final-excludes]
-# `nexus` is the no_std kernel — it must not depend on the (std) workspace-hack.
+# `mnesis` is the no_std kernel — it must not depend on the (std) workspace-hack.
 # hakari removes the edge; `hakari verify` enforces its absence. (#279)
-workspace-members = ["nexus"]
+workspace-members = ["mnesis"]
 third-party = [
   { name = "futures-core" },
 ]
@@ -176,47 +176,47 @@ third-party = [
 Run: `nix develop -c cargo hakari generate`
 Then: `nix develop -c cargo hakari manage-deps`
 
-(`generate` rewrites `crates/workspace-hack/Cargo.toml` without `nexus`'s contributions; `manage-deps` removes the `workspace-hack` line from `crates/nexus/Cargo.toml`.)
+(`generate` rewrites `crates/workspace-hack/Cargo.toml` without `mnesis`'s contributions; `manage-deps` removes the `workspace-hack` line from `crates/mnesis/Cargo.toml`.)
 
-- [ ] **Step 3: Verify hakari is consistent and `nexus` no longer depends on workspace-hack**
+- [ ] **Step 3: Verify hakari is consistent and `mnesis` no longer depends on workspace-hack**
 
 Run: `nix develop -c cargo hakari verify`
 Expected: **PASS** (exit 0).
 
-Run: `grep -n "workspace-hack" crates/nexus/Cargo.toml`
+Run: `grep -n "workspace-hack" crates/mnesis/Cargo.toml`
 Expected: **no output** (the dependency line is gone).
 
 - [ ] **Step 4: Verify the std build still works**
 
-Run: `nix develop -c cargo build -p nexus`
+Run: `nix develop -c cargo build -p mnesis`
 Expected: **PASS**.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .config/hakari.toml crates/nexus/Cargo.toml crates/workspace-hack/Cargo.toml
-git commit -m "build(nexus): exclude kernel from workspace-hack for no_std (#279)
+git add .config/hakari.toml crates/mnesis/Cargo.toml crates/workspace-hack/Cargo.toml
+git commit -m "build(mnesis): exclude kernel from workspace-hack for no_std (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
 
-Expected: pre-commit `nix flake check` passes (`nexus-hakari` check green), commit succeeds.
+Expected: pre-commit `nix flake check` passes (`mnesis-hakari` check green), commit succeeds.
 
 ---
 
 ## Task 4: Port the kernel to no_std (the red → green step)
 
 **Files:**
-- Modify: `crates/nexus/src/lib.rs`
-- Modify: `crates/nexus/src/aggregate.rs:6-10`
-- Modify: `crates/nexus/src/message.rs:1`
-- Modify: `crates/nexus/src/id.rs:1-2`
-- Modify: `crates/nexus/src/version.rs:1-3`
-- Modify: `crates/nexus/src/testing.rs` (add one import)
+- Modify: `crates/mnesis/src/lib.rs`
+- Modify: `crates/mnesis/src/aggregate.rs:6-10`
+- Modify: `crates/mnesis/src/message.rs:1`
+- Modify: `crates/mnesis/src/id.rs:1-2`
+- Modify: `crates/mnesis/src/version.rs:1-3`
+- Modify: `crates/mnesis/src/testing.rs` (add one import)
 
 - [ ] **Step 1: Make `lib.rs` no_std with allocator-free production code**
 
-At the very top of `crates/nexus/src/lib.rs` (before the `mod` declarations), add:
+At the very top of `crates/mnesis/src/lib.rs` (before the `mod` declarations), add:
 
 ```rust
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -229,7 +229,7 @@ extern crate alloc;
 
 - [ ] **Step 2: Swap `std::` → `core::` in `aggregate.rs`**
 
-In `crates/nexus/src/aggregate.rs`, change lines 6–10 from:
+In `crates/mnesis/src/aggregate.rs`, change lines 6–10 from:
 
 ```rust
 use std::error::Error;
@@ -253,7 +253,7 @@ use core::num::NonZeroUsize;
 
 - [ ] **Step 3: Swap `std::` → `core::` in `message.rs`**
 
-In `crates/nexus/src/message.rs`, change line 1 from:
+In `crates/mnesis/src/message.rs`, change line 1 from:
 
 ```rust
 use std::fmt::Debug;
@@ -267,7 +267,7 @@ use core::fmt::Debug;
 
 - [ ] **Step 4: Swap `std::` → `core::` in `id.rs`**
 
-In `crates/nexus/src/id.rs`, change lines 1–2 from:
+In `crates/mnesis/src/id.rs`, change lines 1–2 from:
 
 ```rust
 use std::fmt::{Debug, Display};
@@ -283,7 +283,7 @@ use core::hash::Hash;
 
 - [ ] **Step 5: Swap `std::` → `core::` in `version.rs`**
 
-In `crates/nexus/src/version.rs`, change lines 1–3 from:
+In `crates/mnesis/src/version.rs`, change lines 1–3 from:
 
 ```rust
 use std::fmt;
@@ -301,7 +301,7 @@ use core::num::NonZeroU64;
 
 - [ ] **Step 6: Point `testing.rs` at `alloc::vec::Vec`**
 
-In `crates/nexus/src/testing.rs`, add this import at the top of the file with the other `use` statements (the fixture uses `Vec` / `Vec::new()` in ~10 places; a single import resolves them all):
+In `crates/mnesis/src/testing.rs`, add this import at the top of the file with the other `use` statements (the fixture uses `Vec` / `Vec::new()` in ~10 places; a single import resolves them all):
 
 ```rust
 use alloc::vec::Vec;
@@ -312,32 +312,32 @@ use alloc::vec::Vec;
 Run:
 
 ```bash
-nix develop -c bash -c "grep -n 'std::' crates/nexus/src/{aggregate,message,id,version}.rs | grep -vE '///|impl std::fmt::Display for Ctr|use std::panic'"
+nix develop -c bash -c "grep -n 'std::' crates/mnesis/src/{aggregate,message,id,version}.rs | grep -vE '///|impl std::fmt::Display for Ctr|use std::panic'"
 ```
 
 Expected: only doctest lines (prefixed `///`) — no bare production `use std::` or inline `std::` outside `#[cfg(test)]`. If a production line appears, swap its `std::` → `core::`.
 
 - [ ] **Step 8: Verify the std build + tests are unchanged**
 
-Run: `nix develop -c cargo build -p nexus --all-features`
+Run: `nix develop -c cargo build -p mnesis --all-features`
 Expected: **PASS**.
 
-Run: `nix develop -c cargo test -p nexus --features testing,derive`
+Run: `nix develop -c cargo test -p mnesis --features testing,derive`
 Expected: **PASS** (all existing kernel tests green — proves the `core::` swap is semantics-preserving).
 
 - [ ] **Step 9: Verify the no_std builds are now GREEN (red → green)**
 
-Run: `nix develop -c cargo build -p nexus --no-default-features --target thumbv7em-none-eabihf`
+Run: `nix develop -c cargo build -p mnesis --no-default-features --target thumbv7em-none-eabihf`
 Expected: **PASS** (was FAIL in Task 1 Step 2).
 
-Run: `nix develop -c cargo build -p nexus --no-default-features --target wasm32-unknown-unknown`
+Run: `nix develop -c cargo build -p mnesis --no-default-features --target wasm32-unknown-unknown`
 Expected: **PASS**.
 
 - [ ] **Step 10: Commit**
 
 ```bash
-git add crates/nexus/src/lib.rs crates/nexus/src/aggregate.rs crates/nexus/src/message.rs crates/nexus/src/id.rs crates/nexus/src/version.rs crates/nexus/src/testing.rs
-git commit -m "feat(nexus)!: port kernel to no_std, error bounds to core::error::Error (#279)
+git add crates/mnesis/src/lib.rs crates/mnesis/src/aggregate.rs crates/mnesis/src/message.rs crates/mnesis/src/id.rs crates/mnesis/src/version.rs crates/mnesis/src/testing.rs
+git commit -m "feat(mnesis)!: port kernel to no_std, error bounds to core::error::Error (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
@@ -351,35 +351,35 @@ Expected: pre-commit `nix flake check` passes, commit succeeds.
 **Files:**
 - Modify: `flake.nix` (add two entries to the `checks` attrset)
 
-- [ ] **Step 1: Add `nexus-wasm` and `nexus-nostd` checks**
+- [ ] **Step 1: Add `mnesis-wasm` and `mnesis-nostd` checks**
 
-In `flake.nix`, inside the `checks = { ... }` attrset (e.g. right after the `nexus-hakari` check and before the closing `};` of `checks`), add:
+In `flake.nix`, inside the `checks = { ... }` attrset (e.g. right after the `mnesis-hakari` check and before the closing `};` of `checks`), add:
 
 ```nix
           # no_std gates — CI is just `nix flake check`, so these ride along.
-          # `nexus-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
+          # `mnesis-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
           # std-free bare-metal target. `wasm32-unknown-unknown` still ships std,
           # so it alone would not catch a std leak. Both build --no-default-features.
-          nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-wasm";
+            pname = "mnesis-wasm";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
+              cargo build -p mnesis --target wasm32-unknown-unknown --no-default-features
             '';
           });
 
-          nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-nostd = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-nostd";
+            pname = "mnesis-nostd";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p mnesis --target thumbv7em-none-eabihf --no-default-features
             '';
           });
 ```
 
 - [ ] **Step 2: Build both new checks directly**
 
-Run: `nix build .#checks.aarch64-darwin.nexus-nostd .#checks.aarch64-darwin.nexus-wasm -L`
+Run: `nix build .#checks.aarch64-darwin.mnesis-nostd .#checks.aarch64-darwin.mnesis-wasm -L`
 
 Expected: **both build successfully** (no `std` errors).
 
@@ -389,12 +389,12 @@ Expected: **both build successfully** (no `std` errors).
 
 ```bash
 git add flake.nix
-git commit -m "ci(nexus): gate no_std kernel build on thumbv7em + wasm32 (#279)
+git commit -m "ci(mnesis): gate no_std kernel build on thumbv7em + wasm32 (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
 
-Expected: pre-commit `nix flake check` now includes `nexus-wasm` + `nexus-nostd` and passes.
+Expected: pre-commit `nix flake check` now includes `mnesis-wasm` + `mnesis-nostd` and passes.
 
 ---
 
@@ -402,7 +402,7 @@ Expected: pre-commit `nix flake check` now includes `nexus-wasm` + `nexus-nostd`
 
 **Files:**
 - Verify (adjust only if inaccurate): `README.md`
-- Verify only: `crates/nexus-macros/src/lib.rs`
+- Verify only: `crates/mnesis-macros/src/lib.rs`
 
 - [ ] **Step 1: Confirm the embedded/WASM README claim is present and accurate**
 
@@ -410,11 +410,11 @@ Run: `grep -in "embedded\|wasm\|no_std\|no-std\|zero-std\|allocation" README.md`
 
 Expected: the paragraph claiming the kernel compiles for embedded/WASM exists. It is now CI-backed, so **keep it**. Only if the wording overstates scope (e.g. implies the *store* is no_std) trim it to the kernel — for example ensure it reads as "the **kernel** compiles for embedded and WASM targets," not the whole framework. If you edit, `git add README.md`.
 
-- [ ] **Step 2: Confirm the `#[nexus::aggregate]` macro emits no `std::` paths**
+- [ ] **Step 2: Confirm the `#[mnesis::aggregate]` macro emits no `std::` paths**
 
-Run: `grep -n "std ::\|std::" crates/nexus-macros/src/lib.rs | grep -v "use std::collections"`
+Run: `grep -n "std ::\|std::" crates/mnesis-macros/src/lib.rs | grep -v "use std::collections"`
 
-Expected: **no `std::` inside `quote!` output** (the only `use std::collections` is the macro's own host-side code; generated code already uses `::core::` / `::nexus::`). If any generated path uses `std::`, change it to `::core::`. (The `DomainEvent` and `transforms` macros were already verified `::core::`-clean during design.)
+Expected: **no `std::` inside `quote!` output** (the only `use std::collections` is the macro's own host-side code; generated code already uses `::core::` / `::mnesis::`). If any generated path uses `std::`, change it to `::core::`. (The `DomainEvent` and `transforms` macros were already verified `::core::`-clean during design.)
 
 - [ ] **Step 3: Final acceptance — full gate**
 
@@ -428,7 +428,7 @@ The pre-commit hook has run `nix flake check` on every commit, so the gate is al
 
 ```bash
 git add README.md
-git commit -m "docs(nexus): scope embedded/WASM claim to the kernel, now CI-backed (#279)
+git commit -m "docs(mnesis): scope embedded/WASM claim to the kernel, now CI-backed (#279)
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
@@ -441,16 +441,16 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
 ```bash
 git push -u origin feat/279-no-std-kernel
-gh pr create --title "feat(nexus)!: port kernel to no_std (core+alloc) (#279)" --body "$(cat <<'EOF'
+gh pr create --title "feat(mnesis)!: port kernel to no_std (core+alloc) (#279)" --body "$(cat <<'EOF'
 Closes #279.
 
-Ports `crates/nexus` to `no_std` behind an additive `std` default feature, and moves public error bounds from `std::error::Error` to `core::error::Error` (freeze-relevant — breaking to do after 1.0).
+Ports `crates/mnesis` to `no_std` behind an additive `std` default feature, and moves public error bounds from `std::error::Error` to `core::error::Error` (freeze-relevant — breaking to do after 1.0).
 
 ## What
 - `#![cfg_attr(not(feature = "std"), no_std)]`; production kernel is pure `core` (no allocator), `alloc` only under `test`/`testing`.
 - `std::` → `core::` in `aggregate.rs`, `message.rs`, `id.rs`, `version.rs`.
 - `thiserror` no_std at the workspace; std crates opt back in via `features = ["std"]`.
-- `nexus` excluded from `workspace-hack` (hakari `final-excludes`) so no std leaks in.
+- `mnesis` excluded from `workspace-hack` (hakari `final-excludes`) so no std leaks in.
 - Toolchain gains `wasm32-unknown-unknown` + `thumbv7em-none-eabihf`; two `nix flake check` gates build the kernel `--no-default-features` for both.
 
 ## Scope

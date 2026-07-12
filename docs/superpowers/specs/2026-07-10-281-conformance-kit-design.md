@@ -1,21 +1,21 @@
 # Adapter Conformance Kit — Design (#281)
 
 **Date:** 2026-07-10
-**Issue:** [#281] Promote `nexus-store-testing` into the executable store-contract spec
-**Milestone:** 1 — Nexus: Pre-Freeze (1.0 blockers)
+**Issue:** [#281] Promote `mnesis-store-testing` into the executable store-contract spec
+**Milestone:** 1 — Mnesis: Pre-Freeze (1.0 blockers)
 
 ## Problem
 
 The 1.0 freeze pins the store adapter contract (`RawEventStore` + `WakeSource` +
 `AtomicAppend` + subscription semantics). Today that contract lives implicitly in
-`nexus-store-testing` (two suites: per-stream `EventStream`, `$all` read path)
+`mnesis-store-testing` (two suites: per-stream `EventStream`, `$all` read path)
 plus the fjall/postgres/in-memory test suites. Third parties writing adapters
 after the freeze would re-discover every edge case (GlobalSeq semantics,
 wake-loss races, inclusive-vs-exclusive cursor bounds) as production bugs.
 
 ## Goal
 
-`nexus-store-testing` becomes the **public, executable spec** of the store
+`mnesis-store-testing` becomes the **public, executable spec** of the store
 adapter contract: a `conformance!` macro entry point over public per-check
 functions, structured by the 4 test categories, documented by a "writing a
 store adapter" rustdoc page, proven by a toy adapter written against only
@@ -49,7 +49,7 @@ Core factory: `Fn() -> Fut<Output = S>` with `S: RawEventStore + WakeSource` —
 one fresh, empty store per check (the pattern the `$all` suite already
 proved). `WakeSource` is **required in core**: subscription semantics are part
 of the frozen contract, and a third party gets an in-process impl for free by
-embedding `nexus-wake::StreamNotifiers` (the guide teaches exactly this).
+embedding `mnesis-wake::StreamNotifiers` (the guide teaches exactly this).
 
 ### 3. Macro entry points
 
@@ -58,13 +58,13 @@ check under category modules, so nextest reports every contract rule as its
 own named test:
 
 ```rust
-nexus_store_testing::conformance! {
+mnesis_store_testing::conformance! {
     factory: || async { InMemoryStore::new() },
     // optional (postgres): skip_unless: || std::env::var("DATABASE_URL").is_ok(),
 }
-nexus_store_testing::conformance_atomic_append! { factory: ... } // S: + AtomicAppend
-nexus_store_testing::conformance_snapshot! { factory: ... }      // feature "snapshot"
-nexus_store_testing::conformance_lifecycle! {                    // persistent adapters
+mnesis_store_testing::conformance_atomic_append! { factory: ... } // S: + AtomicAppend
+mnesis_store_testing::conformance_snapshot! { factory: ... }      // feature "snapshot"
+mnesis_store_testing::conformance_lifecycle! {                    // persistent adapters
     open:   || async { /* -> (store, ctx) */ },
     reopen: |ctx| async { /* drop handle, reopen same storage -> (store, ctx) */ },
 }
@@ -190,6 +190,6 @@ with the debug repr; *expected* errors (conflicts) are matched structurally.
 - Export/import (`StreamLister`/`EventImporter`) conformance — separate
   capability, already proven on fjall via #220; can be a follow-up macro.
 - A conformance suite for `WakeSource` implementations in isolation
-  (`nexus-wake-nostd`'s `GlobalWake` is exercised through its own crate's
+  (`mnesis-wake-nostd`'s `GlobalWake` is exercised through its own crate's
   tests).
 - Crash-injection / corruption lifecycle tests — adapter-specific by nature.

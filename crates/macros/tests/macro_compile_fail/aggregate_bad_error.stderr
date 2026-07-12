@@ -1,7 +1,7 @@
 error[E0277]: the trait bound `NotAnError: std::error::Error` is not satisfied
   --> tests/macro_compile_fail/aggregate_bad_error.rs:34:40
    |
-34 | #[nexus::aggregate(state = St, error = NotAnError, id = MyId)]
+34 | #[mnesis::aggregate(state = St, error = NotAnError, id = MyId)]
    |                                        ^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `std::error::Error` is not implemented for `NotAnError`
@@ -9,8 +9,8 @@ help: the trait `std::error::Error` is not implemented for `NotAnError`
    |
 32 | struct NotAnError;
    | ^^^^^^^^^^^^^^^^^
-note: required by a bound in `nexus::Aggregate::Error`
-  --> $WORKSPACE/crates/nexus/src/aggregate.rs
+note: required by a bound in `mnesis::Aggregate::Error`
+  --> $WORKSPACE/crates/mnesis/src/aggregate.rs
    |
    |     type Error: Error + Send + Sync + Debug + 'static;
    |                 ^^^^^ required by this bound in `Aggregate::Error`

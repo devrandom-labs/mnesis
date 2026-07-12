@@ -19,9 +19,9 @@ use std::sync::Arc;
 
 use bytes::Bytes;
 use futures::future::join_all;
-use nexus::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
-use nexus_inmemory::InMemoryStore;
-use nexus_store::{
+use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::{
     CommandRepository, Decode, Encode, ExecuteError, PersistedEnvelope, Repository, Store,
 };
 use tokio::sync::Barrier;
@@ -119,7 +119,7 @@ impl Decode<CtrEvent> for CtrCodec {
     }
 }
 
-type Repo = nexus_store::EventStore<InMemoryStore, CtrCodec, Counter>;
+type Repo = mnesis_store::EventStore<InMemoryStore, CtrCodec, Counter>;
 
 fn new_repo() -> Repo {
     Store::new(InMemoryStore::new())

@@ -1,8 +1,8 @@
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 
-use nexus::Version;
-use nexus_store::upcasting::EventMorsel;
+use mnesis::Version;
+use mnesis_store::upcasting::EventMorsel;
 
 #[derive(Debug)]
 struct TestError;
@@ -16,7 +16,7 @@ impl std::error::Error for TestError {}
 #[allow(dead_code, reason = "referenced by macro attribute only")]
 struct TestAggregate;
 
-#[nexus_macros::transforms(aggregate = TestAggregate, error = TestError)]
+#[mnesis_macros::transforms(aggregate = TestAggregate, error = TestError)]
 impl TestTransforms {
     #[transform(event = "OrderCreated", from = 1, to = 2)]
     fn created_v1_to_v2(payload: &[u8]) -> Result<Vec<u8>, TestError> {

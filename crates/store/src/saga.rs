@@ -1,6 +1,6 @@
 //! Store-side bounded saga repository — the saga analogue of [`Repository`].
 //!
-//! Because [`Saga`](nexus::Saga) is an [`Aggregate`](nexus::Aggregate), the
+//! Because [`Saga`](mnesis::Saga) is an [`Aggregate`](mnesis::Aggregate), the
 //! existing [`Repository`] already loads and saves sagas. This module adds only
 //! the saga-specific seam: [`SagaRepository`] (`react → save → project` as one
 //! callable bounded transaction), the version-pinned capability-token return
@@ -16,7 +16,7 @@ use core::iter::Chain;
 use core::option;
 
 use arrayvec::ArrayVec;
-use nexus::{AggregateRoot, DomainEvent, React, Saga, Version};
+use mnesis::{AggregateRoot, DomainEvent, React, Saga, Version};
 
 use crate::conflict::ConflictPredicate;
 use crate::repository::{Repository, first_persisted_version};
@@ -121,7 +121,7 @@ impl<S: Saga> fmt::Debug for ProjectedIntent<S> {
 }
 
 /// A bounded, **heap-free** collection of [`ProjectedIntent`]s — at most
-/// `N + 1` (the producing [`Events<_, N>`](nexus::Events) capacity).
+/// `N + 1` (the producing [`Events<_, N>`](mnesis::Events) capacity).
 ///
 /// Mirrors `Events`' first-plus-rest layout to hit capacity `N + 1` without the
 /// unstable `generic_const_exprs` (`{ N + 1 }`). `first` is `Option` because a
@@ -371,7 +371,7 @@ impl<S: Saga, R: Repository<S>> SagaRepository<S> for R {}
 mod error_tests {
     use super::SagaError;
     use crate::error::StoreError;
-    use nexus::{ErrorId, Version};
+    use mnesis::{ErrorId, Version};
 
     type TestStoreError =
         StoreError<std::io::Error, std::convert::Infallible, std::convert::Infallible>;
@@ -403,7 +403,7 @@ mod error_tests {
 #[cfg(test)]
 mod projected_intents_tests {
     use super::{ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter};
-    use nexus::{Aggregate, AggregateState, DomainEvent, Events, Message, React, Saga, Version};
+    use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Message, React, Saga, Version};
 
     // Minimal saga purely to instantiate the generic collection.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]

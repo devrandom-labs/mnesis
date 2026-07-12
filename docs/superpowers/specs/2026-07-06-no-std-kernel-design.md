@@ -1,8 +1,8 @@
 # Design: `no_std` kernel port (#279)
 
-**Issue:** [#279](https://github.com/devrandom-labs/nexus/issues/279) — `[freeze][T1] no_std kernel: port `nexus` to core+alloc`
-**Milestone:** 1 — Nexus: Pre-Freeze (1.0 blockers)
-**Scope:** `crates/nexus` only. Store/adapter no_std is out of scope (tracked as #300 → #301 → #302).
+**Issue:** [#279](https://github.com/devrandom-labs/mnesis/issues/279) — `[freeze][T1] no_std kernel: port `mnesis` to core+alloc`
+**Milestone:** 1 — Mnesis: Pre-Freeze (1.0 blockers)
+**Scope:** `crates/mnesis` only. Store/adapter no_std is out of scope (tracked as #300 → #301 → #302).
 **Decision:** Option A (port the kernel) — chosen over Option B (drop the IoT claim). Aligns with the IoT/mobile-first target and unblocks Bombay-SDK #7.
 
 ---
@@ -14,7 +14,7 @@ The port is mechanical because the kernel is already heap- and std-light. Verifi
 - **Production kernel code has no heap use** — every `Vec`/`vec!`/`Box`/`String` is in `#[cfg(test)]` code or the `testing` fixture. Dependencies are `arrayvec` (already `default-features = false`, no_std) and `thiserror` (no_std-capable via `default-features = false`).
 - **The std sweep touches only 4 files** — `aggregate.rs`, `message.rs`, `id.rs`, `version.rs`. `error.rs`, `error_id.rs`, `event.rs`, `events.rs`, `saga.rs`, `closing_the_books.rs` have **zero** non-doc `std::` usage.
 - **The freeze-relevant symbol is `std::error::Error`** in `aggregate.rs`'s public trait bounds. Switching to `core::error::Error` (stable since Rust 1.81, under our 1.95 MSRV) after 1.0 would be a breaking change — hence pre-freeze.
-- **`nexus-macros` generated code is already `::core::`-clean** (`::core::option::Option`, `::core::result::Result`, `::nexus::…`). Its own `use std::collections` is host-side proc-macro code, not emitted output. *(Verify the `#[nexus::aggregate]` output too during implementation.)*
+- **`mnesis-macros` generated code is already `::core::`-clean** (`::core::option::Option`, `::core::result::Result`, `::mnesis::…`). Its own `use std::collections` is host-side proc-macro code, not emitted output. *(Verify the `#[mnesis::aggregate]` output too during implementation.)*
 - **Toolchain mechanism is proven in-repo** — the sibling `cesr` crate pins the *identical* `1.95.0` channel with the *identical* fenix `sha256` and adds `targets = ["wasm32-unknown-unknown"]` to its `rust-toolchain.toml`; its `cesr-wasm` flake check builds `--target wasm32-unknown-unknown`. fenix's `fromToolchainFile` honors the toolchain file's `targets` field, and the `sha256` (channel-manifest hash) is unchanged by adding targets.
 
 ## 2. Design
@@ -22,11 +22,11 @@ The port is mechanical because the kernel is already heap- and std-light. Verifi
 ### 2.1 Feature architecture — additive `std`, default-on
 
 ```toml
-# crates/nexus/Cargo.toml
+# crates/mnesis/Cargo.toml
 [features]
 default = ["std"]
 std = ["thiserror/std"]   # additive: enabling only adds; never removes API
-derive = ["dep:nexus-macros"]
+derive = ["dep:mnesis-macros"]
 testing = []
 ```
 
@@ -66,8 +66,8 @@ Doctests may keep `use std::…` — they compile as separate std test binaries 
 Cargo **workspace dependency inheritance cannot override `default-features`** (verified against the Cargo reference — only `optional` and `features` are inheritable). So to make the kernel's `thiserror` no_std:
 
 - Root `Cargo.toml`: `thiserror = { version = "2.0.18", default-features = false }`.
-- `nexus`: `std = ["thiserror/std"]` (already above); its dep stays `thiserror = { workspace = true }`.
-- `nexus-store`, `nexus-fjall`, `nexus-postgres`: add `features = ["std"]` to their `thiserror` dep **to preserve today's behavior exactly**.
+- `mnesis`: `std = ["thiserror/std"]` (already above); its dep stays `thiserror = { workspace = true }`.
+- `mnesis-store`, `mnesis-fjall`, `mnesis-postgres`: add `features = ["std"]` to their `thiserror` dep **to preserve today's behavior exactly**.
 
 This is a necessary, behavior-preserving cross-crate change even though the card is "kernel-only." *Verification note:* since Rust 1.81 `std::error::Error` **is** `core::error::Error` (a re-export), the std crates may compile unchanged without `features = ["std"]`; add it only where dropping it actually breaks a build (measure, don't assume).
 
@@ -84,18 +84,18 @@ targets = ["wasm32-unknown-unknown", "thumbv7em-none-eabihf"]
 Mirror the `cesr-wasm` / `postgresTests` crane pattern. Both are `checks` entries, so a plain `nix flake check` runs them — no CI-only steps.
 
 ```nix
-nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
+mnesis-wasm = craneLib.mkCargoDerivation (commonArgs // {
   inherit cargoArtifacts;
-  pname = "nexus-wasm";
+  pname = "mnesis-wasm";
   buildPhaseCargoCommand = ''
-    cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
+    cargo build -p mnesis --target wasm32-unknown-unknown --no-default-features
   '';
 });
-nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
+mnesis-nostd = craneLib.mkCargoDerivation (commonArgs // {
   inherit cargoArtifacts;
-  pname = "nexus-nostd";
+  pname = "mnesis-nostd";
   buildPhaseCargoCommand = ''
-    cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
+    cargo build -p mnesis --target thumbv7em-none-eabihf --no-default-features
   '';
 });
 ```
@@ -109,21 +109,21 @@ nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
 ```toml
 # .config/hakari.toml
 [final-excludes]
-workspace-members = ["nexus"]
+workspace-members = ["mnesis"]
 third-party = [ { name = "futures-core" } ]   # existing
 ```
 
-`cargo hakari manage-deps` then **removes** the `workspace-hack` edge from `nexus`, and `hakari verify` enforces its *absence* — the gate stays green. The kernel's dependency closure becomes just `arrayvec` + `thiserror` (+ the host-only `nexus-macros`).
+`cargo hakari manage-deps` then **removes** the `workspace-hack` edge from `mnesis`, and `hakari verify` enforces its *absence* — the gate stays green. The kernel's dependency closure becomes just `arrayvec` + `thiserror` (+ the host-only `mnesis-macros`).
 
 ### 2.9 README
 
-Keep the embedded/WASM paragraph — now backed by the green `nexus-wasm` + `nexus-nostd` flake checks rather than aspirational.
+Keep the embedded/WASM paragraph — now backed by the green `mnesis-wasm` + `mnesis-nostd` flake checks rather than aspirational.
 
 ## 3. Testing strategy
 
 This is a build/toolchain + type-bound change, so the primary test **is the build itself**:
 
-1. **The no_std build gates** (`nexus-wasm`, `nexus-nostd`) — these fail if any std leaks into the kernel. This is the defensive-boundary test for the no_std contract.
+1. **The no_std build gates** (`mnesis-wasm`, `mnesis-nostd`) — these fail if any std leaks into the kernel. This is the defensive-boundary test for the no_std contract.
 2. **Existing kernel test suite** — runs unchanged on the std default path via `nix flake check` nextest (sequence/lifecycle/property tests for aggregate/saga/events already exist). No behavior change is expected; a green suite proves the `core::` swap is semantics-preserving.
 3. **`trybuild` / doctest** — unchanged; compile on std.
 
@@ -132,9 +132,9 @@ No new runtime tests are required — there is no new runtime behavior, only a n
 ## 4. Risks & verification (measure, don't assume)
 
 - [ ] `thiserror` no_std actually compiles the kernel error types under `--no-default-features` (thiserror 2.0.18 has exactly one feature, `std`, default-on — verified via docs.rs).
-- [ ] `#[nexus::aggregate]` macro output is `::core::`-clean (DomainEvent/transforms already are).
+- [ ] `#[mnesis::aggregate]` macro output is `::core::`-clean (DomainEvent/transforms already are).
 - [ ] The two flake checks pass — proves no accidental std usage remains.
-- [ ] `hakari verify` passes with `nexus` in `final-excludes`.
+- [ ] `hakari verify` passes with `mnesis` in `final-excludes`.
 - [ ] Whether std crates need explicit `thiserror` `features = ["std"]` (may be a no-op post-1.81).
 
 ## 5. Acceptance (from #279)
@@ -147,8 +147,8 @@ No new runtime tests are required — there is no new runtime behavior, only a n
 
 Full store no_std is a separate arc, tracked as pre-freeze follow-ups:
 
-- **#300** — extract `StreamNotifiers` → `nexus-wake` (tokio out of `nexus-store`).
-- **#301** — port `nexus-store` to no_std + alloc; store public error bounds → `core::error::Error`.
+- **#300** — extract `StreamNotifiers` → `mnesis-wake` (tokio out of `mnesis-store`).
+- **#301** — port `mnesis-store` to no_std + alloc; store public error bounds → `core::error::Error`.
 - **#302** — no_std `WakeSource` bridge for on-device live-tail subscriptions.
 
-Key finding underpinning that split: `nexus-store` production code is already no_std+alloc-clean **except** for tokio, which is confined to `notify.rs` behind the `subscription` feature and abstracted behind the `WakeSource` trait.
+Key finding underpinning that split: `mnesis-store` production code is already no_std+alloc-clean **except** for tokio, which is confined to `notify.rs` behind the `subscription` feature and abstracted behind the `WakeSource` trait.

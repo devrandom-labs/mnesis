@@ -1,10 +1,10 @@
-// examples/store-inmemory — demonstrates all nexus-store traits with an
+// examples/store-inmemory — demonstrates all mnesis-store traits with an
 // in-memory backend: Codec, RawEventStore, EventStream, plain-function
 // upcasters, and the PendingEnvelope typestate builder. The final step
 // shows the substrate path: `Store::raw()` + `map_err` + `try_fold`
 // composing a typed pipeline over the lending cursor.
 //
-// Run with: cargo run -p nexus-example-store-inmemory
+// Run with: cargo run -p mnesis-example-store-inmemory
 
 // Relaxed lints for example code — production crates should NOT do this.
 #![allow(clippy::unwrap_used, reason = "example code uses unwrap for brevity")]
@@ -24,12 +24,12 @@
 )]
 
 use futures::{StreamExt, TryStreamExt};
-use nexus::{Version, version};
-use nexus_inmemory::InMemoryStore;
-use nexus_store::Store;
-use nexus_store::store::RawEventStore;
-use nexus_store::upcasting::EventMorsel;
-use nexus_store::{Decode, Encode, StreamKey, pending_envelope};
+use mnesis::{Version, version};
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::Store;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::upcasting::EventMorsel;
+use mnesis_store::{Decode, Encode, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -73,7 +73,7 @@ enum TodoEvent {
 impl TodoEvent {
     /// Returns the event type name used in the store.
     ///
-    /// In a real nexus application, you'd derive `DomainEvent` and get
+    /// In a real mnesis application, you'd derive `DomainEvent` and get
     /// this automatically. Here we do it by hand.
     const fn event_type(&self) -> &'static str {
         match self {
@@ -124,7 +124,7 @@ impl Decode<TodoEvent> for JsonCodec {
 
     fn decode<'a>(
         &'a self,
-        env: &'a nexus_store::PersistedEnvelope,
+        env: &'a mnesis_store::PersistedEnvelope,
     ) -> Result<TodoEvent, Self::Error> {
         // In a real system you might dispatch on `event_type` to pick
         // different structs. Here our enum is self-describing via serde,
@@ -171,7 +171,7 @@ fn rename_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, std::conver
 
 #[tokio::main]
 async fn main() {
-    println!("=== nexus-store in-memory example ===");
+    println!("=== mnesis-store in-memory example ===");
     println!();
 
     // --- Setup ---
@@ -215,7 +215,7 @@ async fn main() {
 
     // --- Step 3: Build PendingEnvelopes ---
     println!("Step 3: Build PendingEnvelopes (typestate builder)");
-    let mut envelopes: Vec<nexus_store::envelope::PendingEnvelope> = Vec::new();
+    let mut envelopes: Vec<mnesis_store::envelope::PendingEnvelope> = Vec::new();
     let versions = Version::run(Version::INITIAL, encoded.len()).expect("version overflow");
     for (version, (payload, event_type)) in versions.zip(encoded.iter()) {
         let envelope = pending_envelope(version)
@@ -325,7 +325,7 @@ async fn main() {
         }
 
         let upcast_env =
-            nexus_store::PersistedEnvelope::for_decode(upcasted.event_type(), upcasted.payload())
+            mnesis_store::PersistedEnvelope::for_decode(upcasted.event_type(), upcasted.payload())
                 .expect("wire build_row ok");
         let decoded = codec.decode(&upcast_env).expect("decode should succeed");
         println!("  version={version}: {decoded:?}");
@@ -395,5 +395,5 @@ async fn main() {
     println!("  Substrate fold: count={count}, last_title={last_title:?}");
     println!();
 
-    println!("=== Done! All nexus-store traits demonstrated. ===");
+    println!("=== Done! All mnesis-store traits demonstrated. ===");
 }

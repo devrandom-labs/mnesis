@@ -1,4 +1,4 @@
-//! Adversarial input tests for nexus-store.
+//! Adversarial input tests for mnesis-store.
 //!
 //! Stresses the builder and envelope types with edge-case inputs:
 //! Unicode, large payloads, path traversal, exotic metadata, etc.
@@ -25,9 +25,9 @@
     reason = "tests use as casts for index-to-byte conversions"
 )]
 
-use nexus::Version;
-use nexus_store::envelope::PersistedEnvelope;
-use nexus_store::pending_envelope;
+use mnesis::Version;
+use mnesis_store::envelope::PersistedEnvelope;
+use mnesis_store::pending_envelope;
 
 fn build_persisted(version: Version, event_type: &str, payload: &[u8]) -> PersistedEnvelope {
     let mut buf = Vec::with_capacity(event_type.len() + payload.len());
@@ -39,7 +39,7 @@ fn build_persisted(version: Version, event_type: &str, payload: &[u8]) -> Persis
     PersistedEnvelope::try_new(
         version,
         value,
-        nexus_store::value::SchemaVersion::INITIAL,
+        mnesis_store::value::SchemaVersion::INITIAL,
         0..et_end,
         et_end..pl_end,
         None,

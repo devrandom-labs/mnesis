@@ -9,8 +9,8 @@ use fjall::{
     CompressionType, KeyspaceCreateOptions, Readable, SingleWriterTxKeyspace, SingleWriterWriteTx,
     Slice,
 };
-use nexus::ErrorId;
-use nexus_store::StreamKey;
+use mnesis::ErrorId;
+use mnesis_store::StreamKey;
 
 use crate::error::FjallError;
 use crate::plan::StagedRow;

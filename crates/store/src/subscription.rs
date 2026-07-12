@@ -29,7 +29,7 @@
 use alloc::sync::Arc;
 
 use futures::StreamExt;
-use nexus::{Id, Version};
+use mnesis::{Id, Version};
 
 use crate::PersistedEnvelope;
 use crate::catchup::{AllCatchup, StreamCatchup};
@@ -49,7 +49,7 @@ use crate::wake::WakeSource;
 /// ```ignore
 /// use core::pin::pin;
 /// use futures::StreamExt;
-/// use nexus_store::{Step, StepStreamExt, Store, Subscription};
+/// use mnesis_store::{Step, StepStreamExt, Store, Subscription};
 ///
 /// let store = Store::new(FjallStore::builder("path").open()?);
 /// // Items are `Step<PersistedEnvelope>`: tell catch-up from live directly.

@@ -1,5 +1,5 @@
 {
-  description = "Nexus CQRS, ES, DDD, Hexagonal Arch framework";
+  description = "Mnesis CQRS, ES, DDD, Hexagonal Arch framework";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
@@ -49,7 +49,7 @@
 
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
-        # nexus-postgres's DB-backed tests are built once as a cargo-nextest
+        # mnesis-postgres's DB-backed tests are built once as a cargo-nextest
         # archive, then executed *inside* the NixOS VM below against a live
         # PostgreSQL — so the VM needs no Rust toolchain, only the archive plus
         # `cargo-nextest`. The tests skip (pass) when DATABASE_URL is unset, so
@@ -57,19 +57,19 @@
         # Linux-only `postgres-integration` package are what actually run them.
         postgresTests = craneLib.mkCargoDerivation (commonArgs // {
           inherit cargoArtifacts;
-          pname = "nexus-postgres-tests";
+          pname = "mnesis-postgres-tests";
           doInstallCargoArtifacts = false;
           buildPhaseCargoCommand = ''
             mkdir -p $out
-            cargo nextest archive --package nexus-postgres \
-              --archive-file $out/nexus-postgres.tar.zst
+            cargo nextest archive --package mnesis-postgres \
+              --archive-file $out/mnesis-postgres.tar.zst
           '';
           nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ])
             ++ [ pkgs.cargo-nextest ];
         });
       in with pkgs; {
         checks = {
-          nexus-clippy = craneLib.cargoClippy (commonArgs // {
+          mnesis-clippy = craneLib.cargoClippy (commonArgs // {
             inherit cargoArtifacts;
             # Whole-workspace clippy across ALL targets (lib, tests, benches,
             # examples) under the full feature set. `--all-targets` (not the
@@ -81,28 +81,28 @@
             cargoClippyExtraArgs = "--workspace --all-features --all-targets -- --deny warnings";
           });
 
-          nexus-doc =
+          mnesis-doc =
             craneLib.cargoDoc (commonArgs // { inherit cargoArtifacts; });
 
-          nexus-fmt = craneLib.cargoFmt { inherit src; };
+          mnesis-fmt = craneLib.cargoFmt { inherit src; };
 
-          nexus-toml-fmt = craneLib.taploFmt {
+          mnesis-toml-fmt = craneLib.taploFmt {
             src = pkgs.lib.sources.sourceFilesBySuffices src [ ".toml" ];
             # taplo arguments can be further customized below as needed
             # taploExtraArgs = "format";
           };
 
-          nexus-audit = craneLib.cargoAudit {
+          mnesis-audit = craneLib.cargoAudit {
             inherit src advisory-db;
             # RUSTSEC-2026-0009: time 0.3.x DoS — transitive dep from refinery 0.8.x
             # Cannot fix until refinery upgrades to rusqlite 0.39+
             cargoAuditExtraArgs = "--ignore RUSTSEC-2026-0009";
           };
-          nexus-deny = craneLib.cargoDeny { inherit src; };
+          mnesis-deny = craneLib.cargoDeny { inherit src; };
           # Run tests with cargo-nextest, fused with cargo-llvm-cov for coverage.
           # withLlvmCov collapses the previous separate tarpaulin step into one
           # instrumented test run — LLVM source-based coverage, no ptrace.
-          nexus-nextest = craneLib.cargoNextest (commonArgs // {
+          mnesis-nextest = craneLib.cargoNextest (commonArgs // {
             inherit cargoArtifacts;
             withLlvmCov = true;
             partitions = 1;
@@ -113,9 +113,9 @@
           });
 
           # Ensure that cargo-hakari is up to date
-          nexus-hakari = craneLib.mkCargoDerivation {
+          mnesis-hakari = craneLib.mkCargoDerivation {
             inherit src;
-            pname = "nexus-hakari";
+            pname = "mnesis-hakari";
             cargoArtifacts = null;
             doInstallCargoArtifacts = false;
 
@@ -128,39 +128,39 @@
           };
 
           # no_std gates — CI is just `nix flake check`, so these ride along.
-          # `nexus-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
+          # `mnesis-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
           # std-free bare-metal target. `wasm32-unknown-unknown` still ships std,
           # so it alone would not catch a std leak. Both build --no-default-features.
-          # Each gate also builds `nexus-nostd-smoketest` (#304): a crate that
-          # uses `#[nexus::aggregate]` + `#[derive(DomainEvent)]`, so the macro
+          # Each gate also builds `mnesis-nostd-smoketest` (#304): a crate that
+          # uses `#[mnesis::aggregate]` + `#[derive(DomainEvent)]`, so the macro
           # OUTPUT — not just its source — is compiled for the target. A macro
           # emitting a `std::` path fails the thumbv7em build here.
-          # `nexus-store-nostd` (#301) is the store-crate sibling gate — see its
+          # `mnesis-store-nostd` (#301) is the store-crate sibling gate — see its
           # own comment below for what host vs thumbv7em each catch there.
-          # `nexus-wake-nostd` (#302) also builds on both targets: the no_std
+          # `mnesis-wake-nostd` (#302) also builds on both targets: the no_std
           # WakeSource bridge, proving event-listener + the wake traits are
           # core+alloc clean.
-          nexus-wasm = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-wasm = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-wasm";
+            pname = "mnesis-wasm";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target wasm32-unknown-unknown --no-default-features
-              cargo build -p nexus-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
-              cargo build -p nexus-wake-nostd --target wasm32-unknown-unknown
+              cargo build -p mnesis --target wasm32-unknown-unknown --no-default-features
+              cargo build -p mnesis-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
+              cargo build -p mnesis-wake-nostd --target wasm32-unknown-unknown
             '';
           });
 
-          nexus-nostd = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-nostd = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-nostd";
+            pname = "mnesis-nostd";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus --target thumbv7em-none-eabihf --no-default-features
-              cargo build -p nexus-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
-              cargo build -p nexus-wake-nostd --target thumbv7em-none-eabihf
+              cargo build -p mnesis --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p mnesis-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
+              cargo build -p mnesis-wake-nostd --target thumbv7em-none-eabihf
             '';
           });
 
-          # nexus-store no_std gate (#301). The host build is the in-crate std-leak
+          # mnesis-store no_std gate (#301). The host build is the in-crate std-leak
           # detector (with #![no_std] active a `std::` path fails to resolve even
           # though the host ships std); thumbv7em is the STRONG dep-level gate — an
           # rlib build links no allocator, so the alloc-dependent store builds
@@ -169,14 +169,14 @@
           # import/snapshot/projection) no_std-clean; optional codec features
           # (json/rkyv/cbor) are deliberately NOT gated — they cannot build no_std
           # today (serde_json/rkyv/crc32c pull std).
-          nexus-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
+          mnesis-store-nostd = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pname = "nexus-store-nostd";
+            pname = "mnesis-store-nostd";
             buildPhaseCargoCommand = ''
-              cargo build -p nexus-store --no-default-features
-              cargo build -p nexus-store --target wasm32-unknown-unknown --no-default-features
-              cargo build -p nexus-store --target thumbv7em-none-eabihf --no-default-features
-              cargo build -p nexus-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection
+              cargo build -p mnesis-store --no-default-features
+              cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features
+              cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection
             '';
           });
         };
@@ -186,17 +186,17 @@
           # NixOS integration tests require Linux VMs — Linux-only `packages`
           # attribute, deliberately NOT a `checks` entry, so the darwin
           # `nix flake check` dev gate never builds a test archive or boots a VM.
-          # Boots a NixOS VM with services.postgresql (a `nexus_test` DB, local
+          # Boots a NixOS VM with services.postgresql (a `mnesis_test` DB, local
           # trust auth), then runs the pre-built nextest archive against it with
           # DATABASE_URL pointing at the VM's unix-socket Postgres — so the
-          # nexus-postgres tests that skip without DATABASE_URL actually execute.
+          # mnesis-postgres tests that skip without DATABASE_URL actually execute.
           # Run on Linux/CI with: nix build .#postgres-integration
           postgres-integration = pkgs.testers.runNixOSTest {
-            name = "nexus-postgres-integration";
+            name = "mnesis-postgres-integration";
             nodes.machine = { pkgs, ... }: {
               services.postgresql = {
                 enable = true;
-                ensureDatabases = [ "nexus_test" ];
+                ensureDatabases = [ "mnesis_test" ];
                 # `local all all trust` lets the test process connect over the
                 # unix socket as any role without a password — the simplest auth
                 # for a throwaway CI VM (no networked Postgres, no TLS).
@@ -210,11 +210,11 @@
               machine.wait_for_unit("postgresql.service")
               # The unix-socket DATABASE_URL form needs a role matching the OS
               # user running the tests. The test script runs as root, so create a
-              # `root` superuser role; `nexus_test` is owned by `postgres` and
+              # `root` superuser role; `mnesis_test` is owned by `postgres` and
               # granted to root so the tests can create/truncate the events table.
               machine.succeed("su postgres -c \"psql -c \\\"CREATE ROLE root LOGIN SUPERUSER;\\\"\"")
               machine.copy_from_host(
-                  "${postgresTests}/nexus-postgres.tar.zst", "/tmp/tests.tar.zst"
+                  "${postgresTests}/mnesis-postgres.tar.zst", "/tmp/tests.tar.zst"
               )
               # The nextest archive ships the compiled test binaries but NOT the
               # source, yet nextest still needs the workspace manifest at run
@@ -232,7 +232,7 @@
               # parallel tests would clobber each other's rows (and race on
               # CREATE TABLE IF NOT EXISTS).
               machine.succeed(
-                  "DATABASE_URL='postgres:///nexus_test?host=/run/postgresql' "
+                  "DATABASE_URL='postgres:///mnesis_test?host=/run/postgresql' "
                   "cargo-nextest nextest run --test-threads=1 "
                   "--workspace-remap /tmp/src --archive-file /tmp/tests.tar.zst 2>&1 | tee /tmp/out"
               )

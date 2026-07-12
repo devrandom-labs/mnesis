@@ -6,8 +6,8 @@
 
 use std::fmt;
 
-use nexus::*;
-use nexus_store::{Decode, Encode, Json, JsonCodec, SerdeCodec, SerdeFormat};
+use mnesis::*;
+use mnesis_store::{Decode, Encode, Json, JsonCodec, SerdeCodec, SerdeFormat};
 use serde::{Deserialize, Serialize};
 
 // -- Test domain --
@@ -118,7 +118,7 @@ fn json_codec_encode_decode_roundtrip() {
     };
 
     let bytes = codec.encode(&event).unwrap();
-    let env = nexus_store::PersistedEnvelope::for_decode("Created", &bytes).unwrap();
+    let env = mnesis_store::PersistedEnvelope::for_decode("Created", &bytes).unwrap();
     let decoded: TodoEvent = codec.decode(&env).unwrap();
 
     assert_eq!(decoded, event);
@@ -135,7 +135,7 @@ fn json_codec_ignores_event_type_parameter() {
 
     // Pass a completely wrong event_type — serde JSON dispatches via the
     // internally-tagged `"type"` field, so the env's event_type is unused.
-    let env = nexus_store::PersistedEnvelope::for_decode("TotallyWrongType", &bytes).unwrap();
+    let env = mnesis_store::PersistedEnvelope::for_decode("TotallyWrongType", &bytes).unwrap();
     let decoded: TodoEvent = codec.decode(&env).unwrap();
 
     assert_eq!(decoded, event);
@@ -146,7 +146,7 @@ fn json_codec_invalid_payload_returns_error() {
     let codec = JsonCodec::default();
     let garbage: &[u8] = b"\xff\xfe not json at all";
 
-    let env = nexus_store::PersistedEnvelope::for_decode("Created", garbage).unwrap();
+    let env = mnesis_store::PersistedEnvelope::for_decode("Created", garbage).unwrap();
     let result: Result<TodoEvent, _> = codec.decode(&env);
 
     assert!(result.is_err(), "decoding garbage bytes must fail");
@@ -168,9 +168,9 @@ fn json_codec_is_constructible_via_new() {
 
 mod integration {
     use super::*;
-    use nexus_inmemory::InMemoryStore;
-    use nexus_store::Repository;
-    use nexus_store::Store;
+    use mnesis_inmemory::InMemoryStore;
+    use mnesis_store::Repository;
+    use mnesis_store::Store;
 
     #[tokio::test]
     async fn json_codec_works_with_event_store() {
@@ -215,11 +215,11 @@ mod integration {
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn save_events<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

@@ -1,5 +1,5 @@
-use nexus::ErrorId;
-use nexus_store::envelope::EnvelopeError;
+use mnesis::ErrorId;
+use mnesis_store::envelope::EnvelopeError;
 
 /// Errors produced by the postgres event store adapter.
 ///

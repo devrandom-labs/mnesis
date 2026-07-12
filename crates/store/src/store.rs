@@ -1,6 +1,6 @@
 use alloc::sync::Arc;
 
-use nexus::Version;
+use mnesis::Version;
 
 use crate::envelope::{PendingEnvelope, PersistedEnvelope};
 use crate::error::AppendError;
@@ -63,12 +63,12 @@ impl<S> Store<S> {
     ///
     /// ```ignore
     /// use futures::TryStreamExt;
-    /// use nexus_store::{RawEventStore, Store, StreamKey};
+    /// use mnesis_store::{RawEventStore, Store, StreamKey};
     ///
     /// async fn count_events<S: RawEventStore>(
     ///     store: &Store<S>,
     ///     id: &StreamKey,
-    ///     from: nexus::Version,
+    ///     from: mnesis::Version,
     /// ) -> Result<usize, MyError> {
     ///     let stream = store.raw().read_stream(id, from).await.map_err(MyError::Adapter)?;
     ///     stream.map_err(MyError::Adapter).try_fold(0usize, |acc, _| async move { Ok(acc + 1) }).await
@@ -331,7 +331,7 @@ impl<S: RawEventStore> RawEventStore for Store<S> {
 ///
 /// A scalar for an embedded store (fjall's `GlobalSeq`), a commit-ordered
 /// composite for a concurrent SQL store (postgres's `(txid, seq)`), an LSN for
-/// a WAL tail. `nexus-store` owns only this trait — the *abstraction*; the
+/// a WAL tail. `mnesis-store` owns only this trait — the *abstraction*; the
 /// concrete position lives in the adapter (dependency direction: the store
 /// cannot reference its adapters), and it is **never** carried on the
 /// position-free [`PersistedEnvelope`].

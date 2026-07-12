@@ -1,4 +1,4 @@
-//! Wire-format frame builder shared by `nexus-fjall` and `nexus-store::testing`.
+//! Wire-format frame builder shared by `mnesis-fjall` and `mnesis-store::testing`.
 //!
 //! One canonical implementation of the on-disk frame format: a fixed
 //! header, then event-type bytes, optional metadata bytes, alignment

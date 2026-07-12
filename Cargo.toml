@@ -6,7 +6,7 @@ members = [
     "adapters/postgres",
     "crates/macros",
     "crates/macros/tests/cross_crate_test",
-    "crates/nexus",
+    "crates/mnesis",
     "crates/nostd-smoketest",
     "crates/store",
     "crates/store-testing",
@@ -57,7 +57,7 @@ edition = "2024"
 rust-version = "1.95.0"
 license = "MIT OR Apache-2.0"
 authors = ["Joel DSouza <joel@devrandom.co>"]
-repository = "https://github.com/devrandom-labs/nexus"
+repository = "https://github.com/devrandom-labs/mnesis"
 
 [workspace.lints.clippy]
 # 1. THE FOUNDATION
@@ -92,4 +92,4 @@ shadow_unrelated = "deny"
 allow_attributes_without_reason = "deny"
 
 [workspace.metadata.crane]
-name = "nexus"
+name = "mnesis"

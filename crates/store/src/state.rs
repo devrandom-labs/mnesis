@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 use core::future::Future;
 use core::num::{NonZeroU32, NonZeroU64};
 
-use nexus::{Id, Version};
+use mnesis::{Id, Version};
 
 use crate::codec::{Decode, Encode, OwningCodec};
 

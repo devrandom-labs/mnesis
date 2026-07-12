@@ -1,5 +1,5 @@
 [package]
-name = "nexus-wake-nostd"
+name = "mnesis-wake-nostd"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -16,7 +16,7 @@ categories = ["embedded", "no-std", "asynchronous", "data-structures"]
 # no_std flake gates, and a std workspace-hack edge would break them.
 [dependencies]
 event-listener = { workspace = true }
-nexus-store = { version = "0.1.0", path = "../store", default-features = false, features = ["subscription"] }
+mnesis-store = { version = "0.1.0", path = "../store", default-features = false, features = ["subscription"] }
 
 [lints]
 workspace = true
@@ -24,7 +24,7 @@ workspace = true
 [dev-dependencies]
 embassy-executor = { workspace = true }
 futures = { workspace = true, features = ["std", "executor"] }
-nexus = { path = "../nexus" }
-nexus-inmemory = { path = "../../adapters/inmemory" }
-nexus-store = { path = "../store", features = ["std", "subscription"] }
+mnesis = { path = "../mnesis" }
+mnesis-inmemory = { path = "../../adapters/inmemory" }
+mnesis-store = { path = "../store", features = ["std", "subscription"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time", "sync"] }

@@ -24,11 +24,11 @@ fn sv2() -> NonZeroU32 {
     NonZeroU32::new(2).unwrap()
 }
 
-use nexus::*;
-use nexus_inmemory::{InMemorySnapshotStore, InMemoryStore};
-use nexus_store::Store;
-use nexus_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
-use nexus_store::{Repository, Snapshotting};
+use mnesis::*;
+use mnesis_inmemory::{InMemorySnapshotStore, InMemoryStore};
+use mnesis_store::Store;
+use mnesis_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
+use mnesis_store::{Repository, Snapshotting};
 
 // ── Test domain ────────────────────────────────────────────────────
 
@@ -602,21 +602,21 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
 async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
     // Use a snapshot store that always fails decode (hydrate).
     // We simulate this by using a CodecSnapshotStore with a failing codec.
-    use nexus_store::state::CodecSnapshotStore;
+    use mnesis_store::state::CodecSnapshotStore;
 
     struct FailCodec;
-    impl nexus_store::Encode<CounterState> for FailCodec {
+    impl mnesis_store::Encode<CounterState> for FailCodec {
         type Error = std::io::Error;
         fn encode(&self, _state: &CounterState) -> Result<bytes::Bytes, Self::Error> {
             Ok(bytes::Bytes::from_static(&[1, 2, 3]))
         }
     }
-    impl nexus_store::Decode<CounterState> for FailCodec {
+    impl mnesis_store::Decode<CounterState> for FailCodec {
         type Output<'a> = CounterState;
         type Error = std::io::Error;
         fn decode<'a>(
             &'a self,
-            _env: &'a nexus_store::PersistedEnvelope,
+            _env: &'a mnesis_store::PersistedEnvelope,
         ) -> Result<CounterState, Self::Error> {
             Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
@@ -630,7 +630,7 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
     let byte_store = InMemorySnapshotStore::<Vec<u8>, Version>::new();
 
     // Save events and snapshot with a good codec first
-    let good_state_store = CodecSnapshotStore::new(&byte_store, nexus_store::JsonCodec::default());
+    let good_state_store = CodecSnapshotStore::new(&byte_store, mnesis_store::JsonCodec::default());
     let inner = store.repository().json().build();
     let repo_good = Snapshotting::new(
         inner,
@@ -669,7 +669,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         type Error = std::io::Error;
         async fn hydrate(
             &self,
-            _id: &impl nexus::Id,
+            _id: &impl mnesis::Id,
             _schema_version: NonZeroU32,
         ) -> Result<Hydrated<CounterState, Version>, Self::Error> {
             Err(std::io::Error::new(
@@ -679,7 +679,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         }
         async fn commit(
             &self,
-            _id: &impl nexus::Id,
+            _id: &impl mnesis::Id,
             _schema_version: NonZeroU32,
             _position: Version,
             _state: &CounterState,
@@ -731,14 +731,14 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
         type Error = std::io::Error;
         async fn hydrate(
             &self,
-            _id: &impl nexus::Id,
+            _id: &impl mnesis::Id,
             _schema_version: NonZeroU32,
         ) -> Result<Hydrated<CounterState, Version>, Self::Error> {
             Ok(Hydrated::Absent)
         }
         async fn commit(
             &self,
-            _id: &impl nexus::Id,
+            _id: &impl mnesis::Id,
             _schema_version: NonZeroU32,
             _position: Version,
             _state: &CounterState,
@@ -855,11 +855,11 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn save_events<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

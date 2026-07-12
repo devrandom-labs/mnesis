@@ -1,6 +1,6 @@
 /// aggregate macro must require `error`.
 
-use nexus::*;
+use mnesis::*;
 
 #[derive(Debug, Clone)]
 enum Ev { A }
@@ -27,7 +27,7 @@ impl AsRef<[u8]> for MyId {
     fn as_ref(&self) -> &[u8] { &self.0 }
 }
 
-#[nexus::aggregate(state = St, id = MyId)]
+#[mnesis::aggregate(state = St, id = MyId)]
 struct MissingError;
 
 fn main() {}

@@ -1,7 +1,7 @@
 use core::iter;
 use core::num::NonZeroU32;
 
-use nexus::{DomainEvent, Id, Version};
+use mnesis::{DomainEvent, Id, Version};
 
 use crate::decoded::Decoded;
 use crate::state::{Hydrated, PersistTrigger, SnapshotStore};
@@ -57,7 +57,7 @@ pub trait Projector: Send + Sync + 'static {
 /// projection primitives ([`Projector`], [`PersistTrigger`],
 /// [`SnapshotStore`], and — outside this type — a [`Subscription`]).
 ///
-/// It owns **no loop**. nexus still ships no runner: the host drives the
+/// It owns **no loop**. mnesis still ships no runner: the host drives the
 /// stepper one event at a time. A tokio `while let` calls [`advance`] in its
 /// body; a Bombay/Agency actor calls it from its message handler. Both shrink
 /// to a single `advance` call and share no loop code, so nothing can drift.

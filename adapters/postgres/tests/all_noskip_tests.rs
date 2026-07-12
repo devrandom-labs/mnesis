@@ -51,9 +51,9 @@
 #![allow(clippy::panic, reason = "tests")]
 
 use futures::StreamExt;
-use nexus_postgres::{PgAllPos, PostgresStore};
-use nexus_store::StreamKey;
-use nexus_store::store::RawEventStore;
+use mnesis_postgres::{PgAllPos, PostgresStore};
+use mnesis_store::StreamKey;
+use mnesis_store::store::RawEventStore;
 use sqlx::PgPool;
 
 // ---------------------------------------------------------------------------

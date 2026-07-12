@@ -1,9 +1,9 @@
 //! Property-based tests for macro-generated aggregates.
 //!
-//! Verifies that #[nexus::aggregate] produces code satisfying
+//! Verifies that #[mnesis::aggregate] produces code satisfying
 //! the same algebraic properties as hand-written AggregateRoot.
 
-use nexus::*;
+use mnesis::*;
 use proptest::prelude::*;
 use std::fmt;
 
@@ -69,7 +69,7 @@ struct CountError;
 
 // --- Macro-generated aggregate ---
 
-#[nexus::aggregate(state = CountState, error = CountError, id = PId)]
+#[mnesis::aggregate(state = CountState, error = CountError, id = PId)]
 struct CounterAggregate;
 
 // --- Strategies ---
@@ -128,8 +128,8 @@ proptest! {
 
     // Properties 3 & 4 (apply_event leaves version None; replay-state ==
     // apply_event-state) were deleted as redundant: `apply_event`/`apply_events`
-    // are now private to the `nexus` crate, and their in-isolation contracts are
-    // covered by in-crate tests in `crates/nexus/src/aggregate.rs`
+    // are now private to the `mnesis` crate, and their in-isolation contracts are
+    // covered by in-crate tests in `crates/mnesis/src/aggregate.rs`
     // (`apply_event_accumulates_state_without_advancing_version` and
     // `commit_persisted_advances_version_and_folds_state_atomically`, which
     // asserts the commit-fold matches a replay of the same events).

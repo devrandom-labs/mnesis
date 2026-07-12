@@ -3,10 +3,10 @@
 //!
 //! Those tests probe `pub(crate)` seams (`StreamCatchup`, `AllCatchup`,
 //! `live_stepped`, `CATCHUP_CHUNK`), so they must run inside this crate's
-//! lib-test build — where the real in-memory adapter (`nexus-inmemory`)
+//! lib-test build — where the real in-memory adapter (`mnesis-inmemory`)
 //! cannot be used: a dev-dependency cycle unifies types only for integration
 //! tests in `tests/`, while the lib-test target recompiles this crate under
-//! `cfg(test)` as a *distinct* crate, so `nexus-inmemory`'s trait impls name
+//! `cfg(test)` as a *distinct* crate, so `mnesis-inmemory`'s trait impls name
 //! the other build's traits and satisfy none of this build's bounds.
 //!
 //! [`TestStore`] therefore implements just enough of [`RawEventStore`] +
@@ -14,7 +14,7 @@
 //! generation counter — every wake rouses every waiter, which the
 //! [`WakeRegistration`] contract explicitly permits as a spurious wake. The
 //! public subscription surface is separately proven against the real adapter
-//! and the real `nexus-wake` registry in `tests/subscription_tests.rs`.
+//! and the real `mnesis-wake` registry in `tests/subscription_tests.rs`.
 
 use core::future::Future;
 use std::collections::HashMap;
@@ -24,7 +24,7 @@ use std::num::NonZeroU64;
 use thiserror::Error;
 use tokio::sync::{Mutex, watch};
 
-use nexus::{ErrorId, Version};
+use mnesis::{ErrorId, Version};
 
 use crate::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
 use crate::error::AppendError;

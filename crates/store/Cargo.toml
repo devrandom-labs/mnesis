@@ -1,12 +1,12 @@
 [package]
-name = "nexus-store"
+name = "mnesis-store"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Event store edge layer for the Nexus event-sourcing framework"
+description = "Event store edge layer for the Mnesis event-sourcing framework"
 readme = "../../README.md"
 keywords = ["event-sourcing", "event-store", "cqrs", "persistence"]
 categories = ["data-structures"]
@@ -18,7 +18,7 @@ default = ["std"]
 # yields a no_std + alloc + core::error::Error store. (#301, mirrors #279)
 std = [
     "thiserror/std",
-    "nexus/std",
+    "mnesis/std",
     "futures/std",
     "bytes/std",
     "aligned-vec/std",
@@ -26,7 +26,7 @@ std = [
 # Generic catch-up-then-live-tail subscription loop + the `wake` traits.
 # Dep-free: the loop is generic over `WakeSource`, so no runtime is pulled.
 # The in-process wake registry (`StreamNotifiers`, tokio-backed) lives in the
-# `nexus-wake` crate; the in-memory adapter lives in `nexus-inmemory`.
+# `mnesis-wake` crate; the in-memory adapter lives in `mnesis-inmemory`.
 subscription = []
 serde = ["dep:serde"]
 json = ["serde", "dep:serde_json"]
@@ -60,7 +60,7 @@ crc32c = { workspace = true, optional = true }
 futures = { workspace = true }
 futures-core = { workspace = true }
 minicbor = { workspace = true, features = ["derive"], optional = true }
-nexus = { version = "0.1.0", path = "../nexus", default-features = false }
+mnesis = { version = "0.1.0", path = "../mnesis", default-features = false }
 rkyv = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
@@ -75,12 +75,12 @@ insta = { workspace = true }
 # `snapshot-json` the `snapshot`-gated test files (snapshot_tests.rs,
 # snapshot_integration_tests.rs) never compiled or ran in CI — nothing in the
 # default workspace graph enables `snapshot`. See issue #262.
-nexus-store = { path = ".", features = ["subscription", "export", "import", "cbor", "snapshot-json", "projection"] }
+mnesis-store = { path = ".", features = ["subscription", "export", "import", "cbor", "snapshot-json", "projection"] }
 # In-memory adapter for white-box tests. Path-only (no version): a dev-dep
-# cycle (nexus-inmemory depends on nexus-store) is legal for cargo and the
+# cycle (mnesis-inmemory depends on mnesis-store) is legal for cargo and the
 # path-only form is stripped at publish time.
-nexus-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
-nexus-store-testing = { version = "0.1.0", path = "../store-testing" }
+mnesis-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
+mnesis-store-testing = { version = "0.1.0", path = "../store-testing" }
 proptest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

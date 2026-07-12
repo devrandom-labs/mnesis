@@ -12,8 +12,8 @@ use std::sync::Arc;
 use std::task::Poll;
 use std::time::Duration;
 
-use nexus_store::wake::{WakeRegistration, WakeSource};
-use nexus_wake_nostd::GlobalWake;
+use mnesis_store::wake::{WakeRegistration, WakeSource};
+use mnesis_wake_nostd::GlobalWake;
 use tokio::sync::Barrier;
 use tokio::time::timeout;
 
@@ -187,7 +187,7 @@ async fn trait_surface_wake_rouses_stream_and_all() {
 
 // ───────────────── Category 4: linearizability / isolation ─────────────────
 
-/// Ported from nexus-wake: a registration armed AND PARKED (polled to
+/// Ported from mnesis-wake: a registration armed AND PARKED (polled to
 /// Pending, so its Event listener is registered) before a concurrent wake
 /// must never miss it — this races the notify-delivery path itself, not
 /// just the first-poll generation re-check. Repeated to shake out

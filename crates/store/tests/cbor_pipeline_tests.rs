@@ -1,17 +1,17 @@
 //! Full export → CBOR box → import pipeline over the in-memory adapter —
-//! relocated from `src/cbor.rs` (nexus-inmemory is a dev-dependency; type
+//! relocated from `src/cbor.rs` (mnesis-inmemory is a dev-dependency; type
 //! unification with it requires an integration test).
 
 #![cfg(feature = "cbor")]
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::import::{Atomicity, EventImporter};
-use nexus_store::store::RawEventStore;
-use nexus_store::stream_id::StreamKey;
-use nexus_store::{ChunkWriter, decode_chunk};
+use mnesis::Version;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::import::{Atomicity, EventImporter};
+use mnesis_store::store::RawEventStore;
+use mnesis_store::stream_id::StreamKey;
+use mnesis_store::{ChunkWriter, decode_chunk};
 
 #[allow(
     clippy::unwrap_used,

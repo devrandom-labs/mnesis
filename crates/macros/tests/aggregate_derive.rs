@@ -1,6 +1,6 @@
 //! Tests for #[derive(Aggregate)]
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // --- Domain types ---
@@ -30,7 +30,7 @@ struct TodoCreated {
 #[derive(Debug, Clone)]
 struct TodoCompleted;
 
-#[derive(Debug, Clone, nexus::DomainEvent)]
+#[derive(Debug, Clone, mnesis::DomainEvent)]
 enum TodoEvent {
     Created(TodoCreated),
     Completed(TodoCompleted),
@@ -65,7 +65,7 @@ enum TodoError {
 
 // --- The derive macro in action ---
 
-#[nexus::aggregate(state = TodoState, error = TodoError, id = TodoId)]
+#[mnesis::aggregate(state = TodoState, error = TodoError, id = TodoId)]
 struct TodoAggregate;
 
 // --- Commands + Handle impls on the marker ---

@@ -52,9 +52,9 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use futures::TryStreamExt;
-use nexus::Version;
-use nexus_store::codec::{Decode, Encode};
-use nexus_store::envelope::PersistedEnvelope;
+use mnesis::Version;
+use mnesis_store::codec::{Decode, Encode};
+use mnesis_store::envelope::PersistedEnvelope;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -181,7 +181,7 @@ impl futures::Stream for VecStream {
         let env = PersistedEnvelope::try_new(
             Version::new(row.version).expect("non-zero"),
             row.value,
-            nexus_store::value::SchemaVersion::INITIAL,
+            mnesis_store::value::SchemaVersion::INITIAL,
             row.event_type_range,
             row.payload_range,
             None,

@@ -1,7 +1,7 @@
 //! Closing the Books — bounded streams vs. a long-lived aggregate.
 //!
 //! Builds the same cash-register domain two ways and prints how many events
-//! each must replay to read the current float. See the `nexus::closing_the_books`
+//! each must replay to read the current float. See the `mnesis::closing_the_books`
 //! module for the narrative.
 
 // Relaxed lints for example code — production crates should NOT do this.
@@ -16,7 +16,7 @@
     reason = "explicit compare-then-subtract is the project's underflow guard; saturating_sub is banned (CLAUDE.md rule 2)"
 )]
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // =============================================================================
@@ -155,7 +155,7 @@ impl AggregateState for ShiftState {
     }
 }
 
-#[nexus::aggregate(state = ShiftState, error = ShiftError, id = CashierShiftId)]
+#[mnesis::aggregate(state = ShiftState, error = ShiftError, id = CashierShiftId)]
 struct CashierShift;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -291,7 +291,7 @@ impl AggregateState for RegisterState {
     }
 }
 
-#[nexus::aggregate(state = RegisterState, error = RegisterError, id = RegisterId)]
+#[mnesis::aggregate(state = RegisterState, error = RegisterError, id = RegisterId)]
 struct CashRegister;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -449,7 +449,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nexus::testing::AggregateFixture;
+    use mnesis::testing::AggregateFixture;
 
     fn fixture() -> AggregateFixture<CashierShift> {
         AggregateFixture::with_id(CashierShiftId::new("till-1", 1))

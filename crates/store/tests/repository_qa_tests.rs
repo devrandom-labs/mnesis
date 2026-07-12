@@ -1,4 +1,4 @@
-//! Principal QA test suite — 11 dimensions of adversarial testing for nexus-store.
+//! Principal QA test suite — 11 dimensions of adversarial testing for mnesis-store.
 //!
 //! Each dimension targets a specific class of bugs through the Repository/EventStore
 //! layer. The goal is to break the crate and expose correctness issues.
@@ -44,15 +44,15 @@ use std::fmt;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
-use nexus::*;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::Repository;
-use nexus_store::Store;
-use nexus_store::codec::{Decode, Encode};
-use nexus_store::envelope::PersistedEnvelope;
-use nexus_store::error::StoreError;
-use nexus_store::store::RawEventStore;
-use nexus_store::upcasting::EventMorsel;
+use mnesis::*;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::Repository;
+use mnesis_store::Store;
+use mnesis_store::codec::{Decode, Encode};
+use mnesis_store::envelope::PersistedEnvelope;
+use mnesis_store::error::StoreError;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::upcasting::EventMorsel;
 use proptest::prelude::*;
 
 // StreamId has been removed from the API — use typed Id values directly
@@ -838,7 +838,7 @@ async fn d4_chained_upcasters_v1_to_v3() {
 
 #[tokio::test]
 async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
-    use nexus_store::pending_envelope;
+    use mnesis_store::pending_envelope;
 
     // DeltaDoublingTransform doubles the i32 payload on read.
     // This exercises the borrowing-codec + upcaster path through `EventStore`
@@ -857,7 +857,7 @@ async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
         .expect("valid envelope"); // schema_version defaults to 1
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice(b"counter-1"),
+            &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
             &[legacy],
         )
@@ -880,7 +880,7 @@ async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
 
 #[tokio::test]
 async fn d4_upcaster_must_not_double_apply_to_new_events() {
-    use nexus_store::pending_envelope;
+    use mnesis_store::pending_envelope;
 
     // Scenario: a legacy v1 event exists in the store, then a new event
     // is saved through the EventStore (which stamps it at schema_version=2).
@@ -895,7 +895,7 @@ async fn d4_upcaster_must_not_double_apply_to_new_events() {
         .expect("valid envelope"); // schema_version defaults to 1
     raw_store
         .append(
-            &nexus_store::StreamKey::from_slice(b"counter-1"),
+            &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
             &[legacy],
         )
@@ -1405,7 +1405,7 @@ async fn d10_large_batch_500_events_save_and_load() {
     // per command — the substrate large-batch path is covered via `append`.)
     let events: Vec<CounterEvent> = (0..500).map(|_| CounterEvent::Incremented).collect();
     let (first, rest) = events.split_first().expect("500 events");
-    let mut batch = nexus::Events::<CounterEvent, 511>::new(first.clone());
+    let mut batch = mnesis::Events::<CounterEvent, 511>::new(first.clone());
     for event in rest {
         batch.add(event.clone());
     }
@@ -1462,7 +1462,7 @@ async fn d10_max_rehydration_events_boundary() {
 #[tokio::test]
 async fn d11_schema_version_always_one() {
     use futures::StreamExt;
-    use nexus_store::pending_envelope;
+    use mnesis_store::pending_envelope;
 
     let store = InMemoryStore::new();
 
@@ -1480,7 +1480,7 @@ async fn d11_schema_version_always_one() {
     ];
     store
         .append(
-            &nexus_store::StreamKey::from_slice(b"counter-1"),
+            &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
             &envelopes,
         )
@@ -1489,7 +1489,7 @@ async fn d11_schema_version_always_one() {
 
     let mut stream = store
         .read_stream(
-            &nexus_store::StreamKey::from_slice(b"counter-1"),
+            &mnesis_store::StreamKey::from_slice(b"counter-1"),
             Version::INITIAL,
         )
         .await
@@ -1590,11 +1590,11 @@ async fn d11_multiple_event_types_in_single_stream() {
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn save_events<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

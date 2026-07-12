@@ -10,12 +10,12 @@
 use std::convert::Infallible;
 use std::fmt;
 
-use nexus::*;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::Repository;
-use nexus_store::Store;
-use nexus_store::upcasting::EventMorsel;
-use nexus_store::{Decode, Encode};
+use mnesis::*;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::Repository;
+use mnesis_store::Store;
+use mnesis_store::upcasting::EventMorsel;
+use mnesis_store::{Decode, Encode};
 
 // -- Test domain --
 
@@ -98,7 +98,7 @@ impl Decode<TodoEvent> for TestCodec {
 
     fn decode<'a>(
         &'a self,
-        env: &'a nexus_store::PersistedEnvelope,
+        env: &'a mnesis_store::PersistedEnvelope,
     ) -> Result<TodoEvent, Self::Error> {
         let s = std::str::from_utf8(env.payload())
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
@@ -176,7 +176,7 @@ async fn load_and_save_infer_aggregate_from_repository_binding() {
 
 #[tokio::test]
 async fn into_store_yields_a_usable_store_handle() {
-    use nexus_store::store::RawEventStore;
+    use mnesis_store::store::RawEventStore;
     // #244: `raw.into_store()` is the de-nested equivalent of `Store::new(raw)`
     // — opening flows left-to-right into `.repository::<A>()` with no wrap.
     let es = InMemoryStore::new()
@@ -300,11 +300,11 @@ async fn event_store_with_no_transforms_is_zero_sized_chain() {
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn save_events<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

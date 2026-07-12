@@ -3,10 +3,10 @@
 
 use core::future::Future;
 
-use nexus::Version;
-use nexus_store::StreamKey;
-use nexus_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
-use nexus_store::wake::WakeSource;
+use mnesis::Version;
+use mnesis_store::StreamKey;
+use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::wake::WakeSource;
 // NOTE: RawEventStore is NOT imported — `AtomicAppend: RawEventStore` is a
 // supertrait, and nothing here names the trait directly (unused imports deny).
 

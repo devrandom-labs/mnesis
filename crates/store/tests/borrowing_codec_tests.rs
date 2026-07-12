@@ -1,6 +1,6 @@
 //! Tests for a borrowing (zero-copy) codec — both the [`Decode`] trait's
 //! borrowing GAT shape directly, and end-to-end through the unified
-//! [`EventStore`](nexus_store::EventStore) facade via `.build()`.
+//! [`EventStore`](mnesis_store::EventStore) facade via `.build()`.
 
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
@@ -11,11 +11,11 @@
 
 use std::fmt;
 
-use nexus::*;
-use nexus_inmemory::InMemoryStore;
-use nexus_store::Repository;
-use nexus_store::Store;
-use nexus_store::{Decode, Encode, PersistedEnvelope};
+use mnesis::*;
+use mnesis_inmemory::InMemoryStore;
+use mnesis_store::Repository;
+use mnesis_store::Store;
+use mnesis_store::{Decode, Encode, PersistedEnvelope};
 
 /// A test codec that "decodes" by reinterpreting bytes as a u32 slice.
 struct U32Codec;
@@ -232,11 +232,11 @@ async fn zero_copy_multi_save_load() {
 // pack them into `Events<E, 32>` (capacity 33 — covers every batch built here;
 // the largest strategy yields 29). Empty input is a programmer error: `save`
 // makes a zero-event batch unrepresentable by construction.
-fn events_from_slice<E: nexus::DomainEvent + Clone>(slice: &[E]) -> nexus::Events<E, 32> {
+fn events_from_slice<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E, 32> {
     let (first, rest) = slice
         .split_first()
         .expect("save requires at least one event");
-    let mut events = nexus::Events::new(first.clone());
+    let mut events = mnesis::Events::new(first.clone());
     for event in rest {
         events.add(event.clone());
     }

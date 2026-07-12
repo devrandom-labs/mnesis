@@ -2,11 +2,11 @@
 //! proofs are the `#[tokio::test]`s in `lib.rs`; this binary just drives the
 //! same three functions for a human and prints what each one observed.
 //!
-//! Run with: `cargo run -p nexus-example-fjall-end-to-end`
+//! Run with: `cargo run -p mnesis-example-fjall-end-to-end`
 
 #![allow(clippy::print_stdout, reason = "example narrates progress to stdout")]
 
-use nexus_example_fjall_end_to_end::{
+use mnesis_example_fjall_end_to_end::{
     run_export_import, run_persistence, run_produce_and_sync, run_subscription,
 };
 

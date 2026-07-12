@@ -4,14 +4,14 @@
 //! [`CommandRepository::execute`] fuses `decide → save` into one call so the
 //! decided events can't be forgotten or misthreaded (#251). It adds no
 //! persistence machinery — it is the "imperative shell" over the pure
-//! [`AggregateRoot::handle`](nexus::AggregateRoot::handle) and the atomic
+//! [`AggregateRoot::handle`](mnesis::AggregateRoot::handle) and the atomic
 //! [`Repository::save`](crate::Repository::save).
 //!
 //! See `docs/plans/2026-07-02-execute-command-combinator-design.md`.
 
 use core::future::Future;
 
-use nexus::{Aggregate, AggregateRoot, EventOf, Events, Handle};
+use mnesis::{Aggregate, AggregateRoot, EventOf, Events, Handle};
 
 use crate::conflict::ConflictPredicate;
 use crate::repository::Repository;
@@ -91,7 +91,7 @@ impl<A: Aggregate, R: Repository<A>> CommandRepository<A> for R {}
 mod error_tests {
     use super::ExecuteError;
     use crate::error::StoreError;
-    use nexus::{ErrorId, Version};
+    use mnesis::{ErrorId, Version};
 
     type TestStoreError =
         StoreError<std::io::Error, std::convert::Infallible, std::convert::Infallible>;

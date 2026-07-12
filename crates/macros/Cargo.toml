@@ -1,12 +1,12 @@
 [package]
-name = "nexus-macros"
+name = "mnesis-macros"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Derive macros for the Nexus event-sourcing framework"
+description = "Derive macros for the Mnesis event-sourcing framework"
 readme = "../../README.md"
 keywords = ["event-sourcing", "cqrs", "derive", "macro"]
 categories = ["data-structures"]
@@ -21,8 +21,8 @@ syn = { version = "2.0.117", features = ["extra-traits", "parsing", "derive"] }
 workspace-hack = { version = "0.1.0", path = "../workspace-hack" }
 
 [dev-dependencies]
-nexus = { path = "../nexus", features = ["derive"] }
-nexus-store = { path = "../store" }
+mnesis = { path = "../mnesis", features = ["derive"] }
+mnesis-store = { path = "../store" }
 proptest = { workspace = true }
 thiserror = { workspace = true }
 trybuild = "1"

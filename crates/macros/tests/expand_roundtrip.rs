@@ -7,7 +7,7 @@
 //! This catches cases where the macro generates code that only works
 //! due to macro hygiene or implicit context.
 
-use nexus::*;
+use mnesis::*;
 use std::fmt;
 
 // --- Domain types (same as used with macro) ---
@@ -38,8 +38,8 @@ enum RtEvent {
 
 // --- What #[derive(DomainEvent)] expands to ---
 // (manually written, no macro)
-impl ::nexus::Message for RtEvent {}
-impl ::nexus::DomainEvent for RtEvent {
+impl ::mnesis::Message for RtEvent {}
+impl ::mnesis::DomainEvent for RtEvent {
     fn name(&self) -> &'static str {
         match self {
             RtEvent::Added(..) => "Added",
@@ -72,7 +72,7 @@ impl AggregateState for RtState {
 #[error("rt error")]
 struct RtError;
 
-// --- What #[nexus::aggregate(...)] expands to ---
+// --- What #[mnesis::aggregate(...)] expands to ---
 // (manually written, no macro)
 //
 // The macro emits the unit marker struct, `impl Aggregate`, and a convenience
@@ -81,7 +81,7 @@ struct RtError;
 
 struct RtAggregate;
 
-impl ::nexus::Aggregate for RtAggregate {
+impl ::mnesis::Aggregate for RtAggregate {
     type State = RtState;
     type Error = RtError;
     type Id = RtId;
@@ -89,8 +89,8 @@ impl ::nexus::Aggregate for RtAggregate {
 
 impl RtAggregate {
     #[must_use]
-    fn new(id: RtId) -> ::nexus::AggregateRoot<Self> {
-        ::nexus::AggregateRoot::new(id)
+    fn new(id: RtId) -> ::mnesis::AggregateRoot<Self> {
+        ::mnesis::AggregateRoot::new(id)
     }
 }
 

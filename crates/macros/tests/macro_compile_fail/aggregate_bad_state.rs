@@ -1,6 +1,6 @@
 /// state type must implement AggregateState.
 
-use nexus::*;
+use mnesis::*;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 struct MyId([u8; 8]);
@@ -22,7 +22,7 @@ struct NotAState;
 #[error("e")]
 struct MyError;
 
-#[nexus::aggregate(state = NotAState, error = MyError, id = MyId)]
+#[mnesis::aggregate(state = NotAState, error = MyError, id = MyId)]
 struct BadAggregate;
 
 fn main() {}

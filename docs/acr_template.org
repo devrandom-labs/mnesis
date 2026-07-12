@@ -1,7 +1,7 @@
 #+TITLE: ACR: [Concise Title of the Change]
 #+AUTHOR: [Your Name/Alias, e.g., Supreme Rust Architect]
 #+DATE: <YYYY-MM-DD>
-#+PROPERTY: ACR_ID NEXUS-ACR-[Sequential Number, e.g., 001]
+#+PROPERTY: ACR_ID MNESIS-ACR-[Sequential Number, e.g., 001]
 #+PROPERTY: STATUS [Proposed | Accepted | Rejected | Implemented | Deprecated]
 #+PROPERTY: CHAMPION [Lead person advocating for this change]
 #+PROPERTY: CATEGORY [e.g., CoreFramework | API | Performance | Security | DX | Refactoring | NewFeature]
@@ -72,7 +72,7 @@
   ;; Explain *why* this proposed solution is the preferred approach.
   ;; - What are the main benefits of this change?
   ;; - How does it address the problem statement?
-  ;; - How does it align with the overall architectural vision and principles of the project (e.g., `nexus`'s philosophy of type safety, performance, purity)?
+  ;; - How does it align with the overall architectural vision and principles of the project (e.g., `mnesis`'s philosophy of type safety, performance, purity)?
   ;; - Reference specific design goals or requirements it meets.
   ;; Example: "This change is justified because:
   ;;   - *Enhanced Semantic Clarity*: Successful commands now unequivocally mean state change.

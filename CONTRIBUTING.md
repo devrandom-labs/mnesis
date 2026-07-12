@@ -1,4 +1,4 @@
-# Contributing to Nexus
+# Contributing to Mnesis
 
 All contributions are welcome: bug reports, tests, docs, examples, and code.
 
@@ -14,8 +14,8 @@ All contributions are welcome: bug reports, tests, docs, examples, and code.
 Prerequisites: [Nix](https://nixos.org/) with flakes enabled.
 
 ```bash
-git clone https://github.com/devrandom-labs/nexus.git
-cd nexus
+git clone https://github.com/devrandom-labs/mnesis.git
+cd mnesis
 nix develop   # or: direnv allow
 
 cargo test --all
@@ -29,11 +29,11 @@ cargo clippy --all-targets -- --deny warnings
 cargo test --all
 
 # Single crate
-cargo test -p nexus
-cargo test -p nexus-store
+cargo test -p mnesis
+cargo test -p mnesis-store
 
 # Single test by name
-cargo test -p nexus -- replay_rejects_version_gap
+cargo test -p mnesis -- replay_rejects_version_gap
 ```
 
 Property-based tests (proptest) are included and may take longer on first run.

@@ -44,14 +44,14 @@ use std::collections::HashMap;
 use std::num::NonZeroU32;
 
 use futures::StreamExt;
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::PendingEnvelope;
-use nexus_store::StreamKey;
-use nexus_store::envelope::pending_envelope;
-use nexus_store::error::AppendError;
-use nexus_store::store::RawEventStore;
-use nexus_store::value::SchemaVersion;
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::PendingEnvelope;
+use mnesis_store::StreamKey;
+use mnesis_store::envelope::pending_envelope;
+use mnesis_store::error::AppendError;
+use mnesis_store::store::RawEventStore;
+use mnesis_store::value::SchemaVersion;
 
 use proptest::prelude::*;
 

@@ -18,12 +18,12 @@
 
 use std::num::NonZeroU32;
 
-use nexus_fjall::{FjallStore, GlobalSeq};
-use nexus_store::StreamKey;
-use nexus_store::state::SnapshotStore;
+use mnesis_fjall::{FjallStore, GlobalSeq};
+use mnesis_store::StreamKey;
+use mnesis_store::state::SnapshotStore;
 // Only the cross-partition collision test (both features) needs `Version`.
 #[cfg(feature = "snapshot")]
-use nexus::Version;
+use mnesis::Version;
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
 

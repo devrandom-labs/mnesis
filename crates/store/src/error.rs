@@ -1,4 +1,4 @@
-use nexus::{ErrorId, KernelError, Version};
+use mnesis::{ErrorId, KernelError, Version};
 use thiserror::Error;
 
 /// Errors from the event store layer.
@@ -91,7 +91,7 @@ impl<A, EncErr, DecErr> StoreError<A, EncErr, DecErr> {
     /// retrying load → handle → save, or a `tower::retry::Policy` /
     /// `backon` `.when(|e| e.is_conflict())`.
     ///
-    /// nexus deliberately ships no retry machinery: classifying *other*
+    /// mnesis deliberately ships no retry machinery: classifying *other*
     /// errors as retryable (transient adapter I/O, say) needs context only
     /// the consumer has, and the loop, backoff, and sleep are runtime
     /// concerns. This predicate is the entire retry-facing surface.

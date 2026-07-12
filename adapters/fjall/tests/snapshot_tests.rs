@@ -12,10 +12,10 @@
 
 use std::num::NonZeroU32;
 
-use nexus::Version;
-use nexus_fjall::FjallStore;
-use nexus_store::StreamKey;
-use nexus_store::state::{Hydrated, SnapshotStore};
+use mnesis::Version;
+use mnesis_fjall::FjallStore;
+use mnesis_store::StreamKey;
+use mnesis_store::state::{Hydrated, SnapshotStore};
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
 
@@ -31,8 +31,8 @@ fn temp_store() -> (FjallStore, tempfile::TempDir) {
 
 /// Helper: append events to create a stream so snapshots have something to reference.
 async fn setup_stream(store: &FjallStore, id: &StreamKey, event_count: u64) {
-    use nexus_store::envelope::pending_envelope;
-    use nexus_store::store::RawEventStore;
+    use mnesis_store::envelope::pending_envelope;
+    use mnesis_store::store::RawEventStore;
 
     let mut envs = Vec::new();
     for i in 1..=event_count {
