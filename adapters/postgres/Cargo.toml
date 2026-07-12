@@ -24,7 +24,7 @@ tokio = { workspace = true, features = ["rt", "sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
-mnesis-store-testing = { version = "0.1.0", path = "../../crates/store-testing" }
+mnesis-store-testing = { path = "../../crates/store-testing" }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [lints]

@@ -81,7 +81,7 @@ mnesis-store = { path = ".", features = ["subscription", "export", "import", "cb
 # cycle (mnesis-inmemory depends on mnesis-store) is legal for cargo and the
 # path-only form is stripped at publish time.
 mnesis-inmemory = { path = "../../adapters/inmemory", features = ["export", "import"] }
-mnesis-store-testing = { version = "0.1.0", path = "../store-testing" }
+mnesis-store-testing = { path = "../store-testing" }
 proptest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
