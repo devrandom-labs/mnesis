@@ -27,8 +27,8 @@ criterion = { workspace = true }
 # `nix flake check` nextest run compiles and exercises the `testing` fixture
 # tests via Cargo feature unification (mirrors mnesis-store's pattern). Without
 # this, the gate runs default features only and skips the fixture entirely.
-mnesis = { version = "0.1.0", path = ".", features = ["testing", "derive"] }
-mnesis-macros = { version = "0.1.0", path = "../macros" }
+mnesis = { path = ".", features = ["testing", "derive"] }
+mnesis-macros = { path = "../macros" }
 proptest = { workspace = true }
 static_assertions = { workspace = true }
 thiserror = { workspace = true }

@@ -31,7 +31,7 @@ workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 # crate's own test targets — `AtomicAppend` on `InMemoryStore` is gated
 # behind it (matches the pattern mnesis-store uses for mnesis-inmemory).
 mnesis-inmemory = { path = ".", features = ["import"] }
-mnesis-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+mnesis-store-testing = { path = "../../crates/store-testing", features = [
     "snapshot",
     "atomic-append",
 ] }

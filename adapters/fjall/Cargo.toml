@@ -45,7 +45,7 @@ mnesis-fjall = { path = ".", features = ["export", "import", "snapshot", "projec
 # can encode/decode chunks. Separate from the line above because `cbor` is a
 # mnesis-store feature, not a mnesis-fjall one.
 mnesis-store = { path = "../../crates/store", features = ["cbor"] }
-mnesis-store-testing = { version = "0.1.0", path = "../../crates/store-testing", features = [
+mnesis-store-testing = { path = "../../crates/store-testing", features = [
     "snapshot",
     "atomic-append",
 ] }
