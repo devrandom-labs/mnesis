@@ -1266,6 +1266,7 @@ dependencies = [
  "criterion",
  "mnesis",
  "mnesis-macros",
+ "mnesis-test-domains",
  "proptest",
  "static_assertions",
  "thiserror",
@@ -1459,6 +1460,7 @@ dependencies = [
  "mnesis-inmemory",
  "mnesis-store",
  "mnesis-store-testing",
+ "mnesis-test-domains",
  "proptest",
  "rkyv",
  "serde",
@@ -1482,6 +1484,16 @@ dependencies = [
  "mnesis-wake",
  "thiserror",
  "tokio",
+ "workspace-hack",
+]
+
+[[package]]
+name = "mnesis-test-domains"
+version = "0.0.0"
+dependencies = [
+ "mnesis",
+ "serde",
+ "thiserror",
  "workspace-hack",
 ]
 

@@ -14,7 +14,6 @@
     reason = "test harness — relaxed lints for test code"
 )]
 
-use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
 
 const SV1: NonZeroU32 = NonZeroU32::MIN;
@@ -29,73 +28,20 @@ use mnesis_inmemory::{InMemorySnapshotStore, InMemoryStore};
 use mnesis_store::Store;
 use mnesis_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 use mnesis_store::{Repository, Snapshotting};
+use mnesis_test_domains::Counter;
+use mnesis_test_domains::CounterEvent;
+use mnesis_test_domains::CounterState;
+use mnesis_test_domains::TestId;
 
-// ── Test domain ────────────────────────────────────────────────────
-
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-enum CounterEvent {
-    Incremented,
-    Decremented,
-}
-
-impl Message for CounterEvent {}
-impl DomainEvent for CounterEvent {
-    fn name(&self) -> &'static str {
-        match self {
-            Self::Incremented => "Incremented",
-            Self::Decremented => "Decremented",
-        }
-    }
-}
-
-#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct CounterState {
-    value: i64,
-}
-
-impl AggregateState for CounterState {
-    type Event = CounterEvent;
-    fn initial() -> Self {
-        Self::default()
-    }
-    fn apply(mut self, event: &CounterEvent) -> Self {
-        match event {
-            CounterEvent::Incremented => self.value += 1,
-            CounterEvent::Decremented => self.value -= 1,
-        }
-        self
-    }
-}
-
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
-struct CounterId(String);
-
-impl fmt::Display for CounterId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
-impl AsRef<[u8]> for CounterId {
-    fn as_ref(&self) -> &[u8] {
-        self.0.as_bytes()
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-#[error("counter error")]
-struct CounterError;
-
-struct CounterAggregate;
-impl Aggregate for CounterAggregate {
-    type State = CounterState;
-    type Error = CounterError;
-    type Id = CounterId;
-}
+// ── Test domain: shared canonical `Counter` (mnesis-test-domains, #239) ──
+// Snapshot round-trips events through `JsonCodec`, so the shared domain is
+// pulled in with its `serde` feature (see the crate's dev-dependency). Only
+// `Incremented` / `Decremented` are exercised here; the canonical `Set` variant
+// is unused by these tests.
 
 // ── Helpers ────────────────────────────────────────────────────────
 
-fn repo(trigger: impl PersistTrigger, snapshot_on_read: bool) -> impl Repository<CounterAggregate> {
+fn repo(trigger: impl PersistTrigger, snapshot_on_read: bool) -> impl Repository<Counter> {
     let raw = InMemoryStore::new();
     let store = Store::new(raw);
     let inner = store.repository().json().build();
@@ -114,7 +60,7 @@ fn repo(trigger: impl PersistTrigger, snapshot_on_read: bool) -> impl Repository
 #[tokio::test]
 async fn load_without_snapshot_does_full_replay() {
     let repo = repo(EveryNEvents(NonZeroU64::new(100).unwrap()), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     // Save 5 events
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -137,7 +83,7 @@ async fn load_without_snapshot_does_full_replay() {
 async fn save_triggers_snapshot_and_load_uses_it() {
     // EveryNEvents(3) — snapshot after 3 events
     let repo = repo(EveryNEvents(NonZeroU64::new(3).unwrap()), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     let mut agg = repo.load(id.clone()).await.unwrap();
     let events = vec![
@@ -157,7 +103,7 @@ async fn save_triggers_snapshot_and_load_uses_it() {
 #[tokio::test]
 async fn save_below_threshold_no_snapshot_then_crosses() {
     let repo = repo(EveryNEvents(NonZeroU64::new(5).unwrap()), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     // Save 3 events — below threshold
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -206,8 +152,8 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
         false,
     );
 
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo_v1.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo_v1.load(id.clone()).await.unwrap();
     repo_v1
         .save(&mut agg, &save_events(&[CounterEvent::Incremented]))
         .await
@@ -224,7 +170,7 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
     );
 
     // Load should ignore the v1 snapshot and do full replay
-    let loaded: AggregateRoot<CounterAggregate> = repo_v2.load(id).await.unwrap();
+    let loaded: AggregateRoot<Counter> = repo_v2.load(id).await.unwrap();
     assert_eq!(loaded.state().value, 1);
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
@@ -232,7 +178,7 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
 #[tokio::test]
 async fn after_event_types_trigger_snapshots_on_domain_milestone() {
     let repo = repo(AfterEventTypes::new(&["Decremented"]), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     let mut agg = repo.load(id.clone()).await.unwrap();
 
@@ -271,8 +217,8 @@ async fn lazy_snapshot_on_read_after_full_replay() {
         false, // no on-read yet
     );
 
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo_write.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo_write.load(id.clone()).await.unwrap();
     repo_write
         .save(
             &mut agg,
@@ -297,7 +243,7 @@ async fn lazy_snapshot_on_read_after_full_replay() {
     );
 
     // First load → full replay → lazy snapshot created
-    let loaded: AggregateRoot<CounterAggregate> = repo_read.load(id.clone()).await.unwrap();
+    let loaded: AggregateRoot<Counter> = repo_read.load(id.clone()).await.unwrap();
     assert_eq!(loaded.state().value, 3);
 
     // Verify snapshot was created by hydrating directly
@@ -317,7 +263,7 @@ async fn lazy_snapshot_on_read_after_full_replay() {
 #[tokio::test]
 async fn multiple_save_load_cycles() {
     let repo = repo(EveryNEvents(NonZeroU64::new(3).unwrap()), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     // Cycle 1: save 3 → snapshot at v3
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -359,7 +305,7 @@ async fn multiple_save_load_cycles() {
 #[tokio::test]
 async fn sequence_save_snapshot_save_more_snapshot_again() {
     let repo = repo(EveryNEvents(NonZeroU64::new(3).unwrap()), false);
-    let id = CounterId("counter-42".into());
+    let id = TestId::new("counter-42");
 
     // Save 3 → snapshot at v3
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -400,7 +346,7 @@ async fn sequence_batch_crossing_non_multiple_boundary() {
     // EveryNEvents(5): batch 96→103 crosses 100-boundary
     // We simulate with small numbers: EveryNEvents(5), batch 3→8 crosses 5
     let repo = repo(EveryNEvents(NonZeroU64::new(5).unwrap()), false);
-    let id = CounterId("counter-1".into());
+    let id = TestId::new("counter-1");
 
     // Save 3 events (v1-v3)
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -450,8 +396,8 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
         SV1,
         false,
     );
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo_v1.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo_v1.load(id.clone()).await.unwrap();
     repo_v1
         .save(&mut agg, &save_events(&[CounterEvent::Incremented]))
         .await
@@ -466,7 +412,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
         sv2(),
         false,
     );
-    let mut agg: AggregateRoot<CounterAggregate> = repo_v2.load(id.clone()).await.unwrap();
+    let mut agg: AggregateRoot<Counter> = repo_v2.load(id.clone()).await.unwrap();
     assert_eq!(agg.state().value, 1);
 
     // Save another event → new snapshot with schema v2
@@ -476,7 +422,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
         .unwrap();
 
     // Reload should hit v2 snapshot
-    let loaded: AggregateRoot<CounterAggregate> = repo_v2.load(id.clone()).await.unwrap();
+    let loaded: AggregateRoot<Counter> = repo_v2.load(id.clone()).await.unwrap();
     assert_eq!(loaded.state().value, 2);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 
@@ -505,7 +451,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
 #[tokio::test]
 async fn lifecycle_create_save_snapshot_reload_verify() {
     let repo = repo(EveryNEvents(NonZeroU64::new(2).unwrap()), false);
-    let id = CounterId("counter-99".into());
+    let id = TestId::new("counter-99");
 
     // Create new aggregate
     let mut agg = repo.load(id.clone()).await.unwrap();
@@ -541,8 +487,8 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
         SV1,
         false,
     );
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo_no_snap.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo_no_snap.load(id.clone()).await.unwrap();
     repo_no_snap
         .save(
             &mut agg,
@@ -576,7 +522,7 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
         SV1,
         true,
     );
-    let _loaded: AggregateRoot<CounterAggregate> = repo_on_read.load(id.clone()).await.unwrap();
+    let _loaded: AggregateRoot<Counter> = repo_on_read.load(id.clone()).await.unwrap();
 
     // Snapshot now exists
     let (snap_version, _) = snap_store
@@ -589,7 +535,7 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
 
     // Second load uses snapshot (we can't directly prove partial replay,
     // but state correctness confirms the snapshot path works)
-    let loaded2: AggregateRoot<CounterAggregate> = repo_on_read.load(id).await.unwrap();
+    let loaded2: AggregateRoot<Counter> = repo_on_read.load(id).await.unwrap();
     assert_eq!(loaded2.state().value, 5);
     assert_eq!(loaded2.version(), Some(Version::new(5).unwrap()));
 }
@@ -639,8 +585,8 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
         SV1,
         false,
     );
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo_good.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo_good.load(id.clone()).await.unwrap();
     repo_good
         .save(&mut agg, &save_events(&[CounterEvent::Incremented]))
         .await
@@ -656,7 +602,7 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
         SV1,
         false,
     );
-    let loaded: AggregateRoot<CounterAggregate> = repo_bad.load(id).await.unwrap();
+    let loaded: AggregateRoot<Counter> = repo_bad.load(id).await.unwrap();
     assert_eq!(loaded.state().value, 1);
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
@@ -700,8 +646,8 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         SV1,
         false,
     );
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = good_repo.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = good_repo.load(id.clone()).await.unwrap();
     good_repo
         .save(
             &mut agg,
@@ -719,7 +665,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         SV1,
         false,
     );
-    let loaded: AggregateRoot<CounterAggregate> = bad_repo.load(id).await.unwrap();
+    let loaded: AggregateRoot<Counter> = bad_repo.load(id).await.unwrap();
     assert_eq!(loaded.state().value, 2);
 }
 
@@ -761,8 +707,8 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
         false,
     );
 
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo.load(id.clone()).await.unwrap();
 
     // Save should succeed despite snapshot save failure
     let result = repo
@@ -772,7 +718,7 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
     assert_eq!(agg.state().value, 1);
 
     // Events persist correctly — reload works via full replay
-    let loaded: AggregateRoot<CounterAggregate> = repo.load(id).await.unwrap();
+    let loaded: AggregateRoot<Counter> = repo.load(id).await.unwrap();
     assert_eq!(loaded.state().value, 1);
 }
 
@@ -808,8 +754,8 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
         SV1,
         false,
     );
-    let id = CounterId("counter-1".into());
-    let mut agg: AggregateRoot<CounterAggregate> = repo.load(id.clone()).await.unwrap();
+    let id = TestId::new("counter-1");
+    let mut agg: AggregateRoot<Counter> = repo.load(id.clone()).await.unwrap();
     repo.save(
         &mut agg,
         &save_events(&[
@@ -833,11 +779,11 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
 
     let (load_a, load_b) = tokio::join!(
         async {
-            let agg: AggregateRoot<CounterAggregate> = repo2.load(id.clone()).await.unwrap();
+            let agg: AggregateRoot<Counter> = repo2.load(id.clone()).await.unwrap();
             agg
         },
         async {
-            let agg: AggregateRoot<CounterAggregate> = repo.load(id.clone()).await.unwrap();
+            let agg: AggregateRoot<Counter> = repo.load(id.clone()).await.unwrap();
             agg
         },
     );
