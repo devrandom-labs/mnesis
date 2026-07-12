@@ -161,11 +161,10 @@ impl RawEventStore for FjallStore {
         tx.commit()
             .map_err(|e| AppendError::Store(FjallError::Io(e)))?;
 
-        // Wake only the subscribers parked on this stream, AFTER the commit
-        // is durable so a woken subscriber re-reads already-visible data.
+        // Wake AFTER the commit is durable so a woken subscriber re-reads
+        // already-visible data. `wake` bumps the per-stream generation AND the
+        // store-wide `$all` generation (a per-stream commit is an `$all` event).
         self.notifiers.wake(id_bytes);
-        // Wake every $all subscriber parked on the store-wide notifier.
-        self.notifiers.wake_all();
 
         Ok(())
     }
@@ -540,13 +539,13 @@ mod atomic_append_impl {
                 .map_err(|e| AtomicAppendError::Store(FjallError::Io(e)))?;
 
             // Wake AFTER the durable commit so a woken subscriber re-reads
-            // already-visible data: one wake per touched stream + the $all path.
+            // already-visible data: one wake per touched stream (each also
+            // bumps the `$all` generation).
             for w in writes {
                 if !w.events.is_empty() {
                     self.notifiers.wake(w.target.as_ref());
                 }
             }
-            self.notifiers.wake_all();
             Ok(())
         }
     }
@@ -636,7 +635,6 @@ impl WakeSource for FjallStore {
 
     fn wake(&self, stream: &[u8]) {
         self.notifiers.wake(stream);
-        self.notifiers.wake_all();
     }
 }
 

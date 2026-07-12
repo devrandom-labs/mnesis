@@ -256,13 +256,13 @@
 //!
 //!     fn wake(&self, stream: &[u8]) {
 //!         self.notifiers.wake(stream); // per-stream subscribers + the `$all` generation
-//!         self.notifiers.wake_all(); // the store-wide `$all` notifier
 //!     }
 //! }
 //! ```
 //!
 //! …and at the end of a successful non-empty `append`, after the commit is
-//! durable: `self.notifiers.wake(id.as_ref()); self.notifiers.wake_all();`.
+//! durable: `self.notifiers.wake(id.as_ref());` (one call — it wakes the
+//! stream's subscribers and bumps the store-wide `$all` generation).
 //! A distributed adapter implements the same two traits over its own signal
 //! (postgres: `LISTEN`/`NOTIFY`).
 //!

@@ -457,11 +457,11 @@ impl RawEventStore for InMemoryStore {
         // wake up and immediately try to acquire the same Mutex.
         drop(guard);
 
-        // Wake only the subscribers parked on this stream, keyed by the
-        // stable byte representation (`as_ref`), matching `subscribe`.
+        // Wake the subscribers parked on this stream, keyed by the stable
+        // byte representation (`as_ref`), matching `register`. `wake` also
+        // bumps the `$all` generation (a per-stream commit is an `$all` event).
         if should_notify {
             self.notifiers.wake(id.as_ref());
-            self.notifiers.wake_all();
         }
 
         Ok(())
@@ -596,7 +596,6 @@ impl WakeSource for InMemoryStore {
 
     fn wake(&self, stream: &[u8]) {
         self.notifiers.wake(stream);
-        self.notifiers.wake_all();
     }
 }
 
@@ -729,13 +728,13 @@ impl AtomicAppend for InMemoryStore {
         }
         drop(guard);
 
-        // Wake subscribers parked on each touched stream + the $all notifier.
+        // Wake subscribers parked on each touched stream (each wake also
+        // bumps the `$all` generation).
         for w in writes {
             if !w.events.is_empty() {
                 self.notifiers.wake(w.target.as_ref());
             }
         }
-        self.notifiers.wake_all();
         Ok(())
     }
 }

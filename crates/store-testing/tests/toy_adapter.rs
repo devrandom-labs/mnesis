@@ -216,8 +216,9 @@ impl RawEventStore for ToyStore {
                 .extend(staged);
         }
         // After the commit is durable — never before — fire the wake path.
+        // One call wakes the stream's subscribers and bumps the `$all`
+        // generation.
         self.notifiers.wake(id.as_bytes());
-        self.notifiers.wake_all();
         Ok(())
     }
 
@@ -274,7 +275,6 @@ impl WakeSource for ToyStore {
 
     fn wake(&self, stream: &[u8]) {
         self.notifiers.wake(stream);
-        self.notifiers.wake_all();
     }
 }
 
@@ -336,14 +336,10 @@ impl AtomicAppend for ToyStore {
         }
         // Wake only when something actually landed — same nobody-woken-on-
         // empty discipline as `append` (spurious wakes are permitted, but the
-        // reference shouldn't teach them).
-        let mut woke_any = false;
+        // reference shouldn't teach them). Each wake also bumps the `$all`
+        // generation.
         for write in writes.iter().filter(|w| !w.events.is_empty()) {
             self.notifiers.wake(write.target.as_bytes());
-            woke_any = true;
-        }
-        if woke_any {
-            self.notifiers.wake_all();
         }
         Ok(())
     }
