@@ -103,6 +103,8 @@ See the [examples](examples/) for complete working code:
 
 Nexus is **experimental** with an unstable API. The kernel is well-tested (proptest, miri, mutation testing, trybuild). The store and fjall adapter are under active development.
 
+The 1.0 promise — semver surface, crate tiers, on-disk format, MSRV, and deprecation policy — is written down in [STABILITY.md](STABILITY.md).
+
 ## License
 
 Licensed under your choice of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE).

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Nexus is an event-sourcing and DDD kernel for Rust. It provides composable traits, derive macros, and infrastructure adapters (starting with fjall). The project is **experimental** with an unstable API.
+Nexus is an event-sourcing and DDD kernel for Rust. It provides composable traits, derive macros, and infrastructure adapters (starting with fjall). The project is **experimental** with an unstable API. The 1.0 promise lives in [STABILITY.md](STABILITY.md) (#282): 1.0 tier = `nexus`/`nexus-macros`/`nexus-store`/`nexus-wake`/`nexus-wake-nostd`, adapters + `nexus-store-testing` stay 0.x; documented trait semantics are semver surface; on-disk = major-bounded write format with a one-major read overlap; MSRV bump = minor (pin-is-MSRV, no trailing floor); removals only at a major after ≥1 deprecated minor. Every freeze-affecting change must conform to it or amend it.
 
 ## Build & Development Commands
 
