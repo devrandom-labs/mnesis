@@ -1,0 +1,179 @@
+---
+title: Quickstart
+description: Model a bank account end to end — events, state, commands, replay — with no persistence layer.
+---
+
+# Quickstart
+
+This walkthrough builds a bank account with mnesis' kernel alone: **no store, no
+codec, no async**. You will define events, fold them into state, decide new
+events from commands, and rehydrate an aggregate by replaying its history. It is
+the whole event-sourcing loop in one file.
+
+The complete, runnable version is [`examples/inmemory`](https://github.com/devrandom-labs/mnesis/tree/main/examples/inmemory).
+
+## 1. Add the dependency
+
+The kernel only — pure domain logic, no persistence:
+
+```toml
+[dependencies]
+mnesis = { git = "https://github.com/devrandom-labs/mnesis", features = ["derive"] }
+```
+
+## 2. Identify the aggregate
+
+An id is any type that is stable, hashable, and has a byte representation (the
+store uses the bytes as a key; `Display` is for humans).
+
+```rust
+use std::fmt;
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+struct AccountId(String);
+
+impl fmt::Display for AccountId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl AsRef<[u8]> for AccountId {
+    fn as_ref(&self) -> &[u8] { self.0.as_bytes() }
+}
+```
+
+## 3. Define the events
+
+Events are a plain enum. `#[derive(DomainEvent)]` gives each variant a stable
+`name()` used on the wire.
+
+```rust
+use mnesis::*;
+
+#[derive(Debug, Clone)]
+struct AccountOpened { owner: String }
+#[derive(Debug, Clone)]
+struct MoneyDeposited { amount: u64 }
+#[derive(Debug, Clone)]
+struct MoneyWithdrawn { amount: u64 }
+#[derive(Debug, Clone)]
+struct AccountClosed;
+
+#[derive(Debug, Clone, DomainEvent)]
+enum AccountEvent {
+    Opened(AccountOpened),
+    Deposited(MoneyDeposited),
+    Withdrawn(MoneyWithdrawn),
+    Closed(AccountClosed),
+}
+```
+
+## 4. Fold events into state
+
+`AggregateState::apply` is a pure fold: current state + one event → next state.
+This is the *only* place state changes.
+
+```rust
+#[derive(Default, Debug, Clone)]
+struct AccountState { owner: String, balance: u64, is_open: bool }
+
+impl AggregateState for AccountState {
+    type Event = AccountEvent;
+    fn initial() -> Self { Self::default() }
+
+    fn apply(mut self, event: &AccountEvent) -> Self {
+        match event {
+            AccountEvent::Opened(e)    => { self.owner = e.owner.clone(); self.is_open = true; }
+            AccountEvent::Deposited(e) => { self.balance += e.amount; }
+            AccountEvent::Withdrawn(e) => { self.balance -= e.amount; }
+            AccountEvent::Closed(_)    => { self.is_open = false; }
+        }
+        self
+    }
+}
+```
+
+## 5. Bind the aggregate and decide from commands
+
+`#[mnesis::aggregate]` turns a unit struct into the aggregate marker. A
+`Handle<C>` impl is a pure decision function — it reads borrowed `state`,
+validates invariants, and returns decided events. It **never** sees version or
+identity: a decision depends only on domain state and the command.
+
+```rust
+#[derive(Debug, thiserror::Error)]
+enum AccountError {
+    #[error("account already open")]
+    AlreadyOpen,
+    #[error("account is closed")]
+    Closed,
+    #[error("insufficient funds: have {balance}, need {amount}")]
+    InsufficientFunds { balance: u64, amount: u64 },
+}
+
+#[mnesis::aggregate(state = AccountState, error = AccountError, id = AccountId)]
+struct BankAccount;
+
+struct OpenAccount { owner: String }
+struct Deposit { amount: u64 }
+struct Withdraw { amount: u64 }
+
+impl Handle<OpenAccount> for BankAccount {
+    fn handle(state: &AccountState, cmd: OpenAccount) -> Result<Events<AccountEvent>, AccountError> {
+        if state.is_open { return Err(AccountError::AlreadyOpen); }
+        Ok(events![AccountEvent::Opened(AccountOpened { owner: cmd.owner })])
+    }
+}
+
+impl Handle<Withdraw> for BankAccount {
+    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
+        if !state.is_open { return Err(AccountError::Closed); }
+        if state.balance < cmd.amount {
+            return Err(AccountError::InsufficientFunds { balance: state.balance, amount: cmd.amount });
+        }
+        Ok(events![AccountEvent::Withdrawn(MoneyWithdrawn { amount: cmd.amount })])
+    }
+}
+```
+
+## 6. Drive it — decide, persist, rehydrate
+
+`AggregateRoot<BankAccount>` holds state and version. You `handle` a command to
+get decided events, persist them (here into a `HashMap`), then
+`commit_persisted` to advance the version and fold the events in — atomically,
+so state can never lag its version.
+
+```rust
+let mut alice = AggregateRoot::<BankAccount>::new(AccountId("alice-001".into()));
+
+// Decide → get events (nothing has changed yet).
+let decided = alice.handle(OpenAccount { owner: "Alice".into() })?;
+
+// Persist those events to your store, then sync the in-memory root:
+let next = alice.version().map_or(Version::INITIAL, |v| v.next().expect("no overflow"));
+alice.commit_persisted(next, &decided);
+```
+
+Rehydration is just replaying the stored events in version order:
+
+```rust
+let mut reloaded = AggregateRoot::<BankAccount>::new(id.clone());
+for e in stored_events {           // each is a VersionedEvent<AccountEvent>
+    reloaded.replay(e.version(), e.event())?;
+}
+// reloaded.state() now reflects the full history.
+```
+
+That is the complete loop: **decide** (`handle`) → **persist** → **fold**
+(`commit_persisted`), and **rehydrate** (`replay`) on load.
+
+## Where to next
+
+- **[Aggregates](/model-a-domain/aggregates)** and
+  **[Handle & Decide](/model-a-domain/handle-decide)** — the kernel model in
+  depth.
+- **[Repository](/persist-events/repository)** — let `mnesis-store` do the
+  persist-and-rehydrate loop for you against a real store.
+- **[Closing the Books](/concepts/closing-the-books)** — keep streams short so
+  rehydration stays fast without snapshots.
