@@ -1,0 +1,59 @@
+{
+  "name": "Mnesis",
+  "description": "Event sourcing for Rust — no Box<dyn>, no runtime downcasting, no hidden allocations.",
+  "logo": {
+    "light": "https://github.com/devrandom-labs/mnesis/raw/refs/heads/main/docs/logo.svg",
+    "dark": "https://github.com/devrandom-labs/mnesis/raw/refs/heads/main/docs/logo.svg"
+  },
+  "sidebar": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        { "title": "Introduction", "href": "/", "icon": "globe" },
+        { "title": "Quickstart", "href": "/getting-started", "icon": "rocket" }
+      ]
+    },
+    {
+      "group": "Learn Event Sourcing",
+      "pages": [
+        { "title": "Event Sourcing", "href": "/concepts/event-sourcing", "icon": "clock-rotate-left" },
+        { "title": "Domain-Driven Design", "href": "/concepts/ddd", "icon": "diagram-project" },
+        { "title": "CQRS", "href": "/concepts/cqrs", "icon": "code-branch" },
+        { "title": "Hexagonal Architecture", "href": "/concepts/hexagonal", "icon": "cube" },
+        { "title": "Closing the Books", "href": "/concepts/closing-the-books", "icon": "book" }
+      ]
+    },
+    {
+      "group": "Model a Domain",
+      "pages": [
+        { "title": "Aggregates", "href": "/model-a-domain/aggregates", "icon": "layer-group" },
+        { "title": "Handle & Decide", "href": "/model-a-domain/handle-decide", "icon": "gavel" },
+        { "title": "Sagas", "href": "/model-a-domain/sagas", "icon": "sitemap" }
+      ]
+    },
+    {
+      "group": "Persist Events",
+      "pages": [
+        { "title": "Envelopes & Codecs", "href": "/persist-events/envelopes-codecs", "icon": "box" },
+        { "title": "Repository", "href": "/persist-events/repository", "icon": "database" },
+        { "title": "Snapshots", "href": "/persist-events/snapshots", "icon": "camera" },
+        { "title": "Backup & Restore", "href": "/persist-events/backup-restore", "icon": "floppy-disk" }
+      ]
+    },
+    {
+      "group": "Go Live",
+      "pages": [
+        { "title": "Subscriptions", "href": "/go-live/subscriptions", "icon": "tower-broadcast" },
+        { "title": "Adapters", "href": "/go-live/adapters", "icon": "plug" },
+        { "title": "Writing a Store Adapter", "href": "/go-live/writing-a-store-adapter", "icon": "screwdriver-wrench" }
+      ]
+    },
+    {
+      "group": "Reference",
+      "pages": [
+        { "title": "Stability & the 1.0 Promise", "href": "/reference/stability", "icon": "shield-halved" },
+        { "title": "API Docs (docs.rs)", "href": "https://docs.rs/mnesis", "icon": "rust" }
+      ]
+    }
+  ]
+}

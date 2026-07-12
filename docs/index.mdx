@@ -1,0 +1,113 @@
+---
+title: Introduction
+description: Event sourcing for Rust — no Box<dyn>, no runtime downcasting, no hidden allocations.
+---
+
+# Mnesis
+
+**Mnesis is an event-sourcing and DDD kernel for Rust.** It gives you composable
+traits, derive macros, and storage adapters to model a domain as a stream of
+events — with the type system, not a runtime message bus, holding it together.
+
+The name is Greek for *memory*. That is what an event-sourced system keeps: an
+append-only record of everything that happened, from which current state is a
+pure fold.
+
+```rust
+use mnesis::*;
+
+#[derive(Debug, Clone, DomainEvent)]
+enum Event {
+    Deposited(Deposited),
+    Withdrawn(Withdrawn),
+}
+
+#[derive(Debug, Clone)]
+struct Deposited { amount: u64 }
+#[derive(Debug, Clone)]
+struct Withdrawn { amount: u64 }
+
+#[derive(Default, Debug, Clone)]
+struct Account { balance: u64 }
+
+impl AggregateState for Account {
+    type Event = Event;
+    fn initial() -> Self { Self::default() }
+    fn apply(mut self, event: &Event) -> Self {
+        match event {
+            Event::Deposited(e) => self.balance += e.amount,
+            Event::Withdrawn(e) => self.balance -= e.amount,
+        }
+        self
+    }
+}
+
+#[mnesis::aggregate(state = Account, error = BankError, id = AccountId)]
+struct BankAccount;
+
+struct Deposit { amount: u64 }
+
+impl Handle<Deposit> for BankAccount {
+    fn handle(state: &Account, cmd: Deposit) -> Result<Events<Event>, BankError> {
+        Ok(events![Event::Deposited(Deposited { amount: cmd.amount })])
+    }
+}
+```
+
+## Why Mnesis?
+
+**Concrete event enums, not trait objects.** Events are plain Rust enums.
+`match` is exhaustive — the compiler catches every missing handler at build
+time. No `Box<dyn Any>`, no runtime downcasting, no message-bus plumbing.
+
+**A `no_std` / `no_alloc` kernel.** The core crate has zero dependence on `std`
+allocation. `Events<E, N>` is backed by `ArrayVec` with const generics — `N = 0`
+(the default) is a single event with **no heap allocation at all**. The kernel
+compiles for embedded (`thumbv7em`) and WASM targets.
+
+**A zero-copy read path.** One `Decode<E>` trait with an `Output<'a>` GAT covers
+both owning codecs (serde returns `E`) and borrowing codecs (rkyv returns
+`&'a Archived<E>`, bytemuck returns `&'a E`). Event streams are plain
+`futures::Stream<Item = Result<PersistedEnvelope, _>>`, so the whole
+`futures::StreamExt` / `TryStreamExt` surface is free. The on-disk row format
+aligns every payload to a 16-byte boundary, so zero-copy decoders get sound
+`&T` references with no copy and no realignment.
+
+## The crate map
+
+Mnesis is a small stack of crates layered by a load-bearing boundary:
+**pure kernel → persistence edge → infrastructure adapters.** You depend on only
+the layers you need.
+
+| Crate | Layer | What it gives you |
+|-------|-------|-------------------|
+| `mnesis` | Kernel | Aggregates, events, versioning, command handling, sagas — pure, `no_std`-capable |
+| `mnesis-macros` | Kernel | Derive macros: `DomainEvent`, `#[aggregate]`, `#[transforms]` |
+| `mnesis-store` | Edge | Codecs, envelopes, repositories, subscriptions, snapshots, backup/restore |
+| `mnesis-wake` / `mnesis-wake-nostd` | Core | In-process wake registries that drive live subscriptions |
+| `mnesis-fjall` / `mnesis-postgres` / `mnesis-inmemory` | Adapter | Concrete stores implementing the persistence seam |
+
+Projection is provided as **primitives** (`Projector`, `PersistTrigger`,
+`Subscription`, `SnapshotStore`). Mnesis ships **no** event-loop runner — the
+loop is the consumer's, so mnesis stays a kernel and never a runtime.
+
+## Who is this for?
+
+- You want event sourcing in Rust **without** a framework taking over your
+  runtime.
+- You are targeting **IoT / mobile** and care about allocation and binary size.
+- You want the **compiler** to enforce your domain invariants, not a bag of
+  `dyn Any` downcasts.
+
+## Where to next
+
+- **[Quickstart](/getting-started)** — a bank account, end to end, in memory.
+- **[Closing the Books](/concepts/closing-the-books)** — the modeling discipline
+  that keeps streams short so you rarely need snapshots.
+- **[Stability & the 1.0 Promise](/reference/stability)** — exactly what pinning
+  a `1.x` mnesis crate will buy you.
+- **[API docs on docs.rs](https://docs.rs/mnesis)** — the reference track.
+
+> **Status:** Mnesis is experimental with an unstable API. The kernel is
+> well-tested (proptest, miri, mutation testing, trybuild); the store and
+> adapters are under active development.
