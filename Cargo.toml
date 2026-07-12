@@ -58,6 +58,7 @@ rust-version = "1.95.0"
 license = "MIT OR Apache-2.0"
 authors = ["Joel DSouza <joel@devrandom.co>"]
 repository = "https://github.com/devrandom-labs/mnesis"
+homepage = "https://github.com/devrandom-labs/mnesis"
 
 [workspace.lints.clippy]
 # 1. THE FOUNDATION

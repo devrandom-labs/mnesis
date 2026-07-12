@@ -6,8 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
 description = "Fjall-backed event store adapter for the Mnesis event-sourcing framework"
-readme = "../../README.md"
+readme = "README.md"
 keywords = ["event-sourcing", "event-store", "fjall", "embedded"]
 categories = ["database"]
 
@@ -66,3 +67,6 @@ harness = false
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

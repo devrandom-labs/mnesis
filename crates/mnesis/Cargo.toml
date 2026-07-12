@@ -6,6 +6,7 @@ license.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 repository.workspace = true
+homepage.workspace = true
 description = "A zero-compromise event-sourcing and CQRS kernel for Rust with maximum compile-time type safety"
 readme = "README.md"
 keywords = ["event-sourcing", "cqrs", "ddd", "aggregate", "domain-driven-design"]
@@ -13,7 +14,11 @@ categories = ["data-structures"]
 
 [dependencies]
 arrayvec = { workspace = true }
-mnesis-macros = { version = "0.1.0", path = "../macros", optional = true }
+# Exact `=` version lock (serde/serde_derive model): a published `mnesis` requires
+# the byte-identical `mnesis-macros` it was built against, so the derive output can
+# never drift from the kernel it expands into. release-plz bumps both in lockstep.
+# See STABILITY.md (#282).
+mnesis-macros = { version = "=0.1.0", path = "../macros", optional = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
@@ -44,3 +49,6 @@ harness = false
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

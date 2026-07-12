@@ -44,6 +44,10 @@ impl BankAccountTransforms {
 }
 ```
 
+## MSRV & stability
+
+MSRV **1.95** (pinned stable). **1.0 tier**, version-locked to `mnesis` with an exact `=` pin. See [STABILITY.md](../../STABILITY.md).
+
 ## License
 
 Licensed under your choice of [MIT](../../LICENSE-MIT) or [Apache-2.0](../../LICENSE-APACHE).

@@ -6,8 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
 description = "Event store edge layer for the Mnesis event-sourcing framework"
-readme = "../../README.md"
+readme = "README.md"
 keywords = ["event-sourcing", "event-store", "cqrs", "persistence"]
 categories = ["data-structures"]
 
@@ -94,3 +95,6 @@ harness = false
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
