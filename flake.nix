@@ -28,7 +28,12 @@
           file = ./rust-toolchain.toml;
           sha256 = "sha256-gh/xTkxKHL4eiRXzWv8KP7vfjSk61Iq48x47BEDFgfk=";
         };
-        craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+        # Function form (crane >= 0.18.0): `overrideToolchain` takes a callback
+        # that builds the toolchain for a given `pkgs` instantiation, for correct
+        # cross-compilation splicing. We don't nix-cross (wasm/no_std targets ride
+        # the host toolchain via cargo `--target`), so the argument is ignored and
+        # the `${system}`-pinned `rustToolchain` is returned as-is (issue #222).
+        craneLib = (crane.mkLib pkgs).overrideToolchain (_: rustToolchain);
 
         unfilteredSrc = ./.;
 
