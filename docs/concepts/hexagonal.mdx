@@ -22,8 +22,9 @@ boundary** — not by convention.
    │ mnesis           │  <───  │ mnesis-store         │ <──  │ mnesis-fjall      │
    │ aggregates,      │        │ codecs, envelopes,   │      │ mnesis-postgres   │
    │ events, sagas    │  the   │ repository, the      │ the  │ mnesis-inmemory   │
-   │ (no I/O, no std  │  ports │ subscription loop,   │ adap-│ (concrete stores) │
-   │  alloc required) │        │ the store *traits*   │ ters │                   │
+   │                  │  ports │ subscription loop,   │ adap-│ (concrete stores) │
+   │ no_std, no-alloc │        │ the store *traits*   │ ters │                   │
+   │ (pure core)      │        │ no_std + alloc       │      │ std               │
    └──────────────────┘        └──────────────────────┘      └───────────────────┘
 ```
 

@@ -50,7 +50,7 @@ impl Handle<Deposit> for BankAccount {
 
 **Concrete event enums, not trait objects.** Events are plain Rust enums. `match` is exhaustive — the compiler catches every missing handler at build time. No `Box<dyn Any>`, no runtime downcasting, no message bus plumbing.
 
-**`no_std` down to the persistence layer.** Not just the domain types — the whole core stack builds for bare-metal ARM (`thumbv7em-none-eabihf`) and WASM. The **kernel** is `no_std` and *no-alloc* at `Events<E, 0>` (a single event, `ArrayVec`-backed, zero heap). **`mnesis-store`** — codecs, envelopes, the catch-up + live-tail subscription loop, backup/restore, snapshots, projections — is `no_std` + `alloc`. And `mnesis-wake-nostd` gives on-device live subscriptions under an [embassy](https://embassy.dev) executor. CI builds every one of these on `thumbv7em` on each push, so a `std` leak fails the gate.
+**`no_std` down to the persistence layer.** Not just the domain types — the whole core stack builds for bare-metal ARM (`thumbv7em-none-eabihf`) and WASM. The **kernel** is `no_std` and **pure `core`** — no allocator at all: `Events<E, N>` is `ArrayVec`-backed (stack, any `N`), so it never touches the heap (`N = 0`, the default, is simply a single event). **`mnesis-store`** — codecs, envelopes, the catch-up + live-tail subscription loop, backup/restore, snapshots, projections — is `no_std` + `alloc`. And `mnesis-wake-nostd` gives on-device live subscriptions under an [embassy](https://embassy.dev) executor. CI builds every one of these on `thumbv7em` on each push, so a `std` leak fails the gate.
 
 **Zero-copy read path.** One `Decode<E>` trait with an `Output<'a>` GAT covers both owning codecs (serde JSON/bincode/postcard return `E`) and borrowing codecs (rkyv returns `&'a Archived<E>`, bytemuck returns `&'a E`). Event streams are `futures::Stream<Item = Result<PersistedEnvelope, _>>`, so the entire `futures::StreamExt` / `TryStreamExt` combinator surface is free. The on-disk row format aligns every event payload to a 16-byte boundary, so zero-copy decoders (rkyv, flatbuffers, `#[repr(C)]` POD) get sound `&T` references without a copy or a realignment step.
 
@@ -58,7 +58,7 @@ impl Handle<Deposit> for BankAccount {
 
 | Crate | Description | `no_std` |
 |-------|-------------|----------|
-| [`mnesis`](crates/mnesis) | Kernel — aggregates, events, versioning, command handling | ✅ no-alloc at `N=0` |
+| [`mnesis`](crates/mnesis) | Kernel — aggregates, events, versioning, command handling | ✅ pure `core`, no-alloc |
 | [`mnesis-macros`](crates/macros) | Derive macros — `DomainEvent`, `#[aggregate]`, `#[transforms]` | emits `no_std` code |
 | [`mnesis-store`](crates/store) | Persistence edge — codecs, event streams, upcasters, repositories | ✅ + `alloc` |
 | [`mnesis-wake-nostd`](crates/wake-nostd) | On-device wake source for live subscriptions (embassy) | ✅ + `alloc` |

@@ -62,8 +62,10 @@ time. No `Box<dyn Any>`, no runtime downcasting, no message-bus plumbing.
 
 **`no_std` down to the persistence layer.** Not just your domain types — the
 whole core stack builds for bare-metal ARM (`thumbv7em`) and WASM. The **kernel**
-is `no_std` and *no-alloc* at `Events<E, 0>` (a single event, `ArrayVec`-backed,
-**no heap at all**). **`mnesis-store`** — codecs, envelopes, the subscription loop,
+is `no_std` and **pure `core`** — no allocator at all: `Events<E, N>` is
+`ArrayVec`-backed (stack, any `N`), so it never touches the heap (`N = 0`, the
+default, is just a single event). **`mnesis-store`** — codecs, envelopes, the
+subscription loop,
 backup/restore, snapshots, projections — is `no_std` + `alloc`, and
 `mnesis-wake-nostd` tails events on-device under an embassy executor. CI builds all
 of it on `thumbv7em` on every push. See **[Embedded & `no_std`](/go-live/embedded)**.
@@ -84,7 +86,7 @@ the layers you need.
 
 | Crate | Layer | What it gives you |
 |-------|-------|-------------------|
-| `mnesis` | Kernel | Aggregates, events, versioning, command handling, sagas — pure, `no_std`-capable |
+| `mnesis` | Kernel | Aggregates, events, versioning, command handling, sagas — pure `core`, `no_std`, no-alloc |
 | `mnesis-macros` | Kernel | Derive macros: `DomainEvent`, `#[aggregate]`, `#[transforms]` |
 | `mnesis-store` | Edge | Codecs, envelopes, repositories, subscriptions, snapshots, backup/restore — `no_std` + `alloc` |
 | `mnesis-wake` / `mnesis-wake-nostd` | Core | Wake registries that drive live subscriptions (`-nostd` is `no_std` + `alloc`, for on-device tailing) |
