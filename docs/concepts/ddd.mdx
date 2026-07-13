@@ -5,8 +5,80 @@ description: Aggregates, invariants, and the ubiquitous language — how mnesis 
 
 # Domain-Driven Design
 
-<Info>This page is coming soon.</Info>
+Domain-Driven Design (DDD) is about putting the **business domain** at the centre
+of the model and letting the code speak the domain's language. Event sourcing and
+DDD fit together naturally: DDD gives you the *concepts* (aggregates, events,
+invariants), and event sourcing gives you a *storage model* that records exactly
+what the domain says happened.
 
-Aggregates, invariants, and the ubiquitous language — how mnesis maps DDD onto Rust types.
+mnesis maps the DDD building blocks onto Rust types, one to one.
 
-**In the meantime:** see [Aggregates](/model-a-domain/aggregates) and [Handle & Decide](/model-a-domain/handle-decide).
+## Aggregate — the consistency boundary
+
+An **aggregate** is the unit of consistency: a cluster of data that must always
+obey its invariants *together*, changed only through one entry point. "An account
+balance may never go negative" is an invariant of the `Account` aggregate.
+
+In mnesis an aggregate is:
+
+- a **marker type** (a unit struct) bound by `#[mnesis::aggregate]`, which fixes
+  its `State`, `Error`, and `Id`;
+- an `AggregateState` — the data and its `apply` fold;
+- one or more `Handle<C>` impls — the decisions it will make.
+
+The aggregate's event stream *is* its consistency boundary: everything in one
+stream is versioned and appended together; nothing spans two streams atomically
+(by design — that is what [sagas](/model-a-domain/sagas) are for).
+
+## Domain events — the ubiquitous language, written down
+
+Events are named in the **past tense**, in the domain's own words:
+`AccountOpened`, `MoneyDeposited`, `ShiftClosed`. They are the ubiquitous
+language made executable — a domain expert can read your event enum and recognise
+their business.
+
+```rust
+#[derive(Debug, Clone, DomainEvent)]
+enum AccountEvent {
+    Opened(AccountOpened),
+    Deposited(MoneyDeposited),
+    Withdrawn(MoneyWithdrawn),
+    Closed(AccountClosed),
+}
+```
+
+Because they are a concrete enum — not a bag of `dyn Any` — the compiler enforces
+the language: you cannot fold, decide on, or project an event you forgot to
+handle.
+
+## Commands vs. events
+
+A **command** is a *request* to do something ("withdraw 300") — it can be
+rejected. An **event** is a *fact* that it happened ("withdrew 300") — it cannot.
+Commands are imperative and hopeful; events are past-tense and settled. mnesis
+keeps them different types, and the crossing point between them is the decision
+function (see [Handle & Decide](/model-a-domain/handle-decide)).
+
+## Invariants live in the decision, not the fold
+
+This is the subtle DDD point mnesis makes structural: an invariant like
+"insufficient funds" is checked when you **decide** whether to emit an event, not
+when you **apply** one. By the time an event exists, it is history and cannot be
+refused. So `Handle::handle` returns `Result` (it can say no); `AggregateState::apply`
+does not (it never says no). Your invariants have exactly one home.
+
+## What mnesis deliberately leaves to you
+
+DDD has more tactical patterns — value objects, repositories, domain services,
+bounded contexts. mnesis gives you the aggregate/event/command core and a
+[repository](/persist-events/repository) over a store; value objects are just
+your own Rust types, and bounded-context boundaries are crate/module boundaries
+you draw. mnesis is a kernel, not a framework, so it does not dictate the rest.
+
+## Where to next
+
+- **[Aggregates](/model-a-domain/aggregates)** — the aggregate model in depth.
+- **[Handle & Decide](/model-a-domain/handle-decide)** — where invariants live.
+- **[Sagas](/model-a-domain/sagas)** — coordinating across aggregate boundaries.
+- **[Closing the Books](/concepts/closing-the-books)** — a DDD modeling
+  discipline for long-running processes.

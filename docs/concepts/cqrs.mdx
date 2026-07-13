@@ -5,8 +5,71 @@ description: Separating the write model (aggregates deciding events) from read m
 
 # CQRS
 
-<Info>This page is coming soon.</Info>
+CQRS — Command/Query Responsibility Segregation — is the idea that the model you
+use to **change** state and the model you use to **read** state do not have to be
+the same. Writes go through aggregates that decide events; reads come from
+purpose-built **projections** folded from those events.
 
-Separating the write model (aggregates deciding events) from read models (projections over the log).
+Event sourcing and CQRS are separable ideas that pair extremely well: the event
+log is the single source of truth for the write side, and any number of read
+models can be derived from it.
 
-**In the meantime:** the write side is [Model a Domain](/model-a-domain/aggregates); read models are built from projection primitives — see the [`projection-tokio` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/projection-tokio).
+## The two sides
+
+**Write side (command).** A command loads an aggregate, decides events, and
+appends them. It is optimised for *enforcing invariants*, one aggregate at a
+time. This is [Model a Domain](/model-a-domain/aggregates).
+
+**Read side (query).** A projection folds the event log into a shape optimised
+for *reading* — a table, a summary, a search index. It enforces no invariants; it
+just answers questions fast.
+
+The two sides never share a model. A change to how you *read* never risks a
+domain invariant, and a change to how you *decide* never breaks a query.
+
+## Projections in mnesis — primitives, not a runner
+
+mnesis ships the read side as **four composable primitives**, and deliberately
+**no event loop**:
+
+- **`Projector`** — the fold: `initial()` + `apply(state, &event) -> Result`.
+  Unlike an aggregate's `apply`, a projector's is *fallible* — a read model may
+  do checked arithmetic and legitimately reject bad input.
+- **`Subscription`** — the cursor that feeds the fold events in order (see
+  [Subscriptions](/go-live/subscriptions)).
+- **`PersistTrigger`** — when to persist progress (`EveryNEvents`, or after
+  specific event types).
+- **`SnapshotStore`** — atomic `(state, position)` persistence, so a restart
+  resumes instead of re-folding from zero (see [Snapshots](/persist-events/snapshots)).
+
+The `Projection` stepper *assembles* these into an inert per-event stepper —
+`load` → `advance(state, event)` → `flush` — but it owns **no loop**. You drive
+it from whatever runtime you already have (a tokio `while let`, an actor
+mailbox). Shipping a loop would make mnesis a runtime; it stays a kernel.
+
+```rust
+// The consumer owns the loop; mnesis owns the fold, trigger, and checkpoint.
+let (stepper, mut state) = Projection::load(/* projector, trigger, snapshot store, id, schema */).await?;
+while let Some(event) = subscription.next().await {
+    state = stepper.advance(state, event?).await?;
+}
+stepper.flush(&state).await?;
+```
+
+See the runnable [`projection-tokio`
+example](https://github.com/devrandom-labs/mnesis/tree/main/examples/projection-tokio)
+for a complete loop.
+
+## Why the loop is yours
+
+Lifecycle, supervision, back-pressure, passivation, and cursor management are
+*runtime* concerns that differ wildly between a server and an IoT device. Baking
+one policy into mnesis would duplicate — and fight — whatever runtime you deploy
+into. So mnesis hands you the pure pieces and stays out of the control flow.
+
+## Where to next
+
+- **[Aggregates](/model-a-domain/aggregates)** — the write side.
+- **[Subscriptions](/go-live/subscriptions)** — the event feed a projection reads.
+- **[Snapshots](/persist-events/snapshots)** — checkpointing projection progress.
+- **[Event Sourcing](/concepts/event-sourcing)** — the log both sides build on.

@@ -1,12 +1,101 @@
 ---
 title: Handle & Decide
-description: The Handle<C> trait: a pure decision function of (state, command) that returns decided events.
+description: The Handle<C> trait — a pure decision function of (state, command) that returns decided events.
 ---
 
 # Handle & Decide
 
-<Info>This page is coming soon.</Info>
+Deciding is where your domain says **yes or no**. A command comes in; the
+aggregate reads its current state, checks its invariants, and either produces
+events (yes) or returns a domain error (no). In mnesis that decision is the
+`Handle<C>` trait — one impl per command type.
 
-The Handle<C> trait: a pure decision function of (state, command) that returns decided events.
+## The trait
 
-**In the meantime:** read the [`mnesis` API docs](https://docs.rs/mnesis); the [Quickstart](/getting-started) shows several handlers.
+```rust
+pub trait Handle<C, const N: usize = 0>: Aggregate {
+    fn handle(state: &Self::State, cmd: C) -> Result<Events<EventOf<Self>, N>, Self::Error>;
+}
+```
+
+Read the signature closely — every part is deliberate:
+
+- **`state: &Self::State`** — a *borrow* of the current state. The decision reads
+  it; it cannot mutate it. Producing events is the only way to change anything.
+- **`cmd: C`** — the command, taken *by value* (the caller constructed it fresh).
+- **No `self`, no version, no id.** A decision is a pure function of `(state,
+  command)` **only**. It never branches on persistence position — "am I at
+  version 7?" is never a valid reason to decide differently. This is enforced by
+  the signature: the handler simply cannot see the version.
+- **`Result<Events<..>, Self::Error>`** — yes returns *at least one* event; no
+  returns a typed domain error.
+
+Handlers are implemented **on the marker type**, not on `AggregateRoot`:
+
+```rust
+impl Handle<Withdraw> for BankAccount {
+    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
+        if !state.is_open { return Err(AccountError::Closed); }
+        if state.balance < cmd.amount {
+            return Err(AccountError::InsufficientFunds { balance: state.balance, amount: cmd.amount });
+        }
+        Ok(events![AccountEvent::Withdrawn(MoneyWithdrawn { amount: cmd.amount })])
+    }
+}
+```
+
+## Decide, then apply — never both at once
+
+`handle` **decides**; it does not change the aggregate. The returned events are a
+*proposal*. They become real state only after they are persisted and folded in
+(via `commit_persisted`, usually inside a [repository](/persist-events/repository)
+`save`). This separation is the whole point:
+
+```text
+handle(state, cmd) ─► Events        (decide: can fail, mutates nothing)
+        │
+     persist events                 (durability)
+        │
+   commit_persisted(v, &events)     (apply: infallible fold, advances version)
+```
+
+Validation lives here, in `handle` — never in `AggregateState::apply`, which is
+infallible because an event is already a fact. Your invariants have exactly one
+home.
+
+## `Events<E, N>` — at least one, bounded, allocation-free
+
+A successful decision returns `Events<E, N>`: an `ArrayVec`-backed collection that
+**guarantees at least one event** and has a compile-time capacity of `N + 1`. The
+default `N = 0` means "exactly one event, no heap allocation" — the common case,
+and `no_std`-friendly. Emitting two events? Declare `Handle<C, 1>` and build with
+`events![a, b]`.
+
+```rust
+impl Handle<CloseAccount, 1> for BankAccount {
+    fn handle(state: &AccountState, _: CloseAccount) -> Result<Events<AccountEvent, 1>, AccountError> {
+        // ... may emit up to two events ...
+    }
+}
+```
+
+> One `Handle<C, N>` per command type. Two impls that differ only in `N` for the
+> same `C` are ambiguous at the dispatch site — pick the capacity the command
+> actually needs.
+
+## Dispatching
+
+On a loaded aggregate, `AggregateRoot::handle` forwards to the matching impl and
+infers everything:
+
+```rust
+let decided = account.handle(Withdraw { amount: 300 })?;
+```
+
+## Where to next
+
+- **[Aggregates](/model-a-domain/aggregates)** — the state and container the
+  decision reads.
+- **[Repository](/persist-events/repository)** — persist decided events and fold
+  them back in.
+- **[Sagas](/model-a-domain/sagas)** — `React`, the event-driven dual of `Handle`.

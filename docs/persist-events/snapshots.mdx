@@ -5,8 +5,91 @@ description: The SnapshotStore trait and the Snapshotting decorator — and why 
 
 # Snapshots
 
-<Info>This page is coming soon.</Info>
+Rehydrating an aggregate means replaying its whole stream. For a long stream that
+gets slow, and a **snapshot** is the usual fix: periodically save the folded
+state plus the position it was folded to, and on load start from there instead of
+from event one.
 
-The SnapshotStore trait and the Snapshotting decorator — and why Closing the Books is usually the better tool.
+mnesis supports snapshots — but first, a strong recommendation.
 
-**In the meantime:** prefer [Closing the Books](/concepts/closing-the-books); for the snapshot API, read the [`mnesis-store` docs](https://docs.rs/mnesis-store).
+> **Prefer [Closing the Books](/concepts/closing-the-books) to snapshots** whenever
+> your domain has a natural cycle. A summary *event* flows through the same fold
+> and the same upcaster pipeline as any event; a snapshot is opaque bytes with no
+> migration path. Reach for a snapshot only when you genuinely cannot bound the
+> stream.
+
+## The `SnapshotStore` trait
+
+One trait powers both aggregate snapshots and projection state:
+
+```rust
+pub trait SnapshotStore<S, P>: Send + Sync {
+    async fn hydrate(&self, id, schema_version) -> Result<Hydrated<S, P>, Self::Error>;
+    async fn commit(&self, id, schema_version, position: P, state: &S) -> Result<(), Self::Error>;
+}
+```
+
+State and position are saved and loaded **together, never separately**. That is
+the key safety property: a persisted checkpoint can never be *ahead* of the state
+it describes, so a lost write costs a re-fold (idempotent), never a skipped event.
+It is a structural guarantee — it does not depend on fsync timing.
+
+`P` is the position type: `Version` for a single aggregate stream, `GlobalSeq`
+for a multi-stream projection.
+
+## `Hydrated` — three states, not `Option`
+
+`hydrate` returns a **trichotomy**, not `Option`:
+
+```rust
+pub enum Hydrated<S, P> {
+    Absent,                              // nothing saved — start empty / replay
+    Stale { stored_schema },             // saved under a *different* schema — must rebuild
+    Found { position, state },           // usable checkpoint
+}
+```
+
+Why the extra state matters: for an aggregate snapshot, `Absent` and `Stale` both
+just mean "replay the stream," and the decorator collapses them. But for a
+**projection**, `Stale` means a schema bump invalidated the saved state and the
+next step is a full re-fold of the whole `$all` stream — on a mobile/IoT host,
+a long, battery-heavy operation the host must be able to *see coming*. `Stale`
+deliberately carries no stale bytes: derived state has no upcasting path, so a
+schema change forces a rebuild, never a migration.
+
+## Aggregate snapshots — the `Snapshotting` decorator
+
+You never call `SnapshotStore` by hand for an aggregate. Configure it on the
+[repository](/persist-events/repository) builder and it becomes transparent:
+
+```rust
+let repo = store
+    .repository::<BankAccount>()
+    .json()
+    .snapshot_store_json(snapshot_store)   // wrap in Snapshotting
+    .build();
+```
+
+Now `load` hydrates from the snapshot (falling back to replay if `Absent`/`Stale`)
+and `save` commits a fresh snapshot per a `PersistTrigger`. Snapshot writes are
+**best-effort** — they never block event persistence; a failed snapshot just
+means the next load re-folds.
+
+## When to persist — `PersistTrigger`
+
+- **`EveryNEvents(n)`** — snapshot each time the version crosses a bucket of `n`.
+- **`AfterEventTypes(&[..])`** — snapshot after semantically meaningful events.
+
+## The bridge to byte stores
+
+Adapters implement `SnapshotStore<Vec<u8>, P>` (raw bytes). `CodecSnapshotStore`
+bridges that to a typed `SnapshotStore<S, P>` using your `Encode`/`Decode`, so the
+same codec serializes both events and snapshots.
+
+## Where to next
+
+- **[Closing the Books](/concepts/closing-the-books)** — the preferred
+  alternative.
+- **[Repository](/persist-events/repository)** — wiring snapshots in.
+- **[CQRS](/concepts/cqrs)** — projections use the same `SnapshotStore` for their
+  checkpoint.

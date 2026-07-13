@@ -5,8 +5,74 @@ description: The shipped stores — fjall (embedded LSM-tree), postgres, and in-
 
 # Adapters
 
-<Info>This page is coming soon.</Info>
+An adapter is a concrete store: it implements the `RawEventStore + WakeSource`
+ports (see [Hexagonal Architecture](/concepts/hexagonal)) and everything else —
+repository, subscriptions, snapshots, backup — comes from `mnesis-store` for free.
+mnesis ships three.
 
-The shipped stores — fjall (embedded LSM-tree), postgres, and in-memory — and when to reach for each.
+## `mnesis-fjall` — embedded LSM-tree
 
-**In the meantime:** read the [`mnesis-fjall`](https://docs.rs/mnesis-fjall) and [`mnesis-postgres`](https://docs.rs/mnesis-postgres) API docs.
+The primary on-device store. [fjall](https://github.com/fjall-rs/fjall) is an
+embedded LSM-tree engine, so this is a **single-process, file-backed** store — no
+server, ideal for IoT, mobile, and desktop.
+
+```rust
+let store = FjallStore::builder(path).open()?.into_store();
+```
+
+- Implements `RawEventStore`, `WakeSource`, and (behind features) `SnapshotStore`
+  (aggregate *and* projection state), `AtomicAppend`, and `StreamLister`.
+- Zero-copy reads: the workspace pins fjall with the `bytes_1` feature, so the
+  `bytes::Bytes` inside a `PersistedEnvelope` *is* the same Arc-counted buffer
+  fjall handed back — no copy on the read path.
+- Event payloads land on a 16-byte boundary on disk, so zero-copy decoders work.
+
+**The `$all` index knob.** A produce-and-sync device that never reads `$all`
+should not pay to maintain it. So the `$all` index is configurable:
+
+```rust
+FjallStore::builder(path).all_index(AllIndex::Disabled).open()?;  // no $all index
+// AllIndex::Denormalized (default) maintains a fast $all scan.
+```
+
+`Denormalized` (the default) keeps a full second copy of each event for a
+point-read-free `$all` scan; `Disabled` drops it entirely for a device that only
+appends and syncs. This was a *measured* trade (≈9.3 MB vs 6.8 MB for 20k events)
+— see the [principal-engineer rule](/reference/stability) on surfacing such forks.
+
+## `mnesis-postgres` — networked, multi-writer
+
+A server-side store over PostgreSQL (via `sqlx`), for when many processes share
+one event store. Implements the same ports; the `$all` ordering is made gap-free
+with a reader-side `xid8` watermark, and `WakeSource` is backed by `LISTEN` /
+`NOTIFY` so live subscriptions work across connections. Choose this when you need
+a shared, networked store rather than an embedded one.
+
+## `mnesis-inmemory` — the test fixture
+
+`InMemoryStore` is a full adapter (`RawEventStore + WakeSource + SnapshotStore`,
+plus `AtomicAppend`/`StreamLister` behind features) backed by a `HashMap`. It is
+**not for production** — nothing persists — but it is the fixture `mnesis-store`'s
+own tests run against, and the fastest way to exercise a domain end to end without
+touching disk.
+
+## They are interchangeable
+
+Because all three implement the same two ports, your domain code, repository,
+subscriptions, and backup pipeline are **identical** across them. Develop against
+`InMemoryStore`, ship on `FjallStore`, scale to `PostgresStore` — with no change
+above the store construction line. Every adapter is verified against the same
+[conformance kit](/go-live/writing-a-store-adapter), so the contract holds
+uniformly.
+
+## A note on tiers
+
+The core crates are the frozen 1.0 tier; **adapters stay 0.x** and may evolve
+their on-disk layouts (always with a documented export/import migration path).
+See [Stability](/reference/stability).
+
+## Where to next
+
+- **[Writing a Store Adapter](/go-live/writing-a-store-adapter)** — build a fourth.
+- **[Repository](/persist-events/repository)** — the typed façade over any adapter.
+- **[Backup & Restore](/persist-events/backup-restore)** — move data between them.

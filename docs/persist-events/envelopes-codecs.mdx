@@ -5,8 +5,90 @@ description: PendingEnvelope / PersistedEnvelope and the Encode/Decode traits, i
 
 # Envelopes & Codecs
 
-<Info>This page is coming soon.</Info>
+The kernel deals in typed events; a store deals in bytes. The boundary between
+them is `mnesis-store`, and it has two jobs: **wrap** an event with its metadata
+(the envelope) and **serialize** its payload (the codec). Keeping these separate
+is what lets you pick any serialization format without the store caring.
 
-PendingEnvelope / PersistedEnvelope and the Encode/Decode traits, including the zero-copy Output<'a> GAT.
+## Envelopes — the event's container on the wire
 
-**In the meantime:** read the [`mnesis-store` API docs](https://docs.rs/mnesis-store).
+An envelope carries the event payload plus the metadata the store needs: the
+version, the event-type name, optional user metadata, and the schema version.
+There are two, one per direction:
+
+- **`PendingEnvelope`** — owned, write-path. Built with a typestate builder so you
+  cannot forget a field:
+
+  ```rust
+  let env = pending_envelope(version)
+      .event_type(name)
+      .payload(bytes)
+      .build(metadata);   // Option<Bytes>
+  ```
+
+- **`PersistedEnvelope`** — owned, read-path. One `bytes::Bytes` buffer plus
+  cached offset ranges for each field. It is **cheap to clone** (an `Arc`
+  increment, no copy) and carries no lifetime, so it flows straight through a
+  `futures::Stream` with no bridging code.
+
+Because the envelope owns a single `Bytes` buffer, the read path never re-parses
+header bytes and never allocates per field.
+
+## Codecs — Encode and Decode
+
+Serialization is two traits, `Encode<E>` and `Decode<E>`:
+
+```rust
+pub trait Encode<E: ?Sized>: Send + Sync + 'static {
+    fn encode(&self, event: &E) -> Result<bytes::Bytes, Self::Error>;
+}
+
+pub trait Decode<E: ?Sized>: Send + Sync + 'static {
+    type Output<'a> where Self: 'a;
+    fn decode<'a>(&'a self, env: &'a PersistedEnvelope) -> Result<Self::Output<'a>, Self::Error>;
+}
+```
+
+`Encode` returns `bytes::Bytes`, so the encoded payload flows end to end with no
+`Vec → Bytes` copy.
+
+## The `Output<'a>` GAT — one trait for owning *and* zero-copy codecs
+
+The clever part is `Decode`'s associated `type Output<'a>`. It lets one trait
+serve two very different kinds of codec:
+
+| Codec | `Output<'a>` | Cost |
+|-------|-------------|------|
+| serde (JSON/bincode/postcard) | `E` | one allocation per event — an *owned* value |
+| rkyv (archived) | `&'a Archived<E>` | **zero copy** — borrows into the buffer |
+| bytemuck (`#[repr(C)]` POD) | `&'a E` | **zero copy** — borrows into the buffer |
+
+A zero-copy codec hands you a reference *into the envelope's buffer* — no
+deserialization step at all. This is why the on-disk frame aligns every payload
+to a 16-byte boundary: so `&Archived<E>` and `&repr(C)` references are soundly
+aligned out of the box.
+
+`OwningCodec<E>` is a convenience alias — `for<'a> Decode<E, Output<'a> = E>` —
+naming the owning-codec case so a generic caller writes `C: OwningCodec<E>`
+instead of spelling the HRTB. Some carry-away APIs (`.decoded()`, snapshot decode)
+require it; the [repository](/persist-events/repository) façade does not (it
+consumes the decoded value in place, so it accepts both kinds).
+
+## Built-in codecs
+
+Behind cargo features, `mnesis-store` ships:
+
+- **`serde`** / **`json`** — `SerdeCodec<F>`, with `JsonCodec` as the `Json`
+  alias. The default for anything serde-encodable.
+- **`bytemuck`** — `BytemuckCodec` for `#[repr(C)]` POD types.
+- **`rkyv`** — `RkyvCodec` for rkyv-archived zero-copy types.
+
+Or implement `Encode`/`Decode` yourself for a bespoke format — the store only
+ever sees bytes.
+
+## Where to next
+
+- **[Repository](/persist-events/repository)** — where the codec is plugged in.
+- **[Subscriptions](/go-live/subscriptions)** — decoding a live stream with
+  `.decoded()`.
+- **[Stability](/reference/stability)** — `bytes` is a pinned public dependency.

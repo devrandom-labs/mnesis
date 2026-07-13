@@ -5,8 +5,100 @@ description: Implement RawEventStore + WakeSource, then verify against the execu
 
 # Writing a Store Adapter
 
-<Info>This page is coming soon.</Info>
+Want mnesis on a store it does not ship for — SQLite, Redis, S3, your own engine?
+You implement **two traits**, and everything else (the typed repository,
+subscriptions, snapshots, backup) comes from `mnesis-store` for free. Then you run
+the **conformance kit**, and it tells you whether your adapter is correct.
 
-Implement RawEventStore + WakeSource, then verify against the executable conformance kit — no tribal knowledge required.
+The design goal: a third party can write a correct adapter against a short written
+contract, with **no access to fjall/postgres source and no tribal knowledge**.
+(This was proven — a toy HashMap adapter written against only the guide passed
+34/34 checks on its first run.)
 
-**In the meantime:** read the [`mnesis-store-testing` conformance-kit docs](https://docs.rs/mnesis-store-testing).
+## The two required ports
+
+**`RawEventStore`** — move bytes, stamp versions.
+
+```rust
+pub trait RawEventStore: Send + Sync {
+    type Error: core::error::Error + Send + Sync + 'static;
+    type Stream: EventStream<Error = Self::Error> + 'static;
+    type AllStream: /* Stream of (AllPosition, PersistedEnvelope) */;
+    type AllPosition: AllPosition;
+
+    async fn append(/* stream id, expected version, pending envelopes */) -> Result<..>;
+    async fn read_stream(/* id, from: Version (INCLUSIVE) */) -> Result<Self::Stream, ..>;
+    async fn read_all(/* from: GlobalSeq */) -> Result<Self::AllStream, ..>;
+}
+```
+
+**`WakeSource`** — notify parked subscriptions after a durable commit.
+
+```rust
+pub trait WakeSource: Send + Sync + 'static {
+    type Registration: WakeRegistration;
+    type Error: core::error::Error + Send + Sync + 'static;
+    fn register(&self, stream: Option<&[u8]>) -> Result<Self::Registration, Self::Error>; // None = $all
+    fn wake(&self, stream: &[u8]);   // call AFTER the durable commit
+}
+```
+
+In-process adapters can delegate `WakeSource` straight to `mnesis-wake`'s
+`StreamNotifiers` (as all three shipped adapters do); a distributed adapter
+implements it over `LISTEN`/`NOTIFY` or similar.
+
+## The contract that isn't in the signatures
+
+The traits compile long before the adapter is *correct*. The behaviour you must
+get right — and which the kit checks — includes:
+
+- **`read_stream` `from` is inclusive; `read_all` `from` is exclusive** (an
+  intentional asymmetry).
+- **Conflict rejects with nothing landing** — a version conflict on `append`
+  leaves the store byte-for-byte unchanged.
+- **Catch-up → live ordering** — a subscription delivers the full backlog, emits
+  `CaughtUp` exactly once, then live events, in order.
+- **Lost-wakeup defense** — `wake` is called *after* the commit is durable, so an
+  armed subscription cannot miss it.
+- **Spurious wakes are permitted** — an extra wake costs a re-scan, not a bug.
+
+## The conformance kit — the contract as runnable tests
+
+`mnesis-store-testing` pins all of that as executable checks. You wire it up with
+one macro over a **factory contract** — `|| async { (store, guard) }`, a fresh
+store per test, the guard (a `TempDir`, or `()`) keeping backing resources alive:
+
+```rust
+mnesis_store_testing::conformance!(
+    factory: || async { (MyStore::new(), ()) },
+);
+```
+
+That generates one named `#[tokio::test]` per check across four categories
+(`sequence`, `boundary`, `linearizability`, `lifecycle`). Opt-in capability
+macros cover the optional ports:
+
+- `conformance_atomic_append!` — if you implement `AtomicAppend`.
+- `conformance_snapshot!` — if you implement `SnapshotStore` (takes sample
+  position/extreme pairs).
+- `conformance_lifecycle!` — persistent adapters only (`open`/`reopen` closures).
+
+`skip_unless:` gates environment-dependent adapters (e.g. postgres without a
+`DATABASE_URL`).
+
+## Optional capability ports
+
+Add these when your backend supports them, and unlock the matching features:
+
+| Port | Unlocks |
+|------|---------|
+| `AtomicAppend` | `WholeChunk` [import](/persist-events/backup-restore), cross-stream commits |
+| `SnapshotStore<Vec<u8>, P>` | [aggregate & projection snapshots](/persist-events/snapshots) |
+| `StreamLister` | `list_streams`, [export](/persist-events/backup-restore) |
+
+## Where to next
+
+- **[Adapters](/go-live/adapters)** — the shipped implementations to model yours on.
+- **[Hexagonal Architecture](/concepts/hexagonal)** — why the seam is two traits.
+- **[`mnesis-store-testing` docs](https://docs.rs/mnesis-store-testing)** — the
+  full adapter-author guide and pinned contract notes.

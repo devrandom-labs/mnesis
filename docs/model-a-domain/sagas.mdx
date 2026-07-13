@@ -1,12 +1,92 @@
 ---
 title: Sagas
-description: The dual of an aggregate: React<E> consumes upstream events and produces the saga's own events plus outgoing intents.
+description: The dual of an aggregate — React<E> consumes upstream events and produces the saga's own events plus outgoing intents.
 ---
 
 # Sagas
 
-<Info>This page is coming soon.</Info>
+A **saga** (a.k.a. process manager) coordinates a long-running process that spans
+more than one aggregate — "when an order is placed, take payment; when payment
+settles, arrange shipping." An aggregate never touches another aggregate's stream
+directly; a saga is how you connect them, reacting to events and issuing new
+intents.
 
-The dual of an aggregate: React<E> consumes upstream events and produces the saga's own events plus outgoing intents.
+In mnesis a saga is the **exact dual of an aggregate**:
 
-**In the meantime:** read the [`mnesis` saga API docs](https://docs.rs/mnesis).
+| Aggregate | Saga |
+|-----------|------|
+| `Handle<C>` — decide from a **command** | `React<E>` — react to an **event** |
+| command taken by value (built fresh) | event taken by borrow (read from a stream) |
+| produces its own events | produces its own events *plus* outgoing intents |
+
+Everything else — `AggregateState`, `Events`, versions, replay — is reused
+unchanged. A saga *is* an aggregate with two extra capabilities.
+
+## The traits
+
+```rust
+pub trait Saga: Aggregate {
+    type CorrelationKey: Clone + Eq + Hash + Send + Sync + Debug + 'static;
+    type Command: Message;                                   // outgoing intent vocabulary
+    fn intent_for(event: &EventOf<Self>) -> Option<Self::Command>;
+}
+
+pub trait React<E: DomainEvent, const N: usize = 0>: Saga {
+    fn correlate(event: &E) -> Option<Self::CorrelationKey>;
+    fn react(state: &Self::State, event: &E)
+        -> Result<Option<Events<EventOf<Self>, N>>, Self::Error>;
+}
+```
+
+- **`correlate`** — pure routing. Given an incoming upstream event, which saga
+  *instance* does it belong to? `None` means "not routed to this saga at all."
+- **`react`** — the decision. Given the saga's current state and an upstream
+  event, produce the saga's own events, or `Ok(None)` to ignore it (a routed
+  no-op — a duplicate, or a step already passed).
+- **`intent_for`** — projects the saga's *own* events into outgoing commands
+  (intents), 1:1.
+
+You get **two levels of "ignore"**: `correlate -> None` (not routed) and
+`react -> Ok(None)` (routed, but nothing to do).
+
+## Model A — intents are a projection of events, never a second output
+
+This is the load-bearing design choice. A saga's outgoing commands are **not** a
+separate thing `react` returns. `react` produces only the saga's own events;
+those events are folded into state *and* projected to intents via `intent_for`.
+
+```text
+upstream event ─► react ─► saga's own events ─┬─► apply  (state advances)
+                                              └─► intent_for  (outgoing commands)
+```
+
+Because an intent can only come from a recorded event, **a dispatched command can
+never drift from history**. There is no way to "send a command but forget to
+record why." The store-side saga repository even hands back intents as sealed
+*capability tokens* — possessing one is proof the triggering event is durable.
+
+## What mnesis provides, and what it doesn't
+
+mnesis gives you the saga **primitive** — the traits, `AggregateRoot::react`
+dispatch (the dual of `handle`), and a store-side bounded repository
+(`react_and_save` / `dispatch`). It does **not** give you the runtime: the loop
+that subscribes to upstream streams, resolves instances, and dispatches the
+enriched commands to their target aggregates is the runtime's job (in the
+Mnesis + Agency product, that is Agency).
+
+mnesis keeps the outgoing `Command` a *thin* intent — enriching it into a target
+aggregate's fat command is enrichment the runtime does, not the kernel.
+
+## Testing sagas
+
+The [`testing`](https://docs.rs/mnesis) feature ships a `SagaFixture` dual to the
+aggregate fixture: `given` (replay history) → `when(&event)` (drives `react` and
+projects intents) → `then_expect_events` / `then_expect_commands` /
+`then_expect_ignored` / `then_expect_error`.
+
+## Where to next
+
+- **[Handle & Decide](/model-a-domain/handle-decide)** — the command-side dual.
+- **[Aggregates](/model-a-domain/aggregates)** — the shared foundation.
+- **[Subscriptions](/go-live/subscriptions)** — how a runtime feeds a saga its
+  upstream events.

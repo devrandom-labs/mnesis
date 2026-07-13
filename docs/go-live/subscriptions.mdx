@@ -1,12 +1,102 @@
 ---
 title: Subscriptions
-description: The catch-up-then-live-tail loop: one generic, no-Box machine over any RawEventStore + WakeSource.
+description: The catch-up-then-live-tail loop — one generic, no-Box machine over any RawEventStore + WakeSource.
 ---
 
 # Subscriptions
 
-<Info>This page is coming soon.</Info>
+A subscription lets you **tail** a store: read all existing events, then keep
+receiving new ones as they are appended, forever. It is how projections stay
+current and how sagas hear about upstream events. mnesis implements the whole
+catch-up-then-live-tail loop **once, generically**, for any adapter that is a
+`RawEventStore + WakeSource`.
 
-The catch-up-then-live-tail loop: one generic, no-Box machine over any RawEventStore + WakeSource.
+## Subscribing
 
-**In the meantime:** read the [`mnesis-store` subscription API docs](https://docs.rs/mnesis-store).
+Build a `Subscription` from a store handle, then subscribe to one stream or to
+`$all`:
+
+```rust
+let subscription = Subscription::new(&store);
+
+let stream = subscription.subscribe(&id, None)?;   // from the beginning
+// or resume strictly after a known version:
+let stream = subscription.subscribe(&id, Some(v3))?;
+```
+
+`subscribe` is **synchronous and fallible**: it returns
+`Result<impl Stream<..>, WakeError>`. Registration failure surfaces *eagerly* as
+the `Err`; read failures stream *in-band* as `Err` items — two distinct error
+domains. The `from` argument is **strict-after**: `None` = beginning,
+`Some(v)` = events *after* `v`, so reopening never redelivers a duplicate.
+
+The returned stream is `!Unpin` (it is the `unfold` of the live loop), so
+`pin!` it before consuming — that is the price of the zero-cost, no-`Box`
+implementation.
+
+## `Step` — the catch-up → live boundary
+
+Every subscription item is wrapped in a `Step`, because *the boundary between
+replay and live is what makes a subscription a subscription*:
+
+```rust
+pub enum Step<T> {
+    Event(T),    // an event — replay before CaughtUp, live after
+    CaughtUp,    // emitted exactly once, at the backlog→live boundary
+}
+```
+
+Everything before `CaughtUp` is history; `CaughtUp` fires exactly once when you
+have drained the backlog; everything after is live. The cursor **never returns
+`None`** — when it is caught up it *parks* (waiting on the `WakeSource`) rather
+than ending.
+
+## Decoding — phase and decode are orthogonal
+
+`subscribe` yields raw `Step<PersistedEnvelope>`. Two combinators (from
+`StepStreamExt` / `DecodedStreamExt`) turn that into what you want — you compose
+them, they are never welded into one method:
+
+```rust
+// Typed events, keeping the phase (the projection consumption path):
+let mut typed = subscription
+    .subscribe(&id, None)?
+    .decoded::<AccountEvent, _>(JsonCodec::default());
+// yields Step<Decoded<AccountEvent>>
+
+// Drop the phase, get a bare event stream:
+let events = subscription.subscribe(&id, None)?.events();
+```
+
+- **`.decoded(codec)`** keeps `Step` and decodes each `Event` → tells catch-up
+  from live *and* hands you typed events (owning codecs).
+- **`.events()`** drops the phase → a bare raw stream the full decode surface then
+  applies to.
+- **`.for_each_decoded(codec, f)`** — an internal-iteration fold that hands the
+  *borrowed* window to a closure, so zero-copy codecs (rkyv/bytemuck) work with no
+  lending stream.
+
+## Lost-wakeup safety
+
+The loop **arms before it confirms it is caught up**, then re-scans: it registers
+its interest in future wakes *before* checking for a gap, so an event appended in
+the race window cannot be missed. `WakeRegistration::arm` captures a "seen
+version" at arm time, so only a *future* commit resolves the wait. Spurious wakes
+are permitted (they cost one empty re-scan); missed wakes are not.
+
+## `$all` subscriptions
+
+`subscribe_all(from)` tails **every** stream in append order, yielding
+`Step<(AllPosition, PersistedEnvelope)>`. This is the feed a whole-store projection
+reads; it resumes from a `GlobalSeq`, which is monotonic but **not gapless** (an
+aborted append may burn a value), so tolerate gaps.
+
+## Where to next
+
+- **[CQRS](/concepts/cqrs)** — projections drive off a subscription.
+- **[Writing a Store Adapter](/go-live/writing-a-store-adapter)** — implement
+  `WakeSource` to enable live tailing.
+- **[Envelopes & Codecs](/persist-events/envelopes-codecs)** — what `.decoded()`
+  uses.
+- **[`fjall-end-to-end` example](https://github.com/devrandom-labs/mnesis/tree/main/examples/fjall-end-to-end)**
+  — a live subscription resuming after a restart.
