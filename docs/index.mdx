@@ -60,10 +60,13 @@ impl Handle<Deposit> for BankAccount {
 `match` is exhaustive — the compiler catches every missing handler at build
 time. No `Box<dyn Any>`, no runtime downcasting, no message-bus plumbing.
 
-**A `no_std` / `no_alloc` kernel.** The core crate has zero dependence on `std`
-allocation. `Events<E, N>` is backed by `ArrayVec` with const generics — `N = 0`
-(the default) is a single event with **no heap allocation at all**. The kernel
-compiles for embedded (`thumbv7em`) and WASM targets.
+**`no_std` down to the persistence layer.** Not just your domain types — the
+whole core stack builds for bare-metal ARM (`thumbv7em`) and WASM. The **kernel**
+is `no_std` and *no-alloc* at `Events<E, 0>` (a single event, `ArrayVec`-backed,
+**no heap at all**). **`mnesis-store`** — codecs, envelopes, the subscription loop,
+backup/restore, snapshots, projections — is `no_std` + `alloc`, and
+`mnesis-wake-nostd` tails events on-device under an embassy executor. CI builds all
+of it on `thumbv7em` on every push. See **[Embedded & `no_std`](/go-live/embedded)**.
 
 **A zero-copy read path.** One `Decode<E>` trait with an `Output<'a>` GAT covers
 both owning codecs (serde returns `E`) and borrowing codecs (rkyv returns
@@ -83,8 +86,8 @@ the layers you need.
 |-------|-------|-------------------|
 | `mnesis` | Kernel | Aggregates, events, versioning, command handling, sagas — pure, `no_std`-capable |
 | `mnesis-macros` | Kernel | Derive macros: `DomainEvent`, `#[aggregate]`, `#[transforms]` |
-| `mnesis-store` | Edge | Codecs, envelopes, repositories, subscriptions, snapshots, backup/restore |
-| `mnesis-wake` / `mnesis-wake-nostd` | Core | In-process wake registries that drive live subscriptions |
+| `mnesis-store` | Edge | Codecs, envelopes, repositories, subscriptions, snapshots, backup/restore — `no_std` + `alloc` |
+| `mnesis-wake` / `mnesis-wake-nostd` | Core | Wake registries that drive live subscriptions (`-nostd` is `no_std` + `alloc`, for on-device tailing) |
 | `mnesis-fjall` / `mnesis-postgres` / `mnesis-inmemory` | Adapter | Concrete stores implementing the persistence seam |
 
 Projection is provided as **primitives** (`Projector`, `PersistTrigger`,
@@ -95,13 +98,17 @@ loop is the consumer's, so mnesis stays a kernel and never a runtime.
 
 - You want event sourcing in Rust **without** a framework taking over your
   runtime.
-- You are targeting **IoT / mobile** and care about allocation and binary size.
+- You are targeting **IoT / mobile** and care about allocation and binary size —
+  the kernel *and* the persistence layer are `no_std`, down to bare-metal ARM
+  (see **[Embedded & `no_std`](/go-live/embedded)**).
 - You want the **compiler** to enforce your domain invariants, not a bag of
   `dyn Any` downcasts.
 
 ## Where to next
 
 - **[Quickstart](/getting-started)** — a bank account, end to end, in memory.
+- **[Embedded & `no_std`](/go-live/embedded)** — what runs on bare-metal ARM, and
+  what still pulls `std`.
 - **[Closing the Books](/concepts/closing-the-books)** — the modeling discipline
   that keeps streams short so you rarely need snapshots.
 - **[Stability & the 1.0 Promise](/reference/stability)** — exactly what pinning

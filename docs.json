@@ -45,6 +45,7 @@
       "pages": [
         { "title": "Subscriptions", "href": "/go-live/subscriptions", "icon": "tower-broadcast" },
         { "title": "Adapters", "href": "/go-live/adapters", "icon": "plug" },
+        { "title": "Embedded & no_std", "href": "/go-live/embedded", "icon": "microchip" },
         { "title": "Writing a Store Adapter", "href": "/go-live/writing-a-store-adapter", "icon": "screwdriver-wrench" }
       ]
     },

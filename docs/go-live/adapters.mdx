@@ -65,6 +65,14 @@ above the store construction line. Every adapter is verified against the same
 [conformance kit](/go-live/writing-a-store-adapter), so the contract holds
 uniformly.
 
+## A note on `no_std`
+
+All three shipped adapters are `std` — fjall does file I/O, postgres pulls
+`sqlx` + `tokio`, and in-memory rides `mnesis-wake`. The kernel and `mnesis-store`
+themselves are `no_std`, so on a bare-metal device you implement the
+`RawEventStore` + `WakeSource` ports over your own flash/storage layer and keep the
+whole event-sourcing stack. See [Embedded & `no_std`](/go-live/embedded).
+
 ## A note on tiers
 
 The core crates are the frozen 1.0 tier; **adapters stay 0.x** and may evolve

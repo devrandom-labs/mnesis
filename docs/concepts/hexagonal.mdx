@@ -52,7 +52,9 @@ free. (Optional capability ports — `AtomicAppend`, `SnapshotStore`,
 This is not decoration. Because the seam is two small traits:
 
 - The **kernel is `no_std`-capable** — no adapter can drag `std` or an allocator
-  into your domain.
+  into your domain. And because the seam is so thin, **`mnesis-store` is `no_std`
+  too** (`+ alloc`): the whole persistence edge builds for bare-metal ARM. See
+  [Embedded & `no_std`](/go-live/embedded).
 - The **subscription loop is written once, generically**, and every adapter
   reuses it — there is no per-adapter copy to drift.
 - A **third party can write a new store** against a short contract, with no

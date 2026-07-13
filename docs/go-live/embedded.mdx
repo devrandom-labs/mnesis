@@ -1,0 +1,115 @@
+---
+title: Embedded & no_std
+description: The whole event-sourcing stack — kernel, persistence, and live subscriptions — builds for bare-metal ARM and WASM, not just your domain types.
+---
+
+# Embedded & `no_std`
+
+Mnesis is **IoT- and mobile-first**, and that goes deeper than the domain layer.
+It is not only your aggregates and events that compile without `std` — the
+**persistence edge** (`mnesis-store`) and an **on-device wake source**
+(`mnesis-wake-nostd`) do too. So the codecs, envelopes, upcasters, the catch-up +
+live-tail subscription loop, backup/restore, snapshots, and projections all build
+for a bare-metal ARM Cortex-M target.
+
+None of this is aspirational. Every target below is built by `nix flake check` on
+every push (see the `mnesis-nostd`, `mnesis-store-nostd`, and the WASM gates in
+`flake.nix`), so a regression that drags `std` into the core stack fails CI.
+
+## What builds where
+
+Two targets are gated in CI, and they are not equal:
+
+- **`thumbv7em-none-eabihf`** — ARM Cortex-M4/M7, genuinely bare metal, no `std`
+  at all. This is the **strong** gate.
+- **`wasm32-unknown-unknown`** — still ships `std`, so it proves the build but is
+  the weaker signal. `thumbv7em` is the one that catches a `std` leak.
+
+| Crate | `no_std` level | Needs an allocator? | Gated targets |
+|-------|----------------|---------------------|---------------|
+| `mnesis` (kernel) | `no_std`, and **no-alloc** at `Events<E, 0>` | No (for `N = 0`) | `thumbv7em`, `wasm32` |
+| `mnesis-store` | `no_std` **+ `alloc`** | Yes | `thumbv7em`, `wasm32` |
+| `mnesis-wake-nostd` | `no_std` **+ `alloc`** | Yes | `thumbv7em`, `wasm32` |
+| `mnesis-macros` (output) | emits `no_std`-clean code | — | proven via the smoke-test crate |
+
+The `mnesis-macros` row is subtle: a proc-macro crate always runs on the host
+under `std`, but the code it **emits** must be `no_std`-clean. The
+`mnesis-nostd-smoketest` crate uses `#[mnesis::aggregate]` + `#[derive(DomainEvent)]`
+and is compiled for `thumbv7em`, so a macro that emitted a `std::` path would fail
+the bare-metal build.
+
+## The no-alloc kernel
+
+The kernel is `#![cfg_attr(not(feature = "std"), no_std)]`, so a
+`default-features = false` build has no `std`. At the default `Events<E, N>`
+capacity `N = 0`, a decision returns exactly one event backed by an
+[`ArrayVec`](https://docs.rs/arrayvec) — **no heap allocation at all**. That is
+the tightest tier: pure domain logic, no allocator required.
+
+```toml
+[dependencies]
+mnesis = { git = "https://github.com/devrandom-labs/mnesis", default-features = false, features = ["derive"] }
+```
+
+## The `no_std` + `alloc` store
+
+This is the part that is easy to miss: **`mnesis-store` is `no_std` too** — it just
+needs an allocator (`extern crate alloc`). With default (`std`) features off, the
+whole dependency-free surface builds for `thumbv7em`:
+
+```toml
+[dependencies]
+mnesis-store = { git = "https://github.com/devrandom-labs/mnesis", default-features = false, features = ["subscription", "export", "import", "snapshot", "projection"] }
+```
+
+That feature set — `subscription`, `export`, `import`, `snapshot`, `projection` —
+is exactly what the `mnesis-store-nostd` CI gate compiles for bare metal, so every
+one of these is on-device capable:
+
+- **subscriptions** — the generic catch-up-then-live-tail loop
+- **export / import** — the backup/restore pipeline and CBOR box
+- **snapshots** and **projections** — the `SnapshotStore` / projection primitives
+
+An `rlib` links no allocator, so the store *compiles* as a library for `thumbv7em`
+even without one; a final firmware binary supplies a `#[global_allocator]`.
+
+## On-device live subscriptions
+
+The default device story is **append-and-sync**: the device records events and
+ships them upstream, and subscriptions run server-side under `mnesis-wake` (which
+owns `tokio` and is `std`). But if you genuinely want to tail events *on the
+device*, `mnesis-wake-nostd` provides `GlobalWake` — a `no_std` + `alloc`
+`WakeSource` built on one global eventcount (an `AtomicU32` generation counter plus
+[`event_listener`](https://docs.rs/event-listener)).
+
+It is `AtomicU32`, not `AtomicU64`, on purpose: `thumbv7em` (Cortex-M4) has no
+64-bit atomics. And it is proven end to end — `crates/wake-nostd/tests/embassy_subscription.rs`
+drives a live subscription under the [embassy](https://embassy.dev) `no_std`
+executor.
+
+## What still pulls `std`
+
+Not everything is `no_std`, and the honest list matters:
+
+- **Codec features** on the store — `json` (serde_json), `rkyv`, and `cbor`
+  (crc32c) pull `std` today, so they are **not** part of the bare-metal feature
+  set. On a `no_std` target you bring your own codec by implementing `Encode<E>` /
+  `Decode<E>` over the byte surface.
+- **The shipped adapters** — `mnesis-fjall` (file I/O), `mnesis-postgres`
+  (`sqlx` + `tokio`), and `mnesis-inmemory` (via `mnesis-wake`) are all `std`. See
+  [Adapters](/go-live/adapters). On a `no_std` device you implement the
+  `RawEventStore` + `WakeSource` ports against your own flash/storage layer — the
+  same short contract in [Writing a Store Adapter](/go-live/writing-a-store-adapter).
+
+So the shape of a `no_std` deployment is: the kernel and `mnesis-store` for the
+event-sourcing machinery, `mnesis-wake-nostd` if you tail on-device, your own codec,
+and your own storage-backed adapter.
+
+## Where to next
+
+- **[Hexagonal Architecture](/concepts/hexagonal)** — why the two-trait seam is
+  what keeps `std` out of the core.
+- **[Writing a Store Adapter](/go-live/writing-a-store-adapter)** — implement the
+  ports over your own storage.
+- **[Envelopes & Codecs](/persist-events/envelopes-codecs)** — the byte surface a
+  custom `no_std` codec plugs into.
