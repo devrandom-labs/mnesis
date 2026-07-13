@@ -67,8 +67,9 @@ home.
 
 A successful decision returns `Events<E, N>`: an `ArrayVec`-backed collection that
 **guarantees at least one event** and has a compile-time capacity of `N + 1`. The
-default `N = 0` means "exactly one event, no heap allocation" — the common case,
-and `no_std`-friendly. Emitting two events? Declare `Handle<C, 1>` and build with
+default `N = 0` means "exactly one event" — the common case. Either way the
+`ArrayVec` lives on the stack, so there is no heap allocation for any `N`, which
+keeps it `no_std`-friendly. Emitting two events? Declare `Handle<C, 1>` and build with
 `events![a, b]`.
 
 ```rust
