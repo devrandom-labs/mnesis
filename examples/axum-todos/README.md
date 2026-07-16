@@ -81,13 +81,13 @@ barrier-aligned concurrent PATCHes.
 
 | # | Finding | Issue |
 |---|---------|-------|
-| 1 | The `Projection` stepper cannot drive an `$all` projection — its `SnapshotStore` bound and checkpoint are `Version`-typed (per-stream); the example hand-rolls the loop in `index.rs` | #TBD |
-| 2 | `PersistTrigger` is `Version`-typed and `Decoded<T>` has no position slot — the `$all` position rides in a tuple beside the item; no shipped trigger can accept it, so the loop commits every event | #TBD |
-| 3 | `Handle` cannot decide zero events (`Events<E, N>` guarantees ≥ 1; `React` returns `Option`) — the legitimate no-op `PATCH {}` is answered in the handler from loaded state, without entering the domain | #TBD |
-| 4 | `Repository::save`/`execute` return no position — read-your-writes is unbuildable at the repository seam; `GET` is eventually consistent and the tests await the watch channel instead | #TBD |
-| 5 | `GET /todos` pagination forced an ordering decision upstream never made; creation order was chosen, making pagination deterministic | #TBD |
-| 6 | Two statuses upstream never returns are unavoidable: `409` (the lost-update race surfaces instead of losing the write) and `503` (a dead projection loop must not serve frozen 200s) | #TBD |
-| 7 | `$all` items carry no stream id and `Handle::handle` has no identity access — the todo id is threaded by hand: URL path → command field → every event variant's payload | #TBD |
+| 1 | The `Projection` stepper cannot drive an `$all` projection — its `SnapshotStore` bound and checkpoint are `Version`-typed (per-stream); the example hand-rolls the loop in `index.rs` | #327 |
+| 2 | `PersistTrigger` is `Version`-typed and `Decoded<T>` has no position slot — the `$all` position rides in a tuple beside the item; no shipped trigger can accept it, so the loop commits every event | #328 |
+| 3 | `Handle` cannot decide zero events (`Events<E, N>` guarantees ≥ 1; `React` returns `Option`) — the legitimate no-op `PATCH {}` is answered in the handler from loaded state, without entering the domain | #329 |
+| 4 | `Repository::save`/`execute` return no position — read-your-writes is unbuildable at the repository seam; `GET` is eventually consistent and the tests await the watch channel instead | #330 |
+| 5 | `GET /todos` pagination forced an ordering decision upstream never made; creation order was chosen, making pagination deterministic | #331 |
+| 6 | Two statuses upstream never returns are unavoidable: `409` (the lost-update race surfaces instead of losing the write) and `503` (a dead projection loop must not serve frozen 200s) | #332 |
+| 7 | `$all` items carry no stream id and `Handle::handle` has no identity access — the todo id is threaded by hand: URL path → command field → every event variant's payload | #333 |
 
 ### What did NOT strain
 
