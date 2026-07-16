@@ -14,6 +14,7 @@ members = [
     "crates/wake",
     "crates/wake-nostd",
     "crates/workspace-hack",
+    "examples/axum-todos",
     "examples/closing-the-books",
     "examples/fjall-end-to-end",
     "examples/inmemory",
@@ -25,6 +26,7 @@ members = [
 [workspace.dependencies]
 aligned-vec = { version = "=0.6.4", default-features = false }
 arrayvec = { version = "0.7.6", default-features = false }
+axum = "0.8.9"
 bytemuck = { version = "1", features = ["derive"] }
 bytes = { version = "1", default-features = false }
 crc32c = "0.6.8"
@@ -35,6 +37,9 @@ fjall = { version = "3", features = ["bytes_1"] }
 foldhash = "0.2.0"
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
 futures-core = { version = "0.3", default-features = false }
+http-body-util = "0.1.4"
+hyper = "1.10.1"
+hyper-util = { version = "0.1.20", features = ["client", "http1", "client-legacy"] }
 insta = "1.47.2"
 minicbor = { version = "2.2.2", features = ["alloc"] }
 parking_lot = "0.12.5"
@@ -49,6 +54,11 @@ tempfile = "3"
 thiserror = { version = "2.0.18", default-features = false }
 tokio = { version = "1.52.1", features = ["full"] }
 tokio-stream = "0.1"
+tower = { version = "0.5.3", features = ["util", "timeout"] }
+tower-http = { version = "0.7.0", features = ["trace"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+uuid = { version = "1.24.0", features = ["serde", "v4"] }
 
 [workspace.package]
 version = "0.1.0"
