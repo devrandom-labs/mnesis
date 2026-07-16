@@ -299,6 +299,15 @@ mod tests {
     }
 
     #[test]
+    fn delete_missing_todo_is_rejected() {
+        let id = uid();
+        let _ = fixture(id)
+            .given([])
+            .when(Delete { id })
+            .then_expect_error(TodoError::NotFound);
+    }
+
+    #[test]
     fn delete_twice_is_rejected() {
         let id = uid();
         let _ = fixture(id)
