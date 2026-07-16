@@ -1,6 +1,32 @@
-//! Port of axum's `examples/todos` onto mnesis + mnesis-fjall (#326).
+//! Port of axum's own `examples/todos` onto mnesis + mnesis-fjall (#326).
 //!
-//! (Narrative docs land in a later task; this is the compile skeleton.)
+//! The HTTP contract — routes, methods, status codes, request/response
+//! shapes — is unchanged from upstream (see `PROVENANCE.md`); the
+//! `Arc<RwLock<HashMap<Uuid, Todo>>>` behind it is replaced by an
+//! event-sourced todo aggregate (one stream per todo) on a real on-disk
+//! `FjallStore`, with `GET /todos` served from a consumer-owned `$all`
+//! projection.
+//!
+//! **This example is evidence, not a demo**: the requirements were written
+//! by people with no knowledge of mnesis, so every place the port strains
+//! is a genuine finding about the application-author seam — each is filed
+//! as its own issue and cross-referenced in `README.md`. The two additions
+//! the contract could not absorb silently:
+//!
+//! - `409 Conflict` — upstream's `todos_update` lost-update race is
+//!   unrepresentable here, so the second overlapping writer surfaces.
+//! - `503 Service Unavailable` — reads come from a projection; a dead
+//!   projection loop must not serve frozen reads as 200s.
+//!
+//! And one semantic shift with no status of its own: `GET` is eventually
+//! consistent (`save` returns no position to await — finding #326-4).
+//!
+//! Surfaces exercised: `#[mnesis::aggregate]` / `Handle` / `events!`,
+//! `Store::repository::<A>().json().build()`,
+//! `CommandRepository::execute` with `ExecuteError::is_conflict`,
+//! `Subscription::subscribe_all` with `.events().decoded()`, `Projector`,
+//! fjall's `SnapshotStore<Vec<u8>, GlobalSeq>` via `CodecSnapshotStore`,
+//! and `AggregateFixture` (unit tests).
 
 // Example code relaxes strict lints locally (production crates do NOT) —
 // same posture as `examples/fjall-end-to-end`. `unwrap_used` is allowed

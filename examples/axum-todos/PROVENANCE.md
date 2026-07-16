@@ -41,3 +41,13 @@ Two things in the upstream file are load-bearing for #326 and must **not** be si
    That choice is a finding, not an implementation detail — record it rather than assume it.
 
 Per #326, every strain point found during the port is filed as its own issue.
+
+## Port status
+
+The port is complete: the routes, methods, status codes, and JSON shapes
+upstream defined are preserved (verified by integration tests driving a real
+bound port). Deliberate divergences — `409 Conflict` and `503 Service
+Unavailable` (statuses upstream cannot produce), eventual consistency on
+`GET`, and deterministic pagination order — are recorded with their reasons
+in `README.md`, and every friction found during the port is filed as its own
+issue (see the findings table there).
