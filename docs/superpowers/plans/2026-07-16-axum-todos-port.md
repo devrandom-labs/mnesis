@@ -1850,3 +1850,8 @@ PR body: what it proves (application-author seam), acceptance-criteria checklist
 ## Deviation log
 
 (Record divergences here as they happen: what, why, impact.)
+
+- 2026-07-16, Task 2: `then_expect_state` takes `impl FnOnce(&State)`, not `&State` — plan example adapted to closure form (kernel API was right, plan was wrong; no impact).
+- 2026-07-16, Task 2 review: added `delete_missing_todo_is_rejected` (11th test) — quality review demonstrated the `!state.created` guard branch of `Handle<Delete>` was unkilled by the planned 10 tests.
+- 2026-07-16, Task 3 review: added `pagination_offset_and_limit_compose_in_order` + `completion_change_for_unknown_todo_is_a_projection_error` (17th/18th tests) — skip/take order swap and the second `ok_or` branch survived the planned 5 tests.
+- 2026-07-16, environment: the pre-commit `nix flake check` flaked once on `mnesis-nostd` ("can't find crate for `core`", thumbv7em) during parallel hook builds; identical derivation rebuilt clean. Transient, machine-local; retry the commit if seen.
