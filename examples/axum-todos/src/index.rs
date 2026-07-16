@@ -20,6 +20,9 @@ pub struct TodoView {
 /// `offset`/`limit` pagination is stable across requests. Upstream
 /// paginated `HashMap::values()`, which is unordered — a projection must
 /// choose an ordering, and upstream never did (finding #326-5).
+///
+/// Updates do an `O(n)` linear find per event — fine at example scale; a
+/// production projection would pair the Vec with an id→index map.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TodosIndex {
     todos: Vec<TodoView>,
@@ -198,9 +201,35 @@ mod tests {
     }
 
     #[test]
+    fn completion_change_for_unknown_todo_is_a_projection_error() {
+        let id = Uuid::new_v4();
+        let result = TodosProjector.apply(
+            TodosProjector.initial(),
+            &TodoEvent::CompletionChanged {
+                id,
+                completed: true,
+            },
+        );
+        assert_eq!(result.unwrap_err(), IndexError::UnknownTodo { id });
+    }
+
+    #[test]
     fn pagination_clamps_past_the_end() {
         let index = fold(&[created(Uuid::new_v4(), "only")]);
         assert!(index.page(5, usize::MAX).is_empty());
         assert_eq!(index.page(0, 0).len(), 0);
+    }
+
+    #[test]
+    fn pagination_offset_and_limit_compose_in_order() {
+        let (a, b, c) = (Uuid::new_v4(), Uuid::new_v4(), Uuid::new_v4());
+        let index = fold(&[
+            created(a, "first"),
+            created(b, "second"),
+            created(c, "third"),
+        ]);
+        let page = index.page(1, 1);
+        assert_eq!(page.len(), 1);
+        assert_eq!((page[0].id, page[0].text.as_str()), (b, "second"));
     }
 }
