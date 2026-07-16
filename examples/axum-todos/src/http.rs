@@ -8,6 +8,7 @@
 //! that unrepresentable, so the second writer surfaces here instead of
 //! losing its write (finding #326-6).
 
+use std::error::Error;
 use std::time::Duration;
 
 use axum::error_handling::HandleErrorLayer;
@@ -26,7 +27,7 @@ use tower::{BoxError, ServiceBuilder};
 use tower_http::trace::TraceLayer;
 use uuid::Uuid;
 
-use crate::domain::{Create, Delete, Todo, TodoId, TodoState, Update};
+use crate::domain::{Create, Delete, Todo, TodoError, TodoId, TodoState, Update};
 use crate::index::{TodoView, TodosIndex};
 
 /// Router state — replaces upstream's `Db = Arc<RwLock<HashMap<Uuid, Todo>>>`.
@@ -63,6 +64,14 @@ pub fn app(state: AppState) -> Router {
         .with_state(state)
 }
 
+/// Log the underlying failure before collapsing it to a 500 — upstream's
+/// handlers were infallible, so every error path here is new port surface,
+/// and a silent 500 is undiagnosable.
+fn internal<E: Error>(error: E) -> StatusCode {
+    tracing::error!(%error, "request failed");
+    StatusCode::INTERNAL_SERVER_ERROR
+}
+
 // The query parameters for todos index (upstream verbatim).
 #[derive(Debug, Deserialize, Default)]
 pub struct Pagination {
@@ -73,7 +82,14 @@ pub struct Pagination {
 async fn todos_index(
     pagination: Query<Pagination>,
     State(state): State<AppState>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, StatusCode> {
+    // The projection loop's death signal is the dropped sender (see
+    // `index::run`'s docs): without this guard, a dead loop would serve
+    // frozen reads with 200s forever. 503, like 409, is a status upstream
+    // never returns — the minimum honest divergence.
+    if state.index.has_changed().is_err() {
+        return Err(StatusCode::SERVICE_UNAVAILABLE);
+    }
     // Upstream took a read lock on the HashMap; here the projection's watch
     // channel is borrowed. Eventual consistency is the semantic change: a
     // GET racing its own POST may not see it yet (finding #326-4 — there is
@@ -82,7 +98,7 @@ async fn todos_index(
         pagination.offset.unwrap_or(0),
         pagination.limit.unwrap_or(usize::MAX),
     );
-    Json(todos)
+    Ok(Json(todos))
 }
 
 #[derive(Debug, Deserialize)]
@@ -95,6 +111,8 @@ async fn todos_create(
     Json(input): Json<CreateTodo>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let id = Uuid::new_v4();
+    // Minting the facade per request is Arc-clone cheap; one mint per
+    // aggregate type per handler is the intended pattern.
     let repo = state.store.repository::<Todo>().json().build();
     let mut todo = Todo::new(TodoId(id));
     repo.execute(
@@ -105,7 +123,7 @@ async fn todos_create(
         },
     )
     .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    .map_err(internal)?;
     Ok((StatusCode::CREATED, Json(todo_view(id, todo.state()))))
 }
 
@@ -121,10 +139,7 @@ async fn todos_update(
     Json(input): Json<UpdateTodo>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let repo = state.store.repository::<Todo>().json().build();
-    let mut todo = repo
-        .load(TodoId(id))
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
     // "Does it exist?" is a domain question: an id with no events loads as a
     // fresh root at version None, never an error.
     if todo.version().is_none() || todo.state().deleted {
@@ -149,8 +164,8 @@ async fn todos_update(
     {
         Ok(_) => Ok(Json(todo_view(id, todo.state()))),
         Err(e) if e.is_conflict() => Err(StatusCode::CONFLICT),
-        Err(ExecuteError::Decide(_)) => Err(StatusCode::NOT_FOUND),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(ExecuteError::Decide(TodoError::NotFound)) => Err(StatusCode::NOT_FOUND),
+        Err(error) => Err(internal(error)),
     }
 }
 
@@ -159,18 +174,15 @@ async fn todos_delete(
     State(state): State<AppState>,
 ) -> Result<StatusCode, StatusCode> {
     let repo = state.store.repository::<Todo>().json().build();
-    let mut todo = repo
-        .load(TodoId(id))
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
     if todo.version().is_none() || todo.state().deleted {
         return Err(StatusCode::NOT_FOUND);
     }
     match repo.execute(&mut todo, Delete { id }).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) if e.is_conflict() => Err(StatusCode::CONFLICT),
-        Err(ExecuteError::Decide(_)) => Err(StatusCode::NOT_FOUND),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(ExecuteError::Decide(TodoError::NotFound)) => Err(StatusCode::NOT_FOUND),
+        Err(error) => Err(internal(error)),
     }
 }
 
