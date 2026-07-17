@@ -81,8 +81,8 @@ barrier-aligned concurrent PATCHes.
 
 | # | Finding | Issue |
 |---|---------|-------|
-| 1 | The `Projection` stepper cannot drive an `$all` projection — its `SnapshotStore` bound and checkpoint are `Version`-typed (per-stream); the example hand-rolls the loop in `index.rs` | #327 |
-| 2 | `PersistTrigger` is `Version`-typed and `Decoded<T>` has no position slot — the `$all` position rides in a tuple beside the item; no shipped trigger can accept it, so the loop commits every event | #328 |
+| 1 | The `Projection` stepper cannot drive an `$all` projection — its `SnapshotStore` bound and checkpoint are `Version`-typed (per-stream); the example hand-rolled the loop in `index.rs`. **Resolved:** the stepper is generic over the position (`Pos = Version` default), and `index.rs::run` now drives it | #327 |
+| 2 | `PersistTrigger` is `Version`-typed and `Decoded<T>` has no position slot — the `$all` position rides in a tuple beside the item; no shipped trigger could accept it. **Resolved:** the trigger is `PersistTrigger<P = Version>`; `advance` takes the `(position, Decoded)` tuple whole. `EveryNEvents` stays `Version`-only by decision (no bucket arithmetic on composite positions) — the example's per-event pacer is a 4-line custom trigger | #328 |
 | 3 | `Handle` cannot decide zero events (`Events<E, N>` guarantees ≥ 1; `React` returns `Option`) — the legitimate no-op `PATCH {}` is answered in the handler from loaded state, without entering the domain | #329 |
 | 4 | `Repository::save`/`execute` return no position — read-your-writes is unbuildable at the repository seam; `GET` is eventually consistent and the tests await the watch channel instead | #330 |
 | 5 | `GET /todos` pagination forced an ordering decision upstream never made; creation order was chosen, making pagination deterministic | #331 |
@@ -91,10 +91,10 @@ barrier-aligned concurrent PATCHes.
 
 ### What did NOT strain
 
-The hand-rolled `$all` loop (`subscribe_all → .events() → .decoded() → fold → commit →
-publish`) compiled verbatim first try — no turbofish, no borrow gymnastics, `?` unified
-five error types into one boxed error; the composition surface is solid, and the gaps
-above (findings 1–2) are structural, not ergonomic. Conflict handling at the handler
+The original hand-rolled `$all` loop (`subscribe_all → .events() → .decoded() → fold →
+commit → publish`) compiled verbatim first try — no turbofish, no borrow gymnastics, `?`
+unified five error types into one boxed error; the composition surface was solid, and the
+gaps above (findings 1–2) were structural, not ergonomic. Conflict handling at the handler
 was trivial: `CommandRepository::execute` + `ExecuteError::is_conflict()` — the
 anticipated `StoreError<A, C, U>` three-generic pain never materialized. One real DX
 paper-cut: `Repository` must be imported separately for `.load` even with

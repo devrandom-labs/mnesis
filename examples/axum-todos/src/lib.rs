@@ -84,11 +84,12 @@ pub async fn spawn_app(path: &Path, addr: SocketAddr) -> Result<App, BoxErr> {
 
     let (seed, checkpoint) = index::hydrate(&store).await?;
     // The watch channel is seeded with the hydrated state, so reads are
-    // served immediately after a reopen — no catch-up wait.
-    let (tx, rx) = watch::channel(seed.clone());
+    // served immediately after a reopen — no catch-up wait. The loop's own
+    // `Projection::load` re-reads the same snapshot as its starting point.
+    let (tx, rx) = watch::channel(seed);
     let projection_store = store.clone();
     let projection = tokio::spawn(async move {
-        if let Err(error) = index::run(projection_store, seed, checkpoint, tx).await {
+        if let Err(error) = index::run(projection_store, tx).await {
             tracing::error!("projection loop stopped: {error}");
         }
     });
