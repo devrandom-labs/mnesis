@@ -5,6 +5,7 @@ use mnesis::{DomainEvent, Id, Version};
 
 use crate::decoded::Decoded;
 use crate::state::{Hydrated, PersistTrigger, SnapshotStore};
+use crate::store::AllPosition;
 
 /// A pure fold function over domain events.
 ///
@@ -50,6 +51,57 @@ pub trait Projector: Send + Sync + 'static {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Positioned — the stepper's input contract over both stream item shapes
+// ═══════════════════════════════════════════════════════════════════════════
+
+mod sealed {
+    pub trait Sealed {}
+}
+
+/// A decoded stream item carrying the position the stepper checkpoints at.
+///
+/// The two shapes a decoded subscription yields (the typed duals of
+/// [`RawItem`](crate::decoded::RawItem)):
+///
+/// - [`Decoded<E>`] (per-stream) — the bookmark is the `version` *inside*
+///   the box; <code>Pos = [Version]</code>.
+/// - `(P, Decoded<E>)` (`$all`) — the bookmark is the
+///   [`AllPosition`](crate::AllPosition) tag riding *beside* the box,
+///   exactly as `.decoded()` yields it; `Pos = P`.
+///
+/// Sealed on purpose: the pairing of position and event is **structural**.
+/// A caller can never hand [`Projection::advance`] a position that did not
+/// arrive with the event, so a committed checkpoint always describes the
+/// state it is saved with — the same illegal-states-unrepresentable bet as
+/// the atomic [`SnapshotStore::commit`].
+pub trait Positioned: sealed::Sealed {
+    /// The decoded event type carried by the item.
+    type Event;
+    /// The position type the stepper checkpoints at.
+    type Pos: Copy + Send;
+    /// Split the item into its bookmark and the decoded box.
+    fn into_parts(self) -> (Self::Pos, Decoded<Self::Event>);
+}
+
+impl<E> sealed::Sealed for Decoded<E> {}
+impl<E> Positioned for Decoded<E> {
+    type Event = E;
+    type Pos = Version;
+    fn into_parts(self) -> (Version, Self) {
+        (self.version, self)
+    }
+}
+
+impl<E, P: AllPosition> sealed::Sealed for (P, Decoded<E>) {}
+impl<E, P: AllPosition> Positioned for (P, Decoded<E>) {
+    type Event = E;
+    type Pos = P;
+    fn into_parts(self) -> (P, Decoded<E>) {
+        self
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Projection<I, P, Trig, SS> — inert per-event assembly of the four primitives
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -79,6 +131,7 @@ pub trait Projector: Send + Sync + 'static {
 ///
 /// # Assembly (consumer-owned loop)
 ///
+/// Per-stream (`Pos` defaults to [`Version`]):
 /// ```ignore
 /// let (mut proj, mut state) =
 ///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
@@ -93,18 +146,36 @@ pub trait Projector: Send + Sync + 'static {
 /// proj.flush(&state).await?;
 /// ```
 ///
+/// `$all` (`Pos` = the adapter's [`AllPosition`](crate::AllPosition)) is the
+/// **same loop** — the `(position, Decoded)` tuple `.decoded()` yields feeds
+/// [`advance`] whole; only the subscribe call and the snapshot store's
+/// position type differ:
+/// ```ignore
+/// let (mut proj, mut state) =
+///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
+/// let stream = subscription
+///     .subscribe_all(proj.checkpoint())?
+///     .events()
+///     .decoded(codec);
+/// tokio::pin!(stream);
+/// while let Some(item) = stream.next().await {
+///     state = proj.advance(state, item?).await?;
+/// }
+/// proj.flush(&state).await?;
+/// ```
+///
 /// [`advance`]: Projection::advance
 /// [`flush`]: Projection::flush
-pub struct Projection<I, P: Projector, Trig, SS> {
+pub struct Projection<I, P: Projector, Trig, SS, Pos = Version> {
     id: I,
     projector: P,
     trigger: Trig,
     snapshot_store: SS,
     schema_version: NonZeroU32,
     /// Last position durably committed together with the state.
-    checkpoint: Option<Version>,
+    checkpoint: Option<Pos>,
     /// Folded-but-not-yet-persisted tail position, flushed on shutdown.
-    pending: Option<Version>,
+    pending: Option<Pos>,
     /// `Some(old_schema)` iff `load` discarded a snapshot under a different
     /// schema version — the projection is re-folding from scratch. Surfaced via
     /// [`rebuilding_from`](Projection::rebuilding_from) so a host can distinguish
@@ -112,12 +183,13 @@ pub struct Projection<I, P: Projector, Trig, SS> {
     rebuilt_from: Option<NonZeroU32>,
 }
 
-impl<I, P, Trig, SS> Projection<I, P, Trig, SS>
+impl<I, P, Trig, SS, Pos> Projection<I, P, Trig, SS, Pos>
 where
     I: Id,
     P: Projector,
-    Trig: PersistTrigger,
-    SS: SnapshotStore<P::State, Version>,
+    Trig: PersistTrigger<Pos>,
+    SS: SnapshotStore<P::State, Pos>,
+    Pos: Copy + Send,
 {
     /// Assemble and hydrate the stepper, returning it alongside the starting
     /// state.
@@ -179,18 +251,24 @@ where
         &self.id
     }
 
-    /// The last durably-committed position — pass to `subscribe` as the resume
-    /// point. `None` means "from the beginning".
-    pub const fn checkpoint(&self) -> Option<Version> {
+    /// The last durably-committed position — pass to `subscribe` (per-stream,
+    /// `Pos = Version`) or `subscribe_all` (`Pos` = the adapter's
+    /// [`AllPosition`](crate::AllPosition)) as the resume point. `None` means
+    /// "from the beginning".
+    pub const fn checkpoint(&self) -> Option<Pos> {
         self.checkpoint
     }
 
     /// Fold one decoded event, then commit `(state, position)` together if the
     /// [`PersistTrigger`] fires. Returns the new state.
     ///
-    /// The event's `version` becomes the candidate checkpoint. On a commit the
-    /// checkpoint advances and the pending tail clears; otherwise the position
-    /// is remembered as `pending` for the next [`flush`](Projection::flush).
+    /// Accepts either item shape a decoded stream yields (see [`Positioned`]):
+    /// a bare [`Decoded<E>`](Decoded) from a per-stream subscription (the
+    /// position is its `version`), or the `(position, Decoded<E>)` tuple from
+    /// an `$all` subscription — fed whole, no unpacking. The item's position
+    /// becomes the candidate checkpoint. On a commit the checkpoint advances
+    /// and the pending tail clears; otherwise the position is remembered as
+    /// `pending` for the next [`flush`](Projection::flush).
     ///
     /// # Errors
     ///
@@ -198,12 +276,15 @@ where
     ///   consumed state is not recoverable (the fold owns it by value), so a
     ///   failed `advance` ends the projection — reload to resume.
     /// - [`ProjectionError::Commit`] if the snapshot commit fails.
-    pub async fn advance(
+    pub async fn advance<It>(
         &mut self,
         state: P::State,
-        decoded: Decoded<P::Event>,
-    ) -> Result<P::State, ProjectionError<P::Error, SS::Error>> {
-        let position = decoded.version;
+        item: It,
+    ) -> Result<P::State, ProjectionError<P::Error, SS::Error>>
+    where
+        It: Positioned<Event = P::Event, Pos = Pos>,
+    {
+        let (position, decoded) = item.into_parts();
         let folded = self
             .projector
             .apply(state, &decoded.event)
@@ -242,7 +323,7 @@ where
     /// Persist `(state, position)` atomically and advance the checkpoint.
     async fn commit(
         &mut self,
-        position: Version,
+        position: Pos,
         state: &P::State,
     ) -> Result<(), ProjectionError<P::Error, SS::Error>> {
         self.snapshot_store
