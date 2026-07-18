@@ -165,7 +165,7 @@ pub use import::{
 };
 pub use mnesis::Version;
 #[cfg(feature = "projection")]
-pub use projection::{Projection, ProjectionError, Projector};
+pub use projection::{Positioned, Projection, ProjectionError, Projector};
 pub use repository::{EventStore, Repository};
 pub use saga::{
     ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter, Reaction, SagaError,

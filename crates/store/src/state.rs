@@ -152,18 +152,29 @@ where
 
 /// Strategy for deciding when to persist state.
 ///
-/// Used by both projection runners (when to checkpoint projection state)
+/// Used by both projection steppers (when to checkpoint projection state)
 /// and snapshot decorators (when to snapshot aggregate state).
-pub trait PersistTrigger: Send + Sync {
+///
+/// Generic over the position type `P` (default [`Version`]) for the same
+/// reason [`SnapshotStore`] is: a per-stream caller paces on [`Version`],
+/// an `$all` projection paces on the adapter's
+/// [`AllPosition`](crate::AllPosition). Position-agnostic triggers
+/// ([`AfterEventTypes`]) implement it for every `P`; arithmetic triggers
+/// ([`EveryNEvents`]) only for [`Version`] — a composite `$all` position
+/// (e.g. postgres `(txid, seq)`) deliberately has no bucket arithmetic, so
+/// an `$all` pacer is a custom impl on the adapter's concrete position.
+pub trait PersistTrigger<P = Version>: Send + Sync {
     /// Whether state should be persisted now.
     ///
-    /// - `old_version`: version before the operation (`None` for first run)
-    /// - `new_version`: version after the operation
+    /// - `old_position`: the reference position the caller last persisted at
+    ///   (`None` for first run) — the snapshot decorator passes the version
+    ///   just before this save, the projection stepper its last checkpoint
+    /// - `new_position`: position after the operation
     /// - `event_names`: names of events just processed
     fn should_persist(
         &self,
-        old_version: Option<Version>,
-        new_version: Version,
+        old_position: Option<P>,
+        new_position: P,
         event_names: impl Iterator<Item: AsRef<str>>,
     ) -> bool;
 }
@@ -202,11 +213,11 @@ impl AfterEventTypes {
     }
 }
 
-impl PersistTrigger for AfterEventTypes {
+impl<P> PersistTrigger<P> for AfterEventTypes {
     fn should_persist(
         &self,
-        _old_version: Option<Version>,
-        _new_version: Version,
+        _old_position: Option<P>,
+        _new_position: P,
         mut event_names: impl Iterator<Item: AsRef<str>>,
     ) -> bool {
         event_names.any(|name| self.types.iter().any(|t| *t == name.as_ref()))

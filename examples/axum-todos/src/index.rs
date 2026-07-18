@@ -5,9 +5,11 @@ use std::num::NonZeroU32;
 
 use futures::StreamExt;
 use mnesis_fjall::{FjallStore, GlobalSeq};
-use mnesis_store::state::{CodecSnapshotStore, Hydrated, SnapshotStore};
+use mnesis_store::state::{CodecSnapshotStore, Hydrated, PersistTrigger, SnapshotStore};
 use mnesis_store::store::Store;
-use mnesis_store::{DecodedStreamExt, JsonCodec, Projector, StepStreamExt, Subscription};
+use mnesis_store::{
+    DecodedStreamExt, JsonCodec, Projection, Projector, StepStreamExt, Subscription,
+};
 use serde::{Deserialize, Serialize};
 use tokio::sync::watch;
 use uuid::Uuid;
@@ -148,6 +150,26 @@ impl AsRef<[u8]> for IndexId {
 /// Schema version of the folded state — bump to force a rebuild on deploy.
 pub const INDEX_SCHEMA: NonZeroU32 = NonZeroU32::MIN;
 
+/// Commit `(state, position)` after every event.
+///
+/// The watch channel publishes per event, so the durable checkpoint never
+/// lags the published state — a restart never replays an event readers have
+/// already observed. `EveryNEvents` is deliberately `Version`-only (bucket
+/// arithmetic has no meaning on a composite `$all` position — #328), so an
+/// `$all` per-event pacer is this four-line custom trigger.
+struct EveryEvent;
+
+impl PersistTrigger<GlobalSeq> for EveryEvent {
+    fn should_persist(
+        &self,
+        _old_position: Option<GlobalSeq>,
+        _new_position: GlobalSeq,
+        _event_names: impl Iterator<Item: AsRef<str>>,
+    ) -> bool {
+        true
+    }
+}
+
 /// One boxed error domain for the loop.
 ///
 /// Subscription register, read, decode, fold, and snapshot commit all differ
@@ -156,6 +178,11 @@ pub const INDEX_SCHEMA: NonZeroU32 = NonZeroU32::MIN;
 pub type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 
 /// Load the persisted `(state, checkpoint)` pair, if any.
+///
+/// `spawn_app`'s synchronous peek for the watch-channel seed and the
+/// `resumed_from` oracle; [`run`]'s own `Projection::load` re-reads the same
+/// snapshot as its authoritative starting point (one extra startup
+/// point-read).
 ///
 /// `Stale` (schema bump) folds from scratch, exactly like `Absent` — for this
 /// consumer the two collapse; a host that must anticipate a costly rebuild
@@ -171,43 +198,37 @@ pub async fn hydrate(store: &Store<FjallStore>) -> Result<(TodosIndex, Option<Gl
 /// Fold the `$all` stream into the index forever, committing
 /// `(state, position)` atomically per event and publishing each new state.
 ///
-/// This is `Projection::advance`/`flush` reimplemented for `$all`, because
-/// the stepper and `PersistTrigger` are `Version`-typed (findings #326-1/-2):
-/// the `$all` position rides *beside* the envelope as fjall's [`GlobalSeq`],
-/// `Decoded` has no slot for it, and no shipped trigger can accept it. The
-/// loop commits every event (so there is no pending tail and no flush);
-/// `send_replace` then pays one clone per event — the price of the
-/// deliberately no-`Clone` fold, at the seam where another task must see the
-/// state.
+/// Driven by the position-generic [`Projection`] stepper (#327): `load`
+/// hydrates `(state, checkpoint)` from fjall's `projections` partition, and
+/// the `(GlobalSeq, Decoded)` tuple the subscription yields feeds
+/// [`Projection::advance`] whole — no hand-rolled fold/commit loop. The
+/// [`EveryEvent`] trigger commits every fold, so there is no pending tail
+/// (a `flush` would be a no-op — if you ever swap [`EveryEvent`] for a
+/// bucketed trigger, add `proj.flush(&state)` after the loop) and
+/// `send_replace` pays one clone per event — the price of the deliberately
+/// no-`Clone` fold, at the seam where another task must see the state.
 ///
-/// Die-on-error contract: any `Err` (register, read, decode, fold, or commit)
-/// ends the loop and drops `tx`, so receivers observe `changed() -> Err` as
-/// the death signal. A deterministic fold error (e.g. [`IndexError::UnknownTodo`])
-/// is a permanent crash-loop across restarts — the committed checkpoint sits
-/// just before the poisoned event, so every resume re-reads it; recovery is a
-/// rebuild (schema bump), never a retry. The caller must seed the watch
-/// channel with the hydrated state, or readers serve a stale default until
-/// the first event arrives.
-pub async fn run(
-    store: Store<FjallStore>,
-    seed: TodosIndex,
-    checkpoint: Option<GlobalSeq>,
-    tx: watch::Sender<TodosIndex>,
-) -> Result<(), BoxErr> {
+/// Die-on-error contract: any `Err` (hydrate, register, read, decode, fold,
+/// or commit) ends the loop and drops `tx`, so receivers observe
+/// `changed() -> Err` as the death signal. A deterministic fold error (e.g.
+/// [`IndexError::UnknownTodo`]) is a permanent crash-loop across restarts —
+/// the committed checkpoint sits just before the poisoned event, so every
+/// resume re-reads it; recovery is a rebuild (schema bump), never a retry.
+/// The caller must seed the watch channel with the hydrated state (see
+/// [`hydrate`]), or readers serve a stale default until the first event
+/// arrives.
+pub async fn run(store: Store<FjallStore>, tx: watch::Sender<TodosIndex>) -> Result<(), BoxErr> {
     let snapshots = CodecSnapshotStore::new(store.raw(), JsonCodec::default());
+    let (mut proj, mut state) =
+        Projection::load(IndexId, TodosProjector, EveryEvent, snapshots, INDEX_SCHEMA).await?;
     let stream = Subscription::new(&store)
-        .subscribe_all(checkpoint)?
+        .subscribe_all(proj.checkpoint())?
         .events()
         .decoded(JsonCodec::default());
     tokio::pin!(stream);
 
-    let mut state = seed;
     while let Some(item) = stream.next().await {
-        let (position, decoded) = item?;
-        state = TodosProjector.apply(state, &decoded.event)?;
-        snapshots
-            .commit(&IndexId, INDEX_SCHEMA, position, &state)
-            .await?;
+        state = proj.advance(state, item?).await?;
         tx.send_replace(state.clone());
     }
     Ok(())
@@ -352,18 +373,18 @@ mod tests {
         .expect("create");
     }
 
-    /// Spawn [`run`] from `(seed, checkpoint)` and await until the published
-    /// index contains `id`; returns the receiver holding the folded state.
+    /// Spawn [`run`] and await until the published index contains `id`;
+    /// returns the receiver holding the folded state. `run` loads its own
+    /// checkpoint from the store — the same path production takes.
     async fn drive_until_contains(
         store: &Store<FjallStore>,
         seed: TodosIndex,
-        checkpoint: Option<GlobalSeq>,
         id: Uuid,
     ) -> watch::Receiver<TodosIndex> {
-        let (tx, mut rx) = watch::channel(seed.clone());
+        let (tx, mut rx) = watch::channel(seed);
         let loop_store = store.clone();
         let task = tokio::spawn(async move {
-            let _ = run(loop_store, seed, checkpoint, tx).await;
+            let _ = run(loop_store, tx).await;
         });
         tokio::time::timeout(Duration::from_secs(5), async {
             loop {
@@ -398,7 +419,7 @@ mod tests {
             // Write one todo through the repository, then drive the loop and
             // watch it publish the folded index.
             create_todo(&store, first_id, "persisted").await;
-            drive_until_contains(&store, seed, checkpoint, first_id).await;
+            drive_until_contains(&store, seed, first_id).await;
         }
         // All store handles dropped: the keyspace closes and the same path
         // reopens. hydrate must find the committed (state, position) pair —
@@ -423,7 +444,7 @@ mod tests {
             // assertion below.
             let second_id = Uuid::new_v4();
             create_todo(&store, second_id, "resumed").await;
-            let rx = drive_until_contains(&store, seed, checkpoint, second_id).await;
+            let rx = drive_until_contains(&store, seed, second_id).await;
 
             let ids: Vec<Uuid> = rx
                 .borrow()

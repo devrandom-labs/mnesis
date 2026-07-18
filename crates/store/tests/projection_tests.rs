@@ -17,6 +17,7 @@ use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
 
 use mnesis::Version;
+use mnesis_inmemory::InMemoryAllPos;
 use mnesis_store::Projector;
 use mnesis_store::state::{AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore};
 
@@ -372,4 +373,27 @@ fn projector_returns_error_on_underflow() {
     let state = CountState { count: 0, total: 0 };
     let result = proj.apply(state, &TestEvent::Removed(1));
     assert!(result.is_err());
+}
+
+// ── PersistTrigger is generic over the position type (#328) ─────────
+// AfterEventTypes never inspects positions, so it must accept an
+// adapter's $all position, not only Version.
+
+#[test]
+fn after_event_types_fires_by_name_for_all_positions() {
+    let trigger = AfterEventTypes::new(&["Closed"]);
+    let old = InMemoryAllPos::new(3);
+    let new = InMemoryAllPos::new(7).unwrap();
+    assert!(trigger.should_persist(old, new, std::iter::once("Closed")));
+    assert!(!trigger.should_persist(old, new, std::iter::once("Opened")));
+}
+
+#[test]
+fn after_event_types_accepts_first_run_with_all_position() {
+    // old_position: None is the first-run case — must work for an $all
+    // position exactly as it does for Version.
+    let trigger = AfterEventTypes::new(&["Closed"]);
+    let new = InMemoryAllPos::new(7).unwrap();
+    assert!(trigger.should_persist(None, new, std::iter::once("Closed")));
+    assert!(!trigger.should_persist(None, new, std::iter::once("Opened")));
 }
