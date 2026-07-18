@@ -96,7 +96,7 @@ disk size **or** append time. If A1 wins, Task 7 swaps its key/value edits
 accordingly (the store-level contract in Tasks 2–6 is identical either way) —
 log the swap in the deviation log.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add adapters/fjall/benches/all_index_layout.rs adapters/fjall/Cargo.toml docs/superpowers/plans/2026-07-18-333-all-stream-attribution.md
@@ -978,11 +978,15 @@ uuid-string-sized ids, `events_global`'s production partition config —
 
 | Layout | Insert time (criterion, 20k events) | On-disk size (`disk_space()`) | Chosen |
 |---|---|---|---|
-| A2 (id in key, shared value) | 35.066 ms [34.593, 35.870] | 0.36 MiB (×0.092 of logical) | **✓** |
-| A1 (id in value wrap) | 35.811 ms [34.914, 37.226] | 0.37 MiB (×0.094 of logical) | — |
+| A2 (id in key, shared value) | 28.461 ms [27.607, 29.315] | 0.36 MiB (×0.092 of logical) | **✓** |
+| A1 (id in value wrap) | 28.669 ms [28.304, 29.065] | 0.37 MiB (×0.094 of logical) | — |
 
-Delta (A1 vs A2): **+2.0%** on-disk, **+2.1%** insert time — both well under
+Delta (A1 vs A2): **+2.0%** on-disk, **+0.7%** insert time — both well under
 the 5% threshold, and both point the same direction (A1 worse, not better).
+(Numbers re-measured after a review fix: the criterion routine now returns the
+`(TempDir, keyspace)` tuple so database shutdown + directory deletion drop
+outside the timed window; the first run had timed that teardown in both
+layouts, inflating both by ~7 ms equally.)
 Per the decision rule (default A2; switch to A1 only if A2 is worse by >5% on
 either axis), **A2 is confirmed**: id in the key, value stays the shared frame
 `Slice` clone with zero extra per-append allocation. Task 7 proceeds with A2

@@ -310,8 +310,12 @@ fn insert_benchmarks(c: &mut Criterion) {
                     .expect("keyspace");
                 (dir, ks)
             },
-            |(_dir, ks)| {
+            |(dir, ks)| {
                 insert_a2(&ks, &ids, &frame);
+                // Return the handles so criterion drops them OUTSIDE the timed
+                // window — database shutdown + TempDir deletion are teardown,
+                // not insert cost.
+                (dir, ks)
             },
         );
     });
@@ -328,8 +332,10 @@ fn insert_benchmarks(c: &mut Criterion) {
                     .expect("keyspace");
                 (dir, ks)
             },
-            |(_dir, ks)| {
+            |(dir, ks)| {
                 insert_a1(&ks, &ids, &frame);
+                // Same untimed-teardown discipline as the A2 routine above.
+                (dir, ks)
             },
         );
     });
