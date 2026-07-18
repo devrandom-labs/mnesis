@@ -66,7 +66,7 @@ mod sealed {
 /// - [`Decoded<E>`] (per-stream) — the bookmark is the `version` *inside*
 ///   the box; <code>Pos = [Version]</code>.
 /// - `(P, Decoded<E>)` (`$all`) — the bookmark is the
-///   [`AllPosition`](crate::AllPosition) tag riding *beside* the box,
+///   [`AllPosition`] tag riding *beside* the box,
 ///   exactly as `.decoded()` yields it; `Pos = P`.
 ///
 /// Sealed on purpose: the pairing of position and event is **structural**.
@@ -146,7 +146,7 @@ impl<E, P: AllPosition> Positioned for (P, Decoded<E>) {
 /// proj.flush(&state).await?;
 /// ```
 ///
-/// `$all` (`Pos` = the adapter's [`AllPosition`](crate::AllPosition)) is the
+/// `$all` (`Pos` = the adapter's [`AllPosition`]) is the
 /// **same loop** — the `(position, Decoded)` tuple `.decoded()` yields feeds
 /// [`advance`] whole; only the subscribe call and the snapshot store's
 /// position type differ:
@@ -253,7 +253,7 @@ where
 
     /// The last durably-committed position — pass to `subscribe` (per-stream,
     /// `Pos = Version`) or `subscribe_all` (`Pos` = the adapter's
-    /// [`AllPosition`](crate::AllPosition)) as the resume point. `None` means
+    /// [`AllPosition`]) as the resume point. `None` means
     /// "from the beginning".
     pub const fn checkpoint(&self) -> Option<Pos> {
         self.checkpoint
