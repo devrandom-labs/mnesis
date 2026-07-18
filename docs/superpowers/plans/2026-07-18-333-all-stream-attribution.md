@@ -33,14 +33,14 @@ fjall partitions, no store change needed) and records the numbers.
 - Create: `adapters/fjall/benches/all_index_layout.rs`
 - Modify: `adapters/fjall/Cargo.toml` (add the `[[bench]]` entry beside the existing ones)
 
-- [ ] **Step 1: Read the existing disk-size bench for its harness pattern**
+- [x] **Step 1: Read the existing disk-size bench for its harness pattern**
 
 Read `adapters/fjall/benches/projection_storage.rs` fully. Reuse its
 keyspace-setup, persist, and on-disk-size measurement approach (it is the
 recorded #270-era pattern). Reuse `fjall_benchmarks.rs`'s `payload()` helper
 shape for synthetic values.
 
-- [ ] **Step 2: Write the layout bench**
+- [x] **Step 2: Write the layout bench**
 
 Core shape (adapt setup/teardown to the harness read in Step 1 — same
 `TempDir` + keyspace pattern, same disk-size measurement):
@@ -81,14 +81,14 @@ production `events_global`), insert all `EVENTS` rows (ids cycle through
 does), persist/flush, then record (a) wall-clock insert time via criterion and
 (b) on-disk directory size the way `projection_storage.rs` measures it.
 
-- [ ] **Step 3: Run it and record the numbers**
+- [x] **Step 3: Run it and record the numbers**
 
 Run: `nix develop -c cargo bench -p mnesis-fjall --bench all_index_layout`
 
 Record in the **Decision record** section at the bottom of this plan: insert
 time and on-disk bytes for A2 vs A1.
 
-- [ ] **Step 4: Decide**
+- [x] **Step 4: Decide**
 
 Default is **A2** (id in key; value stays the shared `Slice` — zero extra
 allocation on append). Choose A1 only if the numbers show A2 worse by >5% on
@@ -971,13 +971,25 @@ postgres) is green and the user approves.
 
 ## Decision record (filled by Task 1)
 
-| Layout | Insert time (20k events) | On-disk size | Chosen |
+Benchmark: `nix develop -c cargo bench -p mnesis-fjall --bench all_index_layout`
+(20 000 events, 120-byte payloads, 100 streams cycling through 36-byte
+uuid-string-sized ids, `events_global`'s production partition config —
+32 KiB blocks + all-levels LZ4). Logical size for both layouts: 3.93 MiB.
+
+| Layout | Insert time (criterion, 20k events) | On-disk size (`disk_space()`) | Chosen |
 |---|---|---|---|
-| A2 (id in key, shared value) | _(Task 1 records here)_ | _(Task 1 records here)_ | — |
-| A1 (id in value wrap) | _(Task 1 records here)_ | _(Task 1 records here)_ | — |
+| A2 (id in key, shared value) | 35.066 ms [34.593, 35.870] | 0.36 MiB (×0.092 of logical) | **✓** |
+| A1 (id in value wrap) | 35.811 ms [34.914, 37.226] | 0.37 MiB (×0.094 of logical) | — |
+
+Delta (A1 vs A2): **+2.0%** on-disk, **+2.1%** insert time — both well under
+the 5% threshold, and both point the same direction (A1 worse, not better).
+Per the decision rule (default A2; switch to A1 only if A2 is worse by >5% on
+either axis), **A2 is confirmed**: id in the key, value stays the shared frame
+`Slice` clone with zero extra per-append allocation. Task 7 proceeds with A2
+as planned (no swap needed).
 
 ## Deviation log
 
 | Date | Deviation | Reason | Impact |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-07-18 | Bench mirrors `mnesis_fjall::partition::scan_defaults()` inline (`events_global_config()` in the bench file) rather than importing it | `partition` is a private module (`mod partition`, not `pub mod`) in `mnesis-fjall`'s `lib.rs` — only `AllIndex`/`KeyspaceConfig` are re-exported, so a `benches/` file (a separate crate) cannot reach `scan_defaults` directly. Same workaround `projection_storage.rs` already uses for `projections`/`snapshots` configs. | None on the measurement — the mirrored options are copied verbatim (32 KiB blocks, all-levels LZ4, no bloom); if `scan_defaults()`'s tuning ever changes, this bench's copy must be updated in lockstep (same maintenance burden `projection_storage.rs` already carries). |

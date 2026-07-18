@@ -65,6 +65,12 @@ harness = false
 name = "projection_storage"
 harness = false
 
+# Decision-gate benchmark for the `events_global` ($all index) layout fork
+# (#333, rule 9): A2 (id in key, shared value) vs A1 (id in value wrap).
+[[bench]]
+name = "all_index_layout"
+harness = false
+
 [lints]
 workspace = true
 
