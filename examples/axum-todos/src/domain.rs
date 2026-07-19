@@ -29,9 +29,12 @@ impl AsRef<[u8]> for TodoId {
 
 /// Every variant carries `id`.
 ///
-/// The `$all` stream does not: a `PersistedEnvelope` has no stream id, so a
-/// multi-stream projection can only learn which todo an event belongs to
-/// from the payload itself (finding #326-7).
+/// This is now a **domain modeling choice** (self-describing events), not a
+/// framework obligation: since #333 the `$all` read tags every item with its
+/// origin `StreamKey`, so a multi-stream projection attributes each event to
+/// its todo from the tag without decoding the payload. Carrying `id` in the
+/// event too is redundant for routing here but keeps the events self-addressing
+/// (finding #326-7, resolved at the store seam by #333).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, DomainEvent)]
 pub enum TodoEvent {
     Created { id: Uuid, text: String },
@@ -85,8 +88,11 @@ pub struct Todo;
 /// Commands carry the id.
 ///
 /// `Handle::handle` is a pure function of `(state, command)` with no
-/// identity access — the only route from the URL path to the event payload
-/// is command -> event, by hand (finding #326-7).
+/// identity access, so threading the id from the URL path into the event
+/// payload is command -> event, by hand. Since #333 this is no longer needed
+/// for `$all` *routing* (the read path tags each item with its origin
+/// `StreamKey`); it remains the mechanism for putting the id *inside* the
+/// event when the domain wants self-addressing events (finding #326-7).
 pub struct Create {
     pub id: Uuid,
     pub text: String,
