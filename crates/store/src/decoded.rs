@@ -26,6 +26,7 @@ use futures::{Stream, StreamExt};
 use crate::codec::{Decode, OwningCodec};
 use crate::envelope::PersistedEnvelope;
 use crate::step::Step;
+use crate::stream_id::StreamKey;
 use mnesis::Version;
 
 /// A raw envelope, un-packed: the decoded event plus its resume bookmark and
@@ -78,10 +79,11 @@ mod sealed {
 /// Implemented for the two raw shapes the store yields:
 /// - `PersistedEnvelope` (per-stream / `read_stream`) → typed item `Decoded<T>`;
 ///   the bookmark (`version`) lives **inside** the box.
-/// - `(P, PersistedEnvelope)` (`$all` / `read_all`) → typed item
-///   `(P, Decoded<T>)`; the `$all` position bookmark stays **beside** the box.
+/// - `(P, StreamKey, PersistedEnvelope)` (`$all` / `read_all`) → typed item
+///   `(P, StreamKey, Decoded<T>)`; the `$all` position bookmark and the origin
+///   stream key both stay **beside** the box, preserved through the decode.
 ///
-/// The asymmetry is intentional (CLAUDE rule 4): each bookmark rides exactly
+/// The asymmetry is intentional (CLAUDE rule 4): each tag rides exactly
 /// where it lives in the raw layer. Sealed — not implementable downstream.
 pub trait RawItem: sealed::Sealed {
     /// The typed item once the envelope is decoded to `Decoded<T>`.
@@ -103,14 +105,14 @@ impl RawItem for PersistedEnvelope {
     }
 }
 
-impl<P: Copy> sealed::Sealed for (P, PersistedEnvelope) {}
-impl<P: Copy> RawItem for (P, PersistedEnvelope) {
-    type Typed<T> = (P, Decoded<T>);
+impl<P: Copy> sealed::Sealed for (P, StreamKey, PersistedEnvelope) {}
+impl<P: Copy> RawItem for (P, StreamKey, PersistedEnvelope) {
+    type Typed<T> = (P, StreamKey, Decoded<T>);
     fn envelope(&self) -> &PersistedEnvelope {
-        &self.1
+        &self.2
     }
-    fn retag<T>(&self, decoded: Decoded<T>) -> (P, Decoded<T>) {
-        (self.0, decoded)
+    fn retag<T>(&self, decoded: Decoded<T>) -> (P, StreamKey, Decoded<T>) {
+        (self.0, self.1.clone(), decoded)
     }
 }
 
@@ -130,7 +132,8 @@ where
     /// compiler steers zero-copy consumers to
     /// [`for_each_decoded`](Self::for_each_decoded).
     /// Per-stream items become `Decoded<E>`; `$all` items become
-    /// `(AllPosition, Decoded<E>)` (the tag is preserved beside the box).
+    /// `(AllPosition, StreamKey, Decoded<E>)` (both tags are preserved beside
+    /// the box).
     fn decoded<E, C>(
         self,
         codec: C,
@@ -176,11 +179,12 @@ where
     /// the `I::Typed<_>` associated-type projection (rustc "implementation of
     /// `FnMut` is not general enough"), so a concrete outer constructor is
     /// required for the zero-copy path to type-check. Consequently, over an
-    /// `$all` stream the `AllPosition` tag is **not** surfaced to `f` (the
-    /// per-stream `Decoded::version` still is) — a positioned `$all` consumer
-    /// must either use [`decoded`](Self::decoded) (owning codecs), or fold the
-    /// raw `subscribe_all` stream directly, calling `codec.decode(&env)` per
-    /// item (zero-copy; the tag rides beside the envelope on the raw tuple).
+    /// `$all` stream neither the `AllPosition` tag nor the [`StreamKey`] is
+    /// surfaced to `f` (the per-stream `Decoded::version` still is) — a
+    /// positioned or routed `$all` consumer must either use
+    /// [`decoded`](Self::decoded) (owning codecs), or fold the raw
+    /// `subscribe_all` stream directly, calling `codec.decode(&env)` per item
+    /// (zero-copy; both tags ride beside the envelope on the raw tuple).
     fn for_each_decoded<E, C, F, H>(
         self,
         codec: C,

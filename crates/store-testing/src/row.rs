@@ -173,8 +173,28 @@ pub async fn drain_all<S: RawEventStore>(
     pin_mut!(stream);
     let mut out = Vec::new();
     while let Some(item) = stream.next().await {
-        let (pos, env) = item.unwrap_or_else(|e| panic!("read_all item errored: {e:?}"));
+        let (pos, _key, env) = item.unwrap_or_else(|e| panic!("read_all item errored: {e:?}"));
         out.push((pos, env.payload().to_vec()));
+    }
+    out
+}
+
+/// Drain `read_all(from)` into `(position, stream-key bytes, payload)` triples —
+/// the attribution-aware form (`drain_all` drops the key). Used by the #333
+/// stream-attribution check.
+pub async fn drain_all_attributed<S: RawEventStore>(
+    store: &S,
+    from: Option<S::AllPosition>,
+) -> Vec<(S::AllPosition, Vec<u8>, Vec<u8>)> {
+    let stream = store
+        .read_all(from)
+        .await
+        .unwrap_or_else(|e| panic!("read_all failed: {e:?}"));
+    pin_mut!(stream);
+    let mut out = Vec::new();
+    while let Some(item) = stream.next().await {
+        let (pos, key, env) = item.unwrap_or_else(|e| panic!("read_all item errored: {e:?}"));
+        out.push((pos, key.as_bytes().to_vec(), env.payload().to_vec()));
     }
     out
 }

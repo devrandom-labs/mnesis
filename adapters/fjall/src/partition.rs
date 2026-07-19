@@ -242,7 +242,7 @@ impl Partitions {
         let slice = Slice::from(row.frame.clone());
         tx.insert(&self.events, &row.event_key, slice.clone());
         if self.mode == AllIndex::Denormalized {
-            tx.insert(&self.events_global, row.global_key, slice);
+            tx.insert(&self.events_global, &row.global_key, slice);
         }
     }
 

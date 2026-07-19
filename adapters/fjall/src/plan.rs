@@ -36,8 +36,9 @@ use crate::wire_key::{encode_event_key, encode_global_key};
 pub struct StagedRow {
     /// `events` partition key: `[u16 BE id_len][id_bytes][u64 BE version]`.
     pub event_key: Vec<u8>,
-    /// `events_global` partition key: `[u64 BE global_seq][u64 BE version]`.
-    pub global_key: [u8; 16],
+    /// `events_global` partition key:
+    /// `[u64 BE global_seq][u16 BE id_len][id_bytes][u64 BE version]`.
+    pub global_key: Vec<u8>,
     /// The 16-byte-aligned V2 wire frame (the value written to both partitions).
     pub frame: Bytes,
 }
@@ -120,7 +121,15 @@ pub fn plan_run(
             version,
             reason: reason_label(&e),
         })?;
-        let global_key = encode_global_key(global_seq, version);
+        // Defensively-unreachable arm: the id already passed the same u16
+        // length gate in `encode_event_key` above — but it stays typed (rule 3),
+        // never an unwrap.
+        let global_key = encode_global_key(global_seq, id_bytes, version).map_err(|e| {
+            PlanError::InvalidInput {
+                version,
+                reason: reason_label(&e),
+            }
+        })?;
 
         rows.push(StagedRow {
             event_key,
@@ -255,9 +264,10 @@ mod tests {
     fn staged_keys_match_the_wire_key_codecs() {
         let evs = [env(1)];
         let p = plan_run(0, 0, &sk(), &evs).unwrap();
-        // event_key = [u16 id_len][id][u64 version]; global_key = [gseq][ver].
+        // event_key = [u16 id_len][id][u64 version];
+        // global_key = [gseq][u16 id_len][id][ver].
         assert_eq!(p.rows[0].event_key, encode_event_key(b"s", 1).unwrap());
-        assert_eq!(p.rows[0].global_key, encode_global_key(1, 1));
+        assert_eq!(p.rows[0].global_key, encode_global_key(1, b"s", 1).unwrap());
         assert!(!p.rows[0].frame.is_empty());
     }
 }

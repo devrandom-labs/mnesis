@@ -818,8 +818,9 @@ mod tests {
             .unwrap();
         store.append(&id, None, &[env]).await.unwrap();
 
-        // The index holds exactly one row, keyed by [global_seq=1][version=1].
-        let key = crate::wire_key::encode_global_key(1, 1);
+        // The index holds exactly one row, keyed by
+        // [global_seq=1][id_len=6]["acct-1"][version=1] (#333, layout A2).
+        let key = crate::wire_key::encode_global_key(1, b"acct-1", 1).unwrap();
         let got = store.partitions.events_global().inner().get(key).unwrap();
         assert!(
             got.is_some(),
@@ -992,15 +993,21 @@ mod tests {
         let mut all = store.read_all(None).await.unwrap();
         let mut seen = Vec::new();
         while let Some(item) = all.next().await {
-            let (pos, env) = item.unwrap();
-            seen.push((pos.as_u64(), env.payload().to_vec()));
+            let (pos, key, env) = item.unwrap();
+            seen.push((
+                pos.as_u64(),
+                key.as_bytes().to_vec(),
+                env.payload().to_vec(),
+            ));
         }
+        // Positive attribution: each `$all` item carries its origin stream key
+        // in exact interleaving order [a, b, a] (#333).
         assert_eq!(
             seen,
             vec![
-                (1, b"a1".to_vec()),
-                (2, b"b1".to_vec()),
-                (3, b"a2".to_vec()),
+                (1, b"a".to_vec(), b"a1".to_vec()),
+                (2, b"b".to_vec(), b"b1".to_vec()),
+                (3, b"a".to_vec(), b"a2".to_vec()),
             ],
         );
     }
@@ -1077,9 +1084,10 @@ mod tests {
         let mut all = store.read_all(None).await.unwrap();
         let mut seen = Vec::new();
         while let Some(item) = all.next().await {
-            let (pos, env) = item.unwrap();
+            let (pos, key, env) = item.unwrap();
             seen.push((
                 pos.as_u64(),
+                key.as_bytes().to_vec(),
                 env.event_type().to_owned(),
                 env.payload().to_vec(),
             ));
@@ -1087,12 +1095,13 @@ mod tests {
         assert_eq!(
             seen,
             vec![
-                (1, "A1".to_owned(), b"a1".to_vec()),
-                (2, "A2".to_owned(), b"a2".to_vec()),
-                (3, "B1".to_owned(), b"b1".to_vec()),
-                (4, "A3".to_owned(), b"a3".to_vec()),
+                (1, b"a".to_vec(), "A1".to_owned(), b"a1".to_vec()),
+                (2, b"a".to_vec(), "A2".to_owned(), b"a2".to_vec()),
+                (3, b"b".to_vec(), "B1".to_owned(), b"b1".to_vec()),
+                (4, b"a".to_vec(), "A3".to_owned(), b"a3".to_vec()),
             ],
-            "read_all after reopen must recover every event with identical positions",
+            "read_all after reopen must recover every event with identical \
+             positions and origin stream keys",
         );
 
         // The persisted global counter is intact: a post-reopen append
@@ -1129,12 +1138,13 @@ mod tests {
                 .append(&sk("a"), None, &[make_envelope(1, "E", b"ok")])
                 .await
                 .unwrap();
-            // Overwrite the events_global row value (global_seq 1, version 1)
-            // with too few bytes to be a valid frame, committed durably.
+            // Overwrite the events_global row value (global_seq 1, stream "a",
+            // version 1) with too few bytes to be a valid frame, committed
+            // durably.
             let mut tx = store.db.write_tx();
             tx.insert(
                 store.partitions.events_global(),
-                encode_global_key(1, 1),
+                encode_global_key(1, b"a", 1).unwrap(),
                 Slice::from(&[0u8, 1, 2][..]),
             );
             tx.commit().unwrap();
@@ -1150,6 +1160,69 @@ mod tests {
         assert!(
             all.next().await.is_none(),
             "poisoned cursor must terminate, not silently skip the corrupt row",
+        );
+    }
+
+    #[tokio::test]
+    async fn read_all_rejects_pre_333_global_key_layout() {
+        // Clean-break defense (#333): a pre-#333 16-byte events_global key
+        // ([u64 gs][u64 version], no id) planted beside a VALID frame value
+        // must surface through `read_all` as a typed CorruptValue — never a
+        // misparse into a bogus (position, stream, envelope), never a silent
+        // skip. 16 bytes is below the new layout's 18-byte fixed-parts floor
+        // (prefix + version), so decode rejects it as ValueTooShort before
+        // id_len is ever read.
+        let (store, _dir) = temp_store();
+        {
+            let mut old_key = [0u8; 16];
+            old_key[0..8].copy_from_slice(&1u64.to_be_bytes());
+            old_key[8..16].copy_from_slice(&1u64.to_be_bytes());
+            let mut tx = store.db.write_tx();
+            tx.insert(
+                store.partitions.events_global(),
+                &old_key[..],
+                frame_value("E", b"legacy"),
+            );
+            tx.commit().unwrap();
+        }
+        let mut all = store.read_all(None).await.unwrap();
+        assert!(
+            matches!(all.next().await, Some(Err(FjallError::CorruptValue { .. }))),
+            "an old-layout key must decode to a typed CorruptValue, never misparse",
+        );
+        assert!(
+            all.next().await.is_none(),
+            "poisoned cursor must terminate after the old-layout row",
+        );
+    }
+
+    #[tokio::test]
+    async fn read_all_rejects_empty_origin_id_in_global_key() {
+        // Storage-invariant defense (#333): fjall rejects an empty stream id
+        // at `append`, so an events_global key claiming id_len = 0 (18 bytes:
+        // gs + id_len + version, no id) can only be corruption. Planted beside
+        // a VALID frame, it must surface through `read_all` as a typed
+        // CorruptValue — never a valid empty StreamKey, never a silent skip.
+        let (store, _dir) = temp_store();
+        {
+            let mut tx = store.db.write_tx();
+            tx.insert(
+                store.partitions.events_global(),
+                encode_global_key(1, b"", 1).unwrap(),
+                frame_value("E", b"orphan"),
+            );
+            tx.commit().unwrap();
+        }
+        let mut all = store.read_all(None).await.unwrap();
+        match all.next().await {
+            Some(Err(FjallError::CorruptValue { version, .. })) => {
+                assert_eq!(version, Some(1), "corruption surfaces the row's version");
+            }
+            other => panic!("expected CorruptValue for an empty origin id, got {other:?}"),
+        }
+        assert!(
+            all.next().await.is_none(),
+            "poisoned cursor must terminate after the empty-id row",
         );
     }
 
@@ -1184,12 +1257,12 @@ mod tests {
             let mut tx = store.db.write_tx();
             tx.insert(
                 store.partitions.events_global(),
-                encode_global_key(1, 1),
+                encode_global_key(1, b"s", 1).unwrap(),
                 frame_value("E", b"p1"),
             );
             tx.insert(
                 store.partitions.events_global(),
-                encode_global_key(3, 1),
+                encode_global_key(3, b"s", 1).unwrap(),
                 frame_value("E", b"p3"),
             );
             tx.commit().unwrap();
@@ -1198,7 +1271,7 @@ mod tests {
         let mut all = store.read_all(None).await.unwrap();
         let mut seen = Vec::new();
         while let Some(item) = all.next().await {
-            let (pos, env) = item.unwrap();
+            let (pos, _key, env) = item.unwrap();
             seen.push((pos.as_u64(), env.payload().to_vec()));
         }
         assert_eq!(

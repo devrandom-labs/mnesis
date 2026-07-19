@@ -81,14 +81,19 @@ async fn setup() -> Option<(PostgresStore, PgPool)> {
     Some((store, pool))
 }
 
-/// Drain a full `read_all(from)` into `(PgAllPos, event_type)` pairs.
-async fn drain_all(store: &PostgresStore, from: Option<PgAllPos>) -> Vec<(PgAllPos, String)> {
+/// Drain a full `read_all(from)` into `(PgAllPos, event_type, stream_id_bytes)`
+/// triples — the third field is the origin [`StreamKey`]'s raw bytes, surfaced
+/// so tests can assert per-event attribution (#333).
+async fn drain_all(
+    store: &PostgresStore,
+    from: Option<PgAllPos>,
+) -> Vec<(PgAllPos, String, Vec<u8>)> {
     let stream = store.read_all(from).await.expect("open read_all");
     futures::pin_mut!(stream);
     let mut out = Vec::new();
     while let Some(item) = stream.next().await {
-        let (pos, env) = item.expect("read_all item must be Ok");
-        out.push((pos, env.event_type().to_owned()));
+        let (pos, key, env) = item.expect("read_all item must be Ok");
+        out.push((pos, env.event_type().to_owned(), key.as_bytes().to_vec()));
     }
     out
 }
@@ -198,6 +203,20 @@ async fn all_noskip_out_of_order_commits() {
     assert_eq!(
         phase5[1].1, "YEvent",
         "Phase 5: Y's event (higher txid = B opened after A) must sort after X's event"
+    );
+
+    // Attribution (#333): each yielded item carries the origin stream id beside
+    // the envelope, in position order — X's event is attributed to stream-x, Y's
+    // to stream-y — so a consumer can route without decoding the payload.
+    assert_eq!(
+        phase5[0].2,
+        stream_x.as_bytes(),
+        "Phase 5: first item ($all pos 0) must be attributed to stream-x"
+    );
+    assert_eq!(
+        phase5[1].2,
+        stream_y.as_bytes(),
+        "Phase 5: second item ($all pos 1) must be attributed to stream-y"
     );
 }
 

@@ -332,15 +332,17 @@ async fn subscribe_all_replays_position_order_then_one_caughtup_then_live() {
     tokio::pin!(stream);
 
     let mut positions = Vec::new();
+    let mut keys = Vec::new();
     let mut caughtup_count = 0u32;
     for _ in 0..4 {
         match recv(&mut stream).await {
-            Step::Event((pos, _env)) => {
+            Step::Event((pos, key, _env)) => {
                 assert_eq!(
                     caughtup_count, 0,
                     "no $all event may follow CaughtUp during catch-up"
                 );
                 positions.push(pos.as_u64());
+                keys.push(key);
             }
             Step::CaughtUp => caughtup_count += 1,
         }
@@ -351,21 +353,35 @@ async fn subscribe_all_replays_position_order_then_one_caughtup_then_live() {
         positions.windows(2).all(|w| w[0] < w[1]),
         "$all positions strictly ascending: {positions:?}"
     );
+    let key_bytes: Vec<&[u8]> = keys.iter().map(StreamKey::as_bytes).collect();
+    assert_eq!(
+        key_bytes,
+        vec![b"a".as_slice(), b"b".as_slice(), b"a".as_slice()],
+        "$all items must carry the stream key they were appended to"
+    );
 
     // Live append on a *third* stream — arrives with a strictly-greater position.
     let c = AcctId("c".to_owned());
     append(&store, &c, 1, &Money::Deposited { amount: 9 }).await;
     match recv(&mut stream).await {
-        Step::Event((pos, _)) => assert!(
-            pos.as_u64() > *positions.last().unwrap(),
-            "live $all position must exceed the last catch-up position"
-        ),
+        Step::Event((pos, key, _)) => {
+            assert!(
+                pos.as_u64() > *positions.last().unwrap(),
+                "live $all position must exceed the last catch-up position"
+            );
+            assert_eq!(
+                key.as_bytes(),
+                b"c",
+                "live $all item must carry the appended stream's key"
+            );
+        }
         Step::CaughtUp => panic!("CaughtUp emitted twice"),
     }
 }
 
-/// `subscribe_all().decoded()` keeps the `$all` position tag **beside** the
-/// decoded box and preserves the phase: `Step<(AllPosition, Decoded<E>)>`.
+/// `subscribe_all().decoded()` keeps the `$all` position and stream-key tags
+/// **beside** the decoded box and preserves the phase:
+/// `Step<(AllPosition, StreamKey, Decoded<E>)>`.
 #[tokio::test]
 async fn subscribe_all_decoded_preserves_position_tag_and_phase() {
     let store = Store::new(InMemoryStore::new());
@@ -379,9 +395,14 @@ async fn subscribe_all_decoded_preserves_position_tag_and_phase() {
     tokio::pin!(stream);
 
     match recv(&mut stream).await {
-        Step::Event((_pos, d)) => {
+        Step::Event((_pos, key, d)) => {
             assert_eq!(d.event, Money::Deposited { amount: 100 });
             assert_eq!(d.version, Version::new(1).unwrap());
+            assert_eq!(
+                key.as_bytes(),
+                b"a",
+                "decode must preserve the stream-key tag"
+            );
         }
         Step::CaughtUp => panic!("event must precede CaughtUp"),
     }
@@ -590,7 +611,7 @@ async fn subscribe_all_caughtup_once_under_concurrent_multistream_writes() {
     let mut prev = 0u64;
     for _ in 0..20 {
         match recv(&mut stream).await {
-            Step::Event((pos, _)) => {
+            Step::Event((pos, _, _)) => {
                 let p = pos.as_u64();
                 assert!(
                     p > prev,

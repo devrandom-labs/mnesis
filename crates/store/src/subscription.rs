@@ -35,6 +35,7 @@ use crate::PersistedEnvelope;
 use crate::catchup::{AllCatchup, StreamCatchup};
 use crate::step::Step;
 use crate::store::{RawEventStore, Store};
+use crate::stream_id::StreamKey;
 use crate::subscription_cursor::live_stepped;
 use crate::wake::WakeSource;
 
@@ -135,12 +136,13 @@ impl<S: RawEventStore + WakeSource> Subscription<S> {
     ///
     /// `from: None` starts from the first event ever appended; `from: Some(p)`
     /// starts from the event *strictly after* position `p`. Items are
-    /// [`Step<(AllPosition, PersistedEnvelope)>`](Step): the replay events, then
-    /// exactly one [`Step::CaughtUp`], then live events. The position is
-    /// **beside** the envelope (a `$all` event carries no per-store position on
-    /// the box), so the consumer checkpoints the tag and hands it back here (or
-    /// to [`read_all`](RawEventStore::read_all)) to resume; the checkpoint type
-    /// is adapter-defined and must be serializable.
+    /// [`Step<(AllPosition, StreamKey, PersistedEnvelope)>`](Step): the replay
+    /// events, then exactly one [`Step::CaughtUp`], then live events. Each event
+    /// carries three parts beside the box: the **position** to checkpoint (the
+    /// consumer hands it back here or to [`read_all`](RawEventStore::read_all)
+    /// to resume; the checkpoint type is adapter-defined and must be
+    /// serializable), the **stream key** to route on without decoding the
+    /// payload, and the **envelope** for content.
     ///
     /// Compose with [`.events()`](crate::StepStreamExt::events) /
     /// [`.decoded(codec)`](crate::StepStreamExt::decoded) exactly as
@@ -162,7 +164,11 @@ impl<S: RawEventStore + WakeSource> Subscription<S> {
     ) -> Result<
         impl futures_core::Stream<
             Item = Result<
-                Step<(<S as RawEventStore>::AllPosition, PersistedEnvelope)>,
+                Step<(
+                    <S as RawEventStore>::AllPosition,
+                    StreamKey,
+                    PersistedEnvelope,
+                )>,
                 <S as RawEventStore>::Error,
             >,
         > + Send

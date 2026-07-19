@@ -66,8 +66,12 @@
 //!   the supertraits need).
 //! - `type AllStream` — the all-streams read cursor: an owned, `'static`,
 //!   `Send` `futures::Stream` with
-//!   `Item = Result<(Self::AllPosition, PersistedEnvelope), Self::Error>` —
-//!   every item tagged with its position.
+//!   `Item = Result<(Self::AllPosition, StreamKey, PersistedEnvelope), Self::Error>`
+//!   — every item is tagged with its position AND the origin
+//!   [`StreamKey`](mnesis_store::StreamKey) (stream attribution is a store
+//!   guarantee — a `$all` consumer routes without decoding the payload). The
+//!   per-stream `read_stream` does NOT stamp the id: there it is the query
+//!   argument, so re-stamping it on every item would be redundant.
 //! - Make both stream types `Unpin`. The trait imposes no such bound, but
 //!   the subscription path
 //!   ([`Subscription`](mnesis_store::subscription::Subscription)) requires it.
@@ -186,7 +190,8 @@
 //!
 //! - `from` is **exclusive**: `None` = from the very beginning, `Some(p)` =
 //!   strictly after `p`. Yield in ascending position order, each item tagged
-//!   `(position, envelope)`, then terminate with `None` when caught up.
+//!   `(position, stream key, envelope)`, then terminate with `None` when
+//!   caught up.
 //! - Resume is `Ord`-based: the subscription loop reopens with the last
 //!   position it delivered, and there is deliberately no successor function.
 //!   Your scan must read "strictly greater than `from`" — tolerating gaps by
@@ -436,6 +441,7 @@ macro_rules! conformance {
             $crate::__conformance_case!(sequence, check_append_retry_after_conflict_succeeds, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_empty_store_yields_none, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_global_order_across_streams, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_items_carry_their_stream_key, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_from_is_exclusive, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_multi_resume_cycles, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_boundary_then_new_append, $factory, $skip);

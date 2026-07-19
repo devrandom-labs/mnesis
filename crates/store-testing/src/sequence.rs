@@ -15,7 +15,7 @@ use tokio::time::timeout;
 
 use crate::row::{
     ConformanceRow, SubId, append_event, append_rows, assert_strictly_increasing, drain_all,
-    drain_stream, envelope_for,
+    drain_all_attributed, drain_stream, envelope_for,
 };
 
 /// Upper bound on any single subscription wait — a hang here means a lost
@@ -287,6 +287,39 @@ where
     assert_strictly_increasing(&got);
 }
 
+/// #333: every `$all` item carries the origin [`StreamKey`](mnesis_store::StreamKey).
+///
+/// Attribution is a store guarantee, not a payload convention. Interleaves two
+/// streams and asserts each item's key matches its append target, in position
+/// order.
+pub async fn check_all_items_carry_their_stream_key<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let alpha = StreamKey::from_slice(b"alpha");
+    let beta = StreamKey::from_slice(b"beta");
+    append_event(&store, &alpha, 1, b"a1").await;
+    append_event(&store, &beta, 1, b"b1").await;
+    append_event(&store, &alpha, 2, b"a2").await;
+
+    let got = drain_all_attributed(&store, None).await;
+    let attributed: Vec<(Vec<u8>, Vec<u8>)> =
+        got.iter().map(|(_, k, p)| (k.clone(), p.clone())).collect();
+    assert_eq!(
+        attributed,
+        vec![
+            (b"alpha".to_vec(), b"a1".to_vec()),
+            (b"beta".to_vec(), b"b1".to_vec()),
+            (b"alpha".to_vec(), b"a2".to_vec()),
+        ],
+        "each $all item must carry the StreamKey of the stream it was appended to, in position order",
+    );
+}
+
 /// `read_all(Some(p))` is EXCLUSIVE: strictly after `p`.
 pub async fn check_all_from_is_exclusive<S, C, F, Fut>(factory: &F)
 where
@@ -365,7 +398,7 @@ where
         let mut taken = 0;
         let mut advanced = false;
         while let Some(item) = stream.next().await {
-            let (pos, env) = item.unwrap_or_else(|e| panic!("cycle item errored: {e:?}"));
+            let (pos, _key, env) = item.unwrap_or_else(|e| panic!("cycle item errored: {e:?}"));
             acc.push((pos, env.payload().to_vec()));
             checkpoint = Some(pos);
             advanced = true;
@@ -577,26 +610,39 @@ where
         .unwrap_or_else(|e| panic!("register failed: {e:?}"));
     pin_mut!(stream);
 
-    let mut backlog: Vec<(S::AllPosition, Vec<u8>)> = Vec::new();
-    while let Step::Event((pos, env)) = next_step(&mut stream, "all backlog").await {
-        backlog.push((pos, env.payload().to_vec()));
+    let mut backlog: Vec<(S::AllPosition, Vec<u8>, Vec<u8>)> = Vec::new();
+    while let Step::Event((pos, key, env)) = next_step(&mut stream, "all backlog").await {
+        backlog.push((pos, key.as_bytes().to_vec(), env.payload().to_vec()));
     }
-    let payloads: Vec<Vec<u8>> = backlog.iter().map(|(_, p)| p.clone()).collect();
+    let payloads: Vec<Vec<u8>> = backlog.iter().map(|(_, _, p)| p.clone()).collect();
     assert_eq!(
         payloads,
         vec![b"a1".to_vec(), b"b1".to_vec(), b"a2".to_vec()],
         "$all backlog must replay in position order",
     );
-    assert_strictly_increasing(&backlog);
+    let keys: Vec<Vec<u8>> = backlog.iter().map(|(_, k, _)| k.clone()).collect();
+    assert_eq!(
+        keys,
+        vec![b"a".to_vec(), b"b".to_vec(), b"a".to_vec()],
+        "$all backlog items must carry the StreamKey of their append target",
+    );
+    let positions: Vec<(S::AllPosition, Vec<u8>)> =
+        backlog.iter().map(|(p, _, _)| (*p, Vec::new())).collect();
+    assert_strictly_increasing(&positions);
     let last = backlog.last().expect("non-empty").0;
 
     append_event(&store, &b, 2, b"b2").await;
     match next_step(&mut stream, "all live").await {
-        Step::Event((pos, env)) => {
+        Step::Event((pos, key, env)) => {
             assert_eq!(
                 env.payload(),
                 b"b2",
                 "live $all event must be the new append"
+            );
+            assert_eq!(
+                key.as_bytes(),
+                b"b",
+                "live $all item must carry the StreamKey of its append target",
             );
             assert!(
                 pos > last,

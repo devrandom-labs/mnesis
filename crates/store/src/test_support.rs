@@ -68,7 +68,7 @@ pub struct TestStore {
 #[derive(Debug, Default)]
 struct Inner {
     streams: HashMap<Vec<u8>, Vec<PersistedEnvelope>>,
-    all: Vec<(TestAllPos, PersistedEnvelope)>,
+    all: Vec<(TestAllPos, StreamKey, PersistedEnvelope)>,
 }
 
 impl TestStore {
@@ -103,7 +103,7 @@ impl RawEventStore for TestStore {
         futures::stream::Iter<std::vec::IntoIter<Result<PersistedEnvelope, TestStoreError>>>;
     type AllPosition = TestAllPos;
     type AllStream = futures::stream::Iter<
-        std::vec::IntoIter<Result<(TestAllPos, PersistedEnvelope), TestStoreError>>,
+        std::vec::IntoIter<Result<(TestAllPos, StreamKey, PersistedEnvelope), TestStoreError>>,
     >;
 
     async fn append(
@@ -143,7 +143,7 @@ impl RawEventStore for TestStore {
             let Some(pos) = next else {
                 unreachable!("Vec length + 1 is always a valid TestAllPos")
             };
-            inner.all.push((pos, env.clone()));
+            inner.all.push((pos, id.clone(), env.clone()));
             inner
                 .streams
                 .entry(id.as_bytes().to_vec())
@@ -178,10 +178,10 @@ impl RawEventStore for TestStore {
 
     async fn read_all(&self, from: Option<TestAllPos>) -> Result<Self::AllStream, Self::Error> {
         let inner = self.inner.lock().await;
-        let rows: Vec<Result<(TestAllPos, PersistedEnvelope), TestStoreError>> = inner
+        let rows: Vec<Result<(TestAllPos, StreamKey, PersistedEnvelope), TestStoreError>> = inner
             .all
             .iter()
-            .filter(|(pos, _)| from.is_none_or(|f| *pos > f))
+            .filter(|(pos, _, _)| from.is_none_or(|f| *pos > f))
             .cloned()
             .map(Ok)
             .collect();

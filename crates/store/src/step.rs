@@ -6,7 +6,7 @@
 ///
 /// Everything yielded before [`CaughtUp`](Step::CaughtUp) is replay (catch-up
 /// over the backlog); everything after is live. `T` is the item payload —
-/// `Decoded<E>` per-stream, `(AllPosition, Decoded<E>)` for `$all`.
+/// `Decoded<E>` per-stream, `(AllPosition, StreamKey, Decoded<E>)` for `$all`.
 ///
 /// Exhaustive (no `#[non_exhaustive]`, per project rule): the two variants are
 /// frozen at 1.0. A lag signal (`FellBehind`) is intentionally omitted — the

@@ -171,6 +171,10 @@ struct EventRow {
 /// — no hand repack.
 #[derive(sqlx::FromRow)]
 struct AllEventRow {
+    /// The origin stream this event was appended to (`BYTEA` — matches
+    /// `StreamKey`'s raw bytes). Surfaced on the `$all` read so a consumer can
+    /// attribute/route each event without decoding its payload (#333).
+    stream_id: Vec<u8>,
     /// `xid8` read back as `bigint` via `txid::text::bigint` cast (see SQL note
     /// on `read_all`). Valid as long as the xid8 value ≤ `i64::MAX`, which is
     /// effectively forever for any real workload.
@@ -403,13 +407,15 @@ impl PostgresStore {
 type Stream = futures::stream::Iter<std::vec::IntoIter<Result<PersistedEnvelope, PostgresError>>>;
 
 /// `$all` stream type: owned, `Send`, `'static` iterator-backed stream of
-/// `Result<(PgAllPos, PersistedEnvelope), PostgresError>`.
+/// `Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>`.
 ///
-/// Distinct from [`Stream`] because `$all` items are position-tagged
-/// (`(PgAllPos, PersistedEnvelope)`) while per-stream items are not
-/// (`PersistedEnvelope` only). Same eager-fetch caveat as [`Stream`].
-type AllStream =
-    futures::stream::Iter<std::vec::IntoIter<Result<(PgAllPos, PersistedEnvelope), PostgresError>>>;
+/// Distinct from [`Stream`] because `$all` items carry the `$all` position
+/// (`PgAllPos`) and the origin [`StreamKey`] beside the envelope, while
+/// per-stream items are the bare `PersistedEnvelope` (the id is the query
+/// argument there). Same eager-fetch caveat as [`Stream`].
+type AllStream = futures::stream::Iter<
+    std::vec::IntoIter<Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>>,
+>;
 
 impl RawEventStore for PostgresStore {
     type Error = PostgresError;
@@ -543,7 +549,7 @@ impl RawEventStore for PostgresStore {
         // (`WHERE (txid, global_seq) > ($1::text::xid8, $2)`) rather than casting
         // the column down to `bigint`.
         let rows: Vec<AllEventRow> = sqlx::query_as(
-            "SELECT txid::text::bigint AS txid, global_seq, \
+            "SELECT stream_id, txid::text::bigint AS txid, global_seq, \
                     version, event_type, schema_version, payload, metadata \
              FROM events \
              WHERE ($1::bigint IS NULL OR (txid::text::bigint, global_seq) > ($1, $2)) \
@@ -556,16 +562,17 @@ impl RawEventStore for PostgresStore {
         .await
         .map_err(PostgresError::Sqlx)?;
 
-        let tagged: Vec<Result<(PgAllPos, PersistedEnvelope), PostgresError>> = rows
+        let tagged: Vec<Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>> = rows
             .into_iter()
             .map(move |r| {
                 let txid =
                     u64::try_from(r.txid).map_err(|_| corrupt(label, "txid out of range"))?;
                 let seq = u64::try_from(r.global_seq)
                     .map_err(|_| corrupt(label, "global_seq <= 0 or out of range"))?;
+                let stream = StreamKey::from_bytes(r.stream_id);
                 // `r.event` is the flattened `EventRow` — reuse the single rebuild path.
                 let env = row_to_envelope(r.event, label)?;
-                Ok((PgAllPos::new(txid, seq), env))
+                Ok((PgAllPos::new(txid, seq), stream, env))
             })
             .collect();
         Ok(futures::stream::iter(tagged))

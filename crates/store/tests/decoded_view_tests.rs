@@ -177,7 +177,7 @@ async fn read_error_item_surfaces_read_variant() {
 }
 
 #[tokio::test]
-async fn decoded_all_preserves_the_position_tag_beside_the_box() {
+async fn decoded_all_preserves_the_position_and_key_beside_the_box() {
     let store = Store::new(InMemoryStore::new());
     let id = AcctId("acct-all".to_owned());
     append(&store, &id, 1, &Money::Deposited { amount: 1 }).await;
@@ -189,13 +189,18 @@ async fn decoded_all_preserves_the_position_tag_beside_the_box() {
         .decoded::<Money, _>(JsonCodec::default());
     tokio::pin!(stream);
 
-    let (_pos, d) = tokio::time::timeout(TIMEOUT, stream.next())
+    let (_pos, key, d) = tokio::time::timeout(TIMEOUT, stream.next())
         .await
         .unwrap()
         .unwrap()
         .unwrap();
     assert_eq!(d.event, Money::Deposited { amount: 1 });
     assert_eq!(d.version, Version::new(1).unwrap());
+    assert_eq!(
+        key.as_bytes(),
+        b"acct-all",
+        "$all decoded item must carry the stream key it was appended to"
+    );
 }
 
 // ═══ for_each_decoded: owning codec folds typed state ═══
