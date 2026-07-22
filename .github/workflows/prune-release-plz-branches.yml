@@ -1,0 +1,57 @@
+name: Prune release-plz branches
+
+# release-plz opens a fresh timestamped `release-plz-<ts>` branch for every
+# release PR and *closes* (does not merge) the superseded one. GitHub's
+# "Automatically delete head branches" only fires on MERGE, so the closed,
+# never-merged release PR branches accumulate indefinitely. This job prunes
+# every `release-plz-*` branch that has no OPEN pull request. Published versions
+# live in git tags, so nothing durable is lost.
+on:
+  schedule:
+    - cron: '17 3 * * 1' # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  prune:
+    name: Prune orphaned release-plz branches
+    runs-on: ubuntu-latest
+    steps:
+      # Same App token as the release workflow: the org's default GITHUB_TOKEN is
+      # locked to read-only, so deleting a ref (Contents: write) needs the
+      # app-scoped token rather than GITHUB_TOKEN.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_PLZ_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLZ_APP_PRIVATE_KEY }}
+
+      - name: Delete release-plz branches with no open PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Head branches of every OPEN PR — these are never pruned.
+          open_prs="$(gh pr list --repo "$REPO" --state open --limit 200 \
+            --json headRefName --jq '.[].headRefName' | sort -u)"
+          # Every release-plz-* branch currently on the remote.
+          branches="$(gh api --paginate "repos/$REPO/branches" \
+            --jq '.[].name' | { grep '^release-plz-' || true; })"
+          if [ -z "$branches" ]; then
+            echo "No release-plz-* branches; nothing to prune."
+            exit 0
+          fi
+          while IFS= read -r br; do
+            [ -z "$br" ] && continue
+            if printf '%s\n' "$open_prs" | grep -qxF "$br"; then
+              echo "keep   $br (open PR)"
+            else
+              echo "prune  $br"
+              gh api -X DELETE "repos/$REPO/git/refs/heads/$br"
+            fi
+          done <<< "$branches"
