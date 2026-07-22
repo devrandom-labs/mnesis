@@ -1,9 +1,9 @@
 use alloc::sync::Arc;
 
-use mnesis::Version;
+use mnesis::{ErrorId, Version};
 
 use crate::envelope::{PendingEnvelope, PersistedEnvelope};
-use crate::error::AppendError;
+use crate::error::{AppendError, AppendValidationError};
 use crate::stream::EventStream;
 use crate::stream_id::StreamKey;
 
@@ -372,3 +372,162 @@ impl<S: RawEventStore> RawEventStore for Store<S> {
 /// causal/HLC metadata rides in the event's `metadata` bytes, the store never
 /// orders by it, and merging across producers is the consumer's job.
 pub trait AllPosition: Copy + Ord + Send + Sync + core::fmt::Debug + 'static {}
+
+/// Validate the append contract once, for every adapter.
+///
+/// `current` is the stream's current max version (`0` = a fresh stream that has
+/// never been appended to). This enforces the two invariants the
+/// [`RawEventStore::append`] doc specifies in prose but leaves unimplemented:
+///
+/// 1. **Optimistic concurrency** — `expected` must equal `current` (a fresh
+///    stream requires `expected == None`; a non-empty stream requires
+///    `expected == Some(current)`). Any mismatch is an
+///    [`AppendValidationError::Conflict`].
+/// 2. **Strict-sequentiality** — `envelopes` must be `current+1, current+2, …`,
+///    overflow-checked. A gap, out-of-order entry, or `u64::MAX` overflow is a
+///    `Conflict` (gap/out-of-order) or [`AppendValidationError::VersionOverflow`]
+///    (overflow — never a retry-eligible `Conflict`, rule 3).
+///
+/// Adapters call this *inside* their transaction/lock, **before** any staging or
+/// wire encoding, then map the neutral [`AppendValidationError`] into their own
+/// `AppendError`. Centralising it here means the contract has one source of truth
+/// instead of being copy-pasted (and silently drifted) across every adapter.
+///
+/// # Errors
+///
+/// - [`AppendValidationError::Conflict`] — `expected` does not match `current`
+///   (optimistic-concurrency mismatch), or an envelope's version is not the
+///   strict successor of its predecessor (a gap or out-of-order entry).
+/// - [`AppendValidationError::VersionOverflow`] — the version sequence would
+///   advance past `u64::MAX` (never reported as a retry-eligible `Conflict`).
+pub fn validate_append_versions(
+    current: u64,
+    expected: Option<Version>,
+    envelopes: &[PendingEnvelope],
+    id: &StreamKey,
+) -> Result<(), AppendValidationError> {
+    // 1. Optimistic concurrency. `actual` is `None` for a fresh stream so that
+    //    `expected == None` is the only valid expectation there.
+    let actual: Option<Version> = if current == 0 {
+        None
+    } else {
+        Version::new(current)
+    };
+    if expected != actual {
+        return Err(AppendValidationError::Conflict {
+            stream_id: ErrorId::from_display(id),
+            expected,
+            actual,
+        });
+    }
+
+    // 2. Strict-sequentiality. A running `checked_add` counter — no index→u64
+    //    cast, overflow-safe near `u64::MAX` (rule 2).
+    let mut next = current;
+    for env in envelopes {
+        next = next
+            .checked_add(1)
+            .ok_or(AppendValidationError::VersionOverflow)?;
+        if env.version().as_u64() != next {
+            return Err(AppendValidationError::Conflict {
+                stream_id: ErrorId::from_display(id),
+                expected: Version::new(next),
+                actual: Some(env.version()),
+            });
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "test code")]
+#[allow(clippy::panic, reason = "test code")]
+mod validate_append_tests {
+    use super::*;
+    use crate::envelope::pending_envelope;
+
+    fn sk() -> StreamKey {
+        StreamKey::from_slice(b"s")
+    }
+
+    fn env(version: u64) -> PendingEnvelope {
+        pending_envelope(Version::new(version).unwrap())
+            .event_type("E")
+            .payload(b"p".as_slice())
+            .build()
+            .unwrap()
+    }
+
+    #[test]
+    fn fresh_stream_ok() {
+        assert!(validate_append_versions(0, None, &[env(1), env(2), env(3)], &sk()).is_ok());
+    }
+
+    #[test]
+    fn existing_stream_ok() {
+        assert!(validate_append_versions(5, Version::new(5), &[env(6), env(7)], &sk()).is_ok());
+    }
+
+    #[test]
+    fn empty_batch_ok() {
+        assert!(validate_append_versions(0, None, &[], &sk()).is_ok());
+    }
+
+    #[test]
+    fn stale_expected_conflict() {
+        let err = validate_append_versions(5, Version::new(4), &[env(6)], &sk()).unwrap_err();
+        assert!(matches!(err, AppendValidationError::Conflict { .. }));
+    }
+
+    #[test]
+    fn fresh_stream_with_expected_some_conflict() {
+        // A non-empty expectation on a brand-new stream is a conflict.
+        let err = validate_append_versions(0, Version::new(1), &[env(1)], &sk()).unwrap_err();
+        assert!(matches!(err, AppendValidationError::Conflict { .. }));
+    }
+
+    #[test]
+    fn gapped_batch_conflict() {
+        let err = validate_append_versions(0, None, &[env(1), env(3)], &sk()).unwrap_err();
+        match err {
+            AppendValidationError::Conflict {
+                expected, actual, ..
+            } => {
+                assert_eq!(expected, Version::new(2));
+                assert_eq!(actual, Some(env(3).version()));
+            }
+            AppendValidationError::VersionOverflow => {
+                panic!("expected Conflict, got VersionOverflow")
+            }
+        }
+    }
+
+    #[test]
+    fn out_of_order_batch_conflict() {
+        let err = validate_append_versions(0, None, &[env(2), env(1)], &sk()).unwrap_err();
+        match err {
+            AppendValidationError::Conflict {
+                expected, actual, ..
+            } => {
+                assert_eq!(expected, Version::new(1));
+                assert_eq!(actual, Some(env(2).version()));
+            }
+            AppendValidationError::VersionOverflow => {
+                panic!("expected Conflict, got VersionOverflow")
+            }
+        }
+    }
+
+    #[test]
+    fn wrong_start_version_conflict() {
+        let err = validate_append_versions(5, Version::new(5), &[env(7)], &sk()).unwrap_err();
+        assert!(matches!(err, AppendValidationError::Conflict { .. }));
+    }
+
+    #[test]
+    fn version_overflow_is_version_overflow_not_conflict() {
+        let err = validate_append_versions(u64::MAX, Version::new(u64::MAX), &[env(1)], &sk())
+            .unwrap_err();
+        assert!(matches!(err, AppendValidationError::VersionOverflow));
+    }
+}

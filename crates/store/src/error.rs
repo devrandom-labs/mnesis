@@ -155,3 +155,22 @@ pub enum AppendError<E> {
     #[error("store error: {0}")]
     Store(#[source] E),
 }
+/// Neutral result of validating the append contract
+/// ([`validate_append_versions`]). Adapters map this into their own
+/// `AppendError<E>` at the boundary (rule 3: one variant per failure domain).
+///
+/// `VersionOverflow` is never a retry-eligible `Conflict` — it maps to
+/// `AppendError::Store(..)`, never `AppendError::Conflict`.
+#[derive(Debug, Error)]
+pub enum AppendValidationError {
+    /// Optimistic-concurrency or non-sequential-version conflict.
+    #[error("append conflict on '{stream_id}': expected {expected:?}, actual {actual:?}")]
+    Conflict {
+        stream_id: ErrorId,
+        expected: Option<Version>,
+        actual: Option<Version>,
+    },
+    /// The stream version sequence would advance past `u64::MAX`.
+    #[error("stream version overflow at u64::MAX")]
+    VersionOverflow,
+}

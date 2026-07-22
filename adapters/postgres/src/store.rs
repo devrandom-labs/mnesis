@@ -6,7 +6,7 @@ use mnesis::{ErrorId, Version};
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::PersistedEnvelope;
-use mnesis_store::error::AppendError;
+use mnesis_store::error::{AppendError, AppendValidationError};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
 use mnesis_store::wire;
@@ -282,50 +282,28 @@ struct PreparedInsert<'a> {
 /// each to its DB column type. Returns the rows ready to `INSERT`, or the first
 /// violation. No `await`, no pool — the *decision* lives here; `append`'s loop
 /// is purely mechanical.
-fn prepare_inserts<'a>(
-    current: u64,
-    expected: Option<Version>,
+/// Postgres-specific column narrowing — **DB-free**, but *not* the append
+/// contract. Optimistic concurrency + strict-sequential version validation live
+/// in the kernel [`mnesis_store::store::validate_append_versions`] (shared by
+/// every adapter); this fn only turns validated envelopes into insert rows with
+/// `i64`-typed columns (the `version`/`schema_version` SQL `BIGINT` width).
+fn narrow_inserts<'a>(
     envelopes: &'a [PendingEnvelope],
     id: &StreamKey,
 ) -> Result<Vec<PreparedInsert<'a>>, AppendError<PostgresError>> {
-    // Optimistic check: `expected` must equal the stream's current version.
-    if expected.map_or(0, Version::as_u64) != current {
-        return Err(AppendError::Conflict {
-            stream_id: ErrorId::from_display(id),
-            expected,
-            actual: Version::new(current),
-        });
-    }
-
-    // Combinator-first (rule 6): a running `expect` counter folded through the
-    // batch; `collect::<Result<Vec<_>, _>>()` short-circuits on the first error.
-    let mut expect = current;
     envelopes
         .iter()
         .map(|env| {
-            expect = expect.checked_add(1).ok_or_else(|| {
-                AppendError::Store(PostgresError::CorruptRow {
-                    stream_id: ErrorId::from_display(id),
-                    reason: ErrorId::from_display(&"version overflow"),
-                })
-            })?;
-            if env.version().as_u64() != expect {
-                return Err(AppendError::Conflict {
-                    stream_id: ErrorId::from_display(id),
-                    expected: Version::new(expect),
-                    actual: Some(env.version()),
-                });
-            }
+            // `Version` is `NonZeroU64`, so `env.version()` is always >= 1; the
+            // only overflow risk is `> i64::MAX`, which the adapter must surface
+            // as a store error (conformance: persist every valid `Version`).
             let version = i64::try_from(env.version().as_u64()).map_err(|_| {
                 AppendError::Store(PostgresError::CorruptRow {
                     stream_id: ErrorId::from_display(id),
                     reason: ErrorId::from_display(&"version exceeds i64::MAX"),
                 })
             })?;
-            // `schema_version` column is BIGINT (i64); `env.schema_version()` is
-            // `u32`, which widens to i64 infallibly — so the FULL `SchemaVersion`
-            // (`NonZeroU32`) range is stored, no rejection (conformance: the
-            // adapter must persist every valid `SchemaVersion`).
+            // `schema_version` is `u32`, which widens to `i64` infallibly.
             let schema_version = i64::from(env.schema_version());
             Ok(PreparedInsert {
                 version,
@@ -334,6 +312,28 @@ fn prepare_inserts<'a>(
             })
         })
         .collect()
+}
+
+/// Map the kernel-neutral [`AppendValidationError`] (the append contract) into
+/// this adapter's `AppendError`. Overflow is never a retry-eligible `Conflict`
+/// (rule 3).
+fn postgres_validation_err(
+    id: &StreamKey,
+    e: &AppendValidationError,
+) -> AppendError<PostgresError> {
+    match *e {
+        AppendValidationError::Conflict {
+            expected, actual, ..
+        } => AppendError::Conflict {
+            stream_id: ErrorId::from_display(id),
+            expected,
+            actual,
+        },
+        AppendValidationError::VersionOverflow => AppendError::Store(PostgresError::CorruptRow {
+            stream_id: ErrorId::from_display(id),
+            reason: ErrorId::from_display(&"version overflow"),
+        }),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -432,7 +432,12 @@ impl RawEventStore for PostgresStore {
         let mut tx = self.pool().begin().await.map_err(store_err)?;
 
         let current = read_current_version(&mut tx, id).await?; // IO
-        let rows = prepare_inserts(current, expected_version, envelopes, id)?; // PURE
+        // Kernel-owned contract: optimistic + strict-sequential (shared by every
+        // adapter). Postgres-specific `i64` column narrowing happens in
+        // `narrow_inserts`.
+        mnesis_store::store::validate_append_versions(current, expected_version, envelopes, id)
+            .map_err(|e| postgres_validation_err(id, &e))?;
+        let rows = narrow_inserts(envelopes, id)?; // PURE
         if rows.is_empty() {
             return Ok(()); // version checked; nothing to write
         }
@@ -580,7 +585,7 @@ impl RawEventStore for PostgresStore {
 }
 
 // ---------------------------------------------------------------------------
-// DB-free unit tests for `prepare_inserts` (Task 4 Step 3)
+// DB-free unit tests for `narrow_inserts` column narrowing
 //
 // These run under `nix flake check` with no DATABASE_URL and cover the append
 // contract: optimistic check, strict-sequential versions, range narrowing.
@@ -599,10 +604,9 @@ mod tests {
     use mnesis_store::PendingEnvelope;
     use mnesis_store::StreamKey;
     use mnesis_store::envelope::pending_envelope;
-    use mnesis_store::error::AppendError;
     use mnesis_store::value::SchemaVersion;
 
-    use super::prepare_inserts;
+    use super::narrow_inserts;
 
     fn stream_key() -> StreamKey {
         StreamKey::from_bytes("test-stream")
@@ -632,15 +636,16 @@ mod tests {
             .unwrap()
     }
 
-    // 1. Sequence/protocol — happy paths
+    // 1. Column narrowing — happy paths
     // --------------------------------------------------------------------------
 
     /// `current = 0`, `expected = None`, batch versions `[1, 2, 3]` → Ok(3 rows)
-    /// with version column values `[1, 2, 3]`.
+    /// with version column values `[1, 2, 3]`. (Optimistic + sequential checks
+    /// now live in the kernel `validate_append_versions`.)
     #[test]
     fn fresh_stream_three_events_ok() {
         let envs = [make_envelope(1), make_envelope(2), make_envelope(3)];
-        let rows = prepare_inserts(0, None, &envs, &stream_key()).unwrap();
+        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
         assert_eq!(rows.len(), 3);
         assert_eq!(rows[0].version, 1);
         assert_eq!(rows[1].version, 2);
@@ -652,17 +657,16 @@ mod tests {
     #[test]
     fn existing_stream_two_events_ok() {
         let envs = [make_envelope(6), make_envelope(7)];
-        let rows = prepare_inserts(5, Version::new(5), &envs, &stream_key()).unwrap();
+        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
         assert_eq!(rows.len(), 2);
         assert_eq!(rows[0].version, 6);
         assert_eq!(rows[1].version, 7);
     }
 
-    /// Empty batch with `expected = None` and `current = 0` → Ok(empty) so
-    /// `append` can short-circuit after the version check.
+    /// Empty batch → Ok(empty) so `append` can short-circuit after the version check.
     #[test]
     fn empty_batch_ok() {
-        let rows = prepare_inserts(0, None, &[], &stream_key()).unwrap();
+        let rows = narrow_inserts(&[], &stream_key()).unwrap();
         assert!(rows.is_empty());
     }
 
@@ -670,77 +674,20 @@ mod tests {
     #[test]
     fn schema_version_widens_to_i64() {
         let envs = [make_envelope_sv(1, 42)];
-        let rows = prepare_inserts(0, None, &envs, &stream_key()).unwrap();
+        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
         assert_eq!(rows[0].schema_version, 42_i64);
     }
 
-    // 2. Conflict / defensive boundary — failure paths
-    // --------------------------------------------------------------------------
-
-    /// Stale `expected` (`Some(4)` when `current = 5`) → `Conflict`.
-    #[test]
-    fn stale_expected_version_conflict() {
-        let envs = [make_envelope(6)];
-        let err = prepare_inserts(5, Version::new(4), &envs, &stream_key()).unwrap_err();
-        assert!(
-            matches!(err, AppendError::Conflict { .. }),
-            "expected Conflict, got {err:?}"
-        );
-    }
-
-    /// `expected = Some(0)` (zero is `None` semantics) when `current = 5` →
-    /// `Conflict`. Ensures the `expected.map_or(0, …) != current` path is hit.
-    #[test]
-    fn wrong_expected_none_when_stream_nonempty_conflict() {
-        let envs = [make_envelope(6)];
-        let err = prepare_inserts(5, None, &envs, &stream_key()).unwrap_err();
-        assert!(matches!(err, AppendError::Conflict { .. }));
-    }
-
-    /// Gapped batch `[1, 3]` (skips version 2) → `Conflict` at the second
-    /// envelope with `expected = Some(2)`, `actual = Some(3)`.
-    #[test]
-    fn gapped_batch_conflict() {
-        let envs = [make_envelope(1), make_envelope(3)];
-        let err = prepare_inserts(0, None, &envs, &stream_key()).unwrap_err();
-        match err {
-            AppendError::Conflict {
-                expected, actual, ..
-            } => {
-                assert_eq!(expected, Version::new(2), "expected version 2");
-                assert_eq!(actual, Some(make_envelope(3).version()), "actual version 3");
-            }
-            other => panic!("expected Conflict, got {other:?}"),
-        }
-    }
-
-    /// Out-of-order batch `[2, 1]` → `Conflict` at the first envelope
-    /// (`version = 2` instead of `1` from `current = 0`).
-    #[test]
-    fn out_of_order_batch_conflict() {
-        let envs = [make_envelope(2), make_envelope(1)];
-        let err = prepare_inserts(0, None, &envs, &stream_key()).unwrap_err();
-        match err {
-            AppendError::Conflict {
-                expected, actual, ..
-            } => {
-                assert_eq!(expected, Version::new(1), "expected version 1");
-                assert_eq!(actual, Some(make_envelope(2).version()), "actual version 2");
-            }
-            other => panic!("expected Conflict, got {other:?}"),
-        }
-    }
-
     /// The FULL `SchemaVersion` (`NonZeroU32`) range is accepted and widened to
-    /// the BIGINT column — including `u32::MAX`, which exceeds `i32::MAX`. This
-    /// is a conformance requirement (the kit's
-    /// `sequence::check_append_then_read_round_trips` feeds a boundary
-    /// `schema_version` of `u32::MAX`): the adapter must persist every valid
-    /// `SchemaVersion`, never reject one.
+    /// the BIGINT column — including `u32::MAX`, which exceeds `i32::MAX`.
     #[test]
     fn schema_version_full_u32_range_is_accepted() {
         let envs = [make_envelope_sv(1, u32::MAX)];
-        let rows = prepare_inserts(0, None, &envs, &stream_key()).unwrap();
+        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
         assert_eq!(rows[0].schema_version, i64::from(u32::MAX));
     }
+
+    // 2. Optimistic + sequential conflicts now live in the kernel
+    //    `validate_append_versions` (see `crates/store/src/store.rs`). The
+    //    `store-testing` harness still drives the full contract through `append`.
 }

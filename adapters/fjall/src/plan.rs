@@ -9,7 +9,11 @@
 //! [`GlobalSeq`](crate::GlobalSeq). None of that touches fjall — it is a pure
 //! function of `(current_version, current_global, id, envelopes)`, so it lives
 //! here, unit-tested with no database, exactly as `mnesis-postgres` factors its
-//! `prepare_inserts` out of `append`.
+//! `narrow_inserts` out of `append`. The append *contract* (optimistic
+//! concurrency + strict-sequential versions) is validated once in the kernel
+//! [`validate_append_versions`](mnesis_store::store::validate_append_versions)
+//! before this core runs; `plan_run` re-derives each version from a running
+//! counter for the key codec rather than trusting the envelope's own field.
 //!
 //! The two public methods differ only in their *error domain* and in the
 //! single-stream-vs-cross-run validation that wraps this core: `append` maps a
@@ -18,7 +22,7 @@
 //! check (index-based conflicts) and then calls [`plan_run`] purely to stage.
 
 use bytes::Bytes;
-use mnesis::{ErrorId, Version};
+use mnesis::ErrorId;
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::wire;
@@ -58,13 +62,6 @@ pub struct PlannedRun {
 /// (rule 3: one variant = one failure domain; overflow is never a conflict).
 #[derive(Debug)]
 pub enum PlanError {
-    /// A run version was not the strict successor of the prior version.
-    /// `expected` is the version the run should have carried at that position;
-    /// `actual` is the version it did carry.
-    Conflict {
-        expected: Option<Version>,
-        actual: Option<Version>,
-    },
     /// The stream version sequence would advance past `u64::MAX`.
     VersionOverflow,
     /// The store-global sequence would advance past `u64::MAX`.
@@ -87,21 +84,20 @@ pub fn plan_run(
     envelopes: &[PendingEnvelope],
 ) -> Result<PlannedRun, PlanError> {
     let id_bytes = id.as_ref();
-    let mut expected = current_version;
+    let mut version = current_version;
     let mut global_seq = current_global;
     let mut rows = Vec::with_capacity(envelopes.len());
 
     for env in envelopes {
-        // Strict-sequential check via a running checked_add counter — no
-        // index→u64 cast, overflow-safe near u64::MAX (rule 2).
-        expected = expected.checked_add(1).ok_or(PlanError::VersionOverflow)?;
-        let version = env.version().as_u64();
-        if version != expected {
-            return Err(PlanError::Conflict {
-                expected: Version::new(expected),
-                actual: Some(env.version()),
-            });
-        }
+        // `version` is the validated, strictly-sequential successor of
+        // `current_version`. The kernel `validate_append_versions` (single-stream
+        // path) or `validate_atomic_writes` (atomic path) already proved the
+        // batch is `current_version+1, +2, …`, so we re-derive it here from the
+        // running counter rather than trusting the envelope's own version field
+        // — a stray envelope version can't reach the key codec. `checked_add`
+        // keeps the arithmetic overflow-safe (rule 2); it is unreachable once the
+        // kernel validator has passed.
+        version = version.checked_add(1).ok_or(PlanError::VersionOverflow)?;
         global_seq = global_seq
             .checked_add(1)
             .ok_or(PlanError::GlobalSeqOverflow)?;
@@ -138,9 +134,9 @@ pub fn plan_run(
         });
     }
 
-    let new_version = envelopes
-        .last()
-        .map_or(current_version, |last| last.version().as_u64());
+    // After the loop `version == current_version + envelopes.len()`; for an empty
+    // run the loop never runs, so it stays `current_version`.
+    let new_version = version;
     Ok(PlannedRun {
         rows,
         new_version,
@@ -153,6 +149,7 @@ pub fn plan_run(
 #[allow(clippy::panic, reason = "test code")]
 mod tests {
     use super::*;
+    use mnesis::Version;
     use mnesis_store::envelope::pending_envelope;
 
     fn sk() -> StreamKey {
@@ -197,50 +194,17 @@ mod tests {
         assert_eq!(p.ending_global, 40);
     }
 
-    // 2. Conflict / defensive boundary — failure paths ----------------------
-
-    #[test]
-    fn gapped_run_is_conflict_with_expected_and_actual() {
-        // [1, 3] skips version 2 → Conflict at the second event.
-        let evs = [env(1), env(3)];
-        match plan_run(0, 0, &sk(), &evs).unwrap_err() {
-            PlanError::Conflict { expected, actual } => {
-                assert_eq!(expected, Version::new(2));
-                assert_eq!(actual, Version::new(3));
-            }
-            other => panic!("expected Conflict, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn out_of_order_run_is_conflict_at_first_event() {
-        // [2, 1] on a fresh stream → first event should be version 1.
-        let evs = [env(2), env(1)];
-        match plan_run(0, 0, &sk(), &evs).unwrap_err() {
-            PlanError::Conflict { expected, actual } => {
-                assert_eq!(expected, Version::new(1));
-                assert_eq!(actual, Version::new(2));
-            }
-            other => panic!("expected Conflict, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn wrong_start_version_is_conflict() {
-        // current_version = 5, run starts at 7 (should be 6).
-        let evs = [env(7)];
-        assert!(matches!(
-            plan_run(5, 40, &sk(), &evs).unwrap_err(),
-            PlanError::Conflict { .. }
-        ));
-    }
+    // 2. Defensive boundary — overflow paths. Sequence conflicts now live in the
+    //    kernel `validate_append_versions` (see `crates/store/src/store.rs`); the
+    //    `store-testing` harness still drives the full contract through `append`.
 
     #[test]
     fn version_overflow_at_ceiling_is_version_overflow_not_conflict() {
         // current_version = u64::MAX → the first successor overflows. This must
         // be VersionOverflow, never Conflict (rule 3: overflow is not a retry-
-        // eligible conflict). The envelope version is irrelevant — overflow is
-        // detected before the version is compared.
+        // eligible conflict). `plan_run` still re-derives the version via
+        // `checked_add(1)` for the key codec, so it surfaces here even though the
+        // kernel validated the sequence.
         let evs = [env(1)];
         assert!(matches!(
             plan_run(u64::MAX, 0, &sk(), &evs).unwrap_err(),
