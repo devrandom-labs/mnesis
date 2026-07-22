@@ -12,7 +12,11 @@ use mnesis_store::PersistedEnvelope;
 use crate::error::{FjallError, reason_label};
 use crate::global_seq::GlobalSeq;
 use crate::subscription_id::OwnedStreamId;
-use crate::wire_key::{decode_event_key, decode_global_key, encode_event_key, encode_global_key};
+use crate::wire_key::{
+    GLOBAL_KEY_PREFIX_SIZE, decode_event_key, decode_global_key, encode_event_key,
+    encode_global_key,
+};
+use mnesis_store::StreamKey;
 use mnesis_store::wire;
 
 /// The differing parts of a bounded keyset scan, factored so one cursor can
@@ -21,14 +25,18 @@ pub trait ScanStrategy: Send {
     /// The position the scan opens from ([`Version`] for a stream, [`GlobalSeq`] for `$all`).
     type Position: Copy + Send;
     /// What one decoded row yields. Per-stream: a bare [`PersistedEnvelope`];
-    /// `$all`: a `(GlobalSeq, PersistedEnvelope)` tagged with the key-derived
-    /// position (the envelope no longer carries it), matching the
-    /// position-tagged `$all` stream contract.
+    /// `$all`: a `(GlobalSeq, StreamKey, PersistedEnvelope)` tagged with the
+    /// key-derived position and origin stream (the envelope carries neither),
+    /// matching the attributed `$all` stream contract (#333).
     type Item: Send;
     /// Keyset lower bound (inclusive) for opening at `from`.
     fn lower_key(&self, from: Self::Position) -> Result<Vec<u8>, FjallError>;
-    /// Keyset upper bound (inclusive) — the end of this strategy's key range.
-    fn upper_key(&self) -> Result<Vec<u8>, FjallError>;
+    /// Keyset upper bound (inclusive) — the end of this strategy's key range,
+    /// or `None` when the scan is unbounded above: the `events_global`
+    /// partition holds ONLY `$all` keys, and with a variable-length id inside
+    /// the key no fixed-width maximum key exists, so [`GlobalScan`] scans to
+    /// the partition's end.
+    fn upper_key(&self) -> Result<Option<Vec<u8>>, FjallError>;
     /// Decode one stored row into this strategy's item, mapping malformed
     /// shapes to `FjallError`.
     fn decode(&self, key: &Slice, value: Slice) -> Result<Self::Item, FjallError>;
@@ -40,7 +48,9 @@ pub struct StreamScan {
     pub label: ErrorId,
 }
 
-/// `$all` scan: keyed by `[global_seq][version]`, opens from a [`GlobalSeq`].
+/// `$all` scan: keyed by `[global_seq][id_len][id][version]` (#333, layout A2 —
+/// the origin stream id rides in the KEY; the value stays the shared frame
+/// bytes), opens from a [`GlobalSeq`].
 pub struct GlobalScan;
 
 /// Shared decode tail: validate the raw `version` and build the envelope,
@@ -49,9 +59,10 @@ pub struct GlobalScan;
 /// the [`GlobalScan`] pairs on top (the envelope no longer carries it).
 ///
 /// `stream_id` is the diagnostic label stamped into every error: the per-stream
-/// label for [`StreamScan`], an empty [`ErrorId`] for [`GlobalScan`] (a
-/// global key carries no stream id). `raw_version` is the version decoded from
-/// the key; it appears verbatim in the error fields.
+/// label for [`StreamScan`], the key-decoded origin-stream label for
+/// [`GlobalScan`] (the `$all` key carries the id since #333; this helper is
+/// just handed the ready-made label, never the key). `raw_version` is the
+/// version decoded from the key; it appears verbatim in the error fields.
 fn build_envelope(
     bytes_value: Bytes,
     decoded: wire::DecodedFrame,
@@ -90,12 +101,14 @@ impl ScanStrategy for StreamScan {
         })
     }
 
-    fn upper_key(&self) -> Result<Vec<u8>, FjallError> {
-        encode_event_key(self.id.as_ref(), u64::MAX).map_err(|e| FjallError::InvalidInput {
-            stream_id: self.label,
-            version: u64::MAX,
-            reason: reason_label(&e),
-        })
+    fn upper_key(&self) -> Result<Option<Vec<u8>>, FjallError> {
+        encode_event_key(self.id.as_ref(), u64::MAX)
+            .map(Some)
+            .map_err(|e| FjallError::InvalidInput {
+                stream_id: self.label,
+                version: u64::MAX,
+                reason: reason_label(&e),
+            })
     }
 
     fn decode(&self, key: &Slice, value: Slice) -> Result<Self::Item, FjallError> {
@@ -117,41 +130,74 @@ impl ScanStrategy for StreamScan {
 
 impl ScanStrategy for GlobalScan {
     type Position = GlobalSeq;
-    type Item = (GlobalSeq, PersistedEnvelope);
+    type Item = (GlobalSeq, StreamKey, PersistedEnvelope);
 
     fn lower_key(&self, from: Self::Position) -> Result<Vec<u8>, FjallError> {
-        Ok(encode_global_key(from.as_u64(), 0).to_vec())
+        // The empty-id lower bound sorts before every real key with the same
+        // global_seq: fjall rejects an empty stream key at `append`, so every
+        // stored key carries id_len >= 1 and compares greater at byte 9. The
+        // encode error is unreachable (an empty id can never be over-long) but
+        // stays typed, mirroring `StreamScan::lower_key` — never an unwrap.
+        encode_global_key(from.as_u64(), b"", 0).map_err(|e| FjallError::InvalidInput {
+            stream_id: ErrorId::default(),
+            version: from.as_u64(),
+            reason: reason_label(&e),
+        })
     }
 
-    fn upper_key(&self) -> Result<Vec<u8>, FjallError> {
-        Ok(encode_global_key(u64::MAX, u64::MAX).to_vec())
+    fn upper_key(&self) -> Result<Option<Vec<u8>>, FjallError> {
+        // Unbounded above: the events_global partition holds only `$all` keys,
+        // and the variable-length id inside the key means no fixed-width max
+        // key exists — scan to the partition's end.
+        Ok(None)
     }
 
     fn decode(&self, key: &Slice, value: Slice) -> Result<Self::Item, FjallError> {
-        let (key_global_seq, version_raw) =
+        let (key_global_seq, id_bytes, version_raw) =
             decode_global_key(key).map_err(|_| FjallError::CorruptValue {
                 stream_id: ErrorId::default(),
                 version: None,
             })?;
+        let id_len = id_bytes.len();
+        // The codec accepts id_len = 0 (it only describes bytes), but the
+        // storage invariant is judged HERE: fjall rejects an empty stream id
+        // at `append`, so a STORED row claiming an empty origin id is
+        // corruption, never a valid empty `StreamKey`.
+        if id_bytes.is_empty() {
+            return Err(FjallError::CorruptValue {
+                stream_id: ErrorId::default(),
+                version: Some(version_raw),
+            });
+        }
+
+        // Zero-copy: the key Slice is Arc-backed Bytes (bytes_1); subslice the
+        // id out of it rather than copying. The decoded id doubles as the
+        // diagnostic label for every error raised past this point.
+        let key_bytes: Bytes = key.clone().into();
+        let stream = StreamKey::from_bytes(
+            key_bytes.slice(GLOBAL_KEY_PREFIX_SIZE..GLOBAL_KEY_PREFIX_SIZE + id_len),
+        );
+        let label = ErrorId::from_display(&stream);
+
         // The key is the authoritative `$all` position; an event is always
         // stamped with global_seq >= 1, so a 0 here is corruption.
-        let position = GlobalSeq::new(key_global_seq).ok_or_else(|| FjallError::CorruptValue {
-            stream_id: ErrorId::default(),
+        let position = GlobalSeq::new(key_global_seq).ok_or(FjallError::CorruptValue {
+            stream_id: label,
             version: Some(version_raw),
         })?;
 
         let bytes_value: Bytes = value.into();
         let decoded =
             wire::decode_frame(bytes_value.as_ref()).map_err(|_| FjallError::CorruptValue {
-                stream_id: ErrorId::default(),
+                stream_id: label,
                 version: Some(version_raw),
             })?;
 
-        // Tag the envelope with the key-derived position — the `$all` stream
-        // contract. The frame no longer stores global_seq, so there is no
-        // redundant key/frame cross-check to perform.
-        let env = build_envelope(bytes_value, decoded, version_raw, ErrorId::default())?;
-        Ok((position, env))
+        // Tag the envelope with the key-derived position and origin stream —
+        // the attributed `$all` contract (#333). The frame stores neither, so
+        // there is no redundant key/frame cross-check to perform.
+        let env = build_envelope(bytes_value, decoded, version_raw, label)?;
+        Ok((position, stream, env))
     }
 }
 
@@ -185,8 +231,10 @@ impl<S: ScanStrategy> ScanCursor<S> {
         from: S::Position,
     ) -> Result<Self, FjallError> {
         let lower = strategy.lower_key(from)?;
-        let upper = strategy.upper_key()?;
-        let iter = keyspace.inner().range(lower..=upper);
+        let iter = match strategy.upper_key()? {
+            Some(upper) => keyspace.inner().range(lower..=upper),
+            None => keyspace.inner().range(lower..),
+        };
         Ok(Self {
             iter,
             strategy,
@@ -352,9 +400,25 @@ mod tests {
         )
         .unwrap();
 
-        // The `$all` scan is position-tagged; the tag is the key-derived position.
-        let seqs: Vec<u64> = cursor.map(|item| item.unwrap().0.as_u64()).collect().await;
-        assert_eq!(seqs, vec![1, 2, 3, 4]);
+        // The `$all` scan is position- AND stream-tagged; both ride on the
+        // key-derived tags, so the interleaving order [a, b, a, b] is
+        // observable without decoding a payload.
+        let items: Vec<(u64, Vec<u8>)> = cursor
+            .map(|item| {
+                let (pos, stream, _env) = item.unwrap();
+                (pos.as_u64(), stream.as_bytes().to_vec())
+            })
+            .collect()
+            .await;
+        assert_eq!(
+            items,
+            vec![
+                (1, b"a".to_vec()),
+                (2, b"b".to_vec()),
+                (3, b"a".to_vec()),
+                (4, b"b".to_vec()),
+            ],
+        );
     }
 
     fn stream_scan(id_bytes: &[u8], label: &str) -> StreamScan {
@@ -376,11 +440,18 @@ mod tests {
         (Slice::from(key), Slice::from(val))
     }
 
-    fn global_row(global_seq: u64, version: u64, et: &str, payload: &[u8]) -> (Slice, Slice) {
-        // `global_seq` is the `$all` index KEY; the value (frame) no longer holds it.
-        let key = encode_global_key(global_seq, version);
+    fn global_row(
+        global_seq: u64,
+        id: &[u8],
+        version: u64,
+        et: &str,
+        payload: &[u8],
+    ) -> (Slice, Slice) {
+        // `global_seq` + origin id ride in the `$all` index KEY (#333, A2);
+        // the value (frame) holds neither.
+        let key = encode_global_key(global_seq, id, version).unwrap();
         let val = test_row_value(et, payload);
-        (Slice::from(&key[..]), Slice::from(val))
+        (Slice::from(key), Slice::from(val))
     }
 
     #[test]
@@ -441,10 +512,12 @@ mod tests {
 
     #[test]
     fn global_decode_yields_position_tagged_envelope() {
-        let (k, v) = global_row(42, 7, "Created", b"data");
-        // `$all` decode pairs the key-derived position with the envelope.
-        let (pos, env) = GlobalScan.decode(&k, v).unwrap();
+        let (k, v) = global_row(42, b"user-1", 7, "Created", b"data");
+        // `$all` decode pairs the key-derived position AND origin stream with
+        // the envelope (#333).
+        let (pos, stream, env) = GlobalScan.decode(&k, v).unwrap();
         assert_eq!(pos, GlobalSeq::new(42).unwrap());
+        assert_eq!(stream.as_bytes(), b"user-1");
         assert_eq!(env.version(), Version::new(7).unwrap());
         assert_eq!(env.event_type(), "Created");
         assert_eq!(env.payload(), b"data");

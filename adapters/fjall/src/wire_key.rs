@@ -96,42 +96,89 @@ pub fn decode_event_key(key: &[u8]) -> Result<(&[u8], u64), DecodeError> {
     Ok((id_bytes, version))
 }
 
-/// Size of a `$all` index key: `[u64 BE global_seq][u64 BE version]`.
-const GLOBAL_KEY_SIZE: usize = 16;
+/// Fixed part of a `$all` index key: `[u64 BE global_seq][u16 BE id_len]`
+/// before the id, `[u64 BE version]` after it.
+pub const GLOBAL_KEY_PREFIX_SIZE: usize = 8 + 2;
 
-/// Encode an `events_global` key as `[u64 BE global_seq][u64 BE version]`.
+/// Size of the version suffix in a `$all` index key: `[u64 BE version]`.
+const GLOBAL_KEY_VERSION_SIZE: usize = 8;
+
+/// Encode an `events_global` key as
+/// `[u64 BE global_seq][u16 BE id_len][id_bytes][u64 BE version]`.
 ///
-/// `global_seq` alone is unique per event; `version` is carried so the
-/// read path can reconstruct a `PersistedEnvelope` (the wire-frame value
-/// does not store version — fjall keeps it in the primary event key).
-/// Big-endian encoding ensures lexicographic byte order equals numeric order.
-#[must_use]
-pub fn encode_global_key(global_seq: u64, version: u64) -> [u8; GLOBAL_KEY_SIZE] {
-    let mut buf = [0u8; GLOBAL_KEY_SIZE];
-    buf[0..8].copy_from_slice(&global_seq.to_be_bytes());
-    buf[8..16].copy_from_slice(&version.to_be_bytes());
-    buf
-}
-
-/// Decode an `events_global` key into `(global_seq, version)`.
+/// `global_seq` alone is unique per event, so the 8-byte BE prefix fully
+/// determines sort order — the id and version behind it are payload carried in
+/// the key (never order-determining), which keeps the row *value* the same
+/// shared frame bytes as the `events` partition (#333, layout A2). `version`
+/// is carried so the read path can reconstruct a `PersistedEnvelope`.
 ///
 /// # Errors
 ///
-/// Returns [`DecodeError::InvalidSize`] if `key` is not exactly [`GLOBAL_KEY_SIZE`] bytes.
-pub fn decode_global_key(key: &[u8]) -> Result<(u64, u64), DecodeError> {
-    if key.len() != GLOBAL_KEY_SIZE {
-        return Err(DecodeError::InvalidSize {
-            expected: GLOBAL_KEY_SIZE,
+/// Returns [`EncodeError::IdTooLong`] if `id` exceeds `u16::MAX` bytes.
+pub fn encode_global_key(global_seq: u64, id: &[u8], version: u64) -> Result<Vec<u8>, EncodeError> {
+    let id_len = u16::try_from(id.len()).map_err(|_| EncodeError::IdTooLong { len: id.len() })?;
+    let mut buf = Vec::with_capacity(GLOBAL_KEY_PREFIX_SIZE + id.len() + GLOBAL_KEY_VERSION_SIZE);
+    buf.extend_from_slice(&global_seq.to_be_bytes());
+    buf.extend_from_slice(&id_len.to_be_bytes());
+    buf.extend_from_slice(id);
+    buf.extend_from_slice(&version.to_be_bytes());
+    Ok(buf)
+}
+
+/// Decode an `events_global` key into `(global_seq, id_bytes, version)`.
+///
+/// The codec accepts `id_len = 0` (it only describes bytes); the storage
+/// invariant that a stored row's id is never empty is judged by the caller
+/// (`GlobalScan::decode`), where it is known.
+///
+/// # Errors
+///
+/// Returns [`DecodeError::ValueTooShort`] if `key` is shorter than the fixed
+/// parts (18 bytes: prefix + version) — which is what rejects the pre-#333
+/// 16-byte `[gs][version]` layout (the documented clean break, no misparse
+/// possible) — or [`DecodeError::InvalidSize`] if the claimed `id_len` does
+/// not match the remaining bytes exactly.
+pub fn decode_global_key(key: &[u8]) -> Result<(u64, &[u8], u64), DecodeError> {
+    let min = GLOBAL_KEY_PREFIX_SIZE + GLOBAL_KEY_VERSION_SIZE;
+    if key.len() < min {
+        return Err(DecodeError::ValueTooShort {
+            min,
             actual: key.len(),
         });
     }
+
     let global_seq = u64::from_be_bytes([
         key[0], key[1], key[2], key[3], key[4], key[5], key[6], key[7],
     ]);
+    let id_len = usize::from(u16::from_be_bytes([key[8], key[9]]));
+    let expected_total = GLOBAL_KEY_PREFIX_SIZE
+        .checked_add(id_len)
+        .and_then(|n| n.checked_add(GLOBAL_KEY_VERSION_SIZE))
+        .ok_or(DecodeError::InvalidSize {
+            expected: usize::MAX,
+            actual: key.len(),
+        })?;
+    if key.len() != expected_total {
+        return Err(DecodeError::InvalidSize {
+            expected: expected_total,
+            actual: key.len(),
+        });
+    }
+
+    let id_bytes = &key[GLOBAL_KEY_PREFIX_SIZE..GLOBAL_KEY_PREFIX_SIZE + id_len];
+    let version_start = GLOBAL_KEY_PREFIX_SIZE + id_len;
     let version = u64::from_be_bytes([
-        key[8], key[9], key[10], key[11], key[12], key[13], key[14], key[15],
+        key[version_start],
+        key[version_start + 1],
+        key[version_start + 2],
+        key[version_start + 3],
+        key[version_start + 4],
+        key[version_start + 5],
+        key[version_start + 6],
+        key[version_start + 7],
     ]);
-    Ok((global_seq, version))
+
+    Ok((global_seq, id_bytes, version))
 }
 
 /// Encode a stream version as `[u64 LE version]`.
@@ -248,25 +295,87 @@ mod tests {
     // --- Global key tests ---
 
     #[test]
-    fn global_key_roundtrips() {
-        let key = encode_global_key(42, 7);
-        let (gseq, version) = decode_global_key(&key).unwrap();
-        assert_eq!(gseq, 42);
-        assert_eq!(version, 7);
+    fn global_key_round_trips_with_id() {
+        let key = encode_global_key(42, b"stream-7", 7).unwrap();
+        let (gs, id, ver) = decode_global_key(&key).unwrap();
+        assert_eq!(gs, 42);
+        assert_eq!(id, b"stream-7");
+        assert_eq!(ver, 7);
     }
 
     #[test]
-    fn global_keys_sort_by_global_seq_then_version() {
-        // Big-endian → lexicographic byte order equals numeric order.
-        let a = encode_global_key(1, 999);
-        let b = encode_global_key(2, 1);
-        assert!(a < b, "global_seq 1 must sort before global_seq 2");
+    fn global_key_sorts_by_global_seq_regardless_of_id() {
+        let k1 = encode_global_key(1, b"zzzzzzzz", 9).unwrap();
+        let k2 = encode_global_key(2, b"a", 1).unwrap();
+        assert!(
+            k1 < k2,
+            "8-byte BE global_seq prefix must dominate ordering"
+        );
     }
 
     #[test]
-    fn decode_global_key_rejects_wrong_length() {
+    fn global_key_rejects_old_16_byte_layout() {
+        // Pre-#333 layout: [u64 gs][u64 ver] — must be a typed decode error,
+        // never a misparse (the documented clean-break defense). 16 bytes is
+        // below the 18-byte fixed-parts floor, so the min-length check rejects
+        // it as ValueTooShort before id_len is ever read.
+        let mut old = [0u8; 16];
+        old[0..8].copy_from_slice(&42u64.to_be_bytes());
+        old[8..16].copy_from_slice(&7u64.to_be_bytes());
+        assert!(matches!(
+            decode_global_key(&old).unwrap_err(),
+            DecodeError::ValueTooShort { .. }
+        ));
+    }
+
+    #[test]
+    fn global_key_rejects_id_len_mismatch() {
+        let mut key = encode_global_key(1, b"abc", 1).unwrap();
+        // Corrupt the id_len field (offset 8..10) to overclaim.
+        key[8..10].copy_from_slice(&u16::MAX.to_be_bytes());
+        assert!(decode_global_key(&key).is_err());
+    }
+
+    #[test]
+    fn global_key_rejects_truncated_fixed_parts() {
+        // Shorter than prefix + version can never carry even an empty id.
         assert!(decode_global_key(&[0u8; 8]).is_err());
         assert!(decode_global_key(&[0u8; 17]).is_err());
+    }
+
+    #[test]
+    fn global_key_round_trips_at_max_id_len() {
+        // Acceptance boundary: exactly u16::MAX id bytes must encode and
+        // round-trip (one past it is rejected — see the over-long test).
+        let id = vec![0xABu8; usize::from(u16::MAX)];
+        let key = encode_global_key(9, &id, 3).unwrap();
+        let (gs, decoded_id, ver) = decode_global_key(&key).unwrap();
+        assert_eq!(gs, 9);
+        assert_eq!(decoded_id, id.as_slice());
+        assert_eq!(ver, 3);
+    }
+
+    #[test]
+    fn global_key_round_trips_boundary_id_lengths() {
+        // Explicit id-length boundaries below the proptest's sampled range:
+        // empty (codec-legal; the storage judgment lives in GlobalScan),
+        // 1, and 2 bytes.
+        for id in [b"".as_slice(), b"a".as_slice(), b"ab".as_slice()] {
+            let key = encode_global_key(5, id, 2).unwrap();
+            let (gs, decoded_id, ver) = decode_global_key(&key).unwrap();
+            assert_eq!(gs, 5);
+            assert_eq!(decoded_id, id);
+            assert_eq!(ver, 2);
+        }
+    }
+
+    #[test]
+    fn global_key_rejects_over_long_id() {
+        let too_long = vec![0u8; usize::from(u16::MAX) + 1];
+        assert!(matches!(
+            encode_global_key(1, &too_long, 1).unwrap_err(),
+            EncodeError::IdTooLong { len } if len == usize::from(u16::MAX) + 1
+        ));
     }
 
     // --- Encoding attack surface (proptest) ---
@@ -285,6 +394,38 @@ mod tests {
             let (decoded_id, decoded_version) = decode_event_key(&encoded).unwrap();
             prop_assert_eq!(decoded_id, id_bytes.as_slice(), "id_bytes round-trip failed");
             prop_assert_eq!(decoded_version, version, "version round-trip failed");
+        }
+
+        /// For any (global_seq, id_bytes, version), encode_global_key ->
+        /// decode_global_key is identity.
+        #[test]
+        fn attack_encoding_global_key_round_trip_any_values(
+            global_seq in any::<u64>(),
+            id_bytes in prop::collection::vec(any::<u8>(), 0..200),
+            version in any::<u64>(),
+        ) {
+            let encoded = encode_global_key(global_seq, &id_bytes, version).unwrap();
+            let (gs, decoded_id, ver) = decode_global_key(&encoded).unwrap();
+            prop_assert_eq!(gs, global_seq, "global_seq round-trip failed");
+            prop_assert_eq!(decoded_id, id_bytes.as_slice(), "id_bytes round-trip failed");
+            prop_assert_eq!(ver, version, "version round-trip failed");
+        }
+
+        /// For any a < b (u64), the 8-byte BE global_seq prefix dominates
+        /// ordering regardless of the ids behind it.
+        #[test]
+        fn attack_encoding_global_key_seq_prefix_ordering(
+            a in 0..u64::MAX,
+            id_a in prop::collection::vec(any::<u8>(), 0..50),
+            id_b in prop::collection::vec(any::<u8>(), 0..50),
+            ver_a in any::<u64>(),
+            ver_b in any::<u64>(),
+        ) {
+            let b = a + 1;
+            let key_a = encode_global_key(a, &id_a, ver_a).unwrap();
+            let key_b = encode_global_key(b, &id_b, ver_b).unwrap();
+            prop_assert!(key_a < key_b,
+                "global_seq prefix ordering violated");
         }
 
         /// For any u64, encode_stream_version -> decode_stream_version is identity.

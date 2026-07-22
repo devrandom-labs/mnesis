@@ -141,19 +141,23 @@ pub trait RawEventStore: Send + Sync {
     /// The stream type for an all-streams (`$all`) read.
     ///
     /// Owned, non-GAT, `'static` — a `futures::Stream` of
-    /// `Result<(Self::AllPosition, PersistedEnvelope), Self::Error>`:
-    /// **position-tagged**, ascending by [`AllPosition`], not by
-    /// `(stream, version)`. The position rides on the item so resume needs no
-    /// global field on the envelope. Distinct from [`Stream`](Self::Stream)
-    /// because the global order is a different physical index.
+    /// `Result<(Self::AllPosition, StreamKey, PersistedEnvelope), Self::Error>`,
+    /// ascending by [`AllPosition`], not by `(stream, version)`. Each item
+    /// carries three parts: the **position** for checkpointing (resume needs no
+    /// global field on the envelope), the **stream key for routing** (the store
+    /// knows the origin stream at append time, so an `$all` consumer routes on
+    /// raw id bytes without decoding the payload), and the **envelope** for
+    /// content. Distinct from [`Stream`](Self::Stream) because the global order
+    /// is a different physical index.
     ///
     /// Note: the subscription path ([`Subscription::subscribe`]) requires the
     /// stream be `Unpin`. No bound is imposed here, but all shipped adapters
     /// (`ScanCursor`, `InMemoryStream`) satisfy it.
     ///
     /// [`Subscription::subscribe`]: crate::subscription::Subscription::subscribe
-    type AllStream: futures::Stream<Item = Result<(Self::AllPosition, PersistedEnvelope), Self::Error>>
-        + Send
+    type AllStream: futures::Stream<
+            Item = Result<(Self::AllPosition, StreamKey, PersistedEnvelope), Self::Error>,
+        > + Send
         + 'static;
 
     /// Append events to a stream with optimistic concurrency.
@@ -240,6 +244,14 @@ pub trait RawEventStore: Send + Sync {
     ///
     /// This is the building block under an all-streams subscription; the
     /// never-ending wait-when-caught-up behaviour is layered on top.
+    ///
+    /// # Stream attribution
+    ///
+    /// Each item carries the [`StreamKey`] of the stream the event was appended
+    /// to — a **store guarantee**, not a payload convention. The per-stream
+    /// read ([`read_stream`](Self::read_stream)) deliberately does NOT stamp
+    /// it: there the id is the query argument and every returned envelope
+    /// belongs to it by construction (intentional read-path asymmetry).
     ///
     /// # Batching
     ///
@@ -339,8 +351,9 @@ impl<S: RawEventStore> RawEventStore for Store<S> {
 /// # Carried alongside events, not derived from them
 ///
 /// The position rides on each [`AllStream`](RawEventStore::AllStream) item as a
-/// tag `(AllPosition, PersistedEnvelope)`. A consumer checkpoints the position
-/// it last saw and hands it back to [`read_all`](RawEventStore::read_all) /
+/// tag `(AllPosition, StreamKey, PersistedEnvelope)`. A consumer checkpoints
+/// the position it last saw and hands it back to
+/// [`read_all`](RawEventStore::read_all) /
 /// `subscribe_all` to resume — so the consumer's checkpoint type is
 /// adapter-defined and must be serializable (fjall: a `u64`; postgres: a pair).
 ///

@@ -14,7 +14,6 @@
 
 use futures::StreamExt;
 
-use crate::PersistedEnvelope;
 use crate::Step;
 use crate::catchup::Catchup;
 
@@ -63,7 +62,7 @@ struct LiveState<C: Catchup> {
 pub fn live_stepped<C: Catchup + 'static>(
     c: C,
     from: Option<C::Position>,
-) -> impl futures::Stream<Item = Result<Step<(C::Position, PersistedEnvelope)>, C::Error>> + Send
+) -> impl futures::Stream<Item = Result<Step<C::Item>, C::Error>> + Send
 where
     // `StreamExt::next` requires `Unpin`, and the scan is held by-value across
     // awaits in the `unfold` state — so the scan must be `Unpin`. Placed
@@ -101,13 +100,13 @@ where
                 continue;
             };
             match scan.next().await {
-                Some(Ok((pos, env))) => {
-                    s.read_from = Some(pos);
+                Some(Ok(item)) => {
+                    s.read_from = Some(C::position_of(&item));
                     s.drained_in_chunk += 1;
                     if s.drained_in_chunk >= CATCHUP_CHUNK {
                         s.scan = None; // reopen next iteration from the advanced read_from
                     }
-                    return Some((Ok(Step::Event((pos, env))), s));
+                    return Some((Ok(Step::Event(item)), s));
                 }
                 Some(Err(e)) => {
                     s.scan = None;
@@ -120,11 +119,11 @@ where
                     let wait = s.c.arm();
                     match s.c.read_after(s.read_from).await {
                         Ok(mut probe) => match probe.next().await {
-                            Some(Ok((pos, env))) => {
-                                s.read_from = Some(pos);
+                            Some(Ok(item)) => {
+                                s.read_from = Some(C::position_of(&item));
                                 s.scan = Some(probe);
                                 s.drained_in_chunk = 1;
-                                return Some((Ok(Step::Event((pos, env))), s));
+                                return Some((Ok(Step::Event(item)), s));
                             }
                             Some(Err(e)) => return Some((Err(e), s)),
                             None => {
@@ -169,7 +168,7 @@ mod tests {
     use super::*;
     use crate::Step;
     use crate::catchup::{AllCatchup, Catchup, StreamCatchup};
-    use crate::envelope::pending_envelope;
+    use crate::envelope::{PersistedEnvelope, pending_envelope};
     use crate::store::RawEventStore;
     use crate::stream_id::StreamKey;
     use crate::test_support::TestStore;
@@ -196,7 +195,7 @@ mod tests {
     fn live<C: Catchup + 'static>(
         c: C,
         from: Option<C::Position>,
-    ) -> impl futures::Stream<Item = Result<(C::Position, PersistedEnvelope), C::Error>>
+    ) -> impl futures::Stream<Item = Result<C::Item, C::Error>>
     where
         C::Scan: Unpin,
     {
@@ -320,7 +319,7 @@ mod tests {
         // Catch-up: ascending `$all` position across both streams (from the tag).
         let mut seqs = Vec::new();
         for _ in 0..3 {
-            let (pos, _env) = timeout(MUST_DELIVER, cursor.next())
+            let (pos, _key, _env) = timeout(MUST_DELIVER, cursor.next())
                 .await
                 .expect("catch-up event must arrive")
                 .expect("stream never ends")
@@ -347,7 +346,7 @@ mod tests {
                 .unwrap();
         });
 
-        let (live_pos, _live_env) = timeout(MUST_DELIVER, cursor.next())
+        let (live_pos, _live_key, _live_env) = timeout(MUST_DELIVER, cursor.next())
             .await
             .expect("live append must wake the parked $all cursor")
             .expect("stream never ends")
@@ -388,6 +387,7 @@ mod tests {
 
     impl Catchup for FailingCatchup {
         type Position = Version;
+        type Item = (Version, PersistedEnvelope);
         type Scan = futures::stream::Iter<
             std::vec::IntoIter<Result<(Version, PersistedEnvelope), BoomError>>,
         >;
@@ -406,6 +406,10 @@ mod tests {
             core::future::ready(Ok(scan))
         }
 
+        fn position_of(item: &Self::Item) -> Version {
+            item.0
+        }
+
         fn arm(&self) -> impl core::future::Future<Output = ()> + Send + 'static {
             core::future::ready(())
         }
@@ -419,7 +423,7 @@ mod tests {
         // Read back a real PersistedEnvelope to feed the mock's Ok item.
         let store = Arc::new(TestStore::new());
         seed_range(&store, &StreamKey::from_slice(b"s"), 1, 1).await;
-        let (_pos, ok_env) = store
+        let (_pos, _key, ok_env) = store
             .read_all(None)
             .await
             .unwrap()

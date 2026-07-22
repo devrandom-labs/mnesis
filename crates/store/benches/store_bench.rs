@@ -118,7 +118,8 @@ impl RawEventStore for InMemoryRawStore {
     type Error = BenchError;
     type Stream = InMemoryStream;
     type AllPosition = BenchAllPos;
-    type AllStream = futures::stream::Empty<Result<(BenchAllPos, PersistedEnvelope), BenchError>>;
+    type AllStream =
+        futures::stream::Empty<Result<(BenchAllPos, StreamKey, PersistedEnvelope), BenchError>>;
 
     async fn append(
         &self,

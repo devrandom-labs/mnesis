@@ -85,16 +85,17 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn retag_on_tagged_item_copies_the_position_beside_the_box() {
+    async fn retag_on_tagged_item_copies_both_tags_beside_the_box() {
         let e = env(1, None).await;
-        let item = (99u64, e);
+        let item = (99u64, StreamKey::from_slice(b"stream-1"), e);
         let decoded = Decoded {
             event: 7u64,
             version: item.envelope().version(),
             metadata: None,
         };
-        let (pos, typed): (u64, Decoded<u64>) = item.retag(decoded);
+        let (pos, key, typed): (u64, StreamKey, Decoded<u64>) = item.retag(decoded);
         assert_eq!(pos, 99);
+        assert_eq!(key.as_bytes(), b"stream-1");
         assert_eq!(typed.event, 7);
         assert_eq!(typed.version, Version::new(1).expect("nonzero version"));
     }

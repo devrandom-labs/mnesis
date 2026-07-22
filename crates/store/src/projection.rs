@@ -6,6 +6,7 @@ use mnesis::{DomainEvent, Id, Version};
 use crate::decoded::Decoded;
 use crate::state::{Hydrated, PersistTrigger, SnapshotStore};
 use crate::store::AllPosition;
+use crate::stream_id::StreamKey;
 
 /// A pure fold function over domain events.
 ///
@@ -65,9 +66,13 @@ mod sealed {
 ///
 /// - [`Decoded<E>`] (per-stream) — the bookmark is the `version` *inside*
 ///   the box; <code>Pos = [Version]</code>.
-/// - `(P, Decoded<E>)` (`$all`) — the bookmark is the
+/// - `(P, StreamKey, Decoded<E>)` (`$all`) — the bookmark is the
 ///   [`AllPosition`] tag riding *beside* the box,
-///   exactly as `.decoded()` yields it; `Pos = P`.
+///   exactly as `.decoded()` yields it; `Pos = P`. The stepper **drops** the
+///   [`StreamKey`]: [`Projector::apply`] takes `(state, &event)` — a fold over
+///   events, and a key-aware fold is a `Projector` signature question
+///   deliberately out of #333's scope — a consumer that routes by key
+///   hand-rolls its loop over the `.decoded()` stream instead.
 ///
 /// Sealed on purpose: the pairing of position and event is **structural**.
 /// A caller can never hand [`Projection::advance`] a position that did not
@@ -92,12 +97,14 @@ impl<E> Positioned for Decoded<E> {
     }
 }
 
-impl<E, P: AllPosition> sealed::Sealed for (P, Decoded<E>) {}
-impl<E, P: AllPosition> Positioned for (P, Decoded<E>) {
+impl<E, P: AllPosition> sealed::Sealed for (P, StreamKey, Decoded<E>) {}
+// The stream key is dropped here: the stepper folds events, not routes — a
+// key-aware fold would be a different `Projector::apply` signature.
+impl<E, P: AllPosition> Positioned for (P, StreamKey, Decoded<E>) {
     type Event = E;
     type Pos = P;
     fn into_parts(self) -> (P, Decoded<E>) {
-        self
+        (self.0, self.2)
     }
 }
 
@@ -147,9 +154,9 @@ impl<E, P: AllPosition> Positioned for (P, Decoded<E>) {
 /// ```
 ///
 /// `$all` (`Pos` = the adapter's [`AllPosition`]) is the
-/// **same loop** — the `(position, Decoded)` tuple `.decoded()` yields feeds
-/// [`advance`] whole; only the subscribe call and the snapshot store's
-/// position type differ:
+/// **same loop** — the `(position, StreamKey, Decoded)` tuple `.decoded()`
+/// yields feeds [`advance`] whole; only the subscribe call and the snapshot
+/// store's position type differ:
 /// ```ignore
 /// let (mut proj, mut state) =
 ///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
@@ -264,8 +271,9 @@ where
     ///
     /// Accepts either item shape a decoded stream yields (see [`Positioned`]):
     /// a bare [`Decoded<E>`](Decoded) from a per-stream subscription (the
-    /// position is its `version`), or the `(position, Decoded<E>)` tuple from
-    /// an `$all` subscription — fed whole, no unpacking. The item's position
+    /// position is its `version`), or the `(position, StreamKey, Decoded<E>)`
+    /// tuple from an `$all` subscription — fed whole, no unpacking (the stream
+    /// key is dropped; see [`Positioned`]). The item's position
     /// becomes the candidate checkpoint. On a commit the checkpoint advances
     /// and the pending tail clears; otherwise the position is remembered as
     /// `pending` for the next [`flush`](Projection::flush).

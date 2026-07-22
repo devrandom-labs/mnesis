@@ -157,11 +157,13 @@ pub struct InMemoryStore {
     notifiers: Arc<StreamNotifiers>,
     next_global_seq: Mutex<InMemoryAllPos>,
     /// All events keyed by their `$all` position ([`InMemoryAllPos`]), the
-    /// `$all` read order. Holds the same `StoredFrame`s as `streams` (Arc-shared
-    /// `Bytes`, cheap clones); written under `streams`'s lock in `append` so the
-    /// two never diverge. The key is the authoritative position — the frame no
-    /// longer carries one.
-    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, StoredFrame>>>,
+    /// `$all` read order. Each value carries the origin [`StreamKey`] beside the
+    /// frame — the `$all` read path stamps it onto every item (stream
+    /// attribution is a store guarantee). Holds the same `StoredFrame`s as
+    /// `streams` (Arc-shared `Bytes`, cheap clones); written under `streams`'s
+    /// lock in `append` so the two never diverge. The key is the authoritative
+    /// position — the frame no longer carries one.
+    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, (StreamKey, StoredFrame)>>>,
     batch_size: BatchSize,
 }
 
@@ -234,26 +236,27 @@ impl ReadState {
 
 /// Keyset-paginating read state for a one-shot `read_all` (`$all` order).
 struct GlobalReadState {
-    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, StoredFrame>>>,
+    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, (StreamKey, StoredFrame)>>>,
     /// Exclusive lower bound: yield positions **strictly greater** than this;
     /// `None` = from the very beginning. Advances to the last-yielded position
     /// (matching the exclusive `read_all` resume contract).
     after: Option<InMemoryAllPos>,
     batch_size: usize,
-    /// Position-tagged frames — the key is the authoritative `$all` position.
-    buffer: VecDeque<(InMemoryAllPos, StoredFrame)>,
+    /// Position-tagged, key-attributed frames — the position is the
+    /// authoritative `$all` position, the key the origin stream.
+    buffer: VecDeque<(InMemoryAllPos, StreamKey, StoredFrame)>,
     done: bool,
 }
 
 impl GlobalReadState {
     async fn refill(&mut self) {
-        let batch: VecDeque<(InMemoryAllPos, StoredFrame)> = {
+        let batch: VecDeque<(InMemoryAllPos, StreamKey, StoredFrame)> = {
             let guard = self.global_index.lock().await;
             let lower = self.after.map_or(Bound::Unbounded, Bound::Excluded);
             guard
                 .range((lower, Bound::Unbounded))
                 .take(self.batch_size)
-                .map(|(pos, frame)| (*pos, frame.clone()))
+                .map(|(pos, (key, frame))| (*pos, key.clone(), frame.clone()))
                 .collect()
         };
         self.done = batch.len() < self.batch_size;
@@ -283,26 +286,29 @@ impl futures::Stream for InMemoryStream {
     }
 }
 
-/// The boxed inner stream behind [`InMemoryAllStream`] — a position-tagged
-/// `$all` item stream. Aliased so the struct field reads cleanly.
+/// The boxed inner stream behind [`InMemoryAllStream`] — a position-tagged,
+/// key-attributed `$all` item stream. Aliased so the struct field reads cleanly.
 type BoxedAllItemStream = core::pin::Pin<
     Box<
-        dyn futures::Stream<Item = Result<(InMemoryAllPos, PersistedEnvelope), InMemoryStoreError>>
-            + Send,
+        dyn futures::Stream<
+                Item = Result<(InMemoryAllPos, StreamKey, PersistedEnvelope), InMemoryStoreError>,
+            > + Send,
     >,
 >;
 
-/// `futures::Stream` of **position-tagged** envelopes over the `$all` index.
+/// `futures::Stream` of **position-tagged, key-attributed** envelopes over the
+/// `$all` index.
 ///
 /// The `$all` analogue of [`InMemoryStream`]: each `Item` carries the
-/// [`InMemoryAllPos`] the event was read at, so a subscriber can checkpoint a
-/// position the (position-free) envelope no longer holds.
+/// [`InMemoryAllPos`] the event was read at (so a subscriber can checkpoint a
+/// position the position-free envelope no longer holds) and the origin
+/// [`StreamKey`] (so a consumer routes without decoding the payload).
 pub struct InMemoryAllStream {
     inner: BoxedAllItemStream,
 }
 
 impl futures::Stream for InMemoryAllStream {
-    type Item = Result<(InMemoryAllPos, PersistedEnvelope), InMemoryStoreError>;
+    type Item = Result<(InMemoryAllPos, StreamKey, PersistedEnvelope), InMemoryStoreError>;
 
     fn poll_next(
         mut self: core::pin::Pin<&mut Self>,
@@ -444,7 +450,7 @@ impl RawEventStore for InMemoryStore {
         {
             let mut gidx = self.global_index.lock().await;
             for (pos, frame) in &rows {
-                gidx.insert(*pos, frame.clone());
+                gidx.insert(*pos, (id.clone(), frame.clone()));
             }
         }
 
@@ -547,12 +553,12 @@ impl RawEventStore for InMemoryStore {
 
         let unfolded = futures::stream::unfold(state, |mut s| async move {
             loop {
-                if let Some((pos, frame)) = s.buffer.pop_front() {
+                if let Some((pos, key, frame)) = s.buffer.pop_front() {
                     return match frame_to_envelope(&frame) {
                         Ok(env) => {
                             // Advance the exclusive scan bound past this position.
                             s.after = Some(pos);
-                            Some((Ok((pos, env)), s))
+                            Some((Ok((pos, key, env)), s))
                         }
                         Err(e) => {
                             s.done = true;
@@ -699,12 +705,12 @@ impl AtomicAppend for InMemoryStore {
         let mut counter = self.next_global_seq.lock().await;
         let mut seq = *counter;
         let mut staged_streams: Vec<(String, Vec<StoredFrame>)> = Vec::with_capacity(writes.len());
-        let mut staged_global: Vec<(InMemoryAllPos, StoredFrame)> = Vec::new();
+        let mut staged_global: Vec<(InMemoryAllPos, StreamKey, StoredFrame)> = Vec::new();
         for w in writes {
             let mut frames = Vec::with_capacity(w.events.len());
             for env in &w.events {
                 let frame = encode_pending_to_frame(env).map_err(AtomicAppendError::Store)?;
-                staged_global.push((seq, frame.clone()));
+                staged_global.push((seq, w.target.clone(), frame.clone()));
                 frames.push(frame);
                 seq = seq.next().ok_or(AtomicAppendError::Store(
                     InMemoryStoreError::GlobalSeqOverflow,
@@ -719,8 +725,8 @@ impl AtomicAppend for InMemoryStore {
         // section, streams lock still held throughout).
         {
             let mut gidx = self.global_index.lock().await;
-            for (pos, frame) in &staged_global {
-                gidx.insert(*pos, frame.clone());
+            for (pos, key, frame) in staged_global {
+                gidx.insert(pos, (key, frame));
             }
         }
         for (key, frames) in staged_streams {
@@ -893,6 +899,27 @@ mod global_read_tests {
             .append(&sk(id), expected.and_then(Version::new), &[env])
             .await
             .unwrap();
+    }
+
+    #[tokio::test]
+    async fn read_all_carries_origin_stream_keys_in_position_order() {
+        let store = InMemoryStore::new();
+        // Interleave two streams so `$all` order spans both: a@1, b@1, a@2.
+        append_one(&store, "a", 1, None, b"x").await;
+        append_one(&store, "b", 1, None, b"y").await;
+        append_one(&store, "a", 2, Some(1), b"z").await;
+
+        let all = store.read_all(None).await.unwrap();
+        let items: Vec<(InMemoryAllPos, StreamKey, PersistedEnvelope)> =
+            all.map(Result::unwrap).collect().await;
+        let positions: Vec<u64> = items.iter().map(|(pos, _, _)| pos.as_u64()).collect();
+        assert_eq!(positions, vec![1, 2, 3], "$all yields append order");
+        let keys: Vec<&[u8]> = items.iter().map(|(_, key, _)| key.as_bytes()).collect();
+        assert_eq!(
+            keys,
+            vec![b"a".as_slice(), b"b".as_slice(), b"a".as_slice()],
+            "$all items must carry the stream key they were appended to"
+        );
     }
 
     #[tokio::test]

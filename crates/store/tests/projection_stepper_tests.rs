@@ -17,6 +17,7 @@ mod tests {
     use mnesis::{DomainEvent, Message, Version, version};
 
     use mnesis_inmemory::{InMemoryAllPos, InMemorySnapshotStore};
+    use mnesis_store::StreamKey;
     use mnesis_store::decoded::Decoded;
     use mnesis_store::projection::{Projection, ProjectionError, Projector};
     use mnesis_store::state::{
@@ -375,9 +376,10 @@ mod tests {
 
     // ── $all duality (#327): the SAME stepper drives an $all projection ─────
     //
-    // The $all position rides beside the item as `(P, Decoded<E>)` — exactly
-    // what `.decoded()` yields on a subscribe_all stream — and feeds `advance`
-    // whole. `InMemoryAllPos` stands in for fjall's `GlobalSeq`.
+    // The $all position rides beside the item as `(P, StreamKey, Decoded<E>)`
+    // — exactly what `.decoded()` yields on a subscribe_all stream — and feeds
+    // `advance` whole (the stepper drops the key). `InMemoryAllPos` stands in
+    // for fjall's `GlobalSeq`.
 
     /// `$all` trigger that always fires — the per-event-commit dual of
     /// `EveryNEvents(1)`, which is deliberately `Version`-only (#328).
@@ -395,6 +397,11 @@ mod tests {
 
     fn all_pos(v: u64) -> InMemoryAllPos {
         InMemoryAllPos::new(v).expect("nonzero position")
+    }
+
+    /// Stand-in origin key for hand-built `$all` items — the stepper drops it.
+    fn all_key() -> StreamKey {
+        StreamKey::from_slice(b"origin")
     }
 
     fn all_store() -> InMemorySnapshotStore<CountState, InMemoryAllPos> {
@@ -417,11 +424,17 @@ mod tests {
         // (aborted appends burn values) — the stepper checkpoints whatever
         // tag arrives. Inner versions are per-stream (two streams, both v1).
         state = p
-            .advance(state, (all_pos(3), decoded(TestEvent::Added(10), 1)))
+            .advance(
+                state,
+                (all_pos(3), all_key(), decoded(TestEvent::Added(10), 1)),
+            )
             .await
             .unwrap();
         state = p
-            .advance(state, (all_pos(7), decoded(TestEvent::Added(20), 1)))
+            .advance(
+                state,
+                (all_pos(7), all_key(), decoded(TestEvent::Added(20), 1)),
+            )
             .await
             .unwrap();
 
@@ -463,7 +476,10 @@ mod tests {
                     .await
                     .unwrap();
             let _ = p
-                .advance(state, (all_pos(9), decoded(TestEvent::Added(10), 1)))
+                .advance(
+                    state,
+                    (all_pos(9), all_key(), decoded(TestEvent::Added(10), 1)),
+                )
                 .await
                 .unwrap();
         }
@@ -487,7 +503,10 @@ mod tests {
 
         // Resume folds onto the restored state at a later (gappy) position.
         let resumed = p2
-            .advance(state2, (all_pos(12), decoded(TestEvent::Added(5), 2)))
+            .advance(
+                state2,
+                (all_pos(12), all_key(), decoded(TestEvent::Added(5), 2)),
+            )
             .await
             .unwrap();
         assert_eq!(p2.checkpoint(), Some(all_pos(12)));
@@ -519,7 +538,10 @@ mod tests {
         .unwrap();
 
         state = p
-            .advance(state, (all_pos(2), decoded(TestEvent::Added(10), 1)))
+            .advance(
+                state,
+                (all_pos(2), all_key(), decoded(TestEvent::Added(10), 1)),
+            )
             .await
             .unwrap();
         assert_eq!(p.checkpoint(), None, "trigger must not have fired");

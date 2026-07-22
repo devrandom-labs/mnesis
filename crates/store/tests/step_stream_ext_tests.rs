@@ -180,15 +180,19 @@ async fn events_passes_error_items_through_in_place() {
 }
 
 #[tokio::test]
-async fn events_preserves_the_position_tag_on_all_style_items() {
-    // `$all` items are `(P, PersistedEnvelope)`; `.events()` keeps the tag.
+async fn events_preserves_the_position_and_stream_key_on_all_style_items() {
+    // `$all` items are `(P, StreamKey, PersistedEnvelope)`; `.events()` keeps
+    // both tags.
     let p1 = persisted(1, 1).await;
-    let items: Vec<Result<Step<(u64, PersistedEnvelope)>, SynthErr>> =
-        vec![Ok(Step::CaughtUp), Ok(Step::Event((77u64, p1)))];
+    let items: Vec<Result<Step<(u64, StreamKey, PersistedEnvelope)>, SynthErr>> = vec![
+        Ok(Step::CaughtUp),
+        Ok(Step::Event((77u64, StreamKey::from_slice(b"s"), p1))),
+    ];
     let out: Vec<_> = synth(items).events().collect().await;
     assert_eq!(out.len(), 1);
-    let (pos, env) = out[0].as_ref().unwrap();
+    let (pos, key, env) = out[0].as_ref().unwrap();
     assert_eq!(*pos, 77, "position tag rides through .events()");
+    assert_eq!(key.as_bytes(), b"s", "stream key rides through .events()");
     assert_eq!(env.version().as_u64(), 1);
 }
 
@@ -255,17 +259,24 @@ async fn decoded_surfaces_a_bad_payload_as_the_decode_variant() {
 #[tokio::test]
 async fn decoded_on_all_style_items_keeps_tag_and_phase() {
     let p1 = persisted(1, 42).await;
-    let items: Vec<Result<Step<(u64, PersistedEnvelope)>, SynthErr>> =
-        vec![Ok(Step::Event((5u64, p1))), Ok(Step::CaughtUp)];
-    let out: Vec<Result<Step<(u64, Decoded<Money>)>, DecodeStreamError<SynthErr, _>>> =
+    let items: Vec<Result<Step<(u64, StreamKey, PersistedEnvelope)>, SynthErr>> = vec![
+        Ok(Step::Event((5u64, StreamKey::from_slice(b"s"), p1))),
+        Ok(Step::CaughtUp),
+    ];
+    let out: Vec<Result<Step<(u64, StreamKey, Decoded<Money>)>, DecodeStreamError<SynthErr, _>>> =
         synth(items)
             .decoded::<Money, _>(JsonCodec::default())
             .collect()
             .await;
 
     match out[0].as_ref().unwrap() {
-        Step::Event((pos, d)) => {
+        Step::Event((pos, key, d)) => {
             assert_eq!(*pos, 5, "tag preserved beside the decoded box");
+            assert_eq!(
+                key.as_bytes(),
+                b"s",
+                "stream key preserved beside the decoded box"
+            );
             assert_eq!(d.event, Money::Deposited { amount: 42 });
         }
         Step::CaughtUp => panic!("first item is the tagged decoded event"),

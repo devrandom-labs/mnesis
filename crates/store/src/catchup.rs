@@ -23,24 +23,27 @@ use crate::wake::{WakeRegistration, WakeSource};
 /// fused with a wait. The single live loop is written over this trait so the
 /// per-stream and `$all` cases monomorphize into two branch-free machines.
 ///
-/// The scan yields **position-tagged** items `(Position, PersistedEnvelope)` —
-/// the loop threads the resume position from the tag, never from the
-/// (position-free) envelope. Resume is **strictly after** the given position
-/// (`Ord`-based, no successor function): [`read_after`](Self::read_after) is the
-/// single resume transition.
+/// The loop threads the resume position from each delivered [`Item`](Self::Item)
+/// via [`position_of`](Self::position_of), never from the (position-free)
+/// envelope. Resume is **strictly after** the given position (`Ord`-based, no
+/// successor function): [`read_after`](Self::read_after) is the single resume
+/// transition.
 pub trait Catchup: Send {
     /// The position key the scan resumes from (`Version` for a stream, the
     /// adapter's [`AllPosition`](crate::AllPosition) for `$all`).
     type Position: Copy + Send;
-    /// The bounded scan this target opens — a `futures::Stream` of
-    /// position-tagged envelopes.
-    type Scan: futures::Stream<Item = Result<(Self::Position, PersistedEnvelope), Self::Error>>
-        + Send;
+    /// One delivered scan item. Per-stream: `(Version, PersistedEnvelope)`
+    /// (the loop-internal tag). `$all`: the adapter's
+    /// `(AllPosition, StreamKey, PersistedEnvelope)` item, passed through
+    /// verbatim — the loop never re-shapes what the adapter yields.
+    type Item: Send;
+    /// The bounded scan this target opens.
+    type Scan: futures::Stream<Item = Result<Self::Item, Self::Error>> + Send;
     /// The scan/wait error type.
     type Error: core::error::Error + Send + Sync + 'static;
 
     /// Open a bounded scan of events **strictly after** `from` (`None` = from
-    /// the beginning), each item tagged with its position.
+    /// the beginning).
     ///
     /// This is the single resume transition. Per-stream maps it onto its
     /// inclusive `Version` backend (`read_stream(from.next())`); `$all` delegates
@@ -49,6 +52,10 @@ pub trait Catchup: Send {
         &self,
         from: Option<Self::Position>,
     ) -> impl Future<Output = Result<Self::Scan, Self::Error>> + Send;
+
+    /// Extract the resume position an item was delivered at — the single
+    /// place the loop learns where it is.
+    fn position_of(item: &Self::Item) -> Self::Position;
 
     /// Arm a wait for new events. The returned future is `'static` and
     /// lost-wakeup-safe per the [`WakeRegistration`] contract.
@@ -97,6 +104,7 @@ type TagFn<S> = fn(
 
 impl<S: RawEventStore + WakeSource> Catchup for StreamCatchup<S> {
     type Position = Version;
+    type Item = (Version, PersistedEnvelope);
     // Either the mapped (version-tagged) per-stream scan, or — at the
     // `Version::MAX` ceiling, where nothing is strictly after `from` — an empty
     // scan. No box: both arms are concrete `futures` stream types.
@@ -132,6 +140,10 @@ impl<S: RawEventStore + WakeSource> Catchup for StreamCatchup<S> {
         }
     }
 
+    fn position_of(item: &Self::Item) -> Version {
+        item.0
+    }
+
     fn arm(&self) -> impl Future<Output = ()> + Send + 'static {
         self.reg.arm()
     }
@@ -157,6 +169,11 @@ impl<S: RawEventStore + WakeSource> AllCatchup<S> {
 
 impl<S: RawEventStore + WakeSource> Catchup for AllCatchup<S> {
     type Position = <S as RawEventStore>::AllPosition;
+    type Item = (
+        <S as RawEventStore>::AllPosition,
+        StreamKey,
+        PersistedEnvelope,
+    );
     // The adapter's `$all` stream is already position-tagged and exclusive, so
     // `read_after` delegates straight to `read_all` with no mapping.
     type Scan = <S as RawEventStore>::AllStream;
@@ -167,6 +184,10 @@ impl<S: RawEventStore + WakeSource> Catchup for AllCatchup<S> {
         from: Option<Self::Position>,
     ) -> impl Future<Output = Result<Self::Scan, Self::Error>> + Send {
         self.store.read_all(from)
+    }
+
+    fn position_of(item: &Self::Item) -> Self::Position {
+        item.0
     }
 
     fn arm(&self) -> impl Future<Output = ()> + Send + 'static {
@@ -314,22 +335,32 @@ mod tests {
             .unwrap();
 
         let catchup = AllCatchup::new(Arc::clone(&store)).unwrap();
-        let all: Vec<(crate::test_support::TestAllPos, PersistedEnvelope)> = catchup
+        let all: Vec<(
+            crate::test_support::TestAllPos,
+            StreamKey,
+            PersistedEnvelope,
+        )> = catchup
             .read_after(None)
             .await
             .unwrap()
             .map(Result::unwrap)
             .collect()
             .await;
-        let positions: Vec<u64> = all.iter().map(|(p, _)| p.as_u64()).collect();
+        let positions: Vec<u64> = all.iter().map(|(p, _, _)| p.as_u64()).collect();
         assert_eq!(
             positions,
             vec![1, 2, 3],
             "$all catchup must yield every stream's events in position order"
         );
+        let keys: Vec<&[u8]> = all.iter().map(|(_, k, _)| k.as_bytes()).collect();
+        assert_eq!(
+            keys,
+            vec![b"a".as_slice(), b"b".as_slice(), b"a".as_slice()],
+            "$all items must carry the stream key they were appended to"
+        );
 
         // Resume strictly after the first position → [2, 3].
-        let (first_pos, _) = all.first().unwrap();
+        let (first_pos, _, _) = all.first().unwrap();
         let rest: Vec<u64> = AllCatchup::new(Arc::clone(&store))
             .unwrap()
             .read_after(Some(*first_pos))

@@ -30,6 +30,7 @@
 use mnesis::{ErrorId, Version};
 use mnesis_inmemory::InMemoryStoreError;
 use mnesis_store::AppendError;
+use mnesis_store::StreamKey;
 use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::StoreError;
 use mnesis_store::pending_envelope;
@@ -111,12 +112,13 @@ impl RawEventStore for ProbeStore {
     type Error = ProbeError;
     type Stream = ProbeStream;
     type AllPosition = mnesis_inmemory::InMemoryAllPos;
-    type AllStream =
-        futures::stream::Empty<Result<(Self::AllPosition, PersistedEnvelope), ProbeError>>;
+    type AllStream = futures::stream::Empty<
+        Result<(Self::AllPosition, StreamKey, PersistedEnvelope), ProbeError>,
+    >;
 
     async fn append(
         &self,
-        id: &mnesis_store::StreamKey,
+        id: &StreamKey,
         expected_version: Option<Version>,
         envelopes: &[PendingEnvelope],
     ) -> Result<(), AppendError<Self::Error>> {
@@ -146,7 +148,7 @@ impl RawEventStore for ProbeStore {
 
     async fn read_stream(
         &self,
-        id: &mnesis_store::StreamKey,
+        id: &StreamKey,
         from: Version,
     ) -> Result<Self::Stream, Self::Error> {
         let events = self
@@ -258,11 +260,7 @@ async fn append_rejects_backwards_versions() {
     ];
 
     let result = store
-        .append(
-            &mnesis_store::StreamKey::from_slice(b"s1"),
-            None,
-            &envelopes,
-        )
+        .append(&StreamKey::from_slice(b"s1"), None, &envelopes)
         .await;
     assert!(
         result.is_err(),
@@ -324,7 +322,7 @@ proptest! {
                 })
                 .collect();
 
-            let result = store.append(&mnesis_store::StreamKey::from_slice(b"s1"), None, &envelopes).await;
+            let result = store.append(&StreamKey::from_slice(b"s1"), None, &envelopes).await;
 
             // Check if versions are actually sequential from 1
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);

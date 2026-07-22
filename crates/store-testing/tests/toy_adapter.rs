@@ -69,6 +69,9 @@ struct StoredEvent {
     value: Bytes,
     offsets: FrameOffsets,
     pos: ToyPos,
+    /// Origin stream, stamped at append — the `$all` read yields it beside
+    /// each item (stream attribution is a store guarantee).
+    stream: StreamKey,
 }
 
 impl StoredEvent {
@@ -114,8 +117,9 @@ impl ToyStore {
     }
 }
 
-/// Encode one pending envelope into a staged row at position `pos`.
-fn stage(env: &PendingEnvelope, pos: ToyPos) -> Result<StoredEvent, ToyError> {
+/// Encode one pending envelope into a staged row at position `pos`,
+/// stamped with its origin `stream`.
+fn stage(env: &PendingEnvelope, pos: ToyPos, stream: &StreamKey) -> Result<StoredEvent, ToyError> {
     let frame = encode_frame(
         env.schema_version_value(),
         &env.event_type_value(),
@@ -128,6 +132,7 @@ fn stage(env: &PendingEnvelope, pos: ToyPos) -> Result<StoredEvent, ToyError> {
         value: frame.value,
         offsets: frame.offsets,
         pos,
+        stream: stream.clone(),
     })
 }
 
@@ -158,7 +163,7 @@ impl RawEventStore for ToyStore {
     type Stream = stream::Iter<std::vec::IntoIter<Result<PersistedEnvelope, ToyError>>>;
     type AllPosition = ToyPos;
     type AllStream =
-        stream::Iter<std::vec::IntoIter<Result<(ToyPos, PersistedEnvelope), ToyError>>>;
+        stream::Iter<std::vec::IntoIter<Result<(ToyPos, StreamKey, PersistedEnvelope), ToyError>>>;
 
     async fn append(
         &self,
@@ -206,7 +211,7 @@ impl RawEventStore for ToyStore {
                 pos = pos
                     .checked_add(1)
                     .ok_or(AppendError::Store(ToyError::PositionOverflow))?;
-                staged.push(stage(env, ToyPos(pos)).map_err(AppendError::Store)?);
+                staged.push(stage(env, ToyPos(pos), id).map_err(AppendError::Store)?);
             }
             inner.next_pos = pos;
             inner
@@ -257,9 +262,13 @@ impl RawEventStore for ToyStore {
             .cloned()
             .collect();
         rows.sort_by_key(|event| event.pos);
-        let items: Vec<Result<(ToyPos, PersistedEnvelope), ToyError>> = rows
+        let items: Vec<Result<(ToyPos, StreamKey, PersistedEnvelope), ToyError>> = rows
             .iter()
-            .map(|event| event.rebuild().map(|env| (event.pos, env)))
+            .map(|event| {
+                event
+                    .rebuild()
+                    .map(|env| (event.pos, event.stream.clone(), env))
+            })
             .collect();
         Ok(stream::iter(items))
     }
@@ -322,7 +331,9 @@ impl AtomicAppend for ToyStore {
                     pos = pos
                         .checked_add(1)
                         .ok_or(AtomicAppendError::Store(ToyError::PositionOverflow))?;
-                    run.push(stage(env, ToyPos(pos)).map_err(AtomicAppendError::Store)?);
+                    run.push(
+                        stage(env, ToyPos(pos), &write.target).map_err(AtomicAppendError::Store)?,
+                    );
                 }
                 let new_head = write.events.last().map(PendingEnvelope::version);
                 heads.insert(key.clone(), new_head);

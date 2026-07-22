@@ -437,24 +437,31 @@ async fn append_assigns_monotonic_all_position_across_streams() {
 
     // The `$all` read yields a contiguous monotonic position sequence 1..=5,
     // interleaving the two streams in exact append order: a@1,a@2 (1,2), then
-    // b@1 (3) between a's two appends, then a@3,a@4 (4,5).
+    // b@1 (3) between a's two appends, then a@3,a@4 (4,5). Each item also
+    // carries its origin stream key (#333), so the interleaving [a,a,b,a,a]
+    // is asserted positively without decoding a payload.
     let mut all = store.read_all(None).await.unwrap();
-    let mut seen: Vec<(u64, String)> = Vec::new();
+    let mut seen: Vec<(u64, Vec<u8>, String)> = Vec::new();
     while let Some(item) = all.next().await {
-        let (pos, env) = item.unwrap();
-        seen.push((pos.as_u64(), env.event_type().to_owned()));
+        let (pos, key, env) = item.unwrap();
+        seen.push((
+            pos.as_u64(),
+            key.as_bytes().to_vec(),
+            env.event_type().to_owned(),
+        ));
     }
     assert_eq!(
         seen,
         vec![
-            (1, "A1".to_owned()),
-            (2, "A2".to_owned()),
-            (3, "B1".to_owned()),
-            (4, "A3".to_owned()),
-            (5, "A4".to_owned()),
+            (1, b"a".to_vec(), "A1".to_owned()),
+            (2, b"a".to_vec(), "A2".to_owned()),
+            (3, b"b".to_vec(), "B1".to_owned()),
+            (4, b"a".to_vec(), "A3".to_owned()),
+            (5, b"a".to_vec(), "A4".to_owned()),
         ],
         "$all positions must be a contiguous monotonic sequence starting at 1, \
-         interleaving streams in append order",
+         interleaving streams in append order with each event attributed to \
+         its origin stream key",
     );
 }
 
