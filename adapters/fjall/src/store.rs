@@ -8,7 +8,7 @@ use crate::subscription_id::OwnedStreamId;
 use mnesis::{ErrorId, Version};
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
-use mnesis_store::error::AppendError;
+use mnesis_store::error::{AppendError, AppendValidationError};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
 use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
@@ -43,36 +43,6 @@ impl FjallStore {
     pub fn builder(path: impl AsRef<Path>) -> FjallStoreBuilder {
         FjallStoreBuilder::new(path)
     }
-
-    /// Optimistic-concurrency check: the caller's `expected` version must match
-    /// the stream's `current` version. `current == 0` denotes a new stream, for
-    /// which `expected` must be `None`.
-    fn check_optimistic(
-        current: u64,
-        expected: Option<Version>,
-        id: &StreamKey,
-    ) -> Result<(), AppendError<FjallError>> {
-        if current == 0 {
-            // New stream: expected_version must be None.
-            return if expected.is_some() {
-                Err(AppendError::Conflict {
-                    stream_id: ErrorId::from_display(id),
-                    expected,
-                    actual: None,
-                })
-            } else {
-                Ok(())
-            };
-        }
-        if current != expected.map_or(0, Version::as_u64) {
-            return Err(AppendError::Conflict {
-                stream_id: ErrorId::from_display(id),
-                expected,
-                actual: Version::new(current),
-            });
-        }
-        Ok(())
-    }
 }
 
 /// Map a neutral [`plan::PlanError`] into the single-stream [`AppendError`]
@@ -81,11 +51,6 @@ impl FjallStore {
 /// 3), and this matches the atomic-append path's handling.
 fn append_plan_err(id: &StreamKey, e: &plan::PlanError) -> AppendError<FjallError> {
     match *e {
-        plan::PlanError::Conflict { expected, actual } => AppendError::Conflict {
-            stream_id: ErrorId::from_display(id),
-            expected,
-            actual,
-        },
         plan::PlanError::VersionOverflow => AppendError::Store(FjallError::VersionOverflow),
         plan::PlanError::GlobalSeqOverflow => AppendError::Store(FjallError::GlobalSeqOverflow),
         plan::PlanError::InvalidInput { version, reason } => {
@@ -95,6 +60,22 @@ fn append_plan_err(id: &StreamKey, e: &plan::PlanError) -> AppendError<FjallErro
                 reason,
             })
         }
+    }
+}
+
+/// Map the kernel-neutral [`AppendValidationError`] (the append contract:
+/// optimistic concurrency + strict-sequential versions) into this adapter's
+/// `AppendError`. Overflow is never a retry-eligible `Conflict` (rule 3).
+fn fjall_validation_err(id: &StreamKey, e: &AppendValidationError) -> AppendError<FjallError> {
+    match *e {
+        AppendValidationError::Conflict {
+            expected, actual, ..
+        } => AppendError::Conflict {
+            stream_id: ErrorId::from_display(id),
+            expected,
+            actual,
+        },
+        AppendValidationError::VersionOverflow => AppendError::Store(FjallError::VersionOverflow),
     }
 }
 
@@ -125,7 +106,15 @@ impl RawEventStore for FjallStore {
             .partitions
             .read_version(&tx, id)
             .map_err(AppendError::Store)?;
-        Self::check_optimistic(current_version, expected_version, id)?;
+        // Kernel-owned contract: optimistic concurrency + strict-sequential
+        // versions, shared by every adapter (see `mnesis_store::store`).
+        mnesis_store::store::validate_append_versions(
+            current_version,
+            expected_version,
+            envelopes,
+            id,
+        )
+        .map_err(|e| fjall_validation_err(id, &e))?;
 
         // Empty batch: version was checked (or new stream with None), no work to do.
         if envelopes.is_empty() {
@@ -139,10 +128,11 @@ impl RawEventStore for FjallStore {
             .read_global(&tx, id)
             .map_err(AppendError::Store)?;
 
-        // Pure plan: validate strict-sequential versions and encode/stage every
-        // event with a running GlobalSeq. The entire write body lives in
-        // `plan::plan_run`, unit-tested with no fjall (mirrors postgres
-        // `prepare_inserts`) — the same core the atomic-append path stages with.
+        // Pure plan: encode/stage every event with a running GlobalSeq (the
+        // version sequence was just validated by the kernel contract above). The
+        // entire write body lives in `plan::plan_run`, unit-tested with no fjall
+        // (mirrors postgres `narrow_inserts`) — the same core the atomic-append
+        // path stages with.
         let planned = plan::plan_run(current_version, current_global, id, envelopes)
             .map_err(|e| append_plan_err(id, &e))?;
 
@@ -389,16 +379,8 @@ mod atomic_append_impl {
     /// unreachable in practice: `validate_atomic_writes` already proved every run
     /// sequential before any staging. Overflow / encode failures map to `Store`,
     /// never `Conflict` (rule 3).
-    fn atomic_plan_err(
-        index: usize,
-        target: &StreamKey,
-        e: &plan::PlanError,
-    ) -> AtomicAppendError<FjallError> {
+    fn atomic_plan_err(target: &StreamKey, e: &plan::PlanError) -> AtomicAppendError<FjallError> {
         match *e {
-            plan::PlanError::Conflict { .. } => AtomicAppendError::Conflict {
-                index,
-                actual: None,
-            },
             plan::PlanError::VersionOverflow => {
                 AtomicAppendError::Store(FjallError::VersionOverflow)
             }
@@ -484,7 +466,7 @@ mod atomic_append_impl {
                 .read_global(tx, &writes[0].target)
                 .map_err(AtomicAppendError::Store)?;
             let mut global = start_global;
-            for (index, w) in writes.iter().enumerate() {
+            for w in writes {
                 // `validate_atomic_writes` already matched this run's head to the
                 // running projected head, so plan from `expected_version` (== the
                 // head). `plan_run` re-derives the very same staged rows the
@@ -492,7 +474,7 @@ mod atomic_append_impl {
                 // by both write paths, threading the running GlobalSeq across runs.
                 let current_version = w.expected_version.map_or(0, Version::as_u64);
                 let planned = plan::plan_run(current_version, global, &w.target, &w.events)
-                    .map_err(|e| atomic_plan_err(index, &w.target, &e))?;
+                    .map_err(|e| atomic_plan_err(&w.target, &e))?;
                 for row in &planned.rows {
                     self.partitions.stage_event(tx, row);
                 }

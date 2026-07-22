@@ -16,7 +16,7 @@ use mnesis::ErrorId;
 use mnesis::Version;
 use mnesis_store::batch::BatchSize;
 use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
-use mnesis_store::error::AppendError;
+use mnesis_store::error::{AppendError, AppendValidationError};
 #[cfg(feature = "import")]
 use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
 use mnesis_store::store::{AllPosition, RawEventStore};
@@ -376,6 +376,26 @@ fn scan_batch(rows: &[StoredFrame], from: u64, batch_size: usize) -> VecDeque<St
         .collect()
 }
 
+/// Map the kernel-neutral [`AppendValidationError`] (the append contract) into
+/// this adapter's `AppendError`. Overflow is never a retry-eligible `Conflict`
+/// (rule 3).
+fn inmemory_validation_err(
+    id: &StreamKey,
+    e: &AppendValidationError,
+) -> AppendError<InMemoryStoreError> {
+    match *e {
+        AppendValidationError::Conflict {
+            expected, actual, ..
+        } => AppendError::Conflict {
+            stream_id: ErrorId::from_display(id),
+            expected,
+            actual,
+        },
+        AppendValidationError::VersionOverflow => {
+            AppendError::Store(InMemoryStoreError::VersionOverflow)
+        }
+    }
+}
 impl RawEventStore for InMemoryStore {
     type Error = InMemoryStoreError;
     type Stream = InMemoryStream;
@@ -392,40 +412,13 @@ impl RawEventStore for InMemoryStore {
         let key = id.to_string();
         let stream = guard.entry(key).or_default();
 
-        // Optimistic concurrency check.
-        // actual_version_raw is the number of events in the stream (0 = empty).
-        // expected_version: None = new stream (expect 0 events), Some(v) = expect v events.
-        let actual_version_raw = u64::try_from(stream.len()).unwrap_or(u64::MAX);
-        let expected_raw = expected_version.map_or(0, mnesis::Version::as_u64);
-        if actual_version_raw != expected_raw {
-            return Err(AppendError::Conflict {
-                stream_id: ErrorId::from_display(id),
-                expected: expected_version,
-                actual: Version::new(actual_version_raw),
-            });
-        }
-
-        // Sequential version validation: each envelope must have version
-        // expected_raw + 1 + i. Uses checked arithmetic to prevent
-        // overflow at version boundaries near u64::MAX.
-        for (i, env) in envelopes.iter().enumerate() {
-            let i_u64 = u64::try_from(i).unwrap_or(u64::MAX);
-            let expected_env_version = expected_raw
-                .checked_add(1)
-                .and_then(|v| v.checked_add(i_u64))
-                .ok_or_else(|| AppendError::Conflict {
-                    stream_id: ErrorId::from_display(id),
-                    expected: expected_version,
-                    actual: Some(env.version()),
-                })?;
-            if env.version().as_u64() != expected_env_version {
-                return Err(AppendError::Conflict {
-                    stream_id: ErrorId::from_display(id),
-                    expected: Version::new(expected_env_version),
-                    actual: Some(env.version()),
-                });
-            }
-        }
+        // Kernel-owned contract: optimistic concurrency + strict-sequential
+        // versions, shared by every adapter (see `mnesis_store::store`). The
+        // current version is the live stream length; `$all` position assignment
+        // and storage below stay inmemory-specific.
+        let current = u64::try_from(stream.len()).unwrap_or(u64::MAX);
+        mnesis_store::store::validate_append_versions(current, expected_version, envelopes, id)
+            .map_err(|e| inmemory_validation_err(id, &e))?;
 
         // Assign an `$all` position to each event — monotonic across all
         // streams; gaps are permitted by the `RawEventStore` contract.
