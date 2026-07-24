@@ -151,7 +151,8 @@ pub use decoded::{
     DecodeStreamError, Decoded, DecodedStreamExt, FoldDecodedError, RawItem, StepStreamExt,
 };
 pub use envelope::{
-    EnvelopeError, ForDecodeError, PendingEnvelope, PersistedEnvelope, pending_envelope,
+    EnvelopeError, ForDecodeError, PendingBatch, PendingBatchIter, PendingEnvelope,
+    PersistedEnvelope, pending_envelope,
 };
 pub use error::LoadWithError;
 pub use error::{AppendError, StoreError};

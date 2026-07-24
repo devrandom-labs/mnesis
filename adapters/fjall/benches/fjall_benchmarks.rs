@@ -18,6 +18,7 @@ use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_m
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_fjall::FjallStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::pending_envelope;
 use mnesis_store::store::RawEventStore;
@@ -152,7 +153,11 @@ fn append_batch_throughput(c: &mut Criterion) {
                 |(store, _dir, envs)| {
                     rt.block_on(async {
                         store
-                            .append(&sk("bench-stream"), None, &envs)
+                            .append(
+                                &sk("bench-stream"),
+                                None,
+                                PendingBatch::new(&envs).expect("non-empty batch"),
+                            )
                             .await
                             .unwrap();
                     });
@@ -183,7 +188,7 @@ fn append_sequential_throughput(c: &mut Criterion) {
                         let env = make_envelope(v, &event_payload);
                         let expected = if v == 1 { None } else { Version::new(v - 1) };
                         store
-                            .append(&sk("bench-stream"), expected, &[env])
+                            .append(&sk("bench-stream"), expected, PendingBatch::of(&env))
                             .await
                             .unwrap();
                     }
@@ -211,7 +216,11 @@ fn read_throughput(c: &mut Criterion) {
             let envs = make_envelopes(count, &event_payload);
             rt.block_on(async {
                 store
-                    .append(&sk("bench-stream"), None, &envs)
+                    .append(
+                        &sk("bench-stream"),
+                        None,
+                        PendingBatch::new(&envs).expect("non-empty batch"),
+                    )
                     .await
                     .unwrap();
             });
@@ -269,7 +278,10 @@ fn lifecycle_benchmarks(c: &mut Criterion) {
                                     let id =
                                         StreamKey::from_slice(format!("stream-{i}").as_bytes());
                                     let env = make_envelope(1, &event_payload);
-                                    store.append(&id, None, &[env]).await.unwrap();
+                                    store
+                                        .append(&id, None, PendingBatch::of(&env))
+                                        .await
+                                        .unwrap();
                                 }
                             });
                             drop(store);

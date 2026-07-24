@@ -10,7 +10,7 @@ use futures::pin_mut;
 use mnesis::Version;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
-use mnesis_store::{Step, StreamKey, Subscription};
+use mnesis_store::{PendingBatch, Step, StreamKey, Subscription};
 use tokio::time::timeout;
 
 use crate::row::{
@@ -101,7 +101,7 @@ where
     let (reopened, _ctx) = reopen(opened, ctx).await;
     let stale = envelope_for(&ConformanceRow::new(1, "E", vec![9]));
     reopened
-        .append(&id, None, &[stale])
+        .append(&id, None, PendingBatch::of(&stale))
         .await
         .expect_err("the persisted head must still conflict after reopen");
     // The corrected append succeeds.

@@ -30,23 +30,23 @@ where
         PlannedAppend {
             target: StreamKey::from_slice(b"fresh-a"),
             expected_version: None,
-            events: vec![envelope_for(&ConformanceRow::new(1, "E", vec![1]))],
+            head: envelope_for(&ConformanceRow::new(1, "E", vec![1])),
+            tail: Vec::new(),
         },
         PlannedAppend {
             target: StreamKey::from_slice(b"fresh-b"),
             expected_version: None,
-            events: vec![
-                envelope_for(&ConformanceRow::new(1, "E", vec![2])),
-                envelope_for(&ConformanceRow::new(2, "E", vec![3])),
-            ],
+            head: envelope_for(&ConformanceRow::new(1, "E", vec![2])),
+            tail: vec![envelope_for(&ConformanceRow::new(2, "E", vec![3]))],
         },
         PlannedAppend {
             target: existing.clone(),
             expected_version: Version::new(1),
-            events: vec![envelope_for(&ConformanceRow::new(2, "E", vec![4]))],
+            head: envelope_for(&ConformanceRow::new(2, "E", vec![4])),
+            tail: Vec::new(),
         },
     ];
-    store
+    let committed = store
         .atomic_append_many(&writes)
         .await
         .unwrap_or_else(|e| panic!("atomic append must succeed: {e:?}"));
@@ -72,6 +72,20 @@ where
     let all = drain_all(&store, None).await;
     assert_eq!(all.len(), 5, "$all must hold every committed event");
     assert_strictly_increasing(&all);
+
+    // The returned position is the read-your-writes token for the WHOLE
+    // transaction (#330): a consumer that has reached it has been delivered
+    // every event the batch committed, across every stream it touched.
+    let highest = all
+        .iter()
+        .map(|(pos, _)| *pos)
+        .max()
+        .expect("the batch committed events");
+    assert_eq!(
+        committed,
+        Some(highest),
+        "atomic_append_many must return the highest position it committed"
+    );
 }
 
 /// A conflict in ONE run aborts the WHOLE batch: no stream changes, the error
@@ -92,13 +106,15 @@ where
         PlannedAppend {
             target: StreamKey::from_slice(b"fresh-a"),
             expected_version: None,
-            events: vec![envelope_for(&ConformanceRow::new(1, "E", vec![1]))],
+            head: envelope_for(&ConformanceRow::new(1, "E", vec![1])),
+            tail: Vec::new(),
         },
         PlannedAppend {
             // WRONG: head is 1, we claim fresh.
             target: existing.clone(),
             expected_version: None,
-            events: vec![envelope_for(&ConformanceRow::new(1, "E", vec![9]))],
+            head: envelope_for(&ConformanceRow::new(1, "E", vec![9])),
+            tail: Vec::new(),
         },
     ];
     let err = store
@@ -130,7 +146,7 @@ where
     );
 }
 
-/// An empty batch is a no-op `Ok`.
+/// An empty batch is a no-op `Ok` — and commits no position.
 pub async fn check_atomic_empty_batch_is_noop<S, C, F, Fut>(factory: &F)
 where
     S: AtomicAppend + WakeSource,
@@ -139,10 +155,14 @@ where
     Fut: Future<Output = (S, C)> + Send,
 {
     let (store, _guard) = factory().await;
-    store
+    let committed = store
         .atomic_append_many(&[])
         .await
         .unwrap_or_else(|e| panic!("empty atomic batch must be Ok: {e:?}"));
+    assert_eq!(
+        committed, None,
+        "an empty batch commits nothing, so there is no position to return"
+    );
     assert!(
         drain_all(&store, None).await.is_empty(),
         "empty batch must write nothing"

@@ -8,6 +8,7 @@
 use mnesis::Version;
 use thiserror::Error;
 
+use mnesis_store::PendingBatch;
 use mnesis_store::envelope::PersistedEnvelope;
 use mnesis_store::error::AppendError;
 use mnesis_store::store::{RawEventStore, Store};
@@ -318,10 +319,12 @@ mod tests {
     }
 
     fn planned(target: &str, expected: Option<u64>, versions: &[u64]) -> PlannedAppend {
+        let (first, rest) = versions.split_first().expect("planned run is non-empty");
         PlannedAppend {
             target: sk(target),
             expected_version: expected.and_then(Version::new),
-            events: versions.iter().map(|n| pending(*n, b"p")).collect(),
+            head: pending(*first, b"p"),
+            tail: rest.iter().map(|n| pending(*n, b"p")).collect(),
         }
     }
 
@@ -349,7 +352,11 @@ mod tests {
         let store = mnesis_inmemory::InMemoryStore::new();
         // Pre-seed "b" to v1 so the second write (expecting fresh) conflicts.
         store
-            .append(&sk("b"), None, &[pending(1, b"seed")])
+            .append(
+                &sk("b"),
+                None,
+                PendingBatch::new(&[pending(1, b"seed")]).expect("non-empty batch"),
+            )
             .await
             .expect("seed");
 
@@ -414,7 +421,11 @@ mod tests {
         let store = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=3 {
             store
-                .append(&sk("a"), Version::new(n - 1), &[pending(n, b"seed")])
+                .append(
+                    &sk("a"),
+                    Version::new(n - 1),
+                    PendingBatch::new(&[pending(n, b"seed")]).expect("non-empty batch"),
+                )
                 .await
                 .expect("seed");
         }
@@ -532,8 +543,8 @@ mod tests {
             &self,
             id: &StreamKey,
             expected_version: Option<Version>,
-            envelopes: &[mnesis_store::envelope::PendingEnvelope],
-        ) -> Result<(), AppendError<Self::Error>> {
+            envelopes: mnesis_store::envelope::PendingBatch<'_>,
+        ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
             if id.to_string() == self.fail_on {
                 return Err(AppendError::Store(
                     mnesis_inmemory::InMemoryStoreError::VersionOverflow,
@@ -562,7 +573,8 @@ mod tests {
         async fn atomic_append_many(
             &self,
             writes: &[mnesis_store::import::PlannedAppend],
-        ) -> Result<(), mnesis_store::import::AtomicAppendError<Self::Error>> {
+        ) -> Result<Option<Self::AllPosition>, mnesis_store::import::AtomicAppendError<Self::Error>>
+        {
             self.inner.atomic_append_many(writes).await
         }
     }
@@ -656,7 +668,11 @@ mod tests {
         let store = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=2 {
             store
-                .append(&sk("a"), Version::new(n - 1), &[pending(n, b"seed")])
+                .append(
+                    &sk("a"),
+                    Version::new(n - 1),
+                    PendingBatch::new(&[pending(n, b"seed")]).expect("non-empty batch"),
+                )
                 .await
                 .expect("seed");
         }
@@ -702,7 +718,11 @@ mod tests {
         // Pre-seed "b" to v1 so the SECOND write conflicts (index 1), while "a"
         // (index 0) would be fine — exercises index > 0 in the Conflict arm.
         store
-            .append(&sk("b"), None, &[pending(1, b"seed")])
+            .append(
+                &sk("b"),
+                None,
+                PendingBatch::new(&[pending(1, b"seed")]).expect("non-empty batch"),
+            )
             .await
             .expect("seed");
         let sections = vec![
@@ -854,12 +874,20 @@ mod tests {
         let source = mnesis_inmemory::InMemoryStore::new();
         for n in 1..=3 {
             source
-                .append(&sk("acct-1"), Version::new(n - 1), &[pending(n, b"a")])
+                .append(
+                    &sk("acct-1"),
+                    Version::new(n - 1),
+                    PendingBatch::new(&[pending(n, b"a")]).expect("non-empty batch"),
+                )
                 .await
                 .expect("seed a");
         }
         source
-            .append(&sk("acct-2"), None, &[pending(1, b"b")])
+            .append(
+                &sk("acct-2"),
+                None,
+                PendingBatch::new(&[pending(1, b"b")]).expect("non-empty batch"),
+            )
             .await
             .expect("seed b");
 
@@ -875,7 +903,11 @@ mod tests {
         // copying the source's (which started at 1), making the restamp
         // observable on the `$all` read.
         target
-            .append(&sk("warmup"), None, &[pending(1, b"warmup")])
+            .append(
+                &sk("warmup"),
+                None,
+                PendingBatch::new(&[pending(1, b"warmup")]).expect("non-empty batch"),
+            )
             .await
             .expect("warmup seed");
         let report = target
@@ -1001,7 +1033,11 @@ mod tests {
             for vn in 1..=n {
                 // Conflicts are expected once the importer wins; ignore them.
                 let _ = writer_store
-                    .append(&sk("race"), Version::new(vn - 1), &[pending(vn, b"w")])
+                    .append(
+                        &sk("race"),
+                        Version::new(vn - 1),
+                        PendingBatch::new(&[pending(vn, b"w")]).expect("non-empty batch"),
+                    )
                     .await;
             }
         });

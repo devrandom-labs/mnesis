@@ -199,6 +199,7 @@ impl<S: RawEventStore + WakeSource> Catchup for AllCatchup<S> {
 #[allow(clippy::unwrap_used, reason = "test code")]
 mod tests {
     use super::*;
+    use crate::envelope::PendingBatch;
     use crate::envelope::pending_envelope;
     use crate::test_support::TestStore;
     use futures::StreamExt;
@@ -210,7 +211,10 @@ mod tests {
                 .payload(b"e".to_vec())
                 .build()
                 .unwrap();
-            store.append(id, Version::new(v - 1), &[env]).await.unwrap();
+            store
+                .append(id, Version::new(v - 1), PendingBatch::of(&env))
+                .await
+                .unwrap();
         }
     }
 
@@ -330,7 +334,11 @@ mod tests {
             .build()
             .unwrap();
         store
-            .append(&StreamKey::from_slice(b"a"), Version::new(1), &[env])
+            .append(
+                &StreamKey::from_slice(b"a"),
+                Version::new(1),
+                PendingBatch::of(&env),
+            )
             .await
             .unwrap();
 

@@ -39,6 +39,7 @@ use mnesis_store::envelope::PendingEnvelope;
 use mnesis_store::pending_envelope;
 use mnesis_store::store::RawEventStore;
 
+use mnesis_store::PendingBatch;
 use proptest::prelude::*;
 
 // ============================================================================
@@ -96,7 +97,7 @@ proptest! {
             let envelopes = build_envelopes(&payloads);
 
             store
-                .append(&stream_id, None, &envelopes)
+                .append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch"))
                 .await
                 .unwrap();
 
@@ -132,7 +133,7 @@ proptest! {
             let envelopes = build_envelopes(&payloads);
 
             store
-                .append(&stream_id, None, &envelopes)
+                .append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch"))
                 .await
                 .unwrap();
 
@@ -176,11 +177,11 @@ proptest! {
             let envelopes_b = build_envelopes(&payloads_b);
 
             store
-                .append(&id_a, None, &envelopes_a)
+                .append(&id_a, None, PendingBatch::new(&envelopes_a).expect("non-empty batch"))
                 .await
                 .unwrap();
             store
-                .append(&id_b, None, &envelopes_b)
+                .append(&id_b, None, PendingBatch::new(&envelopes_b).expect("non-empty batch"))
                 .await
                 .unwrap();
 

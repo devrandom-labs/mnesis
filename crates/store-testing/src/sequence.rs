@@ -10,12 +10,12 @@ use futures::pin_mut;
 use mnesis::Version;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
-use mnesis_store::{AppendError, Step, StreamKey, Subscription};
+use mnesis_store::{AppendError, PendingBatch, Step, StreamKey, Subscription};
 use tokio::time::timeout;
 
 use crate::row::{
-    ConformanceRow, SubId, append_event, append_rows, assert_strictly_increasing, drain_all,
-    drain_all_attributed, drain_stream, envelope_for,
+    ConformanceRow, SubId, append_event, append_event_at, append_rows, assert_strictly_increasing,
+    drain_all, drain_all_attributed, drain_stream, envelope_for,
 };
 
 /// Upper bound on any single subscription wait — a hang here means a lost
@@ -185,7 +185,7 @@ where
     // Stale expectation: stream head is 2, we claim it's still fresh.
     let env = envelope_for(&ConformanceRow::new(1, "E", vec![9]));
     let err = store
-        .append(&id, None, &[env])
+        .append(&id, None, PendingBatch::of(&env))
         .await
         .expect_err("appending with a stale expected_version must fail");
     match err {
@@ -221,14 +221,14 @@ where
     // Conflict first…
     let stale = envelope_for(&ConformanceRow::new(1, "E", vec![9]));
     store
-        .append(&id, None, &[stale])
+        .append(&id, None, PendingBatch::of(&stale))
         .await
         .expect_err("stale append must conflict");
 
     // …then the corrected retry (head is 1, next event is v2).
     let retry = envelope_for(&ConformanceRow::new(2, "E", vec![2]));
     store
-        .append(&id, Version::new(1), &[retry])
+        .append(&id, Version::new(1), PendingBatch::of(&retry))
         .await
         .expect("retry with corrected expected_version must succeed");
 
@@ -285,6 +285,91 @@ where
         "read_all(None) must yield every event across streams in append order",
     );
     assert_strictly_increasing(&got);
+}
+
+/// #330: `append` returns the `$all` position it assigned to the run's last
+/// event — the read-your-writes token.
+///
+/// The returned position must be the exact position `$all` reports for that
+/// event, and successive appends (within a stream and across streams) must
+/// return strictly increasing positions. Without this an application cannot
+/// await its own write over an `$all` projection without dropping to a raw scan.
+pub async fn check_append_returns_assigned_all_position<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    let (store, _guard) = factory().await;
+
+    let a1 = append_event_at(&store, &a, 1, b"a1").await;
+    let a2 = append_event_at(&store, &a, 2, b"a2").await;
+    let b1 = append_event_at(&store, &b, 1, b"b1").await;
+
+    assert!(
+        a1 < a2,
+        "successive appends to one stream must return strictly increasing positions",
+    );
+    assert!(
+        a2 < b1,
+        "positions are store-wide: an append to another stream advances past the last",
+    );
+
+    // Each returned position must be the exact position `$all` reports for that
+    // event — proven by pairing position to payload over the full `$all` read.
+    let all = drain_all(&store, None).await;
+    let at = |p: S::AllPosition| {
+        all.iter().find(|(pos, _)| *pos == p).map_or_else(
+            || panic!("returned position {p:?} is absent from $all"),
+            |(_, payload)| payload.clone(),
+        )
+    };
+    assert_eq!(at(a1), b"a1".to_vec(), "a1's position must name a1 in $all");
+    assert_eq!(at(a2), b"a2".to_vec(), "a2's position must name a2 in $all");
+    assert_eq!(at(b1), b"b1".to_vec(), "b1's position must name b1 in $all");
+}
+
+/// #330: a multi-event append returns the LAST event's position, so a consumer
+/// that has reached it has necessarily been delivered the whole run.
+pub async fn check_multi_event_append_returns_last_position<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let id = StreamKey::from_slice(b"multi");
+    let (store, _guard) = factory().await;
+
+    let rows = [
+        ConformanceRow::new(1, "E", b"v1".to_vec()),
+        ConformanceRow::new(2, "E", b"v2".to_vec()),
+        ConformanceRow::new(3, "E", b"v3".to_vec()),
+    ];
+    let envs: Vec<_> = rows.iter().map(envelope_for).collect();
+    let returned = store
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&envs).expect("three rows are non-empty"),
+        )
+        .await
+        .unwrap_or_else(|e| panic!("multi-event append failed: {e:?}"));
+
+    let all = drain_all(&store, None).await;
+    let last = all.last().expect("three events landed");
+    assert_eq!(
+        returned, last.0,
+        "the returned position must be the LAST event's, not the first",
+    );
+    assert_eq!(last.1, b"v3".to_vec(), "and the last event is v3");
+    assert_ne!(
+        returned, all[0].0,
+        "the first event's position must not be what append returned",
+    );
 }
 
 /// #333: every `$all` item carries the origin [`StreamKey`](mnesis_store::StreamKey).

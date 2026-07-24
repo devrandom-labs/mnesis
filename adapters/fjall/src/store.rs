@@ -6,6 +6,8 @@ use crate::plan;
 use crate::scan::{GlobalScan, ScanCursor, StreamScan};
 use crate::subscription_id::OwnedStreamId;
 use mnesis::{ErrorId, Version};
+use mnesis_store::PendingBatch;
+#[cfg(test)]
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::error::{AppendError, AppendValidationError};
@@ -93,13 +95,10 @@ impl RawEventStore for FjallStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         let id_bytes = id.as_ref();
 
-        // Version check BEFORE empty-batch early return. An empty append
-        // with a stale expected_version signals a stale caller — report the
-        // conflict even though no data would be written.
         let mut tx = self.db.write_tx();
 
         let current_version = self
@@ -115,11 +114,6 @@ impl RawEventStore for FjallStore {
             id,
         )
         .map_err(|e| fjall_validation_err(id, &e))?;
-
-        // Empty batch: version was checked (or new stream with None), no work to do.
-        if envelopes.is_empty() {
-            return Ok(());
-        }
 
         // Read the current store-global sequence counter (monotonic, shared
         // across all streams). Absent key = no events appended yet.
@@ -138,8 +132,9 @@ impl RawEventStore for FjallStore {
 
         // Stage each event into both indexes via the one dual-write site, then
         // advance both counters — all in the same transaction so they commit
-        // together. The batch is non-empty (checked above), so `plan_run` staged
-        // at least one event and advanced the global counter.
+        // together. `PendingBatch` is non-empty by construction, so `plan_run`
+        // staged at least one event and `ending_global` is the position it
+        // assigned to the run's last event.
         for row in &planned.rows {
             self.partitions.stage_event(&mut tx, row);
         }
@@ -156,7 +151,20 @@ impl RawEventStore for FjallStore {
         // store-wide `$all` generation (a per-stream commit is an `$all` event).
         self.notifiers.wake(id_bytes);
 
-        Ok(())
+        // The position assigned to the run's LAST event — the read-your-writes
+        // token (#330). `plan_run` returns `ending_global` as the last value it
+        // stamped (not the next free one), and the batch is non-empty, so this
+        // is always a position this transaction actually committed.
+        // Defensively-unreachable arm, kept typed rather than unwrapped (the
+        // pattern `plan_run` already uses): `ending_global` is
+        // `current_global + rows.len()` with a non-empty batch, so it is `>= 1`.
+        // A zero here could only mean the `global` partition's counter is not
+        // sane, which is corrupt metadata — not an overflow (rule 3).
+        GlobalSeq::new(planned.ending_global).ok_or_else(|| {
+            AppendError::Store(FjallError::CorruptMeta {
+                stream_id: ErrorId::from_display(id),
+            })
+        })
     }
 
     async fn read_stream(
@@ -367,7 +375,7 @@ mod projection_impl {
 /// this is built to prevent.
 #[cfg(feature = "import")]
 mod atomic_append_impl {
-    use super::{ErrorId, FjallError, FjallStore, StreamKey, Version};
+    use super::{ErrorId, FjallError, FjallStore, GlobalSeq, StreamKey, Version};
     use crate::plan;
     use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
     use std::collections::HashMap;
@@ -431,7 +439,7 @@ mod atomic_append_impl {
                 // must be strictly sequential from expected + 1. A running
                 // checked_add counter avoids any index→u64 cast (rule 2).
                 let mut want = expected.checked_add(1);
-                for env in &w.events {
+                for env in w.batch() {
                     let Some(want_version) = want else {
                         return Err(AtomicAppendError::Store(FjallError::VersionOverflow));
                     };
@@ -442,11 +450,8 @@ mod atomic_append_impl {
                 }
                 // Advance this target's projected head by the run just validated,
                 // so a later same-target write in this batch conflicts above.
-                let new_head = w
-                    .events
-                    .last()
-                    .map_or(actual, |last| last.version().as_u64());
-                projected.insert(key, new_head);
+                // The run is non-empty, so its last version is total.
+                projected.insert(key, w.batch().last().version().as_u64());
             }
             Ok(())
         }
@@ -456,11 +461,15 @@ mod atomic_append_impl {
         /// running counter shared across all streams (monotonic; gaps
         /// permitted). `writes` is non-empty (the caller returns early on
         /// empty), so `writes[0]` labels a corrupt global-counter error.
+        ///
+        /// Returns the `GlobalSeq` stamped on the LAST event committed — the
+        /// highest position of the whole batch, since the running counter is
+        /// monotonic across every run (#330).
         fn write_atomic_runs(
             &self,
             tx: &mut Tx<'_>,
             writes: &[PlannedAppend],
-        ) -> Result<(), AtomicAppendError<FjallError>> {
+        ) -> Result<GlobalSeq, AtomicAppendError<FjallError>> {
             let start_global = self
                 .partitions
                 .read_global(tx, &writes[0].target)
@@ -473,27 +482,30 @@ mod atomic_append_impl {
                 // single-stream `append` does — ONE encode implementation shared
                 // by both write paths, threading the running GlobalSeq across runs.
                 let current_version = w.expected_version.map_or(0, Version::as_u64);
-                let planned = plan::plan_run(current_version, global, &w.target, &w.events)
+                let planned = plan::plan_run(current_version, global, &w.target, w.batch())
                     .map_err(|e| atomic_plan_err(&w.target, &e))?;
                 for row in &planned.rows {
                     self.partitions.stage_event(tx, row);
                 }
                 // Advance the stream version counter to the run's last version.
-                // An empty run stages nothing (defensive; the planner guarantees
-                // a non-empty run in practice).
-                if !planned.rows.is_empty() {
-                    self.partitions
-                        .set_version(tx, w.target.as_ref(), planned.new_version);
-                }
+                // Every run is non-empty (`PlannedAppend` carries a head), so
+                // this is unconditional.
+                self.partitions
+                    .set_version(tx, w.target.as_ref(), planned.new_version);
                 global = planned.ending_global;
             }
-            // Advance the global counter once, in the same transaction — only
-            // when at least one event was assigned (an all-empty batch leaves it
-            // untouched, mirroring append's empty-batch path).
-            if global != start_global {
-                self.partitions.set_global(tx, global);
-            }
-            Ok(())
+            // Advance the global counter once, in the same transaction. `writes`
+            // is non-empty and every run carries at least one event, so the
+            // counter always moved past `start_global`.
+            self.partitions.set_global(tx, global);
+            // `global` is `start_global + total events >= 1`, so it is `>= 1`. A
+            // zero would be a corrupt counter, not an overflow (rule 3), and the
+            // first write's target labels it.
+            GlobalSeq::new(global).ok_or_else(|| {
+                AtomicAppendError::Store(FjallError::CorruptMeta {
+                    stream_id: ErrorId::from_display(&writes[0].target),
+                })
+            })
         }
     }
 
@@ -505,10 +517,11 @@ mod atomic_append_impl {
         async fn atomic_append_many(
             &self,
             writes: &[PlannedAppend],
-        ) -> Result<(), AtomicAppendError<FjallError>> {
-            // Nothing to commit — don't open an empty transaction.
+        ) -> Result<Option<GlobalSeq>, AtomicAppendError<FjallError>> {
+            // Nothing to commit — don't open an empty transaction, and there is
+            // no position to return (#330).
             if writes.is_empty() {
-                return Ok(());
+                return Ok(None);
             }
 
             // One write_tx spans validation, every partition insert, and the
@@ -516,7 +529,7 @@ mod atomic_append_impl {
             // across any partition (the whole point of this card).
             let mut tx = self.db.write_tx();
             self.validate_atomic_writes(&tx, writes)?;
-            self.write_atomic_runs(&mut tx, writes)?;
+            let last_position = self.write_atomic_runs(&mut tx, writes)?;
             tx.commit()
                 .map_err(|e| AtomicAppendError::Store(FjallError::Io(e)))?;
 
@@ -524,11 +537,9 @@ mod atomic_append_impl {
             // already-visible data: one wake per touched stream (each also
             // bumps the `$all` generation).
             for w in writes {
-                if !w.events.is_empty() {
-                    self.notifiers.wake(w.target.as_ref());
-                }
+                self.notifiers.wake(w.target.as_ref());
             }
-            Ok(())
+            Ok(Some(last_position))
         }
     }
 }
@@ -647,7 +658,14 @@ pub mod read_test_helpers {
                 .payload(b"payload".to_vec())
                 .build()
                 .unwrap();
-            store.append(id, Version::new(v - 1), &[env]).await.unwrap();
+            store
+                .append(
+                    id,
+                    Version::new(v - 1),
+                    PendingBatch::new(&[env]).expect("non-empty"),
+                )
+                .await
+                .unwrap();
         }
     }
 }
@@ -702,7 +720,13 @@ mod tests {
         let (store, _dir) = temp_store();
         let env = make_envelope(1, "Created", b"payload");
 
-        let result = store.append(&sk("stream-1"), None, &[env]).await;
+        let result = store
+            .append(
+                &sk("stream-1"),
+                None,
+                PendingBatch::new(&[env]).expect("non-empty"),
+            )
+            .await;
         assert!(result.is_ok());
     }
 
@@ -715,7 +739,13 @@ mod tests {
             make_envelope(3, "Updated", b"p3"),
         ];
 
-        let result = store.append(&sk("stream-1"), None, &envs).await;
+        let result = store
+            .append(
+                &sk("stream-1"),
+                None,
+                PendingBatch::new(&envs).expect("non-empty batch"),
+            )
+            .await;
         assert!(result.is_ok());
     }
 
@@ -723,11 +753,24 @@ mod tests {
     async fn append_detects_version_conflict() {
         let (store, _dir) = temp_store();
         let env1 = make_envelope(1, "Created", b"p1");
-        store.append(&sk("stream-1"), None, &[env1]).await.unwrap();
+        store
+            .append(
+                &sk("stream-1"),
+                None,
+                PendingBatch::new(&[env1]).expect("non-empty"),
+            )
+            .await
+            .unwrap();
 
         // Try appending with wrong expected version (None instead of Some(1)).
         let env2 = make_envelope(1, "Duplicate", b"p2");
-        let result = store.append(&sk("stream-1"), None, &[env2]).await;
+        let result = store
+            .append(
+                &sk("stream-1"),
+                None,
+                PendingBatch::new(&[env2]).expect("non-empty"),
+            )
+            .await;
         assert!(result.is_err());
         match result.unwrap_err() {
             AppendError::Conflict {
@@ -752,7 +795,11 @@ mod tests {
         let env = make_envelope(1, "E", b"p");
         // New stream + Some(expected) → immediate optimistic-concurrency conflict.
         let err = store
-            .append(&sk(&long), Version::new(1), &[env])
+            .append(
+                &sk(&long),
+                Version::new(1),
+                PendingBatch::new(&[env]).expect("non-empty"),
+            )
             .await
             .unwrap_err();
         match err {
@@ -774,7 +821,13 @@ mod tests {
         let (store, _dir) = temp_store();
         let env = make_envelope(6, "Created", b"payload");
 
-        let result = store.append(&sk("stream-1"), Version::new(5), &[env]).await;
+        let result = store
+            .append(
+                &sk("stream-1"),
+                Version::new(5),
+                PendingBatch::new(&[env]).expect("non-empty"),
+            )
+            .await;
         assert!(result.is_err());
         match result.unwrap_err() {
             AppendError::Conflict {
@@ -798,7 +851,10 @@ mod tests {
             .payload(b"x".to_vec())
             .build()
             .unwrap();
-        store.append(&id, None, &[env]).await.unwrap();
+        store
+            .append(&id, None, PendingBatch::new(&[env]).expect("non-empty"))
+            .await
+            .unwrap();
 
         // The index holds exactly one row, keyed by
         // [global_seq=1][id_len=6]["acct-1"][version=1] (#333, layout A2).
@@ -824,7 +880,14 @@ mod tests {
             make_envelope(1, "Created", b"p1"),
             make_envelope(2, "Updated", b"p2"),
         ];
-        store.append(&sk("stream-1"), None, &envs).await.unwrap();
+        store
+            .append(
+                &sk("stream-1"),
+                None,
+                PendingBatch::new(&envs).expect("non-empty batch"),
+            )
+            .await
+            .unwrap();
 
         let mut stream = store
             .read_stream(&sk("stream-1"), Version::new(1).unwrap())
@@ -854,11 +917,19 @@ mod tests {
     async fn version_tracks_across_appends() {
         let (store, _dir) = temp_store();
         store
-            .append(&sk("s"), None, &[make_envelope(1, "A", b"")])
+            .append(
+                &sk("s"),
+                None,
+                PendingBatch::new(&[make_envelope(1, "A", b"")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         store
-            .append(&sk("s"), Version::new(1), &[make_envelope(2, "B", b"")])
+            .append(
+                &sk("s"),
+                Version::new(1),
+                PendingBatch::new(&[make_envelope(2, "B", b"")]).expect("non-empty"),
+            )
             .await
             .unwrap();
 
@@ -935,7 +1006,11 @@ mod tests {
             for v in 1..=10u64 {
                 let env = make_envelope(v, "E", b"payload");
                 store
-                    .append(&id, Version::new(v - 1), &[env])
+                    .append(
+                        &id,
+                        Version::new(v - 1),
+                        PendingBatch::new(&[env]).expect("non-empty"),
+                    )
                     .await
                     .unwrap();
             }
@@ -965,10 +1040,28 @@ mod tests {
                 .build()
                 .unwrap()
         };
-        store.append(&a, None, &[mk(1, b"a1")]).await.unwrap();
-        store.append(&b, None, &[mk(1, b"b1")]).await.unwrap();
         store
-            .append(&a, Some(Version::new(1).unwrap()), &[mk(2, b"a2")])
+            .append(
+                &a,
+                None,
+                PendingBatch::new(&[mk(1, b"a1")]).expect("non-empty"),
+            )
+            .await
+            .unwrap();
+        store
+            .append(
+                &b,
+                None,
+                PendingBatch::new(&[mk(1, b"b1")]).expect("non-empty"),
+            )
+            .await
+            .unwrap();
+        store
+            .append(
+                &a,
+                Some(Version::new(1).unwrap()),
+                PendingBatch::new(&[mk(2, b"a2")]).expect("non-empty"),
+            )
             .await
             .unwrap();
 
@@ -1011,13 +1104,24 @@ mod tests {
                 .build()
                 .unwrap()
         };
-        store.append(&a, None, &[mk(1)]).await.unwrap();
         store
-            .append(&a, Some(Version::new(1).unwrap()), &[mk(2)])
+            .append(&a, None, PendingBatch::new(&[mk(1)]).expect("non-empty"))
             .await
             .unwrap();
         store
-            .append(&a, Some(Version::new(2).unwrap()), &[mk(3)])
+            .append(
+                &a,
+                Some(Version::new(1).unwrap()),
+                PendingBatch::new(&[mk(2)]).expect("non-empty"),
+            )
+            .await
+            .unwrap();
+        store
+            .append(
+                &a,
+                Some(Version::new(2).unwrap()),
+                PendingBatch::new(&[mk(3)]).expect("non-empty"),
+            )
             .await
             .unwrap();
 
@@ -1049,16 +1153,28 @@ mod tests {
                 .append(
                     &a,
                     None,
-                    &[make_envelope(1, "A1", b"a1"), make_envelope(2, "A2", b"a2")],
+                    PendingBatch::new(&[
+                        make_envelope(1, "A1", b"a1"),
+                        make_envelope(2, "A2", b"a2"),
+                    ])
+                    .expect("non-empty batch"),
                 )
                 .await
                 .unwrap();
             store
-                .append(&b, None, &[make_envelope(1, "B1", b"b1")])
+                .append(
+                    &b,
+                    None,
+                    PendingBatch::new(&[make_envelope(1, "B1", b"b1")]).expect("non-empty"),
+                )
                 .await
                 .unwrap();
             store
-                .append(&a, Version::new(2), &[make_envelope(3, "A3", b"a3")])
+                .append(
+                    &a,
+                    Version::new(2),
+                    PendingBatch::new(&[make_envelope(3, "A3", b"a3")]).expect("non-empty"),
+                )
                 .await
                 .unwrap();
         }
@@ -1089,7 +1205,11 @@ mod tests {
         // The persisted global counter is intact: a post-reopen append
         // continues the $all sequence at position 5, strictly after 4.
         store
-            .append(&a, Version::new(3), &[make_envelope(4, "A4", b"a4")])
+            .append(
+                &a,
+                Version::new(3),
+                PendingBatch::new(&[make_envelope(4, "A4", b"a4")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         let mut after = store
@@ -1117,7 +1237,11 @@ mod tests {
         {
             let store = FjallStore::builder(&path).open().unwrap();
             store
-                .append(&sk("a"), None, &[make_envelope(1, "E", b"ok")])
+                .append(
+                    &sk("a"),
+                    None,
+                    PendingBatch::new(&[make_envelope(1, "E", b"ok")]).expect("non-empty"),
+                )
                 .await
                 .unwrap();
             // Overwrite the events_global row value (global_seq 1, stream "a",
@@ -1215,7 +1339,11 @@ mod tests {
         // panic, no re-read of the ceiling event.
         let (store, _dir) = temp_store();
         store
-            .append(&sk("a"), None, &[make_envelope(1, "E", b"x")])
+            .append(
+                &sk("a"),
+                None,
+                PendingBatch::new(&[make_envelope(1, "E", b"x")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         let mut all = store
@@ -1312,7 +1440,11 @@ mod tests {
                     .build()
                     .unwrap();
                 writer
-                    .append(&wid, Version::new(v - 1), &[env])
+                    .append(
+                        &wid,
+                        Version::new(v - 1),
+                        PendingBatch::new(&[env]).expect("non-empty"),
+                    )
                     .await
                     .unwrap();
             }
@@ -1361,7 +1493,11 @@ mod tests {
                 .build()
                 .unwrap();
             store
-                .append(&id, Version::new(v - 1), &[env])
+                .append(
+                    &id,
+                    Version::new(v - 1),
+                    PendingBatch::new(&[env]).expect("non-empty"),
+                )
                 .await
                 .unwrap();
         }
@@ -1401,7 +1537,10 @@ mod tests {
             .payload(b"p".to_vec())
             .build()
             .unwrap();
-        store.append(&id, None, &[env]).await.unwrap();
+        store
+            .append(&id, None, PendingBatch::new(&[env]).expect("non-empty"))
+            .await
+            .unwrap();
         // Default (Denormalized) writes the $all index and read_all works.
         assert_eq!(store.partitions.events_global().inner().iter().count(), 1);
         assert!(store.read_all(None).await.is_ok());
@@ -1504,10 +1643,12 @@ mod atomic_append_tests {
     }
 
     fn planned(target: &str, expected: Option<u64>, versions: &[u64]) -> PlannedAppend {
+        let (first, rest) = versions.split_first().unwrap();
         PlannedAppend {
             target: sk(target),
             expected_version: expected.and_then(Version::new),
-            events: versions.iter().map(|n| pending(*n, b"p")).collect(),
+            head: pending(*first, b"p"),
+            tail: rest.iter().map(|n| pending(*n, b"p")).collect(),
         }
     }
 
@@ -1585,7 +1726,11 @@ mod atomic_append_tests {
             .await
             .unwrap();
         store
-            .append(&sk("a"), Version::new(2), &[pending(3, b"p")])
+            .append(
+                &sk("a"),
+                Version::new(2),
+                PendingBatch::new(&[pending(3, b"p")]).expect("non-empty"),
+            )
             .await
             .unwrap();
 
@@ -1626,7 +1771,11 @@ mod atomic_append_tests {
         // A post-reopen normal append continues the global sequence (4th event
         // → global_seq 4), proving the counter persisted.
         store
-            .append(&sk("a"), Version::new(2), &[pending(3, b"p")])
+            .append(
+                &sk("a"),
+                Version::new(2),
+                PendingBatch::new(&[pending(3, b"p")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         assert_eq!(global_counter(&store), Some(4));
@@ -1643,7 +1792,11 @@ mod atomic_append_tests {
         // EVERY partition byte-identical to the pre-import snapshot.
         let (store, _dir) = temp_store();
         store
-            .append(&sk("b"), None, &[pending(1, b"seed")])
+            .append(
+                &sk("b"),
+                None,
+                PendingBatch::new(&[pending(1, b"seed")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         let before = partition_snapshot(&store);
@@ -1765,11 +1918,19 @@ mod atomic_append_tests {
         let (raw, _dir) = temp_store();
         let store = StdArc::new(raw);
         store
-            .append(&sk("a"), None, &[pending(1, b"seed")])
+            .append(
+                &sk("a"),
+                None,
+                PendingBatch::new(&[pending(1, b"seed")]).expect("non-empty"),
+            )
             .await
             .unwrap();
         store
-            .append(&sk("b"), None, &[pending(1, b"seed")])
+            .append(
+                &sk("b"),
+                None,
+                PendingBatch::new(&[pending(1, b"seed")]).expect("non-empty"),
+            )
             .await
             .unwrap();
 

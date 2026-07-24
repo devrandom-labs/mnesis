@@ -29,14 +29,13 @@
 //! the report, the error) and the [`EventImporter`] trait. The concrete
 //! ingest impl is a later card.
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use bytes::Bytes;
 use mnesis::Version;
 use thiserror::Error;
 
-use crate::envelope::{PendingEnvelope, PersistedEnvelope};
+use crate::envelope::{PendingBatch, PendingEnvelope, PersistedEnvelope};
 use crate::error::AppendError;
 use crate::store::{RawEventStore, Store};
 use crate::stream_id::StreamKey;
@@ -208,17 +207,31 @@ pub enum ImportBlock {
 
 /// One planned per-stream write for [`AtomicAppend::atomic_append_many`].
 ///
-/// `events` is a contiguous, version-preserving run; `expected_version` is the
-/// head the target stream must currently be at (`None` = the stream must be
+/// The run is a contiguous, version-preserving sequence; `expected_version` is
+/// the head the target stream must currently be at (`None` = the stream must be
 /// fresh). Built by the importer's per-section planner.
+///
+/// The run is split into [`head`](Self::head) + [`tail`](Self::tail) so its
+/// non-emptiness is structural: [`batch`](Self::batch) hands an adapter a
+/// [`PendingBatch`] with no runtime check (#330).
 #[derive(Debug, Clone)]
 pub struct PlannedAppend {
     /// The resolved target [`StreamKey`].
     pub target: StreamKey,
     /// The version the target must currently be at (`None` = fresh stream).
     pub expected_version: Option<Version>,
-    /// The contiguous run to append, in version order (always non-empty).
-    pub events: Vec<PendingEnvelope>,
+    /// The run's first envelope — the lowest version in the run.
+    pub head: PendingEnvelope,
+    /// The rest of the run, in version order (empty for a one-event run).
+    pub tail: Vec<PendingEnvelope>,
+}
+
+impl PlannedAppend {
+    /// The run as the non-empty batch [`AtomicAppend`] hands to the store.
+    #[must_use]
+    pub fn batch(&self) -> PendingBatch<'_> {
+        PendingBatch::from_parts(&self.head, &self.tail)
+    }
 }
 
 /// Failure of an [`AtomicAppend::atomic_append_many`] transaction.
@@ -263,12 +276,26 @@ pub enum AtomicAppendError<E> {
 ///   writes to one stream) therefore surfaces as [`AtomicAppendError::Conflict`]
 ///   on the second write — never a silently concatenated, gap-creating stream.
 /// - On any failure, **no** write is applied.
+///
+/// # Return value
+///
+/// On success this returns the **highest** [`AllPosition`](RawEventStore::AllPosition)
+/// the transaction committed, across every stream it touched — the
+/// read-your-writes token for the whole batch (#330). A consumer that has
+/// reached it has been delivered every event the batch wrote. `None` iff
+/// `writes` is empty (a no-op commits no position); unlike
+/// [`RawEventStore::append`], the empty case is *reachable* here — a caller may
+/// hand an empty `writes` — so it is answered with `Option` rather than removed.
+///
+/// [`AllPosition`]: RawEventStore::AllPosition
 pub trait AtomicAppend: RawEventStore {
     /// Append every write atomically. See the trait contract.
     fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],
-    ) -> impl core::future::Future<Output = Result<(), AtomicAppendError<Self::Error>>> + Send;
+    ) -> impl core::future::Future<
+        Output = Result<Option<Self::AllPosition>, AtomicAppendError<Self::Error>>,
+    > + Send;
 }
 
 /// `Store<S>` forwards [`AtomicAppend`] to its inner backend (issue #247). With
@@ -279,7 +306,7 @@ impl<S: AtomicAppend> AtomicAppend for Store<S> {
     async fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],
-    ) -> Result<(), AtomicAppendError<Self::Error>> {
+    ) -> Result<Option<Self::AllPosition>, AtomicAppendError<Self::Error>> {
         self.raw().atomic_append_many(writes).await
     }
 }
@@ -349,8 +376,12 @@ enum SectionPlan {
         first: Version,
         /// The head the target must be at (`None` = fresh).
         expected_version: Option<Version>,
-        /// The run, rebuilt as write-path envelopes (always non-empty).
-        events: Vec<PendingEnvelope>,
+        /// The run's first envelope. Split from the tail so the run's
+        /// non-emptiness is carried by the shape rather than asserted in prose
+        /// — `PendingBatch::from_parts` then needs no runtime check (#330).
+        head: PendingEnvelope,
+        /// The rest of the run, in version order (empty for a one-event run).
+        tail: Vec<PendingEnvelope>,
         /// The run's last version (where the stream lands on success). Cached
         /// so the consumer needs no `events.last()` unwrap.
         last: Version,
@@ -381,7 +412,8 @@ fn plan_section(section: &StreamSection) -> Result<SectionPlan, PlanError> {
     // expected head = first - 1; first == 1 → None (fresh stream). Checked.
     let expected_version = first.as_u64().checked_sub(1).and_then(Version::new);
 
-    let mut events = vec![PendingEnvelope::from_persisted(first_event)];
+    let head = PendingEnvelope::from_persisted(first_event);
+    let mut tail = Vec::new();
     let mut last = first;
     let halt = loop {
         let Some(block) = blocks.next() else {
@@ -399,14 +431,15 @@ fn plan_section(section: &StreamSection) -> Result<SectionPlan, PlanError> {
                 got: event.version(),
             };
         }
-        events.push(PendingEnvelope::from_persisted(event));
+        tail.push(PendingEnvelope::from_persisted(event));
         last = event.version();
     };
 
     Ok(SectionPlan::Run {
         first,
         expected_version,
-        events,
+        head,
+        tail,
         last,
         halt,
     })
@@ -466,11 +499,19 @@ where
             SectionPlan::Run {
                 first,
                 expected_version,
-                events,
+                head,
+                tail,
                 last,
                 halt,
-            } => match store.append(&target, expected_version, &events).await {
-                Ok(()) => match halt {
+            } => match store
+                .append(
+                    &target,
+                    expected_version,
+                    PendingBatch::from_parts(&head, &tail),
+                )
+                .await
+            {
+                Ok(_position) => match halt {
                     Halt::Complete => StreamOutcome::Complete { version: last },
                     Halt::Corrupt => StreamOutcome::Corrupt {
                         reached: Some(last),
@@ -521,7 +562,7 @@ where
         };
         // Exhaustive: a future SectionPlan variant must be handled here (no `..`
         // catch-all), matching import_per_stream's exhaustiveness.
-        let (first, expected_version, events, last, halt) = match plan {
+        let (first, expected_version, head, tail, last, halt) = match plan {
             SectionPlan::Empty => continue, // skip; no report entry
             SectionPlan::FirstCorrupt => {
                 return Err(ImportError::Aborted {
@@ -532,10 +573,11 @@ where
             SectionPlan::Run {
                 first,
                 expected_version,
-                events,
+                head,
+                tail,
                 last,
                 halt,
-            } => (first, expected_version, events, last, halt),
+            } => (first, expected_version, head, tail, last, halt),
         };
         match halt {
             Halt::Complete => {}
@@ -558,13 +600,16 @@ where
         writes.push(PlannedAppend {
             target,
             expected_version,
-            events,
+            head,
+            tail,
         });
     }
 
-    // Phase 2 — commit every clean run in one transaction.
+    // Phase 2 — commit every clean run in one transaction. The committed `$all`
+    // position is not surfaced in the report (it is keyed by per-stream
+    // `Version`); a positioned import report is a PR2 follow-up (#330).
     match store.atomic_append_many(&writes).await {
-        Ok(()) => {
+        Ok(_position) => {
             let reports = writes
                 .into_iter()
                 .zip(lasts)
@@ -666,12 +711,13 @@ mod plan_tests {
                 expected_version,
                 last,
                 halt,
-                events,
+                tail,
+                ..
             } => {
                 assert_eq!(first, v(1));
                 assert_eq!(expected_version, None); // first == 1 → fresh stream
                 assert_eq!(last, v(3));
-                assert_eq!(events.len(), 3);
+                assert_eq!(tail.len(), 2, "head + 2 tail == the 3-event run");
                 assert!(matches!(halt, Halt::Complete));
             }
             other => panic!("expected Run, got {other:?}"),
@@ -704,10 +750,10 @@ mod plan_tests {
         let s = section("s", vec![evt(3), evt(4), evt(6)]);
         match plan_section(&s).expect("plans") {
             SectionPlan::Run {
-                last, halt, events, ..
+                last, halt, tail, ..
             } => {
                 assert_eq!(last, v(4));
-                assert_eq!(events.len(), 2);
+                assert_eq!(tail.len(), 1, "head + 1 tail == the 2-event run");
                 assert!(matches!(halt, Halt::Gap { got } if got == v(6)));
             }
             other => panic!("expected Run, got {other:?}"),
@@ -719,10 +765,10 @@ mod plan_tests {
         let s = section("s", vec![evt(1), evt(2), ImportBlock::Corrupt, evt(3)]);
         match plan_section(&s).expect("plans") {
             SectionPlan::Run {
-                last, halt, events, ..
+                last, halt, tail, ..
             } => {
                 assert_eq!(last, v(2));
-                assert_eq!(events.len(), 2);
+                assert_eq!(tail.len(), 1, "head + 1 tail == the 2-event run");
                 assert!(matches!(halt, Halt::Corrupt));
             }
             other => panic!("expected Run, got {other:?}"),
@@ -747,13 +793,14 @@ mod plan_tests {
             SectionPlan::Run {
                 first,
                 expected_version,
-                events,
+                tail,
                 last,
                 halt,
+                ..
             } => {
                 assert_eq!(first, v(u64::MAX));
                 assert_eq!(expected_version, Some(v(u64::MAX - 1)));
-                assert_eq!(events.len(), 1);
+                assert!(tail.is_empty(), "a one-event run is head-only");
                 assert_eq!(last, v(u64::MAX));
                 assert!(matches!(halt, Halt::Complete));
             }

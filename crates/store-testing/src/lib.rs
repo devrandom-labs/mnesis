@@ -92,7 +92,10 @@
 //!   **running** head (counting earlier writes to the same target inside the
 //!   batch); any mismatch aborts the whole transaction with
 //!   `AtomicAppendError::Conflict { index, actual }`, and on any failure
-//!   **no** write is applied.
+//!   **no** write is applied. On success return the **highest** `AllPosition`
+//!   the transaction committed across every stream (`Option`, `None` iff
+//!   `writes` is empty) — the whole-batch read-your-writes token; unlike
+//!   `append`, an empty `writes` is a legitimate no-op here, hence `Option`.
 //! - [`SnapshotStore<Vec<u8>, P>`](mnesis_store::state::SnapshotStore) —
 //!   atomic persistence of derived state plus the position it was folded to
 //!   (`hydrate` / `commit`). Byte-level: `S = Vec<u8>`; typed state is a
@@ -111,7 +114,9 @@
 //!
 //! ## Storing an event
 //!
-//! `append` hands you `&[PendingEnvelope]`; reads must hand back
+//! `append` hands you a [`PendingBatch`](mnesis_store::PendingBatch) — a
+//! **non-empty** run of `PendingEnvelope`s (`batch.first()`, `batch.last()`,
+//! `batch.iter()`, `batch.len()` which is `NonZeroUsize`) — and reads must hand back
 //! [`PersistedEnvelope`](mnesis_store::envelope::PersistedEnvelope)s. The
 //! supported recipe is the canonical wire frame: persist, per event, the
 //! `Version` (from `PendingEnvelope::version()`) plus the output of
@@ -163,9 +168,15 @@
 //!   monotonic across **all** streams in commit order, **not** required to
 //!   be gapless — an aborted append may burn positions, and readers
 //!   tolerate the gaps.
-//! - An empty `envelopes` slice: run the head check first (a stale
-//!   `expected_version` is still a `Conflict`), then return `Ok` — nothing
-//!   written, nobody woken.
+//! - **Return the `AllPosition` you stamped on the run's LAST event.** That is
+//!   the read-your-writes token: a caller awaits its `$all` consumer reaching
+//!   this position and then knows its own write is visible there. Return the
+//!   position the committing transaction actually assigned — not a counter read
+//!   back afterwards, which a concurrent append could make disagree. Because
+//!   `PendingBatch` is non-empty there is always exactly one position to
+//!   return; there is no write-nothing case (that is why the input is a
+//!   `PendingBatch`, not a slice — the empty case is answered once, at the
+//!   type, instead of by every adapter).
 //! - After the commit is durable — never before — fire your wake path (see
 //!   "The wake contract").
 //!
@@ -440,6 +451,8 @@ macro_rules! conformance {
             $crate::__conformance_case!(sequence, check_append_conflict_is_surfaced, $factory, $skip);
             $crate::__conformance_case!(sequence, check_append_retry_after_conflict_succeeds, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_empty_store_yields_none, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_append_returns_assigned_all_position, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_multi_event_append_returns_last_position, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_global_order_across_streams, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_items_carry_their_stream_key, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_from_is_exclusive, $factory, $skip);

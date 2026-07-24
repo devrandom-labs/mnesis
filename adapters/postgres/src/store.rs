@@ -3,13 +3,13 @@ use std::sync::Arc;
 
 use bytes::Bytes;
 use mnesis::{ErrorId, Version};
-use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::PersistedEnvelope;
 use mnesis_store::error::{AppendError, AppendValidationError};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
 use mnesis_store::wire;
+use mnesis_store::{PendingBatch, PendingEnvelope};
 use mnesis_wake::StreamNotifiers;
 use sqlx::PgPool;
 use sqlx::postgres::PgListener;
@@ -288,30 +288,95 @@ struct PreparedInsert<'a> {
 /// every adapter); this fn only turns validated envelopes into insert rows with
 /// `i64`-typed columns (the `version`/`schema_version` SQL `BIGINT` width).
 fn narrow_inserts<'a>(
-    envelopes: &'a [PendingEnvelope],
+    envelopes: PendingBatch<'a>,
     id: &StreamKey,
-) -> Result<Vec<PreparedInsert<'a>>, AppendError<PostgresError>> {
-    envelopes
+) -> Result<(PreparedInsert<'a>, Vec<PreparedInsert<'a>>), AppendError<PostgresError>> {
+    let narrow_one = |env: &'a PendingEnvelope| {
+        // `Version` is `NonZeroU64`, so `env.version()` is always >= 1; the
+        // only overflow risk is `> i64::MAX`, which the adapter must surface
+        // as a store error (conformance: persist every valid `Version`).
+        let version = i64::try_from(env.version().as_u64()).map_err(|_| {
+            AppendError::Store(PostgresError::CorruptRow {
+                stream_id: ErrorId::from_display(id),
+                reason: ErrorId::from_display(&"version exceeds i64::MAX"),
+            })
+        })?;
+        // `schema_version` is `u32`, which widens to `i64` infallibly.
+        let schema_version = i64::from(env.schema_version());
+        Ok(PreparedInsert {
+            version,
+            schema_version,
+            env,
+        })
+    };
+
+    // Head and tail stay split so `append` inserts at least one row without an
+    // `Option`-typed "last assigned position" (#330).
+    let head = narrow_one(envelopes.first())?;
+    let tail = envelopes
         .iter()
-        .map(|env| {
-            // `Version` is `NonZeroU64`, so `env.version()` is always >= 1; the
-            // only overflow risk is `> i64::MAX`, which the adapter must surface
-            // as a store error (conformance: persist every valid `Version`).
-            let version = i64::try_from(env.version().as_u64()).map_err(|_| {
+        .skip(1)
+        .map(narrow_one)
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok((head, tail))
+}
+
+/// Insert one prepared row and return the `$all` position postgres assigned it.
+///
+/// `RETURNING global_seq, txid` costs nothing extra: both are already columns on
+/// `events` (`global_seq` is `GENERATED ALWAYS AS IDENTITY`, `txid` defaults to
+/// `pg_current_xact_id()`), so the position comes back from the same statement
+/// that writes the row — never a counter read back afterwards, which a
+/// concurrent append could make disagree.
+///
+/// `txid` is read back through the same `::text::bigint` cast `read_all` uses,
+/// so the two paths agree on the `xid8` → `u64` mapping by construction.
+async fn insert_one(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    id: &StreamKey,
+    row: &PreparedInsert<'_>,
+) -> Result<PgAllPos, AppendError<PostgresError>> {
+    let returned: Result<(i64, i64), sqlx::Error> = sqlx::query_as(
+        "INSERT INTO events \
+         (stream_id, version, event_type, schema_version, payload, metadata) \
+         VALUES ($1, $2, $3, $4, $5, $6) \
+         RETURNING global_seq, txid::text::bigint",
+    )
+    .bind(id.as_bytes())
+    .bind(row.version)
+    .bind(row.env.event_type())
+    .bind(row.schema_version)
+    .bind(row.env.payload())
+    .bind(row.env.metadata())
+    .fetch_one(&mut **tx)
+    .await;
+
+    match returned {
+        Ok((global_seq, txid)) => {
+            let seq = u64::try_from(global_seq).map_err(|_| {
                 AppendError::Store(PostgresError::CorruptRow {
                     stream_id: ErrorId::from_display(id),
-                    reason: ErrorId::from_display(&"version exceeds i64::MAX"),
+                    reason: ErrorId::from_display(&"assigned global_seq is negative"),
                 })
             })?;
-            // `schema_version` is `u32`, which widens to `i64` infallibly.
-            let schema_version = i64::from(env.schema_version());
-            Ok(PreparedInsert {
-                version,
-                schema_version,
-                env,
-            })
-        })
-        .collect()
+            let txid_u64 = u64::try_from(txid).map_err(|_| {
+                AppendError::Store(PostgresError::CorruptRow {
+                    stream_id: ErrorId::from_display(id),
+                    reason: ErrorId::from_display(&"assigned txid is negative"),
+                })
+            })?;
+            Ok(PgAllPos::new(txid_u64, seq))
+        }
+        // A UNIQUE(stream_id, version) violation means a concurrent writer
+        // claimed this version first — a conflict, not a Store error (CLAUDE
+        // rule 3: one variant = one failure domain).
+        Err(e) if is_unique_violation(&e) => Err(AppendError::Conflict {
+            stream_id: ErrorId::from_display(id),
+            expected: Some(row.env.version()),
+            actual: None, // a racer committed; exact actual unknown here
+        }),
+        Err(e) => Err(AppendError::Store(PostgresError::Sqlx(e))),
+    }
 }
 
 /// Map the kernel-neutral [`AppendValidationError`] (the append contract) into
@@ -427,8 +492,8 @@ impl RawEventStore for PostgresStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         let mut tx = self.pool().begin().await.map_err(store_err)?;
 
         let current = read_current_version(&mut tx, id).await?; // IO
@@ -437,46 +502,22 @@ impl RawEventStore for PostgresStore {
         // `narrow_inserts`.
         mnesis_store::store::validate_append_versions(current, expected_version, envelopes, id)
             .map_err(|e| postgres_validation_err(id, &e))?;
-        let rows = narrow_inserts(envelopes, id)?; // PURE
-        if rows.is_empty() {
-            return Ok(()); // version checked; nothing to write
-        }
+        let (head, tail) = narrow_inserts(envelopes, id)?; // PURE
 
-        for row in &rows {
-            let result = sqlx::query(
-                "INSERT INTO events \
-                 (stream_id, version, event_type, schema_version, payload, metadata) \
-                 VALUES ($1, $2, $3, $4, $5, $6)",
-            )
-            .bind(id.as_bytes())
-            .bind(row.version)
-            .bind(row.env.event_type())
-            .bind(row.schema_version)
-            .bind(row.env.payload())
-            .bind(row.env.metadata())
-            .execute(&mut *tx)
-            .await;
-
-            if let Err(e) = result {
-                // A UNIQUE(stream_id, version) violation means a concurrent
-                // writer claimed this version first — a conflict, not a Store
-                // error (CLAUDE rule 3: one variant = one failure domain).
-                if is_unique_violation(&e) {
-                    return Err(AppendError::Conflict {
-                        stream_id: ErrorId::from_display(id),
-                        expected: Some(row.env.version()),
-                        actual: None, // a racer committed; exact actual unknown here
-                    });
-                }
-                return Err(AppendError::Store(PostgresError::Sqlx(e)));
-            }
+        // The head insert seeds the assigned position; each tail insert
+        // overwrites it, so the value after the loop is the LAST row's — the
+        // position `append` returns (#330). No `Option`, because
+        // `PendingBatch` guarantees the head exists.
+        let mut assigned = insert_one(&mut tx, id, &head).await?;
+        for row in &tail {
+            assigned = insert_one(&mut tx, id, row).await?;
         }
 
         tx.commit().await.map_err(store_err)?;
 
         // Wake AFTER durable commit (WakeSource contract: wake post-commit).
         self.notify_committed(id.as_bytes()).await;
-        Ok(())
+        Ok(assigned)
     }
 
     async fn read_stream(
@@ -607,6 +648,15 @@ mod tests {
     use mnesis_store::value::SchemaVersion;
 
     use super::narrow_inserts;
+    use mnesis_store::PendingBatch;
+
+    /// `narrow_inserts` over a non-empty batch, as `append` calls it.
+    fn narrow(
+        envs: &[PendingEnvelope],
+    ) -> (super::PreparedInsert<'_>, Vec<super::PreparedInsert<'_>>) {
+        let batch = PendingBatch::new(envs).expect("test batches are non-empty");
+        narrow_inserts(batch, &stream_key()).unwrap()
+    }
 
     fn stream_key() -> StreamKey {
         StreamKey::from_bytes("test-stream")
@@ -645,11 +695,11 @@ mod tests {
     #[test]
     fn fresh_stream_three_events_ok() {
         let envs = [make_envelope(1), make_envelope(2), make_envelope(3)];
-        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
-        assert_eq!(rows.len(), 3);
-        assert_eq!(rows[0].version, 1);
-        assert_eq!(rows[1].version, 2);
-        assert_eq!(rows[2].version, 3);
+        let (head, tail) = narrow(&envs);
+        assert_eq!(head.version, 1);
+        assert_eq!(tail.len(), 2, "head + 2 tail == the 3-event batch");
+        assert_eq!(tail[0].version, 2);
+        assert_eq!(tail[1].version, 3);
     }
 
     /// `current = 5`, `expected = Some(5)`, batch `[6, 7]` → Ok(2 rows) with
@@ -657,25 +707,21 @@ mod tests {
     #[test]
     fn existing_stream_two_events_ok() {
         let envs = [make_envelope(6), make_envelope(7)];
-        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
-        assert_eq!(rows.len(), 2);
-        assert_eq!(rows[0].version, 6);
-        assert_eq!(rows[1].version, 7);
+        let (head, tail) = narrow(&envs);
+        assert_eq!(head.version, 6);
+        assert_eq!(tail.len(), 1, "head + 1 tail == the 2-event batch");
+        assert_eq!(tail[0].version, 7);
     }
 
-    /// Empty batch → Ok(empty) so `append` can short-circuit after the version check.
-    #[test]
-    fn empty_batch_ok() {
-        let rows = narrow_inserts(&[], &stream_key()).unwrap();
-        assert!(rows.is_empty());
-    }
+    // REMOVED `empty_batch_ok` (#330): `narrow_inserts` takes a non-empty
+    // `PendingBatch`, so there is no empty batch to narrow. The empty case is
+    // answered once, at the type.
 
     /// Schema version widens to the BIGINT column type (i64) correctly.
     #[test]
     fn schema_version_widens_to_i64() {
         let envs = [make_envelope_sv(1, 42)];
-        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
-        assert_eq!(rows[0].schema_version, 42_i64);
+        assert_eq!(narrow(&envs).0.schema_version, 42_i64);
     }
 
     /// The FULL `SchemaVersion` (`NonZeroU32`) range is accepted and widened to
@@ -683,8 +729,7 @@ mod tests {
     #[test]
     fn schema_version_full_u32_range_is_accepted() {
         let envs = [make_envelope_sv(1, u32::MAX)];
-        let rows = narrow_inserts(&envs, &stream_key()).unwrap();
-        assert_eq!(rows[0].schema_version, i64::from(u32::MAX));
+        assert_eq!(narrow(&envs).0.schema_version, i64::from(u32::MAX));
     }
 
     // 2. Optimistic + sequential conflicts now live in the kernel

@@ -13,6 +13,7 @@ use std::sync::Arc;
 use bytes::Bytes;
 use futures::stream;
 use mnesis::{ErrorId, Version};
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::AppendError;
@@ -140,7 +141,7 @@ fn stage(env: &PendingEnvelope, pos: ToyPos, stream: &StreamKey) -> Result<Store
 /// `expected_version + 1` (from 1 when `None`).
 fn versions_sequential(
     expected_version: Option<Version>,
-    envelopes: &[PendingEnvelope],
+    envelopes: PendingBatch<'_>,
 ) -> Result<(), SeqError> {
     let mut next = match expected_version {
         None => Version::INITIAL,
@@ -169,9 +170,9 @@ impl RawEventStore for ToyStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<ToyError>> {
-        {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<ToyError>> {
+        let last = {
             // One critical section covers head check + validation + insertion:
             // the guide's "one atomic step".
             let mut inner = self.inner.lock().await;
@@ -182,10 +183,6 @@ impl RawEventStore for ToyStore {
                     expected: expected_version,
                     actual,
                 });
-            }
-            // Empty batch: head check done, nothing written, nobody woken.
-            if envelopes.is_empty() {
-                return Ok(());
             }
             // A gap/duplicate/out-of-order batch is rejected in the Conflict
             // domain, and nothing lands. Version overflow is a Store error —
@@ -205,13 +202,17 @@ impl RawEventStore for ToyStore {
             }
             // Stage everything before touching the map so a failed encode
             // leaves the store byte-identical.
-            let mut staged = Vec::with_capacity(envelopes.len());
+            let mut staged = Vec::with_capacity(envelopes.len().get());
             let mut pos = inner.next_pos;
+            // The non-empty batch guarantees the loop stamps at least one
+            // position, so this seed is always overwritten before it is read.
+            let mut last = ToyPos(pos);
             for env in envelopes {
                 pos = pos
                     .checked_add(1)
                     .ok_or(AppendError::Store(ToyError::PositionOverflow))?;
-                staged.push(stage(env, ToyPos(pos), id).map_err(AppendError::Store)?);
+                last = ToyPos(pos);
+                staged.push(stage(env, last, id).map_err(AppendError::Store)?);
             }
             inner.next_pos = pos;
             inner
@@ -219,12 +220,14 @@ impl RawEventStore for ToyStore {
                 .entry(id.as_bytes().to_vec())
                 .or_default()
                 .extend(staged);
-        }
-        // After the commit is durable — never before — fire the wake path.
-        // One call wakes the stream's subscribers and bumps the `$all`
-        // generation.
+            drop(inner); // release the lock before waking (wake-after-commit)
+            last
+        };
+        // After the commit is durable — never before — fire the wake path. One
+        // call wakes the stream's subscribers and bumps the `$all` generation.
         self.notifiers.wake(id.as_bytes());
-        Ok(())
+        // The position of the run's last event — the read-your-writes token (#330).
+        Ok(last)
     }
 
     async fn read_stream(&self, id: &StreamKey, from: Version) -> Result<Self::Stream, ToyError> {
@@ -291,8 +294,11 @@ impl AtomicAppend for ToyStore {
     async fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],
-    ) -> Result<(), AtomicAppendError<ToyError>> {
-        {
+    ) -> Result<Option<Self::AllPosition>, AtomicAppendError<ToyError>> {
+        if writes.is_empty() {
+            return Ok(None);
+        }
+        let last = {
             let mut inner = self.inner.lock().await;
             // Phase 1 — validate every write against a RUNNING projected head
             // (counting earlier writes to the same target in this batch) and
@@ -309,12 +315,9 @@ impl AtomicAppend for ToyStore {
                         actual: head,
                     });
                 }
-                if write.events.is_empty() {
-                    continue;
-                }
                 // Defensive contiguity validation at this boundary; overflow
                 // is a Store error, never a Conflict (rule 3).
-                match versions_sequential(write.expected_version, &write.events) {
+                match versions_sequential(write.expected_version, write.batch()) {
                     Err(SeqError::Malformed) => {
                         return Err(AtomicAppendError::Conflict {
                             index,
@@ -326,8 +329,8 @@ impl AtomicAppend for ToyStore {
                     }
                     Ok(()) => {}
                 }
-                let mut run = Vec::with_capacity(write.events.len());
-                for env in &write.events {
+                let mut run = Vec::with_capacity(write.batch().len().get());
+                for env in write.batch() {
                     pos = pos
                         .checked_add(1)
                         .ok_or(AtomicAppendError::Store(ToyError::PositionOverflow))?;
@@ -335,8 +338,7 @@ impl AtomicAppend for ToyStore {
                         stage(env, ToyPos(pos), &write.target).map_err(AtomicAppendError::Store)?,
                     );
                 }
-                let new_head = write.events.last().map(PendingEnvelope::version);
-                heads.insert(key.clone(), new_head);
+                heads.insert(key.clone(), Some(write.batch().last().version()));
                 staged.push((key, run));
             }
             // Phase 2 — commit: everything lands, or (above) nothing did.
@@ -344,15 +346,17 @@ impl AtomicAppend for ToyStore {
             for (key, run) in staged {
                 inner.streams.entry(key).or_default().extend(run);
             }
-        }
-        // Wake only when something actually landed — same nobody-woken-on-
-        // empty discipline as `append` (spurious wakes are permitted, but the
-        // reference shouldn't teach them). Each wake also bumps the `$all`
-        // generation.
-        for write in writes.iter().filter(|w| !w.events.is_empty()) {
+            drop(inner); // release the lock before waking (wake-after-commit)
+            // `writes` is non-empty and every run carries a head, so `pos`
+            // advanced past its seed — the last stamped position is the batch's
+            // highest (#330).
+            ToyPos(pos)
+        };
+        // Each wake also bumps the `$all` generation.
+        for write in writes {
             self.notifiers.wake(write.target.as_bytes());
         }
-        Ok(())
+        Ok(Some(last))
     }
 }
 

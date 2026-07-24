@@ -23,7 +23,7 @@ use mnesis_inmemory::{
 };
 use mnesis_store::wake::WakeSource;
 use mnesis_store::{
-    AppendError, PendingEnvelope, RawEventStore, Step, Store, StreamKey, Subscription,
+    AppendError, PendingBatch, RawEventStore, Step, Store, StreamKey, Subscription,
     pending_envelope,
 };
 use mnesis_wake_nostd::GlobalWake;
@@ -48,12 +48,12 @@ impl RawEventStore for DeviceStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
-        self.inner.append(id, expected_version, envelopes).await?;
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
+        let position = self.inner.append(id, expected_version, envelopes).await?;
         // Wake only after the commit returned Ok — the WakeSource contract.
         WakeSource::wake(&self.wake, id.as_ref());
-        Ok(())
+        Ok(position)
     }
 
     async fn read_stream(
@@ -117,7 +117,11 @@ async fn append_one(store: &Store<DeviceStore>, version: u64, expected_raw: Opti
         .expect("valid envelope");
     let expected_version = expected_raw.and_then(Version::new);
     store
-        .append(&StreamKey::from_slice(STREAM), expected_version, &[env])
+        .append(
+            &StreamKey::from_slice(STREAM),
+            expected_version,
+            PendingBatch::of(&env),
+        )
         .await
         .expect("append must succeed");
 }

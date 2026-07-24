@@ -23,7 +23,7 @@
 
 use bytes::Bytes;
 use mnesis::ErrorId;
-use mnesis_store::PendingEnvelope;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::wire;
 
@@ -50,11 +50,14 @@ pub struct StagedRow {
 /// The result of planning one stream's append run.
 #[derive(Debug)]
 pub struct PlannedRun {
-    /// The staged rows in version order (empty iff `envelopes` was empty).
+    /// The staged rows in version order — non-empty, because
+    /// [`PendingBatch`] is.
     pub rows: Vec<StagedRow>,
-    /// The stream's new version counter (== `current_version` if empty).
+    /// The stream's new version counter.
     pub new_version: u64,
-    /// The store-global counter after this run (== `current_global` if empty).
+    /// The position stamped on the run's LAST event — what
+    /// [`RawEventStore::append`](mnesis_store::RawEventStore::append) returns
+    /// (#330). Always `>= current_global + 1`.
     pub ending_global: u64,
 }
 
@@ -81,12 +84,12 @@ pub fn plan_run(
     current_version: u64,
     current_global: u64,
     id: &StreamKey,
-    envelopes: &[PendingEnvelope],
+    envelopes: PendingBatch<'_>,
 ) -> Result<PlannedRun, PlanError> {
     let id_bytes = id.as_ref();
     let mut version = current_version;
     let mut global_seq = current_global;
-    let mut rows = Vec::with_capacity(envelopes.len());
+    let mut rows = Vec::with_capacity(envelopes.len().get());
 
     for env in envelopes {
         // `version` is the validated, strictly-sequential successor of
@@ -134,8 +137,8 @@ pub fn plan_run(
         });
     }
 
-    // After the loop `version == current_version + envelopes.len()`; for an empty
-    // run the loop never runs, so it stays `current_version`.
+    // After the loop `version == current_version + envelopes.len()`. The batch is
+    // non-empty, so the loop ran at least once and both counters advanced.
     let new_version = version;
     Ok(PlannedRun {
         rows,
@@ -157,7 +160,7 @@ mod tests {
     }
 
     /// A minimal valid envelope at `version` (>= 1).
-    fn env(version: u64) -> PendingEnvelope {
+    fn env(version: u64) -> mnesis_store::PendingEnvelope {
         pending_envelope(Version::new(version).unwrap())
             .event_type("E")
             .payload(b"p".as_slice())
@@ -165,12 +168,16 @@ mod tests {
             .unwrap()
     }
 
+    fn batch(evs: &[mnesis_store::PendingEnvelope]) -> mnesis_store::PendingBatch<'_> {
+        mnesis_store::PendingBatch::new(evs).expect("test runs are non-empty")
+    }
+
     // 1. Sequence/protocol — happy paths ------------------------------------
 
     #[test]
     fn fresh_stream_three_events_stamps_versions_and_global() {
         let evs = [env(1), env(2), env(3)];
-        let p = plan_run(0, 0, &sk(), &evs).unwrap();
+        let p = plan_run(0, 0, &sk(), batch(&evs)).unwrap();
         assert_eq!(p.rows.len(), 3);
         assert_eq!(p.new_version, 3);
         assert_eq!(p.ending_global, 3);
@@ -180,19 +187,14 @@ mod tests {
     fn existing_stream_continues_version_and_global() {
         // current_version = 5, current_global = 40, run [6, 7]
         let evs = [env(6), env(7)];
-        let p = plan_run(5, 40, &sk(), &evs).unwrap();
+        let p = plan_run(5, 40, &sk(), batch(&evs)).unwrap();
         assert_eq!(p.rows.len(), 2);
         assert_eq!(p.new_version, 7);
         assert_eq!(p.ending_global, 42);
     }
 
-    #[test]
-    fn empty_batch_stages_nothing_and_leaves_counters() {
-        let p = plan_run(5, 40, &sk(), &[]).unwrap();
-        assert!(p.rows.is_empty());
-        assert_eq!(p.new_version, 5);
-        assert_eq!(p.ending_global, 40);
-    }
+    // REMOVED `empty_batch_stages_nothing_and_leaves_counters` (#330): `plan_run`
+    // takes a non-empty `PendingBatch`, so an empty run is unrepresentable.
 
     // 2. Defensive boundary — overflow paths. Sequence conflicts now live in the
     //    kernel `validate_append_versions` (see `crates/store/src/store.rs`); the
@@ -207,7 +209,7 @@ mod tests {
         // kernel validated the sequence.
         let evs = [env(1)];
         assert!(matches!(
-            plan_run(u64::MAX, 0, &sk(), &evs).unwrap_err(),
+            plan_run(u64::MAX, 0, &sk(), batch(&evs)).unwrap_err(),
             PlanError::VersionOverflow
         ));
     }
@@ -217,7 +219,7 @@ mod tests {
         // current_global = u64::MAX → stamping the first event overflows.
         let evs = [env(1)];
         assert!(matches!(
-            plan_run(0, u64::MAX, &sk(), &evs).unwrap_err(),
+            plan_run(0, u64::MAX, &sk(), batch(&evs)).unwrap_err(),
             PlanError::GlobalSeqOverflow
         ));
     }
@@ -227,7 +229,7 @@ mod tests {
     #[test]
     fn staged_keys_match_the_wire_key_codecs() {
         let evs = [env(1)];
-        let p = plan_run(0, 0, &sk(), &evs).unwrap();
+        let p = plan_run(0, 0, &sk(), batch(&evs)).unwrap();
         // event_key = [u16 id_len][id][u64 version];
         // global_key = [gseq][u16 id_len][id][ver].
         assert_eq!(p.rows[0].event_key, encode_event_key(b"s", 1).unwrap());

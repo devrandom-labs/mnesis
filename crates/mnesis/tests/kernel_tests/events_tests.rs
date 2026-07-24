@@ -78,3 +78,28 @@ fn add_panics_on_capacity_overflow() {
     let mut events: Events<_, 0> = Events::new(TestEvent::Created(Created));
     events.add(TestEvent::Activated(Activated)); // N=0, no room for additional events
 }
+
+// `Events` is non-empty by construction; `first`/`rest` expose that split so a
+// downstream non-empty collection can be built with no runtime check and no
+// unprovable `unwrap` (#330 — the store's `PendingBatch` is built this way).
+#[test]
+fn first_is_the_head_event_of_a_single_event_collection() {
+    let events: Events<TestEvent> = Events::new(TestEvent::Created(Created));
+
+    assert_eq!(events.first(), &TestEvent::Created(Created));
+    assert!(events.rest().is_empty());
+}
+
+#[test]
+fn first_and_rest_partition_the_collection_in_order() {
+    let mut events: Events<TestEvent, 2> = Events::new(TestEvent::Created(Created));
+    events.add(TestEvent::Activated(Activated));
+    events.add(TestEvent::Created(Created));
+
+    assert_eq!(events.first(), &TestEvent::Created(Created));
+    assert_eq!(
+        events.rest(),
+        &[TestEvent::Activated(Activated), TestEvent::Created(Created)]
+    );
+    assert_eq!(events.len(), 3, "first + rest is the whole collection");
+}

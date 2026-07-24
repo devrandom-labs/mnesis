@@ -158,6 +158,7 @@ where
     reason = "test code: unexpected Step variant is a test failure"
 )]
 mod tests {
+    use crate::envelope::PendingBatch;
     use std::sync::Arc;
     use std::time::Duration;
 
@@ -183,7 +184,10 @@ mod tests {
                 .payload(b"e".to_vec())
                 .build()
                 .unwrap();
-            store.append(id, Version::new(v - 1), &[env]).await.unwrap();
+            store
+                .append(id, Version::new(v - 1), PendingBatch::of(&env))
+                .await
+                .unwrap();
         }
     }
 
@@ -308,7 +312,11 @@ mod tests {
             .build()
             .unwrap();
         store
-            .append(&StreamKey::from_slice(b"a"), Version::new(1), &[env])
+            .append(
+                &StreamKey::from_slice(b"a"),
+                Version::new(1),
+                PendingBatch::of(&env),
+            )
             .await
             .unwrap();
 
@@ -341,7 +349,11 @@ mod tests {
                 .build()
                 .unwrap();
             writer
-                .append(&StreamKey::from_slice(b"b"), Version::new(1), &[env])
+                .append(
+                    &StreamKey::from_slice(b"b"),
+                    Version::new(1),
+                    PendingBatch::of(&env),
+                )
                 .await
                 .unwrap();
         });

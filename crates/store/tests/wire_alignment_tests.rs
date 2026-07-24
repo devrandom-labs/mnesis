@@ -25,6 +25,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{PendingEnvelope, StreamKey, pending_envelope};
 
@@ -57,7 +58,14 @@ async fn sequence_payloads_are_aligned_across_a_single_stream() {
     let store = InMemoryStore::new();
     let id = StreamKey::from_slice(b"seq");
     let envelopes: Vec<_> = (1..=20).map(|n| build_envelope(n, "E", 42)).collect();
-    store.append(&id, None, &envelopes).await.unwrap();
+    store
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
+        )
+        .await
+        .unwrap();
 
     let mut stream = store.read_stream(&id, Version::INITIAL).await.unwrap();
     let mut count = 0_usize;
@@ -78,7 +86,11 @@ async fn lifecycle_clone_then_read_preserves_alignment() {
     let store = std::sync::Arc::new(InMemoryStore::new());
     let id = StreamKey::from_slice(b"lc");
     store
-        .append(&id, None, &[build_envelope(1, "E", 7)])
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&[build_envelope(1, "E", 7)]).expect("non-empty batch"),
+        )
         .await
         .unwrap();
 
@@ -118,7 +130,14 @@ async fn boundary_event_type_lengths_around_alignment_boundary_all_aligned() {
         .zip(event_types.iter())
         .map(|(v, et)| build_envelope(v, et, 42))
         .collect();
-    store.append(&id, None, &envelopes).await.unwrap();
+    store
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
+        )
+        .await
+        .unwrap();
 
     let mut stream = store.read_stream(&id, Version::INITIAL).await.unwrap();
     while let Some(item) = stream.next().await {
@@ -141,7 +160,11 @@ async fn linearizability_concurrent_writer_aligned_payloads() {
 
     // Pre-seed one event so the reader has something to consume.
     store
-        .append(&id, None, &[build_envelope(1, "E", 16)])
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&[build_envelope(1, "E", 16)]).expect("non-empty batch"),
+        )
         .await
         .unwrap();
 
@@ -156,7 +179,11 @@ async fn linearizability_concurrent_writer_aligned_payloads() {
             for n in 2_u64..=50 {
                 let expected = Version::new(n - 1);
                 store
-                    .append(&id, expected, &[build_envelope(n, "E", 16)])
+                    .append(
+                        &id,
+                        expected,
+                        PendingBatch::new(&[build_envelope(n, "E", 16)]).expect("non-empty batch"),
+                    )
                     .await
                     .unwrap();
             }

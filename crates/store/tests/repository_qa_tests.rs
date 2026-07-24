@@ -45,6 +45,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use mnesis::*;
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::Repository;
 use mnesis_store::Store;
 use mnesis_store::codec::{Decode, Encode};
@@ -791,7 +792,7 @@ async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
-            &[legacy],
+            PendingBatch::new(&[legacy]).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -829,7 +830,7 @@ async fn d4_upcaster_must_not_double_apply_to_new_events() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
-            &[legacy],
+            PendingBatch::new(&[legacy]).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -1396,7 +1397,7 @@ async fn d11_schema_version_always_one() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"counter-1"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -1465,9 +1466,9 @@ async fn d11_stream_isolation_different_streams_independent() {
 }
 
 // REMOVED `d11_append_empty_batch_is_noop` (#207): this exercised
-// `Repository::save(&[])`, which no longer type-checks. Empty *substrate*
-// appends (`RawEventStore::append(&[])`) remain valid and are covered
-// separately in the adversarial/security suites.
+// `Repository::save(&[])`, which no longer type-checks. #330 completed the same
+// move at the substrate: `RawEventStore::append` takes a non-empty
+// `PendingBatch`, so an empty append is now unrepresentable there too.
 
 #[tokio::test]
 async fn d11_multiple_event_types_in_single_stream() {

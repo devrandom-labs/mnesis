@@ -4,6 +4,7 @@
 use mnesis::Version;
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::AppendError;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::pending_envelope;
 use mnesis_store::store::RawEventStore;
@@ -20,7 +21,7 @@ async fn append_conflict_truncates_overlong_stream_id_with_ellipsis() {
         .unwrap();
     // New stream + Some(expected) → conflict carrying the truncated id label.
     let err = store
-        .append(&long, Version::new(1), &[env])
+        .append(&long, Version::new(1), PendingBatch::of(&env))
         .await
         .unwrap_err();
     match err {

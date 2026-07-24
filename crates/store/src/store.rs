@@ -2,7 +2,7 @@ use alloc::sync::Arc;
 
 use mnesis::{ErrorId, Version};
 
-use crate::envelope::{PendingEnvelope, PersistedEnvelope};
+use crate::envelope::{PendingBatch, PersistedEnvelope};
 use crate::error::{AppendError, AppendValidationError};
 use crate::stream::EventStream;
 use crate::stream_id::StreamKey;
@@ -184,18 +184,43 @@ pub trait RawEventStore: Send + Sync {
     ///
     /// Each appended event is assigned an adapter-defined
     /// [`AllPosition`](Self::AllPosition) — the order an `$all` subscription
-    /// resumes from. It is **not** carried on the [`PersistedEnvelope`]; it is
-    /// surfaced only on the `$all` read path, tagged onto each
+    /// resumes from. It is **not** carried on the [`PersistedEnvelope`]; on the
+    /// read path it is surfaced as a tag on each
     /// [`AllStream`](Self::AllStream) item. The position **must** be
     /// monotonically increasing across *all* streams in commit order but is
     /// **not** required to be gapless — an adapter may skip values (e.g. after
     /// an aborted append), and readers must tolerate gaps.
+    ///
+    /// # Return value
+    ///
+    /// On success this returns the position assigned to the run's **last**
+    /// event — the same position `$all` reports for that event. It is the
+    /// read-your-writes token (#330): a caller awaits its `$all` consumer's
+    /// checkpoint reaching this value and then knows its own write is visible
+    /// there. The last event's position is the whole run's barrier because
+    /// `$all` delivery is position-ordered, so a consumer that has reached it
+    /// has necessarily been delivered every earlier event of the same append.
+    ///
+    /// Implementors **must** return the position actually assigned, not a
+    /// counter read back afterwards — the value has to be the one the
+    /// committing transaction stamped, or a concurrent append can make the two
+    /// disagree.
+    ///
+    /// # Non-empty input
+    ///
+    /// [`PendingBatch`] carries at least one envelope, so there is no
+    /// write-nothing case and the returned position is unconditional. An
+    /// adapter therefore never has to answer "what position did zero events
+    /// land at". Note this removes the former version-assertion probe
+    /// (`append(id, expected, &[])`, which checked `expected_version` and wrote
+    /// nothing); it had no production caller and returns additively as its own
+    /// method if it is ever wanted.
     fn append(
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> impl core::future::Future<Output = Result<(), AppendError<Self::Error>>> + Send;
+        envelopes: PendingBatch<'_>,
+    ) -> impl core::future::Future<Output = Result<Self::AllPosition, AppendError<Self::Error>>> + Send;
 
     /// Open a stream of events.
     ///
@@ -314,8 +339,8 @@ impl<S: RawEventStore> RawEventStore for Store<S> {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         self.raw().append(id, expected_version, envelopes).await
     }
 
@@ -403,7 +428,7 @@ pub trait AllPosition: Copy + Ord + Send + Sync + core::fmt::Debug + 'static {}
 pub fn validate_append_versions(
     current: u64,
     expected: Option<Version>,
-    envelopes: &[PendingEnvelope],
+    envelopes: PendingBatch<'_>,
     id: &StreamKey,
 ) -> Result<(), AppendValidationError> {
     // 1. Optimistic concurrency. `actual` is `None` for a fresh stream so that
@@ -444,10 +469,14 @@ pub fn validate_append_versions(
 #[allow(clippy::panic, reason = "test code")]
 mod validate_append_tests {
     use super::*;
-    use crate::envelope::pending_envelope;
+    use crate::envelope::{PendingEnvelope, pending_envelope};
 
     fn sk() -> StreamKey {
         StreamKey::from_slice(b"s")
+    }
+
+    fn batch(envs: &[PendingEnvelope]) -> PendingBatch<'_> {
+        PendingBatch::new(envs).expect("test batches are non-empty by construction")
     }
 
     fn env(version: u64) -> PendingEnvelope {
@@ -460,35 +489,34 @@ mod validate_append_tests {
 
     #[test]
     fn fresh_stream_ok() {
-        assert!(validate_append_versions(0, None, &[env(1), env(2), env(3)], &sk()).is_ok());
+        assert!(validate_append_versions(0, None, batch(&[env(1), env(2), env(3)]), &sk()).is_ok());
     }
 
     #[test]
     fn existing_stream_ok() {
-        assert!(validate_append_versions(5, Version::new(5), &[env(6), env(7)], &sk()).is_ok());
-    }
-
-    #[test]
-    fn empty_batch_ok() {
-        assert!(validate_append_versions(0, None, &[], &sk()).is_ok());
+        assert!(
+            validate_append_versions(5, Version::new(5), batch(&[env(6), env(7)]), &sk()).is_ok()
+        );
     }
 
     #[test]
     fn stale_expected_conflict() {
-        let err = validate_append_versions(5, Version::new(4), &[env(6)], &sk()).unwrap_err();
+        let err =
+            validate_append_versions(5, Version::new(4), batch(&[env(6)]), &sk()).unwrap_err();
         assert!(matches!(err, AppendValidationError::Conflict { .. }));
     }
 
     #[test]
     fn fresh_stream_with_expected_some_conflict() {
         // A non-empty expectation on a brand-new stream is a conflict.
-        let err = validate_append_versions(0, Version::new(1), &[env(1)], &sk()).unwrap_err();
+        let err =
+            validate_append_versions(0, Version::new(1), batch(&[env(1)]), &sk()).unwrap_err();
         assert!(matches!(err, AppendValidationError::Conflict { .. }));
     }
 
     #[test]
     fn gapped_batch_conflict() {
-        let err = validate_append_versions(0, None, &[env(1), env(3)], &sk()).unwrap_err();
+        let err = validate_append_versions(0, None, batch(&[env(1), env(3)]), &sk()).unwrap_err();
         match err {
             AppendValidationError::Conflict {
                 expected, actual, ..
@@ -504,7 +532,7 @@ mod validate_append_tests {
 
     #[test]
     fn out_of_order_batch_conflict() {
-        let err = validate_append_versions(0, None, &[env(2), env(1)], &sk()).unwrap_err();
+        let err = validate_append_versions(0, None, batch(&[env(2), env(1)]), &sk()).unwrap_err();
         match err {
             AppendValidationError::Conflict {
                 expected, actual, ..
@@ -520,14 +548,16 @@ mod validate_append_tests {
 
     #[test]
     fn wrong_start_version_conflict() {
-        let err = validate_append_versions(5, Version::new(5), &[env(7)], &sk()).unwrap_err();
+        let err =
+            validate_append_versions(5, Version::new(5), batch(&[env(7)]), &sk()).unwrap_err();
         assert!(matches!(err, AppendValidationError::Conflict { .. }));
     }
 
     #[test]
     fn version_overflow_is_version_overflow_not_conflict() {
-        let err = validate_append_versions(u64::MAX, Version::new(u64::MAX), &[env(1)], &sk())
-            .unwrap_err();
+        let err =
+            validate_append_versions(u64::MAX, Version::new(u64::MAX), batch(&[env(1)]), &sk())
+                .unwrap_err();
         assert!(matches!(err, AppendValidationError::VersionOverflow));
     }
 }

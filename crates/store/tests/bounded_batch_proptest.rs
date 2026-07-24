@@ -10,6 +10,7 @@
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::batch::BatchSize;
 use mnesis_store::envelope::pending_envelope;
@@ -52,7 +53,7 @@ proptest! {
                     .payload(vec![(v % 256) as u8])
                     .build()
                     .unwrap();
-                store.append(&id, Version::new(v - 1), &[env]).await.unwrap();
+                store.append(&id, Version::new(v - 1), PendingBatch::of(&env)).await.unwrap();
             }
             let mut stream = store.read_stream(&id, Version::INITIAL).await.unwrap();
             let mut seen = Vec::new();

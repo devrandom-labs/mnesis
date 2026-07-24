@@ -43,6 +43,7 @@ use mnesis::{DomainEvent, Message, Version, version};
 use mnesis_example_projection_tokio::run_projection;
 use mnesis_inmemory::InMemorySnapshotStore;
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::{
     Decode, Encode, EveryNEvents, Projection, Projector, RawEventStore, SnapshotStore, Store,
     Subscription, pending_envelope,
@@ -245,7 +246,7 @@ async fn append_events(store: &Store<InMemoryStore>, stream_id: &TestId, events:
     raw.append(
         &mnesis_store::StreamKey::from_slice(stream_id.as_ref()),
         expected,
-        &envelopes,
+        PendingBatch::new(&envelopes).expect("non-empty batch"),
     )
     .await
     .unwrap();
@@ -877,7 +878,7 @@ async fn runner_returns_event_codec_error_on_bad_payload() {
         .append(
             &mnesis_store::StreamKey::from_slice(stream_id.as_ref()),
             None,
-            &[bad_envelope],
+            PendingBatch::new(&[bad_envelope]).expect("non-empty batch"),
         )
         .await
         .unwrap();

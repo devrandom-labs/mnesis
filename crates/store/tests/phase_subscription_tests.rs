@@ -9,6 +9,7 @@ use std::time::Duration;
 use futures::{Stream, StreamExt};
 use mnesis::{DomainEvent, Message, Version};
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{
     DecodeStreamError, Decoded, DecodedStreamExt, Encode, JsonCodec, Step, StepStreamExt, Store,
@@ -75,7 +76,7 @@ async fn append(store: &Store<InMemoryStore>, id: &AcctId, version: u64, ev: &Mo
         .append(
             &StreamKey::from_slice(id.as_ref()),
             expected,
-            &[money_envelope(version, ev)],
+            PendingBatch::new(&[money_envelope(version, ev)]).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -163,7 +164,11 @@ async fn subscribe_decoded_corrupt_payload_surfaces_decode() {
         .build()
         .unwrap();
     store
-        .append(&StreamKey::from_slice(id.as_ref()), None, &[bad])
+        .append(
+            &StreamKey::from_slice(id.as_ref()),
+            None,
+            PendingBatch::of(&bad),
+        )
         .await
         .unwrap();
 
@@ -263,7 +268,11 @@ async fn subscribe_emits_exactly_one_caughtup_across_a_large_multi_chunk_backlog
         .map(|v| money_envelope(v, &Money::Deposited { amount: v }))
         .collect();
     store
-        .append(&StreamKey::from_slice(id.as_ref()), None, &envs)
+        .append(
+            &StreamKey::from_slice(id.as_ref()),
+            None,
+            PendingBatch::new(&envs).expect("non-empty batch"),
+        )
         .await
         .unwrap();
 
@@ -540,7 +549,11 @@ async fn decode_error_item_is_not_swallowed_by_the_phase_marker() {
         .build()
         .unwrap();
     store
-        .append(&StreamKey::from_slice(id.as_ref()), Version::new(1), &[bad])
+        .append(
+            &StreamKey::from_slice(id.as_ref()),
+            Version::new(1),
+            PendingBatch::of(&bad),
+        )
         .await
         .unwrap();
 

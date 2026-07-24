@@ -8,6 +8,7 @@ use std::time::Duration;
 use futures::StreamExt;
 use mnesis::{DomainEvent, Message, Version};
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{
     Decode, DecodeStreamError, Decoded, DecodedStreamExt, Encode, FoldDecodedError, JsonCodec,
@@ -61,7 +62,7 @@ async fn append(store: &Store<InMemoryStore>, id: &AcctId, version: u64, ev: &Mo
         .append(
             &StreamKey::from_slice(id.as_ref()),
             expected,
-            &[money_envelope(version, ev)],
+            PendingBatch::new(&[money_envelope(version, ev)]).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -119,7 +120,11 @@ async fn corrupt_payload_surfaces_decode_not_panic_not_read() {
         .build()
         .unwrap();
     store
-        .append(&StreamKey::from_slice(id.as_ref()), None, &[bad])
+        .append(
+            &StreamKey::from_slice(id.as_ref()),
+            None,
+            PendingBatch::of(&bad),
+        )
         .await
         .unwrap();
 
@@ -151,7 +156,11 @@ async fn read_error_item_surfaces_read_variant() {
         let store = Store::new(InMemoryStore::new());
         let id = AcctId("x".to_owned());
         store
-            .append(&StreamKey::from_slice(id.as_ref()), None, &[pending])
+            .append(
+                &StreamKey::from_slice(id.as_ref()),
+                None,
+                PendingBatch::of(&pending),
+            )
             .await
             .unwrap();
         let mut s = std::pin::pin!(

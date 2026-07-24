@@ -46,6 +46,7 @@ use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_store::AppendError;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
 use mnesis_store::pending_envelope;
@@ -132,8 +133,8 @@ impl RawEventStore for InMemoryRawStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         let mut guard = self.streams.lock().await;
         let stream = guard.entry(id.to_string()).or_default();
         let current_version = u64::try_from(stream.len()).unwrap_or(u64::MAX);
@@ -141,15 +142,17 @@ impl RawEventStore for InMemoryRawStore {
         if current_version != expected_u64 {
             return Err(AppendError::Store(BenchError::Conflict));
         }
+        let mut last = BenchAllPos(0);
         for env in envelopes {
             stream.push((
                 env.version().as_u64(),
                 env.event_type().to_owned(),
                 env.payload().to_vec(),
             ));
+            last = BenchAllPos(env.version().as_u64());
         }
         drop(guard);
-        Ok(())
+        Ok(last)
     }
 
     async fn read_stream(
@@ -294,7 +297,7 @@ fn bench_append(c: &mut Criterion) {
                         .append(
                             &StreamKey::from_slice(b"bench-stream"),
                             None,
-                            black_box(envs),
+                            PendingBatch::new(black_box(envs)).expect("bench batch is non-empty"),
                         )
                         .await
                         .unwrap();
@@ -316,7 +319,11 @@ fn bench_read_stream(c: &mut Criterion) {
         let store = InMemoryRawStore::new();
         rt.block_on(async {
             store
-                .append(&StreamKey::from_slice(b"bench-stream"), None, &envelopes)
+                .append(
+                    &StreamKey::from_slice(b"bench-stream"),
+                    None,
+                    PendingBatch::new(&envelopes).expect("non-empty batch"),
+                )
                 .await
                 .unwrap();
         });

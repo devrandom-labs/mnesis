@@ -7,10 +7,10 @@ use bytes::Bytes;
 use futures::StreamExt;
 use futures::pin_mut;
 use mnesis::Version;
-use mnesis_store::StreamKey;
 use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope, pending_envelope};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::SchemaVersion;
+use mnesis_store::{PendingBatch, StreamKey};
 
 /// One row of test data fed into an adapter for the conformance suite to
 /// observe back out. All fields must round-trip byte-for-byte.
@@ -121,7 +121,11 @@ pub async fn append_rows<S: RawEventStore>(store: &S, id: &StreamKey, rows: &[Co
     }
     let envs: Vec<PendingEnvelope> = rows.iter().map(envelope_for).collect();
     store
-        .append(id, None, &envs)
+        .append(
+            id,
+            None,
+            PendingBatch::new(&envs).expect("kit batches are non-empty"),
+        )
         .await
         .unwrap_or_else(|e| panic!("append of {} rows failed: {e:?}", rows.len()));
 }
@@ -134,12 +138,24 @@ pub async fn append_event<S: RawEventStore>(
     version: u64,
     payload: &[u8],
 ) {
+    append_event_at(store, id, version, payload).await;
+}
+
+/// Like [`append_event`] but returns the `$all` position the append assigned —
+/// the read-your-writes token (#330). The version-only callers use
+/// [`append_event`]; position checks use this.
+pub async fn append_event_at<S: RawEventStore>(
+    store: &S,
+    id: &StreamKey,
+    version: u64,
+    payload: &[u8],
+) -> S::AllPosition {
     let expected = Version::new(version.saturating_sub(1));
     let env = envelope_for(&ConformanceRow::new(version, "E", payload.to_vec()));
     store
-        .append(id, expected, &[env])
+        .append(id, expected, PendingBatch::of(&env))
         .await
-        .unwrap_or_else(|e| panic!("append v{version} failed: {e:?}"));
+        .unwrap_or_else(|e| panic!("append v{version} failed: {e:?}"))
 }
 
 /// Drain `read_stream(id, from)` fully into rows.
