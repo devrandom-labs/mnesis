@@ -3,6 +3,7 @@
 Event sourcing for Rust — no `Box<dyn>`, no runtime downcasting, no hidden allocations.
 
 [![CI](https://github.com/devrandom-labs/mnesis/actions/workflows/checks.yml/badge.svg)](https://github.com/devrandom-labs/mnesis/actions/workflows/checks.yml)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/devrandom-labs/mnesis?utm_source=badge)
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-MIT)
 
 ```rust

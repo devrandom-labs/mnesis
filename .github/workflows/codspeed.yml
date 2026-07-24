@@ -1,0 +1,59 @@
+name: CodSpeed
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  # Allows CodSpeed to trigger backtest performance analysis to generate
+  # initial data.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # for OpenID Connect authentication with CodSpeed
+
+concurrency:
+  group: codspeed-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmarks:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Respects the pinned toolchain from rust-toolchain.toml (channel 1.95.0,
+      # edition 2024) and installs the cargo-codspeed binary.
+      - name: Setup Rust toolchain, cache and cargo-codspeed binary
+        uses: moonrepo/setup-rust@v0
+        with:
+          cache-target: release
+          bins: cargo-codspeed
+
+      # Only the criterion-based benchmark suites are instrumented. The
+      # `projection_storage` bench in mnesis-fjall is a standalone reporting
+      # binary (it measures on-disk footprint by writing megabytes to disk, not
+      # a criterion timing loop), so it is intentionally excluded.
+      - name: Build the benchmark target(s)
+        run: >-
+          cargo codspeed build
+          -p mnesis --bench kernel_bench
+          -p mnesis-store --bench store_bench
+          -p mnesis-fjall --bench fjall_benchmarks --bench all_index_layout
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@v4
+        with:
+          mode: simulation
+          run: >-
+            cargo codspeed run
+            -p mnesis --bench kernel_bench
+            -p mnesis-store --bench store_bench
+            -p mnesis-fjall --bench fjall_benchmarks --bench all_index_layout

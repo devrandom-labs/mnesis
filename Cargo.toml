@@ -30,7 +30,7 @@ axum = "0.8.9"
 bytemuck = { version = "1", features = ["derive"] }
 bytes = { version = "1", default-features = false }
 crc32c = "0.6.8"
-criterion = { version = "0.8", features = ["html_reports"] }
+criterion = { package = "codspeed-criterion-compat", version = "5.0.1", features = ["html_reports"] }
 embassy-executor = { version = "0.10.0", features = ["platform-std", "executor-thread"] }
 event-listener = { version = "5.4.1", default-features = false }
 fjall = { version = "3", features = ["bytes_1"] }

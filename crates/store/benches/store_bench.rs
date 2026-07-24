@@ -22,6 +22,13 @@
 #![allow(clippy::print_stdout, reason = "criterion may print to stdout")]
 #![allow(clippy::print_stderr, reason = "criterion may print to stderr")]
 #![allow(
+    clippy::significant_drop_tightening,
+    reason = "the `Criterion` temporary is held by the expansion of \
+              `codspeed-criterion-compat`'s `criterion_group!`; its scope is \
+              upstream's, not ours, and an item-level allow on the macro call \
+              is discarded as an unused attribute"
+)]
+#![allow(
     clippy::missing_panics_doc,
     reason = "benchmark functions do not need panic docs"
 )]
