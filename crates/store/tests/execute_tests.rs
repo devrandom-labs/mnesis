@@ -92,11 +92,23 @@ impl Aggregate for Counter {
 }
 struct Add(u64);
 impl Handle<Add> for Counter {
-    fn handle(_state: &CtrState, cmd: Add) -> Result<Events<CtrEvent>, CtrError> {
+    fn handle(_state: &CtrState, cmd: Add) -> Result<Option<Events<CtrEvent>>, CtrError> {
         if cmd.0 == 0 {
             return Err(CtrError::Zero);
         }
-        Ok(events![CtrEvent::Added(cmd.0)])
+        Ok(Some(events![CtrEvent::Added(cmd.0)]))
+    }
+}
+
+/// Raise the total to at least `.0`. Already there means nothing to record —
+/// accepted, but no event and no version advance (#329).
+struct RaiseTo(u64);
+impl Handle<RaiseTo> for Counter {
+    fn handle(state: &CtrState, cmd: RaiseTo) -> Result<Option<Events<CtrEvent>>, CtrError> {
+        match cmd.0.checked_sub(state.total) {
+            None | Some(0) => Ok(None),
+            Some(delta) => Ok(Some(events![CtrEvent::Added(delta)])),
+        }
     }
 }
 
@@ -134,12 +146,12 @@ async fn sequence_execute_chain_advances_version_and_state() {
     let repo = new_repo();
     let mut ctr = repo.load(CtrId::new(1)).await.unwrap();
 
-    let e1 = repo.execute(&mut ctr, Add(3)).await.unwrap();
+    let e1 = repo.execute(&mut ctr, Add(3)).await.unwrap().unwrap();
     assert_eq!(e1.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(3)]);
     assert_eq!(ctr.version(), Version::new(1));
     assert_eq!(ctr.state().total, 3);
 
-    let e2 = repo.execute(&mut ctr, Add(4)).await.unwrap();
+    let e2 = repo.execute(&mut ctr, Add(4)).await.unwrap().unwrap();
     assert_eq!(e2.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(4)]);
     assert_eq!(ctr.version(), Version::new(2));
     assert_eq!(ctr.state().total, 7);
@@ -147,6 +159,52 @@ async fn sequence_execute_chain_advances_version_and_state() {
     let reloaded = repo.load(CtrId::new(1)).await.unwrap();
     assert_eq!(reloaded.state().total, 7);
     assert_eq!(reloaded.version(), Version::new(2));
+}
+
+// ── Sequence: a no-op decision persists nothing (#329) ────────────────────
+#[tokio::test]
+async fn sequence_no_op_command_persists_nothing_and_holds_version() {
+    let repo = new_repo();
+    let mut ctr = repo.load(CtrId::new(10)).await.unwrap();
+    repo.execute(&mut ctr, Add(5)).await.unwrap();
+    assert_eq!(ctr.version(), Version::new(1));
+
+    // Already at 5: accepted, decides nothing.
+    let outcome = repo.execute::<RaiseTo, 0>(&mut ctr, RaiseTo(5)).await;
+    assert!(matches!(outcome, Ok(None)));
+    assert_eq!(ctr.version(), Version::new(1));
+    assert_eq!(ctr.state().total, 5);
+
+    // Nothing reached the store: the stream is still at v1.
+    let mut reloaded = repo.load(CtrId::new(10)).await.unwrap();
+    assert_eq!(reloaded.version(), Version::new(1));
+    assert_eq!(reloaded.state().total, 5);
+
+    // The very next command still lands at v2 — no version was burned.
+    let decided = repo
+        .execute(&mut reloaded, RaiseTo(9))
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        decided.iter().collect::<Vec<_>>(),
+        vec![&CtrEvent::Added(4)]
+    );
+    assert_eq!(reloaded.version(), Version::new(2));
+}
+
+#[tokio::test]
+async fn no_op_on_a_fresh_aggregate_creates_no_stream() {
+    let repo = new_repo();
+    let mut ctr = repo.load(CtrId::new(11)).await.unwrap();
+    assert_eq!(ctr.version(), None);
+
+    let outcome = repo.execute::<RaiseTo, 0>(&mut ctr, RaiseTo(0)).await;
+    assert!(matches!(outcome, Ok(None)));
+    assert_eq!(ctr.version(), None);
+
+    let reloaded = repo.load(CtrId::new(11)).await.unwrap();
+    assert_eq!(reloaded.version(), None);
 }
 
 // ── Defensive boundary: rejection persists nothing ────────────────────────
@@ -228,12 +286,12 @@ async fn linearizable_concurrent_execute_one_winner() {
 async fn equivalence_execute_matches_manual_two_step() {
     let manual = new_repo();
     let mut m = manual.load(CtrId::new(5)).await.unwrap();
-    let decided = m.handle::<Add, 0>(Add(9)).unwrap();
+    let decided = m.handle::<Add, 0>(Add(9)).unwrap().unwrap();
     manual.save(&mut m, &decided).await.unwrap();
 
     let fused = new_repo();
     let mut f = fused.load(CtrId::new(6)).await.unwrap();
-    let returned = fused.execute(&mut f, Add(9)).await.unwrap();
+    let returned = fused.execute(&mut f, Add(9)).await.unwrap().unwrap();
 
     assert_eq!(
         returned.iter().collect::<Vec<_>>(),

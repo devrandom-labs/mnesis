@@ -88,20 +88,25 @@ struct ActivateUser;
 
 // --- Command handlers (decide pattern) ---
 impl Handle<CreateUser> for User {
-    fn handle(state: &UserState, cmd: CreateUser) -> Result<Events<UserEvent>, UserError> {
+    fn handle(state: &UserState, cmd: CreateUser) -> Result<Option<Events<UserEvent>>, UserError> {
         if !state.name.is_empty() {
             return Err(UserError::AlreadyExists);
         }
-        Ok(events![UserEvent::Created(UserCreated { name: cmd.name })])
+        Ok(Some(events![UserEvent::Created(UserCreated {
+            name: cmd.name
+        })]))
     }
 }
 
 impl Handle<ActivateUser> for User {
-    fn handle(state: &UserState, _cmd: ActivateUser) -> Result<Events<UserEvent>, UserError> {
+    fn handle(
+        state: &UserState,
+        _cmd: ActivateUser,
+    ) -> Result<Option<Events<UserEvent>>, UserError> {
         if state.active {
             return Err(UserError::AlreadyActive);
         }
-        Ok(events![UserEvent::Activated(UserActivated)])
+        Ok(Some(events![UserEvent::Activated(UserActivated)]))
     }
 }
 
@@ -116,6 +121,7 @@ fn full_aggregate_lifecycle_with_handle() {
         .handle(CreateUser {
             name: "Alice".into(),
         })
+        .unwrap()
         .unwrap();
     assert_eq!(create_events.len(), 1);
     assert_eq!(create_events.iter().next().unwrap().name(), "Created");
@@ -128,7 +134,7 @@ fn full_aggregate_lifecycle_with_handle() {
     assert_eq!(user.version(), Some(v1));
 
     // Second command
-    let activate_events = user.handle(ActivateUser).unwrap();
+    let activate_events = user.handle(ActivateUser).unwrap().unwrap();
     let v2 = Version::new(2).unwrap();
     user.commit_persisted(v2, &activate_events);
 

@@ -37,11 +37,12 @@
 //! The sanctioned one-call command path is `repo.execute(&mut root, cmd)` —
 //! it fuses `AggregateRoot::handle` (decide) and `Repository::save` (persist)
 //! so the decided events can never be forgotten or misthreaded between the
-//! two steps, and returns them for inspection. The manual two-step
-//! `root.handle(cmd)?` + `repo.save(&mut root, &decided).await?` remains
-//! available as the escape hatch when a caller needs to inspect the decided
-//! events *before* they land (e.g. to log or transform them ahead of the
-//! save).
+//! two steps, and returns them for inspection. It returns `Ok(None)` when the
+//! command decided nothing (#329) — no append is issued and the version does
+//! not advance. The manual two-step `root.handle(cmd)?` + `repo.save(&mut
+//! root, &decided).await?` remains available as the escape hatch when a caller
+//! needs to inspect the decided events *before* they land (e.g. to log or
+//! transform them ahead of the save).
 
 // Example code relaxes a handful of strict lints locally (production crates do
 // NOT) — same posture as `examples/closing-the-books` and `examples/inmemory`.

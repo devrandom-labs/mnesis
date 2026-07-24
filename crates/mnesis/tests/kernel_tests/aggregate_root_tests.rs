@@ -110,8 +110,8 @@ impl Handle<Increment> for Counter {
     fn handle(
         _state: &CounterState,
         _cmd: Increment,
-    ) -> Result<Events<CounterEvent>, CounterError> {
-        Ok(events![CounterEvent::Incremented])
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
+        Ok(Some(events![CounterEvent::Incremented]))
     }
 }
 
@@ -119,20 +119,23 @@ impl Handle<IncrementBy> for Counter {
     fn handle(
         _state: &CounterState,
         cmd: IncrementBy,
-    ) -> Result<Events<CounterEvent>, CounterError> {
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
         if cmd.amount == 0 {
             return Err(CounterError::ZeroIncrement);
         }
-        Ok(events![CounterEvent::IncrementedBy(cmd.amount)])
+        Ok(Some(events![CounterEvent::IncrementedBy(cmd.amount)]))
     }
 }
 
 impl Handle<Decrement> for Counter {
-    fn handle(state: &CounterState, _cmd: Decrement) -> Result<Events<CounterEvent>, CounterError> {
+    fn handle(
+        state: &CounterState,
+        _cmd: Decrement,
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
         if state.value <= 0 {
             return Err(CounterError::WouldGoNegative);
         }
-        Ok(events![CounterEvent::Decremented])
+        Ok(Some(events![CounterEvent::Decremented]))
     }
 }
 

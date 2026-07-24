@@ -78,8 +78,6 @@ pub enum TodoError {
     AlreadyExists,
     #[error("todo does not exist")]
     NotFound,
-    #[error("nothing to update")]
-    NothingToUpdate,
 }
 
 #[mnesis::aggregate(state = TodoState, error = TodoError, id = TodoId)]
@@ -109,46 +107,48 @@ pub struct Delete {
 }
 
 impl Handle<Create> for Todo {
-    fn handle(state: &TodoState, cmd: Create) -> Result<Events<TodoEvent>, TodoError> {
+    fn handle(state: &TodoState, cmd: Create) -> Result<Option<Events<TodoEvent>>, TodoError> {
         if state.created {
             return Err(TodoError::AlreadyExists);
         }
-        Ok(events![TodoEvent::Created {
+        Ok(Some(events![TodoEvent::Created {
             id: cmd.id,
             text: cmd.text
-        }])
+        }]))
     }
 }
 
 impl Handle<Update, 1> for Todo {
-    fn handle(state: &TodoState, cmd: Update) -> Result<Events<TodoEvent, 1>, TodoError> {
+    fn handle(state: &TodoState, cmd: Update) -> Result<Option<Events<TodoEvent, 1>>, TodoError> {
         if !state.created || state.deleted {
             return Err(TodoError::NotFound);
         }
         match (cmd.text, cmd.completed) {
-            (Some(text), Some(completed)) => Ok(events![
+            (Some(text), Some(completed)) => Ok(Some(events![
                 TodoEvent::TextChanged { id: cmd.id, text },
                 TodoEvent::CompletionChanged {
                     id: cmd.id,
                     completed
                 },
-            ]),
-            (Some(text), None) => Ok(events![TodoEvent::TextChanged { id: cmd.id, text }]),
-            (None, Some(completed)) => Ok(events![TodoEvent::CompletionChanged {
+            ])),
+            (Some(text), None) => Ok(Some(events![TodoEvent::TextChanged { id: cmd.id, text }])),
+            (None, Some(completed)) => Ok(Some(events![TodoEvent::CompletionChanged {
                 id: cmd.id,
                 completed
-            }]),
-            (None, None) => Err(TodoError::NothingToUpdate),
+            }])),
+            // An all-absent PATCH body is a legitimate no-op: accepted,
+            // records nothing, advances no version (#329).
+            (None, None) => Ok(None),
         }
     }
 }
 
 impl Handle<Delete> for Todo {
-    fn handle(state: &TodoState, cmd: Delete) -> Result<Events<TodoEvent>, TodoError> {
+    fn handle(state: &TodoState, cmd: Delete) -> Result<Option<Events<TodoEvent>>, TodoError> {
         if !state.created || state.deleted {
             return Err(TodoError::NotFound);
         }
-        Ok(events![TodoEvent::Deleted { id: cmd.id }])
+        Ok(Some(events![TodoEvent::Deleted { id: cmd.id }]))
     }
 }
 
@@ -241,11 +241,11 @@ mod tests {
     }
 
     #[test]
-    fn update_with_no_fields_is_rejected() {
-        // `Events<E, N>` guarantees >= 1 event, so "decide nothing" has no
-        // representation in `Handle` (finding #326-3): the all-None command
-        // must be an error here; the HTTP handler answers the no-op PATCH
-        // from state without entering the domain.
+    fn update_with_no_fields_is_a_no_op() {
+        // The all-absent PATCH body is accepted and records nothing (#329).
+        // It is neither an error nor a redundant event, and the whole
+        // decision lives in the domain — the HTTP handler has no special
+        // case for it.
         let id = uid();
         let _ = fixture(id)
             .given([TodoEvent::Created {
@@ -257,7 +257,8 @@ mod tests {
                 text: None,
                 completed: None,
             })
-            .then_expect_error(TodoError::NothingToUpdate);
+            .then_expect_ignored()
+            .then_expect_state(|s| assert_eq!(s.text, "a"));
     }
 
     #[test]

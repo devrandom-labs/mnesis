@@ -77,22 +77,25 @@ struct CreateTodo {
 struct CompleteTodo;
 
 impl Handle<CreateTodo> for TodoAggregate {
-    fn handle(state: &TodoState, cmd: CreateTodo) -> Result<Events<TodoEvent>, TodoError> {
+    fn handle(state: &TodoState, cmd: CreateTodo) -> Result<Option<Events<TodoEvent>>, TodoError> {
         if !state.title.is_empty() {
             return Err(TodoError::AlreadyExists);
         }
-        Ok(events![TodoEvent::Created(TodoCreated {
+        Ok(Some(events![TodoEvent::Created(TodoCreated {
             title: cmd.title
-        })])
+        })]))
     }
 }
 
 impl Handle<CompleteTodo> for TodoAggregate {
-    fn handle(state: &TodoState, _cmd: CompleteTodo) -> Result<Events<TodoEvent>, TodoError> {
+    fn handle(
+        state: &TodoState,
+        _cmd: CompleteTodo,
+    ) -> Result<Option<Events<TodoEvent>>, TodoError> {
         if state.done {
             return Err(TodoError::AlreadyDone);
         }
-        Ok(events![TodoEvent::Completed(TodoCompleted)])
+        Ok(Some(events![TodoEvent::Completed(TodoCompleted)]))
     }
 }
 
@@ -105,9 +108,10 @@ fn derive_aggregate_lifecycle() {
         .handle(CreateTodo {
             title: "Buy milk".into(),
         })
+        .unwrap()
         .unwrap();
     todo.commit_persisted(Version::new(1).unwrap(), &created);
-    let completed = todo.handle(CompleteTodo).unwrap();
+    let completed = todo.handle(CompleteTodo).unwrap().unwrap();
     todo.commit_persisted(Version::new(2).unwrap(), &completed);
 
     assert_eq!(todo.state().title, "Buy milk");
@@ -123,6 +127,7 @@ fn derive_aggregate_invariants() {
         .handle(CreateTodo {
             title: "Test".into(),
         })
+        .unwrap()
         .unwrap();
     todo.commit_persisted(Version::new(1).unwrap(), &created);
 
@@ -133,7 +138,7 @@ fn derive_aggregate_invariants() {
         Err(TodoError::AlreadyExists)
     ));
 
-    let completed = todo.handle(CompleteTodo).unwrap();
+    let completed = todo.handle(CompleteTodo).unwrap().unwrap();
     todo.commit_persisted(Version::new(2).unwrap(), &completed);
     assert!(matches!(
         todo.handle(CompleteTodo),
@@ -186,6 +191,7 @@ fn derive_aggregate_debug_does_not_leak_state() {
         .handle(CreateTodo {
             title: "SECRET_TITLE".into(),
         })
+        .unwrap()
         .unwrap();
     todo.commit_persisted(Version::INITIAL, &created);
     let debug = format!("{todo:?}");

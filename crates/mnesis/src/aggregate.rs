@@ -155,16 +155,18 @@ pub trait Aggregate: Sized {
 /// struct CompleteTodo;
 ///
 /// impl Handle<CompleteTodo> for Todo {
-///     fn handle(state: &TodoState, _cmd: CompleteTodo) -> Result<Events<TodoEvent>, TodoError> {
+///     fn handle(state: &TodoState, _cmd: CompleteTodo) -> Result<Option<Events<TodoEvent>>, TodoError> {
 ///         if state.done {
-///             return Err(TodoError);
+///             // Already complete: nothing to record. Not an error.
+///             return Ok(None);
 ///         }
-///         Ok(events![TodoEvent::Completed])
+///         Ok(Some(events![TodoEvent::Completed]))
 ///     }
 /// }
 /// ```
 pub trait Handle<C, const N: usize = 0>: Aggregate {
-    /// Decide a command, returning decided events or a domain error.
+    /// Decide a command, returning decided events, "nothing to record", or a
+    /// domain error.
     ///
     /// A **pure decision**: reads the aggregate's current `state` and the
     /// command, returns the decided events. No access to version or identity —
@@ -172,10 +174,23 @@ pub trait Handle<C, const N: usize = 0>: Aggregate {
     /// persistence position. Implemented on the aggregate marker type; invoke
     /// via [`AggregateRoot::handle`] on a loaded aggregate.
     ///
+    /// - `Ok(None)` — the command is accepted and changes nothing; e.g. an
+    ///   idempotent re-issue, or an update whose fields are all absent.
+    ///   Nothing is persisted and the version does not advance.
+    /// - `Ok(Some(events))` — the decided events (at least one, by
+    ///   construction of [`Events`]).
+    /// - `Err(_)` — the command violates a domain invariant.
+    ///
+    /// The `Option` mirrors [`React::react`](crate::React::react), the saga
+    /// dual: a routed-but-no-op outcome is a decision, not a failure, so it is
+    /// neither an error variant nor a redundant event appended to an immutable
+    /// log.
+    ///
     /// # Errors
     ///
     /// Returns `Self::Error` when the command violates a domain invariant.
-    fn handle(state: &Self::State, cmd: C) -> Result<Events<EventOf<Self>, N>, Self::Error>;
+    fn handle(state: &Self::State, cmd: C)
+    -> Result<Option<Events<EventOf<Self>, N>>, Self::Error>;
 }
 
 /// Shorthand for accessing the event type of an aggregate.
@@ -284,13 +299,17 @@ impl<A: Aggregate> AggregateRoot<A> {
     /// Decide a command against the current state.
     ///
     /// Dispatches to the aggregate's [`Handle`] impl, passing the current
-    /// [`state`](Self::state). Pure — reads state, returns decided events,
-    /// mutates nothing.
+    /// [`state`](Self::state). Pure — reads state, returns the decided events
+    /// (or `None` when the command changes nothing), mutates nothing. The dual
+    /// of [`react`](Self::react).
     ///
     /// # Errors
     ///
     /// Returns `A::Error` when the command violates a domain invariant.
-    pub fn handle<C, const N: usize>(&self, cmd: C) -> Result<Events<EventOf<A>, N>, A::Error>
+    pub fn handle<C, const N: usize>(
+        &self,
+        cmd: C,
+    ) -> Result<Option<Events<EventOf<A>, N>>, A::Error>
     where
         A: Handle<C, N>,
     {
@@ -509,19 +528,51 @@ mod purist_dispatch_tests {
     struct Add(u64);
 
     impl Handle<Add> for Counter {
-        fn handle(state: &CtrState, cmd: Add) -> Result<Events<CtrEvent>, CtrError> {
+        fn handle(state: &CtrState, cmd: Add) -> Result<Option<Events<CtrEvent>>, CtrError> {
             if cmd.0 == 0 {
                 return Err(CtrError);
             }
             let _ = state.total;
-            Ok(events![CtrEvent::Added(cmd.0)])
+            Ok(Some(events![CtrEvent::Added(cmd.0)]))
         }
+    }
+
+    /// A command whose decision is legitimately "nothing to record" when the
+    /// aggregate already sits at the requested total (#329).
+    struct SetTotal(u64);
+
+    impl Handle<SetTotal> for Counter {
+        fn handle(state: &CtrState, cmd: SetTotal) -> Result<Option<Events<CtrEvent>>, CtrError> {
+            match cmd.0.checked_sub(state.total) {
+                None => Err(CtrError),
+                Some(0) => Ok(None),
+                Some(delta) => Ok(Some(events![CtrEvent::Added(delta)])),
+            }
+        }
+    }
+
+    #[test]
+    fn dispatches_no_op_decision_as_ignored() {
+        // Fresh root: total == 0, so `SetTotal(0)` changes nothing. The
+        // decision is neither an error nor a redundant event.
+        let root = AggregateRoot::<Counter>::new(CtrId::new(1));
+        assert!(matches!(root.handle(SetTotal(0)), Ok(None)));
+    }
+
+    #[test]
+    fn dispatches_decided_events_as_some() {
+        let root = AggregateRoot::<Counter>::new(CtrId::new(1));
+        let decided = root.handle(SetTotal(7)).expect("ok").expect("some");
+        assert_eq!(
+            decided.into_iter().collect::<Vec<_>>(),
+            vec![CtrEvent::Added(7)]
+        );
     }
 
     #[test]
     fn dispatches_to_handle_on_the_marker() {
         let root = AggregateRoot::<Counter>::new(CtrId::new(1));
-        let decided = root.handle(Add(5)).expect("ok");
+        let decided = root.handle(Add(5)).expect("ok").expect("some");
         assert_eq!(
             decided.into_iter().collect::<Vec<_>>(),
             vec![CtrEvent::Added(5)]

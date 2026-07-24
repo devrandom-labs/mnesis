@@ -144,29 +144,35 @@ impl Handle<OpenAccount> for BankAccount {
     fn handle(
         state: &AccountState,
         cmd: OpenAccount,
-    ) -> Result<Events<AccountEvent>, AccountError> {
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if state.is_open {
             return Err(AccountError::AlreadyOpen);
         }
-        Ok(events![AccountEvent::Opened(AccountOpened {
+        Ok(Some(events![AccountEvent::Opened(AccountOpened {
             owner: cmd.owner,
-        })])
+        })]))
     }
 }
 
 impl Handle<Deposit> for BankAccount {
-    fn handle(state: &AccountState, cmd: Deposit) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Deposit,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
-        Ok(events![AccountEvent::Deposited(MoneyDeposited {
+        Ok(Some(events![AccountEvent::Deposited(MoneyDeposited {
             amount: cmd.amount,
-        })])
+        })]))
     }
 }
 
 impl Handle<Withdraw> for BankAccount {
-    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Withdraw,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
@@ -176,9 +182,9 @@ impl Handle<Withdraw> for BankAccount {
                 amount: cmd.amount,
             });
         }
-        Ok(events![AccountEvent::Withdrawn(MoneyWithdrawn {
+        Ok(Some(events![AccountEvent::Withdrawn(MoneyWithdrawn {
             amount: cmd.amount,
-        })])
+        })]))
     }
 }
 
@@ -275,17 +281,20 @@ async fn main() {
         .handle(OpenAccount {
             owner: "Alice Smith".to_owned(),
         })
-        .expect("open should succeed");
+        .expect("open should succeed")
+        .expect("command decided events");
     account.commit_persisted(version!(1), &decided);
 
     let decided = account
         .handle(Deposit { amount: 1000 })
-        .expect("deposit should succeed");
+        .expect("deposit should succeed")
+        .expect("command decided events");
     account.commit_persisted(version!(2), &decided);
 
     let decided = account
         .handle(Deposit { amount: 500 })
-        .expect("deposit should succeed");
+        .expect("deposit should succeed")
+        .expect("command decided events");
     account.commit_persisted(version!(3), &decided);
 
     println!(
@@ -308,16 +317,23 @@ async fn main() {
         .handle(OpenAccount {
             owner: "Alice Smith".to_owned(),
         })
-        .expect("open");
+        .expect("open")
+        .expect("command decided events");
     let envelopes = encode_decided(&codec, &decided, 0);
     fresh.commit_persisted(version!(1), &decided);
 
-    let decided = fresh.handle(Deposit { amount: 1000 }).expect("deposit");
+    let decided = fresh
+        .handle(Deposit { amount: 1000 })
+        .expect("deposit")
+        .expect("command decided events");
     let mut more = encode_decided(&codec, &decided, 1);
     envelopes.len(); // keep envelopes alive
     fresh.commit_persisted(version!(2), &decided);
 
-    let decided = fresh.handle(Deposit { amount: 500 }).expect("deposit");
+    let decided = fresh
+        .handle(Deposit { amount: 500 })
+        .expect("deposit")
+        .expect("command decided events");
     let mut even_more = encode_decided(&codec, &decided, 2);
 
     // Combine all envelopes and persist
@@ -365,7 +381,8 @@ async fn main() {
     let expected_version = account.version();
     let decided = account
         .handle(Withdraw { amount: 300 })
-        .expect("withdraw should succeed");
+        .expect("withdraw should succeed")
+        .expect("command decided events");
     let base = account.version().map_or(0, |v| v.as_u64());
     let envelopes = encode_decided(&codec, &decided, base);
     store

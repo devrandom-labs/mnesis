@@ -79,12 +79,32 @@ struct Counter;
 struct Increment(u64);
 
 impl Handle<Increment> for Counter {
-    fn handle(state: &CounterState, cmd: Increment) -> Result<Events<CounterEvent>, CounterError> {
+    fn handle(
+        state: &CounterState,
+        cmd: Increment,
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
         state
             .total
             .checked_add(cmd.0)
             .ok_or(CounterError::Overflow)?;
-        Ok(events![CounterEvent::Incremented(cmd.0)])
+        Ok(Some(events![CounterEvent::Incremented(cmd.0)]))
+    }
+}
+
+/// Raise the counter to at least `floor`. Already at or above it means there
+/// is nothing to record — accepted, but no event (#329).
+#[derive(Debug)]
+struct RaiseTo(u64);
+
+impl Handle<RaiseTo> for Counter {
+    fn handle(
+        state: &CounterState,
+        cmd: RaiseTo,
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
+        match cmd.0.checked_sub(state.total) {
+            None | Some(0) => Ok(None),
+            Some(delta) => Ok(Some(events![CounterEvent::Incremented(delta)])),
+        }
     }
 }
 
@@ -98,7 +118,7 @@ impl Handle<IncrementBounded> for Counter {
     fn handle(
         state: &CounterState,
         cmd: IncrementBounded,
-    ) -> Result<Events<CounterEvent>, CounterError> {
+    ) -> Result<Option<Events<CounterEvent>>, CounterError> {
         let next = state
             .total
             .checked_add(cmd.by)
@@ -106,7 +126,7 @@ impl Handle<IncrementBounded> for Counter {
         if next > cmd.max {
             return Err(CounterError::Overflow);
         }
-        Ok(events![CounterEvent::Incremented(cmd.by)])
+        Ok(Some(events![CounterEvent::Incremented(cmd.by)]))
     }
 }
 
@@ -215,6 +235,60 @@ fn then_expect_events_panics_when_command_rejected() {
         .given([CounterEvent::Incremented(90)])
         .when(IncrementBounded { by: 20, max: 100 })
         .then_expect_events([CounterEvent::Incremented(20)]);
+}
+
+// ── No-op decisions (#329) ───────────────────────────────────────
+#[test]
+fn no_op_command_is_ignored_not_an_error() {
+    AggregateFixture::<Counter>::new()
+        .given([CounterEvent::Incremented(10)])
+        .when(RaiseTo(10))
+        .then_expect_ignored();
+}
+
+#[test]
+fn ignored_command_leaves_state_untouched() {
+    AggregateFixture::<Counter>::new()
+        .given([CounterEvent::Incremented(10)])
+        .when(RaiseTo(4))
+        .then_expect_ignored()
+        .then_expect_state(|s| assert_eq!(s.total, 10));
+}
+
+#[test]
+fn same_command_decides_events_when_it_changes_something() {
+    AggregateFixture::<Counter>::new()
+        .given([CounterEvent::Incremented(10)])
+        .when(RaiseTo(25))
+        .then_expect_events([CounterEvent::Incremented(15)])
+        .then_expect_state(|s| assert_eq!(s.total, 25));
+}
+
+#[test]
+#[should_panic(expected = "then_expect_ignored")]
+fn then_expect_ignored_panics_when_events_were_decided() {
+    AggregateFixture::<Counter>::new()
+        .given([])
+        .when(Increment(1))
+        .then_expect_ignored();
+}
+
+#[test]
+#[should_panic(expected = "then_expect_ignored")]
+fn then_expect_ignored_panics_when_command_was_rejected() {
+    AggregateFixture::<Counter>::new()
+        .given([CounterEvent::Incremented(u64::MAX)])
+        .when(Increment(1))
+        .then_expect_ignored();
+}
+
+#[test]
+#[should_panic(expected = "use then_expect_ignored")]
+fn then_expect_events_panics_on_a_no_op() {
+    AggregateFixture::<Counter>::new()
+        .given([CounterEvent::Incremented(10)])
+        .when(RaiseTo(10))
+        .then_expect_events([CounterEvent::Incremented(0)]);
 }
 
 #[test]

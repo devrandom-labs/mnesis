@@ -103,13 +103,14 @@ pub struct Given<A: Aggregate> {
 
 impl<A: Aggregate> Given<A> {
     /// Issue a command. Calls [`AggregateRoot::handle`] (which dispatches to
-    /// [`Handle::handle`]), and — on success — folds the decided events into
+    /// [`Handle::handle`]), and — when events were decided — folds them into
     /// the root via [`AggregateRoot::apply_events`] so the root reaches the
     /// post-command state, exactly as the repository does after a successful
     /// persist. The fold uses the kernel's `mem::replace` path (no clone), so
     /// the fixture imposes no `Clone` bound on `A::State`. The raw `Result`
-    /// is captured for `then_expect_events` / `then_expect_error`. On a
-    /// rejected command the root is left at the rehydrated state.
+    /// is captured for `then_expect_events` / `then_expect_ignored` /
+    /// `then_expect_error`. On a rejected command — and on a no-op
+    /// (`Ok(None)`) — the root is left at the rehydrated state.
     #[must_use]
     pub fn when<C, const N: usize>(self, cmd: C) -> Acted<A, N>
     where
@@ -117,9 +118,12 @@ impl<A: Aggregate> Given<A> {
     {
         let mut root = self.root;
         let result = root.handle(cmd);
-        if let Ok(events) = &result {
-            root.apply_events(events);
-        }
+        // `Result::iter` yields the `Ok`, `flatten` drops the `None` — so the
+        // fold runs exactly on `Ok(Some(_))` with no branch to get wrong.
+        result
+            .iter()
+            .flatten()
+            .for_each(|events| root.apply_events(events));
         Acted { root, result }
     }
 
@@ -138,7 +142,7 @@ impl<A: Aggregate> Given<A> {
 /// raw handle result.
 pub struct Acted<A: Aggregate, const N: usize> {
     root: AggregateRoot<A>,
-    result: Result<Events<EventOf<A>, N>, <A as Aggregate>::Error>,
+    result: Result<Option<Events<EventOf<A>, N>>, <A as Aggregate>::Error>,
 }
 
 impl<A: Aggregate, const N: usize> Acted<A, N> {
@@ -147,8 +151,10 @@ impl<A: Aggregate, const N: usize> Acted<A, N> {
     ///
     /// # Panics
     ///
-    /// Panics if the command was rejected, or if the decided events do not
-    /// match `expected` exactly (same order, same count).
+    /// Panics if the command was rejected, if it decided nothing (`Ok(None)` —
+    /// use [`then_expect_ignored`](Self::then_expect_ignored) for that), or if
+    /// the decided events do not match `expected` exactly (same order, same
+    /// count).
     #[must_use]
     pub fn then_expect_events(self, expected: impl IntoIterator<Item = EventOf<A>>) -> Self
     where
@@ -160,14 +166,38 @@ impl<A: Aggregate, const N: usize> Acted<A, N> {
             "then_expect_events: command was rejected with error: {:?}",
             self.result.as_ref().err()
         );
-        let Ok(produced) = &self.result else {
-            return self; // unreachable: the assert above diverges on Err
+        assert!(
+            matches!(self.result, Ok(Some(_))),
+            "then_expect_events: command decided nothing (Ok(None)); \
+             use then_expect_ignored to assert a no-op"
+        );
+        let Ok(Some(produced)) = &self.result else {
+            return self; // unreachable: the asserts above diverge otherwise
         };
         let produced_refs: Vec<&EventOf<A>> = produced.iter().collect();
         let expected_refs: Vec<&EventOf<A>> = expected_events.iter().collect();
         assert_eq!(
             produced_refs, expected_refs,
             "then_expect_events: decided events did not match expected"
+        );
+        self
+    }
+
+    /// Assert the command decided nothing (`Ok(None)`) — accepted, but
+    /// changing nothing, so nothing would be persisted and the version would
+    /// not advance. Returns `Self` for chaining.
+    ///
+    /// The dual of [`SagaReacted::then_expect_ignored`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the command produced events or was rejected.
+    #[must_use]
+    pub fn then_expect_ignored(self) -> Self {
+        assert!(
+            matches!(self.result, Ok(None)),
+            "then_expect_ignored: expected the command to decide nothing (Ok(None)), got: {:?}",
+            self.result
         );
         self
     }
@@ -190,7 +220,7 @@ impl<A: Aggregate, const N: usize> Acted<A, N> {
     {
         assert!(
             self.result.is_err(),
-            "then_expect_error: expected the command to be rejected, but it produced events"
+            "then_expect_error: expected the command to be rejected, but it was accepted"
         );
         let Err(actual) = &self.result else {
             return self; // unreachable: the assert above diverges on Ok

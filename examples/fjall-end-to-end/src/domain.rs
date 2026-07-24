@@ -112,29 +112,35 @@ impl Handle<OpenAccount> for BankAccount {
     fn handle(
         state: &AccountState,
         cmd: OpenAccount,
-    ) -> Result<Events<AccountEvent>, AccountError> {
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if state.is_open {
             return Err(AccountError::AlreadyOpen);
         }
-        Ok(events![AccountEvent::Opened(AccountOpened {
+        Ok(Some(events![AccountEvent::Opened(AccountOpened {
             owner: cmd.owner
-        })])
+        })]))
     }
 }
 
 impl Handle<Deposit> for BankAccount {
-    fn handle(state: &AccountState, cmd: Deposit) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Deposit,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
-        Ok(events![AccountEvent::Deposited(MoneyDeposited {
+        Ok(Some(events![AccountEvent::Deposited(MoneyDeposited {
             amount: cmd.amount
-        })])
+        })]))
     }
 }
 
 impl Handle<Withdraw> for BankAccount {
-    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Withdraw,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
@@ -144,8 +150,8 @@ impl Handle<Withdraw> for BankAccount {
                 amount: cmd.amount,
             });
         }
-        Ok(events![AccountEvent::Withdrawn(MoneyWithdrawn {
+        Ok(Some(events![AccountEvent::Withdrawn(MoneyWithdrawn {
             amount: cmd.amount
-        })])
+        })]))
     }
 }

@@ -24,8 +24,12 @@ Attribute macro on a unit struct. Generates `impl Aggregate` plus a convenience 
 struct BankAccount;
 
 impl Handle<Withdraw> for BankAccount {
-    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
-        // pure decision: read state, return decided events
+    fn handle(
+        state: &AccountState,
+        cmd: Withdraw,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        // pure decision: read state, return decided events — or `Ok(None)`
+        // when the command changes nothing
     }
 }
 ```
