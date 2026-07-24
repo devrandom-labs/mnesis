@@ -12,6 +12,13 @@
     clippy::shadow_reuse,
     reason = "closure parameter shadowing is idiomatic in criterion benchmarks"
 )]
+#![allow(
+    clippy::significant_drop_tightening,
+    reason = "the `Criterion` temporary is held by the expansion of \
+              `codspeed-criterion-compat`'s `criterion_group!`; its scope is \
+              upstream's, not ours, and an item-level allow on the macro call \
+              is discarded as an unused attribute"
+)]
 
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use mnesis::{Aggregate, AggregateRoot, AggregateState, DomainEvent, Events, Message};

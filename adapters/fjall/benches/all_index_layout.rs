@@ -52,6 +52,13 @@
 )]
 #![allow(clippy::doc_markdown, reason = "bench doc is prose, not API")]
 #![allow(
+    clippy::significant_drop_tightening,
+    reason = "the `Criterion` temporary is held by the expansion of \
+              `codspeed-criterion-compat`'s `criterion_group!`; its scope is \
+              upstream's, not ours, and an item-level allow on the macro call \
+              is discarded as an unused attribute"
+)]
+#![allow(
     clippy::items_after_statements,
     reason = "bench-local consts sit next to their use site"
 )]

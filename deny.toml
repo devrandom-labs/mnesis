@@ -9,6 +9,9 @@ allow = [
     "Zlib",
     "BSL-1.0",
     "BlueOak-1.0.0", # Blue Oak Model License — permissive, required by crc32c
+    "0BSD", # BSD Zero Clause — public-domain-equivalent, no attribution clause;
+            # required by varint-rs >= 2.2.1 (transitive via lsm-tree/fjall),
+            # which relicensed from Apache-2.0 in a patch release.
 ]
 private = { ignore = true }
 

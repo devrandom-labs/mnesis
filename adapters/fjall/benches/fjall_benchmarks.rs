@@ -2,6 +2,13 @@
 #![allow(clippy::expect_used, reason = "bench code")]
 #![allow(clippy::missing_panics_doc, reason = "bench code")]
 #![allow(
+    clippy::significant_drop_tightening,
+    reason = "the `Criterion` temporary is held by the expansion of \
+              `codspeed-criterion-compat`'s `criterion_group!`; its scope is \
+              upstream's, not ours, and an item-level allow on the macro call \
+              is discarded as an unused attribute"
+)]
+#![allow(
     clippy::shadow_reuse,
     reason = "criterion closure parameter shadowing is idiomatic"
 )]
