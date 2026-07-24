@@ -93,20 +93,25 @@ struct ActivateUser;
 
 // --- Command handlers (decide pattern) — the user writes this ---
 impl Handle<CreateUser> for UserAggregate {
-    fn handle(state: &UserState, cmd: CreateUser) -> Result<Events<UserEvent>, UserError> {
+    fn handle(state: &UserState, cmd: CreateUser) -> Result<Option<Events<UserEvent>>, UserError> {
         if !state.name.is_empty() {
             return Err(UserError::AlreadyExists);
         }
-        Ok(events![UserEvent::Created(UserCreated { name: cmd.name })])
+        Ok(Some(events![UserEvent::Created(UserCreated {
+            name: cmd.name
+        })]))
     }
 }
 
 impl Handle<ActivateUser> for UserAggregate {
-    fn handle(state: &UserState, _cmd: ActivateUser) -> Result<Events<UserEvent>, UserError> {
+    fn handle(
+        state: &UserState,
+        _cmd: ActivateUser,
+    ) -> Result<Option<Events<UserEvent>>, UserError> {
         if state.active {
             return Err(UserError::AlreadyActive);
         }
-        Ok(events![UserEvent::Activated(UserActivated)])
+        Ok(Some(events![UserEvent::Activated(UserActivated)]))
     }
 }
 
@@ -120,11 +125,12 @@ fn marker_aggregate_lifecycle() {
         .handle(CreateUser {
             name: "Alice".into(),
         })
+        .unwrap()
         .unwrap();
     let v1 = Version::new(1).unwrap();
     user.commit_persisted(v1, &events);
 
-    let events = user.handle(ActivateUser).unwrap();
+    let events = user.handle(ActivateUser).unwrap().unwrap();
     let v2 = Version::new(2).unwrap();
     user.commit_persisted(v2, &events);
 

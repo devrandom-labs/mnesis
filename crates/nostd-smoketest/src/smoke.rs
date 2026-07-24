@@ -77,23 +77,23 @@ pub struct StartTask;
 pub struct FinishTask;
 
 impl Handle<StartTask> for TaskAggregate {
-    fn handle(state: &TaskState, _cmd: StartTask) -> Result<Events<TaskEvent>, TaskError> {
+    fn handle(state: &TaskState, _cmd: StartTask) -> Result<Option<Events<TaskEvent>>, TaskError> {
         if state.started {
             return Err(TaskError::AlreadyStarted);
         }
-        Ok(events![TaskEvent::Started])
+        Ok(Some(events![TaskEvent::Started]))
     }
 }
 
 impl Handle<FinishTask> for TaskAggregate {
-    fn handle(state: &TaskState, _cmd: FinishTask) -> Result<Events<TaskEvent>, TaskError> {
+    fn handle(state: &TaskState, _cmd: FinishTask) -> Result<Option<Events<TaskEvent>>, TaskError> {
         if !state.started {
             return Err(TaskError::NotStarted);
         }
         if state.done {
             return Err(TaskError::AlreadyDone);
         }
-        Ok(events![TaskEvent::Finished])
+        Ok(Some(events![TaskEvent::Finished]))
     }
 }
 
@@ -103,9 +103,10 @@ impl Handle<FinishTask> for TaskAggregate {
 // time on the target.
 pub fn drive(id: u64) -> Option<Version> {
     let mut root = AggregateRoot::<TaskAggregate>::new(TaskId::new(id));
-    if let Ok(events) = root.handle(StartTask) {
-        root.commit_persisted(Version::INITIAL, &events);
-    }
+    let decided = root.handle(StartTask).ok().flatten();
+    decided
+        .iter()
+        .for_each(|events| root.commit_persisted(Version::INITIAL, events));
     root.version()
 }
 

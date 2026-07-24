@@ -145,12 +145,9 @@ async fn todos_update(
     if todo.version().is_none() || todo.state().deleted {
         return Err(StatusCode::NOT_FOUND);
     }
-    // `Handle` cannot decide zero events (`Events<E, N>` guarantees ≥ 1,
-    // unlike `React`'s `Option`), so the no-op PATCH is answered from loaded
-    // state without entering the domain (finding #326-3).
-    if input.text.is_none() && input.completed.is_none() {
-        return Ok(Json(todo_view(id, todo.state())));
-    }
+    // The all-absent PATCH body needs no special case here: `Handle` decides
+    // `Ok(None)` for it, `execute` skips the append, and `todo` is left at the
+    // version and state it loaded with (#329, closing finding #326-3).
     match repo
         .execute(
             &mut todo,

@@ -41,8 +41,9 @@ struct BankAccount;
 struct Deposit { amount: u64 }
 
 impl Handle<Deposit> for BankAccount {
-    fn handle(&self, cmd: Deposit) -> Result<Events<Event>, BankError> {
-        Ok(events![Event::Deposited(Deposited { amount: cmd.amount })])
+    fn handle(_state: &Account, cmd: Deposit) -> Result<Option<Events<Event>>, BankError> {
+        // `None` is a legitimate decision: accepted, records nothing.
+        Ok((cmd.amount > 0).then(|| events![Event::Deposited(Deposited { amount: cmd.amount })]))
     }
 }
 ```

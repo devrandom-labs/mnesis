@@ -149,29 +149,35 @@ impl Handle<OpenAccount> for BankAccount {
     fn handle(
         state: &AccountState,
         cmd: OpenAccount,
-    ) -> Result<Events<AccountEvent>, AccountError> {
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if state.is_open {
             return Err(AccountError::AlreadyOpen);
         }
-        Ok(events![AccountEvent::Opened(AccountOpened {
+        Ok(Some(events![AccountEvent::Opened(AccountOpened {
             owner: cmd.owner,
-        })])
+        })]))
     }
 }
 
 impl Handle<Deposit> for BankAccount {
-    fn handle(state: &AccountState, cmd: Deposit) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Deposit,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
-        Ok(events![AccountEvent::Deposited(MoneyDeposited {
+        Ok(Some(events![AccountEvent::Deposited(MoneyDeposited {
             amount: cmd.amount,
-        })])
+        })]))
     }
 }
 
 impl Handle<Withdraw> for BankAccount {
-    fn handle(state: &AccountState, cmd: Withdraw) -> Result<Events<AccountEvent>, AccountError> {
+    fn handle(
+        state: &AccountState,
+        cmd: Withdraw,
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
@@ -181,9 +187,9 @@ impl Handle<Withdraw> for BankAccount {
                 amount: cmd.amount,
             });
         }
-        Ok(events![AccountEvent::Withdrawn(MoneyWithdrawn {
+        Ok(Some(events![AccountEvent::Withdrawn(MoneyWithdrawn {
             amount: cmd.amount,
-        })])
+        })]))
     }
 }
 
@@ -191,14 +197,14 @@ impl Handle<CloseAccount> for BankAccount {
     fn handle(
         state: &AccountState,
         _cmd: CloseAccount,
-    ) -> Result<Events<AccountEvent>, AccountError> {
+    ) -> Result<Option<Events<AccountEvent>>, AccountError> {
         if !state.is_open {
             return Err(AccountError::Closed);
         }
         if state.balance > 0 {
             return Err(AccountError::NonZeroBalance(state.balance));
         }
-        Ok(events![AccountEvent::Closed(AccountClosed)])
+        Ok(Some(events![AccountEvent::Closed(AccountClosed)]))
     }
 }
 
@@ -262,13 +268,20 @@ fn main() {
         .handle(OpenAccount {
             owner: "Alice Smith".into(),
         })
-        .expect("open");
+        .expect("open")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
 
-    let decided = alice.handle(Deposit { amount: 1000 }).expect("deposit");
+    let decided = alice
+        .handle(Deposit { amount: 1000 })
+        .expect("deposit")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
 
-    let decided = alice.handle(Deposit { amount: 500 }).expect("deposit");
+    let decided = alice
+        .handle(Deposit { amount: 500 })
+        .expect("deposit")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
 
     println!(
@@ -285,10 +298,14 @@ fn main() {
         .handle(OpenAccount {
             owner: "Bob Jones".into(),
         })
-        .expect("open");
+        .expect("open")
+        .expect("command decided events");
     store.save(&mut bob, &decided);
 
-    let decided = bob.handle(Deposit { amount: 200 }).expect("deposit");
+    let decided = bob
+        .handle(Deposit { amount: 200 })
+        .expect("deposit")
+        .expect("command decided events");
     store.save(&mut bob, &decided);
 
     println!(
@@ -309,7 +326,10 @@ fn main() {
     );
 
     // --- Alice withdraws and closes ---
-    let decided = alice.handle(Withdraw { amount: 300 }).expect("withdraw");
+    let decided = alice
+        .handle(Withdraw { amount: 300 })
+        .expect("withdraw")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
     println!("After withdrawal: balance={}", alice.state().balance);
 
@@ -322,10 +342,14 @@ fn main() {
     // Withdraw remaining and close
     let decided = alice
         .handle(Withdraw { amount: 1200 })
-        .expect("withdraw remaining");
+        .expect("withdraw remaining")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
 
-    let decided = alice.handle(CloseAccount).expect("close");
+    let decided = alice
+        .handle(CloseAccount)
+        .expect("close")
+        .expect("command decided events");
     store.save(&mut alice, &decided);
 
     println!(

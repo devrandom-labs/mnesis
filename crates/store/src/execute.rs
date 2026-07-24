@@ -49,9 +49,19 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
     /// Decide `command` against `root`, persist the decided events atomically,
     /// advance `root`, and return the decided events for inspection.
     ///
-    /// - `Ok(events)` — the command was accepted and its events are durable.
+    /// - `Ok(Some(events))` — the command was accepted and its events are durable.
+    /// - `Ok(None)` — the command was accepted and decided nothing
+    ///   ([`Handle::handle`] returned `Ok(None)`); **no append is issued**, so
+    ///   `root` keeps its version, no `GlobalSeq` is burned, and a fresh
+    ///   aggregate stays streamless. Read the unchanged state off `root`.
     /// - `Err(ExecuteError::Decide)` — the aggregate rejected it; nothing persisted.
     /// - `Err(ExecuteError::Store)` — the save failed (see [`ExecuteError::is_conflict`]).
+    ///
+    /// The `Option` is [`Handle`]'s own no-op outcome passed through, not a
+    /// second notion of "nothing happened". It stays an `Option` rather than
+    /// becoming a `Reaction`-style enum (as on the saga side) because there is
+    /// no second field to pair with it: `root` is borrowed mutably, so the
+    /// caller reads the version and state off it on either path.
     ///
     /// On a version conflict this returns `Err(ExecuteError::Store(..))` with
     /// `is_conflict() == true` and does **not** retry — retry is the runtime's
@@ -68,17 +78,24 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
         &self,
         root: &mut AggregateRoot<A>,
         command: C,
-    ) -> impl Future<Output = Result<Events<EventOf<A>, N>, ExecuteError<A::Error, Self::Error>>> + Send
+    ) -> impl Future<
+        Output = Result<Option<Events<EventOf<A>, N>>, ExecuteError<A::Error, Self::Error>>,
+    > + Send
     where
         A: Handle<C, N>,
         C: Send,
     {
         async move {
-            let decided = root.handle::<C, N>(command).map_err(ExecuteError::Decide)?;
-            self.save(root, &decided)
-                .await
-                .map_err(ExecuteError::Store)?;
-            Ok(decided)
+            // A no-op decision never reaches the store: no append, no version,
+            // no GlobalSeq burned.
+            match root.handle::<C, N>(command).map_err(ExecuteError::Decide)? {
+                None => Ok(None),
+                Some(decided) => self
+                    .save(root, &decided)
+                    .await
+                    .map_err(ExecuteError::Store)
+                    .map(|()| Some(decided)),
+            }
         }
     }
 }

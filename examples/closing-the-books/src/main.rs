@@ -179,13 +179,16 @@ struct CloseShift {
 }
 
 impl Handle<OpenShift> for CashierShift {
-    fn handle(state: &ShiftState, cmd: OpenShift) -> Result<Events<ShiftEvent>, ShiftError> {
+    fn handle(
+        state: &ShiftState,
+        cmd: OpenShift,
+    ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
         if state.is_open || state.closed {
             return Err(ShiftError::AlreadyOpen);
         }
-        Ok(events![ShiftEvent::Opened(ShiftOpened {
+        Ok(Some(events![ShiftEvent::Opened(ShiftOpened {
             opening_float: cmd.opening_float,
-        })])
+        })]))
     }
 }
 
@@ -193,18 +196,21 @@ impl Handle<RegisterTransaction> for CashierShift {
     fn handle(
         state: &ShiftState,
         cmd: RegisterTransaction,
-    ) -> Result<Events<ShiftEvent>, ShiftError> {
+    ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
         if !state.is_open {
             return Err(ShiftError::NotOpen);
         }
-        Ok(events![ShiftEvent::TransactionRegistered(
+        Ok(Some(events![ShiftEvent::TransactionRegistered(
             TransactionRegistered { amount: cmd.amount }
-        )])
+        )]))
     }
 }
 
 impl Handle<CloseShift> for CashierShift {
-    fn handle(state: &ShiftState, cmd: CloseShift) -> Result<Events<ShiftEvent>, ShiftError> {
+    fn handle(
+        state: &ShiftState,
+        cmd: CloseShift,
+    ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
         if !state.is_open {
             return Err(ShiftError::NotOpen);
         }
@@ -219,12 +225,12 @@ impl Handle<CloseShift> for CashierShift {
         } else {
             0
         };
-        Ok(events![ShiftEvent::Closed(ShiftClosed {
+        Ok(Some(events![ShiftEvent::Closed(ShiftClosed {
             declared_tender: cmd.declared_tender,
             overage,
             shortage,
             final_float: cmd.declared_tender,
-        })])
+        })]))
     }
 }
 
@@ -314,15 +320,15 @@ impl Handle<OpenRegister> for CashRegister {
     fn handle(
         state: &RegisterState,
         cmd: OpenRegister,
-    ) -> Result<Events<RegisterEvent>, RegisterError> {
+    ) -> Result<Option<Events<RegisterEvent>>, RegisterError> {
         // No CloseRegister command: a register has no lifecycle end, so (unlike
         // a shift) there is no `closed` state to guard against here.
         if state.is_open {
             return Err(RegisterError::AlreadyOpen);
         }
-        Ok(events![RegisterEvent::Opened(RegisterOpened {
+        Ok(Some(events![RegisterEvent::Opened(RegisterOpened {
             opening_float: cmd.opening_float,
-        })])
+        })]))
     }
 }
 
@@ -330,13 +336,13 @@ impl Handle<RegisterSale> for CashRegister {
     fn handle(
         state: &RegisterState,
         cmd: RegisterSale,
-    ) -> Result<Events<RegisterEvent>, RegisterError> {
+    ) -> Result<Option<Events<RegisterEvent>>, RegisterError> {
         if !state.is_open {
             return Err(RegisterError::NotOpen);
         }
-        Ok(events![RegisterEvent::Sale(SaleRegistered {
+        Ok(Some(events![RegisterEvent::Sale(SaleRegistered {
             amount: cmd.amount,
-        })])
+        })]))
     }
 }
 
@@ -352,12 +358,14 @@ fn run_long_lived_demo() {
 
     let opened = register
         .handle(OpenRegister { opening_float: 100 })
-        .expect("open register");
+        .expect("open register")
+        .expect("command decided events");
     record(&mut register, &mut stream, &opened);
     for _ in 0..5000 {
         let sale = register
             .handle(RegisterSale { amount: 1 })
-            .expect("register sale");
+            .expect("register sale")
+            .expect("command decided events");
         record(&mut register, &mut stream, &sale);
     }
 
@@ -380,19 +388,22 @@ fn run_cashier_shift_demo() {
 
     let opened = shift1
         .handle(OpenShift { opening_float: 100 })
-        .expect("open shift 1");
+        .expect("open shift 1")
+        .expect("command decided events");
     record(&mut shift1, &mut shift1_stream, &opened);
     for _ in 0..10 {
         let txn = shift1
             .handle(RegisterTransaction { amount: 1 })
-            .expect("register txn");
+            .expect("register txn")
+            .expect("command decided events");
         record(&mut shift1, &mut shift1_stream, &txn);
     }
     let closed = shift1
         .handle(CloseShift {
             declared_tender: 110,
         })
-        .expect("close shift 1");
+        .expect("close shift 1")
+        .expect("command decided events");
     // The summary event carries the closing float forward — read it from the
     // decided ShiftClosed event rather than recomputing it.
     let final_float = closed
@@ -417,12 +428,14 @@ fn run_cashier_shift_demo() {
         .handle(OpenShift {
             opening_float: final_float,
         })
-        .expect("open shift 2");
+        .expect("open shift 2")
+        .expect("command decided events");
     record(&mut shift2, &mut shift2_stream, &opened);
     for _ in 0..10 {
         let txn = shift2
             .handle(RegisterTransaction { amount: 1 })
-            .expect("register txn");
+            .expect("register txn")
+            .expect("command decided events");
         record(&mut shift2, &mut shift2_stream, &txn);
     }
 

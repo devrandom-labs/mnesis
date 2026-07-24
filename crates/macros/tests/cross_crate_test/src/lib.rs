@@ -83,22 +83,25 @@ pub struct CreateTask {
 pub struct CompleteTask;
 
 impl Handle<CreateTask> for TaskAggregate {
-    fn handle(state: &TaskState, cmd: CreateTask) -> Result<Events<TaskEvent>, TaskError> {
+    fn handle(state: &TaskState, cmd: CreateTask) -> Result<Option<Events<TaskEvent>>, TaskError> {
         if !state.title.is_empty() {
             return Err(TaskError::AlreadyExists);
         }
-        Ok(events![TaskEvent::Created(TaskCreated {
+        Ok(Some(events![TaskEvent::Created(TaskCreated {
             title: cmd.title
-        })])
+        })]))
     }
 }
 
 impl Handle<CompleteTask> for TaskAggregate {
-    fn handle(state: &TaskState, _cmd: CompleteTask) -> Result<Events<TaskEvent>, TaskError> {
+    fn handle(
+        state: &TaskState,
+        _cmd: CompleteTask,
+    ) -> Result<Option<Events<TaskEvent>>, TaskError> {
         if state.done {
             return Err(TaskError::AlreadyDone);
         }
-        Ok(events![TaskEvent::Completed(TaskCompleted)])
+        Ok(Some(events![TaskEvent::Completed(TaskCompleted)]))
     }
 }
 
@@ -119,10 +122,11 @@ mod tests {
             .handle(CreateTask {
                 title: "Write tests".into(),
             })
+            .unwrap()
             .unwrap();
         task.commit_persisted(Version::new(1).unwrap(), &decided);
 
-        let decided = task.handle(CompleteTask).unwrap();
+        let decided = task.handle(CompleteTask).unwrap().unwrap();
         task.commit_persisted(Version::new(2).unwrap(), &decided);
 
         assert_eq!(task.state().title, "Write tests");
@@ -137,6 +141,7 @@ mod tests {
             .handle(CreateTask {
                 title: "Task".into(),
             })
+            .unwrap()
             .unwrap();
         task.commit_persisted(Version::new(1).unwrap(), &decided);
 
@@ -147,7 +152,7 @@ mod tests {
             .is_err()
         );
 
-        let decided = task.handle(CompleteTask).unwrap();
+        let decided = task.handle(CompleteTask).unwrap().unwrap();
         task.commit_persisted(Version::new(2).unwrap(), &decided);
 
         assert!(task.handle(CompleteTask).is_err());

@@ -112,8 +112,19 @@
             withLlvmCov = true;
             partitions = 1;
             partitionType = "count";
-            # Exclude trybuild tests — .stderr snapshots contain absolute paths
-            # that differ between local and Nix sandbox environments
+            # Exclude trybuild tests. The committed .stderr snapshots are
+            # themselves path-relative, but trybuild *runs* cargo inside the
+            # sandbox against `/nix/var/nix/builds/.../source` with a vendored
+            # `/nix/store/...-vendor-cargo-deps` registry, and the diagnostics
+            # it produces there do not match snapshots blessed on a normal
+            # checkout. Verified 2026-07-24: dropping this filter fails all
+            # four trybuild tests in the sandbox while they pass locally.
+            #
+            # KNOWN GAP: nothing else runs these, so a snapshot can rot
+            # unnoticed — `version_literal/zero.stderr` drifted against a
+            # rustc caret-span change and sat broken for ~4 months, invisible
+            # on a protected branch. Closing that needs a trybuild run outside
+            # the Nix sandbox (plain CI job), not removal of this filter.
             cargoNextestExtraArgs = "-E 'not test(compile_fail)'";
           });
 
