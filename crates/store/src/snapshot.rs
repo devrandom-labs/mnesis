@@ -133,14 +133,22 @@ where
         A: Aggregate,
         SS: state::SnapshotStore<A::State, Version>,
     {
+        // Best-effort by design: a snapshot-store read *error* degrades to a
+        // full stream replay (correct, just slower) rather than failing the
+        // load — a corrupt or unavailable snapshot store must never make an
+        // aggregate unloadable. This is matched explicitly (not a silent
+        // `.ok()?`) so the error-vs-miss distinction is visible: a persistent
+        // hydrate error otherwise looks identical to a legitimate miss and
+        // silently re-replays the whole stream on every load. The kernel ships
+        // no logging; surfacing this to a metrics/telemetry hook is a
+        // runtime-layer concern, so the error is intentionally dropped here.
+        let hydrated = match self.snapshot_store.hydrate(id, self.schema_version).await {
+            Ok(hydrated) => hydrated,
+            Err(_snapshot_read_failed) => return None,
+        };
         // Aggregate snapshots treat absent and stale identically — replay the
         // stream either way — so `into_found` collapses both to `None`.
-        let (version, typed_state) = self
-            .snapshot_store
-            .hydrate(id, self.schema_version)
-            .await
-            .ok()?
-            .into_found()?;
+        let (version, typed_state) = hydrated.into_found()?;
         let root = AggregateRoot::<A>::restore(id.clone(), typed_state, version);
         let next = version.next()?;
         Some((root, next))

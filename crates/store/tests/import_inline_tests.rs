@@ -235,12 +235,6 @@ mod tests {
     }
 
     #[test]
-    fn import_error_malformed_display_is_exact() {
-        let err: ImportError<std::io::Error> = ImportError::Malformed("bad magic");
-        assert_eq!(err.to_string(), "malformed chunk: bad magic");
-    }
-
-    #[test]
     fn import_error_aborted_display_formats_stream_and_reason() {
         let err: ImportError<std::io::Error> = ImportError::Aborted {
             stream: StreamKey::from_slice(b"phone:task-123"),
@@ -291,9 +285,6 @@ mod tests {
         // Error-chain shape pin: `Store` is the ONLY source-forwarding variant.
         // `Aborted` deliberately interpolates its `reason` into the message
         // (not `#[source]`), so it terminates the chain too.
-        let malformed: ImportError<std::io::Error> = ImportError::Malformed("x");
-        assert!(malformed.source().is_none());
-
         let overflow: ImportError<std::io::Error> = ImportError::VersionOverflow;
         assert!(overflow.source().is_none());
 

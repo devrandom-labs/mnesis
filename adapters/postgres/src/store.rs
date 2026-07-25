@@ -211,14 +211,14 @@ fn row_to_envelope(
     // `String`/`Vec<u8>` both impl `Into<Bytes>`, so `.into()` targets the
     // `Bytes` arg (audit fix: use `from_bytes`, not the non-existent `::new`).
     let event_type = EventType::from_bytes(Bytes::from(row.event_type))
-        .map_err(|_| corrupt(stream_label, "event_type invalid"))?;
+        .map_err(|e| corrupt_value(stream_label, &e))?;
     let payload = Payload::from_bytes(Bytes::from(row.payload))
-        .map_err(|_| corrupt(stream_label, "payload too large"))?;
+        .map_err(|e| corrupt_value(stream_label, &e))?;
     let metadata = row
         .metadata
         .map(|m| Metadata::from_bytes(Bytes::from(m)))
         .transpose()
-        .map_err(|_| corrupt(stream_label, "metadata too large"))?;
+        .map_err(|e| corrupt_value(stream_label, &e))?;
 
     // Rebuild the canonical, 16-byte-aligned V2 frame so a postgres envelope
     // is byte-identical to a fjall one. `encode_frame` owns the layout +
@@ -253,6 +253,17 @@ fn corrupt(stream_id: ErrorId, reason: &str) -> PostgresError {
     PostgresError::CorruptRow {
         stream_id,
         reason: ErrorId::from_display(&reason),
+    }
+}
+
+/// Build a [`PostgresError::CorruptRow`] preserving a row-value error's **own**
+/// message (rule 3 — don't `|_|`-discard the typed `ValueError` and substitute a
+/// guessed reason like "payload too large" that may misreport the real cause;
+/// `ValueError`'s `Display` already names the offending field and limit).
+fn corrupt_value(stream_id: ErrorId, err: &impl core::fmt::Display) -> PostgresError {
+    PostgresError::CorruptRow {
+        stream_id,
+        reason: ErrorId::from_display(err),
     }
 }
 
@@ -494,6 +505,13 @@ impl RawEventStore for PostgresStore {
         expected_version: Option<Version>,
         envelopes: PendingBatch<'_>,
     ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
+        // Runs at the pool default (READ COMMITTED). That is sufficient here
+        // ONLY because `UNIQUE(stream_id, version)` arbitrates two concurrent
+        // appends racing on the same next version: the loser's INSERT fails with
+        // SQLSTATE 23505, mapped to a retryable `Conflict`. The SELECT-MAX-then-
+        // INSERT below is one transaction, so this holds without SERIALIZABLE —
+        // but the guarantee lives in that UNIQUE constraint (see `schema.rs`); do
+        // not drop it without raising the isolation level here.
         let mut tx = self.pool().begin().await.map_err(store_err)?;
 
         let current = read_current_version(&mut tx, id).await?; // IO
@@ -611,13 +629,17 @@ impl RawEventStore for PostgresStore {
         let tagged: Vec<Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>> = rows
             .into_iter()
             .map(move |r| {
-                let txid =
-                    u64::try_from(r.txid).map_err(|_| corrupt(label, "txid out of range"))?;
-                let seq = u64::try_from(r.global_seq)
-                    .map_err(|_| corrupt(label, "global_seq <= 0 or out of range"))?;
+                // Label each row's corruption error with ITS OWN stream id
+                // (available per row) — not the empty outer `label`, which is
+                // only meaningful for the stream-less pre-fetch conversions.
                 let stream = StreamKey::from_bytes(r.stream_id);
+                let row_label = ErrorId::from_display(&stream);
+                let txid =
+                    u64::try_from(r.txid).map_err(|_| corrupt(row_label, "txid out of range"))?;
+                let seq = u64::try_from(r.global_seq)
+                    .map_err(|_| corrupt(row_label, "global_seq <= 0 or out of range"))?;
                 // `r.event` is the flattened `EventRow` — reuse the single rebuild path.
-                let env = row_to_envelope(r.event, label)?;
+                let env = row_to_envelope(r.event, row_label)?;
                 Ok((PgAllPos::new(txid, seq), stream, env))
             })
             .collect();

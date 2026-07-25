@@ -197,22 +197,18 @@ impl Payload {
 
     /// Construct from already-validated bytes — crate-internal fast path.
     ///
-    /// # Safety
-    ///
-    /// The caller MUST guarantee `bytes.len() <= MAX_PAYLOAD_LEN`.
-    ///
-    /// Violating the invariant does not produce undefined behavior in this
-    /// type's own methods (no `unsafe` consumers), but it will corrupt the
-    /// wire encoding downstream when [`crate::wire::encode_frame`] tries
-    /// to fit the length into a `u32` field. Marked `unsafe` for
-    /// consistency with the other `from_validated_bytes` constructors in
-    /// this module and to make the invariant obligation visible at call
-    /// sites.
+    /// Not `unsafe`: violating the `bytes.len() <= MAX_PAYLOAD_LEN` precondition
+    /// produces **no undefined behavior** in this type (there are no `unsafe`
+    /// consumers of a `Payload`) — worst case is a downstream, *typed*
+    /// [`crate::wire::WireError`] when [`crate::wire::encode_frame`] cannot fit
+    /// the length into its `u32` field. An `unsafe fn` with no UB contract only
+    /// dilutes the keyword and forces callers into false-assurance `unsafe {}`
+    /// blocks; the `debug_assert` below still flags a caller bug in tests.
     ///
     /// The read path ([`crate::envelope::PersistedEnvelope::payload_value`])
-    /// uses this after the buffer's length has been implicitly capped by
-    /// the wire format's `u32` length field.
-    pub(crate) unsafe fn from_validated_bytes(bytes: Bytes) -> Self {
+    /// uses this after the buffer's length has been implicitly capped by the
+    /// wire format's `u32` length field.
+    pub(crate) fn from_validated_bytes(bytes: Bytes) -> Self {
         debug_assert!(
             bytes.len() <= MAX_PAYLOAD_LEN,
             "from_validated_bytes invariant: length ≤ MAX_PAYLOAD_LEN"
@@ -272,25 +268,23 @@ impl Metadata {
 
     /// Construct from already-validated bytes — crate-internal fast path.
     ///
-    /// # Safety
-    ///
-    /// The caller MUST guarantee:
+    /// Not `unsafe`: violating the preconditions produces **no undefined
+    /// behavior** in this type (there are no `unsafe` consumers of a
+    /// `Metadata`). The caller should uphold:
     /// - `!bytes.is_empty()` (the wire format's `u32::MAX` sentinel handles
     ///   absent metadata; a `Some(Metadata)` must carry actual bytes).
     /// - `bytes.len() <= MAX_METADATA_LEN`.
     ///
-    /// Violating these invariants does not produce undefined behavior in
-    /// this type's own methods (no `unsafe` consumers), but it will
-    /// surface as `WireError::FrameLengthOverflow` at encode time or
-    /// trigger the `bytes::Bytes::slice(empty)` `STATIC_VTABLE` footgun
-    /// on the read path. Marked `unsafe` for consistency with the other
-    /// `from_validated_bytes` constructors and to make the invariant
-    /// obligation visible at call sites.
+    /// Violating them surfaces only as a downstream, *typed* failure — a
+    /// `WireError::FrameLengthOverflow` at encode time, or the
+    /// `bytes::Bytes::slice(empty)` `STATIC_VTABLE` footgun on the read path —
+    /// never UB, so `unsafe` would only dilute the keyword. The `debug_assert`s
+    /// below still flag a caller bug in tests.
     ///
     /// The read path ([`crate::envelope::PersistedEnvelope::metadata_value`])
     /// uses this after the wire decoder has rejected the absent sentinel
     /// into `Option::None`.
-    pub(crate) unsafe fn from_validated_bytes(bytes: Bytes) -> Self {
+    pub(crate) fn from_validated_bytes(bytes: Bytes) -> Self {
         debug_assert!(
             !bytes.is_empty(),
             "from_validated_bytes invariant: non-empty"

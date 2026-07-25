@@ -133,10 +133,48 @@ struct StoredFrame {
     schema_version: SchemaVersion,
 }
 
+/// The mutable state behind [`InMemoryStore`], behind a **single** mutex.
+///
+/// The per-stream store, the `$all` position counter, and the `$all` index are
+/// one lock so a reader never sees them diverge and `append` needs no
+/// cross-lock ordering (the earlier three-`Mutex` layout held the `streams`
+/// guard across the `.await` of two nested locks — correct only by a fixed
+/// acquire order, a latent hazard for a fixture every adapter test builds on).
+struct Inner {
+    /// Per-stream event rows in insertion = version order, keyed by the
+    /// stream's **stable byte identity** ([`StreamKey`], `Hash + Eq` over its
+    /// raw bytes) — never its lossy `Display` (a binary id `[0xde, 0xad]` and
+    /// the UTF-8 id `b"0xdead"` share one `Display` string, so a `String` key
+    /// would silently merge two distinct streams).
+    streams: HashMap<StreamKey, Vec<StoredFrame>>,
+    /// The `$all` position to assign to the next appended event — monotonic
+    /// across all streams; gaps are permitted by the `RawEventStore` contract.
+    next_global_seq: InMemoryAllPos,
+    /// All events keyed by their `$all` position ([`InMemoryAllPos`]), the
+    /// `$all` read order. Each value carries the origin [`StreamKey`] beside the
+    /// frame — the `$all` read path stamps it onto every item (stream
+    /// attribution is a store guarantee). Holds the same `StoredFrame`s as
+    /// `streams` (Arc-shared `Bytes`, cheap clones); written in the same
+    /// critical section as `streams` so the two never diverge. The key is the
+    /// authoritative position — the frame no longer carries one.
+    global_index: BTreeMap<InMemoryAllPos, (StreamKey, StoredFrame)>,
+}
+
+impl Default for Inner {
+    fn default() -> Self {
+        Self {
+            streams: HashMap::new(),
+            next_global_seq: InMemoryAllPos::INITIAL,
+            global_index: BTreeMap::new(),
+        }
+    }
+}
+
 /// In-memory event store for testing. Implements [`RawEventStore`].
 ///
-/// Backed by `tokio::sync::Mutex<HashMap<String, Vec<StoredFrame>>>`.
-/// Includes optimistic concurrency and sequential version validation.
+/// Backed by a single `tokio::sync::Mutex<Inner>` (per-stream store keyed by
+/// [`StreamKey`], the `$all` counter, and the `$all` index together). Includes
+/// optimistic concurrency and sequential version validation.
 ///
 /// # Limitations vs real adapters
 ///
@@ -153,17 +191,8 @@ struct StoredFrame {
 /// - **Distributed concurrency**: Single-process only. Cannot simulate
 ///   multiple writers on different machines racing on the same stream.
 pub struct InMemoryStore {
-    streams: Arc<Mutex<HashMap<String, Vec<StoredFrame>>>>,
+    inner: Arc<Mutex<Inner>>,
     notifiers: Arc<StreamNotifiers>,
-    next_global_seq: Mutex<InMemoryAllPos>,
-    /// All events keyed by their `$all` position ([`InMemoryAllPos`]), the
-    /// `$all` read order. Each value carries the origin [`StreamKey`] beside the
-    /// frame — the `$all` read path stamps it onto every item (stream
-    /// attribution is a store guarantee). Holds the same `StoredFrame`s as
-    /// `streams` (Arc-shared `Bytes`, cheap clones); written under `streams`'s
-    /// lock in `append` so the two never diverge. The key is the authoritative
-    /// position — the frame no longer carries one.
-    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, (StreamKey, StoredFrame)>>>,
     batch_size: BatchSize,
 }
 
@@ -178,10 +207,8 @@ impl InMemoryStore {
     #[must_use]
     pub fn with_batch_size(batch_size: BatchSize) -> Self {
         Self {
-            streams: Arc::new(Mutex::new(HashMap::new())),
+            inner: Arc::new(Mutex::new(Inner::default())),
             notifiers: StreamNotifiers::new(),
-            next_global_seq: Mutex::new(InMemoryAllPos::INITIAL),
-            global_index: Arc::new(Mutex::new(BTreeMap::new())),
             batch_size,
         }
     }
@@ -201,8 +228,8 @@ impl Default for InMemoryStore {
 
 /// Keyset-paginating read state for a one-shot `read_stream`.
 struct ReadState {
-    streams: Arc<Mutex<HashMap<String, Vec<StoredFrame>>>>,
-    stream_id: String,
+    inner: Arc<Mutex<Inner>>,
+    stream_id: StreamKey,
     /// Start version of the *first* batch (used until the first yield).
     from: Version,
     last_version: Option<Version>,
@@ -223,8 +250,9 @@ impl ReadState {
 
     async fn refill(&mut self, from: Version) {
         let batch = {
-            let guard = self.streams.lock().await;
+            let guard = self.inner.lock().await;
             guard
+                .streams
                 .get(&self.stream_id)
                 .map(|rows| scan_batch(rows, from.as_u64(), self.batch_size))
                 .unwrap_or_default()
@@ -236,7 +264,7 @@ impl ReadState {
 
 /// Keyset-paginating read state for a one-shot `read_all` (`$all` order).
 struct GlobalReadState {
-    global_index: Arc<Mutex<BTreeMap<InMemoryAllPos, (StreamKey, StoredFrame)>>>,
+    inner: Arc<Mutex<Inner>>,
     /// Exclusive lower bound: yield positions **strictly greater** than this;
     /// `None` = from the very beginning. Advances to the last-yielded position
     /// (matching the exclusive `read_all` resume contract).
@@ -251,9 +279,10 @@ struct GlobalReadState {
 impl GlobalReadState {
     async fn refill(&mut self) {
         let batch: VecDeque<(InMemoryAllPos, StreamKey, StoredFrame)> = {
-            let guard = self.global_index.lock().await;
+            let guard = self.inner.lock().await;
             let lower = self.after.map_or(Bound::Unbounded, Bound::Excluded);
             guard
+                .global_index
                 .range((lower, Bound::Unbounded))
                 .take(self.batch_size)
                 .map(|(pos, (key, frame))| (*pos, key.clone(), frame.clone()))
@@ -408,22 +437,25 @@ impl RawEventStore for InMemoryStore {
         expected_version: Option<Version>,
         envelopes: PendingBatch<'_>,
     ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
-        let mut guard = self.streams.lock().await;
-        let key = id.to_string();
-        let stream = guard.entry(key).or_default();
+        let mut guard = self.inner.lock().await;
 
         // Kernel-owned contract: optimistic concurrency + strict-sequential
         // versions, shared by every adapter (see `mnesis_store::store`). The
-        // current version is the live stream length; `$all` position assignment
-        // and storage below stay inmemory-specific.
-        let current = u64::try_from(stream.len()).unwrap_or(u64::MAX);
+        // current version is the live stream length — read by *borrow* so a
+        // rejected append leaves no empty stream entry behind (the entry is
+        // created only at the commit below). usize ≤ u64 on every supported
+        // (32/64-bit) target; the `map_err` is an unreachable belt-and-braces
+        // guard, not a Rule-3 `|_|` discard (mirrors `atomic_append_many`).
+        let current = u64::try_from(guard.streams.get(id).map_or(0, Vec::len))
+            .map_err(|_| AppendError::Store(InMemoryStoreError::VersionOverflow))?;
         mnesis_store::store::validate_append_versions(current, expected_version, envelopes, id)
             .map_err(|e| inmemory_validation_err(id, &e))?;
 
         // Assign an `$all` position to each event — monotonic across all
-        // streams; gaps are permitted by the `RawEventStore` contract.
-        let mut counter = self.next_global_seq.lock().await;
-        let mut seq = *counter;
+        // streams; gaps are permitted by the `RawEventStore` contract. Frames
+        // are built (fallible encode) *before* any store mutation, so an encode
+        // or overflow error leaves the store untouched (all-or-nothing).
+        let mut seq = guard.next_global_seq;
         // The position `append` returns (#330). The batch is non-empty by
         // construction, so the loop below runs at least once and overwrites this
         // seed before it is read.
@@ -440,21 +472,19 @@ impl RawEventStore for InMemoryStore {
                 .next()
                 .ok_or(AppendError::Store(InMemoryStoreError::GlobalSeqOverflow))?;
         }
-        *counter = seq;
-        drop(counter);
 
-        // Index by `$all` position for `$all` reads, in the same critical
-        // section as the per-stream store, so a reader never sees one without
-        // the other.
-        {
-            let mut gidx = self.global_index.lock().await;
-            for (pos, frame) in &rows {
-                gidx.insert(*pos, (id.clone(), frame.clone()));
-            }
+        // Commit — advance the counter, index by `$all` position, and store the
+        // events per-stream, all in one critical section so a reader never sees
+        // the `$all` index and the per-stream store diverge.
+        guard.next_global_seq = seq;
+        for (pos, frame) in &rows {
+            guard.global_index.insert(*pos, (id.clone(), frame.clone()));
         }
-
-        // Store the events per-stream.
-        stream.extend(rows.into_iter().map(|(_, frame)| frame));
+        guard
+            .streams
+            .entry(id.clone())
+            .or_default()
+            .extend(rows.into_iter().map(|(_, frame)| frame));
 
         // Release lock before notifying to avoid contention: subscribers
         // wake up and immediately try to acquire the same Mutex.
@@ -475,8 +505,8 @@ impl RawEventStore for InMemoryStore {
         from: Version,
     ) -> Result<Self::Stream, Self::Error> {
         let state = ReadState {
-            streams: Arc::clone(&self.streams),
-            stream_id: id.to_string(),
+            inner: Arc::clone(&self.inner),
+            stream_id: id.clone(),
             from,
             last_version: None,
             batch_size: self.batch_size.get(),
@@ -539,7 +569,7 @@ impl RawEventStore for InMemoryStore {
         from: Option<Self::AllPosition>,
     ) -> Result<Self::AllStream, Self::Error> {
         let state = GlobalReadState {
-            global_index: Arc::clone(&self.global_index),
+            inner: Arc::clone(&self.inner),
             // `read_all` is exclusive: yield positions strictly after `from`.
             after: from,
             batch_size: self.batch_size.get(),
@@ -618,12 +648,12 @@ impl mnesis_store::export::StreamLister for InMemoryStore {
     >;
 
     async fn list_streams(&self) -> Result<Self::StreamList, Self::Error> {
+        // Keys are already `StreamKey`s (their lossless byte identity), so
+        // enumeration is a clone — no `Display`→bytes round-trip that would
+        // corrupt a non-UTF-8 id.
         let ids: Vec<Result<mnesis_store::stream_id::StreamKey, InMemoryStoreError>> = {
-            let guard = self.streams.lock().await;
-            guard
-                .keys()
-                .map(|k| Ok(mnesis_store::stream_id::StreamKey::from_slice(k.as_bytes())))
-                .collect()
+            let guard = self.inner.lock().await;
+            guard.streams.keys().cloned().map(Ok).collect()
         };
         Ok(futures::stream::iter(ids))
     }
@@ -635,10 +665,9 @@ impl mnesis_store::export::StreamLister for InMemoryStore {
 
 /// Commit several per-stream runs in one atomic critical section.
 ///
-/// Holds the `streams` lock for the whole operation — validate every write's
-/// head first (no mutation), then encode + apply all — so a half-write is
-/// unrepresentable and no concurrent `append` can interleave. Mirrors
-/// `append`'s lock order (`streams` → `next_global_seq` → `global_index`).
+/// Holds the single [`Inner`] lock for the whole operation — validate every
+/// write's head first (no mutation), then encode + apply all — so a half-write
+/// is unrepresentable and no concurrent `append` can interleave.
 #[cfg(feature = "import")]
 impl AtomicAppend for InMemoryStore {
     async fn atomic_append_many(
@@ -649,22 +678,23 @@ impl AtomicAppend for InMemoryStore {
             // A no-op commits no position (#330).
             return Ok(None);
         }
-        let mut guard = self.streams.lock().await;
+        let mut guard = self.inner.lock().await;
 
         // Phase 1 — validate every head and run shape against the RUNNING
         // per-target head; NO mutation. Tracking prior same-batch writes to a
         // target makes a non-injective route (two writes → one stream) conflict
         // here instead of concatenating into a corrupt, non-monotonic stream
-        // (honours the AtomicAppend distinct-targets contract).
-        let mut projected: HashMap<String, u64> = HashMap::new();
+        // (honours the AtomicAppend distinct-targets contract). Keyed by the
+        // target's `StreamKey` (lossless bytes), never its `Display`.
+        let mut projected: HashMap<StreamKey, u64> = HashMap::new();
         for (index, w) in writes.iter().enumerate() {
-            let key = w.target.to_string();
+            let key = w.target.clone();
             let actual_raw = match projected.get(&key) {
                 Some(&head) => head,
                 // usize ≤ u64 on all supported (32/64-bit) targets; the map_err
                 // is an unreachable belt-and-braces guard, not a Rule-3 |_|
                 // discard of a meaningful error.
-                None => u64::try_from(guard.get(&key).map_or(0, Vec::len))
+                None => u64::try_from(guard.streams.get(&key).map_or(0, Vec::len))
                     .map_err(|_| AtomicAppendError::Store(InMemoryStoreError::VersionOverflow))?,
             };
             let expected_raw = w.expected_version.map_or(0, Version::as_u64);
@@ -699,13 +729,13 @@ impl AtomicAppend for InMemoryStore {
         }
 
         // Phase 2 — assign `$all` positions and stage frames (still no store mutation).
-        let mut counter = self.next_global_seq.lock().await;
-        let mut seq = *counter;
+        let mut seq = guard.next_global_seq;
         // The position of the last event staged — the highest of the whole
         // batch, since `seq` is monotonic across every run (#330). `writes` is
         // non-empty and every run carries a head, so the loop always sets it.
         let mut last_assigned = seq;
-        let mut staged_streams: Vec<(String, Vec<StoredFrame>)> = Vec::with_capacity(writes.len());
+        let mut staged_streams: Vec<(StreamKey, Vec<StoredFrame>)> =
+            Vec::with_capacity(writes.len());
         let mut staged_global: Vec<(InMemoryAllPos, StreamKey, StoredFrame)> = Vec::new();
         for w in writes {
             let mut frames = Vec::with_capacity(w.batch().len().get());
@@ -718,21 +748,17 @@ impl AtomicAppend for InMemoryStore {
                     InMemoryStoreError::GlobalSeqOverflow,
                 ))?;
             }
-            staged_streams.push((w.target.to_string(), frames));
+            staged_streams.push((w.target.clone(), frames));
         }
-        *counter = seq;
-        drop(counter);
 
-        // Phase 3 — commit: global index first, then per-stream (same critical
-        // section, streams lock still held throughout).
-        {
-            let mut gidx = self.global_index.lock().await;
-            for (pos, key, frame) in staged_global {
-                gidx.insert(pos, (key, frame));
-            }
+        // Phase 3 — commit: advance the counter, then global index, then
+        // per-stream, all under the one lock still held.
+        guard.next_global_seq = seq;
+        for (pos, key, frame) in staged_global {
+            guard.global_index.insert(pos, (key, frame));
         }
         for (key, frames) in staged_streams {
-            guard.entry(key).or_default().extend(frames);
+            guard.streams.entry(key).or_default().extend(frames);
         }
         drop(guard);
 
@@ -1115,5 +1141,67 @@ mod all_pos_tests {
                 prop_assert_eq!(v, u64::MAX);
             }
         }
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "test code")]
+mod stream_key_identity_tests {
+    use super::*;
+    use futures::StreamExt;
+    use mnesis_store::envelope::pending_envelope;
+
+    fn env(payload: &[u8]) -> PendingEnvelope {
+        pending_envelope(Version::INITIAL)
+            .event_type("E")
+            .payload(payload.to_vec())
+            .build()
+            .unwrap()
+    }
+
+    async fn payloads(store: &InMemoryStore, id: &StreamKey) -> Vec<Vec<u8>> {
+        let mut s = store.read_stream(id, Version::INITIAL).await.unwrap();
+        let mut out = Vec::new();
+        while let Some(item) = s.next().await {
+            out.push(item.unwrap().payload().to_vec());
+        }
+        out
+    }
+
+    /// Bug probe (issue #281): two DISTINCT ids that render to the SAME lossy
+    /// `Display` string — an **invalid-UTF-8** binary id `[0xff, 0xfe]` (which
+    /// `StreamKey::Display` renders as the hex `"0xfffe"`) and the ASCII id
+    /// `b"0xfffe"` equal to that rendering — must not collide. `[0xff, 0xfe]`
+    /// is deliberately not valid UTF-8: valid-UTF-8 bytes would `Display` as the
+    /// decoded text, not hex, and so would not collide. Keying the store by
+    /// `id.to_string()` silently merged the two into one stream; keying by the
+    /// `StreamKey` byte identity keeps them separate. This test FAILS (second
+    /// append conflicts, or reads see the wrong payload) against the old
+    /// `String`-keyed map.
+    #[tokio::test]
+    async fn distinct_ids_sharing_a_display_string_do_not_collide() {
+        let binary = StreamKey::from_slice(&[0xff, 0xfe]);
+        let text = StreamKey::from_slice(b"0xfffe");
+        assert_eq!(
+            binary.to_string(),
+            text.to_string(),
+            "precondition: the two ids share one Display string"
+        );
+        assert_ne!(binary, text, "but their byte identities differ");
+
+        let store = InMemoryStore::new();
+        // Each is a fresh stream (expected version None ⇒ empty): if they shared
+        // a key, the second append would see current version 1 and conflict.
+        store
+            .append(&binary, None, PendingBatch::of(&env(b"BIN")))
+            .await
+            .unwrap();
+        store
+            .append(&text, None, PendingBatch::of(&env(b"TXT")))
+            .await
+            .unwrap();
+
+        assert_eq!(payloads(&store, &binary).await, vec![b"BIN".to_vec()]);
+        assert_eq!(payloads(&store, &text).await, vec![b"TXT".to_vec()]);
     }
 }

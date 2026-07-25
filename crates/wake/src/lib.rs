@@ -201,15 +201,15 @@ impl StreamNotifiers {
     }
 
     /// Current per-stream wake generation for `stream`, or `0` when the stream
-    /// has no live entry. Bumped by every [`wake`](Self::wake); a cursor reads
-    /// it to detect a wake that arrived between two reads. Wrapping, so compare
-    /// for inequality, not ordering.
+    /// has no live entry. Bumped by every [`wake`](Self::wake). Wrapping, so
+    /// compare for inequality, not ordering.
     ///
-    /// The `0`-for-absent-stream return is unambiguous in practice: a
-    /// subscription cursor reads this only while holding its own live
-    /// [`WakeReg`], so its entry is guaranteed present and a genuine
-    /// generation of `0` (the entry's initial value) cannot be confused with
-    /// the absent-stream `0`.
+    /// **Diagnostics / test observability only** — the lost-wakeup discipline
+    /// runs entirely through [`WakeRegistration::arm`] +
+    /// `tokio::sync::watch::Receiver::changed`, so no subscription cursor reads
+    /// this. It is not a load-bearing part of the wake protocol; it exists so a
+    /// test can assert a wake bumped the counter (the `0`-for-absent-stream
+    /// return is fine there — a test knows whether it registered the stream).
     #[must_use]
     pub fn generation(&self, stream: &[u8]) -> u64 {
         self.map
