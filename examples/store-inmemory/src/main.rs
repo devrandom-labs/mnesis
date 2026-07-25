@@ -26,6 +26,7 @@
 use futures::{StreamExt, TryStreamExt};
 use mnesis::{Version, version};
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::Store;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::upcasting::EventMorsel;
@@ -235,7 +236,11 @@ async fn main() {
     // --- Step 4: Append to the store ---
     println!("Step 4: Append envelopes to InMemoryStore");
     store
-        .append(&StreamKey::from_slice(stream_id.as_ref()), None, &envelopes)
+        .append(
+            &StreamKey::from_slice(stream_id.as_ref()),
+            None,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
+        )
         .await
         .expect("append should succeed");
     println!(
@@ -273,7 +278,7 @@ async fn main() {
             .append(
                 &StreamKey::from_slice(stream_id.as_ref()),
                 Some(version!(3)),
-                &[legacy_envelope],
+                PendingBatch::new(&[legacy_envelope]).expect("non-empty batch"),
             )
             .await
             .expect("append legacy event should succeed");
@@ -358,7 +363,11 @@ async fn main() {
         .expect("valid envelope");
     typed_store
         .raw()
-        .append(&StreamKey::from_slice(b"todo-2"), None, &[envelope])
+        .append(
+            &StreamKey::from_slice(b"todo-2"),
+            None,
+            PendingBatch::of(&envelope),
+        )
         .await
         .expect("append should succeed");
 

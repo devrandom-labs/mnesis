@@ -53,6 +53,7 @@ use mnesis_store::error::AppendError;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::SchemaVersion;
 
+use mnesis_store::PendingBatch;
 use proptest::prelude::*;
 
 fn sk(s: &str) -> StreamKey {
@@ -232,7 +233,7 @@ proptest! {
             let stream_id = sk("roundtrip-test");
             let envelopes = build_envelopes(&payloads);
 
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let read = read_all_payloads(&store, &stream_id).await;
             prop_assert_eq!(read.len(), payloads.len(), "payload count mismatch");
@@ -254,7 +255,7 @@ proptest! {
             let stream_id = sk("evil-roundtrip");
             let envelopes = build_envelopes(&payloads);
 
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let read = read_all_payloads(&store, &stream_id).await;
             prop_assert_eq!(read.len(), payloads.len());
@@ -297,10 +298,10 @@ async fn attack_evil_stream_ids() {
         let stream_id = StreamKey::from_slice(evil_id.as_bytes());
 
         let env = make_envelope(1, "Created", b"test-payload");
-        let result = store.append(&stream_id, None, &[env]).await;
+        let result = store.append(&stream_id, None, PendingBatch::of(&env)).await;
 
         match result {
-            Ok(()) => {
+            Ok(_position) => {
                 // If append succeeded, reading must return the exact data
                 let read = read_all_payloads(&store, &stream_id).await;
                 assert_eq!(
@@ -351,10 +352,10 @@ proptest! {
             let (store, _dir) = temp_store();
 
             let env1 = make_envelope(1, "EventA", b"payload-a");
-            store.append(&s1, None, &[env1]).await.unwrap();
+            store.append(&s1, None, PendingBatch::of(&env1)).await.unwrap();
 
             let env2 = make_envelope(1, "EventB", b"payload-b");
-            store.append(&s2, None, &[env2]).await.unwrap();
+            store.append(&s2, None, PendingBatch::of(&env2)).await.unwrap();
 
             // s1 must only contain its own data
             let s1_payloads = read_all_payloads(&store, &s1).await;
@@ -416,7 +417,7 @@ proptest! {
             // Put N events in the stream
             let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let actual_version = u64::try_from(n).unwrap();
             prop_assume!(wrong_version != actual_version);
@@ -429,7 +430,7 @@ proptest! {
             let result = store.append(
                 &stream_id,
                 Version::new(wrong_version),
-                &new_envelopes,
+                PendingBatch::new(&new_envelopes).expect("non-empty batch"),
             ).await;
 
             prop_assert!(result.is_err(), "wrong expected_version MUST be rejected");
@@ -468,7 +469,7 @@ proptest! {
                 make_envelope(v, leak("E"), &[v as u8])
             }).collect();
 
-            let result = store.append(&stream_id, None, &envelopes).await;
+            let result = store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
 
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);
             if is_sequential {
@@ -505,7 +506,10 @@ async fn attack_schema_version_zero_clamped_by_builder() {
         "schema_version must be 1 (NonZeroU32::MIN)"
     );
 
-    store.append(&sk("sv-zero"), None, &[env]).await.unwrap();
+    store
+        .append(&sk("sv-zero"), None, PendingBatch::of(&env))
+        .await
+        .unwrap();
 
     // Read succeeds because schema_version is now 1
     let mut stream = store
@@ -575,7 +579,7 @@ proptest! {
                         let result = store.append(
                             &sid,
                             Version::new(current_count),
-                            &envelopes,
+                            PendingBatch::new(&envelopes).expect("non-empty batch"),
                         ).await;
                         prop_assert!(result.is_ok(),
                             "model-based append failed for stream {} at version {}",
@@ -661,7 +665,7 @@ proptest! {
                 b"data",
                 schema_ver,
             );
-            store.append(&stream_id, None, &[env]).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::of(&env)).await.unwrap();
 
             let mut stream = store.read_stream(&stream_id, Version::INITIAL).await.unwrap();
             let persisted = stream.next().await.unwrap().unwrap();
@@ -686,7 +690,7 @@ proptest! {
             let stream_id = sk("monotonic-test");
             let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let versions = read_all_versions(&store, &stream_id).await;
             for window in versions.windows(2) {

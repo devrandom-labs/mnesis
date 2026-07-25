@@ -1,4 +1,7 @@
+use core::iter::{Chain, Once, once};
+use core::num::NonZeroUsize;
 use core::ops::Range;
+use core::slice::Iter;
 
 use bytes::Bytes;
 use mnesis::{DomainEvent, Version};
@@ -183,6 +186,126 @@ impl PendingEnvelope {
             payload: persisted.payload_value(),
             metadata: persisted.metadata_value(),
         }
+    }
+}
+
+// =============================================================================
+// PendingBatch — the non-empty run handed to `RawEventStore::append`
+// =============================================================================
+
+/// The concrete iterator over a [`PendingBatch`] — the head chained to the tail.
+pub type PendingBatchIter<'a> = Chain<Once<&'a PendingEnvelope>, Iter<'a, PendingEnvelope>>;
+
+/// A **non-empty** borrowed run of [`PendingEnvelope`]s — what
+/// [`RawEventStore::append`](crate::RawEventStore::append) takes.
+///
+/// # Why the append input is non-empty by construction
+///
+/// `append` returns the [`AllPosition`](crate::AllPosition) its events landed
+/// at, and an append of nothing has no position to return. Keeping the empty
+/// case legal would force the return type to be `Option<AllPosition>`, so every
+/// caller would handle a `None` it can already prove impossible. Making the
+/// input non-empty removes the case instead of propagating it — the same
+/// discipline [`Repository::save`](crate::Repository::save) already applies by
+/// taking `&Events<E, N>` rather than a slice.
+///
+/// This deliberately removes one prior behaviour: `append(id, expected, &[])`
+/// used to validate `expected_version` and write nothing, i.e. a
+/// version-assertion probe. It had no production caller. If it is ever wanted
+/// it returns as its own method, which is an additive change.
+///
+/// # Shape
+///
+/// Head-plus-tail (`first`, `rest`) rather than a non-empty *slice*, matching
+/// [`Events`](mnesis::Events) and `ProjectedIntents`. Because the two parts
+/// need not be contiguous, a caller holding a statically non-empty collection
+/// builds a batch with no runtime check and no unprovable `unwrap` — see
+/// [`from_parts`](Self::from_parts). Callers whose length is only known at
+/// runtime use [`new`](Self::new) and handle the `None` honestly.
+#[derive(Debug, Clone, Copy)]
+pub struct PendingBatch<'a> {
+    first: &'a PendingEnvelope,
+    rest: &'a [PendingEnvelope],
+}
+
+impl<'a> PendingBatch<'a> {
+    /// A batch of exactly one envelope. Infallible — one is not zero.
+    #[must_use]
+    pub const fn of(only: &'a PendingEnvelope) -> Self {
+        Self {
+            first: only,
+            rest: &[],
+        }
+    }
+
+    /// A batch from an already-split head and tail. Infallible: the head's
+    /// existence is the non-emptiness.
+    ///
+    /// This is the constructor for callers that already know their input is
+    /// non-empty — the repository path, whose events come from a non-empty
+    /// [`Events`](mnesis::Events).
+    #[must_use]
+    pub const fn from_parts(first: &'a PendingEnvelope, rest: &'a [PendingEnvelope]) -> Self {
+        Self { first, rest }
+    }
+
+    /// A batch over a slice whose length is only known at runtime.
+    ///
+    /// `None` iff `envelopes` is empty — the one honest place the empty case is
+    /// answered, instead of every downstream caller answering it again.
+    #[must_use]
+    pub fn new(envelopes: &'a [PendingEnvelope]) -> Option<Self> {
+        envelopes
+            .split_first()
+            .map(|(first, rest)| Self { first, rest })
+    }
+
+    /// The first envelope — the lowest [`Version`] in the run.
+    #[must_use]
+    pub const fn first(&self) -> &'a PendingEnvelope {
+        self.first
+    }
+
+    /// The last envelope — the highest [`Version`] in the run, and the one whose
+    /// assigned position `append` returns.
+    #[must_use]
+    pub fn last(&self) -> &'a PendingEnvelope {
+        self.rest.last().unwrap_or(self.first)
+    }
+
+    /// How many envelopes the batch carries — always at least one, carried in
+    /// the type so adapters size buffers without re-deriving non-emptiness.
+    #[must_use]
+    pub const fn len(&self) -> NonZeroUsize {
+        // `1 + rest.len()`, which cannot overflow: `rest` is a slice of a
+        // non-zero-sized type, so its length is at most `isize::MAX`. The
+        // saturating form is the total operation on `NonZeroUsize` and the
+        // saturating branch is unreachable by that proof — not a silently
+        // capped size computation (rule 2).
+        NonZeroUsize::MIN.saturating_add(self.rest.len())
+    }
+
+    /// Iterate the run in version order, head first.
+    pub fn iter(&self) -> PendingBatchIter<'a> {
+        once(self.first).chain(self.rest)
+    }
+}
+
+impl<'a> IntoIterator for PendingBatch<'a> {
+    type Item = &'a PendingEnvelope;
+    type IntoIter = PendingBatchIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a> IntoIterator for &PendingBatch<'a> {
+    type Item = &'a PendingEnvelope;
+    type IntoIter = PendingBatchIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -1525,5 +1648,80 @@ mod persisted_exhaustive_tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    reason = "test code asserts exact values"
+)]
+mod pending_batch_tests {
+    use super::{PendingBatch, PendingEnvelope, pending_envelope};
+    use bytes::Bytes;
+    use mnesis::Version;
+
+    fn env(version: u64) -> PendingEnvelope {
+        pending_envelope(Version::new(version).expect("version is non-zero"))
+            .event_type("E")
+            .payload(Bytes::from_static(b"p"))
+            .build()
+            .expect("valid envelope")
+    }
+
+    #[test]
+    fn empty_slice_yields_no_batch() {
+        assert!(PendingBatch::new(&[]).is_none());
+    }
+
+    #[test]
+    fn batch_keeps_every_envelope_in_order() {
+        let envs = [env(1), env(2), env(3)];
+        let batch = PendingBatch::new(&envs).expect("three envelopes are non-empty");
+
+        assert_eq!(batch.len().get(), 3);
+        let mut versions = batch.iter().map(|e| e.version().as_u64());
+        assert_eq!(versions.next(), Some(1));
+        assert_eq!(versions.next(), Some(2));
+        assert_eq!(versions.next(), Some(3));
+        assert_eq!(versions.next(), None);
+    }
+
+    #[test]
+    fn first_and_last_are_the_boundary_envelopes() {
+        let envs = [env(7), env(8), env(9)];
+        let batch = PendingBatch::new(&envs).expect("non-empty");
+
+        assert_eq!(batch.first().version().as_u64(), 7);
+        assert_eq!(batch.last().version().as_u64(), 9);
+    }
+
+    #[test]
+    fn single_envelope_batch_is_infallible() {
+        let only = env(4);
+        let batch = PendingBatch::of(&only);
+
+        assert_eq!(batch.len().get(), 1);
+        assert_eq!(batch.first().version().as_u64(), 4);
+        assert_eq!(batch.last().version().as_u64(), 4);
+    }
+
+    #[test]
+    fn from_parts_agrees_with_new_over_the_same_envelopes() {
+        let envs = [env(1), env(2)];
+        let (first, rest) = envs.split_first().expect("non-empty");
+
+        let parts = PendingBatch::from_parts(first, rest);
+        let whole = PendingBatch::new(&envs).expect("non-empty");
+
+        assert_eq!(parts.len(), whole.len());
+        let mut a = parts.iter().map(|e| e.version().as_u64());
+        let mut b = whole.iter().map(|e| e.version().as_u64());
+        assert_eq!(a.next(), b.next());
+        assert_eq!(a.next(), b.next());
+        assert_eq!(a.next(), None);
+        assert_eq!(b.next(), None);
     }
 }

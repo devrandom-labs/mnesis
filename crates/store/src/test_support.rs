@@ -26,6 +26,7 @@ use tokio::sync::{Mutex, watch};
 
 use mnesis::{ErrorId, Version};
 
+use crate::envelope::PendingBatch;
 use crate::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
 use crate::error::AppendError;
 use crate::store::{AllPosition, RawEventStore};
@@ -51,6 +52,10 @@ pub enum TestStoreError {
 pub struct TestAllPos(NonZeroU64);
 
 impl TestAllPos {
+    /// The first position a store assigns — also the never-read seed the append
+    /// loop starts from (the batch is non-empty, so it is always overwritten).
+    pub const INITIAL: Self = Self(NonZeroU64::MIN);
+
     pub const fn as_u64(self) -> u64 {
         self.0.get()
     }
@@ -110,8 +115,8 @@ impl RawEventStore for TestStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<TestStoreError>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<TestStoreError>> {
         let mut inner = self.inner.lock().await;
         let head = inner
             .streams
@@ -130,6 +135,9 @@ impl RawEventStore for TestStore {
             .map(persist)
             .collect::<Result<_, _>>()
             .map_err(AppendError::Store)?;
+        // The batch is non-empty, so the loop runs at least once and this seed
+        // is always overwritten by a real assigned position before it is read.
+        let mut last_assigned = TestAllPos::INITIAL;
         for env in persisted {
             let next = inner
                 .all
@@ -143,6 +151,7 @@ impl RawEventStore for TestStore {
             let Some(pos) = next else {
                 unreachable!("Vec length + 1 is always a valid TestAllPos")
             };
+            last_assigned = pos;
             inner.all.push((pos, id.clone(), env.clone()));
             inner
                 .streams
@@ -154,7 +163,7 @@ impl RawEventStore for TestStore {
         self.wake_tx.send_modify(|generation| {
             *generation = generation.wrapping_add(1);
         });
-        Ok(())
+        Ok(last_assigned)
     }
 
     async fn read_stream(

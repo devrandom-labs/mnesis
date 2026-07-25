@@ -18,7 +18,6 @@
 
 use std::net::SocketAddr;
 use std::sync::Arc;
-use std::time::Duration;
 
 use axum::body::Body;
 use axum::http::{Request, StatusCode, header};
@@ -28,7 +27,7 @@ use hyper_util::client::legacy::connect::HttpConnector;
 use hyper_util::rt::TokioExecutor;
 use mnesis::Version;
 use mnesis_example_axum_todos::domain::{Todo, TodoId};
-use mnesis_example_axum_todos::{App, TodosIndex, spawn_app};
+use mnesis_example_axum_todos::{App, spawn_app};
 use mnesis_store::repository::Repository as _;
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -80,21 +79,35 @@ async fn page(client: &HttpClient, base: &str, query: &str) -> Value {
     read_json(res).await
 }
 
-/// Await the projection catching up to a condition — the seam where the port
-/// is honestly eventually-consistent (finding #326-4): there is no position
-/// for a handler to await, so tests await the watch channel instead.
-async fn wait_for_index(app: &App, f: impl Fn(&TodosIndex) -> bool) {
-    let mut rx = app.index.clone();
-    tokio::time::timeout(Duration::from_secs(5), async {
-        loop {
-            if f(&rx.borrow_and_update()) {
-                return;
-            }
-            rx.changed().await.expect("projection loop alive");
-        }
-    })
-    .await
-    .expect("index did not reflect the write within 5s");
+/// The `$all` position a write echoed in `X-Mnesis-Position` — the
+/// read-your-writes token (#330). Every write that appends an event returns it.
+fn write_position(res: &axum::http::Response<hyper::body::Incoming>) -> String {
+    res.headers()
+        .get("x-mnesis-position")
+        .expect("a write echoes its $all position")
+        .to_str()
+        .expect("position header is ascii")
+        .to_owned()
+}
+
+/// `GET /todos{query}` sending `position` back in `X-Mnesis-Position`, so the
+/// handler blocks until the projection has folded through it — the read-your-
+/// writes wait that replaces the old eventual-consistency content predicate
+/// (finding #326-4 resolved). Asserts `200` and returns the page JSON.
+async fn get_after(client: &HttpClient, base: &str, query: &str, position: &str) -> Value {
+    let res = client
+        .request(
+            Request::builder()
+                .method("GET")
+                .uri(format!("{base}/todos{query}"))
+                .header("x-mnesis-position", position)
+                .body(Body::empty())
+                .expect("request builds"),
+        )
+        .await
+        .expect("request");
+    assert_eq!(res.status(), StatusCode::OK);
+    read_json(res).await
 }
 
 // ── Category 1: sequence/protocol — the full todo lifecycle over HTTP ──────
@@ -120,9 +133,8 @@ async fn sequence_full_todo_lifecycle_over_http() {
     assert_eq!(created["text"], "buy milk");
     assert_eq!(created["completed"], false);
     let id = created["id"].as_str().expect("id is a string").to_owned();
-    let uid = Uuid::parse_str(&id).expect("id is a uuid");
 
-    // PATCH → 200 with the updated todo.
+    // PATCH → 200 with the updated todo, echoing its $all position.
     let res = client
         .request(req(
             "PATCH",
@@ -132,46 +144,33 @@ async fn sequence_full_todo_lifecycle_over_http() {
         .await
         .expect("request");
     assert_eq!(res.status(), StatusCode::OK);
+    let patch_pos = write_position(&res);
     let updated = read_json(res).await;
     assert_eq!(updated["text"], "buy milk");
     assert_eq!(updated["completed"], true);
 
-    // GET reflects both writes once the projection catches up.
-    wait_for_index(&app, |ix| {
-        ix.page(0, usize::MAX)
-            .iter()
-            .any(|t| t.id == uid && t.completed)
-    })
-    .await;
-    let res = client
-        .request(req("GET", format!("{base}/todos"), None))
-        .await
-        .expect("request");
-    assert_eq!(res.status(), StatusCode::OK);
+    // GET awaiting the PATCH's position reflects both writes — read-your-writes,
+    // no content-predicate poll (#330).
     assert_eq!(
-        read_json(res).await,
+        get_after(&client, &base, "", &patch_pos).await,
         json!([{"id": id, "text": "buy milk", "completed": true}])
     );
 
-    // DELETE → 204; a second DELETE → 404 (deletion is a domain fact).
+    // DELETE → 204 with its position; a second DELETE → 404 (a domain fact).
     let res = client
         .request(req("DELETE", format!("{base}/todos/{id}"), None))
         .await
         .expect("request");
     assert_eq!(res.status(), StatusCode::NO_CONTENT);
+    let delete_pos = write_position(&res);
     let res = client
         .request(req("DELETE", format!("{base}/todos/{id}"), None))
         .await
         .expect("request");
     assert_eq!(res.status(), StatusCode::NOT_FOUND);
 
-    // GET converges to empty.
-    wait_for_index(&app, TodosIndex::is_empty).await;
-    let res = client
-        .request(req("GET", format!("{base}/todos"), None))
-        .await
-        .expect("request");
-    assert_eq!(read_json(res).await, json!([]));
+    // GET awaiting the DELETE's position sees the empty index.
+    assert_eq!(get_after(&client, &base, "", &delete_pos).await, json!([]));
 
     app.shutdown().await;
 }
@@ -194,18 +193,12 @@ async fn read_from_projection_reflects_http_write() {
         .await
         .expect("request");
     assert_eq!(res.status(), StatusCode::CREATED);
+    let position = write_position(&res);
     let id = read_json(res).await["id"].as_str().expect("id").to_owned();
-    let uid = Uuid::parse_str(&id).expect("uuid");
 
-    wait_for_index(&app, |ix| ix.contains(uid)).await;
-
-    let res = client
-        .request(req("GET", format!("{base}/todos"), None))
-        .await
-        .expect("request");
-    assert_eq!(res.status(), StatusCode::OK);
+    // GET awaiting the POST's position must see the write it just made.
     assert_eq!(
-        read_json(res).await,
+        get_after(&client, &base, "", &position).await,
         json!([{"id": id, "text": "projected", "completed": false}])
     );
 
@@ -303,6 +296,7 @@ async fn pagination_is_stable_creation_order() {
     let base = format!("http://{}", app.addr);
 
     let mut ids = Vec::new();
+    let mut last_pos = String::new();
     for text in ["a", "b", "c"] {
         let res = client
             .request(req(
@@ -312,9 +306,12 @@ async fn pagination_is_stable_creation_order() {
             ))
             .await
             .expect("request");
+        last_pos = write_position(&res);
         ids.push(read_json(res).await["id"].as_str().expect("id").to_owned());
     }
-    wait_for_index(&app, |ix| ix.len() == 3).await;
+    // Block once until the projection has folded all three creates; the
+    // subsequent best-effort pages then read a caught-up index.
+    let _ = get_after(&client, &base, "", &last_pos).await;
 
     assert_eq!(
         page(&client, &base, "?limit=1").await,
@@ -343,6 +340,7 @@ async fn lifecycle_reopen_resumes_projection_from_checkpoint() {
     );
     let client = client();
     let base = format!("http://{}", app.addr);
+    let mut last_pos = String::new();
     for text in ["first", "second"] {
         let res = client
             .request(req(
@@ -353,8 +351,12 @@ async fn lifecycle_reopen_resumes_projection_from_checkpoint() {
             .await
             .expect("request");
         assert_eq!(res.status(), StatusCode::CREATED);
+        last_pos = write_position(&res);
     }
-    wait_for_index(&app, |ix| ix.len() == 2).await;
+    // Read-your-writes: block until the projection has folded both creates, so
+    // the shutdown below persists a checkpoint that covers them.
+    let page = get_after(&client, &base, "", &last_pos).await;
+    assert_eq!(page.as_array().map(Vec::len), Some(2));
     app.shutdown().await;
 
     // Reopen the same keyspace: the projection must resume from its
@@ -366,7 +368,7 @@ async fn lifecycle_reopen_resumes_projection_from_checkpoint() {
         "reopen must find the checkpoint"
     );
     assert_eq!(
-        app.index.borrow().len(),
+        app.index.borrow().index.len(),
         2,
         "hydrated snapshot serves reads at once"
     );
@@ -391,7 +393,9 @@ async fn lifecycle_reopen_resumes_projection_from_checkpoint() {
         .await
         .expect("request");
     assert_eq!(res.status(), StatusCode::CREATED);
-    wait_for_index(&app, |ix| ix.len() == 3).await;
+    let third_pos = write_position(&res);
+    let page = get_after(&client, &base, "", &third_pos).await;
+    assert_eq!(page.as_array().map(Vec::len), Some(3));
 
     app.shutdown().await;
 }

@@ -219,12 +219,14 @@ async fn dispatch_then_reload_then_dispatch_advances_the_saga() {
     let id = OrderId::new(1);
 
     // First upstream event → records PaymentRequested, projects TakePayment.
-    let r1: Reaction<OrderSaga, 0> = repo
+    let r1: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 1, total: 100 })
         .await
         .unwrap();
     match r1 {
-        Reaction::Reacted { version, intents } => {
+        Reaction::Reacted {
+            version, intents, ..
+        } => {
             assert_eq!(version, Version::INITIAL);
             let collected: Vec<_> = intents.iter().collect();
             assert_eq!(collected.len(), 1);
@@ -237,12 +239,14 @@ async fn dispatch_then_reload_then_dispatch_advances_the_saga() {
 
     // Second upstream event of a different type → records OrderCompleted,
     // which projects NO intent (internal-only).
-    let r2: Reaction<OrderSaga, 0> = repo
+    let r2: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &PaymentSettled { id: 1 })
         .await
         .unwrap();
     match r2 {
-        Reaction::Reacted { version, intents } => {
+        Reaction::Reacted {
+            version, intents, ..
+        } => {
             assert_eq!(version, Version::new(2).unwrap());
             assert!(intents.is_empty(), "OrderCompleted projects no intent");
         }
@@ -266,7 +270,7 @@ async fn reopen_facade_over_same_store_sees_prior_saga_events() {
 
     {
         let repo: Repo = store.repository().codec(SagaCodec).build();
-        let _: Reaction<OrderSaga, 0> = repo
+        let _: Reaction<OrderSaga, _, 0> = repo
             .dispatch(id.clone(), &OrderPlaced { id: 7, total: 50 })
             .await
             .unwrap();
@@ -286,13 +290,13 @@ async fn react_ok_none_persists_nothing() {
     let id = OrderId::new(2);
 
     // Prime the saga so payment_requested == true.
-    let _: Reaction<OrderSaga, 0> = repo
+    let _: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 2, total: 10 })
         .await
         .unwrap();
 
     // A duplicate OrderPlaced now reacts to Ok(None) → Ignored, nothing written.
-    let r: Reaction<OrderSaga, 0> = repo
+    let r: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 2, total: 10 })
         .await
         .unwrap();
@@ -308,7 +312,7 @@ async fn react_error_rolls_back_nothing() {
     let repo = new_repo();
     let id = OrderId::new(3);
 
-    let result: Result<Reaction<OrderSaga, 0>, _> = repo
+    let result: Result<Reaction<OrderSaga, _, 0>, _> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 3, total: 0 })
         .await;
     let err = result.unwrap_err();
@@ -329,7 +333,7 @@ async fn stale_root_save_surfaces_conflict() {
     let mut stale: AggregateRoot<OrderSaga> = repo.load(id.clone()).await.unwrap();
 
     // A concurrent writer advances the stream to version 1.
-    let _: Reaction<OrderSaga, 0> = repo
+    let _: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 4, total: 20 })
         .await
         .unwrap();
@@ -386,7 +390,7 @@ async fn concurrent_dispatch_one_wins_loser_conflicts_then_retry_converges() {
 
     // Caller-side retry (reload → re-dispatch) converges: the reload now sees
     // payment_requested == true, so the retry is a clean Ignored no-op.
-    let retry: Reaction<OrderSaga, 0> = repo
+    let retry: Reaction<OrderSaga, _, 0> = repo
         .dispatch(id.clone(), &OrderPlaced { id: 5, total: 30 })
         .await
         .unwrap();

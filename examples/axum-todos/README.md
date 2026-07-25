@@ -69,9 +69,11 @@ barrier-aligned concurrent PATCHes.
   second overlapping writer surfaces instead of being silently lost.
 - **`503 Service Unavailable`** — reads come from a projection, and a dead projection
   loop would otherwise serve frozen reads with 200s forever.
-- **Eventually consistent `GET`** — a `GET` racing its own `POST` may not see it yet;
-  there is no position for the handler to await (finding 4), so the port is honest
-  about it rather than pretending to read-your-writes.
+- **Read-your-writes `GET`** — every write echoes the `$all` position it landed at in
+  an `X-Mnesis-Position` header; a `GET` that sends the same header back blocks until the
+  projection's checkpoint reaches it, so a client always observes its own write (#330,
+  resolving finding 4). Without the header a `GET` stays eventually consistent, so a
+  client that doesn't care pays nothing.
 - **Deterministic pagination order** — upstream paginated `HashMap::values()`, which is
   unordered; the projection had to choose, and creation order (the `$all` fold order of
   `Created` events) makes `offset`/`limit` stable across requests — which upstream's
@@ -84,7 +86,7 @@ barrier-aligned concurrent PATCHes.
 | 1 | The `Projection` stepper cannot drive an `$all` projection — its `SnapshotStore` bound and checkpoint are `Version`-typed (per-stream); the example hand-rolled the loop in `index.rs`. **Resolved:** the stepper is generic over the position (`Pos = Version` default), and `index.rs::run` now drives it | #327 |
 | 2 | `PersistTrigger` is `Version`-typed and `Decoded<T>` has no position slot — the `$all` position rides in a tuple beside the item; no shipped trigger could accept it. **Resolved:** the trigger is `PersistTrigger<P = Version>`; `advance` takes the `(position, Decoded)` tuple whole. `EveryNEvents` stays `Version`-only by decision (no bucket arithmetic on composite positions) — the example's per-event pacer is a 4-line custom trigger | #328 |
 | 3 | `Handle` cannot decide zero events (`Events<E, N>` guarantees ≥ 1; `React` returns `Option`) — the legitimate no-op `PATCH {}` is answered in the handler from loaded state, without entering the domain | #329 |
-| 4 | `Repository::save`/`execute` return no position — read-your-writes is unbuildable at the repository seam; `GET` is eventually consistent and the tests await the watch channel instead | #330 |
+| 4 | `Repository::save`/`execute` returned no position — read-your-writes was unbuildable at the repository seam. **Resolved:** `save` returns `Self::Position` and `execute` returns `Execution { position, .. }`; the `POST`/`PATCH`/`DELETE` handlers echo it in `X-Mnesis-Position` and `GET` awaits it — the tests assert read-your-writes end to end, no watch-channel content poll | #330 |
 | 5 | `GET /todos` pagination forced an ordering decision upstream never made; creation order was chosen, making pagination deterministic | #331 |
 | 6 | Two statuses upstream never returns are unavoidable: `409` (the lost-update race surfaces instead of losing the write) and `503` (a dead projection loop must not serve frozen 200s) | #332 |
 | 7 | `$all` items carry no stream id and `Handle::handle` has no identity access — the todo id is threaded by hand: URL path → command field → every event variant's payload | #333 |

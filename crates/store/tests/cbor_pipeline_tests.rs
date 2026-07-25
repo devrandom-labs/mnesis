@@ -36,7 +36,7 @@ mod pipeline {
                 src.append(
                     &StreamKey::from_slice(sid.as_bytes()),
                     Version::new(v - 1),
-                    core::slice::from_ref(&pe),
+                    mnesis_store::PendingBatch::of(&pe),
                 )
                 .await
                 .expect("append");

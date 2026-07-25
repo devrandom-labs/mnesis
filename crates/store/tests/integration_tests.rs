@@ -20,6 +20,7 @@
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_inmemory::{InMemoryStore, InMemoryStream};
+use mnesis_store::PendingBatch;
 use mnesis_store::pending_envelope;
 use mnesis_store::store::RawEventStore;
 
@@ -71,7 +72,7 @@ async fn multi_batch_append_then_read_all() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"multi-batch-stream"),
             None,
-            &batch1,
+            PendingBatch::new(&batch1).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -82,7 +83,7 @@ async fn multi_batch_append_then_read_all() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"multi-batch-stream"),
             Version::new(3),
-            &batch2,
+            PendingBatch::new(&batch2).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -111,7 +112,7 @@ async fn read_stream_from_version_filters_earlier() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"filter-stream"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -142,7 +143,7 @@ async fn concurrent_append_detects_conflict() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"conflict-stream"),
             None,
-            &seed,
+            PendingBatch::new(&seed).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -153,7 +154,7 @@ async fn concurrent_append_detects_conflict() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"conflict-stream"),
             Version::new(1),
-            &writer_a,
+            PendingBatch::new(&writer_a).expect("non-empty batch"),
         )
         .await;
     assert!(result_a.is_ok(), "writer A should succeed");
@@ -164,7 +165,7 @@ async fn concurrent_append_detects_conflict() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"conflict-stream"),
             Version::new(1),
-            &writer_b,
+            PendingBatch::new(&writer_b).expect("non-empty batch"),
         )
         .await;
     assert!(result_b.is_err(), "writer B should get a conflict error");
@@ -200,7 +201,7 @@ async fn large_batch_append_and_sequential_readback() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"large-batch-stream"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -249,7 +250,7 @@ async fn read_from_future_version_returns_empty() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"future-version-stream"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .unwrap();

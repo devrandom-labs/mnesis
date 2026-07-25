@@ -3,6 +3,7 @@
 
 use mnesis::Version;
 
+use mnesis_store::PendingBatch;
 use mnesis_store::envelope::PersistedEnvelope;
 
 #[cfg(test)]
@@ -40,7 +41,7 @@ mod tests {
                 .build()
                 .expect("valid envelope");
             store
-                .append(&id, expected, &[filler])
+                .append(&id, expected, PendingBatch::of(&filler))
                 .await
                 .expect("append succeeds");
             expected = Version::new(filler_version);
@@ -54,7 +55,7 @@ mod tests {
         }
         let envelope = builder.build().expect("valid envelope");
         store
-            .append(&id, expected, &[envelope])
+            .append(&id, expected, PendingBatch::of(&envelope))
             .await
             .expect("append succeeds");
 

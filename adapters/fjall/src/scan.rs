@@ -298,6 +298,7 @@ mod tests {
     use crate::store::FjallStore;
     use crate::store::read_test_helpers::{sk, temp_store};
     use futures::StreamExt;
+    use mnesis_store::PendingBatch;
     use mnesis_store::StreamKey;
     use mnesis_store::envelope::pending_envelope;
     use mnesis_store::store::RawEventStore;
@@ -330,7 +331,10 @@ mod tests {
                 .payload(format!("v{v}").into_bytes())
                 .build()
                 .unwrap();
-            store.append(id, Version::new(v - 1), &[env]).await.unwrap();
+            store
+                .append(id, Version::new(v - 1), PendingBatch::of(&env))
+                .await
+                .unwrap();
         }
     }
 

@@ -30,6 +30,7 @@
 use mnesis::{ErrorId, Version};
 use mnesis_inmemory::InMemoryStoreError;
 use mnesis_store::AppendError;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::StoreError;
@@ -120,8 +121,8 @@ impl RawEventStore for ProbeStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         let mut guard = self.streams.lock().await;
         let stream = guard.entry(id.to_string()).or_default();
         let current = u64::try_from(stream.len()).unwrap_or(u64::MAX);
@@ -136,14 +137,17 @@ impl RawEventStore for ProbeStore {
                 return Err(AppendError::Store(ProbeError::Conflict));
             }
         }
+        let mut last = mnesis_inmemory::InMemoryAllPos::INITIAL;
         for env in envelopes {
             stream.push((
                 env.version().as_u64(),
                 env.event_type().to_owned(),
                 env.payload().to_vec(),
             ));
+            last = mnesis_inmemory::InMemoryAllPos::new(env.version().as_u64())
+                .unwrap_or(mnesis_inmemory::InMemoryAllPos::INITIAL);
         }
-        Ok(())
+        Ok(last)
     }
 
     async fn read_stream(
@@ -260,7 +264,11 @@ async fn append_rejects_backwards_versions() {
     ];
 
     let result = store
-        .append(&StreamKey::from_slice(b"s1"), None, &envelopes)
+        .append(
+            &StreamKey::from_slice(b"s1"),
+            None,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
+        )
         .await;
     assert!(
         result.is_err(),
@@ -322,7 +330,7 @@ proptest! {
                 })
                 .collect();
 
-            let result = store.append(&StreamKey::from_slice(b"s1"), None, &envelopes).await;
+            let result = store.append(&StreamKey::from_slice(b"s1"), None, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
 
             // Check if versions are actually sequential from 1
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);

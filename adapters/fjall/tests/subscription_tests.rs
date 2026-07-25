@@ -16,6 +16,7 @@ use std::time::Duration;
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_fjall::FjallStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{
     PendingEnvelope, StepStreamExt, Store, StreamKey, Subscription, pending_envelope,
@@ -49,7 +50,10 @@ async fn append_one(
     event_type: &'static str,
 ) {
     let envelope = make_envelope(version, event_type, format!("payload-{version}").as_bytes());
-    store.append(id, expected, &[envelope]).await.unwrap();
+    store
+        .append(id, expected, PendingBatch::of(&envelope))
+        .await
+        .unwrap();
 }
 
 /// Timeout duration for operations that should complete quickly.

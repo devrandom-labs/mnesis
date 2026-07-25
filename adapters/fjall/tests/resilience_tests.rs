@@ -45,6 +45,7 @@ use mnesis_store::StreamKey;
 use mnesis_store::envelope::pending_envelope;
 use mnesis_store::store::RawEventStore;
 
+use mnesis_store::PendingBatch;
 use proptest::prelude::*;
 
 // ============================================================================
@@ -224,8 +225,14 @@ async fn attack_dual_instance_same_path() {
             let env1 = make_envelope(1, "A", b"from-1");
             let env2 = make_envelope(1, "B", b"from-2");
 
-            store1.append(&sid1, None, &[env1]).await.unwrap();
-            store2.append(&sid2, None, &[env2]).await.unwrap();
+            store1
+                .append(&sid1, None, PendingBatch::of(&env1))
+                .await
+                .unwrap();
+            store2
+                .append(&sid2, None, PendingBatch::of(&env2))
+                .await
+                .unwrap();
 
             // Check for corruption: can we read back correctly?
             let r1 = read_all_event_types(&store1, &sid1).await;
@@ -305,8 +312,8 @@ proptest! {
 
                         let expected_ver =
                             Version::new(u64::try_from(existing).unwrap());
-                        match store.append(sid_ref, expected_ver, &envelopes).await {
-                            Ok(()) => {
+                        match store.append(sid_ref, expected_ver, PendingBatch::new(&envelopes).expect("non-empty batch")).await {
+                            Ok(_position) => {
                                 model.entry(*stream).or_default().extend(payloads);
                             }
                             Err(e) => panic!("DST append failed unexpectedly: {e}"),
@@ -354,7 +361,14 @@ async fn attack_crash_simulation_forget_store() {
     {
         let store = FjallStore::builder(&path).open().unwrap();
         let envs = vec![make_envelope(1, "Before", b"crash-data")];
-        store.append(&sk("crash-test"), None, &envs).await.unwrap();
+        store
+            .append(
+                &sk("crash-test"),
+                None,
+                PendingBatch::new(&envs).expect("non-empty batch"),
+            )
+            .await
+            .unwrap();
         std::mem::forget(store); // Simulate crash — no Drop, no flush
     }
 
@@ -414,14 +428,19 @@ async fn append_assigns_monotonic_all_position_across_streams() {
         .append(
             &sk("a"),
             None,
-            &[make_envelope(1, "A1", b"a1"), make_envelope(2, "A2", b"a2")],
+            PendingBatch::new(&[make_envelope(1, "A1", b"a1"), make_envelope(2, "A2", b"a2")])
+                .expect("non-empty batch"),
         )
         .await
         .unwrap();
 
     // Append 2: one event to a different stream "b" -> position 3.
     store
-        .append(&sk("b"), None, &[make_envelope(1, "B1", b"b1")])
+        .append(
+            &sk("b"),
+            None,
+            PendingBatch::new(&[make_envelope(1, "B1", b"b1")]).expect("non-empty batch"),
+        )
         .await
         .unwrap();
 
@@ -430,7 +449,8 @@ async fn append_assigns_monotonic_all_position_across_streams() {
         .append(
             &sk("a"),
             Version::new(2),
-            &[make_envelope(3, "A3", b"a3"), make_envelope(4, "A4", b"a4")],
+            PendingBatch::new(&[make_envelope(3, "A3", b"a3"), make_envelope(4, "A4", b"a4")])
+                .expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -482,7 +502,10 @@ async fn attack_recovery_stream_id_counter_correctness() {
         for i in 0..stream_count {
             let sid_val = sk(&format!("recovery_{i}"));
             let env = make_envelope(1, "Init", &i.to_le_bytes());
-            store.append(&sid_val, None, &[env]).await.unwrap();
+            store
+                .append(&sid_val, None, PendingBatch::of(&env))
+                .await
+                .unwrap();
         }
     }
 
@@ -492,7 +515,10 @@ async fn attack_recovery_stream_id_counter_correctness() {
         // Create one more stream — should get a unique numeric ID
         let sid_val = sk(&format!("recovery_{stream_count}"));
         let env = make_envelope(1, "Init", b"new");
-        store.append(&sid_val, None, &[env]).await.unwrap();
+        store
+            .append(&sid_val, None, PendingBatch::of(&env))
+            .await
+            .unwrap();
 
         // Verify ALL streams are readable
         for i in 0..=stream_count {
@@ -506,25 +532,13 @@ async fn attack_recovery_stream_id_counter_correctness() {
 // ============================================================================
 // CATEGORY M: Empty batch to nonexistent stream
 // ============================================================================
-
-#[tokio::test]
-async fn attack_empty_batch_wrong_version_to_nonexistent() {
-    // BUG PROBE: empty batch skips ALL validation including version check.
-    // This means you can "succeed" with a wrong expected_version on an empty batch.
-    let (store, _dir) = temp_store();
-
-    let result = store.append(&sk("phantom2"), Version::new(999), &[]).await;
-    // The early return at line 61 fires BEFORE any version check.
-    // This is arguably a bug: it should still validate expected_version
-    // against the actual stream state, even for empty batches.
-    if result.is_ok() {
-        println!(
-            "BUG FOUND: empty batch with wrong expected_version (999) \
-             succeeded for nonexistent stream — version check is bypassed \
-             by the early return at store.rs:61"
-        );
-    }
-}
+//
+// REMOVED `attack_empty_batch_wrong_version_to_nonexistent` (#330): this probed
+// the empty-batch early return that used to bypass the version check. `append`
+// now takes a non-empty `PendingBatch`, so an empty append does not type-check
+// — the class of bug this probed is structurally impossible rather than merely
+// checked. The version-assertion-without-writing capability it relied on has no
+// production caller; if ever wanted it returns as its own method, additively.
 
 // ============================================================================
 // CATEGORY P: Schema version 0 attack through the store
@@ -572,7 +586,7 @@ async fn attack_custom_builder_config_still_works() {
 
     let env = make_envelope(1, "A", b"data");
     store
-        .append(&sk("custom-config"), None, &[env])
+        .append(&sk("custom-config"), None, PendingBatch::of(&env))
         .await
         .unwrap();
 

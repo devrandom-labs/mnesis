@@ -13,14 +13,14 @@ use std::time::Duration;
 
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, patch};
 use axum::{Json, Router};
-use mnesis_fjall::FjallStore;
+use mnesis_fjall::{FjallStore, GlobalSeq};
 use mnesis_store::repository::Repository;
 use mnesis_store::store::Store;
-use mnesis_store::{CommandRepository, ExecuteError};
+use mnesis_store::{CommandRepository, ExecuteError, Execution};
 use serde::Deserialize;
 use tokio::sync::watch;
 use tower::{BoxError, ServiceBuilder};
@@ -28,7 +28,28 @@ use tower_http::trace::TraceLayer;
 use uuid::Uuid;
 
 use crate::domain::{Create, Delete, Todo, TodoError, TodoId, TodoState, Update};
-use crate::index::{TodoView, TodosIndex};
+use crate::index::{IndexState, TodoView};
+
+/// The read-your-writes token header (#330). A write echoes the `$all`
+/// position it landed at here; a `GET` may send it back to block until the
+/// projection has folded at least that far. A `u64` — fjall's [`GlobalSeq`]
+/// rendered decimal (`GlobalSeq::as_u64` / `GlobalSeq::new`).
+const POSITION_HEADER: &str = "x-mnesis-position";
+
+/// How long a `GET` waits for the projection to reach a requested position
+/// before serving best-effort. fjall delivers a `GlobalSeq` the instant it is
+/// committed, so this bound is only ever hit if the projection loop stalls; on
+/// a distributed adapter the `$all` watermark (#213) could legitimately delay
+/// reachability, which is exactly why the wait is bounded.
+const READ_YOUR_WRITES_TIMEOUT: Duration = Duration::from_secs(5);
+
+/// Parse the read-your-writes position a `GET` optionally carries. A missing or
+/// malformed header means "no wait" (best-effort read) rather than a `400` —
+/// the token is an optimization the client may always omit.
+fn requested_position(headers: &HeaderMap) -> Option<GlobalSeq> {
+    let raw = headers.get(POSITION_HEADER)?.to_str().ok()?;
+    GlobalSeq::new(raw.parse().ok()?)
+}
 
 /// Router state — replaces upstream's `Db = Arc<RwLock<HashMap<Uuid, Todo>>>`.
 ///
@@ -37,7 +58,7 @@ use crate::index::{TodoView, TodosIndex};
 #[derive(Clone)]
 pub struct AppState {
     pub store: Store<FjallStore>,
-    pub index: watch::Receiver<TodosIndex>,
+    pub index: watch::Receiver<IndexState>,
 }
 
 /// The upstream router, middleware included, over [`AppState`].
@@ -81,6 +102,7 @@ pub struct Pagination {
 
 async fn todos_index(
     pagination: Query<Pagination>,
+    headers: HeaderMap,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // The projection loop's death signal is the dropped sender (see
@@ -90,15 +112,33 @@ async fn todos_index(
     if state.index.has_changed().is_err() {
         return Err(StatusCode::SERVICE_UNAVAILABLE);
     }
-    // Upstream took a read lock on the HashMap; here the projection's watch
-    // channel is borrowed. Eventual consistency is the semantic change: a
-    // GET racing its own POST may not see it yet (finding #326-4 — there is
-    // no position to await; `save` returns `()`).
-    let todos = state.index.borrow().page(
+    let (offset, limit) = (
         pagination.offset.unwrap_or(0),
         pagination.limit.unwrap_or(usize::MAX),
     );
-    Ok(Json(todos))
+    let mut index = state.index.clone();
+
+    // Read-your-writes (#330): if the client echoes the position its own write
+    // returned, block until the projection's checkpoint reaches it — then the
+    // *same* `IndexState` snapshot necessarily reflects that write. Upstream
+    // (and the pre-#330 port, finding #326-4) had no position to await, so a
+    // GET racing its own POST could miss it; now it cannot.
+    if let Some(target) = requested_position(&headers) {
+        match tokio::time::timeout(
+            READ_YOUR_WRITES_TIMEOUT,
+            index.wait_for(|s| s.checkpoint >= Some(target)),
+        )
+        .await
+        {
+            // Checkpoint reached: page from this consistent snapshot.
+            Ok(Ok(snapshot)) => return Ok(Json(snapshot.index.page(offset, limit))),
+            // Sender dropped — the loop died, same as the guard above.
+            Ok(Err(_closed)) => return Err(StatusCode::SERVICE_UNAVAILABLE),
+            // Timed out (unreachable on fjall): fall through to best-effort.
+            Err(_elapsed) => {}
+        }
+    }
+    Ok(Json(index.borrow().index.page(offset, limit)))
 }
 
 #[derive(Debug, Deserialize)]
@@ -115,16 +155,26 @@ async fn todos_create(
     // aggregate type per handler is the intended pattern.
     let repo = state.store.repository::<Todo>().json().build();
     let mut todo = Todo::new(TodoId(id));
-    repo.execute(
-        &mut todo,
-        Create {
-            id,
-            text: input.text,
-        },
-    )
-    .await
-    .map_err(internal)?;
-    Ok((StatusCode::CREATED, Json(todo_view(id, todo.state()))))
+    let Execution::Executed { position, .. } = repo
+        .execute(
+            &mut todo,
+            Create {
+                id,
+                text: input.text,
+            },
+        )
+        .await
+        .map_err(internal)?
+    else {
+        // `Create` always decides an event — `Ignored` is unreachable here.
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    // Echo the read-your-writes position so the client can await its own write.
+    Ok((
+        StatusCode::CREATED,
+        [(POSITION_HEADER, position.as_u64().to_string())],
+        Json(todo_view(id, todo.state())),
+    ))
 }
 
 #[derive(Debug, Deserialize)]
@@ -137,7 +187,7 @@ async fn todos_update(
     Path(id): Path<Uuid>,
     State(state): State<AppState>,
     Json(input): Json<UpdateTodo>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<Response, StatusCode> {
     let repo = state.store.repository::<Todo>().json().build();
     let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
     // "Does it exist?" is a domain question: an id with no events loads as a
@@ -159,7 +209,14 @@ async fn todos_update(
         )
         .await
     {
-        Ok(_) => Ok(Json(todo_view(id, todo.state()))),
+        // A real update carries the read-your-writes position; a no-op update
+        // (`Ignored`) appended nothing, so there is no position to echo.
+        Ok(Execution::Executed { position, .. }) => Ok((
+            [(POSITION_HEADER, position.as_u64().to_string())],
+            Json(todo_view(id, todo.state())),
+        )
+            .into_response()),
+        Ok(Execution::Ignored) => Ok(Json(todo_view(id, todo.state())).into_response()),
         Err(e) if e.is_conflict() => Err(StatusCode::CONFLICT),
         Err(ExecuteError::Decide(TodoError::NotFound)) => Err(StatusCode::NOT_FOUND),
         Err(error) => Err(internal(error)),
@@ -169,14 +226,21 @@ async fn todos_update(
 async fn todos_delete(
     Path(id): Path<Uuid>,
     State(state): State<AppState>,
-) -> Result<StatusCode, StatusCode> {
+) -> Result<Response, StatusCode> {
     let repo = state.store.repository::<Todo>().json().build();
     let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
     if todo.version().is_none() || todo.state().deleted {
         return Err(StatusCode::NOT_FOUND);
     }
     match repo.execute(&mut todo, Delete { id }).await {
-        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        // A delete of a live todo always decides an event, so it carries a
+        // position; `Ignored` is unreachable given the guard above.
+        Ok(Execution::Executed { position, .. }) => Ok((
+            StatusCode::NO_CONTENT,
+            [(POSITION_HEADER, position.as_u64().to_string())],
+        )
+            .into_response()),
+        Ok(Execution::Ignored) => Ok(StatusCode::NO_CONTENT.into_response()),
         Err(e) if e.is_conflict() => Err(StatusCode::CONFLICT),
         Err(ExecuteError::Decide(TodoError::NotFound)) => Err(StatusCode::NOT_FOUND),
         Err(error) => Err(internal(error)),

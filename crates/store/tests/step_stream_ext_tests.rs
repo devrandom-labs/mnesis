@@ -21,6 +21,7 @@
 use futures::{StreamExt, stream};
 use mnesis::{DomainEvent, Message, Version};
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{
     DecodeStreamError, Decoded, Encode, JsonCodec, PersistedEnvelope, Step, StepStreamExt, Store,
@@ -58,13 +59,21 @@ async fn persisted(version: u64, amount: u64) -> PersistedEnvelope {
     let mut expected = None;
     for v in 1..version {
         store
-            .append(&id, expected, &[money_env(v, 0)])
+            .append(
+                &id,
+                expected,
+                PendingBatch::new(&[money_env(v, 0)]).expect("non-empty batch"),
+            )
             .await
             .unwrap();
         expected = Version::new(v);
     }
     store
-        .append(&id, expected, &[money_env(version, amount)])
+        .append(
+            &id,
+            expected,
+            PendingBatch::new(&[money_env(version, amount)]).expect("non-empty batch"),
+        )
         .await
         .unwrap();
     let raw = store
@@ -85,7 +94,10 @@ async fn corrupt_persisted() -> PersistedEnvelope {
         .payload(b"not json".to_vec())
         .build()
         .unwrap();
-    store.append(&id, None, &[bad]).await.unwrap();
+    store
+        .append(&id, None, PendingBatch::of(&bad))
+        .await
+        .unwrap();
     let raw = store.read_stream(&id, Version::INITIAL).await.unwrap();
     let mut cursor = std::pin::pin!(raw);
     cursor.next().await.expect("one event").expect("ok")

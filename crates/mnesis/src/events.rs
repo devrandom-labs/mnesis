@@ -70,6 +70,24 @@ impl<E: DomainEvent, const N: usize> Events<E, N> {
         once(&self.first).chain(self.rest.iter())
     }
 
+    /// The head event — total, because the collection is non-empty.
+    ///
+    /// Together with [`rest`](Self::rest) this exposes the split the type is
+    /// already built on, so a caller can construct a *downstream* non-empty
+    /// collection with no runtime check and no unprovable `unwrap` — see
+    /// `mnesis_store::PendingBatch::from_parts`.
+    #[must_use]
+    pub const fn first(&self) -> &E {
+        &self.first
+    }
+
+    /// Every event after the head, in order. Empty when the collection holds
+    /// exactly one event.
+    #[must_use]
+    pub fn rest(&self) -> &[E] {
+        self.rest.as_slice()
+    }
+
     #[must_use]
     // Safety: rest.len() <= N and N < usize::MAX (ArrayVec cannot be allocated
     // at usize::MAX capacity), so + 1 cannot overflow.

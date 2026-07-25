@@ -15,7 +15,7 @@ use bytes::Bytes;
 use mnesis::ErrorId;
 use mnesis::Version;
 use mnesis_store::batch::BatchSize;
-use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
+use mnesis_store::envelope::{EnvelopeError, PendingBatch, PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::{AppendError, AppendValidationError};
 #[cfg(feature = "import")]
 use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
@@ -406,8 +406,8 @@ impl RawEventStore for InMemoryStore {
         &self,
         id: &StreamKey,
         expected_version: Option<Version>,
-        envelopes: &[PendingEnvelope],
-    ) -> Result<(), AppendError<Self::Error>> {
+        envelopes: PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
         let mut guard = self.streams.lock().await;
         let key = id.to_string();
         let stream = guard.entry(key).or_default();
@@ -424,12 +424,18 @@ impl RawEventStore for InMemoryStore {
         // streams; gaps are permitted by the `RawEventStore` contract.
         let mut counter = self.next_global_seq.lock().await;
         let mut seq = *counter;
-        let mut rows: Vec<(InMemoryAllPos, StoredFrame)> = Vec::with_capacity(envelopes.len());
+        // The position `append` returns (#330). The batch is non-empty by
+        // construction, so the loop below runs at least once and overwrites this
+        // seed before it is read.
+        let mut last_assigned = seq;
+        let mut rows: Vec<(InMemoryAllPos, StoredFrame)> =
+            Vec::with_capacity(envelopes.len().get());
         for env in envelopes {
             rows.push((
                 seq,
                 encode_pending_to_frame(env).map_err(AppendError::Store)?,
             ));
+            last_assigned = seq;
             seq = seq
                 .next()
                 .ok_or(AppendError::Store(InMemoryStoreError::GlobalSeqOverflow))?;
@@ -450,8 +456,6 @@ impl RawEventStore for InMemoryStore {
         // Store the events per-stream.
         stream.extend(rows.into_iter().map(|(_, frame)| frame));
 
-        let should_notify = !envelopes.is_empty();
-
         // Release lock before notifying to avoid contention: subscribers
         // wake up and immediately try to acquire the same Mutex.
         drop(guard);
@@ -459,11 +463,10 @@ impl RawEventStore for InMemoryStore {
         // Wake the subscribers parked on this stream, keyed by the stable
         // byte representation (`as_ref`), matching `register`. `wake` also
         // bumps the `$all` generation (a per-stream commit is an `$all` event).
-        if should_notify {
-            self.notifiers.wake(id.as_ref());
-        }
+        // Unconditional: a non-empty batch always committed something.
+        self.notifiers.wake(id.as_ref());
 
-        Ok(())
+        Ok(last_assigned)
     }
 
     async fn read_stream(
@@ -641,7 +644,11 @@ impl AtomicAppend for InMemoryStore {
     async fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],
-    ) -> Result<(), AtomicAppendError<Self::Error>> {
+    ) -> Result<Option<Self::AllPosition>, AtomicAppendError<Self::Error>> {
+        if writes.is_empty() {
+            // A no-op commits no position (#330).
+            return Ok(None);
+        }
         let mut guard = self.streams.lock().await;
 
         // Phase 1 — validate every head and run shape against the RUNNING
@@ -671,7 +678,7 @@ impl AtomicAppend for InMemoryStore {
             // run must be strictly sequential from expected+1. A running counter
             // avoids any index→u64 conversion (Rule 2).
             let mut want = expected_raw.checked_add(1);
-            for env in &w.events {
+            for env in w.batch() {
                 let Some(want_version) = want else {
                     return Err(AtomicAppendError::Store(
                         InMemoryStoreError::VersionOverflow,
@@ -686,25 +693,27 @@ impl AtomicAppend for InMemoryStore {
                 want = want_version.checked_add(1);
             }
             // Advance this target's projected head by the run just validated, so
-            // a later same-target write in this batch conflicts above.
-            let new_head = w
-                .events
-                .last()
-                .map_or(actual_raw, |last| last.version().as_u64());
-            projected.insert(key, new_head);
+            // a later same-target write in this batch conflicts above. The run is
+            // non-empty, so its last version is total.
+            projected.insert(key, w.batch().last().version().as_u64());
         }
 
         // Phase 2 — assign `$all` positions and stage frames (still no store mutation).
         let mut counter = self.next_global_seq.lock().await;
         let mut seq = *counter;
+        // The position of the last event staged — the highest of the whole
+        // batch, since `seq` is monotonic across every run (#330). `writes` is
+        // non-empty and every run carries a head, so the loop always sets it.
+        let mut last_assigned = seq;
         let mut staged_streams: Vec<(String, Vec<StoredFrame>)> = Vec::with_capacity(writes.len());
         let mut staged_global: Vec<(InMemoryAllPos, StreamKey, StoredFrame)> = Vec::new();
         for w in writes {
-            let mut frames = Vec::with_capacity(w.events.len());
-            for env in &w.events {
+            let mut frames = Vec::with_capacity(w.batch().len().get());
+            for env in w.batch() {
                 let frame = encode_pending_to_frame(env).map_err(AtomicAppendError::Store)?;
                 staged_global.push((seq, w.target.clone(), frame.clone()));
                 frames.push(frame);
+                last_assigned = seq;
                 seq = seq.next().ok_or(AtomicAppendError::Store(
                     InMemoryStoreError::GlobalSeqOverflow,
                 ))?;
@@ -730,11 +739,9 @@ impl AtomicAppend for InMemoryStore {
         // Wake subscribers parked on each touched stream (each wake also
         // bumps the `$all` generation).
         for w in writes {
-            if !w.events.is_empty() {
-                self.notifiers.wake(w.target.as_ref());
-            }
+            self.notifiers.wake(w.target.as_ref());
         }
-        Ok(())
+        Ok(Some(last_assigned))
     }
 }
 
@@ -781,7 +788,10 @@ mod bounded_read_tests {
     async fn seed(store: &InMemoryStore, id: &StreamKey, count: u64) {
         for v in 1..=count {
             let expected = Version::new(v - 1);
-            store.append(id, expected, &[env(v)]).await.unwrap();
+            store
+                .append(id, expected, PendingBatch::of(&env(v)))
+                .await
+                .unwrap();
         }
     }
 
@@ -889,7 +899,11 @@ mod global_read_tests {
             .build()
             .unwrap();
         store
-            .append(&sk(id), expected.and_then(Version::new), &[env])
+            .append(
+                &sk(id),
+                expected.and_then(Version::new),
+                PendingBatch::of(&env),
+            )
             .await
             .unwrap();
     }
@@ -964,7 +978,7 @@ mod bounded_subscription_tests {
         for v in 1..=40 {
             store
                 .raw()
-                .append(&id, Version::new(v - 1), &[env(v)])
+                .append(&id, Version::new(v - 1), PendingBatch::of(&env(v)))
                 .await
                 .unwrap();
         }
@@ -985,7 +999,7 @@ mod bounded_subscription_tests {
         tokio::spawn(async move {
             store2
                 .raw()
-                .append(&id2, Version::new(40), &[env(41)])
+                .append(&id2, Version::new(40), PendingBatch::of(&env(41)))
                 .await
                 .unwrap();
         });
@@ -1018,7 +1032,10 @@ mod wake_source_tests {
             .payload(b"x".to_vec())
             .build()
             .unwrap();
-        store.append(&id, None, &[env]).await.unwrap();
+        store
+            .append(&id, None, PendingBatch::of(&env))
+            .await
+            .unwrap();
         timeout(Duration::from_secs(5), wait)
             .await
             .expect("append must wake the registration");

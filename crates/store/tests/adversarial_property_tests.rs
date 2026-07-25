@@ -70,6 +70,7 @@ use futures::StreamExt;
 use mnesis::{ErrorId, Version};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_inmemory::InMemoryStoreError;
+use mnesis_store::PendingBatch;
 use mnesis_store::Repository;
 use mnesis_store::Store;
 use mnesis_store::codec::{Decode, Encode};
@@ -474,7 +475,7 @@ proptest! {
             let store = InMemoryStore::new();
             let envelopes = build_envelopes(&payloads);
 
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let read = read_all_payloads(&store, &stream_id).await;
             prop_assert_eq!(read.len(), payloads.len(), "payload count mismatch");
@@ -495,7 +496,7 @@ proptest! {
             let store = InMemoryStore::new();
             let envelopes = build_envelopes(&payloads);
 
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let read = read_all_payloads(&store, &stream_id).await;
             prop_assert_eq!(read.len(), payloads.len());
@@ -528,7 +529,7 @@ proptest! {
             // First, put some events in
             let payloads: Vec<Vec<u8>> = (0..initial_count).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let actual_version = u64::try_from(initial_count).unwrap();
             // Skip if wrong_version accidentally matches
@@ -543,7 +544,7 @@ proptest! {
                 &stream_id,
 
                 Version::new(wrong_version),
-                &new_envelopes,
+                PendingBatch::new(&new_envelopes).expect("non-empty batch"),
             ).await;
 
             prop_assert!(result.is_err(), "wrong expected_version MUST be rejected");
@@ -577,7 +578,7 @@ proptest! {
                     .expect("valid envelope")
             }).collect();
 
-            let result = store.append(&stream_id, None, &envelopes).await;
+            let result = store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
 
             let is_sequential = versions.iter().enumerate().all(|(i, &v)| v == (i as u64) + 1);
             if is_sequential {
@@ -608,7 +609,7 @@ proptest! {
                     .expect("valid envelope")
             }).collect();
 
-            let result = store.append(&stream_id, None, &envelopes).await;
+            let result = store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
             prop_assert!(result.is_err(), "duplicate versions MUST be rejected (batch of {} all at v1)", n);
             Ok(())
         })?;
@@ -645,7 +646,7 @@ proptest! {
                     .expect("valid envelope")
             }).collect();
 
-            let result = store.append(&stream_id, None, &envelopes).await;
+            let result = store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
             prop_assert!(result.is_err(), "version gap MUST be rejected: {:?}", versions);
             Ok(())
         })?;
@@ -669,7 +670,7 @@ proptest! {
             let store = InMemoryStore::new();
             let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let versions = read_all_versions(&store, &stream_id).await;
             for window in versions.windows(2) {
@@ -703,7 +704,7 @@ proptest! {
             if n > 0 {
                 let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
                 let envelopes = build_envelopes(&payloads);
-                store.append(&stream_id, None, &envelopes).await.unwrap();
+                store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
             }
 
             let mut stream = store.read_stream(&stream_id, Version::INITIAL).await.unwrap();
@@ -748,8 +749,8 @@ proptest! {
             let envelopes_a = build_envelopes(&payloads_a);
             let envelopes_b = build_envelopes(&payloads_b);
 
-            store.append(&mnesis_store::StreamKey::from_slice(id_a.as_ref()), None, &envelopes_a).await.unwrap();
-            store.append(&mnesis_store::StreamKey::from_slice(id_b.as_ref()), None, &envelopes_b).await.unwrap();
+            store.append(&mnesis_store::StreamKey::from_slice(id_a.as_ref()), None, PendingBatch::new(&envelopes_a).expect("non-empty batch")).await.unwrap();
+            store.append(&mnesis_store::StreamKey::from_slice(id_b.as_ref()), None, PendingBatch::new(&envelopes_b).expect("non-empty batch")).await.unwrap();
 
             let read_a = read_all_payloads(&store, &id_a).await;
             let read_b = read_all_payloads(&store, &id_b).await;
@@ -786,7 +787,7 @@ proptest! {
             let store = InMemoryStore::new();
             let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let from_version = u64::try_from(from_offset).unwrap();
             // from_persisted returns None for 0; use INITIAL (1) as minimum
@@ -1065,7 +1066,7 @@ async fn attack_event_store_transforms_applied_on_load() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"test-1"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .unwrap();
@@ -1143,7 +1144,7 @@ proptest! {
                             payloads,
                         );
 
-                        let result = store.append(&mnesis_store::StreamKey::from_slice(id.as_ref()), expected_version, &envelopes).await;
+                        let result = store.append(&mnesis_store::StreamKey::from_slice(id.as_ref()), expected_version, PendingBatch::new(&envelopes).expect("non-empty batch")).await;
                         prop_assert!(result.is_ok(), "append should succeed for model-valid operation");
 
                         model_stream.extend(payloads.iter().cloned());
@@ -1203,7 +1204,7 @@ proptest! {
                     &stream_id,
 
                     Version::new(total_events),
-                    &envelopes,
+                    PendingBatch::new(&envelopes).expect("non-empty batch"),
                 ).await.unwrap();
 
                 all_payloads.extend(payloads);
@@ -1253,7 +1254,7 @@ proptest! {
                 .expect("valid envelope");
 
             // Append should not panic (may succeed or fail with error)
-            let result = store.append(&stream_id, None, &[envelope]).await;
+            let result = store.append(&stream_id, None, PendingBatch::of(&envelope)).await;
 
             // If append succeeded, read should return the event
             if result.is_ok() {
@@ -1273,25 +1274,10 @@ proptest! {
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(64))]
 
-    #[test]
-    fn attack_empty_append(
-        stream_id in stream_id_strategy(),
-    ) {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let store = InMemoryStore::new();
-
-            // Append with empty slice
-            let result = store.append(&stream_id, None, &[]).await;
-            // This should succeed (no-op) — no events to validate
-            prop_assert!(result.is_ok(), "empty append should succeed as no-op");
-
-            // Stream should be empty
-            let read = read_all_payloads(&store, &stream_id).await;
-            prop_assert!(read.is_empty(), "empty append should not create events");
-            Ok(())
-        })?;
-    }
+    // REMOVED `attack_empty_append` (#330): `RawEventStore::append` now takes a
+    // non-empty `PendingBatch`, so an empty append does not type-check. The
+    // empty case is answered once, at the type — see
+    // `mnesis_store::envelope::pending_batch_tests::empty_slice_yields_no_batch`.
 }
 
 // ============================================================================
@@ -1384,7 +1370,7 @@ proptest! {
             let store = Arc::new(InMemoryStore::new());
             let payloads: Vec<Vec<u8>> = (0..n).map(|i| vec![i as u8]).collect();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             // Spawn multiple readers
             let mut handles = Vec::new();
@@ -1519,7 +1505,7 @@ proptest! {
 
             // Append to non-existent stream should succeed (creating it)
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             // Now reading should return the events
             let read = read_all_payloads(&store, &stream_id).await;
@@ -1633,7 +1619,7 @@ proptest! {
                     .collect();
 
                 let envelopes = build_envelopes(&payloads);
-                store.append(&stream_id, None, &envelopes).await.unwrap();
+                store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
             }
 
             // Verify each stream independently
@@ -1687,7 +1673,7 @@ async fn attack_concurrent_writers_exactly_one_wins() {
                 .append(
                     &mnesis_store::StreamKey::from_slice(b"race-stream"),
                     None,
-                    &[envelope],
+                    PendingBatch::new(&[envelope]).expect("non-empty batch"),
                 )
                 .await
         }));
@@ -1697,7 +1683,7 @@ async fn attack_concurrent_writers_exactly_one_wins() {
     let mut failures = 0;
     for handle in handles {
         match handle.await.unwrap() {
-            Ok(()) => successes += 1,
+            Ok(_position) => successes += 1,
             Err(_) => failures += 1,
         }
     }
@@ -1866,7 +1852,7 @@ proptest! {
         rt.block_on(async {
             let store = InMemoryStore::new();
             let envelopes = build_envelopes(&payloads);
-            store.append(&stream_id, None, &envelopes).await.unwrap();
+            store.append(&stream_id, None, PendingBatch::new(&envelopes).expect("non-empty batch")).await.unwrap();
 
             let read1 = read_all_payloads(&store, &stream_id).await;
             let read2 = read_all_payloads(&store, &stream_id).await;
@@ -1900,15 +1886,15 @@ proptest! {
             let sid_y = mnesis_store::StreamKey::from_slice(b"y");
             let env_x = build_envelopes(&payloads_x);
             let env_y = build_envelopes(&payloads_y);
-            store_a.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x).await.unwrap();
-            store_a.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y).await.unwrap();
+            store_a.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, PendingBatch::new(&env_x).expect("non-empty batch")).await.unwrap();
+            store_a.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, PendingBatch::new(&env_y).expect("non-empty batch")).await.unwrap();
 
             // Store B: write Y first, then X
             let store_b = InMemoryStore::new();
             let env_x2 = build_envelopes(&payloads_x);
             let env_y2 = build_envelopes(&payloads_y);
-            store_b.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, &env_y2).await.unwrap();
-            store_b.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, &env_x2).await.unwrap();
+            store_b.append(&mnesis_store::StreamKey::from_slice(sid_y.as_ref()), None, PendingBatch::new(&env_y2).expect("non-empty batch")).await.unwrap();
+            store_b.append(&mnesis_store::StreamKey::from_slice(sid_x.as_ref()), None, PendingBatch::new(&env_x2).expect("non-empty batch")).await.unwrap();
 
             // Both stores should yield identical data for each stream
             let a_x = read_all_payloads(&store_a, &sid_x).await;

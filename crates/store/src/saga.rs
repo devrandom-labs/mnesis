@@ -242,25 +242,34 @@ impl<S: Saga, const N: usize> fmt::Debug for ProjectedIntents<S, N> {
 /// `#[must_use]`: discarding it drops intents the runtime was meant to dispatch
 /// — a lost-work bug the compiler now warns on (a `Vec` return could not).
 #[must_use = "projected intents must be handed to the runtime for dispatch"]
-pub enum Reaction<S: Saga, const N: usize> {
+pub enum Reaction<S: Saga, P, const N: usize> {
     /// `react` returned `Ok(None)` — routed, no-op, nothing persisted.
     Ignored,
     /// `react` produced events; they were appended atomically.
     Reacted {
         /// Version the saga stream advanced to (the last appended event's version).
         version: Version,
+        /// The `$all` position the last appended event landed at — the
+        /// read-your-writes token for the saga's own stream (#330). Symmetric
+        /// with the aggregate side's [`Execution`](crate::Execution).
+        position: P,
         /// Intents projected from the recorded events, in order (`<= one` per event).
         intents: ProjectedIntents<S, N>,
     },
 }
 
-impl<S: Saga, const N: usize> fmt::Debug for Reaction<S, N> {
+impl<S: Saga, P: fmt::Debug, const N: usize> fmt::Debug for Reaction<S, P, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Ignored => f.write_str("Ignored"),
-            Self::Reacted { version, intents } => f
+            Self::Reacted {
+                version,
+                position,
+                intents,
+            } => f
                 .debug_struct("Reacted")
                 .field("version", version)
+                .field("position", position)
                 .field("intents", intents)
                 .finish(),
         }
@@ -286,11 +295,18 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
     ///
     /// # Errors
     /// See the variants above.
+    #[allow(
+        clippy::type_complexity,
+        reason = "the Reaction-or-typed-error return is intrinsic to the contract; an \
+                  alias would hide the `impl Future`/`Send` capture the API depends on"
+    )]
     fn react_and_save<E, const N: usize>(
         &self,
         root: &mut AggregateRoot<S>,
         event: &E,
-    ) -> impl Future<Output = Result<Reaction<S, N>, SagaError<S::Error, Self::Error>>> + Send
+    ) -> impl Future<
+        Output = Result<Reaction<S, Self::Position, N>, SagaError<S::Error, Self::Error>>,
+    > + Send
     where
         S: React<E, N>,
         E: DomainEvent,
@@ -311,7 +327,8 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
             // `&produced` carries the kernel's `>= 1` guarantee straight into
             // `save` with no Vec materialization; `produced` stays alive as the
             // projection source below (intents are minted only after durability).
-            self.save(root, &produced).await.map_err(SagaError::Store)?;
+            // `save` hands back the `$all` position the last event landed at.
+            let position = self.save(root, &produced).await.map_err(SagaError::Store)?;
 
             // Project intents, each pinned to its event's assigned version.
             // `produced` is non-empty (`react` returned `Some`; `Events` holds
@@ -332,6 +349,7 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
 
             Ok(Reaction::Reacted {
                 version: current,
+                position,
                 intents,
             })
         }
@@ -347,11 +365,18 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
     /// # Errors
     /// As [`react_and_save`](Self::react_and_save), plus `Err(SagaError::Store)`
     /// from the `load`.
+    #[allow(
+        clippy::type_complexity,
+        reason = "the Reaction-or-typed-error return is intrinsic to the contract; an \
+                  alias would hide the `impl Future`/`Send` capture the API depends on"
+    )]
     fn dispatch<E, const N: usize>(
         &self,
         id: S::Id,
         event: &E,
-    ) -> impl Future<Output = Result<Reaction<S, N>, SagaError<S::Error, Self::Error>>> + Send
+    ) -> impl Future<
+        Output = Result<Reaction<S, Self::Position, N>, SagaError<S::Error, Self::Error>>,
+    > + Send
     where
         S: React<E, N>,
         E: DomainEvent,

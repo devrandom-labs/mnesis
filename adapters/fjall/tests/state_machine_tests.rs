@@ -24,6 +24,7 @@ use std::collections::HashMap;
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_fjall::FjallStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::pending_envelope;
@@ -66,8 +67,6 @@ enum Transition {
     ReadFromVersion { stream_name: String },
     /// Append to a brand-new stream.
     CreateStream { stream_name: String },
-    /// Append an empty batch (should succeed without changing version).
-    AppendEmptyBatch { stream_name: String },
 }
 
 // ---------------------------------------------------------------------------
@@ -118,8 +117,6 @@ impl ReferenceStateMachine for ReferenceModel {
                 .prop_map(|stream_name| Transition::ReadStream { stream_name });
             let read_from_version = existing_stream_strategy(state)
                 .prop_map(move |stream_name| Transition::ReadFromVersion { stream_name });
-            let append_empty = existing_stream_strategy(state)
-                .prop_map(|stream_name| Transition::AppendEmptyBatch { stream_name });
 
             prop_oneof![
                 3 => append_valid,
@@ -127,7 +124,6 @@ impl ReferenceStateMachine for ReferenceModel {
                 2 => read_stream,
                 2 => read_from_version,
                 2 => create,
-                1 => append_empty,
             ]
             .boxed()
         } else {
@@ -159,8 +155,7 @@ impl ReferenceStateMachine for ReferenceModel {
             }
             Transition::AppendConflict { .. }
             | Transition::ReadStream { .. }
-            | Transition::ReadFromVersion { .. }
-            | Transition::AppendEmptyBatch { .. } => {
+            | Transition::ReadFromVersion { .. } => {
                 // These transitions don't modify the reference model.
             }
         }
@@ -176,14 +171,6 @@ impl ReferenceStateMachine for ReferenceModel {
             Transition::ReadStream { stream_name }
             | Transition::ReadFromVersion { stream_name } => {
                 state.streams.contains_key(stream_name)
-            }
-            Transition::AppendEmptyBatch { stream_name } => {
-                // Allow on both existing and non-existing streams. However,
-                // since existing_stream_strategy picks from keys, if it
-                // selects a name that was later removed by shrinking, skip it.
-                // For simplicity, we allow all names.
-                let _ = stream_name;
-                true
             }
             Transition::CreateStream { .. } | Transition::AppendValid { .. } => true,
         }
@@ -304,9 +291,11 @@ impl StateMachineTest for FjallStateMachineTest {
                     .map(|(v, et, pl)| make_envelope(*v, et, pl))
                     .collect();
 
-                let result =
-                    sut.rt
-                        .block_on(sut.store.append(&stream_id, expected_version, &envelopes));
+                let result = sut.rt.block_on(sut.store.append(
+                    &stream_id,
+                    expected_version,
+                    PendingBatch::new(&envelopes).expect("non-empty batch"),
+                ));
                 assert!(
                     result.is_ok(),
                     "AppendValid to '{stream_name}' failed: {:?}",
@@ -334,9 +323,11 @@ impl StateMachineTest for FjallStateMachineTest {
                 let env_version = wrong_version.map_or(1, |v| v.as_u64() + 1);
                 let envelope = make_envelope(env_version, "Conflict", b"should-fail");
 
-                let result =
-                    sut.rt
-                        .block_on(sut.store.append(&stream_id, wrong_version, &[envelope]));
+                let result = sut.rt.block_on(sut.store.append(
+                    &stream_id,
+                    wrong_version,
+                    PendingBatch::of(&envelope),
+                ));
                 assert!(
                     result.is_err(),
                     "AppendConflict to '{stream_name}' should have failed but succeeded"
@@ -420,22 +411,6 @@ impl StateMachineTest for FjallStateMachineTest {
                         "ReadFromVersion: unexpected trailing events"
                     );
                 }
-            }
-
-            Transition::AppendEmptyBatch { ref stream_name } => {
-                let stream_id = sk(stream_name);
-                let model_events = ref_state.streams.get(stream_name);
-                let current_version = model_events
-                    .and_then(|evts| evts.last())
-                    .map_or(0, |(v, _, _)| *v);
-
-                let expected = Version::new(current_version);
-                let result = sut.rt.block_on(sut.store.append(&stream_id, expected, &[]));
-                assert!(
-                    result.is_ok(),
-                    "AppendEmptyBatch to '{stream_name}' failed: {:?}",
-                    result.unwrap_err()
-                );
             }
         }
 

@@ -8,6 +8,7 @@ use std::time::Duration;
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_inmemory::InMemoryStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::{StepStreamExt, Store, Subscription, pending_envelope};
 use tokio::time::timeout;
@@ -54,7 +55,7 @@ async fn append_one(
         .append(
             &mnesis_store::StreamKey::from_slice(id.as_ref()),
             expected,
-            &[envelope],
+            PendingBatch::new(&[envelope]).expect("non-empty batch"),
         )
         .await
         .unwrap();

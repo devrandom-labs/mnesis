@@ -9,7 +9,7 @@ use mnesis::Version;
 use mnesis_store::envelope::pending_envelope;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
-use mnesis_store::{AppendError, StreamKey};
+use mnesis_store::{AppendError, PendingBatch, StreamKey};
 
 use crate::row::{ConformanceRow, append_rows, drain_all, drain_stream, envelope_for};
 
@@ -33,7 +33,7 @@ where
 
     let stale = envelope_for(&ConformanceRow::new(1, "E", vec![9]));
     store
-        .append(&id, None, &[stale])
+        .append(&id, None, PendingBatch::of(&stale))
         .await
         .expect_err("stale append must be rejected");
 
@@ -67,7 +67,11 @@ where
         envelope_for(&ConformanceRow::new(3, "E", vec![3])),
     ];
     let err = store
-        .append(&id, None, &envs)
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&envs).expect("kit batches are non-empty"),
+        )
         .await
         .expect_err("a version gap inside the batch must be rejected");
     assert!(
@@ -95,7 +99,11 @@ where
     let id = StreamKey::from_slice(b"first");
     let envs = vec![envelope_for(&ConformanceRow::new(3, "E", vec![3]))];
     let err = store
-        .append(&id, None, &envs)
+        .append(
+            &id,
+            None,
+            PendingBatch::new(&envs).expect("kit batches are non-empty"),
+        )
         .await
         .expect_err("fresh stream starting at v3 must be rejected");
     assert!(matches!(err, AppendError::Conflict { .. }), "got: {err:?}");
@@ -160,7 +168,7 @@ where
         .build()
         .expect("valid envelope");
     store
-        .append(&id, None, &[env])
+        .append(&id, None, PendingBatch::of(&env))
         .await
         .unwrap_or_else(|e| panic!("append max-len event type failed: {e:?}"));
     let got = drain_stream(&store, &id, Version::INITIAL).await;

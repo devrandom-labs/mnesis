@@ -10,7 +10,7 @@ use futures::pin_mut;
 use mnesis::Version;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
-use mnesis_store::{AppendError, Step, StreamKey, Subscription};
+use mnesis_store::{AppendError, PendingBatch, Step, StreamKey, Subscription};
 use tokio::sync::Barrier;
 use tokio::time::timeout;
 
@@ -46,7 +46,9 @@ where
             let payload = vec![u8::try_from(i).unwrap_or(0)];
             let env = envelope_for(&ConformanceRow::new(1, "E", payload));
             task_barrier.wait().await;
-            task_store.append(&task_id, None, &[env]).await
+            task_store
+                .append(&task_id, None, PendingBatch::of(&env))
+                .await
         }));
     }
 
@@ -54,7 +56,7 @@ where
     let mut conflicts = 0;
     for (i, h) in handles.into_iter().enumerate() {
         match h.await.expect("writer task panicked") {
-            Ok(()) => winners.push(i),
+            Ok(_position) => winners.push(i),
             Err(AppendError::Conflict { .. }) => conflicts += 1,
             Err(other) => panic!("writer {i} hit a non-conflict error: {other:?}"),
         }

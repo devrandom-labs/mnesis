@@ -18,12 +18,17 @@
 //! - `503 Service Unavailable` — reads come from a projection; a dead
 //!   projection loop must not serve frozen reads as 200s.
 //!
-//! And one semantic shift with no status of its own: `GET` is eventually
-//! consistent (`save` returns no position to await — finding #326-4).
+//! `GET` is **read-your-writes** consistent (#330, closing finding #326-4): a
+//! write echoes the `$all` position it landed at in an `X-Mnesis-Position`
+//! header, and a `GET` that sends the same header back blocks until the
+//! projection's checkpoint reaches it — so a client always observes its own
+//! write. Without the header, `GET` stays eventually consistent (a client that
+//! doesn't care pays nothing).
 //!
 //! Surfaces exercised: `#[mnesis::aggregate]` / `Handle` / `events!`,
 //! `Store::repository::<A>().json().build()`,
-//! `CommandRepository::execute` with `ExecuteError::is_conflict`,
+//! `CommandRepository::execute` returning `Execution { position, .. }` with
+//! `ExecuteError::is_conflict`,
 //! `Subscription::subscribe_all` with `.events().decoded()`, `Projector`,
 //! fjall's `SnapshotStore<Vec<u8>, GlobalSeq>` via `CodecSnapshotStore`,
 //! and `AggregateFixture` (unit tests).
@@ -59,13 +64,13 @@ use tokio::net::TcpListener;
 use tokio::sync::watch;
 use tokio::task::JoinHandle;
 
-pub use crate::index::{BoxErr, TodosIndex};
+pub use crate::index::{BoxErr, IndexState, TodosIndex};
 
 /// A running instance: HTTP server + projection loop over one fjall keyspace.
 pub struct App {
     pub addr: SocketAddr,
     pub store: Store<FjallStore>,
-    pub index: watch::Receiver<TodosIndex>,
+    pub index: watch::Receiver<IndexState>,
     /// `Some(position)` iff the projection resumed from a persisted
     /// checkpoint rather than folding from scratch — the lifecycle tests'
     /// resume oracle.
@@ -83,10 +88,15 @@ pub async fn spawn_app(path: &Path, addr: SocketAddr) -> Result<App, BoxErr> {
     let store = FjallStore::builder(path).open()?.into_store();
 
     let (seed, checkpoint) = index::hydrate(&store).await?;
-    // The watch channel is seeded with the hydrated state, so reads are
-    // served immediately after a reopen — no catch-up wait. The loop's own
-    // `Projection::load` re-reads the same snapshot as its starting point.
-    let (tx, rx) = watch::channel(seed);
+    // The watch channel is seeded with the hydrated state *and its checkpoint*,
+    // so reads are served immediately after a reopen and a read-your-writes wait
+    // for any position at or below the checkpoint is satisfied at once — no
+    // catch-up wait. The loop's own `Projection::load` re-reads the same
+    // snapshot as its starting point.
+    let (tx, rx) = watch::channel(IndexState {
+        index: seed,
+        checkpoint,
+    });
     let projection_store = store.clone();
     let projection = tokio::spawn(async move {
         if let Err(error) = index::run(projection_store, tx).await {

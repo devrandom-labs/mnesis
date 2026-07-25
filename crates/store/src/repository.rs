@@ -19,9 +19,9 @@ use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
 use futures::TryStreamExt;
 
 use crate::codec::{Decode, Encode};
-use crate::envelope::{PersistedEnvelope, pending_envelope};
+use crate::envelope::{PendingBatch, PersistedEnvelope, pending_envelope};
 use crate::error::{AppendError, LoadWithError, StoreError};
-use crate::store::{RawEventStore, Store};
+use crate::store::{AllPosition, RawEventStore, Store};
 use crate::stream_id::StreamKey;
 use crate::upcasting::EventMorsel;
 use crate::value::SchemaVersion;
@@ -86,6 +86,16 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     /// The error type for repository operations.
     type Error: core::error::Error + Send + Sync + 'static;
 
+    /// The `$all` position [`save`](Self::save) returns — the adapter's
+    /// [`AllPosition`](crate::store::AllPosition), surfaced up from
+    /// [`RawEventStore::append`](crate::RawEventStore::append) (#330).
+    ///
+    /// This is the read-your-writes token: a projection whose checkpoint has
+    /// reached a returned position has necessarily observed the write. On a
+    /// distributed adapter (postgres) the position may be withheld from `$all`
+    /// until a commit watermark clears (#213), so any wait needs a timeout.
+    type Position: AllPosition;
+
     /// Load an aggregate by replaying its event stream.
     ///
     /// Streams events from the store one-by-one through `replay()`,
@@ -105,12 +115,16 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     /// event at compile time — there is no empty-input case.
     ///
     /// On success, calls `commit_persisted` with the last persisted version to
-    /// advance the version and fold the events into in-memory state atomically.
+    /// advance the version and fold the events into in-memory state atomically,
+    /// and returns the [`Position`](Self::Position) the last event landed at —
+    /// the read-your-writes token (#330). The advanced version is read off
+    /// `aggregate`; only the position, which the aggregate does not carry, is
+    /// returned (rule 4 — no redundant `(version, position)` pair).
     fn save<const N: usize>(
         &self,
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
-    ) -> impl Future<Output = Result<(), Self::Error>> + Send;
+    ) -> impl Future<Output = Result<Self::Position, Self::Error>> + Send;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -308,6 +322,8 @@ where
     type Error =
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>;
 
+    type Position = S::AllPosition;
+
     async fn load(&self, id: A::Id) -> Result<AggregateRoot<A>, Self::Error> {
         let root = AggregateRoot::<A>::new(id);
         self.replay_from(root, Version::INITIAL).await
@@ -317,7 +333,7 @@ where
         &self,
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<Self::Position, Self::Error> {
         // The no-upcaster save stamps Version::INITIAL as the schema
         // version on every event — the schema-version-lookup function
         // is only needed when an upcaster is in play. See `save_with`.
@@ -417,6 +433,9 @@ impl<S, C, A> EventStore<S, C, A> {
     /// to [`Version::INITIAL`] (the same default as the no-upcaster
     /// [`save`](Repository::save)).
     ///
+    /// Returns the [`Position`](Repository::Position) the last event landed at,
+    /// exactly as [`save`](Repository::save) does (#330).
+    ///
     /// # Errors
     ///
     /// The same set of errors [`save`](Repository::save) can produce —
@@ -427,7 +446,7 @@ impl<S, C, A> EventStore<S, C, A> {
         events: &Events<EventOf<A>, N>,
         current_version: F,
     ) -> Result<
-        (),
+        S::AllPosition,
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>,
     >
     where
@@ -453,7 +472,7 @@ async fn save_events<A, S, C, F, const N: usize>(
     events: &Events<EventOf<A>, N>,
     current_version: F,
 ) -> Result<
-    (),
+    S::AllPosition,
     StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>,
 >
 where
@@ -468,39 +487,44 @@ where
     let mut next_version =
         first_persisted_version(expected_version).ok_or(StoreError::VersionOverflow)?;
 
-    let mut envelopes = Vec::with_capacity(events.len());
-    // `events` is non-empty (`&Events<_, N>` guarantees >= 1), so the loop
-    // runs at least once and `last_version` is always overwritten before use.
-    let mut last_version = next_version;
+    // Encode head and tail separately so the non-emptiness `Events` guarantees
+    // survives into `PendingBatch` — `from_parts` needs no runtime check and no
+    // unprovable `unwrap` (#330). Scoped in a block so the `current_version`
+    // closure (which is not `Send`) is dropped before the append `.await` —
+    // otherwise the returned future would capture it across the await point and
+    // stop being `Send` (clippy `future_not_send`).
+    let (head, tail, last_version) = {
+        let encode_at = |event: &EventOf<A>, version: Version| {
+            let payload =
+                <C as Encode<EventOf<A>>>::encode(codec, event).map_err(StoreError::Encode)?;
+            let schema_version = current_version(event.name()).unwrap_or(Version::INITIAL);
+            let schema_nz32 = version_to_nz32(schema_version).ok_or(StoreError::VersionOverflow)?;
 
-    for event in events {
-        let payload =
-            <C as Encode<EventOf<A>>>::encode(codec, event).map_err(StoreError::Encode)?;
+            pending_envelope(version)
+                .event(event)
+                .payload(payload)
+                .schema_version(SchemaVersion::new(schema_nz32))
+                .build()
+                .map_err(StoreError::from)
+        };
 
-        let event_name = event.name();
-        let schema_version = current_version(event_name).unwrap_or(Version::INITIAL);
-        let schema_nz32 = version_to_nz32(schema_version).ok_or(StoreError::VersionOverflow)?;
-
-        let envelope = pending_envelope(next_version)
-            .event(event)
-            .payload(payload)
-            .schema_version(SchemaVersion::new(schema_nz32))
-            .build()?;
-
-        last_version = next_version;
-        envelopes.push(envelope);
-
-        if envelopes.len() < events.len() {
+        let head = encode_at(events.first(), next_version)?;
+        let mut last_version = next_version;
+        let mut tail = Vec::with_capacity(events.rest().len());
+        for event in events.rest() {
             next_version = next_version.next().ok_or(StoreError::VersionOverflow)?;
+            tail.push(encode_at(event, next_version)?);
+            last_version = next_version;
         }
-    }
+        (head, tail, last_version)
+    };
 
-    store
+    let position = store
         .raw()
         .append(
             &StreamKey::from_slice(aggregate.id().as_ref()),
             expected_version,
-            &envelopes,
+            PendingBatch::from_parts(&head, &tail),
         )
         .await
         .map_err(|err| match err {
@@ -517,7 +541,7 @@ where
         })?;
 
     aggregate.commit_persisted(last_version, events);
-    Ok(())
+    Ok(position)
 }
 
 #[cfg(test)]

@@ -30,6 +30,7 @@ use futures::StreamExt;
 use mnesis::{ErrorId, Version};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_inmemory::InMemoryStoreError;
+use mnesis_store::PendingBatch;
 use mnesis_store::error::StoreError;
 use mnesis_store::pending_envelope;
 use mnesis_store::store::RawEventStore;
@@ -58,32 +59,13 @@ fn c2_builder_accepts_empty_event_type() {
 }
 
 // =============================================================================
-// H1: RawEventStore::append accepts empty envelope slice
+// H1: RawEventStore::append cannot be handed an empty batch
 // =============================================================================
-
-#[tokio::test]
-async fn h1_append_empty_envelopes_is_noop_or_error() {
-    let store = InMemoryStore::new();
-    // Appending zero events should either be rejected or be a safe no-op
-    let result = store
-        .append(&mnesis_store::StreamKey::from_slice(b"s1"), None, &[])
-        .await;
-    // This should succeed (no-op) but version should not change
-    assert!(result.is_ok());
-
-    // Read should return empty stream
-    let mut stream = store
-        .read_stream(
-            &mnesis_store::StreamKey::from_slice(b"s1"),
-            Version::INITIAL,
-        )
-        .await
-        .unwrap();
-    assert!(
-        stream.next().await.is_none(),
-        "Empty append should not create any events"
-    );
-}
+//
+// REMOVED `h1_append_empty_envelopes_is_noop_or_error` (#330): `append` takes a
+// non-empty `PendingBatch`, so "append zero events" is unrepresentable rather
+// than a runtime no-op to probe. The invariant is asserted at its type in
+// `mnesis_store::envelope::pending_batch_tests::empty_slice_yields_no_batch`.
 
 // NOTE: H2 (upcaster empty event_type) and H3 (upcaster version downgrade)
 // tests have been removed. The replacement SchemaTransform trait uses
@@ -123,7 +105,7 @@ async fn h5_append_with_non_sequential_versions() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"s1"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await;
     // Currently the test adapter accepts this — it should NOT
@@ -159,7 +141,7 @@ async fn h5_append_with_duplicate_versions() {
         .append(
             &mnesis_store::StreamKey::from_slice(b"s1"),
             None,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await;
     assert!(result.is_err(), "Append should reject duplicate versions");
@@ -250,11 +232,19 @@ async fn streams_are_isolated() {
     ];
 
     store
-        .append(&mnesis_store::StreamKey::from_slice(b"stream-a"), None, &e1)
+        .append(
+            &mnesis_store::StreamKey::from_slice(b"stream-a"),
+            None,
+            PendingBatch::new(&e1).expect("non-empty batch"),
+        )
         .await
         .unwrap();
     store
-        .append(&mnesis_store::StreamKey::from_slice(b"stream-b"), None, &e2)
+        .append(
+            &mnesis_store::StreamKey::from_slice(b"stream-b"),
+            None,
+            PendingBatch::new(&e2).expect("non-empty batch"),
+        )
         .await
         .unwrap();
 

@@ -24,7 +24,7 @@ use futures::StreamExt;
 use mnesis::*;
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::store::RawEventStore;
-use mnesis_store::{Decode, Encode, StreamKey, pending_envelope};
+use mnesis_store::{Decode, Encode, PendingBatch, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -345,7 +345,7 @@ async fn main() {
         .append(
             &StreamKey::from_slice(alice_id.as_ref()),
             None,
-            &all_envelopes,
+            PendingBatch::new(&all_envelopes).expect("non-empty batch"),
         )
         .await
         .expect("append should succeed");
@@ -389,7 +389,7 @@ async fn main() {
         .append(
             &StreamKey::from_slice(alice_id.as_ref()),
             expected_version,
-            &envelopes,
+            PendingBatch::new(&envelopes).expect("non-empty batch"),
         )
         .await
         .expect("append should succeed");

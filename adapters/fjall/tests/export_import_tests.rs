@@ -28,6 +28,7 @@ use std::collections::BTreeSet;
 use futures::StreamExt;
 use mnesis::Version;
 use mnesis_fjall::FjallStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::cbor::{ChunkError, ChunkWriter, decode_chunk};
 use mnesis_store::envelope::{PersistedEnvelope, pending_envelope};
@@ -66,7 +67,10 @@ async fn append_one(
     }
     .expect("valid envelope");
     let expected = Version::new(version - 1);
-    store.append(id, expected, &[env]).await.expect("append");
+    store
+        .append(id, expected, PendingBatch::of(&env))
+        .await
+        .expect("append");
 }
 
 /// Drain a stream into owned envelopes (whole stream from v1).

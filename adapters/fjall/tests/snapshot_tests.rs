@@ -14,6 +14,7 @@ use std::num::NonZeroU32;
 
 use mnesis::Version;
 use mnesis_fjall::FjallStore;
+use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::state::{Hydrated, SnapshotStore};
 
@@ -44,7 +45,10 @@ async fn setup_stream(store: &FjallStore, id: &StreamKey, event_count: u64) {
                 .expect("valid envelope"),
         );
     }
-    store.append(id, None, &envs).await.unwrap();
+    store
+        .append(id, None, PendingBatch::new(&envs).expect("non-empty batch"))
+        .await
+        .unwrap();
 }
 
 // ── 3. Defensive Boundary Tests ────────────────────────────────────

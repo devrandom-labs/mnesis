@@ -4,6 +4,7 @@
 #![cfg(feature = "export")]
 
 use mnesis::Version;
+use mnesis_store::PendingBatch;
 use mnesis_store::store::{RawEventStore, Store};
 use mnesis_store::stream_id::StreamKey;
 
@@ -46,7 +47,11 @@ mod tests {
     async fn append_one(store: &InMemoryStore, id: &StreamKey, v: u64, payload: &[u8]) {
         let expected = Version::new(v - 1);
         store
-            .append(id, expected, &[env(v, payload)])
+            .append(
+                id,
+                expected,
+                PendingBatch::new(&[env(v, payload)]).expect("non-empty batch"),
+            )
             .await
             .expect("append succeeds");
     }
@@ -145,7 +150,10 @@ mod tests {
             .metadata(b"meta".to_vec())
             .build()
             .expect("valid envelope");
-        store.append(&id, None, &[pending]).await.expect("append");
+        store
+            .append(&id, None, PendingBatch::of(&pending))
+            .await
+            .expect("append");
 
         let exported = collect_export(&store, &id, Version::INITIAL).await;
 
@@ -403,7 +411,11 @@ mod tests {
         // The handle itself appends, lists, and exports — never `.raw()`.
         let store = Store::new(InMemoryStore::new());
         store
-            .append(&sk("acct-1"), None, &[env(1, b"x")])
+            .append(
+                &sk("acct-1"),
+                None,
+                PendingBatch::new(&[env(1, b"x")]).expect("non-empty batch"),
+            )
             .await
             .expect("append via the handle");
 
