@@ -244,10 +244,13 @@ impl<S: ScanStrategy> ScanCursor<S> {
 
     /// Open an intentionally **empty** cursor — the `$all` ceiling case, where
     /// nothing is strictly after the maximum position so the exclusive resume
-    /// has no successor. A reversed keyset bound (`[1] ..= [0]`) yields no rows.
+    /// has no successor. Uses a canonical **empty half-open** bound
+    /// (`[0] .. [0]`: `start == end`, so no key satisfies it) — not a *reversed*
+    /// inclusive bound, whose emptiness would depend on fjall's undocumented
+    /// handling of `start > end` (a future upgrade could panic there instead).
     /// Infallible (the bound is constant), unlike [`open`](Self::open).
     pub fn open_empty(keyspace: &fjall::SingleWriterTxKeyspace, strategy: S) -> Self {
-        let iter = keyspace.inner().range(vec![1u8]..=vec![0u8]);
+        let iter = keyspace.inner().range(vec![0u8]..vec![0u8]);
         Self {
             iter,
             strategy,

@@ -419,8 +419,10 @@ mod atomic_append_impl {
         ) -> Result<(), AtomicAppendError<FjallError>> {
             let mut projected: HashMap<Vec<u8>, u64> = HashMap::with_capacity(writes.len());
             for (index, w) in writes.iter().enumerate() {
-                let key = w.target.as_ref().to_vec();
-                let actual = match projected.get(&key) {
+                // Look up by BORROW (`&[u8]` via `Vec<u8>: Borrow<[u8]>`) — the
+                // owned key is allocated only at the `insert` below, so a
+                // conflict/overflow early-return never allocates.
+                let actual = match projected.get(w.target.as_ref()) {
                     Some(&head) => head,
                     None => self
                         .partitions
@@ -451,7 +453,10 @@ mod atomic_append_impl {
                 // Advance this target's projected head by the run just validated,
                 // so a later same-target write in this batch conflicts above.
                 // The run is non-empty, so its last version is total.
-                projected.insert(key, w.batch().last().version().as_u64());
+                projected.insert(
+                    w.target.as_ref().to_vec(),
+                    w.batch().last().version().as_u64(),
+                );
             }
             Ok(())
         }

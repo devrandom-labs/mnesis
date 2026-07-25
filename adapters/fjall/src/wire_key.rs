@@ -29,6 +29,13 @@ const STREAM_VERSION_SIZE: usize = 8;
 /// Compute the total size of an event key for a given ID length.
 ///
 /// Format: `[u16 BE id_len][id_bytes][u64 BE version]`.
+///
+/// Bare `+` is sound here (rule 2's provably-bounded carve-out): both call
+/// sites bound `id_len` by `u16::MAX` — `encode_event_key` validates it via
+/// `u16::try_from` first, and `decode_event_key` derives it from a `u16` — so
+/// the sum is at most `2 + 65535 + 8 = 65545`, unrepresentable-overflow only on
+/// a <32-bit target, which this workspace does not support. (The `$all`-key
+/// path uses `checked_add` because its inputs are not so bounded.)
 const fn event_key_size(id_len: usize) -> usize {
     EVENT_KEY_HEADER_SIZE + id_len + EVENT_KEY_VERSION_SIZE
 }

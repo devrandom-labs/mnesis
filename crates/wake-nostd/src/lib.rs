@@ -175,6 +175,17 @@ impl WakeRegistration for GlobalWakeReg {
             // `Release` BEFORE calling `notify`, whose `SeqCst` fence
             // orders that store ahead of this load — so a notify this
             // listener missed implies a generation bump this load sees.
+            //
+            // Both guarantees are `event-listener` 5.4.1 primary-source facts
+            // (rule 0 — cite a concurrency claim), not assumptions:
+            //   - `Event::listen()` "registers this listener" eagerly at the
+            //     call and returns an `EventListener` already in the list; a
+            //     `notify` after this point reaches it. (crate docs,
+            //     `Event::listen`.)
+            //   - `Event::notify(n)` uses a full `SeqCst` fence by default;
+            //     only the explicit `.notify(n.relaxed())` builder drops it.
+            //     We call the fenced form, so the store→re-check ordering
+            //     above holds. (crate docs, `Event::notify` / `IntoNotification`.)
             let listener = inner.event.listen();
             if inner.generation.load(Ordering::Acquire) != seen {
                 return;

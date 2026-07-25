@@ -161,6 +161,16 @@ pub enum AppendError<E> {
 ///
 /// `VersionOverflow` is never a retry-eligible `Conflict` — it maps to
 /// `AppendError::Store(..)`, never `AppendError::Conflict`.
+///
+/// Unlike the terminal error enums in this module ([`AppendError`],
+/// [`StoreError`]), this type is deliberately **exhaustive** (no
+/// `#[non_exhaustive]`): it is a *closed translation contract*, not an error a
+/// user receives. Every adapter maps it total-ly into its own `AppendError` at
+/// the crate boundary (`mnesis-inmemory`, `mnesis-fjall`, `mnesis-postgres`
+/// each have exactly one 2-arm `match`). A new variant here is a new class of
+/// append-validation failure that adapters MUST translate; the compile-time
+/// break that exhaustiveness forces is the intended safeguard — `#[non_exhaustive]`
+/// would convert it into a silent `_`-arm mis-map with no correct neutral target.
 #[derive(Debug, Error)]
 pub enum AppendValidationError {
     /// Optimistic-concurrency or non-sequential-version conflict.

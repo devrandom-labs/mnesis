@@ -159,11 +159,12 @@ pub enum AbortReason {
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum ImportError<E> {
-    /// Chunk header unreadable: bad magic, unknown format-version, or a
-    /// structurally unparseable block. Distinct from a per-block checksum
-    /// failure (that is a per-stream [`StreamOutcome::Corrupt`]).
-    #[error("malformed chunk: {0}")]
-    Malformed(&'static str),
+    // NOTE: there is no `Malformed` variant. Decoding the backup box is the
+    // box's job (`cbor::decode_chunk` → `ChunkError::Malformed`); `import` takes
+    // already-decoded `&[StreamSection]`, and the only `EventImporter` impl is
+    // the blanket one, so no code path here can produce a malformed-chunk error.
+    // A variant nothing can construct would mislead callers; re-add additively
+    // (behind an inline-decoding importer) if one is ever introduced.
     /// Whole-chunk atomicity only: a bad block rolled the entire chunk back —
     /// nothing was written. `stream` is the first offender; retry the whole
     /// chunk. (Per-stream atomicity never aborts — it reports per stream.)
@@ -470,14 +471,25 @@ impl<S: RawEventStore + AtomicAppend> EventImporter for S {
 /// stops only its stream; the rest commit. Always returns `Ok(report)` unless
 /// a genuine store error or version overflow occurs.
 ///
-/// On `Err(ImportError::Store)` or `Err(ImportError::VersionOverflow)`,
-/// sections already appended remain committed — `PerStream` performs no
-/// cross-stream rollback, and the partial report is discarded with the error.
+/// This is the **only** import path that needs just [`RawEventStore`] — no
+/// cross-stream [`AtomicAppend`]. A produce-only device adapter that cannot do
+/// a cross-partition transaction (so cannot implement [`EventImporter`], whose
+/// unified `import` offers [`Atomicity::WholeChunk`] too) still gets per-stream
+/// restore by calling this function directly. It is the exact mobile-resilience
+/// path `WholeChunk` cannot serve.
 ///
 /// An empty section (no blocks) produces no `StreamReport` entry; a caller
 /// correlating sections to report entries must not assume positional
 /// correspondence.
-async fn import_per_stream<S, R>(
+///
+/// # Errors
+///
+/// Returns [`ImportError::Store`] if the underlying `append` fails, or
+/// [`ImportError::VersionOverflow`] if a stream's `version + 1` overflows
+/// `u64`. In either case sections already appended remain committed —
+/// `PerStream` performs no cross-stream rollback, and the partial report is
+/// discarded with the error.
+pub async fn import_per_stream<S, R>(
     store: &S,
     sections: &[StreamSection],
     route: R,
@@ -621,22 +633,44 @@ where
             Ok(ImportReport::new(reports))
         }
         Err(AtomicAppendError::Conflict { index, actual }) => {
-            // `index` < writes.len() (== firsts.len()) by the primitive's
-            // Conflict contract; `firsts[index]` is the cached first version of
-            // the conflicting run (no events[0] indexing — honours the planner's
-            // `first` cache).
-            let got = firsts[index];
-            let stream = writes[index].target.clone();
-            let expected = match actual {
-                Some(head) => head.next().ok_or(ImportError::VersionOverflow)?,
-                None => Version::INITIAL,
-            };
-            Err(ImportError::Aborted {
-                stream,
-                reason: AbortReason::Mismatch { expected, got },
-            })
+            Err(map_atomic_conflict(&firsts, &writes, index, actual))
         }
         Err(AtomicAppendError::Store(error)) => Err(ImportError::Store(error)),
+    }
+}
+
+/// Map an [`AtomicAppend`] conflict into an [`ImportError::Aborted`],
+/// defensively (rule 4 — validate at our own boundary). The primitive's
+/// contract is `index < writes.len()` (== `firsts.len()`), but a misbehaving
+/// adapter returning an out-of-range index must NOT cause an OOB panic:
+/// `writes`/`firsts` are non-empty and equal-length whenever a Conflict is
+/// returned, so a `None` from `.get(index)` means a broken adapter, and we
+/// degrade to the first planned run so the abort is still reported coherently.
+/// `firsts[index]` is the conflicting run's cached first version (no
+/// `events[0]` indexing).
+fn map_atomic_conflict<E>(
+    firsts: &[Version],
+    writes: &[PlannedAppend],
+    index: usize,
+    actual: Option<Version>,
+) -> ImportError<E> {
+    let (Some(&got), Some(write)) = (
+        firsts.get(index).or_else(|| firsts.first()),
+        writes.get(index).or_else(|| writes.first()),
+    ) else {
+        // Unreachable: a Conflict implies a non-empty batch.
+        return ImportError::VersionOverflow;
+    };
+    let expected = match actual {
+        Some(head) => match head.next() {
+            Some(next) => next,
+            None => return ImportError::VersionOverflow,
+        },
+        None => Version::INITIAL,
+    };
+    ImportError::Aborted {
+        stream: write.target.clone(),
+        reason: AbortReason::Mismatch { expected, got },
     }
 }
 

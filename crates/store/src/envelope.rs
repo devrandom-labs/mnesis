@@ -627,18 +627,11 @@ impl PersistedEnvelope {
     /// Validated payload — one Arc share over the underlying buffer.
     #[must_use]
     pub fn payload_value(&self) -> Payload {
-        // SAFETY: `PersistedEnvelope::try_new` validated `payload_range`
-        // against `value.len()` via `check_range`. The range is a
-        // `Range<u32>`, so the resulting slice length is bounded by
-        // `u32::MAX = MAX_PAYLOAD_LEN`. `payload_bytes()` returns a slice
-        // of the same validated buffer.
-        #[allow(
-            unsafe_code,
-            reason = "size invariant established at PersistedEnvelope::try_new"
-        )]
-        unsafe {
-            Payload::from_validated_bytes(self.payload_bytes())
-        }
+        // `from_validated_bytes` is a safe fast-path (no UB contract): the
+        // length invariant is already established — `try_new` validated
+        // `payload_range` against `value.len()`, and the `Range<u32>` bounds
+        // the slice length by `u32::MAX = MAX_PAYLOAD_LEN`.
+        Payload::from_validated_bytes(self.payload_bytes())
     }
 
     /// Validated metadata — one Arc share per `Some` over the underlying
@@ -648,18 +641,11 @@ impl PersistedEnvelope {
     #[must_use]
     pub fn metadata_value(&self) -> Option<Metadata> {
         self.metadata_bytes().map(|b| {
-            // SAFETY: `from_validated_bytes` requires (1) `!bytes.is_empty()` and
-            // (2) `bytes.len() <= MAX_METADATA_LEN`. Both invariants are
-            // established by `try_new`: the `MetadataRangeEmpty` check rejects
+            // Safe fast-path (no UB contract): both invariants are already
+            // established by `try_new` — the `MetadataRangeEmpty` check rejects
             // an empty `Some(range)`, and `MetadataRangeTooLong` enforces the
-            // cap on the range length.
-            #[allow(
-                unsafe_code,
-                reason = "non-empty and length cap both established by try_new"
-            )]
-            unsafe {
-                Metadata::from_validated_bytes(b)
-            }
+            // length cap.
+            Metadata::from_validated_bytes(b)
         })
     }
 
