@@ -156,7 +156,7 @@ pub use envelope::{
 };
 pub use error::LoadWithError;
 pub use error::{AppendError, StoreError};
-pub use execute::{CommandRepository, ExecuteError};
+pub use execute::{CommandRepository, ExecuteError, Execution};
 #[cfg(feature = "export")]
 pub use export::{EventExporter, StreamLister};
 #[cfg(feature = "import")]

@@ -72,6 +72,8 @@ where
 {
     type Error = <R as Repository<A>>::Error;
 
+    type Position = <R as Repository<A>>::Position;
+
     async fn load(&self, id: A::Id) -> Result<AggregateRoot<A>, Self::Error> {
         // Snapshot hit → partial replay from snapshot version.
         if let Some((root, from)) = self.try_load_from_snapshot::<A>(&id).await {
@@ -93,16 +95,18 @@ where
         &self,
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<Self::Position, Self::Error> {
         let old_version = aggregate.version();
 
-        // Delegate event persistence to inner.
-        self.inner.save(aggregate, events).await?;
+        // Delegate event persistence to inner; carry its read-your-writes
+        // position straight through — snapshotting is best-effort decoration
+        // and never changes the position the events landed at (#330).
+        let position = self.inner.save(aggregate, events).await?;
 
         // Snapshot after save when the trigger fires. `events` is non-empty
         // (`&Events<_, N>`), so a successful save always advances the version.
         let Some(new_version) = aggregate.version() else {
-            return Ok(());
+            return Ok(position);
         };
         if self.trigger.should_persist(
             old_version,
@@ -112,7 +116,7 @@ where
             self.try_save_snapshot::<A>(aggregate, new_version).await;
         }
 
-        Ok(())
+        Ok(position)
     }
 }
 

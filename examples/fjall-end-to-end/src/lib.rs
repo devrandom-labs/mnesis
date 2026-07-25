@@ -107,15 +107,18 @@ async fn seed_account<R: Repository<BankAccount>>(
     deposits: &[u64],
 ) -> Result<AccountState, BoxErr> {
     let mut account = repo.load(id.clone()).await?;
-    repo.execute(
-        &mut account,
-        OpenAccount {
-            owner: owner.to_owned(),
-        },
-    )
-    .await?;
+    // The returned `Execution` carries the read-your-writes position; this seed
+    // path only needs the resulting state, so drop it explicitly (`#[must_use]`).
+    let _ = repo
+        .execute(
+            &mut account,
+            OpenAccount {
+                owner: owner.to_owned(),
+            },
+        )
+        .await?;
     for &amount in deposits {
-        repo.execute(&mut account, Deposit { amount }).await?;
+        let _ = repo.execute(&mut account, Deposit { amount }).await?;
     }
     Ok(account.state().clone())
 }
@@ -150,7 +153,7 @@ pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState)
         // to `BankAccount` (named at `repository::<BankAccount>()`), so `load`
         // infers the aggregate — no annotation (#243).
         let mut account = repo.load(id.clone()).await?;
-        repo.execute(&mut account, Withdraw { amount: 300 }).await?;
+        let _ = repo.execute(&mut account, Withdraw { amount: 300 }).await?;
         account.state().clone()
     };
 
@@ -228,7 +231,8 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
         let repo = writer_store.repository::<BankAccount>().json().build();
         writer_barrier.wait().await;
         let mut account = repo.load(writer_id).await.expect("load for live append");
-        repo.execute(&mut account, Deposit { amount: 250 })
+        let _ = repo
+            .execute(&mut account, Deposit { amount: 250 })
             .await
             .expect("live deposit executes");
     });

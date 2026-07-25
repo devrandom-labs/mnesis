@@ -9,9 +9,10 @@
 //!
 //! See `docs/plans/2026-07-02-execute-command-combinator-design.md`.
 
+use core::fmt;
 use core::future::Future;
 
-use mnesis::{Aggregate, AggregateRoot, EventOf, Events, Handle};
+use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Handle};
 
 use crate::conflict::ConflictPredicate;
 use crate::repository::Repository;
@@ -39,6 +40,50 @@ impl<DecideErr, StoreErr: ConflictPredicate> ExecuteError<DecideErr, StoreErr> {
     }
 }
 
+/// Outcome of one [`CommandRepository::execute`] — the aggregate-side dual of
+/// [`Reaction`](crate::Reaction).
+///
+/// Two variants, exactly mirroring [`Handle::handle`]'s own `Option`: a no-op
+/// decision persists nothing and has no position; an accepted command's events
+/// are durable and carry the `$all` position they landed at.
+///
+/// `#[must_use]`: the `Executed` position is the read-your-writes token — a
+/// caller that reads its own write back needs it (#330).
+#[must_use = "the read-your-writes position and the decided events should be inspected"]
+pub enum Execution<A: Aggregate, P, const N: usize> {
+    /// [`Handle::handle`] returned `Ok(None)` — accepted, decided nothing.
+    /// **No append was issued**, so `root` keeps its version, no `GlobalSeq`
+    /// is burned, and there is no position. Read the unchanged state off `root`.
+    Ignored,
+    /// The command was accepted and its events are durable.
+    Executed {
+        /// The `$all` position the **last** decided event landed at — the
+        /// read-your-writes token. A projection whose checkpoint has reached it
+        /// has necessarily observed this whole append.
+        position: P,
+        /// The decided events, for inspection.
+        events: Events<EventOf<A>, N>,
+    },
+}
+
+// Manual Debug: `A` is a bare marker (never `Debug`); its event type and the
+// position are, so no extra bound leaks onto the marker.
+impl<A: Aggregate, P: fmt::Debug, const N: usize> fmt::Debug for Execution<A, P, N>
+where
+    EventOf<A>: DomainEvent,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Ignored => f.write_str("Ignored"),
+            Self::Executed { position, events } => f
+                .debug_struct("Executed")
+                .field("position", position)
+                .field("events", events)
+                .finish(),
+        }
+    }
+}
+
 /// The command-facing port: `decide → save` as one callable transaction.
 ///
 /// Extends [`Repository<A>`] and inherits its `load`/`save` unchanged. The one
@@ -47,21 +92,23 @@ impl<DecideErr, StoreErr: ConflictPredicate> ExecuteError<DecideErr, StoreErr> {
 /// [`Snapshotting`](crate::snapshot::Snapshotting) decorator alike.
 pub trait CommandRepository<A: Aggregate>: Repository<A> {
     /// Decide `command` against `root`, persist the decided events atomically,
-    /// advance `root`, and return the decided events for inspection.
+    /// advance `root`, and return an [`Execution`] carrying the read-your-writes
+    /// position and the decided events.
     ///
-    /// - `Ok(Some(events))` — the command was accepted and its events are durable.
-    /// - `Ok(None)` — the command was accepted and decided nothing
+    /// - `Ok(Execution::Executed { position, events })` — accepted and durable;
+    ///   `position` is the `$all` position the last event landed at (#330).
+    /// - `Ok(Execution::Ignored)` — the command was accepted and decided nothing
     ///   ([`Handle::handle`] returned `Ok(None)`); **no append is issued**, so
     ///   `root` keeps its version, no `GlobalSeq` is burned, and a fresh
     ///   aggregate stays streamless. Read the unchanged state off `root`.
     /// - `Err(ExecuteError::Decide)` — the aggregate rejected it; nothing persisted.
     /// - `Err(ExecuteError::Store)` — the save failed (see [`ExecuteError::is_conflict`]).
     ///
-    /// The `Option` is [`Handle`]'s own no-op outcome passed through, not a
-    /// second notion of "nothing happened". It stays an `Option` rather than
-    /// becoming a `Reaction`-style enum (as on the saga side) because there is
-    /// no second field to pair with it: `root` is borrowed mutably, so the
-    /// caller reads the version and state off it on either path.
+    /// [`Execution`] is a two-variant enum rather than [`Handle`]'s bare
+    /// `Option` (#330): once `save` returns a position, the accepted branch has
+    /// a second field to pair with the events — the exact symmetry with the
+    /// saga side's [`Reaction`](crate::Reaction). The no-op branch stays
+    /// positionless, since nothing was appended.
     ///
     /// On a version conflict this returns `Err(ExecuteError::Store(..))` with
     /// `is_conflict() == true` and does **not** retry — retry is the runtime's
@@ -71,7 +118,7 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
     /// See the variants above.
     #[allow(
         clippy::type_complexity,
-        reason = "the decided-events-or-typed-error return is intrinsic to the contract; an \
+        reason = "the Execution-or-typed-error return is intrinsic to the contract; an \
                   alias would hide the `impl Future`/`Send` capture the API depends on"
     )]
     fn execute<C, const N: usize>(
@@ -79,7 +126,7 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
         root: &mut AggregateRoot<A>,
         command: C,
     ) -> impl Future<
-        Output = Result<Option<Events<EventOf<A>, N>>, ExecuteError<A::Error, Self::Error>>,
+        Output = Result<Execution<A, Self::Position, N>, ExecuteError<A::Error, Self::Error>>,
     > + Send
     where
         A: Handle<C, N>,
@@ -89,12 +136,17 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
             // A no-op decision never reaches the store: no append, no version,
             // no GlobalSeq burned.
             match root.handle::<C, N>(command).map_err(ExecuteError::Decide)? {
-                None => Ok(None),
-                Some(decided) => self
-                    .save(root, &decided)
-                    .await
-                    .map_err(ExecuteError::Store)
-                    .map(|()| Some(decided)),
+                None => Ok(Execution::Ignored),
+                Some(decided) => {
+                    let position = self
+                        .save(root, &decided)
+                        .await
+                        .map_err(ExecuteError::Store)?;
+                    Ok(Execution::Executed {
+                        position,
+                        events: decided,
+                    })
+                }
             }
         }
     }

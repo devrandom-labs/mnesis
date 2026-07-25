@@ -22,7 +22,8 @@ use futures::future::join_all;
 use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::{
-    CommandRepository, Decode, Encode, ExecuteError, PersistedEnvelope, Repository, Store,
+    CommandRepository, Decode, Encode, ExecuteError, Execution, PersistedEnvelope, Repository,
+    Store,
 };
 use tokio::sync::Barrier;
 
@@ -140,18 +141,27 @@ fn new_repo() -> Repo {
         .build()
 }
 
+/// Unwrap the accepted branch, dropping the `$all` position (asserted separately
+/// in `repository_position_tests.rs`) so these tests keep asserting on events.
+fn executed<P, const N: usize>(x: Execution<Counter, P, N>) -> Events<CtrEvent, N> {
+    match x {
+        Execution::Executed { events, .. } => events,
+        Execution::Ignored => panic!("expected Executed, got Ignored"),
+    }
+}
+
 // ── 1. Sequence/protocol ──────────────────────────────────────────────────
 #[tokio::test]
 async fn sequence_execute_chain_advances_version_and_state() {
     let repo = new_repo();
     let mut ctr = repo.load(CtrId::new(1)).await.unwrap();
 
-    let e1 = repo.execute(&mut ctr, Add(3)).await.unwrap().unwrap();
+    let e1 = executed(repo.execute(&mut ctr, Add(3)).await.unwrap());
     assert_eq!(e1.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(3)]);
     assert_eq!(ctr.version(), Version::new(1));
     assert_eq!(ctr.state().total, 3);
 
-    let e2 = repo.execute(&mut ctr, Add(4)).await.unwrap().unwrap();
+    let e2 = executed(repo.execute(&mut ctr, Add(4)).await.unwrap());
     assert_eq!(e2.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(4)]);
     assert_eq!(ctr.version(), Version::new(2));
     assert_eq!(ctr.state().total, 7);
@@ -166,12 +176,12 @@ async fn sequence_execute_chain_advances_version_and_state() {
 async fn sequence_no_op_command_persists_nothing_and_holds_version() {
     let repo = new_repo();
     let mut ctr = repo.load(CtrId::new(10)).await.unwrap();
-    repo.execute(&mut ctr, Add(5)).await.unwrap();
+    executed(repo.execute(&mut ctr, Add(5)).await.unwrap());
     assert_eq!(ctr.version(), Version::new(1));
 
     // Already at 5: accepted, decides nothing.
     let outcome = repo.execute::<RaiseTo, 0>(&mut ctr, RaiseTo(5)).await;
-    assert!(matches!(outcome, Ok(None)));
+    assert!(matches!(outcome, Ok(Execution::Ignored)));
     assert_eq!(ctr.version(), Version::new(1));
     assert_eq!(ctr.state().total, 5);
 
@@ -181,11 +191,7 @@ async fn sequence_no_op_command_persists_nothing_and_holds_version() {
     assert_eq!(reloaded.state().total, 5);
 
     // The very next command still lands at v2 — no version was burned.
-    let decided = repo
-        .execute(&mut reloaded, RaiseTo(9))
-        .await
-        .unwrap()
-        .unwrap();
+    let decided = executed(repo.execute(&mut reloaded, RaiseTo(9)).await.unwrap());
     assert_eq!(
         decided.iter().collect::<Vec<_>>(),
         vec![&CtrEvent::Added(4)]
@@ -200,7 +206,7 @@ async fn no_op_on_a_fresh_aggregate_creates_no_stream() {
     assert_eq!(ctr.version(), None);
 
     let outcome = repo.execute::<RaiseTo, 0>(&mut ctr, RaiseTo(0)).await;
-    assert!(matches!(outcome, Ok(None)));
+    assert!(matches!(outcome, Ok(Execution::Ignored)));
     assert_eq!(ctr.version(), None);
 
     let reloaded = repo.load(CtrId::new(11)).await.unwrap();
@@ -230,7 +236,7 @@ async fn defensive_stale_root_conflicts() {
     let mut a = repo.load(CtrId::new(3)).await.unwrap();
     let mut b = repo.load(CtrId::new(3)).await.unwrap();
 
-    repo.execute(&mut a, Add(1)).await.unwrap();
+    executed(repo.execute(&mut a, Add(1)).await.unwrap());
     let err = repo.execute(&mut b, Add(2)).await.unwrap_err();
     assert!(err.is_conflict());
     assert!(matches!(err, ExecuteError::Store(_)));
@@ -291,7 +297,7 @@ async fn equivalence_execute_matches_manual_two_step() {
 
     let fused = new_repo();
     let mut f = fused.load(CtrId::new(6)).await.unwrap();
-    let returned = fused.execute(&mut f, Add(9)).await.unwrap().unwrap();
+    let returned = executed(fused.execute(&mut f, Add(9)).await.unwrap());
 
     assert_eq!(
         returned.iter().collect::<Vec<_>>(),

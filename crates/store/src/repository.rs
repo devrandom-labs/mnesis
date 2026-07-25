@@ -21,7 +21,7 @@ use futures::TryStreamExt;
 use crate::codec::{Decode, Encode};
 use crate::envelope::{PendingBatch, PersistedEnvelope, pending_envelope};
 use crate::error::{AppendError, LoadWithError, StoreError};
-use crate::store::{RawEventStore, Store};
+use crate::store::{AllPosition, RawEventStore, Store};
 use crate::stream_id::StreamKey;
 use crate::upcasting::EventMorsel;
 use crate::value::SchemaVersion;
@@ -86,6 +86,16 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     /// The error type for repository operations.
     type Error: core::error::Error + Send + Sync + 'static;
 
+    /// The `$all` position [`save`](Self::save) returns — the adapter's
+    /// [`AllPosition`](crate::store::AllPosition), surfaced up from
+    /// [`RawEventStore::append`](crate::RawEventStore::append) (#330).
+    ///
+    /// This is the read-your-writes token: a projection whose checkpoint has
+    /// reached a returned position has necessarily observed the write. On a
+    /// distributed adapter (postgres) the position may be withheld from `$all`
+    /// until a commit watermark clears (#213), so any wait needs a timeout.
+    type Position: AllPosition;
+
     /// Load an aggregate by replaying its event stream.
     ///
     /// Streams events from the store one-by-one through `replay()`,
@@ -105,12 +115,16 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     /// event at compile time — there is no empty-input case.
     ///
     /// On success, calls `commit_persisted` with the last persisted version to
-    /// advance the version and fold the events into in-memory state atomically.
+    /// advance the version and fold the events into in-memory state atomically,
+    /// and returns the [`Position`](Self::Position) the last event landed at —
+    /// the read-your-writes token (#330). The advanced version is read off
+    /// `aggregate`; only the position, which the aggregate does not carry, is
+    /// returned (rule 4 — no redundant `(version, position)` pair).
     fn save<const N: usize>(
         &self,
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
-    ) -> impl Future<Output = Result<(), Self::Error>> + Send;
+    ) -> impl Future<Output = Result<Self::Position, Self::Error>> + Send;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -308,6 +322,8 @@ where
     type Error =
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>;
 
+    type Position = S::AllPosition;
+
     async fn load(&self, id: A::Id) -> Result<AggregateRoot<A>, Self::Error> {
         let root = AggregateRoot::<A>::new(id);
         self.replay_from(root, Version::INITIAL).await
@@ -317,7 +333,7 @@ where
         &self,
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<Self::Position, Self::Error> {
         // The no-upcaster save stamps Version::INITIAL as the schema
         // version on every event — the schema-version-lookup function
         // is only needed when an upcaster is in play. See `save_with`.
@@ -417,6 +433,9 @@ impl<S, C, A> EventStore<S, C, A> {
     /// to [`Version::INITIAL`] (the same default as the no-upcaster
     /// [`save`](Repository::save)).
     ///
+    /// Returns the [`Position`](Repository::Position) the last event landed at,
+    /// exactly as [`save`](Repository::save) does (#330).
+    ///
     /// # Errors
     ///
     /// The same set of errors [`save`](Repository::save) can produce —
@@ -427,7 +446,7 @@ impl<S, C, A> EventStore<S, C, A> {
         events: &Events<EventOf<A>, N>,
         current_version: F,
     ) -> Result<
-        (),
+        S::AllPosition,
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>,
     >
     where
@@ -453,7 +472,7 @@ async fn save_events<A, S, C, F, const N: usize>(
     events: &Events<EventOf<A>, N>,
     current_version: F,
 ) -> Result<
-    (),
+    S::AllPosition,
     StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>,
 >
 where
@@ -500,7 +519,7 @@ where
         (head, tail, last_version)
     };
 
-    store
+    let position = store
         .raw()
         .append(
             &StreamKey::from_slice(aggregate.id().as_ref()),
@@ -522,7 +541,7 @@ where
         })?;
 
     aggregate.commit_persisted(last_version, events);
-    Ok(())
+    Ok(position)
 }
 
 #[cfg(test)]
