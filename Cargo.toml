@@ -19,6 +19,7 @@ members = [
     "examples/fjall-end-to-end",
     "examples/inmemory",
     "examples/projection-tokio",
+    "examples/signed-events",
     "examples/store-and-kernel",
     "examples/store-inmemory",
 ]
@@ -27,10 +28,12 @@ members = [
 aligned-vec = { version = "=0.6.4", default-features = false }
 arrayvec = { version = "0.7.6", default-features = false }
 axum = "0.8.9"
+blake3 = "1.8.5"
 bytemuck = { version = "1", features = ["derive"] }
 bytes = { version = "1", default-features = false }
 crc32c = "0.6.8"
 criterion = { package = "codspeed-criterion-compat", version = "5.0.1", features = ["html_reports"] }
+ed25519-dalek = "2.2.0"
 embassy-executor = { version = "0.10.0", features = ["platform-std", "executor-thread"] }
 event-listener = { version = "5.4.1", default-features = false }
 fjall = { version = "3", features = ["bytes_1"] }
@@ -45,6 +48,7 @@ minicbor = { version = "2.2.2", features = ["alloc"] }
 parking_lot = "0.12.5"
 proptest = "1.11.0"
 proptest-state-machine = "0.8.0"
+rand_core = { version = "0.6.4", features = ["getrandom"] }
 rkyv = "0.8"
 serde = { version = "1.0.228", features = ["derive", "rc"] }
 serde_json = "1.0.149"
@@ -53,7 +57,6 @@ static_assertions = "1.1.0"
 tempfile = "3"
 thiserror = { version = "2.0.18", default-features = false }
 tokio = { version = "1.52.1", features = ["full"] }
-tokio-stream = "0.1"
 tower = { version = "0.5.3", features = ["util", "timeout"] }
 tower-http = { version = "0.7.0", features = ["trace"] }
 tracing = "0.1.44"
