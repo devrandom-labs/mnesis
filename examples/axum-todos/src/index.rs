@@ -69,6 +69,26 @@ impl TodosIndex {
     }
 }
 
+/// What the projection publishes on its watch channel: the folded index paired
+/// with the `$all` [`GlobalSeq`] checkpoint it was folded to.
+///
+/// State and checkpoint travel in **one** payload, never two channels, so a
+/// reader that observes `checkpoint >= pos` is guaranteed the paired `index`
+/// already reflects every event up to `pos` — the read-your-writes token a
+/// `GET` awaits (#330). This is the same "state and position are one value"
+/// invariant [`commit_persisted`](mnesis::AggregateRoot::commit_persisted) and
+/// [`SnapshotStore`] rely on; two channels would let a reader see a fresh
+/// checkpoint against a stale index.
+#[derive(Debug, Clone, Default)]
+pub struct IndexState {
+    /// The folded read model.
+    pub index: TodosIndex,
+    /// The `$all` position `index` was folded through, or `None` before the
+    /// first event. `Ord` on `Option<GlobalSeq>` puts `None` below every
+    /// position, so a wait for `checkpoint >= Some(pos)` never matches `None`.
+    pub checkpoint: Option<GlobalSeq>,
+}
+
 /// Fold-time failure of the read-model projector.
 #[derive(Debug, PartialEq, Eq, thiserror::Error)]
 pub enum IndexError {
@@ -219,7 +239,7 @@ pub async fn hydrate(store: &Store<FjallStore>) -> Result<(TodosIndex, Option<Gl
 /// The caller must seed the watch channel with the hydrated state (see
 /// [`hydrate`]), or readers serve a stale default until the first event
 /// arrives.
-pub async fn run(store: Store<FjallStore>, tx: watch::Sender<TodosIndex>) -> Result<(), BoxErr> {
+pub async fn run(store: Store<FjallStore>, tx: watch::Sender<IndexState>) -> Result<(), BoxErr> {
     let snapshots = CodecSnapshotStore::new(store.raw(), JsonCodec::default());
     let (mut proj, mut state) =
         Projection::load(IndexId, TodosProjector, EveryEvent, snapshots, INDEX_SCHEMA).await?;
@@ -231,18 +251,27 @@ pub async fn run(store: Store<FjallStore>, tx: watch::Sender<TodosIndex>) -> Res
 
     while let Some(item) = stream.next().await {
         state = proj.advance(state, item?).await?;
-        tx.send_replace(state.clone());
+        // Publish the folded state paired with the checkpoint it reached, so a
+        // reader awaiting a returned position sees a consistent snapshot (#330).
+        tx.send_replace(IndexState {
+            index: state.clone(),
+            checkpoint: proj.checkpoint(),
+        });
     }
     Ok(())
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::panic,
+    reason = "test asserts an unreachable projection outcome via panic in a let-else"
+)]
 mod tests {
     use std::time::Duration;
 
     use mnesis_fjall::FjallStore;
-    use mnesis_store::CommandRepository as _;
     use mnesis_store::store::RawEventStore as _;
+    use mnesis_store::{CommandRepository as _, Execution};
     use tokio::sync::watch;
     use uuid::Uuid;
 
@@ -360,44 +389,49 @@ mod tests {
         assert_eq!((page[0].id, page[0].text.as_str()), (b, "second"));
     }
 
-    /// Persist one `Created` event through the real repository path.
-    async fn create_todo(store: &Store<FjallStore>, id: Uuid, text: &str) {
+    /// Persist one `Created` event through the real repository path, returning
+    /// the `$all` position it landed at — the read-your-writes token (#330).
+    async fn create_todo(store: &Store<FjallStore>, id: Uuid, text: &str) -> GlobalSeq {
         let repo = store.repository::<Todo>().json().build();
         let mut root = Todo::new(TodoId(id));
-        repo.execute(
-            &mut root,
-            Create {
-                id,
-                text: text.to_owned(),
-            },
-        )
-        .await
-        .expect("create");
+        let Execution::Executed { position, .. } = repo
+            .execute(
+                &mut root,
+                Create {
+                    id,
+                    text: text.to_owned(),
+                },
+            )
+            .await
+            .expect("create")
+        else {
+            panic!("Create always decides an event");
+        };
+        position
     }
 
-    /// Spawn [`run`] and await until the published index contains `id`;
-    /// returns the receiver holding the folded state. `run` loads its own
-    /// checkpoint from the store — the same path production takes.
-    async fn drive_until_contains(
+    /// Spawn [`run`] and await until the published checkpoint reaches `target`
+    /// — the loop-level read-your-writes wait (the exact discipline the HTTP
+    /// `GET` uses). When the checkpoint reaches `target` the paired `index` in
+    /// the same [`IndexState`] necessarily reflects that write. Returns the
+    /// receiver. `run` loads its own checkpoint — the production path.
+    async fn drive_until(
         store: &Store<FjallStore>,
-        seed: TodosIndex,
-        id: Uuid,
-    ) -> watch::Receiver<TodosIndex> {
+        seed: IndexState,
+        target: GlobalSeq,
+    ) -> watch::Receiver<IndexState> {
         let (tx, mut rx) = watch::channel(seed);
         let loop_store = store.clone();
         let task = tokio::spawn(async move {
             let _ = run(loop_store, tx).await;
         });
         tokio::time::timeout(Duration::from_secs(5), async {
-            loop {
-                if rx.borrow_and_update().contains(id) {
-                    break;
-                }
-                rx.changed().await.expect("loop alive");
-            }
+            rx.wait_for(|s| s.checkpoint >= Some(target))
+                .await
+                .expect("loop alive");
         })
         .await
-        .expect("loop folds the write");
+        .expect("loop reaches the returned position");
         task.abort();
         let _ = task.await;
         rx
@@ -418,10 +452,22 @@ mod tests {
             assert_eq!(seed, TodosIndex::default());
             assert!(checkpoint.is_none());
 
-            // Write one todo through the repository, then drive the loop and
-            // watch it publish the folded index.
-            create_todo(&store, first_id, "persisted").await;
-            drive_until_contains(&store, seed, first_id).await;
+            // Write one todo through the repository, then drive the loop until
+            // its checkpoint reaches the position the write returned.
+            let pos = create_todo(&store, first_id, "persisted").await;
+            let published = drive_until(
+                &store,
+                IndexState {
+                    index: seed,
+                    checkpoint,
+                },
+                pos,
+            )
+            .await;
+            assert!(
+                published.borrow().index.contains(first_id),
+                "the write is visible once the checkpoint reaches its position"
+            );
         }
         // All store handles dropped: the keyspace closes and the same path
         // reopens. hydrate must find the committed (state, position) pair —
@@ -445,11 +491,20 @@ mod tests {
             // duplicate would land before event 2 and fail the exact-page
             // assertion below.
             let second_id = Uuid::new_v4();
-            create_todo(&store, second_id, "resumed").await;
-            let rx = drive_until_contains(&store, seed, second_id).await;
+            let pos = create_todo(&store, second_id, "resumed").await;
+            let rx = drive_until(
+                &store,
+                IndexState {
+                    index: seed,
+                    checkpoint,
+                },
+                pos,
+            )
+            .await;
 
             let ids: Vec<Uuid> = rx
                 .borrow()
+                .index
                 .page(0, usize::MAX)
                 .iter()
                 .map(|todo| todo.id)
