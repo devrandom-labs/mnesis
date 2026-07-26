@@ -103,3 +103,29 @@ fn first_and_rest_partition_the_collection_in_order() {
     );
     assert_eq!(events.len(), 3, "first + rest is the whole collection");
 }
+
+// ── PartialEq distinguishes first, rest, AND equal (kills all 5 eq mutants) ──
+// `eq` is `self.first == other.first && self.rest == other.rest`. Three
+// assertions pin every operand: an identical pair must be equal (kills `-> false`
+// and each `==` -> `!=`), a first-only difference must be unequal (kills `-> true`
+// and the first `==` -> `!=`), and a rest-only difference must be unequal (kills
+// the `&&` -> `||`, which would call two differing collections equal).
+#[test]
+fn events_eq_distinguishes_first_rest_and_equal() {
+    let mk = |a, b| {
+        let mut e: Events<TestEvent, 1> = Events::new(a);
+        e.add(b);
+        e
+    };
+    let base = mk(TestEvent::Created(Created), TestEvent::Activated(Activated));
+    let same = mk(TestEvent::Created(Created), TestEvent::Activated(Activated));
+    let diff_first = mk(
+        TestEvent::Activated(Activated),
+        TestEvent::Activated(Activated),
+    );
+    let diff_rest = mk(TestEvent::Created(Created), TestEvent::Created(Created));
+
+    assert_eq!(base, same);
+    assert_ne!(base, diff_first);
+    assert_ne!(base, diff_rest);
+}

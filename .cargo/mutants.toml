@@ -1,0 +1,32 @@
+# cargo-mutants configuration (read by default at `.cargo/mutants.toml`).
+#
+# `exclude_re` lists mutants that NO test can kill — equivalent mutants (the
+# mutated code is observably identical), non-terminating mutants (an infinite
+# loop that any test would only hit as a timeout), unreachable defensive
+# branches, and diagnostic-only rendering. Each is a documented judgement, the
+# config-file equivalent of `#[mutants::skip]` (kept here to avoid adding the
+# no-op `mutants` crate as a production dependency). Everything else the sweep
+# surfaces is a real gap and must be killed by a test, not listed here.
+exclude_re = [
+    # EQUIVALENT: at every call site `limit <= s.len()`, and the end-of-string
+    # index is always a char boundary, so `>` and `>=` return identical results.
+    'replace > with >= in truncate_at_char_boundary',
+    # NON-TERMINATING: `pos /= 1` leaves `pos` unchanged, so the char-boundary
+    # walk-back loop never progresses — an infinite loop no test can kill (it can
+    # only ever be observed as a timeout).
+    'replace -= with /= in truncate_at_char_boundary',
+    # EQUIVALENT / UNREACHABLE: the `N < ELLIPSIS.len()` (N < 3) guard is
+    # defensive for degenerate widths; every instantiation uses N >= 32, so the
+    # `<=`/`==` boundary variants are indistinguishable from `<` in practice.
+    'replace < with <= in append_ellipsis',
+    'replace < with == in append_ellipsis',
+    # EQUIVALENT: on the final item `remaining` is already 0 and the iterator is
+    # exhausted, so advancing `next` one more time is a dead computation whose
+    # result is discarded — `>` and `>=` yield the same sequence.
+    'replace > with >= in <impl Iterator for VersionRun>::next',
+    # DIAGNOSTIC: the `Debug` impl renders `{id, version, ..}` for humans; its
+    # exact byte output is incidental (derive-shaped), not behavioral. Asserting
+    # it would couple the test suite to `TestId`'s derived rendering. (The sibling
+    # `ErrorId` Debug IS tested — its "render like a string literal" is a contract.)
+    'replace <impl fmt::Debug for AggregateRoot<A>>::fmt',
+]

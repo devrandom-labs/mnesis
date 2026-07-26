@@ -1,0 +1,266 @@
+name: deep-fuzz
+
+# Coverage-guided fuzzing (ported from the sibling `cesr` repo). Two engines —
+# bolero/libFuzzer (nightly, ASan) and afl.rs/AFL++/CMPLOG (stable) — each
+# time-boxed per target. Quarantined off `nix flake check`: the cheap
+# deterministic corpus replay runs there (the `mnesis-fuzz-replay` check); this
+# workflow is the deep leg. A single `fuzz-gate` job collapses the matrix into
+# one blocking required check.
+on:
+  schedule:
+    - cron: "0 3 * * *" # nightly 03:00 UTC
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: "Seconds to fuzz each target"
+        required: false
+        default: "120"
+
+concurrency:
+  # Scope by event so a PR push cancels only the superseded PR run, never a
+  # concurrently running nightly on the same ref.
+  group: fuzz-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Nightly is PINNED (not floating `nightly`) so sancov/`-Zsanitizer` findings are
+  # reproducible on the exact compiler that produced them — those are unstable `-Z`
+  # flags with no cross-version guarantee. Bump deliberately in a PR. Kept OUT of a
+  # `fuzz/rust-toolchain.toml` on purpose: such a file would make a plain
+  # `cd fuzz && cargo test` corpus-replay pull nightly, breaking the "replay needs
+  # no nightly" contract. Nightly stays quarantined to CI via this env var.
+  FUZZ_TOOLCHAIN: nightly-2026-06-15
+
+jobs:
+  deep-fuzz:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # gh run download of the previous night's corpus artifact
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - wire_decode_frame
+          - cbor_decode_header
+          - cbor_decode_chunk
+          - value_event_type
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pinned nightly toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.FUZZ_TOOLCHAIN }}
+          components: llvm-tools-preview
+
+      - name: System deps for cargo-bolero
+        run: sudo apt-get update && sudo apt-get install -y binutils-dev libunwind-dev
+
+      - name: Install cargo-bolero
+        # Pin to the same 0.13.x series as the `bolero` lib in fuzz/Cargo.toml, so a
+        # `--force` install can't silently pull a future release with an incompatible CLI.
+        run: cargo install cargo-bolero --version '^0.13' --locked --force
+
+      - name: Restore previous corpus
+        # Corpus compounds night over night: seed this run from the last successful
+        # nightly's uploaded corpus. Pull BOTH engines' corpora so CMPLOG discoveries
+        # feed value-profile and vice-versa. First-ever run has no prior artifact.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          corpus_dir="fuzz/tests/__fuzz__/${{ matrix.target }}/corpus"
+          run_id="$(gh run list --workflow fuzz.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty' 2>/dev/null || true)"
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" --name "corpus-libfuzzer-${{ matrix.target }}" --dir "$corpus_dir" || true
+            gh run download "$run_id" --name "corpus-afl-${{ matrix.target }}" --dir "$corpus_dir" || true
+          fi
+
+      - name: Fuzz ${{ matrix.target }}
+        working-directory: fuzz
+        # RUSTUP_TOOLCHAIN forces this step (and the cargo/rustc children cargo-bolero
+        # spawns) onto the pinned nightly — the repo-root rust-toolchain.toml otherwise
+        # shadows it to stable. -Zsanitizer=address needs nightly. -use_value_profile=1
+        # turns on libFuzzer comparison coverage so the fuzzer can climb exact-byte
+        # gates (magic/version prefixes, length checks) plain edge coverage can't guess.
+        env:
+          RUSTUP_TOOLCHAIN: ${{ env.FUZZ_TOOLCHAIN }}
+        # Duration: dispatch input > PR smoke (60s) > nightly default (120s).
+        run: |
+          cargo bolero test ${{ matrix.target }} \
+            --sanitizer address \
+            --engine libfuzzer \
+            -E=-use_value_profile=1 \
+            -E=-max_total_time=${{ github.event.inputs.duration || (github.event_name == 'pull_request' && '60') || '120' }}
+
+      - name: Minimize corpus
+        # cargo bolero reduce == libFuzzer -merge=1: keeps one input per new-feature
+        # set. Only meaningful when the run found no crash, so skipped on failure.
+        # Corpus persistence is a nightly concern — PR smoke reads but never writes.
+        if: success() && github.event_name != 'pull_request'
+        working-directory: fuzz
+        env:
+          RUSTUP_TOOLCHAIN: ${{ env.FUZZ_TOOLCHAIN }}
+        run: cargo bolero reduce ${{ matrix.target }} --engine libfuzzer
+
+      - name: Upload corpus
+        # Named per-engine so it does not clobber the parallel AFL leg's corpus-afl-*.
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-libfuzzer-${{ matrix.target }}
+          path: fuzz/tests/__fuzz__/${{ matrix.target }}/corpus/
+          retention-days: 90
+          if-no-files-found: ignore
+          overwrite: true
+
+      - name: Upload crashes
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashes-${{ matrix.target }}
+          path: fuzz/tests/__fuzz__/${{ matrix.target }}/crashes/
+          if-no-files-found: ignore
+
+  deep-fuzz-afl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # gh run download of the previous night's shared corpus artifact
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - wire_decode_frame
+          - cbor_decode_header
+          - cbor_decode_chunk
+          - value_event_type
+    env:
+      # AFL++ refuses to run under a locked-down CI sandbox without these.
+      AFL_SKIP_CPUFREQ: "1"
+      AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: "1"
+      AFL_NO_AFFINITY: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # afl.rs 0.18 builds on STABLE — no nightly pin (unlike the libFuzzer leg).
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-afl
+        # Pin to the 0.18.x series matching the `afl` lib dep in fuzz-afl/Cargo.toml.
+        run: cargo install cargo-afl --version '^0.18' --locked --force
+
+      - name: Build AFL++ runtime
+        # cargo-afl vendors AFL++. --force rebuilds unconditionally, covering both the
+        # already-built and not-built cases (a plain --build panics if already built).
+        run: cargo afl config --build --force
+
+      - name: Restore shared corpus (seed dir)
+        # Seed from BOTH engines' corpora so value-profile finds seed CMPLOG and
+        # vice-versa. First-ever run: none yet.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          seed_dir="seeds/${{ matrix.target }}"
+          mkdir -p "$seed_dir"
+          run_id="$(gh run list --workflow fuzz.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty' 2>/dev/null || true)"
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" --name "corpus-libfuzzer-${{ matrix.target }}" --dir "$seed_dir" || true
+            gh run download "$run_id" --name "corpus-afl-${{ matrix.target }}" --dir "$seed_dir" || true
+          fi
+          # AFL requires a non-empty input dir; plant a 1-byte seed if none restored.
+          if [ -z "$(ls -A "$seed_dir" 2>/dev/null)" ]; then
+            printf 'A' > "$seed_dir/seed0"
+          fi
+
+      - name: Build CMPLOG-instrumented target
+        working-directory: fuzz-afl
+        run: cargo afl build --release --bin ${{ matrix.target }}
+
+      - name: Fuzz ${{ matrix.target }} (AFL++/CMPLOG)
+        working-directory: fuzz-afl
+        # CMPLOG is default-on in afl.rs. -V bounds wall-clock; the run exits 0 at
+        # the limit. Tee output so the next step can confirm CMPLOG engaged.
+        # Duration: dispatch input > PR smoke (60s) > nightly default (120s).
+        run: |
+          cargo afl fuzz \
+            -V ${{ github.event.inputs.duration || (github.event_name == 'pull_request' && '60') || '120' }} \
+            -i ../seeds/${{ matrix.target }} \
+            -o out \
+            target/release/${{ matrix.target }} 2>&1 | tee afl.log
+
+      - name: Confirm CMPLOG engaged
+        working-directory: fuzz-afl
+        # Acceptance criterion: prove CMPLOG is active. Fail the job if no evidence.
+        run: |
+          if grep -iq 'cmplog' afl.log; then
+            echo "CMPLOG confirmed engaged."
+          else
+            echo "::error::CMPLOG not detected in afl-fuzz output"
+            exit 1
+          fi
+
+      - name: Fold discoveries into shared corpus + minimize
+        # Corpus persistence is a nightly concern — PR smoke runs read, never write.
+        if: success() && github.event_name != 'pull_request'
+        working-directory: fuzz-afl
+        run: |
+          cp -f out/default/queue/* ../seeds/${{ matrix.target }}/ 2>/dev/null || true
+          mkdir -p ../corpus-min/${{ matrix.target }}
+          cargo afl cmin \
+            -i ../seeds/${{ matrix.target }} \
+            -o ../corpus-min/${{ matrix.target }} \
+            target/release/${{ matrix.target }} || \
+            cp -rf ../seeds/${{ matrix.target }}/* ../corpus-min/${{ matrix.target }}/
+
+      - name: Upload shared corpus
+        # Named per-engine so it does not clobber the parallel libFuzzer leg's corpus.
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-afl-${{ matrix.target }}
+          path: corpus-min/${{ matrix.target }}/
+          retention-days: 90
+          if-no-files-found: ignore
+          overwrite: true
+
+      - name: Upload crashes
+        # AFL++ does not exit on crash (unlike libFuzzer): it logs to
+        # out/default/crashes/ and keeps fuzzing to the -V bound, exiting 0. So
+        # if: failure() would never fire — upload on always(). The dir only exists
+        # after a real crash; if-no-files-found: ignore covers the clean case.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashes-afl-${{ matrix.target }}
+          path: fuzz-afl/out/default/crashes/
+          if-no-files-found: ignore
+
+  fuzz-gate:
+    # Single stable check name for branch protection. Requiring the matrix jobs
+    # directly would mean per-target contexts that silently drift whenever a
+    # target is added or renamed; this job collapses them into one. `always()`
+    # so it still reports (as a failure) when a needed job fails or is cancelled —
+    # a skipped required check would leave the PR stuck at "Expected".
+    name: fuzz-gate
+    if: always()
+    needs: [deep-fuzz, deep-fuzz-afl]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every fuzz leg green
+        run: |
+          for result in ${{ join(needs.*.result, ' ') }}; do
+            if [ "$result" != "success" ]; then
+              echo "::error::a fuzz leg finished with result: $result"
+              exit 1
+            fi
+          done
+          echo "all fuzz legs green"

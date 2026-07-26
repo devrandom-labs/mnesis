@@ -22,6 +22,7 @@ members = [
     "examples/signed-events",
     "examples/store-and-kernel",
     "examples/store-inmemory",
+    "mutants-gate",
 ]
 
 [workspace.dependencies]
