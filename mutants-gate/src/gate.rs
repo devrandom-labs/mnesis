@@ -234,6 +234,29 @@ pub(crate) fn render_report(v: &Verdict) -> String {
     s
 }
 
+/// Guard against a silently-empty run. cargo-mutants writes an `outcomes.json`
+/// whose only entry is a failed or timed-out `Baseline` when the UNMUTATED suite
+/// does not pass (a broken or wrongly-filtered test run), and then tests zero
+/// mutants. Emitting a baseline from that would bless an empty ratchet; checking
+/// against it would pass vacuously. Returns the reason the run is unusable, if any.
+pub(crate) fn unusable_reason(report: &Report) -> Option<String> {
+    for outcome in &report.outcomes {
+        if matches!(outcome.scenario, Scenario::Baseline) && outcome.summary != Summary::Success {
+            return Some(format!(
+                "the unmutated baseline did not pass (summary: {:?}) — no mutants were tested; \
+                 fix the baseline test run before seeding or gating",
+                outcome.summary
+            ));
+        }
+    }
+    let tested = report
+        .outcomes
+        .iter()
+        .filter(|o| matches!(o.scenario, Scenario::Mutant(_)))
+        .count();
+    (tested == 0).then(|| "no mutants were tested (empty outcomes)".to_owned())
+}
+
 /// Build a baseline skeleton from a clean run: every viable function floored at
 /// its current viable count; every 0-viable function listed as known-zero. The
 /// operator REVIEWS the diff before committing (a genuinely-should-be-tested

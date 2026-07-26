@@ -27,6 +27,12 @@ pub(crate) enum Summary {
     MissedMutant,
     Unviable,
     Timeout,
+    /// cargo-mutants emits this when a test process fails for a non-mutation
+    /// reason — most often the **unmutated baseline** suite failing to pass (a
+    /// broken or wrongly-filtered test run), in which case NO mutants are tested.
+    /// Modelled so the parse never crashes; a baseline `Failure` is caught as a
+    /// hard error before the empty result can masquerade as a clean baseline.
+    Failure,
 }
 
 /// Either the bare string `"Baseline"` or `{ "Mutant": { .. } }`.

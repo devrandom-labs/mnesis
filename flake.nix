@@ -47,6 +47,9 @@
             # it from the sandbox. `maybeMissing` keeps eval clean before the
             # baseline is first seeded (see mutants-gate/README.md).
             (lib.fileset.maybeMissing ./mutants-baseline.json)
+            # cargo-mutants' exclude list (equivalent/non-terminating mutants).
+            # Must reach the sandbox or those mutants reappear as survivors.
+            ./.cargo/mutants.toml
           ];
         };
 
@@ -263,20 +266,66 @@
           mutants = craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
             pnameSuffix = "-mutants";
-            nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants ];
-            # --timeout is cargo-mutants' PER-MUTANT test-phase bound (the
-            # unmutated baseline runs fast — it is not the pressure). 180s leaves
-            # headroom for a mutant that makes a real-time test wait out a timeout.
+            nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants cargo-nextest ];
+            # `--test-tool nextest` runs the kernel suite in PARALLEL — plain
+            # `cargo test` runs the proptest blocks serially and blows past any
+            # sane per-mutant timeout on the unmutated baseline alone. PROPTEST_CASES
+            # is capped for the sweep: the gate needs a test to KILL the mutant, which
+            # a few cases do — the full 256-case run stays the job of the normal gate.
+            # NO fixed --timeout: cargo-mutants auto-derives the per-mutant bound
+            # from the MEASURED baseline (baseline x multiplier), so a machine
+            # under concurrent load (a fixed cap would clip the 2s idle baseline
+            # to a false timeout) is handled — the baseline itself is never clipped.
             buildPhaseCargoCommand = ''
               set -o pipefail
-              cargo mutants \
+              # `-- -E 'not test(compile_fail)'` forwards to nextest: the trybuild
+              # compile-fail tests can't match their committed .stderr snapshots
+              # inside the nix sandbox (path-relative), so the normal nextest gate
+              # excludes them too — without this the UNMUTATED baseline fails and
+              # zero mutants get tested.
+              PROPTEST_CASES=64 cargo mutants \
                 --package mnesis \
                 --file 'crates/mnesis/**' \
-                --no-shuffle --colors never --timeout 180 \
-                --output "$out" || true
+                --test-tool nextest \
+                --no-shuffle --colors never \
+                --output "$out" \
+                -- -E 'not test(compile_fail)' || true
               cargo run --release -p mutants-gate -- \
                 check "$out/mutants.out" "$PWD/mutants-baseline.json" \
                 | tee "$out/mutants-gate-report.txt"
+            '';
+            doInstallCargoArtifacts = false;
+            doCheck = false;
+          });
+
+          # Baseline seeder / reseeder for the mutation gate. Same scoped sweep as
+          # `.#mutants`, but it runs `mutants-gate emit-baseline` instead of the
+          # strict verdict and ALWAYS succeeds — so it produces a fresh
+          # `mutants-baseline.json` even when no baseline exists yet (the gate
+          # itself fails closed in that state, so it cannot seed itself). Run
+          # `nix build .#mutants-sweep -L`, then copy `result/mutants-baseline.json`
+          # to the repo root, REVIEW it (a should-be-tested 0-viable function
+          # belongs in floors, not known_zero), and commit. See mutants-gate/README.md.
+          mutants-sweep = craneLib.mkCargoDerivation (commonArgs // {
+            inherit cargoArtifacts;
+            pnameSuffix = "-mutants-sweep";
+            nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants cargo-nextest ];
+            # Same test-runner + proptest settings as `.#mutants` so the seeded
+            # baseline matches exactly what the gate will re-measure.
+            buildPhaseCargoCommand = ''
+              PROPTEST_CASES=64 cargo mutants \
+                --package mnesis \
+                --file 'crates/mnesis/**' \
+                --test-tool nextest \
+                --no-shuffle --colors never \
+                --output "$out" \
+                -- -E 'not test(compile_fail)' || true
+              cargo run --release -p mutants-gate -- \
+                emit-baseline "$out/mutants.out" > "$out/mutants-baseline.json"
+              # Surface survivors/timeouts in the build log so a seed run that
+              # reveals a genuine test gap is visible, not silently floored.
+              cp -f "$out/mutants.out/missed.txt" "$out/missed.txt" 2>/dev/null || true
+              cp -f "$out/mutants.out/timeout.txt" "$out/timeout.txt" 2>/dev/null || true
             '';
             doInstallCargoArtifacts = false;
             doCheck = false;

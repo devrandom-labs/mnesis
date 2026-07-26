@@ -64,6 +64,10 @@ fn run() -> Result<bool, GateError> {
             };
             let out_dir = Path::new(&dir_arg);
             let report: Report = read_json(&out_dir.join("outcomes.json"))?;
+            if let Some(reason) = gate::unusable_reason(&report) {
+                eprintln!("mutants-gate: cannot seed a baseline: {reason}");
+                return Ok(false);
+            }
             println!("{}", gate::emit_baseline(&report));
             Ok(true)
         }
@@ -73,6 +77,10 @@ fn run() -> Result<bool, GateError> {
             };
             let out_dir = Path::new(&dir_arg);
             let report: Report = read_json(&out_dir.join("outcomes.json"))?;
+            if let Some(reason) = gate::unusable_reason(&report) {
+                eprintln!("mutants-gate FAIL: unusable run: {reason}");
+                return Ok(false);
+            }
             let candidates: Vec<Candidate> = read_json(&out_dir.join("mutants.json"))?;
             let baseline: Baseline = read_json(Path::new(&baseline_path))?;
             let verdict = gate::evaluate(&report, &candidates, &baseline);
