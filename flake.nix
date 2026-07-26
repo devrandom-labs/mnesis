@@ -42,11 +42,11 @@
           fileset = lib.fileset.unions [
             (craneLib.fileset.commonCargoSources unfilteredSrc)
             (lib.fileset.fileFilter (f: f.hasExt "snap") unfilteredSrc)
-            # The mutation-gate ratchet. crane's cargo-source filter strips
-            # non-.rs/.toml files, but the `mutants` package's verdict step reads
-            # it from the sandbox. `maybeMissing` keeps eval clean before the
-            # baseline is first seeded (see mutants-gate/README.md).
-            (lib.fileset.maybeMissing ./mutants-baseline.json)
+            # Per-crate mutation-gate ratchets (`.mutants-baselines/<crate>.json`).
+            # crane's cargo-source filter strips non-.rs/.toml files, but each
+            # `mutants-<crate>` verdict step reads its baseline from the sandbox.
+            # `maybeMissing` keeps eval clean for crates not yet rolled out.
+            (lib.fileset.maybeMissing ./.mutants-baselines)
             # cargo-mutants' exclude list (equivalent/non-terminating mutants).
             # Must reach the sandbox or those mutants reappear as survivors.
             ./.cargo/mutants.toml
@@ -246,80 +246,75 @@
           });
         };
 
-        packages = {
-          # Mutation-testing gate (ported from the sibling `bombay` repo). A
-          # flake *package*, NOT a `nix flake check`: cargo-mutants rebuilds +
-          # re-tests once per mutant (minutes to hours), the same quarantine as
-          # fuzzing. `nix build .#mutants -L` runs the scoped sweep, then
-          # `mutants-gate` OWNS the verdict — it fails on a survivor, a timeout,
-          # an interrupted run (fewer outcomes than candidates), or a per-function
-          # viability collapse against mutants-baseline.json, and always writes
-          # the "N viable / M total" ratio to $out/mutants-gate-report.txt.
-          # cargo-mutants' own exit is swallowed (`|| true`) so the gate is the
-          # single source of truth; `set -o pipefail` makes the gate's exit code
-          # (not tee's) fail the derivation. The `--file` glob is single-quoted so
-          # cargo-mutants — not the shell — matches it, scoping the sweep to the
-          # kernel crate (crates/mnesis). Widen as coverage grows to the store.
-          #
-          # Requires a committed mutants-baseline.json (see mutants-gate/README.md
-          # for the one-time seed step). Until then the verdict step fails closed.
-          mutants = craneLib.mkCargoDerivation (commonArgs // {
+        packages = let
+          # Mutation gate is rolled out ONE CRATE AT A TIME (a whole-workspace
+          # sweep is 1542 mutants / many hours — over GitHub's 6h job cap). Each
+          # crate gets its own `.#mutants-<pkg>` verdict + `.#mutants-sweep-<pkg>`
+          # seeder and its own `.mutants-baselines/<pkg>.json` ratchet. The CI
+          # nightly matrix (mutants.yml) gates the crates that have a committed
+          # baseline; PRs run `cargo-mutants --in-diff` instead (changed lines
+          # only). `mnesis-postgres` is absent by decision — its tests need a live
+          # DB the sandbox lacks; mutation-grading it is tracked in #351.
+          mutantCrates = [
+            "mnesis"
+            "mnesis-store"
+            "mnesis-fjall"
+            "mnesis-inmemory"
+            "mnesis-wake"
+            "mnesis-wake-nostd"
+            "mnesis-macros"
+          ];
+          # One cargo-mutants sweep of a single crate. `--test-tool nextest` runs
+          # the suite in PARALLEL (plain `cargo test` runs proptest serially and
+          # blows past any sane per-mutant timeout on the baseline alone).
+          # PROPTEST_CASES is capped so a few cases kill each mutant (the full
+          # 256-case run stays the normal gate's job). NO fixed --timeout:
+          # cargo-mutants auto-derives it from the MEASURED baseline, robust to
+          # machine load that would clip a fixed cap into a false timeout.
+          # `-- -E 'not test(compile_fail)'` forwards to nextest: the trybuild
+          # compile-fail tests can't match their .stderr snapshots in the sandbox
+          # (path-relative), so the normal nextest gate excludes them too — without
+          # it the unmutated baseline fails and zero mutants get tested.
+          mutantsSweep = pkg: ''
+            PROPTEST_CASES=64 cargo mutants \
+              --package ${pkg} \
+              --test-tool nextest \
+              --no-shuffle --colors never \
+              --output "$out" \
+              -- -E 'not test(compile_fail)' || true
+          '';
+          # The gate: sweep one crate, then `mutants-gate` OWNS the verdict — fails
+          # on a survivor, timeout, interrupted run, or viability collapse against
+          # `.mutants-baselines/<pkg>.json`, and writes the ratio to
+          # $out/mutants-gate-report.txt. cargo-mutants' own exit is swallowed
+          # (`|| true`); `set -o pipefail` makes the gate's exit fail the build.
+          # Fails closed until that crate's baseline is committed.
+          mkGate = pkg: craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pnameSuffix = "-mutants";
+            pnameSuffix = "-mutants-${pkg}";
             nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants cargo-nextest ];
-            # `--test-tool nextest` runs the kernel suite in PARALLEL — plain
-            # `cargo test` runs the proptest blocks serially and blows past any
-            # sane per-mutant timeout on the unmutated baseline alone. PROPTEST_CASES
-            # is capped for the sweep: the gate needs a test to KILL the mutant, which
-            # a few cases do — the full 256-case run stays the job of the normal gate.
-            # NO fixed --timeout: cargo-mutants auto-derives the per-mutant bound
-            # from the MEASURED baseline (baseline x multiplier), so a machine
-            # under concurrent load (a fixed cap would clip the 2s idle baseline
-            # to a false timeout) is handled — the baseline itself is never clipped.
             buildPhaseCargoCommand = ''
               set -o pipefail
-              # `-- -E 'not test(compile_fail)'` forwards to nextest: the trybuild
-              # compile-fail tests can't match their committed .stderr snapshots
-              # inside the nix sandbox (path-relative), so the normal nextest gate
-              # excludes them too — without this the UNMUTATED baseline fails and
-              # zero mutants get tested.
-              PROPTEST_CASES=64 cargo mutants \
-                --package mnesis \
-                --file 'crates/mnesis/**' \
-                --test-tool nextest \
-                --no-shuffle --colors never \
-                --output "$out" \
-                -- -E 'not test(compile_fail)' || true
+              ${mutantsSweep pkg}
               cargo run --release -p mutants-gate -- \
-                check "$out/mutants.out" "$PWD/mutants-baseline.json" \
+                check "$out/mutants.out" "$PWD/.mutants-baselines/${pkg}.json" \
                 | tee "$out/mutants-gate-report.txt"
             '';
             doInstallCargoArtifacts = false;
             doCheck = false;
           });
-
-          # Baseline seeder / reseeder for the mutation gate. Same scoped sweep as
-          # `.#mutants`, but it runs `mutants-gate emit-baseline` instead of the
-          # strict verdict and ALWAYS succeeds — so it produces a fresh
-          # `mutants-baseline.json` even when no baseline exists yet (the gate
-          # itself fails closed in that state, so it cannot seed itself). Run
-          # `nix build .#mutants-sweep -L`, then copy `result/mutants-baseline.json`
-          # to the repo root, REVIEW it (a should-be-tested 0-viable function
-          # belongs in floors, not known_zero), and commit. See mutants-gate/README.md.
-          mutants-sweep = craneLib.mkCargoDerivation (commonArgs // {
+          # The seeder/reseeder: same sweep, but `emit-baseline` instead of the
+          # strict verdict, and it ALWAYS succeeds — so it produces a fresh
+          # baseline even when none exists yet (the gate fails closed and cannot
+          # seed itself). Run `nix build .#mutants-sweep-<pkg> -L`, then
+          # `cp result/mutants-baseline.json .mutants-baselines/<pkg>.json`, REVIEW
+          # it, and commit. See mutants-gate/README.md.
+          mkSweep = pkg: craneLib.mkCargoDerivation (commonArgs // {
             inherit cargoArtifacts;
-            pnameSuffix = "-mutants-sweep";
+            pnameSuffix = "-mutants-sweep-${pkg}";
             nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants cargo-nextest ];
-            # Same test-runner + proptest settings as `.#mutants` so the seeded
-            # baseline matches exactly what the gate will re-measure.
             buildPhaseCargoCommand = ''
-              PROPTEST_CASES=64 cargo mutants \
-                --package mnesis \
-                --file 'crates/mnesis/**' \
-                --test-tool nextest \
-                --no-shuffle --colors never \
-                --output "$out" \
-                -- -E 'not test(compile_fail)' || true
+              ${mutantsSweep pkg}
               cargo run --release -p mutants-gate -- \
                 emit-baseline "$out/mutants.out" > "$out/mutants-baseline.json"
               # Surface survivors/timeouts in the build log so a seed run that
@@ -330,7 +325,11 @@
             doInstallCargoArtifacts = false;
             doCheck = false;
           });
-        } // lib.optionalAttrs isLinux {
+          perCrate = builtins.listToAttrs (lib.concatMap (pkg: [
+            { name = "mutants-${pkg}"; value = mkGate pkg; }
+            { name = "mutants-sweep-${pkg}"; value = mkSweep pkg; }
+          ]) mutantCrates);
+        in perCrate // lib.optionalAttrs isLinux {
           # NixOS integration tests require Linux VMs — Linux-only `packages`
           # attribute, deliberately NOT a `checks` entry, so the darwin
           # `nix flake check` dev gate never builds a test archive or boots a VM.
@@ -411,6 +410,7 @@
             tmux
             cargo-hakari
             cargo-mutants
+            cargo-nextest
             tree
             cloc
             cargo-edit
