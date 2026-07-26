@@ -43,7 +43,12 @@ platforms = [
 # `mnesis-wake-nostd` is the no_std WakeSource bridge (#302): built for
 # thumbv7em/wasm32 by the no_std gates, so a std workspace-hack edge would
 # break it — same reasoning as `mnesis-nostd-smoketest`.
-workspace-members = ["mnesis", "mnesis-nostd-smoketest", "mnesis-store", "mnesis-wake-nostd"]
+#
+# `mutants-gate` is a CI-only host tool (the mutation-gate verdict), never
+# shipped and never a dependency of any published crate. It stays out of the
+# workspace-hack unification so a build-time-only tool does not perturb the
+# feature set of the real dependency graph.
+workspace-members = ["mnesis", "mnesis-nostd-smoketest", "mnesis-store", "mnesis-wake-nostd", "mutants-gate"]
 third-party = [
   { name = "futures-core" },
 ]

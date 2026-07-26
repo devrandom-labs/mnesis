@@ -42,6 +42,11 @@
           fileset = lib.fileset.unions [
             (craneLib.fileset.commonCargoSources unfilteredSrc)
             (lib.fileset.fileFilter (f: f.hasExt "snap") unfilteredSrc)
+            # The mutation-gate ratchet. crane's cargo-source filter strips
+            # non-.rs/.toml files, but the `mutants` package's verdict step reads
+            # it from the sandbox. `maybeMissing` keeps eval clean before the
+            # baseline is first seeded (see mutants-gate/README.md).
+            (lib.fileset.maybeMissing ./mutants-baseline.json)
           ];
         };
 
@@ -53,6 +58,26 @@
         };
 
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+
+        # Source for the isolated `fuzz/` workspace check. crane's cargo-source
+        # filter keeps only .rs/.toml/Cargo.lock, which would strip committed
+        # corpus seeds under `fuzz/tests/__fuzz__/**` (they have no extension).
+        # bolero's DefaultEngine replays those seeds, so they MUST reach the
+        # sandbox. This filter keeps everything crane keeps PLUS any file under a
+        # `__fuzz__` corpus directory.
+        fuzzSrc = lib.cleanSourceWith {
+          src = ./.;
+          name = "mnesis-fuzz-source";
+          filter =
+            path: type:
+            (craneLib.filterCargoSources path type)
+            || (lib.hasInfix "/tests/__fuzz__/" (toString path));
+        };
+
+        # The fuzz workspace has its OWN Cargo.lock (bolero + mnesis-store path
+        # dep). Vendor it separately so the check builds offline/hermetically
+        # without touching the root workspace's vendored deps.
+        fuzzCargoArtifacts = craneLib.vendorCargoDeps { cargoLock = ./fuzz/Cargo.lock; };
 
         # mnesis-postgres's DB-backed tests are built once as a cargo-nextest
         # archive, then executed *inside* the NixOS VM below against a live
@@ -195,9 +220,67 @@
               cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection
             '';
           });
+
+          # Deterministic corpus-replay + bounded-random fuzz gate (ported from
+          # the sibling `cesr` repo). Runs the bolero `check!` targets in the
+          # isolated `fuzz/` workspace via plain `cargo test` on the pinned
+          # STABLE toolchain — bolero's DefaultEngine needs no nightly; the
+          # coverage-guided sanitizer runs (which DO need nightly) live in the
+          # scheduled `deep-fuzz` GitHub workflow, quarantined off this gate.
+          # The source carries the whole tree (so `mnesis-store = { path = .. }`
+          # resolves) plus `fuzz/`'s committed corpus seeds; `fuzzCargoArtifacts`
+          # vendors the fuzz workspace's own Cargo.lock so the build is hermetic.
+          # bolero discovers corpus relative to CARGO_MANIFEST_DIR, so the test
+          # runs from the fuzz workspace root where `tests/__fuzz__/**` resolves.
+          mnesis-fuzz-replay = craneLib.mkCargoDerivation (commonArgs // {
+            src = fuzzSrc;
+            cargoVendorDir = fuzzCargoArtifacts;
+            cargoArtifacts = null;
+            pnameSuffix = "-fuzz-replay";
+            buildPhaseCargoCommand = ''
+              (cd fuzz && cargo test --no-fail-fast)
+            '';
+          });
         };
 
         packages = {
+          # Mutation-testing gate (ported from the sibling `bombay` repo). A
+          # flake *package*, NOT a `nix flake check`: cargo-mutants rebuilds +
+          # re-tests once per mutant (minutes to hours), the same quarantine as
+          # fuzzing. `nix build .#mutants -L` runs the scoped sweep, then
+          # `mutants-gate` OWNS the verdict — it fails on a survivor, a timeout,
+          # an interrupted run (fewer outcomes than candidates), or a per-function
+          # viability collapse against mutants-baseline.json, and always writes
+          # the "N viable / M total" ratio to $out/mutants-gate-report.txt.
+          # cargo-mutants' own exit is swallowed (`|| true`) so the gate is the
+          # single source of truth; `set -o pipefail` makes the gate's exit code
+          # (not tee's) fail the derivation. The `--file` glob is single-quoted so
+          # cargo-mutants — not the shell — matches it, scoping the sweep to the
+          # kernel crate (crates/mnesis). Widen as coverage grows to the store.
+          #
+          # Requires a committed mutants-baseline.json (see mutants-gate/README.md
+          # for the one-time seed step). Until then the verdict step fails closed.
+          mutants = craneLib.mkCargoDerivation (commonArgs // {
+            inherit cargoArtifacts;
+            pnameSuffix = "-mutants";
+            nativeBuildInputs = commonArgs.nativeBuildInputs ++ [ cargo-mutants ];
+            # --timeout is cargo-mutants' PER-MUTANT test-phase bound (the
+            # unmutated baseline runs fast — it is not the pressure). 180s leaves
+            # headroom for a mutant that makes a real-time test wait out a timeout.
+            buildPhaseCargoCommand = ''
+              set -o pipefail
+              cargo mutants \
+                --package mnesis \
+                --file 'crates/mnesis/**' \
+                --no-shuffle --colors never --timeout 180 \
+                --output "$out" || true
+              cargo run --release -p mutants-gate -- \
+                check "$out/mutants.out" "$PWD/mutants-baseline.json" \
+                | tee "$out/mutants-gate-report.txt"
+            '';
+            doInstallCargoArtifacts = false;
+            doCheck = false;
+          });
         } // lib.optionalAttrs isLinux {
           # NixOS integration tests require Linux VMs — Linux-only `packages`
           # attribute, deliberately NOT a `checks` entry, so the darwin

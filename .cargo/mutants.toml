@@ -1,0 +1,12 @@
+# cargo-mutants configuration (read by default at `.cargo/mutants.toml`).
+#
+# Skip list for mutants that are legitimately unkillable — a mutation whose only
+# effect is a diagnostic side-channel (an `eprintln!` on an error path) has no
+# behavior a test can assert without capturing that channel, so it survives by
+# construction. This is the config-file equivalent of `#[mutants::skip]`, kept
+# here to avoid adding the no-op `mutants` crate as a production dependency.
+#
+# Empty for now: the kernel scope (crates/mnesis/src/**) has no diagnostic-only
+# paths of that class. Add `exclude_re = ["replace <fn_name>"]` entries here as
+# the sweep surfaces genuinely-unobservable mutants (document each, like bombay).
+exclude_re = []

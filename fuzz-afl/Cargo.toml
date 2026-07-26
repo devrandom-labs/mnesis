@@ -1,0 +1,36 @@
+# afl.rs (AFL++/CMPLOG) harness. Its OWN workspace root (empty [workspace]) so the
+# `afl` dependency — whose build.rs compiles AFL++ C — never enters the stable
+# `mnesis-fuzz-replay` graph (fuzz/ + fuzz-common). Exercised only by the
+# scheduled `deep-fuzz-afl` CI job, never by `nix flake check`.
+[workspace]
+
+[package]
+name = "mnesis-fuzz-afl"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.95.0"
+publish = false
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+afl = "0.18"
+fuzz-common = { path = "../fuzz-common" }
+
+[[bin]]
+name = "wire_decode_frame"
+path = "src/bin/wire_decode_frame.rs"
+
+[[bin]]
+name = "cbor_decode_header"
+path = "src/bin/cbor_decode_header.rs"
+
+[[bin]]
+name = "cbor_decode_chunk"
+path = "src/bin/cbor_decode_chunk.rs"
+
+[[bin]]
+name = "value_event_type"
+path = "src/bin/value_event_type.rs"
+
+[profile.release]
+panic = "abort"
