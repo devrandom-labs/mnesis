@@ -7,22 +7,23 @@
 //! of the aggregate's write-side fold ([`AggregateState::apply`]), which trusts
 //! the already-accepted log.
 //!
-//! # Stream attribution and the `Projector` strain
+//! # Stream attribution (#333/#345)
 //!
-//! [`Projector::apply`](mnesis_store::Projector::apply) receives only
-//! `(state, &event)` — **not** the origin `StreamKey`. A `Set` event carries no
-//! register id in its payload, so on an `$all` read (where events from many
-//! registers interleave) the fold cannot tell which register a `Set` belongs to
-//! from the event alone. Since #333 the store tags every `$all` item with its
-//! origin `StreamKey`, so the driving loop knows the id; it injects it via
-//! [`RegisterView::route_to`] before each `apply`. This "route through the
-//! state" shim is the visible strain: a key-aware projector would want the
-//! `StreamKey` in `apply`'s signature. See `README.md`.
+//! A `Set` event carries no register id in its payload — the stream *is* the
+//! identity — so on an `$all` read (events from many registers interleaved)
+//! the fold attributes each event to its register through the origin
+//! `StreamKey` the store stamps beside every `$all` item (#333).
+//! [`RegisterProjector`] overrides
+//! [`Projector::apply_attributed`](mnesis_store::Projector::apply_attributed)
+//! and decodes the [`RegisterId`] from that key; the keyless
+//! [`Projector::apply`](mnesis_store::Projector::apply) is the error path
+//! ([`ViewError::Unattributed`]). No driver-side routing shim. See
+//! `README.md`.
 
 use std::collections::HashMap;
 
 use ed25519_dalek::{Signature, VerifyingKey};
-use mnesis_store::Projector;
+use mnesis_store::{Projector, StreamKey};
 
 use crate::domain::{RegisterEvent, RegisterId, event_digest, inception_preimage, set_preimage};
 
@@ -41,20 +42,9 @@ pub struct RegisterView {
     pub registers: HashMap<RegisterId, HashMap<String, String>>,
     /// Per-register `(owner, chain head)` — verification state.
     chains: HashMap<RegisterId, ChainHead>,
-    /// The register the next `apply` folds into, injected by the driver from
-    /// the `$all` `StreamKey` tag (#333) before each call.
-    route: Option<RegisterId>,
 }
 
 impl RegisterView {
-    /// Point the next [`Projector::apply`] at register `id`.
-    ///
-    /// The driver calls this with the id decoded from the `$all` `StreamKey`
-    /// tag before folding each event — see the module docs.
-    pub const fn route_to(&mut self, id: RegisterId) {
-        self.route = Some(id);
-    }
-
     /// The verified entries of `id`, if the register has been folded.
     #[must_use]
     pub fn entries_of(&self, id: &RegisterId) -> Option<&HashMap<String, String>> {
@@ -85,9 +75,14 @@ pub enum ViewError {
     /// A second `Inception` arrived for an already-incepted register.
     #[error("register already incepted")]
     AlreadyIncepted,
-    /// The driver did not route the event to a register before applying.
-    #[error("no route: the driver must set the register id before applying")]
-    Unrouted,
+    /// The fold was invoked without stream attribution (keyless `apply`, or a
+    /// per-stream item) — a multi-stream re-verifying fold requires the origin
+    /// `StreamKey`.
+    #[error("no stream attribution: the $all StreamKey is required")]
+    Unattributed,
+    /// The `$all` stream key was not a valid 32-byte register id.
+    #[error("stream key is not a 32-byte register id")]
+    BadStreamKey,
 }
 
 /// The read-side re-verifying fold.
@@ -103,12 +98,25 @@ impl Projector for RegisterProjector {
         RegisterView::default()
     }
 
+    /// Keyless fold: this projector cannot attribute an event without the
+    /// origin stream key, so the required `apply` is its error path.
     fn apply(
         &self,
+        _view: RegisterView,
+        _event: &RegisterEvent,
+    ) -> Result<RegisterView, ViewError> {
+        Err(ViewError::Unattributed)
+    }
+
+    fn apply_attributed(
+        &self,
         mut view: RegisterView,
+        stream_key: Option<&StreamKey>,
         event: &RegisterEvent,
     ) -> Result<RegisterView, ViewError> {
-        let id = view.route.ok_or(ViewError::Unrouted)?;
+        let id = stream_key.ok_or(ViewError::Unattributed).and_then(|k| {
+            RegisterId::from_key_bytes(k.as_bytes()).ok_or(ViewError::BadStreamKey)
+        })?;
         match event {
             RegisterEvent::Inception { owner_pubkey, sig } => {
                 // Content-addressing check: the stream id must equal blake3 of
@@ -185,7 +193,7 @@ mod tests {
     };
     use ed25519_dalek::{Signer, SigningKey};
     use mnesis::{AggregateRoot, Handle, Version};
-    use mnesis_store::Projector;
+    use mnesis_store::{Projector, StreamKey};
     use rand_core::OsRng;
 
     /// Build a genuine `(inception, set)` chain for one register via the real
@@ -222,12 +230,12 @@ mod tests {
     }
 
     fn fold(
-        mut view: RegisterView,
+        view: RegisterView,
         id: RegisterId,
         event: &RegisterEvent,
     ) -> Result<RegisterView, ViewError> {
-        view.route_to(id);
-        RegisterProjector.apply(view, event)
+        let key = StreamKey::from_slice(id.as_ref());
+        RegisterProjector.apply_attributed(view, Some(&key), event)
     }
 
     #[test]
@@ -322,6 +330,29 @@ mod tests {
         assert_eq!(
             fold(RegisterProjector.initial(), id, &set).unwrap_err(),
             ViewError::NotIncepted
+        );
+    }
+
+    #[test]
+    fn keyless_apply_is_unattributed() {
+        let (_sk, _id, inception, _set) = genuine_chain();
+        assert_eq!(
+            RegisterProjector
+                .apply(RegisterProjector.initial(), &inception)
+                .unwrap_err(),
+            ViewError::Unattributed
+        );
+    }
+
+    #[test]
+    fn rejects_a_stream_key_that_is_not_a_register_id() {
+        let (_sk, _id, inception, _set) = genuine_chain();
+        let short = StreamKey::from_slice(b"too-short");
+        assert_eq!(
+            RegisterProjector
+                .apply_attributed(RegisterProjector.initial(), Some(&short), &inception)
+                .unwrap_err(),
+            ViewError::BadStreamKey
         );
     }
 }

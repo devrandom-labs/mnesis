@@ -49,6 +49,32 @@ pub trait Projector: Send + Sync + 'static {
     /// Returns `Self::Error` when the event cannot be applied — e.g.,
     /// arithmetic overflow, underflow, or domain invariant violation.
     fn apply(&self, state: Self::State, event: &Self::Event) -> Result<Self::State, Self::Error>;
+
+    /// Apply one event together with its origin-stream attribution, when the
+    /// item carries one.
+    ///
+    /// `key` is `Some` iff the event arrived off an `$all` read — the origin
+    /// [`StreamKey`] the store stamps beside every `$all` item (#333). On a
+    /// per-stream fold it is `None`: there the stream id is the query argument
+    /// the caller already holds, and the item carries no tag.
+    ///
+    /// The default ignores the key and delegates to [`apply`](Self::apply), so
+    /// a single-stream projector implements only `apply`. A multi-stream
+    /// projector that routes by origin stream overrides this method instead.
+    /// [`Projection::advance`] calls only this method.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Self::Error` when the event cannot be applied.
+    fn apply_attributed(
+        &self,
+        state: Self::State,
+        key: Option<&StreamKey>,
+        event: &Self::Event,
+    ) -> Result<Self::State, Self::Error> {
+        let _ = key;
+        self.apply(state, event)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -68,11 +94,11 @@ mod sealed {
 ///   the box; <code>Pos = [Version]</code>.
 /// - `(P, StreamKey, Decoded<E>)` (`$all`) — the bookmark is the
 ///   [`AllPosition`] tag riding *beside* the box,
-///   exactly as `.decoded()` yields it; `Pos = P`. The stepper **drops** the
-///   [`StreamKey`]: [`Projector::apply`] takes `(state, &event)` — a fold over
-///   events, and a key-aware fold is a `Projector` signature question
-///   deliberately out of #333's scope — a consumer that routes by key
-///   hand-rolls its loop over the `.decoded()` stream instead.
+///   exactly as `.decoded()` yields it; `Pos = P`. The [`StreamKey`] flows to
+///   [`Projector::apply_attributed`]: a multi-stream projector that routes by
+///   origin stream overrides it; the defaulted method ignores the key and
+///   delegates to [`Projector::apply`], so a single-stream projector is
+///   untouched.
 ///
 /// Sealed on purpose: the pairing of position and event is **structural**.
 /// A caller can never hand [`Projection::advance`] a position that did not
@@ -84,27 +110,26 @@ pub trait Positioned: sealed::Sealed {
     type Event;
     /// The position type the stepper checkpoints at.
     type Pos: Copy + Send;
-    /// Split the item into its bookmark and the decoded box.
-    fn into_parts(self) -> (Self::Pos, Decoded<Self::Event>);
+    /// Split the item into its bookmark, its origin-stream attribution
+    /// (`$all` items only), and the decoded box.
+    fn into_parts(self) -> (Self::Pos, Option<StreamKey>, Decoded<Self::Event>);
 }
 
 impl<E> sealed::Sealed for Decoded<E> {}
 impl<E> Positioned for Decoded<E> {
     type Event = E;
     type Pos = Version;
-    fn into_parts(self) -> (Version, Self) {
-        (self.version, self)
+    fn into_parts(self) -> (Version, Option<StreamKey>, Self) {
+        (self.version, None, self)
     }
 }
 
 impl<E, P: AllPosition> sealed::Sealed for (P, StreamKey, Decoded<E>) {}
-// The stream key is dropped here: the stepper folds events, not routes — a
-// key-aware fold would be a different `Projector::apply` signature.
 impl<E, P: AllPosition> Positioned for (P, StreamKey, Decoded<E>) {
     type Event = E;
     type Pos = P;
-    fn into_parts(self) -> (P, Decoded<E>) {
-        (self.0, self.2)
+    fn into_parts(self) -> (P, Option<StreamKey>, Decoded<E>) {
+        (self.0, Some(self.1), self.2)
     }
 }
 
@@ -273,7 +298,7 @@ where
     /// a bare [`Decoded<E>`](Decoded) from a per-stream subscription (the
     /// position is its `version`), or the `(position, StreamKey, Decoded<E>)`
     /// tuple from an `$all` subscription — fed whole, no unpacking (the stream
-    /// key is dropped; see [`Positioned`]). The item's position
+    /// key is forwarded to [`Projector::apply_attributed`]). The item's position
     /// becomes the candidate checkpoint. On a commit the checkpoint advances
     /// and the pending tail clears; otherwise the position is remembered as
     /// `pending` for the next [`flush`](Projection::flush).
@@ -292,10 +317,10 @@ where
     where
         It: Positioned<Event = P::Event, Pos = Pos>,
     {
-        let (position, decoded) = item.into_parts();
+        let (position, key, decoded) = item.into_parts();
         let folded = self
             .projector
-            .apply(state, &decoded.event)
+            .apply_attributed(state, key.as_ref(), &decoded.event)
             .map_err(ProjectionError::Apply)?;
 
         if self
