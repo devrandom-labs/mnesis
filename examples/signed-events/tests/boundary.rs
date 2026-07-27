@@ -17,7 +17,7 @@ use mnesis_example_signed_events::domain::{
 use mnesis_example_signed_events::projection::{RegisterProjector, ViewError};
 use mnesis_fjall::FjallStore;
 use mnesis_store::store::{RawEventStore, Store};
-use mnesis_store::{CommandRepository, ExecuteError, Projector};
+use mnesis_store::{CommandRepository, ExecuteError, Projector, StreamKey};
 use rand_core::OsRng;
 use tempfile::TempDir;
 
@@ -80,9 +80,9 @@ async fn read_side_folds_genuine_events_but_rejects_a_tampered_one() {
     let projector = RegisterProjector;
     let mut view = projector.initial();
     for (route, event) in &events {
-        view.route_to(*route);
+        let key = StreamKey::from_slice(route.as_ref());
         view = projector
-            .apply(view, event)
+            .apply_attributed(view, Some(&key), event)
             .expect("genuine event verifies");
     }
     assert_eq!(
@@ -99,14 +99,16 @@ async fn read_side_folds_genuine_events_but_rejects_a_tampered_one() {
         panic!("event #1 should be a Set");
     }
     let mut fresh = projector.initial();
-    fresh.route_to(tampered_events[0].0);
+    let inception_key = StreamKey::from_slice(tampered_events[0].0.as_ref());
     fresh = projector
-        .apply(fresh, &tampered_events[0].1)
+        .apply_attributed(fresh, Some(&inception_key), &tampered_events[0].1)
         .expect("inception still folds");
     assert!(fresh.registers.contains_key(&id), "inception folded");
-    fresh.route_to(tampered_events[1].0);
+    let set_key = StreamKey::from_slice(tampered_events[1].0.as_ref());
     assert_eq!(
-        projector.apply(fresh, &tampered_events[1].1).unwrap_err(),
+        projector
+            .apply_attributed(fresh, Some(&set_key), &tampered_events[1].1)
+            .unwrap_err(),
         ViewError::BadSignature,
         "a tampered signature is rejected on the read side"
     );
