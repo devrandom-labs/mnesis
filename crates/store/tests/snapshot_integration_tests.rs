@@ -795,6 +795,86 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
     assert_eq!(load_b.version(), Some(Version::new(3).unwrap()));
 }
 
+#[tokio::test]
+async fn load_uses_snapshot_state_when_events_cannot_reproduce_it() {
+    // Snapshot-load and full-replay are observationally identical whenever the
+    // event stream can rebuild the state, so no existing assertion distinguishes
+    // them — which lets `try_load_from_snapshot` short-circuit to `None`
+    // (always replay) undetected. Force divergence: put the state ONLY in the
+    // snapshot and load against an EMPTY event store. A `None` short-circuit then
+    // replays nothing and yields a fresh aggregate instead of the snapshot state.
+    let snap_store = InMemorySnapshotStore::<CounterState, Version>::new();
+    let id = TestId::new("counter-1");
+
+    // Store A: write 3 events; the trigger snapshots state=3 at v3.
+    let store_a = Store::new(InMemoryStore::new());
+    let inner_a = store_a.repository().json().build();
+    let repo_a = Snapshotting::new(
+        inner_a,
+        &snap_store,
+        EveryNEvents(NonZeroU64::new(3).unwrap()),
+        SV1,
+        false,
+    );
+    let mut agg: AggregateRoot<Counter> = repo_a.load(id.clone()).await.unwrap();
+    repo_a
+        .save(
+            &mut agg,
+            &save_events(&[
+                CounterEvent::Incremented,
+                CounterEvent::Incremented,
+                CounterEvent::Incremented,
+            ]),
+        )
+        .await
+        .unwrap();
+
+    // Store B is EMPTY but shares the snapshot store. Only the snapshot can
+    // supply state=3 @ v3; replaying B sees no events.
+    let store_b = Store::new(InMemoryStore::new());
+    let inner_b = store_b.repository().json().build();
+    let repo_b = Snapshotting::new(
+        inner_b,
+        &snap_store,
+        EveryNEvents(NonZeroU64::new(3).unwrap()),
+        SV1,
+        false,
+    );
+    let loaded: AggregateRoot<Counter> = repo_b.load(id).await.unwrap();
+    assert_eq!(
+        loaded.state().value,
+        3,
+        "state must be hydrated from the snapshot, not an empty replay"
+    );
+    assert_eq!(loaded.version(), Some(Version::new(3).unwrap()));
+}
+
+#[tokio::test]
+async fn codec_snapshot_store_commit_then_hydrate_roundtrips() {
+    // Pins `CodecSnapshotStore::commit` (state.rs): a no-op `Ok(())` that skipped
+    // the encode + inner write would leave the byte store empty, so hydrate would
+    // return `Absent` and `into_found()` would be `None`.
+    use mnesis_store::state::CodecSnapshotStore;
+
+    let byte_store = InMemorySnapshotStore::<Vec<u8>, Version>::new();
+    let state_store = CodecSnapshotStore::new(&byte_store, mnesis_store::JsonCodec::default());
+    let id = TestId::new("counter-1");
+    let version = Version::new(7).unwrap();
+    let state = CounterState { value: 42 };
+
+    state_store.commit(&id, SV1, version, &state).await.unwrap();
+    // `CodecSnapshotStore` impls `SnapshotStore<S, _>` for every S, so the hydrate
+    // return type must be pinned to `CounterState` here.
+    let (loaded_version, loaded_state): (Version, CounterState) = state_store
+        .hydrate(&id, SV1)
+        .await
+        .unwrap()
+        .into_found()
+        .expect("commit must have persisted the snapshot");
+    assert_eq!(loaded_version, version);
+    assert_eq!(loaded_state, state);
+}
+
 // ─── #207 test helper ──────────────────────────────────────────────────────
 // `Repository::save` takes `&Events<E, N>` (non-empty, compile-time capacity).
 // These tests build batches from runtime-length slices/proptest vectors, so we

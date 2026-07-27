@@ -469,7 +469,17 @@ pub mod bytemuck {
             // 8 bytes instead of 16 (size_of::<Pos>())
             let env = build_test_envelope(&[0u8; 8]);
             let result: Result<&Pos, _> = codec.decode(&env);
-            assert!(result.is_err(), "wrong-size payload must be rejected");
+            let err = result
+                .copied()
+                .expect_err("wrong-size payload must be rejected");
+            // The error must carry the upstream PodCastError detail — a size
+            // mismatch renders as `SizeMismatch`. Asserting the content (not just
+            // `is_err`) pins the `From<PodCastError>` conversion: an impl that
+            // dropped the cause would render an empty inner string.
+            assert!(
+                err.to_string().contains("SizeMismatch"),
+                "error must carry the PodCastError cause, got: {err}"
+            );
         }
     }
 }

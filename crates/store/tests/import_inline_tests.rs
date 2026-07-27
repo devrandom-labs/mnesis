@@ -339,6 +339,33 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn store_handle_forwards_atomic_append_position() {
+        // `Store<S>` forwards AtomicAppend to its inner backend (import.rs:311).
+        // The handle must return the SAME `$all` position the raw store assigns,
+        // never `None`. Two identical fresh stores — one written through the
+        // handle, one through the raw store — must agree on the position.
+        let writes = vec![planned("a", None, &[1, 2]), planned("b", None, &[1])];
+
+        let handle = Store::new(mnesis_inmemory::InMemoryStore::new());
+        let via_handle = handle
+            .atomic_append_many(&writes)
+            .await
+            .expect("handle commits");
+
+        let raw = mnesis_inmemory::InMemoryStore::new();
+        let via_raw = raw.atomic_append_many(&writes).await.expect("raw commits");
+
+        assert!(
+            via_handle.is_some(),
+            "a non-empty write returns a position, never None"
+        );
+        assert_eq!(
+            via_handle, via_raw,
+            "the Store handle must forward the raw store's position verbatim"
+        );
+    }
+
+    #[tokio::test]
     async fn atomic_append_many_rolls_back_all_on_one_conflict() {
         let store = mnesis_inmemory::InMemoryStore::new();
         // Pre-seed "b" to v1 so the second write (expecting fresh) conflicts.

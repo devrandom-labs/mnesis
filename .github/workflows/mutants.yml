@@ -1,10 +1,17 @@
 name: mutants
 
-# The reproducible mutation gate lives ENTIRELY inside the flake package
-# `nix build .#mutants` — sweep + `mutants-gate` verdict tool, `tee`d to
-# `./result/mutants-gate-report.txt`. This workflow just builds it and
-# publishes the ratio. Quarantined off `nix flake check` (rebuild-per-mutant
-# is too slow for per-push) — same pattern as fuzz.yml.
+# Mutation gate, rolled out ONE CRATE AT A TIME (a whole-workspace sweep is
+# ~1542 mutants / many hours — over GitHub's 6h job cap). Two triggers:
+#
+#   * pull_request -> `mutants-in-diff`: cargo-mutants `--in-diff` mutates only
+#     the lines this PR changed. Fast (proportional to the diff), and it grades
+#     the tests for exactly the code you touched.
+#   * schedule/dispatch -> `mutants-sweep` matrix: one job per ROLLED-OUT crate
+#     (`nix build .#mutants-<crate>`), each well under the 6h cap, updating that
+#     crate's `.mutants-baselines/<crate>.json` ratchet.
+#
+# `mutants-gate` collapses both into ONE blocking required check. Quarantined off
+# `nix flake check` (rebuild-per-mutant is too slow for per-push) — like fuzz.yml.
 on:
   schedule:
     - cron: "0 5 * * *" # nightly 05:00 UTC
@@ -14,15 +21,67 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Scope by event so a PR push cancels only the superseded PR run, never a
-  # concurrently running nightly on the same ref.
   group: mutants-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  mutants-sweep:
+  # PR path: mutate only the changed lines. Runs in the dev shell (non-hermetic)
+  # because the diff is dynamic per-PR and can't be a static nix input.
+  mutants-in-diff:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need the base branch to diff against
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-mutants-indiff-${{ runner.os }}-${{ hashFiles('flake.lock') }}
+          restore-prefixes-first-match: nix-mutants-indiff-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+
+      - name: cargo-mutants on the PR diff
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          # Only source dirs; postgres excluded (its tests need a live DB the
+          # runner lacks, so a changed line there would falsely survive — #351).
+          git diff "origin/${{ github.base_ref }}...HEAD" -- 'crates/**' 'adapters/**' > pr.diff
+          if [ ! -s pr.diff ]; then
+            echo "No source changes in this PR — nothing to mutate."
+            exit 0
+          fi
+          nix develop -c cargo mutants \
+            --in-diff pr.diff \
+            --exclude mnesis-postgres \
+            --test-tool nextest \
+            --no-shuffle --colors never \
+            -- -E 'not test(compile_fail)'
+
+  # Nightly path: one full-crate sweep per rolled-out crate. Add a crate here
+  # AND commit its `.mutants-baselines/<crate>.json` to bring it under the gate.
+  mutants-sweep:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # under GitHub's 360-min job cap
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - mnesis
+          - mnesis-store
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,47 +98,47 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v6
         with:
-          primary-key: nix-mutants-${{ runner.os }}-${{ hashFiles('Cargo.toml', 'flake.nix', 'flake.lock', 'Cargo.lock') }}
-          restore-prefixes-first-match: nix-mutants-${{ runner.os }}-
+          primary-key: nix-mutants-${{ matrix.crate }}-${{ runner.os }}-${{ hashFiles('Cargo.toml', 'flake.nix', 'flake.lock', 'Cargo.lock') }}
+          restore-prefixes-first-match: nix-mutants-${{ matrix.crate }}-${{ runner.os }}-
           gc-max-store-size-linux: 1G
           purge: true
-          purge-prefixes: nix-mutants-${{ runner.os }}-
+          purge-prefixes: nix-mutants-${{ matrix.crate }}-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
 
-      - name: Sweep + gate
-        run: nix build .#mutants -L
+      - name: Sweep + gate ${{ matrix.crate }}
+        run: nix build ".#mutants-${{ matrix.crate }}" -L
 
       - name: Publish the viable-mutant ratio
         if: always()
         run: |
           if [ -f ./result/mutants-gate-report.txt ]; then
             {
-              echo "### Mutation coverage"
+              echo "### Mutation coverage — ${{ matrix.crate }}"
               echo '```'
               cat ./result/mutants-gate-report.txt
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::warning::no mutants-gate-report.txt produced by nix build .#mutants"
+            echo "::warning::no report produced by nix build .#mutants-${{ matrix.crate }}"
           fi
 
   mutants-gate:
-    # Single stable check name. Requiring the sweep job directly would mean
-    # contexts that silently drift; this collapses them into one. `always()`
-    # so it still reports (as a failure) when a needed job fails or is
-    # cancelled — a skipped required check leaves a PR stuck at "Expected".
+    # Single stable check name for branch protection. `always()` so it still
+    # reports when a needed job fails/cancels — a skipped required check leaves a
+    # PR stuck at "Expected". Only ONE of the two paths runs per event; the other
+    # is `skipped`, which counts as OK here (a real failure/cancel does not).
     name: mutants-gate
     if: always()
-    needs: [mutants-sweep]
+    needs: [mutants-in-diff, mutants-sweep]
     runs-on: ubuntu-latest
     steps:
-      - name: Require the mutants sweep green
+      - name: Require the mutation path green
         run: |
           for result in ${{ join(needs.*.result, ' ') }}; do
-            if [ "$result" != "success" ]; then
-              echo "::error::the mutants sweep finished with result: $result"
+            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
+              echo "::error::a mutation job finished with result: $result"
               exit 1
             fi
           done
-          echo "mutants sweep green"
+          echo "mutation path green"
