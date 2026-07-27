@@ -567,4 +567,264 @@ mod tests {
             }
         );
     }
+
+    // ── attributed fold (#345): the stepper forwards the $all StreamKey ────
+
+    /// Routes each event's value into a per-origin-stream bucket. State maps
+    /// raw key bytes → running total. `apply` (keyless) is unreachable for a
+    /// correctly driven $all fold and returns `Unattributed`.
+    struct RoutingProjector;
+
+    #[derive(Debug, PartialEq, thiserror::Error)]
+    enum RoutingError {
+        #[error("attributed fold invoked without a stream key")]
+        Unattributed,
+        #[error("overflow")]
+        Overflow,
+    }
+
+    impl Projector for RoutingProjector {
+        type Event = TestEvent;
+        type State = std::collections::HashMap<Vec<u8>, u64>;
+        type Error = RoutingError;
+
+        fn initial(&self) -> Self::State {
+            std::collections::HashMap::new()
+        }
+
+        fn apply(
+            &self,
+            _state: Self::State,
+            _event: &TestEvent,
+        ) -> Result<Self::State, RoutingError> {
+            Err(RoutingError::Unattributed)
+        }
+
+        fn apply_attributed(
+            &self,
+            mut state: Self::State,
+            stream_key: Option<&StreamKey>,
+            event: &TestEvent,
+        ) -> Result<Self::State, RoutingError> {
+            let k = stream_key.ok_or(RoutingError::Unattributed)?;
+            let slot = state.entry(k.as_bytes().to_vec()).or_insert(0);
+            *slot = match event {
+                TestEvent::Added(n) => slot.checked_add(*n).ok_or(RoutingError::Overflow)?,
+                TestEvent::Removed(n) => slot.checked_sub(*n).ok_or(RoutingError::Overflow)?,
+            };
+            Ok(state)
+        }
+    }
+
+    fn routing_store()
+    -> InMemorySnapshotStore<std::collections::HashMap<Vec<u8>, u64>, InMemoryAllPos> {
+        InMemorySnapshotStore::new()
+    }
+
+    // ── 1. Sequence/protocol (#345): $all items route by origin stream ─────
+
+    #[tokio::test]
+    async fn advance_routes_all_items_by_origin_stream() {
+        let ss = routing_store();
+        let id = TestId("routed");
+        let (mut p, mut state) =
+            Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
+                .await
+                .unwrap();
+
+        // Interleaved origins, gappy $all positions: a:Added(10), b:Added(5),
+        // a:Added(20).
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(3),
+                    StreamKey::from_slice(b"a"),
+                    decoded(TestEvent::Added(10), 1),
+                ),
+            )
+            .await
+            .unwrap();
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(7),
+                    StreamKey::from_slice(b"b"),
+                    decoded(TestEvent::Added(5), 1),
+                ),
+            )
+            .await
+            .unwrap();
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(12),
+                    StreamKey::from_slice(b"a"),
+                    decoded(TestEvent::Added(20), 2),
+                ),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(p.checkpoint(), Some(all_pos(12)));
+        assert_eq!(
+            state,
+            std::collections::HashMap::from([(b"a".to_vec(), 30), (b"b".to_vec(), 5)])
+        );
+    }
+
+    // ── 2. Defensive (#345): the default seam ignores the key ───────────────
+
+    #[tokio::test]
+    async fn default_projector_ignores_the_key_on_all_items() {
+        let ss = all_store();
+        let id = TestId("default-seam");
+        let (mut p, mut state) =
+            Projection::load(id, CountingProjector, Always, &ss, NonZeroU32::MIN)
+                .await
+                .unwrap();
+
+        // Same interleaved two-key shape as the routing test; the key must be
+        // inert for a projector that does not override `apply_attributed`.
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(3),
+                    StreamKey::from_slice(b"a"),
+                    decoded(TestEvent::Added(10), 1),
+                ),
+            )
+            .await
+            .unwrap();
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(7),
+                    StreamKey::from_slice(b"b"),
+                    decoded(TestEvent::Added(5), 1),
+                ),
+            )
+            .await
+            .unwrap();
+        state = p
+            .advance(
+                state,
+                (
+                    all_pos(12),
+                    StreamKey::from_slice(b"a"),
+                    decoded(TestEvent::Added(20), 2),
+                ),
+            )
+            .await
+            .unwrap();
+
+        // Identical to the keyless fold of the same three events.
+        assert_eq!(p.checkpoint(), Some(all_pos(12)));
+        assert_eq!(
+            state,
+            CountState {
+                count: 3,
+                total: 35
+            }
+        );
+    }
+
+    // ── 3. Defensive (#345): None is observable on per-stream items ─────────
+
+    #[tokio::test]
+    async fn attributed_projector_sees_none_on_per_stream_items() {
+        let ss: InMemorySnapshotStore<std::collections::HashMap<Vec<u8>, u64>, Version> =
+            InMemorySnapshotStore::new();
+        let (mut p, state) = Projection::load(
+            TestId("per-stream"),
+            RoutingProjector,
+            EveryNEvents(NonZeroU64::MIN),
+            &ss,
+            NonZeroU32::MIN,
+        )
+        .await
+        .unwrap();
+
+        // A bare Decoded item carries no tag, so the routing projector sees
+        // None and surfaces its typed error — absence is not swallowed.
+        let err = p
+            .advance(state, decoded(TestEvent::Added(1), 1))
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, ProjectionError::Apply(RoutingError::Unattributed)),
+            "expected Apply(Unattributed), got {err:?}"
+        );
+        assert_eq!(p.checkpoint(), None);
+    }
+
+    // ── 4. Lifecycle (#345): attributed fold resumes from the checkpoint ────
+
+    #[tokio::test]
+    async fn attributed_projection_resumes_from_committed_checkpoint() {
+        let ss = routing_store();
+        let id = TestId("routed");
+
+        {
+            let (mut p, mut state) =
+                Projection::load(id.clone(), RoutingProjector, Always, &ss, NonZeroU32::MIN)
+                    .await
+                    .unwrap();
+            state = p
+                .advance(
+                    state,
+                    (
+                        all_pos(3),
+                        StreamKey::from_slice(b"a"),
+                        decoded(TestEvent::Added(10), 1),
+                    ),
+                )
+                .await
+                .unwrap();
+            let _ = p
+                .advance(
+                    state,
+                    (
+                        all_pos(7),
+                        StreamKey::from_slice(b"b"),
+                        decoded(TestEvent::Added(5), 1),
+                    ),
+                )
+                .await
+                .unwrap();
+        }
+
+        // Fresh stepper over the same snapshot store: routed state and the
+        // $all checkpoint are restored.
+        let (mut p2, state2) = Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
+            .await
+            .unwrap();
+        assert_eq!(p2.checkpoint(), Some(all_pos(7)));
+        assert_eq!(
+            state2,
+            std::collections::HashMap::from([(b"a".to_vec(), 10), (b"b".to_vec(), 5)])
+        );
+
+        // Resume: the third event routes onto the restored buckets.
+        let resumed = p2
+            .advance(
+                state2,
+                (
+                    all_pos(12),
+                    StreamKey::from_slice(b"a"),
+                    decoded(TestEvent::Added(20), 2),
+                ),
+            )
+            .await
+            .unwrap();
+        assert_eq!(p2.checkpoint(), Some(all_pos(12)));
+        assert_eq!(
+            resumed,
+            std::collections::HashMap::from([(b"a".to_vec(), 30), (b"b".to_vec(), 5)])
+        );
+    }
 }

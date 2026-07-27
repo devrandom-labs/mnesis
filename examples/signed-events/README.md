@@ -32,7 +32,7 @@ A register is a small key→value store owned by one ed25519 key.
 ### Where the crypto lives
 
 | Trait | Responsibility |
-|-------|----------------|
+| ------- | ---------------- |
 | `Handle<Incept>` | Sign the genesis event; reject a second inception (`AlreadyIncepted`). |
 | `Handle<SubmitSet>` | Sign the set; **verify the signer is the stored owner** — a state-dependent check that rejects a non-owner (`Unauthorized`). |
 | `AggregateState::apply` | Pure fold of an already-accepted event. **No verification** — replay trusts the committed log. |
@@ -67,7 +67,7 @@ the re-verifying projector.
 ## Tests — the 4 categories (project rule 7)
 
 | Category | Where | What it proves |
-|----------|-------|----------------|
+| ---------- | ------- | ---------------- |
 | Sequence / protocol | `tests/sequence.rs` (+ `domain.rs` units) | incept → set → set round-trips; the on-disk chain links; replay rebuilds identical state. |
 | Lifecycle | `tests/lifecycle.rs` | write → drop store → reopen: state and chain head resume; a post-reopen `Set` continues the chain. |
 | Defensive boundary | `tests/boundary.rs` (+ `projection.rs` units) | tampered signature → `BadSignature`; broken link → `BrokenChain`; forged (non-owner) event → rejected; wrong stream id → `IdMismatch`; non-owner command → `Unauthorized` at decide. |
@@ -84,15 +84,15 @@ the re-verifying projector.
    the event payload*, so the example stays on the blessed typed path — and the
    gap is documented here and filed, not hidden.
 
-2. **`Projector::apply` cannot see the stream key.** Its signature is
-   `(state, &event)`; a `Set` event carries no register id, so on an `$all` read
-   (events from many registers interleaved) the fold can't attribute an event to
-   its register from the payload alone. Since #333 the store *does* tag every
-   `$all` item with its origin `StreamKey`, so the driving loop knows the id — but
-   it has to smuggle it into the fold via `RegisterView::route_to` before each
-   `apply`. A key-aware `Projector` variant (the `StreamKey` in `apply`'s
-   signature) would remove the shim. This is the same class of finding as
-   axum-todos' self-addressing-events note.
+2. **`Projector::apply` could not see the stream key — resolved by [#345].**
+   `Projector` now carries a defaulted second method,
+   `apply_attributed(state, Option<&StreamKey>, &event)`: the stepper forwards
+   the `$all` `StreamKey` tag (#333) through it, and `RegisterProjector`
+   overrides it to decode the register id from the key bytes. The keyless
+   `apply` remains the required method and is this projector's error path
+   (`ViewError::Unattributed`); a single-stream projector implements only
+   `apply` and the default delegates, key ignored. The old
+   `RegisterView::route_to` driver shim is gone.
 
 3. **The chain digest cannot be the JSON payload bytes.** The design sketch
    suggested `blake3(canonical JSON of the event)`, reproducible read-side. But
@@ -103,3 +103,4 @@ the re-verifying projector.
    same digest from the decoded event, so "reproducible read-side" still holds.
 
 [#344]: https://github.com/devrandom-labs/mnesis/issues/344
+[#345]: https://github.com/devrandom-labs/mnesis/issues/345

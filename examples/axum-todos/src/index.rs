@@ -221,9 +221,10 @@ pub async fn hydrate(store: &Store<FjallStore>) -> Result<(TodosIndex, Option<Gl
 /// Driven by the position-generic [`Projection`] stepper (#327): `load`
 /// hydrates `(state, checkpoint)` from fjall's `projections` partition, and
 /// the `(GlobalSeq, StreamKey, Decoded)` tuple the subscription yields feeds
-/// [`Projection::advance`] whole — the stepper drops the attribution key
-/// (this projection routes by the payload's todo id) — no hand-rolled
-/// fold/commit loop. The
+/// [`Projection::advance`] whole — the stepper forwards the attribution key to
+/// [`Projector::apply_attributed`]; [`TodosProjector`] doesn't override it, so
+/// the key is ignored (this projection routes by the payload's todo id) — no
+/// hand-rolled fold/commit loop. The
 /// [`EveryEvent`] trigger commits every fold, so there is no pending tail
 /// (a `flush` would be a no-op — if you ever swap [`EveryEvent`] for a
 /// bucketed trigger, add `proj.flush(&state)` after the loop) and

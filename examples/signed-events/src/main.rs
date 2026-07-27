@@ -112,12 +112,9 @@ async fn main() -> Result<(), BoxError> {
     while let Some(item) = all.next().await {
         let (_position, stream_key, envelope) = item?;
         let event: RegisterEvent = serde_json::from_slice(envelope.payload())?;
-        let id = RegisterId::from_key_bytes(stream_key.as_bytes())
-            .ok_or("stream key was not a 32-byte register id")?;
-        view.route_to(id);
         // A forged or tampered event would surface here as an Err instead of
         // being trusted — that is the whole point of the read-side re-check.
-        view = projector.apply(view, &event)?;
+        view = projector.apply_attributed(view, Some(&stream_key), &event)?;
     }
     println!(
         "  re-verified {} register(s) off $all",
