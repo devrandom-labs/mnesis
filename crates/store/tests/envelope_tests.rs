@@ -49,6 +49,13 @@ fn pending_envelope_with_metadata() {
         .expect("valid envelope");
 
     assert_eq!(envelope.metadata(), Some(meta.as_slice()));
+    // PendingEnvelope::metadata_bytes — assert the EXACT owned run so a
+    // `None`/`Some(empty)` short-circuit in the accessor is caught.
+    assert_eq!(
+        envelope.metadata_bytes(),
+        Some(Bytes::from(meta)),
+        "metadata_bytes must return the exact metadata run"
+    );
 }
 
 #[test]
@@ -60,6 +67,9 @@ fn persisted_envelope_accessors() {
     assert_eq!(envelope.event_type(), "UserActivated");
     assert_eq!(envelope.payload(), &[10, 20, 30]);
     assert!(envelope.metadata().is_none());
+    // A metadata-less envelope must report None from the owned accessor too —
+    // pins the `Some(default)` mutant that would fabricate empty `Bytes`.
+    assert!(envelope.metadata_bytes().is_none());
 }
 
 #[test]
@@ -87,6 +97,13 @@ fn persisted_envelope_metadata_bytes() {
     .expect("valid envelope");
 
     assert_eq!(envelope.metadata(), Some(b"tenant:acme".as_slice()));
+    // metadata_bytes() returns the owned `Bytes` view — assert the EXACT run so
+    // a `None`/`Some(empty)` short-circuit in the accessor is caught.
+    assert_eq!(
+        envelope.metadata_bytes(),
+        Some(Bytes::from_static(b"tenant:acme")),
+        "metadata_bytes must return the exact metadata run"
+    );
 }
 
 #[test]
@@ -129,6 +146,9 @@ fn build_without_metadata_has_no_metadata() {
         .expect("valid envelope");
 
     assert!(env.metadata().is_none());
+    // The owned accessor must agree — pins the `Some(default)` mutant that would
+    // fabricate empty `Bytes` for a metadata-less PendingEnvelope.
+    assert!(env.metadata_bytes().is_none());
     assert_eq!(env.version(), Version::new(5).unwrap());
     assert_eq!(env.event_type(), "Evt");
     assert_eq!(env.payload(), &[9, 8, 7]);

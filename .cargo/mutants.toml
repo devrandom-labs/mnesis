@@ -29,4 +29,60 @@ exclude_re = [
     # it would couple the test suite to `TestId`'s derived rendering. (The sibling
     # `ErrorId` Debug IS tested — its "render like a string literal" is a contract.)
     'replace <impl fmt::Debug for AggregateRoot<A>>::fmt',
+
+    # ── mnesis-store ──────────────────────────────────────────────────────────
+    # DIAGNOSTIC: `Debug` impls whose `fmt` renders for humans; exact output is
+    # incidental. Same policy as the kernel's `AggregateRoot` Debug above.
+    'Debug for SerdeCodec',
+    'Debug for Execution',
+    'Debug for Reaction',
+    'Debug for ProjectedIntent',
+    'Debug for Subscription',
+    # UNREACHABLE BOUNDARY: the length caps are `u32::MAX` / `u32::MAX - 1`, so
+    # distinguishing `>` from `>=`/`==` (or `-` from `/` in the const) needs a
+    # ~4 GB allocation in a test — infeasible. The wire format's u32 length field
+    # makes the cap itself the real guard; these mutants only shift it by one byte
+    # at the 4 GB frontier no test can reach.
+    'value.rs:31:.*replace - with /',
+    'replace > with >= in Payload::from_bytes',
+    'replace > with >= in Metadata::from_bytes',
+    'replace > with == in Metadata::from_bytes',
+    # UNREACHABLE BOUNDARY (same 4 GB frontier as the value.rs caps): the
+    # metadata-range cap at envelope.rs:512 is `MAX_METADATA_LEN` (u32::MAX - 1),
+    # so `==`/`<`/`>=` diverge from `>` only for a ~4 GB metadata range — no test
+    # can build it. Scoped to :512 so the FEASIBLE event-type cap check at :501
+    # (MAX_EVENT_TYPE_LEN = u16::MAX = 64 KiB) is NOT excluded.
+    'envelope.rs:512:.*replace > with',
+    # EQUIVALENT: the `while d.position() < bytes.len()` loop at cbor.rs:370 with
+    # `<=` runs one extra iteration once position == len; that iteration reads at
+    # EOF and immediately hits the `is_end_of_input() => break` arm, so the
+    # decoded sections are identical. Only the `<=` variant is equivalent — the
+    # `==`/`>` variants change which items are visited and stay killable.
+    'cbor.rs:370:.*replace < with <=',
+    # EQUIVALENT: `drained_in_chunk += 1` counts toward the per-CATCHUP_CHUNK
+    # (1024) scan REOPEN, a resource-hygiene step (don't pin a GC watermark /
+    # snapshot view across an unbounded backlog). `-=`/`*=` keep the counter from
+    # ever reaching 1024, so the mid-backlog reopen never fires — but event
+    # delivery and ordering are byte-identical (the caught-up re-scan at the
+    # None arm still picks up everything), so no black-box test can observe the
+    # difference. Reopen is not a correctness property; these are unkillable.
+    'subscription_cursor.rs:105:.*replace \+= with',
+    # EQUIVALENT (empirically confirmed by a clean full sweep — the only 4
+    # survivors): these `is_end_of_input()` match guards are UNREACHABLE. Both are
+    # entered only after the caller peeked the item type (`decode_chunk` matched
+    # `Type::Array`/`Type::Map`, or the `while pos < len` loop guaranteed a byte),
+    # so the guarded `d.array()`/`d.datatype()` call always has a present byte and
+    # can never return an end-of-input error — the guard arm never runs, and
+    # `true`/`false` mutations of it are unobservable. The reachable EOF guards on
+    # the same functions (the crc/body/heading reads, cbor.rs 293/298/377) ARE
+    # tested (torn-tail + malformed-type cases in cbor_pipeline_tests.rs).
+    'cbor.rs:288:.*is_end_of_input',
+    'cbor.rs:389:.*is_end_of_input',
+]
+
+# Test-only scaffolding compiled under cfg(test): mutating it is meaningless (its
+# code exists to drive tests, not to be tested). cargo-mutants sees it because
+# cfg(test) is active during the sweep.
+exclude_globs = [
+    "crates/store/src/test_support.rs",
 ]

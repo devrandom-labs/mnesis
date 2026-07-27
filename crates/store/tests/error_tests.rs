@@ -3,6 +3,7 @@
 #![allow(clippy::unwrap_used, reason = "tests")]
 
 use mnesis::{ErrorId, KernelError, Version};
+use mnesis_store::conflict::ConflictPredicate;
 use mnesis_store::{LoadWithError, StoreError};
 
 /// Concrete `StoreError` for tests: adapter = `std::io::Error`, codec = `std::io::Error`.
@@ -61,6 +62,31 @@ fn is_conflict_true_only_for_conflict_variant() {
 
     let overflow: TestStoreError = StoreError::VersionOverflow;
     assert!(!overflow.is_conflict(), "VersionOverflow is not a conflict");
+}
+
+#[test]
+fn conflict_predicate_trait_impl_tracks_variant() {
+    // `is_conflict_true_only_for_conflict_variant` calls the INHERENT
+    // `StoreError::is_conflict` (const fn), which wins method resolution — so the
+    // `ConflictPredicate` trait impl (the seam error wrappers delegate through)
+    // is never exercised there. Call it via UFCS to pin the trait method itself.
+    let conflict: TestStoreError = StoreError::Conflict {
+        stream_id: label("order-42"),
+        expected: Version::new(3),
+        actual: Version::new(5),
+    };
+    assert!(
+        <TestStoreError as ConflictPredicate>::is_conflict(&conflict),
+        "trait impl must report Conflict as a conflict"
+    );
+
+    let not_found: TestStoreError = StoreError::StreamNotFound {
+        stream_id: label("user-99"),
+    };
+    assert!(
+        !<TestStoreError as ConflictPredicate>::is_conflict(&not_found),
+        "trait impl must report a non-Conflict variant as not a conflict"
+    );
 }
 
 #[test]

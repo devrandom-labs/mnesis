@@ -75,8 +75,20 @@ insta = { workspace = true }
 # default-feature nextest gate (which builds no explicit features). Without
 # `snapshot-json` the `snapshot`-gated test files (snapshot_tests.rs,
 # snapshot_integration_tests.rs) never compiled or ran in CI — nothing in the
-# default workspace graph enables `snapshot`. See issue #262.
-mnesis-store = { path = ".", features = ["subscription", "export", "import", "cbor", "snapshot-json", "projection"] }
+# default workspace graph enables `snapshot`. See issue #262. `bytemuck`/`rkyv`
+# are here so the zero-copy codec modules (and their inline round-trip tests)
+# actually compile under the mutation sweep; without them those codecs are dead
+# code the mutation gate can only report as phantom survivors.
+mnesis-store = { path = ".", features = [
+    "subscription",
+    "export",
+    "import",
+    "cbor",
+    "snapshot-json",
+    "projection",
+    "bytemuck",
+    "rkyv",
+] }
 # In-memory adapter for white-box tests. Path-only (no version): a dev-dep
 # cycle (mnesis-inmemory depends on mnesis-store) is legal for cargo and the
 # path-only form is stripped at publish time.
