@@ -215,6 +215,28 @@ pub async fn drain_all_attributed<S: RawEventStore>(
     out
 }
 
+/// Drain `read_all(from)` into `(position, metadata, payload)` triples.
+pub async fn drain_all_with_metadata<S: RawEventStore>(
+    store: &S,
+    from: Option<S::AllPosition>,
+) -> Vec<(S::AllPosition, Option<Vec<u8>>, Vec<u8>)> {
+    let stream = store
+        .read_all(from)
+        .await
+        .unwrap_or_else(|e| panic!("read_all failed: {e:?}"));
+    pin_mut!(stream);
+    let mut out = Vec::new();
+    while let Some(item) = stream.next().await {
+        let (pos, _key, env) = item.unwrap_or_else(|e| panic!("read_all item errored: {e:?}"));
+        out.push((
+            pos,
+            env.metadata().map(<[u8]>::to_vec),
+            env.payload().to_vec(),
+        ));
+    }
+    out
+}
+
 /// Assert positions strictly increase (monotonic, no duplicate).
 pub fn assert_strictly_increasing<P: Copy + Ord + fmt::Debug>(positions: &[(P, Vec<u8>)]) {
     for w in positions.windows(2) {

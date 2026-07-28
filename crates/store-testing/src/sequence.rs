@@ -15,7 +15,7 @@ use tokio::time::timeout;
 
 use crate::row::{
     ConformanceRow, SubId, append_event, append_event_at, append_rows, assert_strictly_increasing,
-    drain_all, drain_all_attributed, drain_stream, envelope_for,
+    drain_all, drain_all_attributed, drain_all_with_metadata, drain_stream, envelope_for,
 };
 
 /// Upper bound on any single subscription wait — a hang here means a lost
@@ -285,6 +285,53 @@ where
         "read_all(None) must yield every event across streams in append order",
     );
     assert_strictly_increasing(&got);
+}
+
+/// Metadata round-trips byte-for-byte on the `$all` read path.
+///
+/// The per-stream path is checked by [`check_metadata_absent_vs_present_distinct`];
+/// this check pins the same guarantee for the attributed `(position, key, envelope)`
+/// read used by projections and subscriptions.
+pub async fn check_all_metadata_round_trips<S, C, F, Fut>(factory: &F)
+where
+    S: RawEventStore + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    let (store, _guard) = factory().await;
+    let a = StreamKey::from_slice(b"a");
+    let b = StreamKey::from_slice(b"b");
+    let rows = [
+        ConformanceRow::new(1, "A", b"a1".to_vec()),
+        ConformanceRow::new(1, "B", b"b1".to_vec()).with_metadata(vec![1, 2, 3]),
+        ConformanceRow::new(2, "A", b"a2".to_vec()).with_metadata(vec![4, 5]),
+    ];
+    // Append to distinct streams: stream `a` gets two events in one batch,
+    // then stream `b` gets one event. `$all` order is the commit order, so
+    // stream `a`'s run lands first (versions 1 and 2) and stream `b` follows.
+    append_rows(&store, &a, &[rows[0].clone(), rows[2].clone()]).await;
+    append_rows(&store, &b, &[rows[1].clone()]).await;
+
+    let got = drain_all_with_metadata(&store, None).await;
+    let payloads: Vec<Vec<u8>> = got.iter().map(|(_, _, p)| p.clone()).collect();
+    assert_eq!(
+        payloads,
+        vec![b"a1".to_vec(), b"a2".to_vec(), b"b1".to_vec()],
+        "read_all(None) must yield events across streams in append order"
+    );
+
+    let metadata: Vec<Option<Vec<u8>>> = got.iter().map(|(_, m, _)| m.clone()).collect();
+    assert_eq!(
+        metadata,
+        vec![None, Some(vec![4, 5]), Some(vec![1, 2, 3])],
+        "metadata must round-trip byte-for-byte on the $all path"
+    );
+    assert_strictly_increasing(
+        &got.iter()
+            .map(|(pos, _, payload)| (*pos, payload.clone()))
+            .collect::<Vec<_>>(),
+    );
 }
 
 /// #330: `append` returns the `$all` position it assigned to the run's last
