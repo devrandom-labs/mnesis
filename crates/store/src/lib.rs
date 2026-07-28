@@ -105,6 +105,7 @@ pub mod execute;
 pub mod export;
 #[cfg(feature = "import")]
 pub mod import;
+pub mod metadata;
 #[cfg(feature = "projection")]
 pub mod projection;
 pub mod repository;
@@ -164,6 +165,7 @@ pub use import::{
     AbortReason, Atomicity, EventImporter, ImportBlock, ImportError, ImportReport, StreamOutcome,
     StreamReport, StreamSection,
 };
+pub use metadata::MetadataProvider;
 pub use mnesis::Version;
 #[cfg(feature = "projection")]
 pub use projection::{Positioned, Projection, ProjectionError, Projector};

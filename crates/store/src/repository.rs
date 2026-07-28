@@ -19,12 +19,13 @@ use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
 use futures::TryStreamExt;
 
 use crate::codec::{Decode, Encode};
-use crate::envelope::{PendingBatch, PersistedEnvelope, pending_envelope};
+use crate::envelope::{EnvelopeError, PendingBatch, PersistedEnvelope, pending_envelope};
 use crate::error::{AppendError, LoadWithError, StoreError};
+use crate::metadata::MetadataProvider;
 use crate::store::{AllPosition, RawEventStore, Store};
 use crate::stream_id::StreamKey;
 use crate::upcasting::EventMorsel;
-use crate::value::SchemaVersion;
+use crate::value::{Payload, SchemaVersion};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Repository<A> — high-level aggregate facade (load + save)
@@ -235,39 +236,46 @@ pub(crate) const fn first_persisted_version(current: Option<Version>) -> Option<
 ///
 /// # Internal ownership
 ///
-/// Owns the codec as `Arc<C>` so async load paths can clone the handle
-/// into combinator closures and capture it by value. Per Rust 2024's
-/// stricter capture rules (RFC 3498, rustc issue 133529), a closure that
-/// borrows from `&self` and is then handed to a `try_fold`-style
-/// combinator whose returned future is `+ Send` cannot satisfy the
-/// bound — the future-Send check effectively requires the borrow to be
-/// `'static`. Owning the component via `Arc` and cloning per call
-/// sidesteps the borrow entirely. Cost: one heap allocation at facade
-/// construction, one pointer bump per `load`.
-pub struct EventStore<S, C, A> {
+/// Owns the codec as `Arc<C>` and the metadata provider as `Arc<M>` so async
+/// load paths can clone both handles into combinator closures and capture them
+/// by value. Per Rust 2024's stricter capture rules (RFC 3498, rustc issue
+/// 133529), a closure that borrows from `&self` and is then handed to a
+/// `try_fold`-style combinator whose returned future is `+ Send` cannot satisfy
+/// the bound — the future-Send check effectively requires the borrow to be
+/// `'static`. Owning the components via `Arc` and cloning per call sidesteps the
+/// borrow entirely. Cost: one heap allocation at facade construction, one
+/// pointer bump per `load`.
+///
+/// The `M = ()` default keeps every existing call site compiling unchanged; the
+/// inert provider always returns `None` metadata.
+pub struct EventStore<S, C, A, M = ()> {
     store: Store<S>,
     codec: Arc<C>,
+    meta: Arc<M>,
     _aggregate: PhantomData<fn() -> A>,
 }
 
-impl<S, C, A> EventStore<S, C, A> {
-    /// Create an event store bound to a shared store and codec for aggregate `A`.
-    pub(crate) fn new(store: Store<S>, codec: C) -> Self {
+impl<S, C, A, M> EventStore<S, C, A, M> {
+    /// Create an event store bound to a shared store, codec, and metadata
+    /// provider for aggregate `A`.
+    pub(crate) fn new(store: Store<S>, codec: C, meta: M) -> Self {
         Self {
             store,
             codec: Arc::new(codec),
+            meta: Arc::new(meta),
             _aggregate: PhantomData,
         }
     }
 }
 
-impl<S, C, A> ReplayFrom<A> for EventStore<S, C, A>
+impl<S, C, A, M> ReplayFrom<A> for EventStore<S, C, A, M>
 where
     A: Aggregate,
     S: RawEventStore + 'static,
     for<'a> C: Encode<EventOf<A>> + Decode<EventOf<A>, Output<'a>: Borrow<EventOf<A>>> + 'static,
     EventOf<A>: DomainEvent,
     S::Stream: Send,
+    M: Send + Sync + 'static,
 {
     type Error =
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>;
@@ -311,13 +319,14 @@ where
     }
 }
 
-impl<S, C, A> Repository<A> for EventStore<S, C, A>
+impl<S, C, A, M> Repository<A> for EventStore<S, C, A, M>
 where
     A: Aggregate,
     S: RawEventStore + 'static,
     for<'a> C: Encode<EventOf<A>> + Decode<EventOf<A>, Output<'a>: Borrow<EventOf<A>>> + 'static,
     EventOf<A>: DomainEvent,
     S::Stream: Send,
+    M: MetadataProvider<EventOf<A>>,
 {
     type Error =
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>;
@@ -337,11 +346,11 @@ where
         // The no-upcaster save stamps Version::INITIAL as the schema
         // version on every event — the schema-version-lookup function
         // is only needed when an upcaster is in play. See `save_with`.
-        save_events::<A, S, C, _, N>(&self.store, &self.codec, aggregate, events, |_| None).await
+        save_events::<A, S, C, _, M, N>(self, aggregate, events, |_| None).await
     }
 }
 
-impl<S, C, A> EventStore<S, C, A> {
+impl<S, C, A, M> EventStore<S, C, A, M> {
     /// Load an aggregate, running `upcast` over each persisted event
     /// before decoding it.
     ///
@@ -380,6 +389,7 @@ impl<S, C, A> EventStore<S, C, A> {
         E: core::error::Error + Send + Sync + 'static,
         EventOf<A>: DomainEvent,
         S::Stream: Send,
+        M: Send + Sync + 'static,
     {
         let store = self.store.clone();
         let codec = Arc::<C>::clone(&self.codec);
@@ -455,9 +465,9 @@ impl<S, C, A> EventStore<S, C, A> {
         C: Encode<EventOf<A>> + Decode<EventOf<A>> + 'static,
         F: Fn(&str) -> Option<Version>,
         EventOf<A>: DomainEvent,
+        M: MetadataProvider<EventOf<A>>,
     {
-        save_events::<A, S, C, _, N>(&self.store, &self.codec, aggregate, events, current_version)
-            .await
+        save_events::<A, S, C, _, M, N>(self, aggregate, events, current_version).await
     }
 }
 
@@ -465,9 +475,8 @@ impl<S, C, A> EventStore<S, C, A> {
 // Version::INITIAL) and EventStore::save_with (uses the user's current_version
 // fn). Encode-only — the decode shape is irrelevant on the write path, so this
 // serves owning and borrowing codecs alike.
-async fn save_events<A, S, C, F, const N: usize>(
-    store: &Store<S>,
-    codec: &Arc<C>,
+async fn save_events<A, S, C, F, M, const N: usize>(
+    facade: &EventStore<S, C, A, M>,
     aggregate: &mut AggregateRoot<A>,
     events: &Events<EventOf<A>, N>,
     current_version: F,
@@ -480,6 +489,7 @@ where
     S: RawEventStore,
     C: Encode<EventOf<A>> + Decode<EventOf<A>>,
     F: Fn(&str) -> Option<Version>,
+    M: MetadataProvider<EventOf<A>>,
     EventOf<A>: DomainEvent,
 {
     let expected_version = aggregate.version();
@@ -495,17 +505,25 @@ where
     // stop being `Send` (clippy `future_not_send`).
     let (head, tail, last_version) = {
         let encode_at = |event: &EventOf<A>, version: Version| {
-            let payload =
-                <C as Encode<EventOf<A>>>::encode(codec, event).map_err(StoreError::Encode)?;
+            let payload_bytes = <C as Encode<EventOf<A>>>::encode(&facade.codec, event)
+                .map_err(StoreError::Encode)?;
+            let payload = Payload::from_bytes(payload_bytes)
+                .map_err(EnvelopeError::from)
+                .map_err(StoreError::from)?;
             let schema_version = current_version(event.name()).unwrap_or(Version::INITIAL);
             let schema_nz32 = version_to_nz32(schema_version).ok_or(StoreError::VersionOverflow)?;
 
-            pending_envelope(version)
+            let metadata = facade.meta.metadata(version, event, &payload);
+
+            let builder = pending_envelope(version)
                 .event(event)
-                .payload(payload)
-                .schema_version(SchemaVersion::new(schema_nz32))
-                .build()
-                .map_err(StoreError::from)
+                .payload(payload.into_bytes())
+                .schema_version(SchemaVersion::new(schema_nz32));
+            match metadata {
+                Some(m) => builder.metadata(m.into_bytes()).build(),
+                None => builder.build(),
+            }
+            .map_err(StoreError::from)
         };
 
         let head = encode_at(events.first(), next_version)?;
@@ -519,7 +537,8 @@ where
         (head, tail, last_version)
     };
 
-    let position = store
+    let position = facade
+        .store
         .raw()
         .append(
             &StreamKey::from_slice(aggregate.id().as_ref()),

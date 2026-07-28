@@ -76,39 +76,65 @@ pub struct WithSnapshot<SS, T> {
 /// // Custom codec:
 /// let repo = store.repository::<Order>().codec(MyCodec).build();
 ///
+/// // With metadata provider (e.g. HLC stamp, signature bytes):
+/// let repo = store.repository::<Order>().codec(MyCodec).metadata(|v, e, p| Some(...)).build();
+///
 /// // With upcasting (drop to the facade after build):
 /// let repo = store.repository::<Order>().codec(MyCodec).build();
 /// let root = repo.load_with(id, OrderTransforms::upcast).await?;
 /// ```
-pub struct RepositoryBuilder<S, C, A, Snap = NoSnapshot> {
+pub struct RepositoryBuilder<S, C, A, Snap = NoSnapshot, M = ()> {
     store: Store<S>,
     codec: C,
     snapshot: Snap,
+    meta: M,
     /// The aggregate this builder will bind the facade to (named once at
     /// [`Store::repository::<A>()`]). Threaded through every builder step so
-    /// `.build()` produces an [`EventStore<S, C, A>`] that implements
+    /// `.build()` produces an [`EventStore<S, C, A, M>`] that implements
     /// `Repository<A>` for exactly this `A`.
     aggregate: PhantomData<fn() -> A>,
 }
 
-impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
+impl<S, C, A, Snap, M> RepositoryBuilder<S, C, A, Snap, M> {
     /// Replace the codec.
     ///
     /// Returns a new builder with the updated codec type, preserving
-    /// the store, the bound aggregate, and any snapshot configuration.
+    /// the store, the bound aggregate, any snapshot configuration, and
+    /// any configured metadata provider.
     #[must_use]
-    pub fn codec<NewC>(self, codec: NewC) -> RepositoryBuilder<S, NewC, A, Snap> {
+    pub fn codec<NewC>(self, codec: NewC) -> RepositoryBuilder<S, NewC, A, Snap, M> {
         RepositoryBuilder {
             store: self.store,
             codec,
             snapshot: self.snapshot,
+            meta: self.meta,
+            aggregate: PhantomData,
+        }
+    }
+
+    /// Set the metadata provider for this facade.
+    ///
+    /// The provider is called once per event on the write path (post-encode)
+    /// and can return `Some(Metadata)` to attach to the envelope or `None` to
+    /// leave metadata absent. It is infallible; cap errors are handled by the
+    /// provider at [`Metadata`](crate::Metadata) construction.
+    ///
+    /// Order-independent: may be called before or after `.codec()`,
+    /// `.snapshot_store()`, etc.
+    #[must_use]
+    pub fn metadata<NewM>(self, provider: NewM) -> RepositoryBuilder<S, C, A, Snap, NewM> {
+        RepositoryBuilder {
+            store: self.store,
+            codec: self.codec,
+            snapshot: self.snapshot,
+            meta: provider,
             aggregate: PhantomData,
         }
     }
 }
 
 #[cfg(feature = "json")]
-impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
+impl<S, C, A, Snap, M> RepositoryBuilder<S, C, A, Snap, M> {
     /// Use the built-in [`JsonCodec`](crate::JsonCodec) as this facade's codec.
     ///
     /// Convenience for `.codec(JsonCodec::default())`. This is *additive* API:
@@ -116,7 +142,7 @@ impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
     /// [`Store::repository()`]'s return type, which is always
     /// [`NeedsCodec`] regardless of features (issue #211).
     #[must_use]
-    pub fn json(self) -> RepositoryBuilder<S, crate::JsonCodec, A, Snap> {
+    pub fn json(self) -> RepositoryBuilder<S, crate::JsonCodec, A, Snap, M> {
         self.codec(crate::JsonCodec::default())
     }
 }
@@ -125,10 +151,11 @@ impl<S, C, A, Snap> RepositoryBuilder<S, C, A, Snap> {
 // NoSnapshot — plain EventStore
 // ═══════════════════════════════════════════════════════════════════════════
 
-impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot>
+impl<S, C, A, M> RepositoryBuilder<S, C, A, NoSnapshot, M>
 where
     S: RawEventStore,
     C: Send + Sync + 'static,
+    M: Send + Sync + 'static,
 {
     /// Build an [`EventStore`] for aggregate `A`.
     ///
@@ -138,8 +165,8 @@ where
     /// site. Requires a configured codec (`C: Send + Sync + 'static`, which
     /// excludes [`NeedsCodec`]).
     #[must_use]
-    pub fn build(self) -> EventStore<S, C, A> {
-        EventStore::new(self.store, self.codec)
+    pub fn build(self) -> EventStore<S, C, A, M> {
+        EventStore::new(self.store, self.codec, self.meta)
     }
 }
 
@@ -163,7 +190,7 @@ const DEFAULT_SNAPSHOT_INTERVAL: u64 = 100;
 const DEFAULT_SCHEMA_VERSION: core::num::NonZeroU32 = core::num::NonZeroU32::MIN;
 
 #[cfg(feature = "snapshot-json")]
-impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
+impl<S, C, A, M> RepositoryBuilder<S, C, A, NoSnapshot, M> {
     /// Configure a snapshot store from a byte-level store, wrapping it in the
     /// built-in [`JsonCodec`](crate::JsonCodec).
     ///
@@ -198,6 +225,7 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
         C,
         A,
         WithSnapshot<state::CodecSnapshotStore<SS, crate::JsonCodec>, state::EveryNEvents>,
+        M,
     > {
         let typed_store =
             state::CodecSnapshotStore::new(snapshot_store, crate::JsonCodec::default());
@@ -213,13 +241,14 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
                 schema_version: DEFAULT_SCHEMA_VERSION,
                 snapshot_on_read: false,
             },
+            meta: self.meta,
             aggregate: PhantomData,
         }
     }
 }
 
 #[cfg(feature = "snapshot")]
-impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
+impl<S, C, A, M> RepositoryBuilder<S, C, A, NoSnapshot, M> {
     /// Configure a snapshot store.
     ///
     /// Accepts a pre-composed typed [`SnapshotStore<S, Version>`](state::SnapshotStore).
@@ -251,7 +280,7 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
     pub fn snapshot_store<SS>(
         self,
         snapshot_store: SS,
-    ) -> RepositoryBuilder<S, C, A, WithSnapshot<SS, state::EveryNEvents>> {
+    ) -> RepositoryBuilder<S, C, A, WithSnapshot<SS, state::EveryNEvents>, M> {
         RepositoryBuilder {
             store: self.store,
             codec: self.codec,
@@ -264,19 +293,20 @@ impl<S, C, A> RepositoryBuilder<S, C, A, NoSnapshot> {
                 schema_version: DEFAULT_SCHEMA_VERSION,
                 snapshot_on_read: false,
             },
+            meta: self.meta,
             aggregate: PhantomData,
         }
     }
 }
 
 #[cfg(feature = "snapshot")]
-impl<S, C, A, SS, T> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>> {
+impl<S, C, A, SS, T, M> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>, M> {
     /// Replace the snapshot trigger.
     #[must_use]
     pub fn snapshot_trigger<NewT: state::PersistTrigger>(
         self,
         trigger: NewT,
-    ) -> RepositoryBuilder<S, C, A, WithSnapshot<SS, NewT>> {
+    ) -> RepositoryBuilder<S, C, A, WithSnapshot<SS, NewT>, M> {
         RepositoryBuilder {
             store: self.store,
             codec: self.codec,
@@ -286,6 +316,7 @@ impl<S, C, A, SS, T> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>> {
                 schema_version: self.snapshot.schema_version,
                 snapshot_on_read: self.snapshot.snapshot_on_read,
             },
+            meta: self.meta,
             aggregate: PhantomData,
         }
     }
@@ -310,15 +341,16 @@ impl<S, C, A, SS, T> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "snapshot")]
-impl<S, C, A, SS, T> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>>
+impl<S, C, A, SS, T, M> RepositoryBuilder<S, C, A, WithSnapshot<SS, T>, M>
 where
     S: RawEventStore,
     C: Send + Sync + 'static,
+    M: Send + Sync + 'static,
 {
     /// Build a snapshot-aware [`EventStore`] for aggregate `A` using an owning [`Codec`](crate::Codec).
     #[must_use]
-    pub fn build(self) -> Snapshotting<EventStore<S, C, A>, SS, T> {
-        let inner = EventStore::new(self.store, self.codec);
+    pub fn build(self) -> Snapshotting<EventStore<S, C, A, M>, SS, T> {
+        let inner = EventStore::new(self.store, self.codec, self.meta);
         let snap = self.snapshot;
         Snapshotting::new(
             inner,
@@ -369,6 +401,7 @@ impl<S: RawEventStore> Store<S> {
             store: self.clone(),
             codec: NeedsCodec::new(),
             snapshot: NoSnapshot,
+            meta: (),
             aggregate: PhantomData,
         }
     }

@@ -82,7 +82,9 @@ the re-verifying projector.
    there must drop to the raw `RawEventStore::append` seam and hand-build a
    `PendingEnvelope`. **Decision for this example:** the signature lives *inside
    the event payload*, so the example stays on the blessed typed path — and the
-   gap is documented here and filed, not hidden.
+   gap is documented here and filed, not hidden. #344 is now resolved by the
+   builder-level `MetadataProvider` configured via `RepositoryBuilder::metadata(provider)`,
+   so new code can place signatures in envelope metadata on the typed path.
 
 2. **`Projector::apply` could not see the stream key — resolved by [#345].**
    `Projector` now carries a defaulted second method,

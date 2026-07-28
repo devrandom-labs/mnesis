@@ -454,6 +454,7 @@ macro_rules! conformance {
             $crate::__conformance_case!(sequence, check_append_returns_assigned_all_position, $factory, $skip);
             $crate::__conformance_case!(sequence, check_multi_event_append_returns_last_position, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_global_order_across_streams, $factory, $skip);
+            $crate::__conformance_case!(sequence, check_all_metadata_round_trips, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_items_carry_their_stream_key, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_from_is_exclusive, $factory, $skip);
             $crate::__conformance_case!(sequence, check_all_multi_resume_cycles, $factory, $skip);

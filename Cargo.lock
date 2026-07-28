@@ -1859,6 +1859,7 @@ dependencies = [
  "mnesis-store",
  "mnesis-store-testing",
  "mnesis-test-domains",
+ "parking_lot",
  "proptest",
  "rkyv",
  "serde",
