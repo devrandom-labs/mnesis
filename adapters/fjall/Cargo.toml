@@ -23,9 +23,9 @@ arrayvec = { workspace = true }
 bytes = { workspace = true, features = ["std"] }
 fjall = { workspace = true }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-mnesis = { version = "0.2.0", path = "../../crates/mnesis" }
-mnesis-store = { version = "0.2.0", path = "../../crates/store", features = ["subscription"] }
-mnesis-wake = { version = "0.2.0", path = "../../crates/wake" }
+mnesis = { version = "0.2.1", path = "../../crates/mnesis" }
+mnesis-store = { version = "0.2.1", path = "../../crates/store", features = ["subscription"] }
+mnesis-wake = { version = "0.2.1", path = "../../crates/wake" }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
