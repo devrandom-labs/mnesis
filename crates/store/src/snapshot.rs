@@ -128,6 +128,15 @@ where
 {
     /// Try to load a snapshot. Returns `(root, next_version)` on hit.
     /// Returns `None` on miss, schema mismatch, or any error (best-effort).
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(
+            name = "mnesis.snapshot.hydrate",
+            level = "debug",
+            skip_all,
+            fields(stream = %id, hit = tracing::field::Empty)
+        )
+    )]
     async fn try_load_from_snapshot<A>(&self, id: &A::Id) -> Option<(AggregateRoot<A>, Version)>
     where
         A: Aggregate,
@@ -144,17 +153,47 @@ where
         // runtime-layer concern, so the error is intentionally dropped here.
         let hydrated = match self.snapshot_store.hydrate(id, self.schema_version).await {
             Ok(hydrated) => hydrated,
-            Err(_snapshot_read_failed) => return None,
+            Err(_snapshot_read_failed) => {
+                #[cfg(feature = "tracing")]
+                tracing::Span::current().record("hit", "error");
+                return None;
+            }
         };
         // Aggregate snapshots treat absent and stale identically — replay the
-        // stream either way — so `into_found` collapses both to `None`.
-        let (version, typed_state) = hydrated.into_found()?;
+        // stream either way. The explicit match records the hit path for
+        // telemetry (feature `tracing`) without changing best-effort semantics.
+        let (version, typed_state) = match hydrated {
+            state::Hydrated::Found { position, state } => {
+                #[cfg(feature = "tracing")]
+                tracing::Span::current().record("hit", "found");
+                (position, state)
+            }
+            state::Hydrated::Stale { .. } => {
+                #[cfg(feature = "tracing")]
+                tracing::Span::current().record("hit", "stale");
+                return None;
+            }
+            state::Hydrated::Absent => {
+                #[cfg(feature = "tracing")]
+                tracing::Span::current().record("hit", "absent");
+                return None;
+            }
+        };
         let root = AggregateRoot::<A>::restore(id.clone(), typed_state, version);
         let next = version.next()?;
         Some((root, next))
     }
 
     /// Best-effort snapshot save. Errors are silently ignored.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(
+            name = "mnesis.snapshot.commit",
+            level = "debug",
+            skip_all,
+            fields(stream = %aggregate.id(), version = %version)
+        )
+    )]
     async fn try_save_snapshot<A>(&self, aggregate: &AggregateRoot<A>, version: Version)
     where
         A: Aggregate,

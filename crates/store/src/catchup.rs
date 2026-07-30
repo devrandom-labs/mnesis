@@ -31,7 +31,7 @@ use crate::wake::{WakeRegistration, WakeSource};
 pub trait Catchup: Send {
     /// The position key the scan resumes from (`Version` for a stream, the
     /// adapter's [`AllPosition`](crate::AllPosition) for `$all`).
-    type Position: Copy + Send;
+    type Position: Copy + Send + core::fmt::Debug;
     /// One delivered scan item. Per-stream: `(Version, PersistedEnvelope)`
     /// (the loop-internal tag). `$all`: the adapter's
     /// `(AllPosition, StreamKey, PersistedEnvelope)` item, passed through

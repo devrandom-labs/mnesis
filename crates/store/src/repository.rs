@@ -280,6 +280,20 @@ where
     type Error =
         StoreError<S::Error, <C as Encode<EventOf<A>>>::Error, <C as Decode<EventOf<A>>>::Error>;
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(
+            name = "mnesis.aggregate.load",
+            level = "debug",
+            skip_all,
+            fields(
+                aggregate = core::any::type_name::<A>(),
+                stream = %root.id(),
+                from = %from,
+                version = tracing::field::Empty
+            )
+        )
+    )]
     async fn replay_from(
         &self,
         root: AggregateRoot<A>,
@@ -298,7 +312,7 @@ where
             .await
             .map_err(StoreError::Adapter)?;
 
-        raw_stream
+        let loaded = raw_stream
             .map_err(StoreError::Adapter)
             .try_fold(root, move |mut r, env| {
                 let codec = Arc::<C>::clone(&codec);
@@ -315,7 +329,10 @@ where
                     Ok(r)
                 }
             })
-            .await
+            .await?;
+        #[cfg(feature = "tracing")]
+        tracing::Span::current().record("version", tracing::field::debug(&loaded.version()));
+        Ok(loaded)
     }
 }
 
@@ -367,6 +384,25 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
     /// Returns [`LoadWithError::Store`] for any non-upcast error
     /// (adapter, codec, kernel) and [`LoadWithError::Upcast`] for any
     /// error returned by the `upcast` function.
+    #[allow(
+        clippy::type_complexity,
+        reason = "the four-source LoadWithError return is intrinsic to the contract; an alias would \
+                  hide which domains the upcasting read path can fail from"
+    )]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(
+            name = "mnesis.aggregate.load",
+            level = "debug",
+            skip_all,
+            fields(
+                aggregate = core::any::type_name::<A>(),
+                stream = %id,
+                from = %Version::INITIAL,
+                version = tracing::field::Empty
+            )
+        )
+    )]
     pub async fn load_with<F, E>(
         &self,
         id: A::Id,
@@ -402,7 +438,7 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
             .map_err(|e| LoadWithError::Store(StoreError::Adapter(e)))?;
 
         let upcast = Arc::new(upcast);
-        raw_stream
+        let loaded = raw_stream
             .map_err(|e| LoadWithError::Store(StoreError::Adapter(e)))
             .try_fold(root, move |mut r, env| {
                 let codec = Arc::<C>::clone(&codec);
@@ -430,7 +466,10 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
                     Ok(r)
                 }
             })
-            .await
+            .await?;
+        #[cfg(feature = "tracing")]
+        tracing::Span::current().record("version", tracing::field::debug(&loaded.version()));
+        Ok(loaded)
     }
 
     /// Persist decided events, stamping the schema version on each via
@@ -475,6 +514,26 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
 // Version::INITIAL) and EventStore::save_with (uses the user's current_version
 // fn). Encode-only — the decode shape is irrelevant on the write path, so this
 // serves owning and borrowing codecs alike.
+#[allow(
+    clippy::type_complexity,
+    reason = "the three-source StoreError return is intrinsic to the contract; an alias would hide \
+              which domains the save path can fail from"
+)]
+#[cfg_attr(
+    feature = "tracing",
+    tracing::instrument(
+        name = "mnesis.aggregate.save",
+        level = "debug",
+        skip_all,
+        fields(
+            aggregate = core::any::type_name::<A>(),
+            stream = %aggregate.id(),
+            events = events.len(),
+            expected = ?aggregate.version(),
+            position = tracing::field::Empty
+        )
+    )
+)]
 async fn save_events<A, S, C, F, M, const N: usize>(
     facade: &EventStore<S, C, A, M>,
     aggregate: &mut AggregateRoot<A>,
@@ -558,6 +617,9 @@ where
             },
             AppendError::Store(e) => StoreError::Adapter(e),
         })?;
+
+    #[cfg(feature = "tracing")]
+    tracing::Span::current().record("position", tracing::field::debug(&position));
 
     aggregate.commit_persisted(last_version, events);
     Ok(position)

@@ -50,6 +50,7 @@ sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate"
 sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
+tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
@@ -95,6 +96,7 @@ sqlx-postgres = { version = "0.8", default-features = false, features = ["migrat
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
+tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }

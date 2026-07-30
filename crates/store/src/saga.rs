@@ -311,48 +311,7 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
         S: React<E, N>,
         E: DomainEvent,
     {
-        async move {
-            let before = root.version();
-
-            // React is pure. Ok(None) ⇒ routed but no-op; persist nothing.
-            let Some(produced) = root.react::<E, N>(event).map_err(SagaError::React)? else {
-                return Ok(Reaction::Ignored);
-            };
-
-            // First version this append assigns. Checked pre-save so overflow is
-            // a clean error (save would also reject it).
-            let first = first_persisted_version(before).ok_or(SagaError::VersionOverflow)?;
-
-            // Persist atomically (optimistic concurrency enforced inside `save`).
-            // `&produced` carries the kernel's `>= 1` guarantee straight into
-            // `save` with no Vec materialization; `produced` stays alive as the
-            // projection source below (intents are minted only after durability).
-            // `save` hands back the `$all` position the last event landed at.
-            let position = self.save(root, &produced).await.map_err(SagaError::Store)?;
-
-            // Project intents, each pinned to its event's assigned version.
-            // `produced` is non-empty (`react` returned `Some`; `Events` holds
-            // >= 1), so the loop runs at least once and `current` ends on the
-            // last event's version. `peekable` advances the version only when a
-            // successor exists, sidestepping a bare `len() - 1` index computation.
-            let mut intents = ProjectedIntents::<S, N>::new();
-            let mut current = first;
-            let mut iter = produced.iter().peekable();
-            while let Some(recorded) = iter.next() {
-                if let Some(intent) = S::intent_for(recorded) {
-                    intents.push(ProjectedIntent::new(root.id().clone(), current, intent));
-                }
-                if iter.peek().is_some() {
-                    current = current.next().ok_or(SagaError::VersionOverflow)?;
-                }
-            }
-
-            Ok(Reaction::Reacted {
-                version: current,
-                position,
-                intents,
-            })
-        }
+        react_and_save_inner(self, root, event)
     }
 
     /// **Convenience (stateless concurrent reactors / world B).** `load` the
@@ -391,6 +350,91 @@ pub trait SagaRepository<S: Saga>: Repository<S> {
 // Rides on every repository — bare `EventStore` AND the
 // `Snapshotting` decorator — with zero per-type code. Fully static dispatch.
 impl<S: Saga, R: Repository<S>> SagaRepository<S> for R {}
+
+/// Inner body of [`SagaRepository::react_and_save`] — extracted so the
+/// `mnesis.saga.react` span can attach to an `async fn` (times the future's
+/// polling, not the construction of the `impl Future`). The `tracing::Instrument`
+/// combinator shape trips this workspace's deny-level `shadow_reuse`/
+/// `let_and_return` lints; a private `async fn` carrying
+/// `#[cfg_attr(feature = "tracing", ...)]` is lint-clean.
+#[allow(
+    clippy::type_complexity,
+    reason = "the Reaction-or-typed-error return is the same intrinsic contract as the trait method; \
+              an alias would hide the `impl Future`/`Send` capture the API depends on"
+)]
+#[cfg_attr(
+    feature = "tracing",
+    tracing::instrument(
+        name = "mnesis.saga.react",
+        level = "debug",
+        skip_all,
+        fields(
+            saga = core::any::type_name::<S>(),
+            stream = %root.id(),
+            intents = tracing::field::Empty,
+            version = tracing::field::Empty
+        )
+    )
+)]
+async fn react_and_save_inner<S, R, E, const N: usize>(
+    repo: &R,
+    root: &mut AggregateRoot<S>,
+    event: &E,
+) -> Result<
+    Reaction<S, <R as Repository<S>>::Position, N>,
+    SagaError<S::Error, <R as Repository<S>>::Error>,
+>
+where
+    S: Saga + React<E, N>,
+    R: Repository<S> + ?Sized,
+    E: DomainEvent,
+{
+    let before = root.version();
+
+    // React is pure. Ok(None) ⇒ routed but no-op; persist nothing.
+    let Some(produced) = root.react::<E, N>(event).map_err(SagaError::React)? else {
+        return Ok(Reaction::Ignored);
+    };
+
+    // First version this append assigns. Checked pre-save so overflow is
+    // a clean error (save would also reject it).
+    let first = first_persisted_version(before).ok_or(SagaError::VersionOverflow)?;
+
+    // Persist atomically (optimistic concurrency enforced inside `save`).
+    // `&produced` carries the kernel's `>= 1` guarantee straight into
+    // `save` with no Vec materialization; `produced` stays alive as the
+    // projection source below (intents are minted only after durability).
+    // `save` hands back the `$all` position the last event landed at.
+    let position = repo.save(root, &produced).await.map_err(SagaError::Store)?;
+
+    // Project intents, each pinned to its event's assigned version.
+    // `produced` is non-empty (`react` returned `Some`; `Events` holds
+    // >= 1), so the loop runs at least once and `current` ends on the
+    // last event's version. `peekable` advances the version only when a
+    // successor exists, sidestepping a bare `len() - 1` index computation.
+    let mut intents = ProjectedIntents::<S, N>::new();
+    let mut current = first;
+    let mut iter = produced.iter().peekable();
+    while let Some(recorded) = iter.next() {
+        if let Some(intent) = S::intent_for(recorded) {
+            intents.push(ProjectedIntent::new(root.id().clone(), current, intent));
+        }
+        if iter.peek().is_some() {
+            current = current.next().ok_or(SagaError::VersionOverflow)?;
+        }
+    }
+
+    #[cfg(feature = "tracing")]
+    tracing::Span::current().record("intents", intents.len());
+    #[cfg(feature = "tracing")]
+    tracing::Span::current().record("version", tracing::field::display(current));
+
+    Ok(Reaction::Reacted {
+        version: current,
+        position,
+        intents,
+    })
+}
 
 #[cfg(test)]
 mod error_tests {

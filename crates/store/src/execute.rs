@@ -132,22 +132,59 @@ pub trait CommandRepository<A: Aggregate>: Repository<A> {
         A: Handle<C, N>,
         C: Send,
     {
-        async move {
-            // A no-op decision never reaches the store: no append, no version,
-            // no GlobalSeq burned.
-            match root.handle::<C, N>(command).map_err(ExecuteError::Decide)? {
-                None => Ok(Execution::Ignored),
-                Some(decided) => {
-                    let position = self
-                        .save(root, &decided)
-                        .await
-                        .map_err(ExecuteError::Store)?;
-                    Ok(Execution::Executed {
-                        position,
-                        events: decided,
-                    })
-                }
-            }
+        execute_inner(self, root, command)
+    }
+}
+
+/// Inner body of [`CommandRepository::execute`] — extracted so the
+/// `mnesis.aggregate.execute` span can attach to an `async fn` (times the
+/// future's polling, not the construction of the `impl Future`). The
+/// `tracing::Instrument` combinator shape trips this workspace's deny-level
+/// `shadow_reuse`/`let_and_return` lints; a private `async fn` carrying
+/// `#[cfg_attr(feature = "tracing", ...)]` is lint-clean.
+#[allow(
+    clippy::type_complexity,
+    reason = "the Execution-or-typed-error return is the same intrinsic contract as the trait method; \
+              an alias would hide the `impl Future`/`Send` capture the API depends on"
+)]
+#[cfg_attr(
+    feature = "tracing",
+    tracing::instrument(
+        name = "mnesis.aggregate.execute",
+        level = "debug",
+        skip_all,
+        fields(
+            aggregate = core::any::type_name::<A>(),
+            stream = %root.id()
+        )
+    )
+)]
+async fn execute_inner<A, R, C, const N: usize>(
+    repo: &R,
+    root: &mut AggregateRoot<A>,
+    command: C,
+) -> Result<
+    Execution<A, <R as Repository<A>>::Position, N>,
+    ExecuteError<A::Error, <R as Repository<A>>::Error>,
+>
+where
+    A: Aggregate + Handle<C, N>,
+    R: Repository<A> + ?Sized,
+    C: Send,
+{
+    // A no-op decision never reaches the store: no append, no version,
+    // no GlobalSeq burned.
+    match root.handle::<C, N>(command).map_err(ExecuteError::Decide)? {
+        None => Ok(Execution::Ignored),
+        Some(decided) => {
+            let position = repo
+                .save(root, &decided)
+                .await
+                .map_err(ExecuteError::Store)?;
+            Ok(Execution::Executed {
+                position,
+                events: decided,
+            })
         }
     }
 }

@@ -50,6 +50,10 @@ Explicitly **not** public API:
   …): implementing them outside this workspace is unsupported.
 - The exact text of `Display`/`Debug` output, including `ErrorId` truncation
   rendering. Match on error *variants*, never on strings.
+- Telemetry emitted under the `tracing` feature — span/event names, field
+  names, and levels — is diagnostic output, not semver surface; it may
+  change in minor releases. Build dashboards against it with that
+  understanding.
 - Adapter internals: on-disk key layouts, partition names, and
   connection/session behavior of the 0.x adapters.
 - The conformance kit's check list: new checks may be added in any release. A

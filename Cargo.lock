@@ -1867,6 +1867,8 @@ dependencies = [
  "static_assertions",
  "thiserror",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "trybuild",
 ]
 
@@ -3508,6 +3510,7 @@ dependencies = [
  "syn 2.0.119",
  "thiserror",
  "tokio",
+ "tracing",
  "tracing-core",
  "trybuild",
  "zerocopy",
