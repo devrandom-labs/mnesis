@@ -132,6 +132,12 @@ where
                                 // BEFORE parking, then park on subsequent polls.
                                 if !s.caught_up {
                                     s.caught_up = true;
+                                    #[cfg(feature = "tracing")]
+                                    tracing::info!(
+                                        name: "mnesis.subscription.caught_up",
+                                        position = ?s.read_from,
+                                        "subscription caught up"
+                                    );
                                     return Some((Ok(Step::CaughtUp), s));
                                 }
                                 wait.await;

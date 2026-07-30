@@ -68,11 +68,11 @@ build holds; `examples/axum-todos` re-enables what it needs additively
 |---|---|---|---|
 | `mnesis.aggregate.load` | span, DEBUG | `repository.rs` `Repository::load` | `aggregate` (type name), `stream` (id label); records resulting `version` |
 | `mnesis.aggregate.save` | span, DEBUG | `repository.rs` `Repository::save` | `aggregate`, `stream`, `events` (count), `expected` (version); records assigned `$all` `position` |
-| `mnesis.aggregate.execute` | span, DEBUG | `execute.rs` `CommandRepository::execute` | `aggregate`, `stream`; parents the load/save spans |
+| `mnesis.aggregate.execute` | span, DEBUG | `execute.rs` `CommandRepository::execute` | `aggregate`, `stream`; parents the save span (`execute` takes an already-loaded root — load is a sibling span, not a child) |
 | `mnesis.saga.react` | span, DEBUG | `saga.rs` `react_and_save` | `saga`, `stream`, `intents` (count) |
-| `mnesis.snapshot.hydrate` | span, DEBUG | `snapshot.rs` (`snapshot` + `tracing`) | `stream`; records `hit` (Found / Stale / Absent) |
+| `mnesis.snapshot.hydrate` | span, DEBUG | `snapshot.rs` (`snapshot` + `tracing`) | `stream`; records `hit` (`"found"` / `"stale"` / `"absent"` / `"error"` — the last is the best-effort read failure the code currently drops silently) |
 | `mnesis.snapshot.commit` | span, DEBUG | `snapshot.rs` | `stream`, `version` |
-| `mnesis.projection.commit` | span, DEBUG | `projection.rs` stepper persist (trigger fired / `flush`) | `id`, `position` |
+| `mnesis.projection.commit` | span, DEBUG | `projection.rs` stepper persist (trigger fired / `flush`) | `id` only — `position` is deliberately not recorded: the stepper's `Pos` generic carries no `Debug` bound, and telemetry never widens a public bound |
 | `mnesis.subscription.caught_up` | event, INFO | `subscription_cursor.rs` at the `Step::CaughtUp` emission | `position` (last delivered) |
 
 Deliberately **no** span on: per-event `Projection::advance`, codec

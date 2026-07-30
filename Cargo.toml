@@ -60,7 +60,7 @@ thiserror = { version = "2.0.18", default-features = false }
 tokio = { version = "1.52.1", features = ["full"] }
 tower = { version = "0.5.3", features = ["util", "timeout"] }
 tower-http = { version = "0.7.0", features = ["trace"] }
-tracing = "0.1.44"
+tracing = { version = "0.1.44", default-features = false }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.24.0", features = ["serde", "v4"] }
 

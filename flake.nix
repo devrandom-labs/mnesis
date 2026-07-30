@@ -220,7 +220,7 @@
               cargo build -p mnesis-store --no-default-features
               cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features
               cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features
-              cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection
+              cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection,tracing
             '';
           });
 

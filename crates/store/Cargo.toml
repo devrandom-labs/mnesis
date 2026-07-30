@@ -23,12 +23,18 @@ std = [
     "futures/std",
     "bytes/std",
     "aligned-vec/std",
+    "tracing?/std",
 ]
 # Generic catch-up-then-live-tail subscription loop + the `wake` traits.
 # Dep-free: the loop is generic over `WakeSource`, so no runtime is pulled.
 # The in-process wake registry (`StreamNotifiers`, tokio-backed) lives in the
 # `mnesis-wake` crate; the in-memory adapter lives in `mnesis-inmemory`.
 subscription = []
+# Inline `tracing` spans at the facade seams (issue #136). Off by default;
+# no_std + alloc clean (the workspace `tracing` entry is default-features =
+# false). Span/event names, fields, and levels are diagnostic output, not
+# semver surface (STABILITY.md).
+tracing = ["dep:tracing"]
 serde = ["dep:serde"]
 json = ["serde", "dep:serde_json"]
 snapshot = []
@@ -66,6 +72,7 @@ rkyv = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 thiserror = { workspace = true }
+tracing = { workspace = true, features = ["attributes"], optional = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -81,6 +88,7 @@ insta = { workspace = true }
 # code the mutation gate can only report as phantom survivors.
 mnesis-store = { path = ".", features = [
     "subscription",
+    "tracing",
     "export",
     "import",
     "cbor",
@@ -104,6 +112,8 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 static_assertions = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing = { workspace = true, features = ["std", "attributes"] }
+tracing-subscriber = { workspace = true }
 trybuild = { version = "1", features = ["diff"] }
 
 [[bench]]

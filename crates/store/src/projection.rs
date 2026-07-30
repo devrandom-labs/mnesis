@@ -354,6 +354,15 @@ where
     }
 
     /// Persist `(state, position)` atomically and advance the checkpoint.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(
+            name = "mnesis.projection.commit",
+            level = "debug",
+            skip_all,
+            fields(id = %self.id)
+        )
+    )]
     async fn commit(
         &mut self,
         position: Pos,
