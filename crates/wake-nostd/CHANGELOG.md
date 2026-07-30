@@ -1,0 +1,18 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.2.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-wake-nostd-v0.1.0...mnesis-wake-nostd-v0.2.0) - 2026-07-28
+
+### Added
+
+- *(store)* [**breaking**] read-your-writes — append/repository surface the $all position ([#330](https://github.com/devrandom-labs/mnesis/pull/330)) ([#343](https://github.com/devrandom-labs/mnesis/pull/343))
+
+### Fixed
+
+- *(store)* audit hardening across store + adapters ([#347](https://github.com/devrandom-labs/mnesis/pull/347))
