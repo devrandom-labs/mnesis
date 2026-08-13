@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/devrandom-labs/mnesis/compare/mnesis-v0.2.0...mnesis-v0.2.1) - 2026-08-13
+
+### Other
+
+- release v0.2.1 ([#357](https://github.com/devrandom-labs/mnesis/pull/357))
+
 ## [0.2.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-v0.1.0...mnesis-v0.2.0) - 2026-07-28
 
 ### Added
