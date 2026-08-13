@@ -67,7 +67,7 @@ crc32c = { workspace = true, optional = true }
 futures = { workspace = true }
 futures-core = { workspace = true }
 minicbor = { workspace = true, features = ["derive"], optional = true }
-mnesis = { version = "0.2.1", path = "../mnesis", default-features = false }
+mnesis = { version = "0.2.2", path = "../mnesis", default-features = false }
 rkyv = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
