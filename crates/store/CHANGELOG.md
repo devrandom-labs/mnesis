@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.2.0...mnesis-store-v0.2.1) - 2026-07-30
+
+### Added
+
+- *(store)* tracing feature — inline spans at the facade seams ([#356](https://github.com/devrandom-labs/mnesis/pull/356))
+
 ## [0.2.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.1.0...mnesis-store-v0.2.0) - 2026-07-28
 
 ### Added
