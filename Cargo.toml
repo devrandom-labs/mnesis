@@ -65,7 +65,7 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.24.0", features = ["serde", "v4"] }
 
 [workspace.package]
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 # MSRV == the pinned toolchain (rust-toolchain.toml). Policy: pin tracks the
 # latest stable we build/test against; bump both together. See issue #204.

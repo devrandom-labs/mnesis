@@ -14,7 +14,7 @@ categories = ["data-structures", "asynchronous"]
 
 [dependencies]
 foldhash = { workspace = true }
-mnesis-store = { version = "0.3.0", path = "../store", features = ["subscription"] }
+mnesis-store = { version = "0.3.1", path = "../store", features = ["subscription"] }
 parking_lot = { workspace = true }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["sync"] }
