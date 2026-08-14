@@ -17,7 +17,7 @@ categories = ["embedded", "no-std", "asynchronous", "data-structures"]
 # no_std flake gates, and a std workspace-hack edge would break them.
 [dependencies]
 event-listener = { workspace = true }
-mnesis-store = { version = "0.2.2", path = "../store", default-features = false, features = ["subscription"] }
+mnesis-store = { version = "0.3.0", path = "../store", default-features = false, features = ["subscription"] }
 
 [lints]
 workspace = true
