@@ -13,7 +13,10 @@ publish = false
 # it is a target-compile probe, exercised only through the two flake gates.
 
 [dependencies]
-mnesis = { path = "../mnesis", default-features = false, optional = true }
+# Deliberately use dependency defaults: this smoke crate proves the published
+# kernel does not require every no_std consumer to remember
+# `default-features = false` (#364).
+mnesis = { path = "../mnesis", optional = true }
 thiserror = { workspace = true, optional = true }
 
 [features]

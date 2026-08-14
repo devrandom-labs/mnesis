@@ -23,7 +23,7 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
-# Self dev-dependency enabling the test-only features, so the default-feature
+# Self dev-dependency enabling the test-only features, so the workspace
 # `nix flake check` nextest run compiles and exercises the `testing` fixture
 # tests via Cargo feature unification (mirrors mnesis-store's pattern). Without
 # this, the gate runs default features only and skips the fixture entirely.
@@ -40,10 +40,10 @@ thiserror = { workspace = true }
 trybuild = "1"
 
 [features]
-default = ["std"]
+default = []
 # Additive: enabling `std` only ADDS (the std::error::Error bridge via
-# thiserror); disabling it (`--no-default-features`) yields a no_std +
-# core::error::Error kernel. (#279)
+# thiserror). The kernel is no_std by default; std hosts opt in explicitly.
+# (#279, #364)
 std = ["thiserror/std"]
 derive = ["dep:mnesis-macros"]
 testing = []

@@ -1,7 +1,8 @@
 //! `no_std` compile smoke-test for the mnesis derive macros (#304).
 //!
-//! #279 (PR #303) made the `mnesis` kernel `no_std` and added flake gates that
-//! build the kernel **bare** (`--no-default-features`). Those gates prove the
+//! #279 (PR #303) made the `mnesis` kernel `no_std`; #364 made that the kernel's
+//! default and strengthened the flake gates to build it **bare by default**.
+//! Those gates prove the
 //! *core* compiles `no_std`, but they never compile the **output** of
 //! `#[mnesis::aggregate]` / `#[derive(DomainEvent)]` for a `no_std` target — the
 //! macro source was only grepped for `std::` paths, which is weak.
