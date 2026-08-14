@@ -20,7 +20,7 @@ default = []
 serde = ["dep:serde"]
 
 [dependencies]
-mnesis = { version = "0.2.2", path = "../mnesis", default-features = false }
+mnesis = { version = "0.3.0", path = "../mnesis", default-features = false }
 serde = { workspace = true, features = ["derive"], optional = true }
 thiserror = { workspace = true }
 workspace-hack = { version = "0.1", path = "../workspace-hack" }
