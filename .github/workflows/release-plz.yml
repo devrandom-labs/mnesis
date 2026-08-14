@@ -70,12 +70,15 @@ jobs:
         run: cargo hakari disable
 
       # On a release commit, cut the version + changelog, tag, make the GitHub
-      # release, and publish the crates to crates.io. GITHUB_TOKEN is the App
-      # token; the registry token is the org-level CARGO_REGISTRY_SECRET.
+      # release, and publish the crates to crates.io. Use the built-in token
+      # here deliberately: events created by GITHUB_TOKEN do not recursively
+      # start another workflow run. The App token above is scoped only to the
+      # operation for which it is required: opening/updating the release PR.
+      # The registry token is the org-level CARGO_REGISTRY_SECRET. (#364)
       - name: Publish and tag releases
         uses: release-plz/action@v0.5
         with:
           command: release
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_SECRET }}

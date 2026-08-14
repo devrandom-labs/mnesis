@@ -174,7 +174,9 @@
           # no_std gates — CI is just `nix flake check`, so these ride along.
           # `mnesis-nostd` (thumbv7em-none-eabihf) is the STRONG gate: a fully
           # std-free bare-metal target. `wasm32-unknown-unknown` still ships std,
-          # so it alone would not catch a std leak. Both build --no-default-features.
+          # so it alone would not catch a std leak. Both build the kernel and
+          # smoke consumer with Mnesis dependency defaults, proving no_std does
+          # not require a downstream opt-out (#364).
           # Each gate also builds `mnesis-nostd-smoketest` (#304): a crate that
           # uses `#[mnesis::aggregate]` + `#[derive(DomainEvent)]`, so the macro
           # OUTPUT — not just its source — is compiled for the target. A macro
@@ -188,7 +190,7 @@
             inherit cargoArtifacts;
             pname = "mnesis-wasm";
             buildPhaseCargoCommand = ''
-              cargo build -p mnesis --target wasm32-unknown-unknown --no-default-features
+              cargo build -p mnesis --target wasm32-unknown-unknown
               cargo build -p mnesis-nostd-smoketest --target wasm32-unknown-unknown --no-default-features --features derive
               cargo build -p mnesis-wake-nostd --target wasm32-unknown-unknown
             '';
@@ -198,7 +200,7 @@
             inherit cargoArtifacts;
             pname = "mnesis-nostd";
             buildPhaseCargoCommand = ''
-              cargo build -p mnesis --target thumbv7em-none-eabihf --no-default-features
+              cargo build -p mnesis --target thumbv7em-none-eabihf
               cargo build -p mnesis-nostd-smoketest --target thumbv7em-none-eabihf --no-default-features --features derive
               cargo build -p mnesis-wake-nostd --target thumbv7em-none-eabihf
             '';

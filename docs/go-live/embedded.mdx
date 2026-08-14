@@ -40,8 +40,8 @@ the bare-metal build.
 
 ## The no-alloc kernel
 
-The kernel is `#![cfg_attr(not(feature = "std"), no_std)]`, so a
-`default-features = false` build has no `std`. It is also **pure `core`** — the
+The kernel is `#![cfg_attr(not(feature = "std"), no_std)]` and is `no_std` by
+default. It is also **pure `core`** — the
 production kernel links no allocator at all (`alloc` is pulled in only for the test
 fixture). `Events<E, N>` is backed by an [`ArrayVec`](https://docs.rs/arrayvec) of
 capacity `N + 1` that lives entirely on the stack, so a decision **never touches
@@ -51,7 +51,7 @@ allocator required.
 
 ```toml
 [dependencies]
-mnesis = { git = "https://github.com/devrandom-labs/mnesis", default-features = false, features = ["derive"] }
+mnesis = { git = "https://github.com/devrandom-labs/mnesis", features = ["derive"] }
 ```
 
 ## The `no_std` + `alloc` store
