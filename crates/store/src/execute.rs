@@ -20,7 +20,6 @@ use crate::repository::Repository;
 /// Error from a command `execute`. Two failure domains kept distinct
 /// (CLAUDE.md rule 3 — one variant = one domain).
 #[derive(Debug, thiserror::Error)]
-#[non_exhaustive]
 pub enum ExecuteError<DecideErr, StoreErr> {
     /// The aggregate rejected the command (a domain invariant). Nothing persisted.
     #[error("command rejected: {0}")]

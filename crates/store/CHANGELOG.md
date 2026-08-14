@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Closed `ExecuteError` and `SagaError` CQRS protocols are now exhaustively
+  matchable downstream, so adapters can preserve every failure domain without
+  a wildcard panic or erasure ([#366](https://github.com/devrandom-labs/mnesis/issues/366)).
+
 ## [0.3.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.2.2...mnesis-store-v0.3.0) - 2026-08-14
 
 ### Other
