@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.3.0...mnesis-store-v0.3.1) - 2026-08-14
+
+### Fixed
+
+- *(store)* close CQRS error protocols ([#366](https://github.com/devrandom-labs/mnesis/pull/366)) ([#367](https://github.com/devrandom-labs/mnesis/pull/367))
+
 ### Fixed
 
 - Closed `ExecuteError` and `SagaError` CQRS protocols are now exhaustively
