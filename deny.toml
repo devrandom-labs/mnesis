@@ -1,3 +1,18 @@
+[advisories]
+# Check for known vulnerabilities in the lockfiles (`cargo deny check advisories`).
+# All advisories are blocking; every entry in `ignore` must be a dated, reasoned
+# exception with a named owner for the real fix.
+version = 2
+ignore = [
+    # 2026-09-17: `event-listener` 5.4.1 — RUSTSEC-2026-0221 (unsound: the
+    # `listener!` macro's `StackSlot` lets `!Send` tags cross threads). Fixed
+    # in 5.4.2; pulled in transitively (mnesis-wake-nostd, sqlx-core). Ignored
+    # here ONLY because this PR is scoped to CI config and cannot touch
+    # Cargo.lock. The real fix — `cargo update -p event-listener` (>= 5.4.2) —
+    # should land as its own commit and delete this entry.
+    "RUSTSEC-2026-0221",
+]
+
 [licenses]
 allow = [
     "MIT",

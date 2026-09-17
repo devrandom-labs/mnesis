@@ -47,7 +47,9 @@ jobs:
           purge-primary-key: never
 
       - name: Flake Check
-        run: nix flake check
+        # -L: stream full build logs. Without it a failing derivation surfaces as
+        # Nix's truncated last-25-lines summary, which hides the real error.
+        run: nix flake check -L
 
   postgres-integration:
     name: Postgres Integration (nixosTest)

@@ -61,10 +61,28 @@ jobs:
       - name: System deps for cargo-bolero
         run: sudo apt-get update && sudo apt-get install -y binutils-dev libunwind-dev
 
-      - name: Install cargo-bolero
+      - name: Restore cargo-bolero install
+        # The engine install recompiles from scratch in EVERY matrix job (audit
+        # P2 #8). Cache ~/.cargo/bin keyed on the pinned nightly + the bolero
+        # lib series in fuzz/Cargo.toml; the version guard in the next step
+        # keeps a stale hit from masking a series bump.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: cargo-bolero-${{ runner.os }}-${{ env.FUZZ_TOOLCHAIN }}-${{ hashFiles('fuzz/Cargo.toml') }}
+          restore-keys: cargo-bolero-${{ runner.os }}-
+
+      - name: Install cargo-bolero (cache-aware)
         # Pin to the same 0.13.x series as the `bolero` lib in fuzz/Cargo.toml, so a
         # `--force` install can't silently pull a future release with an incompatible CLI.
-        run: cargo install cargo-bolero --version '^0.13' --locked --force
+        # Skip the forced cold-path install when a 0.13.x binary is already present.
+        run: |
+          if [ -x "$HOME/.cargo/bin/cargo-bolero" ] \
+            && cargo bolero --version 2>/dev/null | grep -q '^cargo-bolero 0\.13'; then
+            echo "cargo-bolero 0.13.x already installed — cache hit, skipping"
+          else
+            cargo install cargo-bolero --version '^0.13' --locked --force
+          fi
 
       - name: Restore previous corpus
         # Corpus compounds night over night: seed this run from the last successful
@@ -153,14 +171,43 @@ jobs:
       - name: Install stable toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install cargo-afl
-        # Pin to the 0.18.x series matching the `afl` lib dep in fuzz-afl/Cargo.toml.
-        run: cargo install cargo-afl --version '^0.18' --locked --force
+      - name: Restore cargo-afl install + AFL++ runtime
+        # Both the cargo-afl binary and the AFL++ runtime it drives recompile in
+        # EVERY matrix job (audit P2 #8). Cache ~/.cargo/bin plus afl.rs's XDG
+        # data dir: the runtime object lands under
+        # ~/.local/share/afl.rs/<rustc-version>/<afl-version>/afl-llvm/, keyed
+        # internally on the toolchain that built it, so a stale cross-toolchain
+        # hit can never be reused.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.local/share/afl.rs
+          key: cargo-afl-${{ runner.os }}-${{ hashFiles('fuzz-afl/Cargo.toml') }}
+          restore-keys: cargo-afl-${{ runner.os }}-
 
-      - name: Build AFL++ runtime
-        # cargo-afl vendors AFL++. --force rebuilds unconditionally, covering both the
-        # already-built and not-built cases (a plain --build panics if already built).
-        run: cargo afl config --build --force
+      - name: Install cargo-afl (cache-aware)
+        # Pin to the 0.18.x series matching the `afl` lib dep in fuzz-afl/Cargo.toml.
+        # Skip the forced cold-path install when a 0.18.x binary is already present.
+        run: |
+          if [ -x "$HOME/.cargo/bin/cargo-afl" ] \
+            && cargo afl --version 2>/dev/null | grep -q '^cargo-afl 0\.18'; then
+            echo "cargo-afl 0.18.x already installed — cache hit, skipping"
+          else
+            cargo install cargo-afl --version '^0.18' --locked --force
+          fi
+
+      - name: Build AFL++ runtime (cache-aware)
+        # cargo-afl vendors AFL++. Skip the forced rebuild when a runtime object
+        # already exists for this rustc/afl pair (the cache path is keyed
+        # internally by both); only a true cache miss pays the compile, and the
+        # cold path keeps --force so it covers the already-built case too.
+        run: |
+          if find "$HOME/.local/share/afl.rs" -name 'afl-compiler-rt.o' 2>/dev/null | grep -q .; then
+            echo "AFL++ runtime already built — cache hit, skipping"
+          else
+            cargo afl config --build --force
+          fi
 
       - name: Restore shared corpus (seed dir)
         # Seed from BOTH engines' corpora so value-profile finds seed CMPLOG and
