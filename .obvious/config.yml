@@ -1,0 +1,6 @@
+# .obvious/config.yml — repo policy for obvious agents.
+# Auto-detected from GitHub repo settings (devrandom-labs/mnesis) on 2026-09-17:
+# default branch main; merge commits enabled with title = PR title (squash and rebase
+# also allowed); delete-branch-on-merge enabled.
+defaultBranch: main
+mergeMethod: merge
