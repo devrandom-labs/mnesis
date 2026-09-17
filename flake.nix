@@ -277,14 +277,24 @@
           # compile-fail tests can't match their .stderr snapshots in the sandbox
           # (path-relative), so the normal nextest gate excludes them too — without
           # it the unmutated baseline fails and zero mutants get tested.
-          mutantsSweep = pkg: ''
-            PROPTEST_CASES=64 cargo mutants \
-              --package ${pkg} \
-              --test-tool nextest \
-              --no-shuffle --colors never \
-              --output "$out" \
-              -- -E 'not test(compile_fail)' || true
-          '';
+          mutantsSweep =
+            pkg:
+            let
+              # The kernel crate is no_std by default and its inline tests use
+              # std/Vec — a standalone `-p mnesis` build gets no workspace
+              # feature unification, so the unmutated baseline failed to
+              # compile (12 hard errors) and no mutants were ever tested.
+              # `--features std` matches the documented kernel test command.
+              features = if pkg == "mnesis" then " --features std" else "";
+            in
+            ''
+              PROPTEST_CASES=64 cargo mutants \
+                --package ${pkg}${features} \
+                --test-tool nextest \
+                --no-shuffle --colors never \
+                --output "$out" \
+                -- -E 'not test(compile_fail)' || true
+            '';
           # The gate: sweep one crate, then `mutants-gate` OWNS the verdict — fails
           # on a survivor, timeout, interrupted run, or viability collapse against
           # `.mutants-baselines/<pkg>.json`, and writes the ratio to

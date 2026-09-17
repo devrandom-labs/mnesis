@@ -1,0 +1,36 @@
+# cargo-deny: security advisories + license compliance over the workspace
+# lockfiles. Complements CodeQL (own-code dataflow) and cargo-audit in the nix
+# gate (dependency advisories). Weekly schedule so newly-published RUSTSEC
+# advisories surface even when the code does not change.
+name: cargo-deny
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    # Weekly (Mondays 05:37 UTC) — offset from codeql.yml's Monday 05:23 slot.
+    - cron: "37 5 * * 1"
+
+# Don't pile up redundant scans on rapid pushes.
+concurrency:
+  group: deny-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deny:
+    name: Deny (advisories + licenses)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check advisories and licenses
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
