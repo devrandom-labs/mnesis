@@ -104,9 +104,9 @@ fn expanded_lifecycle() {
         RtEvent::Added("two".into()),
         RtEvent::Removed,
     ];
-    root.commit_persisted(Version::new(3).unwrap(), &decided);
+    root.commit_persisted(&decided).expect("root is usable");
 
-    assert_eq!(root.state().items, vec!["one"]);
+    assert_eq!(root.state().unwrap().items, vec!["one"]);
     // commit_persisted advances the version to the last persisted event.
     assert_eq!(root.version(), Version::new(3));
 }
@@ -121,7 +121,7 @@ fn expanded_rehydrate() {
         &RtEvent::Added("b".into()),
     )
     .unwrap();
-    assert_eq!(root.state().items, vec!["a", "b"]);
+    assert_eq!(root.state().unwrap().items, vec!["a", "b"]);
     assert_eq!(root.version(), Version::new(2));
 }
 
@@ -133,7 +133,7 @@ fn expanded_root_accessors_work() {
 
     // AggregateRoot accessors
     assert_eq!(root.id(), &RtId::new(1));
-    assert_eq!(root.state().items, vec!["test"]);
+    assert_eq!(root.state().unwrap().items, vec!["test"]);
     // replay advances the version to the replayed event.
     assert_eq!(root.version(), Version::new(1));
 }
@@ -159,5 +159,5 @@ fn expanded_new_constructor_returns_root() {
     let root = RtAggregate::new(RtId::new(7));
     assert_eq!(root.id(), &RtId::new(7));
     assert_eq!(root.version(), None);
-    assert!(root.state().items.is_empty());
+    assert!(root.state().unwrap().items.is_empty());
 }

@@ -5,7 +5,10 @@ use std::num::NonZeroU32;
 
 use futures::StreamExt;
 use mnesis_fjall::{FjallStore, GlobalSeq};
-use mnesis_store::state::{CodecSnapshotStore, Hydrated, PersistTrigger, SnapshotStore};
+use mnesis_store::checkpoint::{
+    CheckpointError, CheckpointHydrated, CheckpointRejection, CheckpointStore,
+};
+use mnesis_store::state::{CodecSnapshotStore, PersistTrigger};
 use mnesis_store::store::Store;
 use mnesis_store::{
     DecodedStreamExt, JsonCodec, Projection, Projector, StepStreamExt, Subscription,
@@ -77,7 +80,7 @@ impl TodosIndex {
 /// already reflects every event up to `pos` — the read-your-writes token a
 /// `GET` awaits (#330). This is the same "state and position are one value"
 /// invariant [`commit_persisted`](mnesis::AggregateRoot::commit_persisted) and
-/// [`SnapshotStore`] rely on; two channels would let a reader see a fresh
+/// [`CheckpointStore`] rely on; two channels would let a reader see a fresh
 /// checkpoint against a stale index.
 #[derive(Debug, Clone, Default)]
 pub struct IndexState {
@@ -151,7 +154,7 @@ impl Projector for TodosProjector {
 /// so the two can never drift.
 const INDEX_NAME: &str = "todos-index";
 
-/// The projection's own id in fjall's `projections` partition.
+/// The projection's own id in fjall's `checkpoints_global` partition.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct IndexId;
 
@@ -204,30 +207,42 @@ pub type BoxErr = Box<dyn std::error::Error + Send + Sync>;
 /// snapshot as its authoritative starting point (one extra startup
 /// point-read).
 ///
-/// `Stale` (schema bump) folds from scratch, exactly like `Absent` — for this
-/// consumer the two collapse; a host that must anticipate a costly rebuild
-/// would branch here.
+/// A different stored schema requires an explicit rebuild; startup returns a
+/// typed schema mismatch instead of silently discarding the saved read model.
 pub async fn hydrate(store: &Store<FjallStore>) -> Result<(TodosIndex, Option<GlobalSeq>), BoxErr> {
     let snapshots = CodecSnapshotStore::new(store.raw(), JsonCodec::default());
-    Ok(match snapshots.hydrate(&IndexId, INDEX_SCHEMA).await? {
-        Hydrated::Found { position, state } => (state, Some(position)),
-        Hydrated::Absent | Hydrated::Stale { .. } => (TodosIndex::default(), None),
-    })
+    Ok(
+        match snapshots.hydrate_checkpoint(&IndexId, INDEX_SCHEMA).await? {
+            CheckpointHydrated::Found {
+                position, state, ..
+            } => (state, Some(position)),
+            CheckpointHydrated::Absent => (TodosIndex::default(), None),
+            CheckpointHydrated::Stale { stored_schema, .. } => {
+                return Err(CheckpointError::<mnesis_fjall::FjallError>::Rejected(
+                    CheckpointRejection::SchemaMismatch {
+                        stored: stored_schema,
+                        requested: INDEX_SCHEMA,
+                    },
+                )
+                .into());
+            }
+        },
+    )
 }
 
 /// Fold the `$all` stream into the index forever, committing
 /// `(state, position)` atomically per event and publishing each new state.
 ///
 /// Driven by the position-generic [`Projection`] stepper (#327): `load`
-/// hydrates `(state, checkpoint)` from fjall's `projections` partition, and
+/// hydrates `(state, checkpoint)` from fjall's `checkpoints_global` partition, and
 /// the `(GlobalSeq, StreamKey, Decoded)` tuple the subscription yields feeds
 /// [`Projection::advance`] whole — the stepper forwards the attribution key to
 /// [`Projector::apply_attributed`]; [`TodosProjector`] doesn't override it, so
 /// the key is ignored (this projection routes by the payload's todo id) — no
 /// hand-rolled fold/commit loop. The
-/// [`EveryEvent`] trigger commits every fold, so there is no pending tail
-/// (a `flush` would be a no-op — if you ever swap [`EveryEvent`] for a
-/// bucketed trigger, add `proj.flush(&state)` after the loop) and
+/// `EveryEvent` trigger commits every fold, so there is no pending tail
+/// (a `flush` would be a no-op — if you ever swap `EveryEvent` for a
+/// bucketed trigger, add `proj.flush()` after the loop) and
 /// `send_replace` pays one clone per event — the price of the deliberately
 /// no-`Clone` fold, at the seam where another task must see the state.
 ///
@@ -242,7 +257,7 @@ pub async fn hydrate(store: &Store<FjallStore>) -> Result<(TodosIndex, Option<Gl
 /// arrives.
 pub async fn run(store: Store<FjallStore>, tx: watch::Sender<IndexState>) -> Result<(), BoxErr> {
     let snapshots = CodecSnapshotStore::new(store.raw(), JsonCodec::default());
-    let (mut proj, mut state) =
+    let mut proj =
         Projection::load(IndexId, TodosProjector, EveryEvent, snapshots, INDEX_SCHEMA).await?;
     let stream = Subscription::new(&store)
         .subscribe_all(proj.checkpoint())?
@@ -251,11 +266,11 @@ pub async fn run(store: Store<FjallStore>, tx: watch::Sender<IndexState>) -> Res
     tokio::pin!(stream);
 
     while let Some(item) = stream.next().await {
-        state = proj.advance(state, item?).await?;
+        proj.advance(item?).await?;
         // Publish the folded state paired with the checkpoint it reached, so a
         // reader awaiting a returned position sees a consistent snapshot (#330).
         tx.send_replace(IndexState {
-            index: state.clone(),
+            index: proj.state()?.clone(),
             checkpoint: proj.checkpoint(),
         });
     }
@@ -373,7 +388,7 @@ mod tests {
     #[test]
     fn pagination_clamps_past_the_end() {
         let index = fold(&[created(Uuid::new_v4(), "only")]);
-        assert!(index.page(5, usize::MAX).is_empty());
+        assert_eq!(index.page(5, usize::MAX), Vec::<TodoView>::new());
         assert_eq!(index.page(0, 0).len(), 0);
     }
 

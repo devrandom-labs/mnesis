@@ -127,15 +127,14 @@ fn marker_aggregate_lifecycle() {
         })
         .unwrap()
         .unwrap();
-    let v1 = Version::new(1).unwrap();
-    user.commit_persisted(v1, &events);
+    user.commit_persisted(&events).expect("root is usable");
 
     let events = user.handle(ActivateUser).unwrap().unwrap();
     let v2 = Version::new(2).unwrap();
-    user.commit_persisted(v2, &events);
+    user.commit_persisted(&events).expect("root is usable");
 
-    assert_eq!(user.state().name, "Alice");
-    assert!(user.state().active);
+    assert_eq!(user.state().unwrap().name, "Alice");
+    assert!(user.state().unwrap().active);
     assert_eq!(user.version(), Some(v2));
 }
 
@@ -191,8 +190,8 @@ fn marker_aggregate_id_accessible() {
 #[test]
 fn marker_aggregate_initial_state() {
     let user = AggregateRoot::<UserAggregate>::new(UserId::new(1));
-    assert_eq!(user.state().name, "");
-    assert!(!user.state().active);
+    assert_eq!(user.state().unwrap().name, "");
+    assert!(!user.state().unwrap().active);
 }
 
 #[test]

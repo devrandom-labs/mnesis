@@ -1,6 +1,6 @@
 //! Store-side bounded saga repository — the saga analogue of [`Repository`].
 //!
-//! Because [`Saga`](mnesis::Saga) is an [`Aggregate`](mnesis::Aggregate), the
+//! Because [`Saga`] is an [`Aggregate`](mnesis::Aggregate), the
 //! existing [`Repository`] already loads and saves sagas. This module adds only
 //! the saga-specific seam: [`SagaRepository`] (`react → save → project` as one
 //! callable bounded transaction), the version-pinned capability-token return
@@ -21,10 +21,14 @@ use mnesis::{AggregateRoot, DomainEvent, React, Saga, Version};
 use crate::conflict::ConflictPredicate;
 use crate::repository::{Repository, first_persisted_version};
 
-/// Error from a saga react+persist. Two failure domains plus a defensive
-/// overflow guard (CLAUDE.md rule 3 — one variant = one domain).
+/// Saga reaction/persistence failure. Kernel integrity, application rejection,
+/// persistence and intent-version arithmetic are distinct failure domains.
 #[derive(Debug, thiserror::Error)]
 pub enum SagaError<SagaErr, StoreErr> {
+    /// The root is unusable after an application panic; nothing was persisted.
+    #[error("aggregate integrity error: {0}")]
+    Kernel(#[source] mnesis::KernelError),
+
     /// `react` rejected the upstream event (a saga invariant). Nothing persisted.
     #[error("saga rejected event: {0}")]
     React(#[source] SagaErr),
@@ -391,7 +395,11 @@ where
     let before = root.version();
 
     // React is pure. Ok(None) ⇒ routed but no-op; persist nothing.
-    let Some(produced) = root.react::<E, N>(event).map_err(SagaError::React)? else {
+    let Some(produced) = root.react::<E, N>(event).map_err(|error| match error {
+        mnesis::DecisionError::Kernel(cause) => SagaError::Kernel(cause),
+        mnesis::DecisionError::Domain(cause) => SagaError::React(cause),
+    })?
+    else {
         return Ok(Reaction::Ignored);
     };
 

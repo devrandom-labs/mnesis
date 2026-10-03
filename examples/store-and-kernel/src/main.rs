@@ -75,31 +75,55 @@ enum AccountEvent {
 
 // --- State ---
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 struct AccountState {
     owner: String,
-    balance: u64,
+    balance: Result<u64, AccountError>,
     is_open: bool,
+}
+
+impl AccountState {
+    fn balance(&self) -> Result<u64, AccountError> {
+        self.balance.clone()
+    }
 }
 
 impl AggregateState for AccountState {
     type Event = AccountEvent;
 
     fn initial() -> Self {
-        Self::default()
+        Self {
+            owner: String::new(),
+            balance: Ok(0),
+            is_open: false,
+        }
     }
 
     fn apply(mut self, event: &AccountEvent) -> Self {
+        let Ok(balance) = self.balance else {
+            return self;
+        };
         match event {
             AccountEvent::Opened(e) => {
                 self.owner = e.owner.clone();
                 self.is_open = true;
             }
             AccountEvent::Deposited(e) => {
-                self.balance += e.amount;
+                self.balance = balance
+                    .checked_add(e.amount)
+                    .ok_or(AccountError::BalanceOverflow {
+                        balance,
+                        amount: e.amount,
+                    });
             }
             AccountEvent::Withdrawn(e) => {
-                self.balance -= e.amount;
+                self.balance =
+                    balance
+                        .checked_sub(e.amount)
+                        .ok_or(AccountError::InsufficientFunds {
+                            balance,
+                            amount: e.amount,
+                        });
             }
         }
         self
@@ -108,7 +132,7 @@ impl AggregateState for AccountState {
 
 // --- Errors ---
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 enum AccountError {
     #[error("account already open")]
     AlreadyOpen,
@@ -116,6 +140,8 @@ enum AccountError {
     Closed,
     #[error("insufficient funds: have {balance}, need {amount}")]
     InsufficientFunds { balance: u64, amount: u64 },
+    #[error("balance overflow: have {balance}, deposit {amount}")]
+    BalanceOverflow { balance: u64, amount: u64 },
 }
 
 // --- Aggregate ---
@@ -145,6 +171,7 @@ impl Handle<OpenAccount> for BankAccount {
         state: &AccountState,
         cmd: OpenAccount,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        state.balance()?;
         if state.is_open {
             return Err(AccountError::AlreadyOpen);
         }
@@ -159,9 +186,16 @@ impl Handle<Deposit> for BankAccount {
         state: &AccountState,
         cmd: Deposit,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        let balance = state.balance()?;
         if !state.is_open {
             return Err(AccountError::Closed);
         }
+        balance
+            .checked_add(cmd.amount)
+            .ok_or(AccountError::BalanceOverflow {
+                balance,
+                amount: cmd.amount,
+            })?;
         Ok(Some(events![AccountEvent::Deposited(MoneyDeposited {
             amount: cmd.amount,
         })]))
@@ -173,12 +207,13 @@ impl Handle<Withdraw> for BankAccount {
         state: &AccountState,
         cmd: Withdraw,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        let balance = state.balance()?;
         if !state.is_open {
             return Err(AccountError::Closed);
         }
-        if state.balance < cmd.amount {
+        if balance < cmd.amount {
             return Err(AccountError::InsufficientFunds {
-                balance: state.balance,
+                balance,
                 amount: cmd.amount,
             });
         }
@@ -283,24 +318,28 @@ async fn main() {
         })
         .expect("open should succeed")
         .expect("command decided events");
-    account.commit_persisted(version!(1), &decided);
+    account.commit_persisted(&decided).expect("root is usable");
 
     let decided = account
         .handle(Deposit { amount: 1000 })
         .expect("deposit should succeed")
         .expect("command decided events");
-    account.commit_persisted(version!(2), &decided);
+    account.commit_persisted(&decided).expect("root is usable");
 
     let decided = account
         .handle(Deposit { amount: 500 })
         .expect("deposit should succeed")
         .expect("command decided events");
-    account.commit_persisted(version!(3), &decided);
+    account.commit_persisted(&decided).expect("root is usable");
 
     println!(
         "State: owner={}, balance={}, version={:?}",
-        account.state().owner,
-        account.state().balance,
+        account.state().expect("aggregate state is available").owner,
+        account
+            .state()
+            .expect("aggregate state is available")
+            .balance()
+            .expect("valid account arithmetic"),
         account.version()
     );
 
@@ -320,7 +359,7 @@ async fn main() {
         .expect("open")
         .expect("command decided events");
     let envelopes = encode_decided(&codec, &decided, 0);
-    fresh.commit_persisted(version!(1), &decided);
+    fresh.commit_persisted(&decided).expect("root is usable");
 
     let decided = fresh
         .handle(Deposit { amount: 1000 })
@@ -328,7 +367,7 @@ async fn main() {
         .expect("command decided events");
     let mut more = encode_decided(&codec, &decided, 1);
     envelopes.len(); // keep envelopes alive
-    fresh.commit_persisted(version!(2), &decided);
+    fresh.commit_persisted(&decided).expect("root is usable");
 
     let decided = fresh
         .handle(Deposit { amount: 500 })
@@ -368,8 +407,12 @@ async fn main() {
 
     println!(
         "Rehydrated: owner={}, balance={}, version={:?}",
-        account.state().owner,
-        account.state().balance,
+        account.state().expect("aggregate state is available").owner,
+        account
+            .state()
+            .expect("aggregate state is available")
+            .balance()
+            .expect("valid account arithmetic"),
         account.version()
     );
 
@@ -383,6 +426,9 @@ async fn main() {
         .handle(Withdraw { amount: 300 })
         .expect("withdraw should succeed")
         .expect("command decided events");
+    account
+        .commit_version(&decided)
+        .expect("commit must fit before persistence");
     let base = account.version().map_or(0, |v| v.as_u64());
     let envelopes = encode_decided(&codec, &decided, base);
     store
@@ -394,14 +440,16 @@ async fn main() {
         .await
         .expect("append should succeed");
 
-    let new_ver =
-        expected_version.map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
-    account.commit_persisted(new_ver, &decided);
+    account.commit_persisted(&decided).expect("root is usable");
 
     println!(
         "Persisted {} more event(s). balance={}, version={:?}",
         envelopes.len(),
-        account.state().balance,
+        account
+            .state()
+            .expect("aggregate state is available")
+            .balance()
+            .expect("valid account arithmetic"),
         account.version()
     );
 
@@ -423,8 +471,12 @@ async fn main() {
 
     println!(
         "Final state: owner={}, balance={}, version={:?}",
-        account.state().owner,
-        account.state().balance,
+        account.state().expect("aggregate state is available").owner,
+        account
+            .state()
+            .expect("aggregate state is available")
+            .balance()
+            .expect("valid account arithmetic"),
         account.version()
     );
 
@@ -446,4 +498,101 @@ async fn main() {
     println!("Double-open rejected: {err}");
 
     println!("\nDone. Full event-sourcing lifecycle with kernel + store integration.");
+}
+
+#[cfg(test)]
+mod audit_arithmetic {
+    use super::{
+        AccountError, AccountEvent, AccountOpened, AccountState, BankAccount, Deposit,
+        MoneyDeposited, MoneyWithdrawn, OpenAccount, Withdraw,
+    };
+    use mnesis::{AggregateState, Handle};
+
+    #[test]
+    fn deposits_reject_balance_overflow() {
+        let state = AccountState {
+            balance: Ok(u64::MAX),
+            is_open: true,
+            ..AccountState::initial()
+        };
+        assert!(matches!(
+            <BankAccount as Handle<Deposit>>::handle(&state, Deposit { amount: 1 }),
+            Err(AccountError::BalanceOverflow {
+                balance: u64::MAX,
+                amount: 1
+            })
+        ));
+    }
+
+    #[test]
+    fn boundary_deposits_fold_exactly() {
+        for (balance, amount, expected) in [
+            (0, 0, 0),
+            (0, u64::MAX, u64::MAX),
+            (u64::MAX - 1, 1, u64::MAX),
+            (u64::MAX, 0, u64::MAX),
+        ] {
+            let state = AccountState {
+                balance: Ok(balance),
+                is_open: true,
+                ..AccountState::initial()
+            };
+            let decided = <BankAccount as Handle<Deposit>>::handle(&state, Deposit { amount })
+                .unwrap()
+                .unwrap();
+            assert_eq!(decided.len(), 1);
+            assert_eq!(state.apply(decided.first()).balance(), Ok(expected));
+        }
+        assert!(matches!(
+            <BankAccount as Handle<Deposit>>::handle(
+                &AccountState::initial(),
+                Deposit { amount: 0 }
+            ),
+            Err(AccountError::Closed)
+        ));
+    }
+
+    #[test]
+    fn invalid_arithmetic_is_typed_and_cannot_be_repaired() {
+        for (balance, event, expected) in [
+            (
+                u64::MAX,
+                AccountEvent::Deposited(MoneyDeposited { amount: 1 }),
+                AccountError::BalanceOverflow {
+                    balance: u64::MAX,
+                    amount: 1,
+                },
+            ),
+            (
+                0,
+                AccountEvent::Withdrawn(MoneyWithdrawn { amount: 1 }),
+                AccountError::InsufficientFunds {
+                    balance: 0,
+                    amount: 1,
+                },
+            ),
+        ] {
+            let state = AccountState {
+                balance: Ok(balance),
+                is_open: true,
+                ..AccountState::initial()
+            }
+            .apply(&event);
+            assert_eq!(state.balance(), Err(expected.clone()));
+            assert!(
+                matches!(<BankAccount as Handle<Deposit>>::handle(&state, Deposit { amount: 0 }), Err(error) if error == expected)
+            );
+            assert!(
+                matches!(<BankAccount as Handle<Withdraw>>::handle(&state, Withdraw { amount: 0 }), Err(error) if error == expected)
+            );
+            assert!(
+                matches!(<BankAccount as Handle<OpenAccount>>::handle(&state, OpenAccount { owner: "repair".to_owned() }), Err(error) if error == expected)
+            );
+            let later = state.apply(&AccountEvent::Opened(AccountOpened {
+                owner: "repair".to_owned(),
+            }));
+            assert_eq!(later.balance(), Err(expected));
+            assert_eq!(later.owner, "");
+        }
+    }
 }

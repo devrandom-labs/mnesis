@@ -1715,11 +1715,13 @@ name = "mnesis-example-signed-events"
 version = "0.0.0"
 dependencies = [
  "blake3",
+ "bytes",
  "ed25519-dalek",
  "futures",
  "mnesis",
  "mnesis-fjall",
  "mnesis-store",
+ "proptest",
  "rand_core 0.6.4",
  "serde",
  "serde_json",
@@ -1765,7 +1767,9 @@ dependencies = [
 name = "mnesis-fjall"
 version = "0.3.1"
 dependencies = [
+ "aligned-vec",
  "arrayvec",
+ "bytemuck",
  "bytes",
  "codspeed-criterion-compat",
  "fjall",
@@ -1778,6 +1782,7 @@ dependencies = [
  "mnesis-wake",
  "proptest",
  "proptest-state-machine",
+ "rkyv",
  "tempfile",
  "thiserror",
  "tokio",
@@ -1789,6 +1794,7 @@ name = "mnesis-inmemory"
 version = "0.3.1"
 dependencies = [
  "bytes",
+ "codspeed-criterion-compat",
  "futures",
  "mnesis",
  "mnesis-inmemory",
@@ -1805,11 +1811,15 @@ dependencies = [
 name = "mnesis-macros"
 version = "0.3.1"
 dependencies = [
+ "futures",
  "mnesis",
+ "mnesis-inmemory",
  "mnesis-store",
  "proc-macro2",
  "proptest",
  "quote",
+ "serde",
+ "serde_json",
  "syn 2.0.119",
  "thiserror",
  "trybuild",
@@ -1949,6 +1959,7 @@ version = "0.0.0"
 dependencies = [
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror",
 ]
 

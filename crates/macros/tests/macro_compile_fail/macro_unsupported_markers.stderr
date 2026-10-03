@@ -1,0 +1,137 @@
+error: transform marker impls cannot have generics or where clauses
+ --> tests/macro_compile_fail/macro_unsupported_markers.rs:6:5
+  |
+6 | impl<T> Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { O...
+  |     ^^^
+
+error: transform marker impls cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:12:5
+   |
+12 | impl<'a> Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> {...
+   |     ^^^^
+
+error: transform marker impls cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:18:5
+   |
+18 | impl<const N: usize> Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::I...
+   |     ^^^^^^^^^^^^^^^^
+
+error: transform marker impls cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:23:1
+   |
+23 | #[transforms(aggregate = (), error = std::convert::Infallible)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `transforms` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: transform marker must be a single unqualified type name
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:30:6
+   |
+30 | impl path::Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible>...
+   |      ^^^^^^^^^^^^
+
+error: transform marker must be a single unqualified type name
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:36:6
+   |
+36 | impl Marker<u8> { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> {...
+   |      ^^^^^^^^^^
+
+error: transforms requires a plain inherent impl
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:42:1
+   |
+42 | impl SomeTrait for Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(payload.to_vec()) } }
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transforms requires a plain inherent impl
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:48:1
+   |
+48 | unsafe impl SomeTrait for Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(payload.to_vec()) } }
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform impls support only functions and constants
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:54:15
+   |
+54 | impl Marker { type Payload = Vec<u8>; }
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform impls support only functions and constants
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:60:15
+   |
+60 | impl Marker { unknown!(); }
+   |               ^^^^^^^^^^^
+
+error: name is reserved for the generated transform API
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:66:18
+   |
+66 | impl Marker { fn upcast() {} }
+   |                  ^^^^^^
+
+error: name is reserved for the generated transform API
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:72:18
+   |
+72 | impl Marker { fn current_version() {} }
+   |                  ^^^^^^^^^^^^^^^
+
+error: aggregate markers cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:78:14
+   |
+78 | struct Marker<T>;
+   |              ^^^
+
+error: aggregate markers cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:84:14
+   |
+84 | struct Marker<'a>;
+   |              ^^^^
+
+error: aggregate markers cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:90:14
+   |
+90 | struct Marker<const N: usize>;
+   |              ^^^^^^^^^^^^^^^^
+
+error: aggregate markers cannot have generics or where clauses
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:95:1
+   |
+95 | #[mnesis::aggregate(state = (), error = (), id = ())]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `mnesis::aggregate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aggregate macro requires a unit struct (no fields).
+   --> tests/macro_compile_fail/macro_unsupported_markers.rs:102:8
+    |
+102 | struct Marker {}
+    |        ^^^^^^
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:76:9
+   |
+76 |     use super::*;
+   |         ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:82:9
+   |
+82 |     use super::*;
+   |         ^^^^^^^^
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:88:9
+   |
+88 |     use super::*;
+   |         ^^^^^^^^
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_unsupported_markers.rs:94:9
+   |
+94 |     use super::*;
+   |         ^^^^^^^^
+
+warning: unused import: `super::*`
+   --> tests/macro_compile_fail/macro_unsupported_markers.rs:100:9
+    |
+100 |     use super::*;
+    |         ^^^^^^^^

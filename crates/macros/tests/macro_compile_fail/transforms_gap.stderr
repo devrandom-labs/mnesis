@@ -1,5 +1,5 @@
-error: transform chain gap for event 'OrderCreated': missing step from version 2 to version 3 (chain must cover every version in [1, 5])
-  --> tests/macro_compile_fail/transforms_gap.rs:21:8
+error: transform chain gap: no transform produces 'OrderCreated@4'; chains must start at schema 1
+  --> tests/macro_compile_fail/transforms_gap.rs:26:8
    |
-21 |     fn v1_to_v2(payload: &[u8]) -> Result<Vec<u8>, MyError> {
+26 |     fn v4_to_v5(payload: &[u8]) -> Result<Vec<u8>, MyError> {
    |        ^^^^^^^^

@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Respects the pinned toolchain from rust-toolchain.toml (channel 1.95.0,
+      # Respects the pinned toolchain from rust-toolchain.toml (channel 1.99.0,
       # edition 2024) and installs the cargo-codspeed binary.
       - name: Setup Rust toolchain, cache and cargo-codspeed binary
         uses: moonrepo/setup-rust@v0

@@ -1,0 +1,78 @@
+{
+  "outcomes": [
+    {
+      "summary": "Success",
+      "scenario": "Baseline"
+    },
+    {
+      "summary": "CaughtMutant",
+      "scenario": {
+        "Mutant": {
+          "file": "x.rs",
+          "function": {
+            "function_name": "f",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 21
+              }
+            }
+          },
+          "replacement": "true",
+          "package": "fixture",
+          "genre": "FnValue",
+          "span": {
+            "start": {
+              "line": 1,
+              "column": 10
+            },
+            "end": {
+              "line": 1,
+              "column": 20
+            }
+          }
+        }
+      }
+    },
+    {
+      "summary": "CaughtMutant",
+      "scenario": {
+        "Mutant": {
+          "file": "x.rs",
+          "function": {
+            "function_name": "f",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 21
+              }
+            }
+          },
+          "replacement": "true",
+          "package": "fixture",
+          "genre": "FnValue",
+          "span": {
+            "start": {
+              "line": 1,
+              "column": 10
+            },
+            "end": {
+              "line": 1,
+              "column": 20
+            }
+          }
+        }
+      }
+    }
+  ]
+}

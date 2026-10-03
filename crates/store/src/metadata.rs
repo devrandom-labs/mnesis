@@ -59,7 +59,7 @@ pub trait MetadataProvider<E: ?Sized>: Send + Sync + 'static {
 ///
 /// This is the default `M = ()` slot on [`EventStore`](crate::EventStore) and
 /// [`RepositoryBuilder`](crate::RepositoryBuilder), so existing callers that do
-/// not call [`.metadata()`](RepositoryBuilder::metadata) behave exactly as
+/// not call [`.metadata()`](crate::RepositoryBuilder::metadata) behave exactly as
 /// before: every event is persisted with metadata absent.
 impl<E: ?Sized> MetadataProvider<E> for () {
     fn metadata(&self, _version: Version, _event: &E, _payload: &Payload) -> Option<Metadata> {

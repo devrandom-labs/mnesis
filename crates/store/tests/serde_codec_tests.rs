@@ -191,8 +191,8 @@ mod integration {
         // Load and verify state after Created
         let mut loaded: AggregateRoot<TodoAggregate> =
             repo.load(TodoId("todo-1".into())).await.unwrap();
-        assert_eq!(loaded.state().title, "Write tests");
-        assert!(!loaded.state().done);
+        assert_eq!(loaded.state().unwrap().title, "Write tests");
+        assert!(!loaded.state().unwrap().done);
         assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 
         // Append a Done event
@@ -203,8 +203,8 @@ mod integration {
         // Reload and verify full state
         let final_agg: AggregateRoot<TodoAggregate> =
             repo.load(TodoId("todo-1".into())).await.unwrap();
-        assert_eq!(final_agg.state().title, "Write tests");
-        assert!(final_agg.state().done);
+        assert_eq!(final_agg.state().unwrap().title, "Write tests");
+        assert!(final_agg.state().unwrap().done);
         assert_eq!(final_agg.version(), Some(Version::new(2).unwrap()));
     }
 }

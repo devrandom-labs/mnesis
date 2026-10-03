@@ -284,12 +284,13 @@ fn lifecycle_benchmarks(c: &mut Criterion) {
                                         .unwrap();
                                 }
                             });
-                            drop(store);
+                            rt.block_on(store.close()).unwrap();
                         }
                         (dir, db_path)
                     },
                     |(_dir, db_path)| {
-                        let _store = FjallStore::builder(&db_path).open().unwrap();
+                        let reopened = FjallStore::builder(&db_path).open().unwrap();
+                        rt.block_on(reopened.close()).unwrap();
                     },
                 );
             },

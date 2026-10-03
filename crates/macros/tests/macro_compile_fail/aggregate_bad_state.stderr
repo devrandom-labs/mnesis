@@ -2,15 +2,15 @@ warning: unused import: `mnesis::*`
  --> tests/macro_compile_fail/aggregate_bad_state.rs:3:5
   |
 3 | use mnesis::*;
-  |     ^^^^^^^^
+  |     ^^^^^^^^^
   |
   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
 
 error[E0277]: the trait bound `NotAState: AggregateState` is not satisfied
-  --> tests/macro_compile_fail/aggregate_bad_state.rs:25:28
+  --> tests/macro_compile_fail/aggregate_bad_state.rs:25:29
    |
 25 | #[mnesis::aggregate(state = NotAState, error = MyError, id = MyId)]
-   |                            ^^^^^^^^^ unsatisfied trait bound
+   |                             ^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `AggregateState` is not implemented for `NotAState`
   --> tests/macro_compile_fail/aggregate_bad_state.rs:19:1

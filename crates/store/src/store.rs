@@ -225,13 +225,13 @@ pub trait RawEventStore: Send + Sync {
     /// Open a stream of events.
     ///
     /// Events are yielded one at a time as a `futures::Stream` of
-    /// owned [`PersistedEnvelope`](crate::envelope::PersistedEnvelope)s.
+    /// owned [`PersistedEnvelope`]s.
     ///
     /// `from` is **inclusive**: the stream yields every event with
     /// `version >= from`, in ascending `Version` order, then terminates with
-    /// `None`. This matches [`read_all`](Self::read_all)'s `from` semantics;
-    /// the catchup seam relies on this inclusivity to resume without skipping
-    /// the boundary event.
+    /// `None`. In contrast, [`read_all`](Self::read_all) resumes strictly after
+    /// its exclusive global position. Stream catch-up uses an inclusive
+    /// next-version bound; global catch-up uses the last observed position.
     ///
     /// # Batching
     ///

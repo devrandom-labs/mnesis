@@ -10,12 +10,15 @@
     reason = "test harness — relaxed lints for test code"
 )]
 
-//! `SnapshotStore<Vec<u8>, GlobalSeq>` — the fjall-backed projection-state
+//! `CheckpointStore<Vec<u8>, GlobalSeq>` — the fjall-backed projection-state
 //! adapter (issue #164). Projection state and the `$all` [`GlobalSeq`] it was
-//! folded up to are committed together into the dedicated `projections`
+//! folded up to are committed together into the dedicated `checkpoints_global`
 //! partition. These are the public-API tests; the corrupt-bytes defensive test
 //! is a white-box unit test in `src/store.rs` (it needs raw partition access).
 
+use mnesis_store::checkpoint::{CheckpointMode, CheckpointStore, CheckpointWrite};
+#[path = "support/checkpoint.rs"]
+mod checkpoint;
 use std::num::NonZeroU32;
 
 use mnesis_fjall::{FjallStore, GlobalSeq};
@@ -41,10 +44,10 @@ fn temp_store() -> (FjallStore, tempfile::TempDir) {
     (store, dir)
 }
 
-/// The reason the `projections` partition is separate from `snapshots`: an
+/// The reason the `checkpoints_global` partition is separate from `snapshots`: an
 /// aggregate snapshot and a projection checkpoint stored under the **same id
 /// bytes** must not clobber each other. This is the one test that defends the
-/// partition split — it FAILS if the two `SnapshotStore` impls ever share a
+/// partition split — it FAILS if the snapshot and checkpoint impls ever share a
 /// keyspace (a merged partition would let the second `commit` overwrite the
 /// first, so one `hydrate` would decode the other's value). Requires both
 /// features, hence the `snapshot` gate on top of the file's `projection` gate.
@@ -64,9 +67,19 @@ async fn snapshot_and_projection_with_same_id_do_not_collide() {
     )
     .await
     .unwrap();
-    SnapshotStore::<Vec<u8>, GlobalSeq>::commit(&store, &id, SV1, gs(9), &vec![9, 9, 9])
-        .await
-        .unwrap();
+    <FjallStore as CheckpointStore<Vec<u8>, GlobalSeq>>::commit_checkpoint(
+        &store,
+        &id,
+        CheckpointWrite {
+            expected: None,
+            schema_version: SV1,
+            position: gs(9),
+            state: &vec![9, 9, 9],
+            mode: CheckpointMode::Advance,
+        },
+    )
+    .await
+    .unwrap();
 
     // Each hydrates its own value untouched — proof the keyspaces are disjoint.
     let (v, snap) = SnapshotStore::<Vec<u8>, Version>::hydrate(&store, &id, SV1)
@@ -74,12 +87,13 @@ async fn snapshot_and_projection_with_same_id_do_not_collide() {
         .unwrap()
         .into_found()
         .unwrap();
-    let (g, proj) = SnapshotStore::<Vec<u8>, GlobalSeq>::hydrate(&store, &id, SV1)
-        .await
-        .unwrap()
-        .into_found()
-        .unwrap();
+    let (revision, g, proj) = checkpoint::found(
+        <FjallStore as CheckpointStore<Vec<u8>, GlobalSeq>>::hydrate_checkpoint(&store, &id, SV1)
+            .await
+            .unwrap(),
+    );
 
     assert_eq!((v, snap), (Version::new(5).unwrap(), vec![1, 2, 3]));
+    assert_eq!(revision, std::num::NonZeroU64::MIN);
     assert_eq!((g, proj), (gs(9), vec![9, 9, 9]));
 }

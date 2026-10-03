@@ -32,7 +32,7 @@ env:
   # `fuzz/rust-toolchain.toml` on purpose: such a file would make a plain
   # `cd fuzz && cargo test` corpus-replay pull nightly, breaking the "replay needs
   # no nightly" contract. Nightly stays quarantined to CI via this env var.
-  FUZZ_TOOLCHAIN: nightly-2026-06-15
+  FUZZ_TOOLCHAIN: nightly-2026-10-02
 
 jobs:
   deep-fuzz:
@@ -172,42 +172,47 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Restore cargo-afl install + AFL++ runtime
+        id: afl-cache
         # Both the cargo-afl binary and the AFL++ runtime it drives recompile in
         # EVERY matrix job (audit P2 #8). Cache ~/.cargo/bin plus afl.rs's XDG
         # data dir: the runtime object lands under
         # ~/.local/share/afl.rs/<rustc-version>/<afl-version>/afl-llvm/, keyed
-        # internally on the toolchain that built it, so a stale cross-toolchain
-        # hit can never be reused.
+        # internally on the toolchain that built it. A restored cache can also
+        # contain artifacts for older compilers; rebuild for the current pin.
+        # Rebuilding also requires cargo-afl-common's vendored source tree.
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin
+            ~/.cargo/registry/src
             ~/.local/share/afl.rs
-          key: cargo-afl-${{ runner.os }}-${{ hashFiles('fuzz-afl/Cargo.toml') }}
+          key: cargo-afl-v2-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml', 'fuzz-afl/Cargo.lock') }}
           restore-keys: cargo-afl-${{ runner.os }}-
 
       - name: Install cargo-afl (cache-aware)
-        # Pin to the 0.18.x series matching the `afl` lib dep in fuzz-afl/Cargo.toml.
-        # Skip the forced cold-path install when a 0.18.x binary is already present.
+        # An exact v2 hit includes the vendored sources. Fallback caches may
+        # contain only the executable, so reinstall to restore those sources.
+        # Use the AFL version already pinned in the harness lockfile.
+        env:
+          EXACT_CACHE_HIT: ${{ steps.afl-cache.outputs.cache-hit }}
         run: |
-          if [ -x "$HOME/.cargo/bin/cargo-afl" ] \
-            && cargo afl --version 2>/dev/null | grep -q '^cargo-afl 0\.18'; then
-            echo "cargo-afl 0.18.x already installed — cache hit, skipping"
-          else
-            cargo install cargo-afl --version '^0.18' --locked --force
+          afl_version="$(python3 - <<'PY'
+          from pathlib import Path
+          import tomllib
+          lock = tomllib.loads(Path("fuzz-afl/Cargo.lock").read_text())
+          [package] = [p for p in lock["package"] if p["name"] == "afl"]
+          print(package["version"])
+          PY
+          )"
+          if [ "$EXACT_CACHE_HIT" != true ] \
+            || [ "$(cargo afl --version 2>/dev/null)" != "cargo-afl $afl_version" ]; then
+            cargo install cargo-afl --version "=$afl_version" --locked --force
           fi
 
-      - name: Build AFL++ runtime (cache-aware)
-        # cargo-afl vendors AFL++. Skip the forced rebuild when a runtime object
-        # already exists for this rustc/afl pair (the cache path is keyed
-        # internally by both); only a true cache miss pays the compile, and the
-        # cold path keeps --force so it covers the already-built case too.
-        run: |
-          if find "$HOME/.local/share/afl.rs" -name 'afl-compiler-rt.o' 2>/dev/null | grep -q .; then
-            echo "AFL++ runtime already built — cache hit, skipping"
-          else
-            cargo afl config --build --force
-          fi
+      - name: Build AFL++ runtime for the repository toolchain
+        # Finding any cached object does not prove it matches this compiler.
+        # cargo-afl resolves the active compiler's artifact directory itself.
+        run: cargo afl config --build --force
 
       - name: Restore shared corpus (seed dir)
         # Seed from BOTH engines' corpora so value-profile finds seed CMPLOG and
@@ -230,7 +235,7 @@ jobs:
 
       - name: Build CMPLOG-instrumented target
         working-directory: fuzz-afl
-        run: cargo afl build --release --bin ${{ matrix.target }}
+        run: cargo afl build --release --locked --bin ${{ matrix.target }}
 
       - name: Fuzz ${{ matrix.target }} (AFL++/CMPLOG)
         working-directory: fuzz-afl

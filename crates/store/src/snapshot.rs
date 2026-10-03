@@ -77,7 +77,10 @@ where
     async fn load(&self, id: A::Id) -> Result<AggregateRoot<A>, Self::Error> {
         // Snapshot hit → partial replay from snapshot version.
         if let Some((root, from)) = self.try_load_from_snapshot::<A>(&id).await {
-            return self.inner.replay_from(root, from).await;
+            return match from {
+                Some(next) => self.inner.replay_from(root, next).await,
+                None => Ok(root),
+            };
         }
 
         // Fallback: full replay.
@@ -126,7 +129,8 @@ where
     SS: Send + Sync,
     T: Send + Sync,
 {
-    /// Try to load a snapshot. Returns `(root, next_version)` on hit.
+    /// Return a restored root and optional tail start on a snapshot hit.
+    /// At `u64::MAX`, the hit has no possible successor and needs no replay.
     /// Returns `None` on miss, schema mismatch, or any error (best-effort).
     #[cfg_attr(
         feature = "tracing",
@@ -137,7 +141,14 @@ where
             fields(stream = %id, hit = tracing::field::Empty)
         )
     )]
-    async fn try_load_from_snapshot<A>(&self, id: &A::Id) -> Option<(AggregateRoot<A>, Version)>
+    #[allow(
+        clippy::match_same_arms,
+        reason = "stale and absent record distinct tracing fields when tracing is enabled"
+    )]
+    async fn try_load_from_snapshot<A>(
+        &self,
+        id: &A::Id,
+    ) -> Option<(AggregateRoot<A>, Option<Version>)>
     where
         A: Aggregate,
         SS: state::SnapshotStore<A::State, Version>,
@@ -180,8 +191,7 @@ where
             }
         };
         let root = AggregateRoot::<A>::restore(id.clone(), typed_state, version);
-        let next = version.next()?;
-        Some((root, next))
+        Some((root, version.next()))
     }
 
     /// Best-effort snapshot save. Errors are silently ignored.
@@ -199,14 +209,12 @@ where
         A: Aggregate,
         SS: state::SnapshotStore<A::State, Version>,
     {
+        let Ok(current_state) = aggregate.state() else {
+            return;
+        };
         let _ = self
             .snapshot_store
-            .commit(
-                aggregate.id(),
-                self.schema_version,
-                version,
-                aggregate.state(),
-            )
+            .commit(aggregate.id(), self.schema_version, version, current_state)
             .await;
     }
 }

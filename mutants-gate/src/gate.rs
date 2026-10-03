@@ -1,574 +1,582 @@
-//! The pure heart of the gate: turn a parsed run + committed baseline into a
-//! verdict. No IO here — `main` reads the files and calls `evaluate`.
-
+//! Validate report integrity before evaluating mutation coverage floors.
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt::Write as _;
 
-use crate::model::{Baseline, Candidate, FunctionInfo, Report, Scenario, Summary};
+use crate::model::{Baseline, Candidate, Genre, MutantInfo, Report, Scenario, Summary};
 
-/// Per-`file::function` mutation tally.
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub(crate) struct Tally {
-    pub(crate) total: usize,
-    pub(crate) caught: usize,
-    pub(crate) unviable: usize,
-    pub(crate) missed: usize,
-    pub(crate) timeout: usize,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum BaselinePolicy {
+    Required,
+    Skipped,
 }
 
-impl Tally {
-    /// Viable = compiled and ran (caught + missed + timeout); excludes
-    /// `Unviable`, which measures nothing about the tests. This is the number
-    /// the ratchet floors.
-    pub(crate) fn viable(&self) -> usize {
-        [self.caught, self.missed, self.timeout].into_iter().sum()
-    }
-}
-
-/// A reason the gate fails. One variant per failure domain.
-#[derive(Debug, PartialEq, Eq)]
-pub(crate) enum Failure {
-    /// A function produced fewer outcomes than it had candidates — the run was
-    /// interrupted partway through it (fewer outcomes than candidates), checked per
-    /// function so a duplicate elsewhere cannot backfill the aggregate.
-    MissingOutcomes {
-        key: String,
-        expected: usize,
-        executed: usize,
+#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+pub(crate) enum RunError {
+    #[error("candidate list is empty")]
+    Empty,
+    #[error("invalid mutation identity: {0:?}")]
+    InvalidIdentity(Box<MutantInfo>),
+    #[error("duplicate candidate: {0:?}")]
+    DuplicateCandidate(Box<MutantInfo>),
+    #[error("unknown candidate outcome: {0:?}")]
+    UnknownOutcome(Box<MutantInfo>),
+    #[error("duplicate candidate outcome: {0:?}")]
+    DuplicateOutcome(Box<MutantInfo>),
+    #[error("missing candidate outcome: {0:?}")]
+    MissingOutcome(Box<MutantInfo>),
+    #[error("invalid mutant summary: {0:?}")]
+    InvalidSummary(Summary),
+    #[error("unmutated baseline did not pass: {0:?}")]
+    BaselineFailed(Summary),
+    #[error("expected one baseline under Required, zero under Skipped; got {count} ({policy:?})")]
+    BaselineCount {
+        count: usize,
+        policy: BaselinePolicy,
     },
-    /// A mutant survived (a test SHOULD have caught it and did not).
+    #[error("cannot seed a baseline from a surviving or timed-out mutant")]
+    UncleanSeed,
+}
+
+#[derive(Debug)]
+pub(crate) struct ValidatedRun {
+    tallies: BTreeMap<String, Vec<Summary>>,
+}
+
+fn key(info: &MutantInfo) -> String {
+    info.function.as_ref().map_or_else(
+        || format!("{}::<module>", info.file),
+        |function| format!("{}::{}", info.file, function.function_name),
+    )
+}
+
+fn valid_identity(info: &MutantInfo) -> bool {
+    !info.package.is_empty()
+        && !info.file.is_empty()
+        && info.span.start <= info.span.end
+        && (info.genre != Genre::FnValue || info.function.is_some())
+        && info.function.as_ref().is_none_or(|function| {
+            !function.function_name.is_empty()
+                && function.span.start <= info.span.start
+                && info.span.end <= function.span.end
+        })
+}
+
+fn baseline_check(report: &Report, policy: BaselinePolicy) -> Result<(), RunError> {
+    let baselines: Vec<_> = report
+        .outcomes
+        .iter()
+        .filter(|outcome| matches!(outcome.scenario, Scenario::Baseline))
+        .collect();
+    let expected = usize::from(policy == BaselinePolicy::Required);
+    if baselines.len() != expected {
+        return Err(RunError::BaselineCount {
+            count: baselines.len(),
+            policy,
+        });
+    }
+    for baseline in baselines {
+        if baseline.summary != Summary::Success {
+            return Err(RunError::BaselineFailed(baseline.summary));
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn validate(
+    report: &Report,
+    candidates: &[Candidate],
+    policy: BaselinePolicy,
+) -> Result<ValidatedRun, RunError> {
+    baseline_check(report, policy)?;
+    if candidates.is_empty() {
+        return Err(RunError::Empty);
+    }
+    let mut pending = BTreeSet::new();
+    for candidate in candidates {
+        if !valid_identity(candidate) {
+            return Err(RunError::InvalidIdentity(Box::new(candidate.clone())));
+        }
+        if !pending.insert(candidate) {
+            return Err(RunError::DuplicateCandidate(Box::new(candidate.clone())));
+        }
+    }
+    let expected = pending.clone();
+    let mut tallies: BTreeMap<String, Vec<Summary>> = BTreeMap::new();
+    for outcome in &report.outcomes {
+        let Scenario::Mutant(info) = &outcome.scenario else {
+            continue;
+        };
+        if !expected.contains(info) {
+            return Err(RunError::UnknownOutcome(Box::new(info.clone())));
+        }
+        if !pending.remove(info) {
+            return Err(RunError::DuplicateOutcome(Box::new(info.clone())));
+        }
+        match outcome.summary {
+            Summary::Success | Summary::Failure => {
+                return Err(RunError::InvalidSummary(outcome.summary));
+            }
+            Summary::CaughtMutant
+            | Summary::MissedMutant
+            | Summary::Unviable
+            | Summary::Timeout => {}
+        }
+        tallies.entry(key(info)).or_default().push(outcome.summary);
+    }
+    if let Some(missing) = pending.into_iter().next() {
+        return Err(RunError::MissingOutcome(Box::new(missing.clone())));
+    }
+    Ok(ValidatedRun { tallies })
+}
+
+#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+pub(crate) enum Failure {
+    #[error("surviving mutant in {key}")]
     Survivor { key: String },
-    /// A mutant timed out — treated as a failure (a slow test is not a pass).
+    #[error("timed-out mutant in {key}")]
     Timeout { key: String },
-    /// A floored function's viable count dropped below its recorded floor.
+    #[error("{key}: viable count {viable} below floor {floor}")]
     Collapse {
         key: String,
         floor: usize,
         viable: usize,
     },
-    /// A function the sweep saw is in neither `floors` nor `known_zero_viable`.
+    #[error("unaccounted function {key} ({viable} viable)")]
     Unaccounted { key: String, viable: usize },
-    /// The baseline floors a function the sweep never saw (renamed/deleted): the
-    /// floor is stale and silently unenforced. Regenerate the baseline.
+    #[error("stale floor for {key} ({floor})")]
     StaleFloor { key: String, floor: usize },
-    /// A baseline floor is 0 — an inert no-op floor (an authoring slip).
+    #[error("invalid zero floor for {key}")]
     InvalidFloor { key: String },
+    #[error("duplicate known-zero entry or overlapping floor for {key}")]
+    InvalidKnownZero { key: String },
 }
 
-/// The full outcome of a gate run: the tally (always) + any failures.
-#[derive(Debug)]
-pub(crate) struct Verdict {
-    pub(crate) tallies: BTreeMap<String, Tally>,
-    pub(crate) failures: Vec<Failure>,
-}
-
-impl Verdict {
-    pub(crate) const fn passed(&self) -> bool {
-        self.failures.is_empty()
-    }
-
-    pub(crate) fn total_viable(&self) -> usize {
-        self.tallies.values().map(Tally::viable).sum()
-    }
-
-    pub(crate) fn total_mutants(&self) -> usize {
-        self.tallies.values().map(|t| t.total).sum()
-    }
-}
-
-/// The ratchet key for a mutation. A function-less mutation (an associated
-/// `const` etc., where cargo-mutants reports `function: null`) groups under a
-/// synthetic `<module>` name so it is still floored and reported, never dropped.
-fn key(file: &str, function: Option<&FunctionInfo>) -> String {
-    function.map_or_else(
-        || format!("{file}::<module>"),
-        |f| format!("{file}::{}", f.function_name),
-    )
-}
-
-/// Group MUTATION outcomes into per-function tallies. Skips the `Baseline`
-/// scenario and any stray `Success` summary (only meaningful on the baseline),
-/// so `total` always equals the sum of the mutation buckets. Counting is via
-/// `.count()`/`.len()` — no manual arithmetic.
-fn tally(report: &Report) -> BTreeMap<String, Tally> {
-    let mut grouped: BTreeMap<String, Vec<Summary>> = BTreeMap::new();
-    for outcome in &report.outcomes {
-        let Scenario::Mutant(info) = &outcome.scenario else {
-            continue;
-        };
-        if matches!(outcome.summary, Summary::Success) {
-            continue;
-        }
-        grouped
-            .entry(key(&info.file, info.function.as_ref()))
-            .or_default()
-            .push(outcome.summary);
-    }
-    grouped
-        .into_iter()
-        .map(|(k, summaries)| {
-            let count = |want: Summary| summaries.iter().filter(|&&s| s == want).count();
-            let tally = Tally {
-                total: summaries.len(),
-                caught: count(Summary::CaughtMutant),
-                unviable: count(Summary::Unviable),
-                missed: count(Summary::MissedMutant),
-                timeout: count(Summary::Timeout),
-            };
-            (k, tally)
+fn viable(summaries: &[Summary]) -> usize {
+    summaries
+        .iter()
+        .filter(|summary| {
+            matches!(
+                summary,
+                Summary::CaughtMutant | Summary::MissedMutant | Summary::Timeout
+            )
         })
-        .collect()
+        .count()
 }
 
-/// Expected outcome count per `file::function`, from the candidate list.
-/// Counted via `.count()` (no manual arithmetic); the candidate list is small.
-fn expected_counts(candidates: &[Candidate]) -> BTreeMap<String, usize> {
-    let keys: Vec<String> = candidates
-        .iter()
-        .map(|c| key(&c.file, c.function.as_ref()))
-        .collect();
-    keys.iter()
-        .collect::<BTreeSet<&String>>()
-        .into_iter()
-        .map(|k| (k.clone(), keys.iter().filter(|x| *x == k).count()))
-        .collect()
-}
-
-/// Evaluate a run against the baseline. Pure: no IO, deterministic.
-pub(crate) fn evaluate(report: &Report, candidates: &[Candidate], baseline: &Baseline) -> Verdict {
-    let tallies = tally(report);
-    let expected = expected_counts(candidates);
+pub(crate) fn evaluate(run: &ValidatedRun, baseline: &Baseline) -> Vec<Failure> {
     let mut failures = Vec::new();
-
-    let known_zero: BTreeSet<&str> = baseline
-        .known_zero_viable
-        .iter()
-        .map(String::as_str)
-        .collect();
-
-    // 1. Per-function completeness — every candidate must have produced an
-    //    outcome. Per key, so a duplicate outcome elsewhere cannot backfill a
-    //    genuinely missing one.
-    for (k, &want) in &expected {
-        let got = tallies.get(k).map_or(0, |t| t.total);
-        if got < want {
-            failures.push(Failure::MissingOutcomes {
-                key: k.clone(),
-                expected: want,
-                executed: got,
-            });
+    let mut zero = BTreeSet::new();
+    for name in &baseline.known_zero_viable {
+        if !zero.insert(name) || baseline.floors.contains_key(name) {
+            failures.push(Failure::InvalidKnownZero { key: name.clone() });
         }
     }
-
-    // 2. Baseline hygiene — a floor for a function the sweep never saw is stale
-    //    (silently unenforced); a 0 floor is inert.
-    for (k, &floor) in &baseline.floors {
+    for (name, &floor) in &baseline.floors {
         if floor == 0 {
-            failures.push(Failure::InvalidFloor { key: k.clone() });
+            failures.push(Failure::InvalidFloor { key: name.clone() });
         }
-        if !tallies.contains_key(k) && !expected.contains_key(k) {
+        if !run.tallies.contains_key(name) {
             failures.push(Failure::StaleFloor {
-                key: k.clone(),
+                key: name.clone(),
                 floor,
             });
         }
     }
-
-    // 3. Per-function survivors, timeouts, ratchet, and accounting.
-    for (k, t) in &tallies {
-        if t.missed > 0 {
-            failures.push(Failure::Survivor { key: k.clone() });
+    for (name, summaries) in &run.tallies {
+        if summaries.contains(&Summary::MissedMutant) {
+            failures.push(Failure::Survivor { key: name.clone() });
         }
-        if t.timeout > 0 {
-            failures.push(Failure::Timeout { key: k.clone() });
+        if summaries.contains(&Summary::Timeout) {
+            failures.push(Failure::Timeout { key: name.clone() });
         }
-        let viable = t.viable();
-        match baseline.floors.get(k) {
-            Some(&floor) => {
-                if viable < floor {
-                    failures.push(Failure::Collapse {
-                        key: k.clone(),
-                        floor,
-                        viable,
-                    });
-                }
-            }
-            None => {
-                if !known_zero.contains(k.as_str()) {
-                    failures.push(Failure::Unaccounted {
-                        key: k.clone(),
-                        viable,
-                    });
-                }
-            }
+        let count = viable(summaries);
+        match baseline.floors.get(name) {
+            Some(&floor) if count < floor => failures.push(Failure::Collapse {
+                key: name.clone(),
+                floor,
+                viable: count,
+            }),
+            None if !zero.contains(name) => failures.push(Failure::Unaccounted {
+                key: name.clone(),
+                viable: count,
+            }),
+            Some(_) | None => {}
         }
     }
-
-    Verdict { tallies, failures }
+    failures
 }
 
-/// Render the always-printed ratio + per-function table.
-pub(crate) fn render_report(v: &Verdict) -> String {
-    use std::fmt::Write as _;
-    let mut s = String::new();
+pub(crate) fn render_report(run: &ValidatedRun) -> String {
+    let mut text = String::new();
+    let total = run.tallies.values().flatten().count();
+    let viable_count = run
+        .tallies
+        .values()
+        .flatten()
+        .filter(|summary| {
+            matches!(
+                summary,
+                Summary::CaughtMutant | Summary::MissedMutant | Summary::Timeout
+            )
+        })
+        .count();
     let _ = writeln!(
-        s,
-        "mutation coverage: {} viable / {} total",
-        v.total_viable(),
-        v.total_mutants()
+        text,
+        "mutation coverage: {viable_count} viable / {total} total"
     );
     let _ = writeln!(
-        s,
+        text,
         "{:<60} {:>6} {:>6} {:>8}",
         "file::function", "viable", "total", "unviable"
     );
-    for (k, t) in &v.tallies {
+    for (name, summaries) in &run.tallies {
         let _ = writeln!(
-            s,
+            text,
             "{:<60} {:>6} {:>6} {:>8}",
-            k,
-            t.viable(),
-            t.total,
-            t.unviable
+            name,
+            viable(summaries),
+            summaries.len(),
+            summaries
+                .iter()
+                .filter(|summary| **summary == Summary::Unviable)
+                .count()
         );
     }
-    s
+    text
 }
 
-/// Guard against a silently-empty run. cargo-mutants writes an `outcomes.json`
-/// whose only entry is a failed or timed-out `Baseline` when the UNMUTATED suite
-/// does not pass (a broken or wrongly-filtered test run), and then tests zero
-/// mutants. Emitting a baseline from that would bless an empty ratchet; checking
-/// against it would pass vacuously. Returns the reason the run is unusable, if any.
-pub(crate) fn unusable_reason(report: &Report) -> Option<String> {
-    for outcome in &report.outcomes {
-        if matches!(outcome.scenario, Scenario::Baseline) && outcome.summary != Summary::Success {
-            return Some(format!(
-                "the unmutated baseline did not pass (summary: {:?}) — no mutants were tested; \
-                 fix the baseline test run before seeding or gating",
-                outcome.summary
-            ));
-        }
+pub(crate) fn emit_baseline(run: &ValidatedRun) -> Result<String, EmitError> {
+    if run.tallies.values().any(|summaries| {
+        summaries
+            .iter()
+            .any(|summary| matches!(summary, Summary::MissedMutant | Summary::Timeout))
+    }) {
+        return Err(RunError::UncleanSeed.into());
     }
-    let tested = report
-        .outcomes
+    let floors: BTreeMap<_, _> = run
+        .tallies
         .iter()
-        .filter(|o| matches!(o.scenario, Scenario::Mutant(_)))
-        .count();
-    (tested == 0).then(|| "no mutants were tested (empty outcomes)".to_owned())
+        .filter_map(|(name, summaries)| {
+            let count = viable(summaries);
+            (count != 0).then_some((name, count))
+        })
+        .collect();
+    let known_zero: Vec<_> = run
+        .tallies
+        .iter()
+        .filter_map(|(name, summaries)| (viable(summaries) == 0).then_some(name))
+        .collect();
+    serde_json::to_string_pretty(
+        &serde_json::json!({"floors": floors, "known_zero_viable": known_zero}),
+    )
+    .map_err(EmitError::Serialize)
 }
 
-/// Build a baseline skeleton from a clean run: every viable function floored at
-/// its current viable count; every 0-viable function listed as known-zero. The
-/// operator REVIEWS the diff before committing (a genuinely-should-be-tested
-/// 0-viable function is caught here, not by the machine).
-pub(crate) fn emit_baseline(report: &Report) -> String {
-    let tallies = tally(report);
-    let mut floors = std::collections::BTreeMap::new();
-    let mut known_zero = Vec::new();
-    for (k, t) in &tallies {
-        if t.viable() > 0 {
-            floors.insert(k.clone(), t.viable());
-        } else {
-            known_zero.push(k.clone());
-        }
-    }
-    let value = serde_json::json!({ "floors": floors, "known_zero_viable": known_zero });
-    serde_json::to_string_pretty(&value).unwrap_or_else(|_| "{}".to_owned())
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum EmitError {
+    #[error(transparent)]
+    Run(#[from] RunError),
+    #[error("serializing baseline: {0}")]
+    Serialize(#[source] serde_json::Error),
 }
 
 #[cfg(test)]
 mod tests {
+    use std::num::NonZeroU64;
+
     use super::*;
-    use crate::model::{FunctionInfo, MutantInfo};
+    use crate::model::Outcome;
 
-    fn mutant(file: &str, func: &str, summary: Summary) -> crate::model::Outcome {
-        crate::model::Outcome {
+    fn candidates() -> Vec<Candidate> {
+        serde_json::from_str(include_str!(
+            "../tests/audit_cases/real-candidates-27.1.0.json"
+        ))
+        .unwrap()
+    }
+
+    fn report(candidates: &[Candidate], summary: Summary) -> Report {
+        let mut outcomes = vec![Outcome {
+            summary: Summary::Success,
+            scenario: Scenario::Baseline,
+        }];
+        outcomes.extend(candidates.iter().cloned().map(|info| Outcome {
             summary,
-            scenario: Scenario::Mutant(MutantInfo {
-                file: file.to_owned(),
-                function: Some(FunctionInfo {
-                    function_name: func.to_owned(),
-                }),
-            }),
-        }
+            scenario: Scenario::Mutant(info),
+        }));
+        Report { outcomes }
     }
 
-    /// A mutation with no enclosing function (an associated `const` etc.).
-    fn module_mutant(file: &str, summary: Summary) -> crate::model::Outcome {
-        crate::model::Outcome {
-            summary,
-            scenario: Scenario::Mutant(MutantInfo {
-                file: file.to_owned(),
-                function: None,
-            }),
-        }
-    }
-
-    fn candidate(file: &str, func: &str) -> Candidate {
-        Candidate {
-            file: file.to_owned(),
-            function: Some(FunctionInfo {
-                function_name: func.to_owned(),
-            }),
-        }
-    }
-
-    fn module_candidate(file: &str) -> Candidate {
-        Candidate {
-            file: file.to_owned(),
-            function: None,
-        }
-    }
-
-    fn baseline(floors: &[(&str, usize)], known_zero: &[&str]) -> Baseline {
-        Baseline {
-            floors: floors.iter().map(|(k, v)| ((*k).to_owned(), *v)).collect(),
-            known_zero_viable: known_zero.iter().map(|s| (*s).to_owned()).collect(),
-        }
+    fn baseline(run: &ValidatedRun) -> Baseline {
+        serde_json::from_str(&emit_baseline(run).unwrap()).unwrap()
     }
 
     #[test]
-    fn clean_run_at_floor_passes() {
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::CaughtMutant),
-                mutant("a.rs", "f", Summary::CaughtMutant),
-                mutant("a.rs", "f", Summary::Unviable),
-            ],
-        };
-        let candidates = vec![
-            candidate("a.rs", "f"),
-            candidate("a.rs", "f"),
-            candidate("a.rs", "f"),
-        ];
-        let base = baseline(&[("a.rs::f", 2)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert!(v.passed(), "failures: {:?}", v.failures);
-        assert_eq!(v.total_viable(), 2);
-        assert_eq!(v.total_mutants(), 3);
-    }
-
-    #[test]
-    fn a_survivor_fails() {
-        let report = Report {
-            outcomes: vec![mutant("a.rs", "f", Summary::MissedMutant)],
-        };
-        let candidates = vec![candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
+    fn incomplete_or_invalid_identity_is_rejected() {
+        let value: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/audit_cases/real-candidates-27.1.0.json"
+        ))
+        .unwrap();
+        for field in [
+            "package",
+            "file",
+            "function",
+            "span",
+            "replacement",
+            "genre",
+        ] {
+            let mut missing = value[0].clone();
+            missing.as_object_mut().unwrap().remove(field);
+            assert!(
+                serde_json::from_value::<Candidate>(missing).is_err(),
+                "{field}"
+            );
+        }
+        let mut zero_position = value[0].clone();
+        zero_position["span"]["start"]["line"] = serde_json::json!(0);
+        assert!(serde_json::from_value::<Candidate>(zero_position).is_err());
+        let mut unknown_genre = value[0].clone();
+        unknown_genre["genre"] = serde_json::json!("UnknownGenre");
+        assert!(serde_json::from_value::<Candidate>(unknown_genre).is_err());
+        let mut candidates = candidates();
+        candidates[0].span.end = candidates[0].span.start;
+        candidates[0].span.start.column = NonZeroU64::new(u64::MAX).unwrap();
+        let report = report(&candidates, Summary::CaughtMutant);
         assert_eq!(
-            v.failures,
-            vec![Failure::Survivor {
-                key: "a.rs::f".to_owned()
-            }]
+            validate(&report, &candidates, BaselinePolicy::Required).unwrap_err(),
+            RunError::InvalidIdentity(Box::new(candidates[0].clone()))
+        );
+        let mut no_function: Candidate = serde_json::from_value(value[0].clone()).unwrap();
+        no_function.function = None;
+        let invalid = vec![no_function.clone()];
+        let invalid_report = self::report(&invalid, Summary::CaughtMutant);
+        assert_eq!(
+            validate(&invalid_report, &invalid, BaselinePolicy::Required).unwrap_err(),
+            RunError::InvalidIdentity(Box::new(no_function))
         );
     }
 
     #[test]
-    fn a_timeout_fails() {
-        let report = Report {
-            outcomes: vec![mutant("a.rs", "f", Summary::Timeout)],
-        };
-        let candidates = vec![candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
+    fn real_exporter_identities_round_trip_and_enforce_floors() {
+        let candidates = candidates();
+        let report = report(&candidates, Summary::CaughtMutant);
+        let run = validate(&report, &candidates, BaselinePolicy::Required).unwrap();
+        let base = baseline(&run);
+        assert_eq!(evaluate(&run, &base), vec![]);
+        assert_eq!(base.floors.values().sum::<usize>(), candidates.len());
+        assert_eq!(base.known_zero_viable, Vec::<String>::new());
+    }
+
+    #[test]
+    fn every_summary_is_checked_for_each_scenario() {
+        let candidates = candidates();
+        for summary in [
+            Summary::Success,
+            Summary::CaughtMutant,
+            Summary::MissedMutant,
+            Summary::Unviable,
+            Summary::Timeout,
+            Summary::Failure,
+        ] {
+            let mut mutant_report = report(&candidates, summary);
+            let outcome = validate(&mutant_report, &candidates, BaselinePolicy::Required);
+            match summary {
+                Summary::Success | Summary::Failure => {
+                    assert_eq!(outcome.unwrap_err(), RunError::InvalidSummary(summary));
+                }
+                Summary::CaughtMutant
+                | Summary::MissedMutant
+                | Summary::Unviable
+                | Summary::Timeout => assert!(outcome.is_ok()),
+            }
+            mutant_report.outcomes[0].summary = summary;
+            if summary != Summary::Success {
+                assert_eq!(
+                    validate(&mutant_report, &candidates, BaselinePolicy::Required).unwrap_err(),
+                    RunError::BaselineFailed(summary)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn baseline_skipping_must_be_explicit_and_consistent() {
+        let candidates = candidates();
+        let mut report = report(&candidates, Summary::CaughtMutant);
         assert_eq!(
-            v.failures,
-            vec![Failure::Timeout {
-                key: "a.rs::f".to_owned()
-            }]
+            validate(&report, &candidates, BaselinePolicy::Skipped).unwrap_err(),
+            RunError::BaselineCount {
+                count: 1,
+                policy: BaselinePolicy::Skipped
+            }
+        );
+        report.outcomes.remove(0);
+        assert_eq!(
+            validate(&report, &candidates, BaselinePolicy::Required).unwrap_err(),
+            RunError::BaselineCount {
+                count: 0,
+                policy: BaselinePolicy::Required
+            }
+        );
+        assert!(validate(&report, &candidates, BaselinePolicy::Skipped).is_ok());
+        report.outcomes.extend([
+            Outcome {
+                summary: Summary::Success,
+                scenario: Scenario::Baseline,
+            },
+            Outcome {
+                summary: Summary::Success,
+                scenario: Scenario::Baseline,
+            },
+        ]);
+        assert_eq!(
+            validate(&report, &candidates, BaselinePolicy::Required).unwrap_err(),
+            RunError::BaselineCount {
+                count: 2,
+                policy: BaselinePolicy::Required
+            }
         );
     }
 
     #[test]
-    fn an_interrupted_run_reports_missing_outcomes() {
-        // 2 candidates enumerated, only 1 outcome recorded (an interrupted
-        // sweep) — attributed to the specific function that vanished.
-        let report = Report {
-            outcomes: vec![mutant("a.rs", "f", Summary::CaughtMutant)],
-        };
-        let candidates = vec![candidate("a.rs", "f"), candidate("a.rs", "g")];
-        let base = baseline(&[("a.rs::f", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
+    fn duplicate_missing_and_empty_reports_fail() {
+        let candidates = candidates();
+        let mut report = report(&candidates, Summary::CaughtMutant);
+        report.outcomes.pop();
         assert_eq!(
-            v.failures,
-            vec![Failure::MissingOutcomes {
-                key: "a.rs::g".to_owned(),
-                expected: 1,
-                executed: 0
-            }]
+            validate(&report, &candidates, BaselinePolicy::Required).unwrap_err(),
+            RunError::MissingOutcome(Box::new(candidates.last().unwrap().clone()))
+        );
+        let mut duplicate_report = self::report(&candidates, Summary::CaughtMutant);
+        duplicate_report.outcomes.push(Outcome {
+            summary: Summary::CaughtMutant,
+            scenario: Scenario::Mutant(candidates[0].clone()),
+        });
+        assert_eq!(
+            validate(&duplicate_report, &candidates, BaselinePolicy::Required).unwrap_err(),
+            RunError::DuplicateOutcome(Box::new(candidates[0].clone()))
+        );
+        let duplicate = vec![candidates[0].clone(), candidates[0].clone()];
+        assert_eq!(
+            validate(&duplicate_report, &duplicate, BaselinePolicy::Required).unwrap_err(),
+            RunError::DuplicateCandidate(Box::new(candidates[0].clone()))
+        );
+        assert_eq!(
+            validate(&duplicate_report, &[], BaselinePolicy::Required).unwrap_err(),
+            RunError::Empty
         );
     }
 
     #[test]
-    fn viability_collapse_below_floor_fails() {
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::CaughtMutant),
-                mutant("a.rs", "f", Summary::Unviable),
-            ],
-        };
-        let candidates = vec![candidate("a.rs", "f"), candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 2)], &[]);
-        let v = evaluate(&report, &candidates, &base);
+    fn identity_changes_cannot_substitute_another_candidate() {
+        let candidates = candidates();
+        let original = &candidates[0];
+        let mut substitutions = vec![original.clone(); 7];
+        substitutions[0].package = "wrong-package".to_owned();
+        substitutions[1].file = "wrong.rs".to_owned();
+        substitutions[2].replacement = "wrong replacement".to_owned();
+        substitutions[3].genre = Genre::StructField;
+        substitutions[4].span.end = substitutions[4].span.start;
+        substitutions[5].function.as_mut().unwrap().function_name = "wrong-function".to_owned();
+        substitutions[6].function.as_mut().unwrap().return_type = "-> Wrong".to_owned();
+        for substitute in substitutions {
+            assert_ne!(&substitute, original);
+            let mut report = report(&candidates, Summary::CaughtMutant);
+            report.outcomes[1].scenario = Scenario::Mutant(substitute.clone());
+            assert_eq!(
+                validate(&report, &candidates, BaselinePolicy::Required).unwrap_err(),
+                RunError::UnknownOutcome(Box::new(substitute))
+            );
+        }
+    }
+
+    #[test]
+    fn unclean_runs_cannot_seed_and_known_zero_does_not_excuse_survivors() {
+        let candidates = candidates();
+        for summary in [Summary::MissedMutant, Summary::Timeout] {
+            let report = report(&candidates, summary);
+            let run = validate(&report, &candidates, BaselinePolicy::Required).unwrap();
+            assert!(matches!(
+                emit_baseline(&run),
+                Err(EmitError::Run(RunError::UncleanSeed))
+            ));
+            let base = Baseline {
+                floors: BTreeMap::new(),
+                known_zero_viable: run.tallies.keys().cloned().collect(),
+            };
+            let failures = evaluate(&run, &base);
+            let expected: Vec<_> = run
+                .tallies
+                .keys()
+                .map(|name| match summary {
+                    Summary::MissedMutant => Failure::Survivor { key: name.clone() },
+                    _ => Failure::Timeout { key: name.clone() },
+                })
+                .collect();
+            assert_eq!(failures, expected);
+        }
+    }
+
+    #[test]
+    fn module_mutations_and_unviable_results_remain_accounted() {
+        let mut candidates = candidates();
+        candidates[0].function = None;
+        candidates[0].genre = Genre::BinaryOperator;
+        let report = report(&candidates, Summary::Unviable);
+        let run = validate(&report, &candidates, BaselinePolicy::Required).unwrap();
+        let base = baseline(&run);
+        assert_eq!(base.floors, BTreeMap::new());
         assert_eq!(
-            v.failures,
+            base.known_zero_viable,
+            run.tallies.keys().cloned().collect::<Vec<_>>()
+        );
+        assert_eq!(evaluate(&run, &base), vec![]);
+    }
+
+    #[test]
+    fn ratchet_rejects_stale_invalid_collapsed_and_unaccounted_entries() {
+        let candidates = candidates();
+        let report = report(&candidates, Summary::CaughtMutant);
+        let run = validate(&report, &candidates, BaselinePolicy::Required).unwrap();
+        let mut base = baseline(&run);
+        let name = base.floors.keys().next().unwrap().clone();
+        let count = base.floors[&name];
+        base.floors
+            .insert(name.clone(), count.checked_add(1).unwrap());
+        assert_eq!(
+            evaluate(&run, &base),
             vec![Failure::Collapse {
-                key: "a.rs::f".to_owned(),
-                floor: 2,
-                viable: 1
+                key: name.clone(),
+                floor: count + 1,
+                viable: count
             }]
         );
-    }
-
-    #[test]
-    fn a_new_unaccounted_function_fails() {
-        let report = Report {
-            outcomes: vec![mutant("new.rs", "g", Summary::CaughtMutant)],
-        };
-        let candidates = vec![candidate("new.rs", "g")];
-        let base = baseline(&[], &[]);
-        let v = evaluate(&report, &candidates, &base);
+        base.floors.insert(name.clone(), 0);
         assert_eq!(
-            v.failures,
+            evaluate(&run, &base),
+            vec![Failure::InvalidFloor { key: name.clone() }]
+        );
+        base.floors.remove(&name);
+        assert_eq!(
+            evaluate(&run, &base),
             vec![Failure::Unaccounted {
-                key: "new.rs::g".to_owned(),
-                viable: 1
+                key: name.clone(),
+                viable: count
             }]
         );
-    }
-
-    #[test]
-    fn a_documented_zero_viable_function_passes() {
-        let report = Report {
-            outcomes: vec![
-                mutant("actor_ref.rs", "with_sender", Summary::Unviable),
-                mutant("actor_ref.rs", "with_sender", Summary::Unviable),
-            ],
-        };
-        let candidates = vec![
-            candidate("actor_ref.rs", "with_sender"),
-            candidate("actor_ref.rs", "with_sender"),
-        ];
-        let base = baseline(&[], &["actor_ref.rs::with_sender"]);
-        let v = evaluate(&report, &candidates, &base);
-        assert!(v.passed(), "failures: {:?}", v.failures);
-        assert_eq!(v.total_viable(), 0);
-    }
-
-    #[test]
-    fn a_function_less_mutant_keys_under_module() {
-        // A caught associated-const mutation (function: null) must be floored
-        // and reported under `file::<module>`, never dropped.
-        let report = Report {
-            outcomes: vec![module_mutant("mailbox.rs", Summary::CaughtMutant)],
-        };
-        let candidates = vec![module_candidate("mailbox.rs")];
-        let base = baseline(&[("mailbox.rs::<module>", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert!(v.passed(), "failures: {:?}", v.failures);
+        base.floors.insert(name.clone(), count);
+        base.floors.insert("gone.rs::f".to_owned(), 2);
         assert_eq!(
-            v.tallies.get("mailbox.rs::<module>").map(Tally::viable),
-            Some(1)
-        );
-    }
-
-    #[test]
-    fn a_stale_floor_fails() {
-        // gone.rs::x is floored but appears in neither candidates nor outcomes.
-        let report = Report {
-            outcomes: vec![mutant("a.rs", "f", Summary::CaughtMutant)],
-        };
-        let candidates = vec![candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 1), ("gone.rs::x", 2)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert_eq!(
-            v.failures,
+            evaluate(&run, &base),
             vec![Failure::StaleFloor {
-                key: "gone.rs::x".to_owned(),
+                key: "gone.rs::f".to_owned(),
                 floor: 2
             }]
         );
-    }
-
-    #[test]
-    fn a_zero_floor_is_invalid() {
-        let report = Report {
-            outcomes: vec![mutant("a.rs", "f", Summary::CaughtMutant)],
-        };
-        let candidates = vec![candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 0)], &[]);
-        let v = evaluate(&report, &candidates, &base);
+        base.floors.remove("gone.rs::f");
+        base.known_zero_viable.push(name.clone());
         assert_eq!(
-            v.failures,
-            vec![Failure::InvalidFloor {
-                key: "a.rs::f".to_owned()
-            }]
+            evaluate(&run, &base),
+            vec![Failure::InvalidKnownZero { key: name }]
         );
-    }
-
-    #[test]
-    fn multiple_failures_accumulate() {
-        // One survivor and one timeout, different functions — both surface.
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::MissedMutant),
-                mutant("b.rs", "g", Summary::Timeout),
-            ],
-        };
-        let candidates = vec![candidate("a.rs", "f"), candidate("b.rs", "g")];
-        let base = baseline(&[("a.rs::f", 1), ("b.rs::g", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert_eq!(v.failures.len(), 2);
-        assert!(v.failures.contains(&Failure::Survivor {
-            key: "a.rs::f".to_owned()
-        }));
-        assert!(v.failures.contains(&Failure::Timeout {
-            key: "b.rs::g".to_owned()
-        }));
-    }
-
-    #[test]
-    fn report_shows_the_ratio() {
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::CaughtMutant),
-                mutant("a.rs", "f", Summary::Unviable),
-            ],
-        };
-        let candidates = vec![candidate("a.rs", "f"), candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert!(render_report(&v).contains("1 viable / 2 total"));
-    }
-
-    #[test]
-    fn emit_baseline_floors_viable_and_lists_zero() {
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::CaughtMutant),
-                mutant("b.rs", "z", Summary::Unviable),
-            ],
-        };
-        let out = emit_baseline(&report);
-        assert!(out.contains("\"a.rs::f\": 1"));
-        assert!(out.contains("b.rs::z"));
-    }
-
-    #[test]
-    fn success_summary_under_a_mutant_scenario_is_ignored() {
-        // A stray Success under a Mutant scenario must not inflate `total`.
-        let report = Report {
-            outcomes: vec![
-                mutant("a.rs", "f", Summary::Success),
-                mutant("a.rs", "f", Summary::CaughtMutant),
-            ],
-        };
-        let candidates = vec![candidate("a.rs", "f")];
-        let base = baseline(&[("a.rs::f", 1)], &[]);
-        let v = evaluate(&report, &candidates, &base);
-        assert!(v.passed(), "failures: {:?}", v.failures);
-        assert_eq!(v.total_mutants(), 1);
-        assert_eq!(v.total_viable(), 1);
     }
 }

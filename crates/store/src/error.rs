@@ -60,8 +60,8 @@ pub enum StoreError<A, EncErr, DecErr> {
     /// Reachable only from upcaster-driven paths
     /// ([`EventStore::load_with`](crate::EventStore::load_with)):
     /// after the user's upcast transforms the event, a fresh aligned
-    /// envelope is built from the transformed `event_type` + payload via
-    /// [`PersistedEnvelope::for_decode`](crate::PersistedEnvelope::for_decode).
+    /// envelope is built from the transformed event type, schema and payload via
+    /// [`PersistedEnvelope::for_transformed_decode`](crate::PersistedEnvelope::for_transformed_decode).
     /// The build can fail at the value-newtype boundary (oversize
     /// `event_type`/`payload`), the wire encode (`FrameLengthOverflow`),
     /// or the envelope construction (range invariants).
@@ -106,16 +106,16 @@ impl<A, EncErr, DecErr> StoreError<A, EncErr, DecErr> {
 /// Errors from the with-upcaster load path.
 ///
 /// Returned by [`EventStore::load_with`](crate::EventStore::load_with).
-/// Wraps the four error sources [`StoreError`] already carries plus the
-/// user-supplied upcast function's error type.
+/// Wraps the error sources [`StoreError`] carries plus the
+/// user-supplied transformation and original-verification error types.
 ///
-/// `LoadWithError<A, EncErr, DecErr, UpErr>` is structurally `StoreError +
-/// Upcast(UpErr)`. The `From<StoreError<A, EncErr, DecErr>>` impl lets the
+/// `LoadWithError` separates store, transformation and original-verification
+/// errors. The `From<StoreError<A, EncErr, DecErr>>` impl lets the
 /// `?` operator promote a `StoreError` into the wider variant inside a
 /// `load_with` body without manual matching.
 #[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum LoadWithError<A, EncErr, DecErr, UpErr> {
+pub enum LoadWithError<A, EncErr, DecErr, UpErr, VerifyErr = core::convert::Infallible> {
     /// All non-upcast errors — wrapped verbatim from the no-upcaster path.
     #[error(transparent)]
     Store(#[from] StoreError<A, EncErr, DecErr>),
@@ -125,9 +125,15 @@ pub enum LoadWithError<A, EncErr, DecErr, UpErr> {
     /// version) in your own error type if needed.
     #[error("upcast error: {0}")]
     Upcast(#[source] UpErr),
+
+    /// Verification of the original persisted envelope failed before upcasting.
+    #[error("original event verification error: {0}")]
+    Verification(#[source] VerifyErr),
 }
 
-impl<A, EncErr, DecErr, UpErr> From<KernelError> for LoadWithError<A, EncErr, DecErr, UpErr> {
+impl<A, EncErr, DecErr, UpErr, VerifyErr> From<KernelError>
+    for LoadWithError<A, EncErr, DecErr, UpErr, VerifyErr>
+{
     fn from(err: KernelError) -> Self {
         Self::Store(StoreError::Kernel(err))
     }
@@ -156,7 +162,7 @@ pub enum AppendError<E> {
     Store(#[source] E),
 }
 /// Neutral result of validating the append contract
-/// ([`validate_append_versions`]). Adapters map this into their own
+/// ([`validate_append_versions`](crate::store::validate_append_versions)). Adapters map this into their own
 /// `AppendError<E>` at the boundary (rule 3: one variant per failure domain).
 ///
 /// `VersionOverflow` is never a retry-eligible `Conflict` — it maps to

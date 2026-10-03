@@ -1,0 +1,87 @@
+error: transform functions must be ordinary synchronous safe Rust functions
+ --> tests/macro_compile_fail/transforms_unsupported_functions.rs:6:59
+  |
+6 | ...t = "E", from = 1, to = 2)] async fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { unreachable!() } }
+  |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform functions must be ordinary synchronous safe Rust functions
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:12:59
+   |
+12 | ... = "E", from = 1, to = 2)] unsafe fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { unreachable!() } }
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform functions must be ordinary synchronous safe Rust functions
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:18:59
+   |
+18 | ... = "E", from = 1, to = 2)] const fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { unreachable!() } }
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform functions must be ordinary synchronous safe Rust functions
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:24:59
+   |
+24 | ... "E", from = 1, to = 2)] extern "C" fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { unreachable!() } }
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: transform functions cannot have generics or where clauses
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:30:66
+   |
+30 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step<T>(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { ...
+   |                                                                  ^^^
+
+error: transform functions cannot have generics or where clauses
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:36:66
+   |
+36 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step<'a>(payload: &'a [u8]) -> Result<Vec<u8>, std::convert::Infallible...
+   |                                                                  ^^^^
+
+error: transform functions cannot have generics or where clauses
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:42:66
+   |
+42 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step<const N: usize>(payload: &[u8]) -> Result<Vec<u8>, std::convert::I...
+   |                                                                  ^^^^^^^^^^^^^^^^
+
+error: transform functions cannot have generics or where clauses
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:47:1
+   |
+47 | #[transforms(aggregate = (), error = std::convert::Infallible)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `transforms` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: transform functions require exactly one payload argument and no receiver
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:53:1
+   |
+53 | #[transforms(aggregate = (), error = std::convert::Infallible)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `transforms` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: transform functions require exactly one payload argument and no receiver
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:60:67
+   |
+60 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step(a: &[u8], b: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> {...
+   |                                                                   ^^^^^^^^^^^^^^^^^^
+
+error: transform functions require exactly one payload argument and no receiver
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:66:67
+   |
+66 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step(&self) -> Result<Vec<u8>, std::convert::Infallible> { unreachable!...
+   |                                                                   ^^^^^
+
+error: transform functions must return Result<Vec<u8>, the configured error type>
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:72:59
+   |
+72 | impl Marker { #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) { unreachable!() } }
+   |                                                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+error: conditional transform functions are unsupported; condition the entire transform impl instead
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:78:15
+   |
+78 | impl Marker { #[cfg(any())] #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Inf...
+   |               ^^^^^^^^^^^^^
+
+error: conditional transform functions are unsupported; condition the entire transform impl instead
+  --> tests/macro_compile_fail/transforms_unsupported_functions.rs:84:15
+   |
+84 | impl Marker { #[cfg_attr(all(), inline)] #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std:...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^

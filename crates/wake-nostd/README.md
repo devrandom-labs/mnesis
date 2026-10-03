@@ -15,7 +15,7 @@ Builds for `thumbv7em-none-eabihf` and `wasm32-unknown-unknown`.
 
 ## MSRV & stability
 
-MSRV **1.95** (pinned stable — no `#![feature]` gates). Part of the **1.0 tier**. See [STABILITY.md](../../STABILITY.md).
+MSRV **1.99** (pinned stable — no `#![feature]` gates). Part of the **1.0 tier**. See [STABILITY.md](../../STABILITY.md).
 
 ## License
 

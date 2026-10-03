@@ -289,7 +289,7 @@ where
 
 /// Metadata round-trips byte-for-byte on the `$all` read path.
 ///
-/// The per-stream path is checked by [`check_metadata_absent_vs_present_distinct`];
+/// The per-stream path is checked by [`check_metadata_absent_vs_present_distinct`](crate::boundary::check_metadata_absent_vs_present_distinct);
 /// this check pins the same guarantee for the attributed `(position, key, envelope)`
 /// read used by projections and subscriptions.
 pub async fn check_all_metadata_round_trips<S, C, F, Fut>(factory: &F)
@@ -419,7 +419,7 @@ where
     );
 }
 
-/// #333: every `$all` item carries the origin [`StreamKey`](mnesis_store::StreamKey).
+/// #333: every `$all` item carries the origin [`StreamKey`].
 ///
 /// Attribution is a store guarantee, not a payload convention. Interleaves two
 /// streams and asserts each item's key matches its append target, in position

@@ -128,17 +128,19 @@ fn full_aggregate_lifecycle_with_handle() {
 
     // Simulate persistence + state advancement
     let v1 = Version::new(1).unwrap();
-    user.commit_persisted(v1, &create_events);
+    user.commit_persisted(&create_events)
+        .expect("root is usable");
 
-    assert_eq!(user.state().name, "Alice");
+    assert_eq!(user.state().unwrap().name, "Alice");
     assert_eq!(user.version(), Some(v1));
 
     // Second command
     let activate_events = user.handle(ActivateUser).unwrap().unwrap();
     let v2 = Version::new(2).unwrap();
-    user.commit_persisted(v2, &activate_events);
+    user.commit_persisted(&activate_events)
+        .expect("root is usable");
 
-    assert!(user.state().active);
+    assert!(user.state().unwrap().active);
     assert_eq!(user.version(), Some(v2));
 }
 

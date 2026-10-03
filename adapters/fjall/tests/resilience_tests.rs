@@ -9,7 +9,7 @@
 //! B. Dual instance data corruption
 //! C. Deterministic simulation testing (DST) with shadow model
 //! D. Snapshot isolation
-//! E. Crash simulation via `mem::forget`
+//! Process crash recovery and journal faults live in `crash_recovery.rs` / `journal_faults.rs`.
 //! F. Key boundary conditions (`u64::MAX` reads)
 //! G. Recovery torture (100 streams, 5 reopen cycles)
 //! H. Concurrent append storm (50 tasks)
@@ -329,7 +329,7 @@ proptest! {
                         );
                     }
                     Op::Reopen => {
-                        drop(store);
+                        store.close().await.unwrap();
                         store = FjallStore::builder(&path).open().unwrap();
                     }
                 }
@@ -345,59 +345,6 @@ proptest! {
                 );
             }
         });
-    }
-}
-
-// ============================================================================
-// CATEGORY E: Crash Simulation via mem::forget
-// ============================================================================
-
-#[tokio::test]
-async fn attack_crash_simulation_forget_store() {
-    let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("db");
-
-    // Write events, then "crash" by forgetting the store (no clean shutdown)
-    {
-        let store = FjallStore::builder(&path).open().unwrap();
-        let envs = vec![make_envelope(1, "Before", b"crash-data")];
-        store
-            .append(
-                &sk("crash-test"),
-                None,
-                PendingBatch::new(&envs).expect("non-empty batch"),
-            )
-            .await
-            .unwrap();
-        std::mem::forget(store); // Simulate crash — no Drop, no flush
-    }
-
-    // Reopen and check if data survived.
-    // fjall v3 uses file locking — if mem::forget skipped Drop, the lock may
-    // still be held, making reopen impossible. Both outcomes are valid:
-    // - Locked: lock file not released (crash left stale lock)
-    // - Ok: lock released, data may or may not have survived
-    match FjallStore::builder(&path).open() {
-        Err(_) => {
-            println!(
-                "DURABILITY NOTE: reopen failed after mem::forget — \
-                 fjall v3 file lock was not released (expected for crash simulation)"
-            );
-        }
-        Ok(store) => {
-            let payloads = read_all_payloads(&store, &sk("crash-test")).await;
-            if payloads.is_empty() {
-                println!(
-                    "DURABILITY NOTE: data lost after mem::forget — \
-                     fjall does not fsync on every commit by default"
-                );
-            } else {
-                assert_eq!(payloads, vec![b"crash-data".to_vec()]);
-                println!(
-                    "DURABILITY NOTE: data survived mem::forget — fjall fsynced or recovered from WAL"
-                );
-            }
-        }
     }
 }
 

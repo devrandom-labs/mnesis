@@ -46,10 +46,9 @@ fn replay_events(events: &[CounterEvent]) -> AggregateRoot<Counter> {
 /// Helper: fold events via `commit_persisted` (simulating post-persistence sync).
 fn apply_events_to(events: &[CounterEvent]) -> AggregateRoot<Counter> {
     let mut agg = AggregateRoot::<Counter>::new(TestId::numbered(1));
-    for (i, e) in events.iter().enumerate() {
-        let v = Version::new((i + 1) as u64).unwrap();
+    for e in events {
         let batch: Events<_, 0> = Events::new(e.clone());
-        agg.commit_persisted(v, &batch);
+        agg.commit_persisted(&batch).expect("root is usable");
     }
     agg
 }
@@ -68,7 +67,7 @@ proptest! {
         let agg1 = replay_events(&raw_events);
         let agg2 = replay_events(&raw_events);
 
-        prop_assert_eq!(agg1.state(), agg2.state());
+        prop_assert_eq!(agg1.state().unwrap(), agg2.state().unwrap());
         prop_assert_eq!(agg1.version(), agg2.version());
     }
 
@@ -97,7 +96,7 @@ proptest! {
         let replayed = replay_events(&raw_events);
         let applied = apply_events_to(&raw_events);
 
-        prop_assert_eq!(replayed.state(), applied.state());
+        prop_assert_eq!(replayed.state().unwrap(), applied.state().unwrap());
     }
 
     /// Property 4: Version gap rejection
@@ -145,7 +144,7 @@ proptest! {
             split.replay(Version::new(v).unwrap(), e).unwrap();
         }
 
-        prop_assert_eq!(full.state(), split.state(), "full vs split diverged");
+        prop_assert_eq!(full.state().unwrap(), split.state().unwrap(), "full vs split diverged");
         prop_assert_eq!(full.version(), split.version(), "full vs split version diverged");
     }
 

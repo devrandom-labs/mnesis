@@ -21,11 +21,14 @@ mod model;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use gate::BaselinePolicy;
 use model::{Baseline, Candidate, Report};
 
 #[derive(Debug, thiserror::Error)]
 enum GateError {
-    #[error("usage: mutants-gate <check <out-dir> <baseline.json> | emit-baseline <out-dir>>")]
+    #[error(
+        "usage: mutants-gate <check <out-dir> <baseline.json> | emit-baseline <out-dir>> [--skip-baseline]"
+    )]
     Usage,
     #[error("reading {}: {source}", .path.display())]
     Io {
@@ -53,42 +56,48 @@ fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, GateError
 }
 
 fn run() -> Result<bool, GateError> {
-    let mut args = std::env::args().skip(1);
-    let Some(mode) = args.next() else {
-        return Err(GateError::Usage);
+    let mut args: Vec<_> = std::env::args().skip(1).collect();
+    let policy = if args.last().is_some_and(|arg| arg == "--skip-baseline") {
+        args.pop();
+        BaselinePolicy::Skipped
+    } else {
+        BaselinePolicy::Required
+    };
+    let (mode, directory_arg, baseline_path) = match args.as_slice() {
+        [mode, directory] if mode == "emit-baseline" => (mode, directory, None),
+        [mode, directory, baseline] if mode == "check" => (mode, directory, Some(baseline)),
+        _ => return Err(GateError::Usage),
+    };
+    let directory = Path::new(directory_arg);
+    let report: Report = read_json(&directory.join("outcomes.json"))?;
+    let candidates: Vec<Candidate> = read_json(&directory.join("mutants.json"))?;
+    let run = match gate::validate(&report, &candidates, policy) {
+        Ok(run) => run,
+        Err(error) => {
+            eprintln!("mutants-gate FAIL: {error}");
+            return Ok(false);
+        }
     };
     match mode.as_str() {
         "emit-baseline" => {
-            let Some(dir_arg) = args.next() else {
-                return Err(GateError::Usage);
+            let text = match gate::emit_baseline(&run) {
+                Ok(text) => text,
+                Err(error) => {
+                    eprintln!("mutants-gate FAIL: {error}");
+                    return Ok(false);
+                }
             };
-            let out_dir = Path::new(&dir_arg);
-            let report: Report = read_json(&out_dir.join("outcomes.json"))?;
-            if let Some(reason) = gate::unusable_reason(&report) {
-                eprintln!("mutants-gate: cannot seed a baseline: {reason}");
-                return Ok(false);
-            }
-            println!("{}", gate::emit_baseline(&report));
+            println!("{text}");
             Ok(true)
         }
         "check" => {
-            let (Some(dir_arg), Some(baseline_path)) = (args.next(), args.next()) else {
-                return Err(GateError::Usage);
-            };
-            let out_dir = Path::new(&dir_arg);
-            let report: Report = read_json(&out_dir.join("outcomes.json"))?;
-            if let Some(reason) = gate::unusable_reason(&report) {
-                eprintln!("mutants-gate FAIL: unusable run: {reason}");
-                return Ok(false);
+            let baseline: Baseline = read_json(Path::new(baseline_path.ok_or(GateError::Usage)?))?;
+            let failures = gate::evaluate(&run, &baseline);
+            print!("{}", gate::render_report(&run));
+            for failure in &failures {
+                eprintln!("mutants-gate FAIL: {failure}");
             }
-            let candidates: Vec<Candidate> = read_json(&out_dir.join("mutants.json"))?;
-            let baseline: Baseline = read_json(Path::new(&baseline_path))?;
-            let verdict = gate::evaluate(&report, &candidates, &baseline);
-            print!("{}", gate::render_report(&verdict));
-            for failure in &verdict.failures {
-                eprintln!("mutants-gate FAIL: {failure:?}");
-            }
-            Ok(verdict.passed())
+            Ok(failures.is_empty())
         }
         _ => Err(GateError::Usage),
     }

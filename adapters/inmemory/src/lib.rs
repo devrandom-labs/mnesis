@@ -18,14 +18,23 @@ use mnesis_store::batch::BatchSize;
 use mnesis_store::envelope::{EnvelopeError, PendingBatch, PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::{AppendError, AppendValidationError};
 #[cfg(feature = "import")]
-use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::import::{
+    AtomicAppend, AtomicAppendError, PlannedAppend, validate_atomic_runs, validate_distinct_targets,
+};
 use mnesis_store::store::{AllPosition, RawEventStore};
 use mnesis_store::value::SchemaVersion;
 use mnesis_store::wake::WakeSource;
 use mnesis_store::wire::{self, FrameOffsets};
 use mnesis_wake::{NotifyError, StreamNotifiers, WakeReg};
 
+mod checkpoint;
+#[cfg(feature = "export")]
+mod export;
 mod snapshot;
+
+pub use checkpoint::InMemoryCheckpointStore;
+#[cfg(feature = "export")]
+pub use export::{InMemoryExportCursor, InMemoryExportSession};
 
 pub use snapshot::InMemorySnapshotStore;
 
@@ -73,7 +82,7 @@ pub enum InMemoryStoreError {
 }
 
 /// [`InMemoryStore`]'s `$all` resume position — its
-/// [`AllPosition`](mnesis_store::AllPosition).
+/// [`AllPosition`].
 ///
 /// A monotonic-but-gappy `NonZeroU64`, the in-memory analogue of fjall's
 /// `GlobalSeq`. It is the key of the store's `$all` index (`global_index`), so
@@ -396,13 +405,15 @@ fn frame_to_envelope(frame: &StoredFrame) -> Result<PersistedEnvelope, InMemoryS
 /// Collect up to `batch_size` frames with `version >= from`, in version order.
 ///
 /// `rows` is in insertion = version order, so the matching frames are a
-/// contiguous suffix; `take(batch_size)` bounds the materialized slice.
+/// contiguous suffix. Binary search skips the prefix; only the bounded page
+/// of frame handles is cloned while holding the store lock.
 fn scan_batch(rows: &[StoredFrame], from: u64, batch_size: usize) -> VecDeque<StoredFrame> {
-    rows.iter()
-        .filter(|r| r.version >= from)
-        .take(batch_size)
-        .cloned()
-        .collect()
+    let start = rows.partition_point(|row| {
+        #[cfg(test)]
+        bounded_read_tests::record_comparison();
+        row.version < from
+    });
+    rows[start..].iter().take(batch_size).cloned().collect()
 }
 
 /// Map the kernel-neutral [`AppendValidationError`] (the append contract) into
@@ -665,7 +676,7 @@ impl mnesis_store::export::StreamLister for InMemoryStore {
 
 /// Commit several per-stream runs in one atomic critical section.
 ///
-/// Holds the single [`Inner`] lock for the whole operation — validate every
+/// Holds the single commit lock for the whole operation — validate every
 /// write's head first (no mutation), then encode + apply all — so a half-write
 /// is unrepresentable and no concurrent `append` can interleave.
 #[cfg(feature = "import")]
@@ -678,25 +689,15 @@ impl AtomicAppend for InMemoryStore {
             // A no-op commits no position (#330).
             return Ok(None);
         }
+        validate_distinct_targets(writes.iter().map(|write| &write.target))?;
+        validate_atomic_runs(writes)?;
         let mut guard = self.inner.lock().await;
 
-        // Phase 1 — validate every head and run shape against the RUNNING
-        // per-target head; NO mutation. Tracking prior same-batch writes to a
-        // target makes a non-injective route (two writes → one stream) conflict
-        // here instead of concatenating into a corrupt, non-monotonic stream
-        // (honours the AtomicAppend distinct-targets contract). Keyed by the
-        // target's `StreamKey` (lossless bytes), never its `Display`.
-        let mut projected: HashMap<StreamKey, u64> = HashMap::new();
+        // Validate every distinct target against its committed head before mutation.
         for (index, w) in writes.iter().enumerate() {
             let key = w.target.clone();
-            let actual_raw = match projected.get(&key) {
-                Some(&head) => head,
-                // usize ≤ u64 on all supported (32/64-bit) targets; the map_err
-                // is an unreachable belt-and-braces guard, not a Rule-3 |_|
-                // discard of a meaningful error.
-                None => u64::try_from(guard.streams.get(&key).map_or(0, Vec::len))
-                    .map_err(|_| AtomicAppendError::Store(InMemoryStoreError::VersionOverflow))?,
-            };
+            let actual_raw = u64::try_from(guard.streams.get(&key).map_or(0, Vec::len))
+                .map_err(|_| AtomicAppendError::Store(InMemoryStoreError::VersionOverflow))?;
             let expected_raw = w.expected_version.map_or(0, Version::as_u64);
             if actual_raw != expected_raw {
                 return Err(AtomicAppendError::Conflict {
@@ -704,28 +705,6 @@ impl AtomicAppend for InMemoryStore {
                     actual: Version::new(actual_raw),
                 });
             }
-            // Defensive (CLAUDE: each crate validates at its own boundary): the
-            // run must be strictly sequential from expected+1. A running counter
-            // avoids any index→u64 conversion (Rule 2).
-            let mut want = expected_raw.checked_add(1);
-            for env in w.batch() {
-                let Some(want_version) = want else {
-                    return Err(AtomicAppendError::Store(
-                        InMemoryStoreError::VersionOverflow,
-                    ));
-                };
-                if env.version().as_u64() != want_version {
-                    return Err(AtomicAppendError::Conflict {
-                        index,
-                        actual: Version::new(actual_raw),
-                    });
-                }
-                want = want_version.checked_add(1);
-            }
-            // Advance this target's projected head by the run just validated, so
-            // a later same-target write in this batch conflicts above. The run is
-            // non-empty, so its last version is total.
-            projected.insert(key, w.batch().last().version().as_u64());
         }
 
         // Phase 2 — assign `$all` positions and stage frames (still no store mutation).
@@ -798,10 +777,45 @@ mod batch_config_tests {
     reason = "test code"
 )]
 mod bounded_read_tests {
+    use std::cell::Cell;
+
     use super::*;
     use futures::StreamExt;
     use mnesis_store::batch::BatchSize;
     use mnesis_store::envelope::pending_envelope;
+
+    thread_local! {
+        static COMPARISONS: Cell<usize> = const { Cell::new(0) };
+    }
+
+    pub fn record_comparison() {
+        COMPARISONS.with(|count| count.set(count.get().checked_add(1).unwrap()));
+    }
+
+    #[tokio::test]
+    async fn paged_reads_bound_prefix_search_work() {
+        for count in [256u64, 512, 1024] {
+            let store = InMemoryStore::with_batch_size(BatchSize::new(8).unwrap());
+            let id = StreamKey::from_slice(b"work-count");
+            seed(&store, &id, count).await;
+            COMPARISONS.with(|work| work.set(0));
+            let mut stream = store.read_stream(&id, Version::INITIAL).await.unwrap();
+            let mut versions = Vec::new();
+            while let Some(row) = stream.next().await {
+                versions.push(row.unwrap().version().as_u64());
+            }
+            assert_eq!(versions, (1..=count).collect::<Vec<_>>());
+            let work = COMPARISONS.with(Cell::get);
+            let pages = usize::try_from(count / 8 + 1).unwrap();
+            let bound = pages
+                .checked_mul(usize::try_from(count.ilog2()).unwrap() + 2)
+                .unwrap();
+            assert!(
+                work <= bound,
+                "{count} rows: {work} comparisons exceeds {bound}"
+            );
+        }
+    }
 
     fn env(v: u64) -> PendingEnvelope {
         pending_envelope(Version::new(v).unwrap())
@@ -871,6 +885,60 @@ mod bounded_read_tests {
             seen.push(item.unwrap().version().as_u64());
         }
         assert_eq!(seen, vec![6, 7, 8, 9, 10]);
+    }
+
+    #[tokio::test]
+    async fn paging_observes_append_between_refills_and_stays_terminal() {
+        let store = Arc::new(InMemoryStore::with_batch_size(BatchSize::new(2).unwrap()));
+        let id = StreamKey::from_slice(b"concurrent-pages");
+        seed(&store, &id, 4).await;
+        let page_read = Arc::new(tokio::sync::Barrier::new(2));
+        let appended = Arc::new(tokio::sync::Barrier::new(2));
+        let reader_store = Arc::clone(&store);
+        let reader_id = id.clone();
+        let reader_page = Arc::clone(&page_read);
+        let reader_appended = Arc::clone(&appended);
+        let reader = tokio::spawn(async move {
+            let mut stream = reader_store
+                .read_stream(&reader_id, Version::INITIAL)
+                .await
+                .unwrap();
+            let mut seen = Vec::new();
+            for _ in 0..2 {
+                seen.push(stream.next().await.unwrap().unwrap().version().as_u64());
+            }
+            reader_page.wait().await;
+            reader_appended.wait().await;
+            while let Some(row) = stream.next().await {
+                seen.push(row.unwrap().version().as_u64());
+            }
+            (stream, seen)
+        });
+        page_read.wait().await;
+        store
+            .append(
+                &id,
+                Version::new(4),
+                PendingBatch::new(&[env(5), env(6)]).unwrap(),
+            )
+            .await
+            .unwrap();
+        appended.wait().await;
+        let (mut stream, seen) = reader.await.unwrap();
+        assert_eq!(seen, vec![1, 2, 3, 4, 5, 6]);
+        store
+            .append(&id, Version::new(6), PendingBatch::of(&env(7)))
+            .await
+            .unwrap();
+        assert!(stream.next().await.is_none());
+        for from in [8, u64::MAX] {
+            let mut absent = store
+                .read_stream(&id, Version::new(from).unwrap())
+                .await
+                .unwrap();
+            assert!(absent.next().await.is_none());
+            assert!(absent.next().await.is_none());
+        }
     }
 
     // Error paths in the unfold closure set `s.done = true` before returning

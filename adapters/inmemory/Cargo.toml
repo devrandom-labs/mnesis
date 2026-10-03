@@ -27,6 +27,7 @@ tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
+criterion = { workspace = true }
 # Path-only self dev-dep (no version) unifies the `import` feature into the
 # crate's own test targets — `AtomicAppend` on `InMemoryStore` is gated
 # behind it (matches the pattern mnesis-store uses for mnesis-inmemory).
@@ -37,6 +38,10 @@ mnesis-store-testing = { path = "../../crates/store-testing", features = [
 ] }
 proptest = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[[bench]]
+name = "paged_reads"
+harness = false
 
 [lints]
 workspace = true

@@ -82,8 +82,8 @@ use futures::StreamExt;
 use futures::TryStreamExt;
 use mnesis::{Version, version};
 use mnesis_fjall::{AllIndex, FjallStore};
-use mnesis_store::cbor::{ChunkWriter, decode_chunk};
-use mnesis_store::export::{EventExporter, StreamLister};
+use mnesis_store::cbor::{ChunkWriter, decode_chunk, salvage_chunk};
+use mnesis_store::export::{ConsistentExporter, ExportSession};
 use mnesis_store::import::{Atomicity, EventImporter, StreamOutcome};
 use mnesis_store::repository::Repository;
 use mnesis_store::store::{RawEventStore, Store};
@@ -120,18 +120,7 @@ async fn seed_account<R: Repository<BankAccount>>(
     for &amount in deposits {
         let _ = repo.execute(&mut account, Deposit { amount }).await?;
     }
-    Ok(account.state().clone())
-}
-
-/// Fold a decoded account event into the running read-model balance. The
-/// `.decoded()` adapter reuses the repository's JSON codec, so the consumer no
-/// longer hand-decodes — this is pure domain arithmetic (#249).
-const fn apply_balance(balance: u64, event: &AccountEvent) -> u64 {
-    match event {
-        AccountEvent::Opened(_) => balance,
-        AccountEvent::Deposited(d) => balance + d.amount,
-        AccountEvent::Withdrawn(w) => balance - w.amount,
-    }
+    Ok(account.state()?.clone())
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -143,8 +132,7 @@ const fn apply_balance(balance: u64, event: &AccountEvent) -> u64 {
 pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState), BoxErr> {
     let id = AccountId("alice".to_owned());
 
-    // Scope the first store so it (and its Arc) drops at block end, closing and
-    // flushing the keyspace before we reopen the same path.
+    // Await worker/engine shutdown before reopening the same directory.
     let before = {
         let store = FjallStore::builder(path).open()?.into_store();
         let repo = store.repository::<BankAccount>().json().build();
@@ -154,14 +142,23 @@ pub async fn run_persistence(path: &Path) -> Result<(AccountState, AccountState)
         // infers the aggregate — no annotation (#243).
         let mut account = repo.load(id.clone()).await?;
         let _ = repo.execute(&mut account, Withdraw { amount: 300 }).await?;
-        account.state().clone()
+        let before_close = account.state()?.clone();
+        let shutdown = store.raw().clone();
+        drop(repo);
+        drop(store);
+        shutdown.close().await?;
+        before_close
     };
 
     // Reopen from scratch and rehydrate purely from the on-disk event log.
     let store = FjallStore::builder(path).open()?.into_store();
     let repo = store.repository::<BankAccount>().json().build();
     let reopened = repo.load(id).await?;
-    let after = reopened.state().clone();
+    let after = reopened.state()?.clone();
+    let shutdown = store.raw().clone();
+    drop(repo);
+    drop(store);
+    shutdown.close().await?;
 
     Ok((before, after))
 }
@@ -215,7 +212,7 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
             Step::CaughtUp => break,
             Step::Event(d) => {
                 catchup_versions.push(d.version.as_u64());
-                balance = apply_balance(balance, &d.event);
+                balance = d.event.balance_after(balance)?;
             }
         }
     }
@@ -249,7 +246,7 @@ pub async fn run_subscription(path: &Path) -> Result<SubscriptionOutcome, BoxErr
         }
     };
     let live_version = d.version.as_u64();
-    let live_balance = apply_balance(balance, &d.event);
+    let live_balance = d.event.balance_after(balance)?;
     writer
         .await
         .map_err(|e| format!("writer task panicked: {e}"))?;
@@ -319,7 +316,10 @@ pub struct RoundTripOutcome {
 /// export streams with `TryStreamExt::try_fold` — one functional pipeline, no
 /// manual byte concatenation, no hand-ordered framing (#246).
 async fn build_chunk(store: &Store<FjallStore>) -> Result<Vec<u8>, BoxErr> {
-    let mut ids: Vec<StreamKey> = store
+    let session = store
+        .open_export_session(std::time::Duration::from_secs(60))
+        .await?;
+    let mut ids: Vec<StreamKey> = session
         .list_streams()
         .await?
         .collect::<Vec<_>>()
@@ -328,17 +328,19 @@ async fn build_chunk(store: &Store<FjallStore>) -> Result<Vec<u8>, BoxErr> {
         .collect::<Result<_, _>>()?;
     ids.sort_by(|a, b| a.as_bytes().cmp(b.as_bytes()));
 
+    let view = &session;
     let writer = futures::stream::iter(ids.into_iter().map(Ok::<_, BoxErr>))
         .try_fold(
             ChunkWriter::new(Vec::new(), None)?,
             |mut w, id| async move {
-                let events = store.export_stream(&id, Version::INITIAL).await?;
+                let events = view.export_stream(&id, Version::INITIAL).await?;
                 w.section(id.as_bytes())?.try_extend(events).await?;
                 Ok(w)
             },
         )
         .await?;
-    Ok(writer.into_sink())
+    session.close().await?;
+    Ok(writer.finish()?)
 }
 
 /// Populate several streams, back them up to a file, restore into a fresh
@@ -386,21 +388,21 @@ pub async fn run_export_import(work_dir: &Path) -> Result<RoundTripOutcome, BoxE
     let mut restored = Vec::new();
     for summary in &originals {
         let restored_root = dst_repo.load(AccountId(summary.id.clone())).await?;
-        let state = restored_root.state().clone();
+        let state = restored_root.state()?.clone();
         restored.push(AccountSummary {
             id: summary.id.clone(),
             state,
         });
     }
 
-    // 5a. Corrupt one block's body (flip the last byte → its crc no longer
-    //     matches). Framing still parses, so the bad block decodes to
-    //     `ImportBlock::Corrupt`; a per-stream import halts that stream's good
-    //     prefix → `StreamOutcome::Corrupt`.
+    // 5a. Damage an event body. Normal restore rejects the artifact; explicit
+    // salvage lets the importer retain good events and report the corrupt block.
     let mut corrupted = chunk;
-    let last = corrupted.len() - 1;
-    corrupted[last] ^= 0xFF;
-    let corrupt_sections = decode_chunk(&corrupted)?;
+    corrupt_last_payload(&mut corrupted, &sections)?;
+    if decode_chunk(&corrupted).is_ok() {
+        return Err("normal restore accepted corruption".into());
+    }
+    let corrupt_sections = salvage_chunk(&corrupted)?.into_sections_for_partial_recovery();
     let probe = FjallStore::builder(work_dir.join("probe"))
         .open()?
         .into_store();
@@ -421,7 +423,8 @@ pub async fn run_export_import(work_dir: &Path) -> Result<RoundTripOutcome, BoxE
     // 5b. Unparseable framing is a *decode* error, a distinct failure domain.
     let malformed_detected = matches!(
         decode_chunk(b"not a valid nxch chunk"),
-        Err(mnesis_store::cbor::ChunkError::Malformed(_))
+        Err(mnesis_store::cbor::ChunkError::Malformed(_)
+            | mnesis_store::cbor::ChunkError::Decode { .. })
     );
 
     Ok(RoundTripOutcome {
@@ -449,7 +452,7 @@ pub struct ProduceSyncOutcome {
 
 /// A produce-and-sync `IoT` device: it appends per-stream and would export/sync
 /// upward, but never reads `$all` locally. Built with
-/// [`AllIndex::Disabled`](mnesis_fjall::AllIndex::Disabled), it **skips the
+/// [`AllIndex::Disabled`], it **skips the
 /// `events_global` frame copy** on every append (a smaller on-disk store, less
 /// flash write) — and `read_all` says so explicitly rather than silently
 /// returning nothing. Append + per-stream rehydrate still work exactly as before.
@@ -463,7 +466,7 @@ pub async fn run_produce_and_sync(path: &Path) -> Result<ProduceSyncOutcome, Box
     // The produce path is unaffected: append + per-stream rehydrate both work.
     let repo = store.repository::<BankAccount>().json().build();
     seed_account(&repo, &id, "Device", &[10, 20, 30]).await?;
-    let rehydrated_balance = repo.load(id).await?.state().balance;
+    let rehydrated_balance = repo.load(id).await?.state()?.balance()?;
 
     // The `$all` index is not maintained — `read_all` surfaces that explicitly.
     let all_index_disabled = matches!(
@@ -481,6 +484,29 @@ pub async fn run_produce_and_sync(path: &Path) -> Result<ProduceSyncOutcome, Box
 // Tests — the gate's nextest runs these (the real proofs).
 // ════════════════════════════════════════════════════════════════════════════
 
+fn corrupt_last_payload(
+    bytes: &mut [u8],
+    sections: &[mnesis_store::StreamSection],
+) -> Result<(), BoxErr> {
+    let payload = sections
+        .iter()
+        .flat_map(|section| &section.blocks)
+        .rev()
+        .find_map(|block| match block {
+            mnesis_store::ImportBlock::Event(event) if !event.payload().is_empty() => {
+                Some(event.payload())
+            }
+            _ => None,
+        })
+        .ok_or("backup contains no nonempty event payload")?;
+    let offset = bytes
+        .windows(payload.len())
+        .rposition(|window| window == payload)
+        .ok_or("backup payload was not found")?;
+    bytes[offset] ^= 0xFF;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -491,7 +517,7 @@ mod tests {
         let (before, after) = run_persistence(&dir.path().join("db")).await?;
 
         // 1000 + 500 - 300 = 1200, and the rehydrated state is identical.
-        assert_eq!(before.balance, 1_200);
+        assert_eq!(before.balance(), Ok(1_200));
         assert_eq!(before.owner, "Alice");
         assert!(before.is_open);
         assert_eq!(
@@ -529,9 +555,9 @@ mod tests {
         );
         // Three distinct accounts actually made the trip.
         assert_eq!(outcome.originals.len(), 3);
-        assert_eq!(outcome.originals[0].state.balance, 1_500); // alice
-        assert_eq!(outcome.originals[1].state.balance, 200); // bob
-        assert_eq!(outcome.originals[2].state.balance, 150); // carol
+        assert_eq!(outcome.originals[0].state.balance(), Ok(1_500)); // alice
+        assert_eq!(outcome.originals[1].state.balance(), Ok(200)); // bob
+        assert_eq!(outcome.originals[2].state.balance(), Ok(150)); // carol
 
         // Corruption distinctions: a crc-failed block halts its stream (Corrupt,
         // carrying the good prefix), while bad framing is Malformed.

@@ -191,7 +191,7 @@ async fn zero_copy_save_and_load_roundtrip() {
         .unwrap();
 
     let loaded: AggregateRoot<CounterAggregate> = es.load(CounterId("ctr-1".into())).await.unwrap();
-    assert_eq!(loaded.state().value, 7);
+    assert_eq!(loaded.state().unwrap().value, 7);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -200,7 +200,7 @@ async fn zero_copy_load_empty_stream() {
     let store = Store::new(InMemoryStore::new());
     let es = store.repository().codec(CounterBorrowingCodec).build();
     let loaded: AggregateRoot<CounterAggregate> = es.load(CounterId("ctr-1".into())).await.unwrap();
-    assert_eq!(loaded.state().value, 0);
+    assert_eq!(loaded.state().unwrap().value, 0);
     assert_eq!(loaded.version(), None);
 }
 
@@ -222,7 +222,7 @@ async fn zero_copy_multi_save_load() {
 
     let final_agg: AggregateRoot<CounterAggregate> =
         es.load(CounterId("ctr-1".into())).await.unwrap();
-    assert_eq!(final_agg.state().value, 8);
+    assert_eq!(final_agg.state().unwrap().value, 8);
     assert_eq!(final_agg.version(), Some(Version::new(2).unwrap()));
 }
 

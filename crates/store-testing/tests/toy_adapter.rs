@@ -17,7 +17,9 @@ use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::{EnvelopeError, PendingEnvelope, PersistedEnvelope};
 use mnesis_store::error::AppendError;
-use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::import::{
+    AtomicAppend, AtomicAppendError, PlannedAppend, validate_atomic_runs, validate_distinct_targets,
+};
 use mnesis_store::store::{AllPosition, RawEventStore};
 use mnesis_store::value::SchemaVersion;
 use mnesis_store::wake::WakeSource;
@@ -298,36 +300,21 @@ impl AtomicAppend for ToyStore {
         if writes.is_empty() {
             return Ok(None);
         }
+        validate_distinct_targets(writes.iter().map(|write| &write.target))?;
+        validate_atomic_runs(writes)?;
         let last = {
             let mut inner = self.inner.lock().await;
-            // Phase 1 — validate every write against a RUNNING projected head
-            // (counting earlier writes to the same target in this batch) and
-            // stage; any failure returns before anything is applied.
-            let mut heads: HashMap<Vec<u8>, Option<Version>> = HashMap::new();
+            // Validate distinct committed heads and stage before applying anything.
             let mut staged: Vec<(Vec<u8>, Vec<StoredEvent>)> = Vec::new();
             let mut pos = inner.next_pos;
             for (index, write) in writes.iter().enumerate() {
                 let key = write.target.as_bytes().to_vec();
-                let head = *heads.entry(key.clone()).or_insert_with(|| inner.head(&key));
+                let head = inner.head(&key);
                 if head != write.expected_version {
                     return Err(AtomicAppendError::Conflict {
                         index,
                         actual: head,
                     });
-                }
-                // Defensive contiguity validation at this boundary; overflow
-                // is a Store error, never a Conflict (rule 3).
-                match versions_sequential(write.expected_version, write.batch()) {
-                    Err(SeqError::Malformed) => {
-                        return Err(AtomicAppendError::Conflict {
-                            index,
-                            actual: head,
-                        });
-                    }
-                    Err(SeqError::Overflow) => {
-                        return Err(AtomicAppendError::Store(ToyError::VersionOverflow));
-                    }
-                    Ok(()) => {}
                 }
                 let mut run = Vec::with_capacity(write.batch().len().get());
                 for env in write.batch() {
@@ -338,7 +325,6 @@ impl AtomicAppend for ToyStore {
                         stage(env, ToyPos(pos), &write.target).map_err(AtomicAppendError::Store)?,
                     );
                 }
-                heads.insert(key.clone(), Some(write.batch().last().version()));
                 staged.push((key, run));
             }
             // Phase 2 — commit: everything lands, or (above) nothing did.

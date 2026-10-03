@@ -1,7 +1,26 @@
 use alloc::borrow::{Cow, ToOwned};
 use alloc::vec::Vec;
 
-use mnesis::Version;
+use mnesis::ErrorId;
+use thiserror::Error;
+
+use crate::SchemaVersion;
+
+/// Errors returned by generated schema transformation functions.
+#[derive(Debug, Error)]
+#[non_exhaustive]
+pub enum TransformError<E> {
+    /// A user-provided transform failed; its original error remains the source.
+    #[error("transform error: {0}")]
+    Transform(#[source] E),
+    /// The name is known, but this schema is not a declared graph node.
+    /// No payload interpretation is safe without an explicit migration policy.
+    #[error("undeclared schema {schema:?} for event '{event_type}'")]
+    UnsupportedSchema {
+        event_type: ErrorId,
+        schema: SchemaVersion,
+    },
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EventMorsel — data unit flowing through the transform pipeline
@@ -23,14 +42,14 @@ use mnesis::Version;
 /// single type that flows through each pipeline step.
 pub struct EventMorsel<'a> {
     event_type: Cow<'a, str>,
-    schema_version: Version,
+    schema_version: SchemaVersion,
     payload: Cow<'a, [u8]>,
 }
 
 impl<'a> EventMorsel<'a> {
     /// Build with owned payload (from a transform).
     #[must_use]
-    pub fn new(event_type: &str, schema_version: Version, payload: Vec<u8>) -> Self {
+    pub fn new(event_type: &str, schema_version: SchemaVersion, payload: Vec<u8>) -> Self {
         Self {
             event_type: Cow::Owned(event_type.to_owned()),
             schema_version,
@@ -40,7 +59,11 @@ impl<'a> EventMorsel<'a> {
 
     /// Create a morsel borrowing from existing data (zero allocation).
     #[must_use]
-    pub const fn borrowed(event_type: &'a str, schema_version: Version, payload: &'a [u8]) -> Self {
+    pub const fn borrowed(
+        event_type: &'a str,
+        schema_version: SchemaVersion,
+        payload: &'a [u8],
+    ) -> Self {
         Self {
             event_type: Cow::Borrowed(event_type),
             schema_version,
@@ -56,7 +79,7 @@ impl<'a> EventMorsel<'a> {
 
     /// The schema version.
     #[must_use]
-    pub const fn schema_version(&self) -> Version {
+    pub const fn schema_version(&self) -> SchemaVersion {
         self.schema_version
     }
 
@@ -66,7 +89,9 @@ impl<'a> EventMorsel<'a> {
         &self.payload
     }
 
-    /// True if all fields still borrow from the original source.
+    /// True if the event type and payload are borrowed.
+    ///
+    /// This does not identify the source or prove that the schema is unchanged.
     #[must_use]
     pub const fn is_borrowed(&self) -> bool {
         matches!(
@@ -83,7 +108,7 @@ impl<'a> EventMorsel<'a> {
 
     /// Return a new morsel with a different schema version.
     #[must_use]
-    pub fn with_schema_version(self, schema_version: Version) -> Self {
+    pub fn with_schema_version(self, schema_version: SchemaVersion) -> Self {
         Self {
             schema_version,
             ..self
