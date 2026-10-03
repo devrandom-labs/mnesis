@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.3.1...mnesis-store-v0.4.0) - 2026-10-03
+
+### Fixed
+
+- [**breaking**] harden non-postgres contracts and retain audit regressions ([#373](https://github.com/devrandom-labs/mnesis/pull/373))
+
 ## [0.3.1](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.3.0...mnesis-store-v0.3.1) - 2026-08-14
 
 ### Fixed
