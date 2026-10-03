@@ -176,14 +176,14 @@ jobs:
         # EVERY matrix job (audit P2 #8). Cache ~/.cargo/bin plus afl.rs's XDG
         # data dir: the runtime object lands under
         # ~/.local/share/afl.rs/<rustc-version>/<afl-version>/afl-llvm/, keyed
-        # internally on the toolchain that built it, so a stale cross-toolchain
-        # hit can never be reused.
+        # internally on the toolchain that built it. A restored cache can also
+        # contain artifacts for older compilers; rebuild for the current pin.
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin
             ~/.local/share/afl.rs
-          key: cargo-afl-${{ runner.os }}-${{ hashFiles('fuzz-afl/Cargo.toml') }}
+          key: cargo-afl-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml', 'fuzz-afl/Cargo.toml') }}
           restore-keys: cargo-afl-${{ runner.os }}-
 
       - name: Install cargo-afl (cache-aware)
@@ -197,17 +197,10 @@ jobs:
             cargo install cargo-afl --version '^0.18' --locked --force
           fi
 
-      - name: Build AFL++ runtime (cache-aware)
-        # cargo-afl vendors AFL++. Skip the forced rebuild when a runtime object
-        # already exists for this rustc/afl pair (the cache path is keyed
-        # internally by both); only a true cache miss pays the compile, and the
-        # cold path keeps --force so it covers the already-built case too.
-        run: |
-          if find "$HOME/.local/share/afl.rs" -name 'afl-compiler-rt.o' 2>/dev/null | grep -q .; then
-            echo "AFL++ runtime already built — cache hit, skipping"
-          else
-            cargo afl config --build --force
-          fi
+      - name: Build AFL++ runtime for the repository toolchain
+        # Finding any cached object does not prove it matches this compiler.
+        # cargo-afl resolves the active compiler's artifact directory itself.
+        run: cargo afl config --build --force
 
       - name: Restore shared corpus (seed dir)
         # Seed from BOTH engines' corpora so value-profile finds seed CMPLOG and
