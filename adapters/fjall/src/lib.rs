@@ -27,10 +27,9 @@
 //! [`bytes::Bytes`] with zero-copy `From<Bytes>` and
 //! `From<Slice> for Bytes` conversions. Without it, every fjall read on
 //! the hot path would pay one alloc + memcpy to materialize a `Bytes`
-//! envelope. With it, the [`bytes::Bytes`] in
-//! [`mnesis_store::PersistedEnvelope`] is the same Arc-counted buffer
-//! fjall handed us — zero copy from disk LSM block to the envelope's
-//! payload bytes.
+//! envelope. With it, aligned Fjall buffers are reused directly. Unaligned
+//! SST buffers are copied once into a 16-byte-aligned owner before building
+//! the envelope, which retains that owner for borrowing decoders.
 //!
 //! # Read path is `futures::Stream`
 //!
@@ -46,8 +45,8 @@
 //! # Wire format
 //!
 //! Every frame is built by [`mnesis_store::wire::encode_frame`]. That helper
-//! guarantees the payload bytes land on a 16-byte boundary inside the
-//! `Bytes` buffer the cursor hands out — the wire-format invariant that
+//! guarantees aligned payload offsets. The read path also checks the actual
+//! buffer address and repairs alignment when needed — the invariant that
 //! zero-copy decoders (rkyv, flatbuffers, `#[repr(C)]` POD) rely on for
 //! sound `&T` reads. Encoding/decoding of the *key* (stream id + version)
 //! lives in the crate-private `wire_key` module; the *value* layout is owned
@@ -60,20 +59,33 @@
     reason = "FjallError is intentionally stack-allocated (~208 bytes) for IoT targets"
 )]
 
+mod async_store;
+mod blocking;
 mod builder;
+#[cfg(feature = "projection")]
+mod checkpoint;
+mod durability;
 mod error;
+#[cfg(feature = "export")]
+mod export;
 mod global_seq;
+mod limits;
+mod manifest;
 mod partition;
 mod plan;
 mod scan;
-#[cfg(any(feature = "snapshot", feature = "projection"))]
+#[cfg(feature = "snapshot")]
 mod snapshot;
 mod store;
-mod subscription_id;
 mod wire_key;
 
+pub use async_store::FjallStore;
+pub use blocking::{BlockingConfig, BlockingStream};
 pub use builder::FjallStoreBuilder;
+pub use durability::Durability;
 pub use error::FjallError;
+#[cfg(feature = "export")]
+pub use export::{FjallExportCursor, FjallExportSession};
 pub use global_seq::GlobalSeq;
+pub use limits::{MAX_KEY_LEN, MAX_STREAM_ID_LEN};
 pub use partition::{AllIndex, KeyspaceConfig};
-pub use store::FjallStore;

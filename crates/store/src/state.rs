@@ -4,6 +4,7 @@ use core::num::{NonZeroU32, NonZeroU64};
 
 use mnesis::{Id, Version};
 
+use crate::checkpoint::{CheckpointError, CheckpointHydrated, CheckpointStore, CheckpointWrite};
 use crate::codec::{Decode, Encode, OwningCodec};
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -64,9 +65,9 @@ impl<S, P> Hydrated<S, P> {
 /// Atomic persistence of a snapshot — derived state plus the position it
 /// was folded up to.
 ///
-/// One trait, two callers:
-/// - aggregate snapshots — the aggregate's state, at its `Version`.
-/// - projections — the projection's state, at its position.
+/// Writes are unconditional cache replacements. For projections that must
+/// reject stale writers and position regressions, use
+/// [`CheckpointStore`].
 ///
 /// State and position are saved and loaded *together*. A half-write
 /// (state without position, or position without state) is impossible:
@@ -75,9 +76,7 @@ impl<S, P> Hydrated<S, P> {
 /// owns both the state and position storage and commits them in one
 /// transaction.
 ///
-/// Generic over the position type `P` so one trait serves a single
-/// stream (`P = Version`) and a multi-stream, single-producer projection
-/// (`P =` the adapter's [`AllPosition`](crate::AllPosition)).
+/// Generic over the position type `P`; aggregate snapshots use `Version`.
 pub trait SnapshotStore<S, P>: Send + Sync {
     /// Adapter-specific error type.
     type Error: core::error::Error + Send + Sync + 'static;
@@ -235,6 +234,14 @@ impl<P> PersistTrigger<P> for AfterEventTypes {
 /// Use this when your storage backend works with raw bytes (e.g., fjall)
 /// but consumers need typed state. The position `P` is opaque to the
 /// bridge — it passes through untouched.
+/// Also implements [`CheckpointStore`] when its byte store supports that
+/// contract, preserving revisions and conditional-write rejections.
+///
+/// Decoding uses [`PersistedEnvelope::for_decode`](crate::PersistedEnvelope::for_decode):
+/// the event type is the Rust state type name, version/schema are synthetic `1`
+/// placeholders, and metadata is absent. The stored schema is validated before
+/// decoding; the stored position is not event history. State codecs must not use
+/// these placeholder fields for event authentication or schema dispatch.
 pub struct CodecSnapshotStore<SS, C> {
     store: SS,
     codec: C,
@@ -308,6 +315,86 @@ where
             .commit(id, schema_version, position, &bytes_vec)
             .await
             .map_err(CodecSnapshotStoreError::Store)
+    }
+}
+
+impl<S, P, CS, C> CheckpointStore<S, P> for CodecSnapshotStore<CS, C>
+where
+    S: Send + Sync + 'static,
+    P: Send,
+    CS: CheckpointStore<Vec<u8>, P>,
+    C: Encode<S> + OwningCodec<S>,
+{
+    type Error =
+        CodecSnapshotStoreError<CS::Error, <C as Encode<S>>::Error, <C as Decode<S>>::Error>;
+
+    async fn hydrate_checkpoint(
+        &self,
+        id: &impl Id,
+        schema_version: NonZeroU32,
+    ) -> Result<CheckpointHydrated<S, P>, Self::Error> {
+        let (revision, position, bytes) = match self
+            .store
+            .hydrate_checkpoint(id, schema_version)
+            .await
+            .map_err(CodecSnapshotStoreError::Store)?
+        {
+            CheckpointHydrated::Absent => return Ok(CheckpointHydrated::Absent),
+            CheckpointHydrated::Stale {
+                revision,
+                stored_schema,
+            } => {
+                return Ok(CheckpointHydrated::Stale {
+                    revision,
+                    stored_schema,
+                });
+            }
+            CheckpointHydrated::Found {
+                revision,
+                position,
+                state,
+            } => (revision, position, state),
+        };
+        let label = id.to_label();
+        let envelope = crate::envelope::PersistedEnvelope::for_decode(label.as_str(), &bytes)
+            .map_err(CodecSnapshotStoreError::EnvelopeSynthesis)?;
+        let state = <C as Decode<S>>::decode(&self.codec, &envelope)
+            .map_err(CodecSnapshotStoreError::Decode)?;
+        Ok(CheckpointHydrated::Found {
+            revision,
+            position,
+            state,
+        })
+    }
+
+    async fn commit_checkpoint(
+        &self,
+        id: &impl Id,
+        write: CheckpointWrite<'_, S, P>,
+    ) -> Result<NonZeroU64, CheckpointError<Self::Error>> {
+        let bytes = <C as Encode<S>>::encode(&self.codec, write.state)
+            .map_err(|error| CheckpointError::Store(CodecSnapshotStoreError::Encode(error)))?;
+        // The byte storage port requires an owned Vec. One copy bridges the
+        // codec's Bytes; it is prepared before entering the adapter transaction.
+        let owned = bytes.to_vec();
+        self.store
+            .commit_checkpoint(
+                id,
+                CheckpointWrite {
+                    expected: write.expected,
+                    schema_version: write.schema_version,
+                    position: write.position,
+                    state: &owned,
+                    mode: write.mode,
+                },
+            )
+            .await
+            .map_err(|error| match error {
+                CheckpointError::Store(source) => {
+                    CheckpointError::Store(CodecSnapshotStoreError::Store(source))
+                }
+                CheckpointError::Rejected(rejection) => CheckpointError::Rejected(rejection),
+            })
     }
 }
 

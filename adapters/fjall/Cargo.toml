@@ -15,10 +15,11 @@ categories = ["database"]
 [features]
 snapshot = ["mnesis-store/snapshot"]
 projection = ["mnesis-store/projection"]
-export = ["mnesis-store/export"]
+export = ["mnesis-store/export", "tokio/rt", "tokio/time"]
 import = ["mnesis-store/import"]
 
 [dependencies]
+aligned-vec = { workspace = true, features = ["std"] }
 arrayvec = { workspace = true }
 bytes = { workspace = true, features = ["std"] }
 fjall = { workspace = true }
@@ -31,8 +32,10 @@ tokio = { workspace = true, features = ["sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
+bytemuck = { workspace = true }
 criterion = { workspace = true }
 insta = { workspace = true }
+rkyv = { workspace = true }
 # Self dev-dependency: enables the `export`/`import` features for the crate's
 # own test + bench builds so the feature-gated impls and tests below actually
 # run under the default-feature `nix flake check` gate (which builds with
@@ -52,7 +55,7 @@ mnesis-store-testing = { path = "../../crates/store-testing", features = [
 proptest = { workspace = true }
 proptest-state-machine = { workspace = true }
 tempfile = { workspace = true }
-tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
 
 [[bench]]
 name = "fjall_benchmarks"

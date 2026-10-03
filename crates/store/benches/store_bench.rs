@@ -3,12 +3,14 @@
 //! Measures the hot paths in the store layer:
 //! - `PendingEnvelope` builder throughput
 //! - `PersistedEnvelope` construction (zero-alloc)
-//! - append throughput at various batch sizes
-//! - `read_stream` throughput at various sizes
+//! - production `InMemoryStore` append throughput at various batch sizes
+//! - production `InMemoryStore` `read_stream` throughput at various sizes
 //! - upcaster chain throughput
 //!
 //! Run: `cargo bench --bench store_bench -p mnesis-store`
 //! Reports: `target/criterion/report/index.html`
+//! Prior runs used a benchmark-only adapter and are not measurements of this
+//! production implementation; rerun before comparing timing results.
 #![allow(clippy::unwrap_used, reason = "benchmarks use unwrap for brevity")]
 #![allow(clippy::expect_used, reason = "benchmarks use expect for brevity")]
 #![allow(
@@ -37,28 +39,19 @@
     reason = "plain-function upcasters keep Result<_, E> so they can be passed to load_with"
 )]
 
-use std::collections::HashMap;
 use std::convert::Infallible;
 use std::hint::black_box;
 
 use bytes::Bytes;
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use futures::StreamExt;
 use mnesis::Version;
-use mnesis_store::AppendError;
+use mnesis_inmemory::InMemoryStore;
 use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::{PendingEnvelope, PersistedEnvelope};
 use mnesis_store::pending_envelope;
 use mnesis_store::store::RawEventStore;
-use tokio::sync::Mutex;
-
-/// The bench adapter's `$all` position. Its `read_all` is a no-op (empty), so
-/// this exists only to satisfy `RawEventStore::AllPosition`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-struct BenchAllPos(u64);
-
-impl mnesis_store::AllPosition for BenchAllPos {}
 
 fn build_persisted(version: u64, event_type: &str, payload: &[u8]) -> PersistedEnvelope {
     let mut buf = Vec::with_capacity(event_type.len() + payload.len());
@@ -79,112 +72,6 @@ fn build_persisted(version: u64, event_type: &str, payload: &[u8]) -> PersistedE
 }
 
 // =============================================================================
-// In-memory adapter (same pattern as raw_store_tests.rs)
-// =============================================================================
-
-type StoredRow = (u64, String, Vec<u8>);
-
-struct InMemoryRawStore {
-    streams: Mutex<HashMap<String, Vec<StoredRow>>>,
-}
-
-impl InMemoryRawStore {
-    fn new() -> Self {
-        Self {
-            streams: Mutex::new(HashMap::new()),
-        }
-    }
-}
-
-struct InMemoryStream {
-    events: Vec<(u64, String, Vec<u8>)>,
-    pos: usize,
-}
-
-impl futures::Stream for InMemoryStream {
-    type Item = Result<PersistedEnvelope, BenchError>;
-    fn poll_next(
-        mut self: core::pin::Pin<&mut Self>,
-        _cx: &mut core::task::Context<'_>,
-    ) -> core::task::Poll<Option<Self::Item>> {
-        if self.pos >= self.events.len() {
-            return core::task::Poll::Ready(None);
-        }
-        let row = self.events[self.pos].clone();
-        self.pos += 1;
-        core::task::Poll::Ready(Some(Ok(build_persisted(row.0, &row.1, &row.2))))
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-enum BenchError {
-    #[error("concurrency conflict")]
-    Conflict,
-}
-
-impl RawEventStore for InMemoryRawStore {
-    type Error = BenchError;
-    type Stream = InMemoryStream;
-    type AllPosition = BenchAllPos;
-    type AllStream =
-        futures::stream::Empty<Result<(BenchAllPos, StreamKey, PersistedEnvelope), BenchError>>;
-
-    async fn append(
-        &self,
-        id: &StreamKey,
-        expected_version: Option<Version>,
-        envelopes: PendingBatch<'_>,
-    ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
-        let mut guard = self.streams.lock().await;
-        let stream = guard.entry(id.to_string()).or_default();
-        let current_version = u64::try_from(stream.len()).unwrap_or(u64::MAX);
-        let expected_u64 = expected_version.map_or(0, mnesis::Version::as_u64);
-        if current_version != expected_u64 {
-            return Err(AppendError::Store(BenchError::Conflict));
-        }
-        let mut last = BenchAllPos(0);
-        for env in envelopes {
-            stream.push((
-                env.version().as_u64(),
-                env.event_type().to_owned(),
-                env.payload().to_vec(),
-            ));
-            last = BenchAllPos(env.version().as_u64());
-        }
-        drop(guard);
-        Ok(last)
-    }
-
-    async fn read_stream(
-        &self,
-        id: &StreamKey,
-        from: Version,
-    ) -> Result<Self::Stream, Self::Error> {
-        let events = self
-            .streams
-            .lock()
-            .await
-            .get(&id.to_string())
-            .map(|s| {
-                s.iter()
-                    .filter(|(v, _, _)| *v >= from.as_u64())
-                    .map(|(v, t, p)| (*v, t.clone(), p.clone()))
-                    .collect()
-            })
-            .unwrap_or_default();
-        Ok(InMemoryStream { events, pos: 0 })
-    }
-
-    async fn read_all(
-        &self,
-        _from: Option<Self::AllPosition>,
-    ) -> Result<Self::AllStream, Self::Error> {
-        // InMemoryRawStore is a benchmark-only adapter that does not implement the $all index.
-        Ok(futures::stream::empty())
-    }
-}
-
-// =============================================================================
 // Noop upcaster for benchmarks — plain-function form, walks v1 through v6
 // =============================================================================
 
@@ -193,38 +80,38 @@ fn noop_v1_to_v6_upcast(
 ) -> Result<mnesis_store::upcasting::EventMorsel<'_>, Infallible> {
     loop {
         morsel = match (morsel.event_type(), morsel.schema_version()) {
-            ("UserCreated", v) if v == Version::new(1).unwrap() => {
+            ("UserCreated", v) if v == mnesis_store::SchemaVersion::from_u32(1).unwrap() => {
                 mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
-                    Version::new(2).unwrap(),
+                    mnesis_store::SchemaVersion::from_u32(2).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
-            ("UserCreated", v) if v == Version::new(2).unwrap() => {
+            ("UserCreated", v) if v == mnesis_store::SchemaVersion::from_u32(2).unwrap() => {
                 mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
-                    Version::new(3).unwrap(),
+                    mnesis_store::SchemaVersion::from_u32(3).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
-            ("UserCreated", v) if v == Version::new(3).unwrap() => {
+            ("UserCreated", v) if v == mnesis_store::SchemaVersion::from_u32(3).unwrap() => {
                 mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
-                    Version::new(4).unwrap(),
+                    mnesis_store::SchemaVersion::from_u32(4).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
-            ("UserCreated", v) if v == Version::new(4).unwrap() => {
+            ("UserCreated", v) if v == mnesis_store::SchemaVersion::from_u32(4).unwrap() => {
                 mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
-                    Version::new(5).unwrap(),
+                    mnesis_store::SchemaVersion::from_u32(5).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
-            ("UserCreated", v) if v == Version::new(5).unwrap() => {
+            ("UserCreated", v) if v == mnesis_store::SchemaVersion::from_u32(5).unwrap() => {
                 mnesis_store::upcasting::EventMorsel::new(
                     "UserCreated",
-                    Version::new(6).unwrap(),
+                    mnesis_store::SchemaVersion::from_u32(6).unwrap(),
                     morsel.payload().to_vec(),
                 )
             }
@@ -290,19 +177,23 @@ fn bench_append(c: &mut Criterion) {
     for size in [1, 10, 100, 1000] {
         let envelopes = make_envelopes(size);
         group.bench_with_input(BenchmarkId::from_parameter(size), &envelopes, |b, envs| {
-            b.iter(|| {
-                let store = InMemoryRawStore::new();
-                rt.block_on(async {
-                    store
-                        .append(
-                            &StreamKey::from_slice(b"bench-stream"),
-                            None,
-                            PendingBatch::new(black_box(envs)).expect("bench batch is non-empty"),
-                        )
-                        .await
-                        .unwrap();
-                });
-            });
+            b.iter_batched_ref(
+                InMemoryStore::new,
+                |store| {
+                    rt.block_on(async {
+                        store
+                            .append(
+                                &StreamKey::from_slice(b"bench-stream"),
+                                None,
+                                PendingBatch::new(black_box(envs))
+                                    .expect("bench batch is non-empty"),
+                            )
+                            .await
+                            .unwrap();
+                    });
+                },
+                BatchSize::SmallInput,
+            );
         });
     }
     group.finish();
@@ -316,7 +207,7 @@ fn bench_read_stream(c: &mut Criterion) {
         let envelopes = make_envelopes(size);
 
         // Pre-populate the store once for this size
-        let store = InMemoryRawStore::new();
+        let store = InMemoryStore::new();
         rt.block_on(async {
             store
                 .append(
@@ -353,7 +244,7 @@ fn bench_upcaster(c: &mut Criterion) {
         b.iter(|| {
             let morsel = mnesis_store::EventMorsel::borrowed(
                 "UserCreated",
-                Version::new(1).unwrap(),
+                mnesis_store::SchemaVersion::from_u32(1).unwrap(),
                 black_box(&payload),
             );
             let result = noop_v1_to_v6_upcast(morsel).unwrap();

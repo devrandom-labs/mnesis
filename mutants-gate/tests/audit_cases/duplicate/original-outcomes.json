@@ -1,0 +1,1 @@
+{"outcomes":[{"summary":"Success","scenario":"Baseline"},{"summary":"CaughtMutant","scenario":{"Mutant":{"file":"x.rs","function":{"function_name":"f"},"replacement":"true"}}},{"summary":"CaughtMutant","scenario":{"Mutant":{"file":"x.rs","function":{"function_name":"f"},"replacement":"true"}}}]}

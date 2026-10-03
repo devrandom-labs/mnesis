@@ -6,18 +6,19 @@ See the [root README](../../README.md) for usage and examples.
 
 ## Verification
 
-The kernel is tested with 9 verification techniques:
+Repository verification tooling includes the following checks. Results apply to
+the executed cases and workloads:
 
-| Technique | What it proves |
+| Technique | What it checks |
 |-----------|---------------|
-| Unit tests + edge cases | Correct behavior |
-| Property-based testing (proptest) | Algebraic properties hold for all random inputs |
+| Unit tests + edge cases | Specified behavior and boundaries |
+| Property-based testing (proptest) | Sampled invariants and boundaries |
 | Compile-failure tests (trybuild) | Invalid code fails to compile |
 | Static assertions | Send, Sync, size, trait bounds enforced at compile time |
-| Miri | Zero undefined behavior under strict provenance |
-| Mutation testing (cargo-mutants) | Every viable mutation caught |
-| Benchmarks (criterion) | Performance regression detection |
-| Doc tests | All examples compile and run |
+| Miri | Checks executed paths under strict provenance |
+| Mutation testing (cargo-mutants) | Checks the tested viable mutations |
+| Benchmarks (criterion) | Measures the specified workloads |
+| Doc tests | Active documentation examples compile and run |
 | Architecture tests | Kernel imports nothing from outer layers |
 
 ## License

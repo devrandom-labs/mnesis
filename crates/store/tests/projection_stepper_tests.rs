@@ -16,13 +16,14 @@ mod tests {
 
     use mnesis::{DomainEvent, Message, Version, version};
 
-    use mnesis_inmemory::{InMemoryAllPos, InMemorySnapshotStore};
+    use mnesis_inmemory::{InMemoryAllPos, InMemoryCheckpointStore};
     use mnesis_store::StreamKey;
+    use mnesis_store::checkpoint::{
+        CheckpointHydrated, CheckpointMode, CheckpointStore, CheckpointWrite,
+    };
     use mnesis_store::decoded::Decoded;
     use mnesis_store::projection::{Projection, ProjectionError, Projector};
-    use mnesis_store::state::{
-        AfterEventTypes, EveryNEvents, Hydrated, PersistTrigger, SnapshotStore,
-    };
+    use mnesis_store::state::{AfterEventTypes, EveryNEvents, PersistTrigger};
 
     // ── fixtures ────────────────────────────────────────────────────────────
 
@@ -96,8 +97,8 @@ mod tests {
         }
     }
 
-    fn store() -> InMemorySnapshotStore<CountState, Version> {
-        InMemorySnapshotStore::new()
+    fn store() -> InMemoryCheckpointStore<CountState, Version> {
+        InMemoryCheckpointStore::new()
     }
 
     // ── 1. Sequence/Protocol: load → advance×n commits and folds ────────────
@@ -106,7 +107,7 @@ mod tests {
     async fn advance_folds_and_commits_each_event_when_trigger_always_fires() {
         let ss = store();
         let id = TestId("s");
-        let (mut p, mut state) = Projection::load(
+        let mut p = Projection::load(
             id.clone(),
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -117,22 +118,13 @@ mod tests {
         .unwrap();
 
         assert_eq!(p.checkpoint(), None);
-        state = p
-            .advance(state, decoded(TestEvent::Added(10), 1))
-            .await
-            .unwrap();
-        state = p
-            .advance(state, decoded(TestEvent::Added(20), 2))
-            .await
-            .unwrap();
-        state = p
-            .advance(state, decoded(TestEvent::Added(30), 3))
-            .await
-            .unwrap();
+        p.advance(decoded(TestEvent::Added(10), 1)).await.unwrap();
+        p.advance(decoded(TestEvent::Added(20), 2)).await.unwrap();
+        p.advance(decoded(TestEvent::Added(30), 3)).await.unwrap();
 
         assert_eq!(p.checkpoint(), Some(version!(3)));
         assert_eq!(
-            state,
+            *p.state().unwrap(),
             CountState {
                 count: 3,
                 total: 60
@@ -140,12 +132,14 @@ mod tests {
         );
 
         // Persisted together, atomically.
-        let (pos, st) = ss
-            .hydrate(&id, NonZeroU32::MIN)
-            .await
-            .unwrap()
-            .into_found()
-            .unwrap();
+        let CheckpointHydrated::Found {
+            position: pos,
+            state: st,
+            ..
+        } = ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap()
+        else {
+            panic!("checkpoint must exist");
+        };
         assert_eq!(pos, version!(3));
         assert_eq!(
             st,
@@ -164,7 +158,7 @@ mod tests {
         let id = TestId("s");
 
         {
-            let (mut p, mut state) = Projection::load(
+            let mut p = Projection::load(
                 id.clone(),
                 CountingProjector,
                 EveryNEvents(NonZeroU64::MIN),
@@ -173,22 +167,13 @@ mod tests {
             )
             .await
             .unwrap();
-            state = p
-                .advance(state, decoded(TestEvent::Added(10), 1))
-                .await
-                .unwrap();
-            state = p
-                .advance(state, decoded(TestEvent::Added(20), 2))
-                .await
-                .unwrap();
-            let _ = p
-                .advance(state, decoded(TestEvent::Added(30), 3))
-                .await
-                .unwrap();
+            p.advance(decoded(TestEvent::Added(10), 1)).await.unwrap();
+            p.advance(decoded(TestEvent::Added(20), 2)).await.unwrap();
+            p.advance(decoded(TestEvent::Added(30), 3)).await.unwrap();
         }
 
         // Fresh stepper over the same snapshot store: state + checkpoint restored.
-        let (mut p2, state2) = Projection::load(
+        let mut p2 = Projection::load(
             id.clone(),
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -199,7 +184,7 @@ mod tests {
         .unwrap();
         assert_eq!(p2.checkpoint(), Some(version!(3)));
         assert_eq!(
-            state2,
+            *p2.state().unwrap(),
             CountState {
                 count: 3,
                 total: 60
@@ -207,13 +192,10 @@ mod tests {
         );
 
         // Resume: the next event folds onto the restored state.
-        let resumed = p2
-            .advance(state2, decoded(TestEvent::Added(40), 4))
-            .await
-            .unwrap();
+        p2.advance(decoded(TestEvent::Added(40), 4)).await.unwrap();
         assert_eq!(p2.checkpoint(), Some(version!(4)));
         assert_eq!(
-            resumed,
+            *p2.state().unwrap(),
             CountState {
                 count: 4,
                 total: 100
@@ -226,7 +208,7 @@ mod tests {
     #[tokio::test]
     async fn advance_surfaces_projector_apply_error() {
         let ss = store();
-        let (mut p, state) = Projection::load(
+        let mut p = Projection::load(
             TestId("s"),
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -238,7 +220,7 @@ mod tests {
 
         // Removed(1) from total 0 underflows in the projector.
         let err = p
-            .advance(state, decoded(TestEvent::Removed(1), 1))
+            .advance(decoded(TestEvent::Removed(1), 1))
             .await
             .unwrap_err();
         assert!(
@@ -256,7 +238,7 @@ mod tests {
         let ss = store();
         let id = TestId("s");
         // Trigger never fires (bucket of 100) — only flush persists.
-        let (mut p, mut state) = Projection::load(
+        let mut p = Projection::load(
             id.clone(),
             CountingProjector,
             EveryNEvents(NonZeroU64::new(100).unwrap()),
@@ -266,28 +248,24 @@ mod tests {
         .await
         .unwrap();
 
-        state = p
-            .advance(state, decoded(TestEvent::Added(10), 1))
-            .await
-            .unwrap();
-        state = p
-            .advance(state, decoded(TestEvent::Added(20), 2))
-            .await
-            .unwrap();
+        p.advance(decoded(TestEvent::Added(10), 1)).await.unwrap();
+        p.advance(decoded(TestEvent::Added(20), 2)).await.unwrap();
         assert_eq!(p.checkpoint(), None, "trigger must not have fired");
         assert_eq!(
-            ss.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
-            Hydrated::Absent
+            ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap(),
+            CheckpointHydrated::Absent
         );
 
-        p.flush(&state).await.unwrap();
+        p.flush().await.unwrap();
         assert_eq!(p.checkpoint(), Some(version!(2)));
-        let (pos, st) = ss
-            .hydrate(&id, NonZeroU32::MIN)
-            .await
-            .unwrap()
-            .into_found()
-            .unwrap();
+        let CheckpointHydrated::Found {
+            position: pos,
+            state: st,
+            ..
+        } = ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap()
+        else {
+            panic!("checkpoint must exist");
+        };
         assert_eq!(pos, version!(2));
         assert_eq!(
             st,
@@ -302,7 +280,7 @@ mod tests {
     async fn flush_is_a_noop_when_nothing_is_pending() {
         let ss = store();
         let id = TestId("s");
-        let (mut p, state) = Projection::load(
+        let mut p = Projection::load(
             id.clone(),
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -313,35 +291,39 @@ mod tests {
         .unwrap();
 
         // Never advanced: flush must not write a spurious snapshot.
-        p.flush(&state).await.unwrap();
+        p.flush().await.unwrap();
         assert_eq!(p.checkpoint(), None);
         assert_eq!(
-            ss.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
-            Hydrated::Absent
+            ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap(),
+            CheckpointHydrated::Absent
         );
     }
 
     // ── defensive: a schema-mismatched snapshot starts fresh, but flags a rebuild ─
 
     #[tokio::test]
-    async fn load_stale_schema_starts_from_initial_and_signals_rebuild() {
+    async fn explicit_schema_rebuild_starts_from_initial_and_signals_rebuild() {
         let ss = store();
         let id = TestId("s");
         // Pre-commit a v1 snapshot.
-        ss.commit(
+        ss.commit_checkpoint(
             &id,
-            NonZeroU32::MIN,
-            version!(5),
-            &CountState {
-                count: 99,
-                total: 999,
+            CheckpointWrite {
+                expected: None,
+                schema_version: NonZeroU32::MIN,
+                position: version!(5),
+                state: &CountState {
+                    count: 99,
+                    total: 999,
+                },
+                mode: CheckpointMode::Advance,
             },
         )
         .await
         .unwrap();
 
         // Load with schema v2 — the v1 snapshot must not be restored...
-        let (p, state) = Projection::load(
+        let p = Projection::rebuild(
             id,
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -351,7 +333,7 @@ mod tests {
         .await
         .unwrap();
         assert_eq!(p.checkpoint(), None);
-        assert_eq!(state, CountState { count: 0, total: 0 });
+        assert_eq!(*p.state().unwrap(), CountState { count: 0, total: 0 });
         // ...but the rebuild is *visible*: a host can tell this apart from a
         // fresh start (which reports `None`) — the whole point of the Stale
         // signal. The invalidated schema version (v1) is reported.
@@ -361,7 +343,7 @@ mod tests {
     #[tokio::test]
     async fn load_fresh_does_not_signal_rebuild() {
         let ss = store();
-        let (p, _state) = Projection::load(
+        let p = Projection::load(
             TestId("s"),
             CountingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -404,8 +386,8 @@ mod tests {
         StreamKey::from_slice(b"origin")
     }
 
-    fn all_store() -> InMemorySnapshotStore<CountState, InMemoryAllPos> {
-        InMemorySnapshotStore::new()
+    fn all_store() -> InMemoryCheckpointStore<CountState, InMemoryAllPos> {
+        InMemoryCheckpointStore::new()
     }
 
     // ── 1. Sequence/Protocol ($all): advance folds and checkpoints the tag ──
@@ -414,33 +396,24 @@ mod tests {
     async fn all_advance_accepts_tuple_items_and_checkpoints_the_all_tag() {
         let ss = all_store();
         let id = TestId("all");
-        let (mut p, mut state) =
-            Projection::load(id.clone(), CountingProjector, Always, &ss, NonZeroU32::MIN)
-                .await
-                .unwrap();
+        let mut p = Projection::load(id.clone(), CountingProjector, Always, &ss, NonZeroU32::MIN)
+            .await
+            .unwrap();
         assert_eq!(p.checkpoint(), None);
 
         // Gappy positions on purpose: $all is monotonic but NOT gapless
         // (aborted appends burn values) — the stepper checkpoints whatever
         // tag arrives. Inner versions are per-stream (two streams, both v1).
-        state = p
-            .advance(
-                state,
-                (all_pos(3), all_key(), decoded(TestEvent::Added(10), 1)),
-            )
+        p.advance((all_pos(3), all_key(), decoded(TestEvent::Added(10), 1)))
             .await
             .unwrap();
-        state = p
-            .advance(
-                state,
-                (all_pos(7), all_key(), decoded(TestEvent::Added(20), 1)),
-            )
+        p.advance((all_pos(7), all_key(), decoded(TestEvent::Added(20), 1)))
             .await
             .unwrap();
 
         assert_eq!(p.checkpoint(), Some(all_pos(7)));
         assert_eq!(
-            state,
+            *p.state().unwrap(),
             CountState {
                 count: 2,
                 total: 30
@@ -448,12 +421,14 @@ mod tests {
         );
 
         // Persisted together, atomically, under the $all position type.
-        let (pos, st) = ss
-            .hydrate(&id, NonZeroU32::MIN)
-            .await
-            .unwrap()
-            .into_found()
-            .unwrap();
+        let CheckpointHydrated::Found {
+            position: pos,
+            state: st,
+            ..
+        } = ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap()
+        else {
+            panic!("checkpoint must exist");
+        };
         assert_eq!(pos, all_pos(7));
         assert_eq!(
             st,
@@ -471,30 +446,25 @@ mod tests {
         let ss = all_store();
         let id = TestId("all");
         {
-            let (mut p, state) =
+            let mut p =
                 Projection::load(id.clone(), CountingProjector, Always, &ss, NonZeroU32::MIN)
                     .await
                     .unwrap();
-            let _ = p
-                .advance(
-                    state,
-                    (all_pos(9), all_key(), decoded(TestEvent::Added(10), 1)),
-                )
+            p.advance((all_pos(9), all_key(), decoded(TestEvent::Added(10), 1)))
                 .await
                 .unwrap();
         }
 
-        let (mut p2, state2) =
-            Projection::load(id, CountingProjector, Always, &ss, NonZeroU32::MIN)
-                .await
-                .unwrap();
+        let mut p2 = Projection::load(id, CountingProjector, Always, &ss, NonZeroU32::MIN)
+            .await
+            .unwrap();
         assert_eq!(
             p2.checkpoint(),
             Some(all_pos(9)),
             "resume point is the $all tag, not a Version"
         );
         assert_eq!(
-            state2,
+            *p2.state().unwrap(),
             CountState {
                 count: 1,
                 total: 10
@@ -502,16 +472,12 @@ mod tests {
         );
 
         // Resume folds onto the restored state at a later (gappy) position.
-        let resumed = p2
-            .advance(
-                state2,
-                (all_pos(12), all_key(), decoded(TestEvent::Added(5), 2)),
-            )
+        p2.advance((all_pos(12), all_key(), decoded(TestEvent::Added(5), 2)))
             .await
             .unwrap();
         assert_eq!(p2.checkpoint(), Some(all_pos(12)));
         assert_eq!(
-            resumed,
+            *p2.state().unwrap(),
             CountState {
                 count: 2,
                 total: 15
@@ -527,7 +493,7 @@ mod tests {
         let id = TestId("all");
         // AfterEventTypes is position-generic (#328); "Removed" never arrives,
         // so only flush persists.
-        let (mut p, mut state) = Projection::load(
+        let mut p = Projection::load(
             id.clone(),
             CountingProjector,
             AfterEventTypes::new(&["Removed"]),
@@ -537,27 +503,25 @@ mod tests {
         .await
         .unwrap();
 
-        state = p
-            .advance(
-                state,
-                (all_pos(2), all_key(), decoded(TestEvent::Added(10), 1)),
-            )
+        p.advance((all_pos(2), all_key(), decoded(TestEvent::Added(10), 1)))
             .await
             .unwrap();
         assert_eq!(p.checkpoint(), None, "trigger must not have fired");
         assert_eq!(
-            ss.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
-            Hydrated::Absent
+            ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap(),
+            CheckpointHydrated::Absent
         );
 
-        p.flush(&state).await.unwrap();
+        p.flush().await.unwrap();
         assert_eq!(p.checkpoint(), Some(all_pos(2)));
-        let (pos, st) = ss
-            .hydrate(&id, NonZeroU32::MIN)
-            .await
-            .unwrap()
-            .into_found()
-            .unwrap();
+        let CheckpointHydrated::Found {
+            position: pos,
+            state: st,
+            ..
+        } = ss.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap()
+        else {
+            panic!("checkpoint must exist");
+        };
         assert_eq!(pos, all_pos(2));
         assert_eq!(
             st,
@@ -617,8 +581,8 @@ mod tests {
     }
 
     fn routing_store()
-    -> InMemorySnapshotStore<std::collections::HashMap<Vec<u8>, u64>, InMemoryAllPos> {
-        InMemorySnapshotStore::new()
+    -> InMemoryCheckpointStore<std::collections::HashMap<Vec<u8>, u64>, InMemoryAllPos> {
+        InMemoryCheckpointStore::new()
     }
 
     // ── 1. Sequence/protocol (#345): $all items route by origin stream ─────
@@ -627,50 +591,37 @@ mod tests {
     async fn advance_routes_all_items_by_origin_stream() {
         let ss = routing_store();
         let id = TestId("routed");
-        let (mut p, mut state) =
-            Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
-                .await
-                .unwrap();
+        let mut p = Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
+            .await
+            .unwrap();
 
         // Interleaved origins, gappy $all positions: a:Added(10), b:Added(5),
         // a:Added(20).
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(3),
-                    StreamKey::from_slice(b"a"),
-                    decoded(TestEvent::Added(10), 1),
-                ),
-            )
-            .await
-            .unwrap();
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(7),
-                    StreamKey::from_slice(b"b"),
-                    decoded(TestEvent::Added(5), 1),
-                ),
-            )
-            .await
-            .unwrap();
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(12),
-                    StreamKey::from_slice(b"a"),
-                    decoded(TestEvent::Added(20), 2),
-                ),
-            )
-            .await
-            .unwrap();
+        p.advance((
+            all_pos(3),
+            StreamKey::from_slice(b"a"),
+            decoded(TestEvent::Added(10), 1),
+        ))
+        .await
+        .unwrap();
+        p.advance((
+            all_pos(7),
+            StreamKey::from_slice(b"b"),
+            decoded(TestEvent::Added(5), 1),
+        ))
+        .await
+        .unwrap();
+        p.advance((
+            all_pos(12),
+            StreamKey::from_slice(b"a"),
+            decoded(TestEvent::Added(20), 2),
+        ))
+        .await
+        .unwrap();
 
         assert_eq!(p.checkpoint(), Some(all_pos(12)));
         assert_eq!(
-            state,
+            *p.state().unwrap(),
             std::collections::HashMap::from([(b"a".to_vec(), 30), (b"b".to_vec(), 5)])
         );
     }
@@ -681,51 +632,38 @@ mod tests {
     async fn default_projector_ignores_the_key_on_all_items() {
         let ss = all_store();
         let id = TestId("default-seam");
-        let (mut p, mut state) =
-            Projection::load(id, CountingProjector, Always, &ss, NonZeroU32::MIN)
-                .await
-                .unwrap();
+        let mut p = Projection::load(id, CountingProjector, Always, &ss, NonZeroU32::MIN)
+            .await
+            .unwrap();
 
         // Same interleaved two-key shape as the routing test; the key must be
         // inert for a projector that does not override `apply_attributed`.
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(3),
-                    StreamKey::from_slice(b"a"),
-                    decoded(TestEvent::Added(10), 1),
-                ),
-            )
-            .await
-            .unwrap();
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(7),
-                    StreamKey::from_slice(b"b"),
-                    decoded(TestEvent::Added(5), 1),
-                ),
-            )
-            .await
-            .unwrap();
-        state = p
-            .advance(
-                state,
-                (
-                    all_pos(12),
-                    StreamKey::from_slice(b"a"),
-                    decoded(TestEvent::Added(20), 2),
-                ),
-            )
-            .await
-            .unwrap();
+        p.advance((
+            all_pos(3),
+            StreamKey::from_slice(b"a"),
+            decoded(TestEvent::Added(10), 1),
+        ))
+        .await
+        .unwrap();
+        p.advance((
+            all_pos(7),
+            StreamKey::from_slice(b"b"),
+            decoded(TestEvent::Added(5), 1),
+        ))
+        .await
+        .unwrap();
+        p.advance((
+            all_pos(12),
+            StreamKey::from_slice(b"a"),
+            decoded(TestEvent::Added(20), 2),
+        ))
+        .await
+        .unwrap();
 
         // Identical to the keyless fold of the same three events.
         assert_eq!(p.checkpoint(), Some(all_pos(12)));
         assert_eq!(
-            state,
+            *p.state().unwrap(),
             CountState {
                 count: 3,
                 total: 35
@@ -737,9 +675,9 @@ mod tests {
 
     #[tokio::test]
     async fn attributed_projector_sees_none_on_per_stream_items() {
-        let ss: InMemorySnapshotStore<std::collections::HashMap<Vec<u8>, u64>, Version> =
-            InMemorySnapshotStore::new();
-        let (mut p, state) = Projection::load(
+        let ss: InMemoryCheckpointStore<std::collections::HashMap<Vec<u8>, u64>, Version> =
+            InMemoryCheckpointStore::new();
+        let mut p = Projection::load(
             TestId("per-stream"),
             RoutingProjector,
             EveryNEvents(NonZeroU64::MIN),
@@ -752,7 +690,7 @@ mod tests {
         // A bare Decoded item carries no tag, so the routing projector sees
         // None and surfaces its typed error — absence is not swallowed.
         let err = p
-            .advance(state, decoded(TestEvent::Added(1), 1))
+            .advance(decoded(TestEvent::Added(1), 1))
             .await
             .unwrap_err();
         assert!(
@@ -770,60 +708,48 @@ mod tests {
         let id = TestId("routed");
 
         {
-            let (mut p, mut state) =
+            let mut p =
                 Projection::load(id.clone(), RoutingProjector, Always, &ss, NonZeroU32::MIN)
                     .await
                     .unwrap();
-            state = p
-                .advance(
-                    state,
-                    (
-                        all_pos(3),
-                        StreamKey::from_slice(b"a"),
-                        decoded(TestEvent::Added(10), 1),
-                    ),
-                )
-                .await
-                .unwrap();
-            let _ = p
-                .advance(
-                    state,
-                    (
-                        all_pos(7),
-                        StreamKey::from_slice(b"b"),
-                        decoded(TestEvent::Added(5), 1),
-                    ),
-                )
-                .await
-                .unwrap();
+            p.advance((
+                all_pos(3),
+                StreamKey::from_slice(b"a"),
+                decoded(TestEvent::Added(10), 1),
+            ))
+            .await
+            .unwrap();
+            p.advance((
+                all_pos(7),
+                StreamKey::from_slice(b"b"),
+                decoded(TestEvent::Added(5), 1),
+            ))
+            .await
+            .unwrap();
         }
 
         // Fresh stepper over the same snapshot store: routed state and the
         // $all checkpoint are restored.
-        let (mut p2, state2) = Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
+        let mut p2 = Projection::load(id, RoutingProjector, Always, &ss, NonZeroU32::MIN)
             .await
             .unwrap();
         assert_eq!(p2.checkpoint(), Some(all_pos(7)));
         assert_eq!(
-            state2,
+            *p2.state().unwrap(),
             std::collections::HashMap::from([(b"a".to_vec(), 10), (b"b".to_vec(), 5)])
         );
 
         // Resume: the third event routes onto the restored buckets.
-        let resumed = p2
-            .advance(
-                state2,
-                (
-                    all_pos(12),
-                    StreamKey::from_slice(b"a"),
-                    decoded(TestEvent::Added(20), 2),
-                ),
-            )
-            .await
-            .unwrap();
+        p2.advance((
+            all_pos(12),
+            StreamKey::from_slice(b"a"),
+            decoded(TestEvent::Added(20), 2),
+        ))
+        .await
+        .unwrap();
         assert_eq!(p2.checkpoint(), Some(all_pos(12)));
         assert_eq!(
-            resumed,
+            *p2.state().unwrap(),
             std::collections::HashMap::from([(b"a".to_vec(), 30), (b"b".to_vec(), 5)])
         );
     }

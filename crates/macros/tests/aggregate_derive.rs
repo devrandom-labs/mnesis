@@ -110,12 +110,12 @@ fn derive_aggregate_lifecycle() {
         })
         .unwrap()
         .unwrap();
-    todo.commit_persisted(Version::new(1).unwrap(), &created);
+    todo.commit_persisted(&created).expect("root is usable");
     let completed = todo.handle(CompleteTodo).unwrap().unwrap();
-    todo.commit_persisted(Version::new(2).unwrap(), &completed);
+    todo.commit_persisted(&completed).expect("root is usable");
 
-    assert_eq!(todo.state().title, "Buy milk");
-    assert!(todo.state().done);
+    assert_eq!(todo.state().unwrap().title, "Buy milk");
+    assert!(todo.state().unwrap().done);
     // commit_persisted advances the version to the last persisted event.
     assert_eq!(todo.version(), Version::new(2));
 }
@@ -129,20 +129,20 @@ fn derive_aggregate_invariants() {
         })
         .unwrap()
         .unwrap();
-    todo.commit_persisted(Version::new(1).unwrap(), &created);
+    todo.commit_persisted(&created).expect("root is usable");
 
     assert!(matches!(
         todo.handle(CreateTodo {
             title: "Again".into()
         }),
-        Err(TodoError::AlreadyExists)
+        Err(mnesis::DecisionError::Domain(TodoError::AlreadyExists))
     ));
 
     let completed = todo.handle(CompleteTodo).unwrap().unwrap();
-    todo.commit_persisted(Version::new(2).unwrap(), &completed);
+    todo.commit_persisted(&completed).expect("root is usable");
     assert!(matches!(
         todo.handle(CompleteTodo),
-        Err(TodoError::AlreadyDone)
+        Err(mnesis::DecisionError::Domain(TodoError::AlreadyDone))
     ));
 }
 
@@ -156,7 +156,7 @@ fn derive_aggregate_rehydrate() {
         }),
     )
     .unwrap();
-    assert_eq!(todo.state().title, "Loaded");
+    assert_eq!(todo.state().unwrap().title, "Loaded");
     assert_eq!(todo.version(), Version::new(1));
 }
 
@@ -193,7 +193,7 @@ fn derive_aggregate_debug_does_not_leak_state() {
         })
         .unwrap()
         .unwrap();
-    todo.commit_persisted(Version::INITIAL, &created);
+    todo.commit_persisted(&created).expect("root is usable");
     let debug = format!("{todo:?}");
     // State must NOT appear in debug output
     assert!(

@@ -5,7 +5,7 @@
 //! decided events can't be forgotten or misthreaded (#251). It adds no
 //! persistence machinery — it is the "imperative shell" over the pure
 //! [`AggregateRoot::handle`](mnesis::AggregateRoot::handle) and the atomic
-//! [`Repository::save`](crate::Repository::save).
+//! [`Repository::save`].
 //!
 //! See `docs/plans/2026-07-02-execute-command-combinator-design.md`.
 
@@ -17,10 +17,14 @@ use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Handle};
 use crate::conflict::ConflictPredicate;
 use crate::repository::Repository;
 
-/// Error from a command `execute`. Two failure domains kept distinct
-/// (CLAUDE.md rule 3 — one variant = one domain).
+/// Command execution failure. Kernel integrity, application rejection and
+/// persistence failures retain their distinct typed sources.
 #[derive(Debug, thiserror::Error)]
 pub enum ExecuteError<DecideErr, StoreErr> {
+    /// The root is unusable after an application panic; nothing was persisted.
+    #[error("aggregate integrity error: {0}")]
+    Kernel(#[source] mnesis::KernelError),
+
     /// The aggregate rejected the command (a domain invariant). Nothing persisted.
     #[error("command rejected: {0}")]
     Decide(#[source] DecideErr),
@@ -173,7 +177,10 @@ where
 {
     // A no-op decision never reaches the store: no append, no version,
     // no GlobalSeq burned.
-    match root.handle::<C, N>(command).map_err(ExecuteError::Decide)? {
+    match root.handle::<C, N>(command).map_err(|error| match error {
+        mnesis::DecisionError::Kernel(cause) => ExecuteError::Kernel(cause),
+        mnesis::DecisionError::Domain(cause) => ExecuteError::Decide(cause),
+    })? {
         None => Ok(Execution::Ignored),
         Some(decided) => {
             let position = repo

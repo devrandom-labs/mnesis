@@ -1,0 +1,5 @@
+error: number too large to fit in target type
+ --> tests/audit_cases/overflow.rs:3:37
+  |
+3 |     #[transform(event = "E", from = 18446744073709551615, to = 0)]
+  |                                     ^^^^^^^^^^^^^^^^^^^^

@@ -41,12 +41,16 @@ use std::num::{NonZeroU32, NonZeroU64};
 use futures::StreamExt;
 use mnesis::{DomainEvent, Message, Version, version};
 use mnesis_example_projection_tokio::run_projection;
-use mnesis_inmemory::InMemorySnapshotStore;
+use mnesis_inmemory::InMemoryCheckpointStore;
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::PendingBatch;
+use mnesis_store::checkpoint::{
+    CheckpointError, CheckpointHydrated, CheckpointMode, CheckpointRejection, CheckpointStore,
+    CheckpointWrite,
+};
 use mnesis_store::{
-    Decode, Encode, EveryNEvents, Projection, Projector, RawEventStore, SnapshotStore, Store,
-    Subscription, pending_envelope,
+    Decode, Encode, EveryNEvents, Projection, Projector, RawEventStore, Store, Subscription,
+    pending_envelope,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -94,6 +98,7 @@ impl DomainEvent for TestEvent {
 #[error("projection overflow")]
 struct TestProjectionError;
 
+#[derive(Clone, Copy)]
 struct CountingProjector;
 
 impl Projector for CountingProjector {
@@ -173,8 +178,8 @@ impl Decode<TestEvent> for TestEventCodec {
 }
 
 /// A fresh in-memory snapshot store for projection state + position.
-fn snapshot_store() -> InMemorySnapshotStore<CountState, Version> {
-    InMemorySnapshotStore::<CountState, Version>::new()
+fn snapshot_store() -> InMemoryCheckpointStore<CountState, Version> {
+    InMemoryCheckpointStore::<CountState, Version>::new()
 }
 
 /// Test-only call-site sugar: assemble with [`Projection::load`], then drive
@@ -185,15 +190,24 @@ fn snapshot_store() -> InMemorySnapshotStore<CountState, Version> {
 async fn run(
     id: TestId,
     subscription: Subscription<InMemoryStore>,
-    snapshots: &InMemorySnapshotStore<CountState, Version>,
+    snapshots: &InMemoryCheckpointStore<CountState, Version>,
     projector: CountingProjector,
     codec: TestEventCodec,
     trigger: EveryNEvents,
     schema: NonZeroU32,
     shutdown: impl Future<Output = ()> + Send,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let (projection, state) = Projection::load(id, projector, trigger, snapshots, schema).await?;
-    run_projection(projection, state, subscription, codec, shutdown).await
+    // This fixture explicitly authorizes schema rebuilds. The production loop
+    // only drives a projection already assembled under the caller's policy.
+    let projection = match Projection::load(id.clone(), projector, trigger, snapshots, schema).await
+    {
+        Ok(projection) => projection,
+        Err(CheckpointError::Rejected(CheckpointRejection::SchemaMismatch { .. })) => {
+            Projection::rebuild(id, projector, trigger, snapshots, schema).await?
+        }
+        Err(error) => return Err(error.into()),
+    };
+    run_projection(projection, subscription, codec, shutdown).await
 }
 
 /// True if `needle` appears in the error's `Display` or anywhere down its
@@ -292,12 +306,15 @@ async fn runner_processes_events_and_checkpoints() {
     .unwrap();
 
     // Verify checkpoint + state — persisted together in the snapshot.
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(position, version!(3));
     assert_eq!(
         state,
@@ -366,12 +383,15 @@ async fn runner_resumes_from_checkpoint() {
     .unwrap();
 
     // Verify: checkpoint at 5, state = count:5 total:95
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(position, version!(5));
     assert_eq!(
         state,
@@ -420,12 +440,15 @@ async fn runner_trigger_controls_checkpoint_frequency() {
 
     // Checkpoint should be at version 5 (flushed on shutdown), state reflects
     // all 5 events.
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(position, version!(5));
     assert_eq!(
         state,
@@ -500,12 +523,15 @@ async fn runner_resumes_normally_after_rebuild_completes() {
     .unwrap();
 
     // Verify: state reflects all 3 events, checkpoint at v3
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(
         state,
         CountState {
@@ -548,10 +574,10 @@ async fn runner_immediate_shutdown_with_no_events() {
 
     // No snapshot saved (no events processed)
     let loaded = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
-    assert!(loaded.into_found().is_none());
+    assert!(matches!(loaded, CheckpointHydrated::Absent));
 }
 
 #[tokio::test]
@@ -588,12 +614,13 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
     .unwrap();
 
     // Snapshot at v3 with schema v1
-    let (position, _) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found { position, .. } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(position, version!(3));
 
     // Phase 2: start with schema v2 but immediate shutdown.
@@ -637,12 +664,13 @@ async fn runner_rebuild_is_idempotent_after_crash_before_trigger() {
     .unwrap();
 
     // Now state should be correctly rebuilt
-    let (_, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
+    let CheckpointHydrated::Found { state, .. } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(
         state,
         CountState {
@@ -685,12 +713,15 @@ async fn runner_graceful_shutdown_flushes_dirty_state() {
 
     // State + checkpoint should be flushed on shutdown even though the
     // trigger never fired.
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(
         state,
         CountState {
@@ -709,13 +740,17 @@ async fn runner_stale_state_falls_back_to_initial() {
 
     // Pre-save a snapshot with schema version 1
     snapshots
-        .commit(
+        .commit_checkpoint(
             &stream_id,
-            NonZeroU32::MIN,
-            version!(5),
-            &CountState {
-                count: 99,
-                total: 999,
+            CheckpointWrite {
+                expected: None,
+                schema_version: NonZeroU32::MIN,
+                position: version!(5),
+                state: &CountState {
+                    count: 99,
+                    total: 999,
+                },
+                mode: CheckpointMode::Advance,
             },
         )
         .await
@@ -746,12 +781,13 @@ async fn runner_stale_state_falls_back_to_initial() {
     .unwrap();
 
     // State should start from initial(), not from stale v1 state
-    let (_, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
+    let CheckpointHydrated::Found { state, .. } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(
         state,
         CountState {
@@ -783,11 +819,11 @@ async fn runner_first_run_with_state_persistence_is_not_rebuild() {
 
     // Verify no prior snapshot exists — confirms this is truly a first run.
     let before = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
     assert!(
-        before.into_found().is_none(),
+        matches!(before, CheckpointHydrated::Absent),
         "expected no snapshot before first run"
     );
 
@@ -806,12 +842,13 @@ async fn runner_first_run_with_state_persistence_is_not_rebuild() {
     .await
     .unwrap();
 
-    let (_, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found { state, .. } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(
         state,
         CountState {
@@ -947,12 +984,15 @@ async fn runner_catches_up_and_processes_all_existing_events() {
     .unwrap();
 
     // All 5 events processed
-    let (position, state) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(position, version!(5));
     assert_eq!(
         state,
@@ -999,12 +1039,17 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
     .unwrap();
 
     // Checkpoint at v1, count:1, total:10
-    let (cp1, state1) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position: cp1,
+        state: state1,
+        ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(cp1, version!(1));
     assert_eq!(
         state1,
@@ -1033,12 +1078,17 @@ async fn runner_resumes_from_checkpoint_on_second_run() {
     .await
     .unwrap();
 
-    let (cp2, state2) = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+    let CheckpointHydrated::Found {
+        position: cp2,
+        state: state2,
+        ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(cp2, version!(2));
     // count:2, total:15 — not count:1/total:5 (fresh) or count:2/total:20 (double-fold)
     assert_eq!(
@@ -1078,10 +1128,13 @@ async fn schema_bump_resolves_to_fresh() {
 
     // Confirm v1 snapshot was committed
     let v1 = snapshots
-        .hydrate(&stream_id, NonZeroU32::MIN)
+        .hydrate_checkpoint(&stream_id, NonZeroU32::MIN)
         .await
         .unwrap();
-    assert!(v1.into_found().is_some(), "expected v1 snapshot to exist");
+    assert!(
+        matches!(v1, CheckpointHydrated::Found { .. }),
+        "expected v1 snapshot to exist"
+    );
 
     // Second run with schema v2 — the schema-mismatched snapshot is invisible.
     // hydrate returns None → state starts from initial() → full replay.
@@ -1101,18 +1154,94 @@ async fn schema_bump_resolves_to_fresh() {
     .unwrap();
 
     // v2 snapshot must reflect a full fold of all 1 events from initial()
-    let (pos2, state2) = snapshots
-        .hydrate(&stream_id, NonZeroU32::new(2).unwrap())
+    let CheckpointHydrated::Found {
+        position: pos2,
+        state: state2,
+        ..
+    } = snapshots
+        .hydrate_checkpoint(&stream_id, NonZeroU32::new(2).unwrap())
         .await
         .unwrap()
-        .into_found()
-        .unwrap();
+    else {
+        panic!("checkpoint must exist");
+    };
     assert_eq!(pos2, version!(1));
     assert_eq!(
         state2,
         CountState {
             count: 1,
             total: 10
+        }
+    );
+}
+
+#[tokio::test]
+async fn runner_continues_after_an_already_folded_unpersisted_tail() {
+    struct NotifyAfterSecond<'a>(&'a tokio::sync::Notify);
+    impl mnesis_store::PersistTrigger for NotifyAfterSecond<'_> {
+        fn should_persist(
+            &self,
+            _old_position: Option<Version>,
+            new_position: Version,
+            _event_names: impl Iterator<Item: AsRef<str>>,
+        ) -> bool {
+            if new_position == version!(2) {
+                self.0.notify_one();
+            }
+            false
+        }
+    }
+    let store = Store::new(InMemoryStore::new());
+    let checkpoints = snapshot_store();
+    let id = TestId("already-folded".into());
+    append_events(&store, &id, &[TestEvent::Added(10), TestEvent::Added(20)]).await;
+    let second_folded = tokio::sync::Notify::new();
+    let mut projection = Projection::load(
+        id.clone(),
+        CountingProjector,
+        NotifyAfterSecond(&second_folded),
+        &checkpoints,
+        NonZeroU32::MIN,
+    )
+    .await
+    .unwrap();
+    projection
+        .advance(mnesis_store::Decoded {
+            event: TestEvent::Added(10),
+            version: version!(1),
+            metadata: None,
+        })
+        .await
+        .unwrap();
+    assert_eq!(projection.observed(), Some(version!(1)));
+    assert_eq!(projection.checkpoint(), None);
+    tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        run_projection(
+            projection,
+            Subscription::new(&store),
+            TestEventCodec,
+            second_folded.notified(),
+        ),
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    let CheckpointHydrated::Found {
+        position, state, ..
+    } = checkpoints
+        .hydrate_checkpoint(&id, NonZeroU32::MIN)
+        .await
+        .unwrap()
+    else {
+        panic!("shutdown must flush the matching tail");
+    };
+    assert_eq!(position, version!(2));
+    assert_eq!(
+        state,
+        CountState {
+            count: 2,
+            total: 30
         }
     );
 }

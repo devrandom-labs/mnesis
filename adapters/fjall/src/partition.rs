@@ -142,7 +142,9 @@ pub struct Partitions {
     #[cfg(feature = "snapshot")]
     snapshots: SingleWriterTxKeyspace,
     #[cfg(feature = "projection")]
-    projections: SingleWriterTxKeyspace,
+    checkpoint_global: SingleWriterTxKeyspace,
+    #[cfg(feature = "projection")]
+    checkpoint_stream: SingleWriterTxKeyspace,
     /// Whether the `$all` index (`events_global`) is maintained — gates the
     /// second write in [`stage_event`](Self::stage_event) and `read_all`.
     mode: AllIndex,
@@ -166,7 +168,10 @@ impl Partitions {
         (events, events_global): (SingleWriterTxKeyspace, SingleWriterTxKeyspace),
         global: SingleWriterTxKeyspace,
         #[cfg(feature = "snapshot")] snapshots: SingleWriterTxKeyspace,
-        #[cfg(feature = "projection")] projections: SingleWriterTxKeyspace,
+        #[cfg(feature = "projection")] (checkpoint_global, checkpoint_stream): (
+            SingleWriterTxKeyspace,
+            SingleWriterTxKeyspace,
+        ),
     ) -> Self {
         Self {
             streams,
@@ -176,7 +181,9 @@ impl Partitions {
             #[cfg(feature = "snapshot")]
             snapshots,
             #[cfg(feature = "projection")]
-            projections,
+            checkpoint_global,
+            #[cfg(feature = "projection")]
+            checkpoint_stream,
             mode: AllIndex::Denormalized,
         }
     }
@@ -277,11 +284,32 @@ impl Partitions {
     /// A lazy, snapshot-pinned iterator over the `streams` partition's keys —
     /// one key per stream id — for the export lister.
     #[cfg(feature = "export")]
-    pub fn stream_ids(&self) -> fjall::Iter {
-        self.streams.inner().iter()
+    pub fn stream_ids(&self, snapshot: &fjall::Snapshot) -> fjall::Iter {
+        snapshot.iter(&self.streams)
     }
 
-    // ----- snapshots (best-effort, outside the event tx) ----------------
+    /// Resume listing in the same database view, strictly after the last id.
+    #[cfg(feature = "export")]
+    pub fn stream_ids_after(
+        &self,
+        snapshot: &fjall::Snapshot,
+        after: Option<&StreamKey>,
+    ) -> fjall::Iter {
+        after.map_or_else(
+            || self.stream_ids(snapshot),
+            |id| {
+                snapshot.range::<&[u8], _>(
+                    &self.streams,
+                    (
+                        std::ops::Bound::Excluded(id.as_bytes()),
+                        std::ops::Bound::Unbounded,
+                    ),
+                )
+            },
+        )
+    }
+
+    // ----- snapshots (separate transaction from events) ----------------
 
     /// Point-read a snapshot blob by id.
     #[cfg(feature = "snapshot")]
@@ -289,39 +317,22 @@ impl Partitions {
         self.snapshots.get(id).map_err(FjallError::Io)
     }
 
-    /// Write a snapshot blob for id (best-effort, non-transactional).
+    /// Stage a snapshot blob in the caller's policy-configured transaction.
     #[cfg(feature = "snapshot")]
-    pub fn write_snapshot(&self, id: &[u8], bytes: &[u8]) -> Result<(), FjallError> {
-        self.snapshots
-            .insert(id, Slice::from(bytes))
-            .map_err(FjallError::Io)
+    pub fn stage_snapshot(&self, tx: &mut SingleWriterWriteTx<'_>, id: &[u8], bytes: &[u8]) {
+        tx.insert(&self.snapshots, id, Slice::from(bytes));
     }
 
-    // ----- projections (separate keyspace from snapshots) ---------------
-
-    /// Point-read a projection state blob by id from the `projections` keyspace
-    /// — a distinct partition from `snapshots`, so a projection id can never
-    /// collide with an aggregate-snapshot id that shares the same bytes.
+    /// Revision-checked `$all` checkpoints, separate from unconditional caches.
     #[cfg(feature = "projection")]
-    pub fn read_projection(&self, id: &[u8]) -> Result<Option<Slice>, FjallError> {
-        self.projections.get(id).map_err(FjallError::Io)
+    pub const fn checkpoint_global(&self) -> &SingleWriterTxKeyspace {
+        &self.checkpoint_global
     }
 
-    /// Write a projection state blob for id into the `projections` keyspace.
-    ///
-    /// The blob bundles `(schema_version, position, state)` into **one value
-    /// under one key**, so the state and the `GlobalSeq` it was folded up to are
-    /// never stored apart. The load-bearing guarantee is structural, not a claim
-    /// about fjall's fsync: because the two are one value, a persisted checkpoint
-    /// can **never be ahead of the state it describes**. So even if this write is
-    /// lost on a crash (`IoT` power-loss), the host resumes from the last *durable*
-    /// checkpoint and re-folds forward — idempotent, never skipping events. That
-    /// is why projection checkpointing needs no cross-partition transaction.
+    /// Per-stream checkpoints have a separate position domain and namespace.
     #[cfg(feature = "projection")]
-    pub fn write_projection(&self, id: &[u8], bytes: &[u8]) -> Result<(), FjallError> {
-        self.projections
-            .insert(id, Slice::from(bytes))
-            .map_err(FjallError::Io)
+    pub const fn checkpoint_stream(&self) -> &SingleWriterTxKeyspace {
+        &self.checkpoint_stream
     }
 
     // ----- white-box test access ----------------------------------------
@@ -338,12 +349,5 @@ impl Partitions {
     #[cfg(test)]
     pub const fn global(&self) -> &SingleWriterTxKeyspace {
         &self.global
-    }
-
-    /// The `projections` keyspace. `#[cfg(test)]` — white-box tests write raw
-    /// (possibly corrupt) bytes directly to exercise the decode error path.
-    #[cfg(all(test, feature = "projection"))]
-    pub const fn projections(&self) -> &SingleWriterTxKeyspace {
-        &self.projections
     }
 }

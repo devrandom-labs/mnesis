@@ -29,7 +29,7 @@
 //! - [`subscription`] — user-facing [`Subscription<S>`] struct (built
 //!   via `Subscription::new(&store)`). Its `subscribe` / `subscribe_all`
 //!   methods assemble the generic catch-up-then-live-tail loop from
-//!   [`RawEventStore`] + [`WakeSource`](crate::wake::WakeSource); there is
+//!   [`RawEventStore`] + [`WakeSource`]; there is
 //!   no adapter-facing subscription trait. The returned cursor is `!Unpin`
 //!   (consumers `pin!` it).
 //! - [`stream`] — [`EventStream`] marker trait over
@@ -39,19 +39,19 @@
 //!   and [`TryStreamExt`](https://docs.rs/futures/latest/futures/stream/trait.TryStreamExt.html).
 //! - [`wire`] — single canonical frame builder
 //!   ([`encode_frame`](crate::wire::encode_frame)) that every adapter must use.
-//!   Guarantees 16-byte payload alignment as a wire-format invariant —
-//!   the precondition zero-copy decoders (rkyv, flatbuffers, `#[repr(C)]`
-//!   POD) rely on for sound `&T` reads.
+//!   Aligns payload offsets to 16 bytes. Adapters must also check the actual
+//!   buffer address and realign when needed; borrowing codecs validate their
+//!   format and required alignment before returning references.
 //! - [`repository`] / [`builder`] — aggregate-facing [`Repository<A>`]
 //!   trait plus its facade impl ([`EventStore`], one terminal for both
 //!   owning and borrowing codecs), constructed via the
 //!   [`RepositoryBuilder`] typestate.
 //! - [`state`] — [`SnapshotStore<S, P>`](crate::SnapshotStore) for atomic
-//!   state+position persistence. Powers both aggregate snapshots and
-//!   projection state — same trait, different position type
-//!   ([`Version`] for a single stream vs an adapter's [`AllPosition`] for a
-//!   multi-stream projection).
-//! - [`upcasting`] — schema evolution via the [`Upcaster`] trait and
+//!   snapshot cache persistence and the codec bridge for typed state.
+//! - [`checkpoint`] — conditional projection writes with monotonically
+//!   increasing revisions and ordered positions. State and position are
+//!   replaced together; stale writers cannot overwrite a newer checkpoint.
+//! - [`upcasting`] — schema evolution via plain functions passed to [`EventStore::load_with`] and
 //!   [`EventMorsel`] zero-copy-when-possible data unit.
 //! - [`snapshot`] (feature-gated) — decorator that wraps a repository to
 //!   hydrate from a [`SnapshotStore`] on read and commit on write per a
@@ -95,6 +95,7 @@ pub mod builder;
 pub(crate) mod catchup;
 #[cfg(feature = "cbor")]
 pub mod cbor;
+pub mod checkpoint;
 pub mod codec;
 pub mod conflict;
 pub mod decoded;
@@ -139,8 +140,9 @@ pub use builder::{NeedsCodec, NoSnapshot, RepositoryBuilder};
 pub use bytes;
 #[cfg(feature = "cbor")]
 pub use cbor::{
-    ChunkError, ChunkHeader, ChunkWriter, SectionError, SectionWriter, WriteError, decode_chunk,
-    decode_header,
+    BackupEventError, ChunkError, ChunkHeader, ChunkSinkError, ChunkWriter, CompletionError,
+    SalvagedChunk, SectionError, SectionWriter, WriteError, decode_chunk, decode_header,
+    salvage_chunk,
 };
 #[cfg(feature = "json")]
 pub use codec::serde::json::{Json, JsonCodec};
@@ -168,7 +170,7 @@ pub use import::{
 pub use metadata::MetadataProvider;
 pub use mnesis::Version;
 #[cfg(feature = "projection")]
-pub use projection::{Positioned, Projection, ProjectionError, Projector};
+pub use projection::{Positioned, Projection, ProjectionError, ProjectionStateError, Projector};
 pub use repository::{EventStore, Repository};
 pub use saga::{
     ProjectedIntent, ProjectedIntents, ProjectedIntentsIntoIter, Reaction, SagaError,
@@ -191,7 +193,7 @@ pub use stream_id::StreamKey;
 pub use futures_core::Stream;
 #[cfg(feature = "subscription")]
 pub use subscription::Subscription;
-pub use upcasting::EventMorsel;
+pub use upcasting::{EventMorsel, TransformError};
 pub use value::{EventType, Metadata, Payload, SchemaVersion, ValueError};
 #[cfg(feature = "subscription")]
 pub use wake::{WakeRegistration, WakeSource};

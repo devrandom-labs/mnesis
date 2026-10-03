@@ -87,7 +87,7 @@ fn first_is_the_head_event_of_a_single_event_collection() {
     let events: Events<TestEvent> = Events::new(TestEvent::Created(Created));
 
     assert_eq!(events.first(), &TestEvent::Created(Created));
-    assert!(events.rest().is_empty());
+    assert_eq!(events.rest(), []);
 }
 
 #[test]

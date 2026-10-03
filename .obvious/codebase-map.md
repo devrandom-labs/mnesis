@@ -35,4 +35,4 @@ package names keep it. Core boundary: `crates/` = everything an adapter builds o
 | `.githooks/` | — | Pre-commit hook (activate: `git config core.hooksPath .githooks`) |
 | `.mutants-baselines/` | — | Per-crate cargo-mutants ratchet baselines |
 | `.cargo/` | — | cargo config, audit + mutants config |
-| root | — | `Cargo.toml` (workspace + lints), `flake.nix` (CI/dev shell), `rust-toolchain.toml` (pin 1.95.0), `clippy.toml`, `rustfmt.toml`, `taplo.toml`, `deny.toml`, `release-plz.toml` |
+| root | — | `Cargo.toml` (workspace + lints), `flake.nix` (CI/dev shell), `rust-toolchain.toml` (pin 1.99.0), `clippy.toml`, `rustfmt.toml`, `taplo.toml`, `deny.toml`, `release-plz.toml` |

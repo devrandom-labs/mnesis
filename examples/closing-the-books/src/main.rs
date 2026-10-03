@@ -34,15 +34,16 @@ fn record<A: Aggregate, const N: usize>(
 ) where
     EventOf<A>: Clone,
 {
+    root.commit_version(decided)
+        .expect("commit must fit before persistence");
     let first = root
         .version()
         .map_or(Version::INITIAL, |v| v.next().expect("version overflow"));
     let run = Version::run(first, decided.len()).expect("version overflow");
-    let last = run.clone().last().unwrap_or(first);
     for (version, event) in run.zip(decided.iter()) {
         history.push(VersionedEvent::new(version, event.clone()));
     }
-    root.commit_persisted(last, decided);
+    root.commit_persisted(decided).expect("root is usable");
 }
 
 /// Rebuild current state from one stream by replaying every event, returning
@@ -120,31 +121,52 @@ struct ShiftClosed {
     final_float: u64,
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 struct ShiftState {
     opening_float: u64,
-    registered_total: u64,
+    registered_total: Result<u64, ShiftError>,
     is_open: bool,
     closed: bool,
 }
 
+impl ShiftState {
+    fn total_after(&self, amount: u64) -> Result<u64, ShiftError> {
+        let total = self.registered_total.clone()?;
+        let updated = total
+            .checked_add(amount)
+            .ok_or(ShiftError::AmountOverflow { total, amount })?;
+        self.opening_float
+            .checked_add(updated)
+            .ok_or(ShiftError::AmountOverflow {
+                total: self.opening_float,
+                amount: updated,
+            })?;
+        Ok(updated)
+    }
+}
+
 impl AggregateState for ShiftState {
     type Event = ShiftEvent;
-
     fn initial() -> Self {
-        Self::default()
+        Self {
+            opening_float: 0,
+            registered_total: Ok(0),
+            is_open: false,
+            closed: false,
+        }
     }
-
     fn apply(mut self, event: &ShiftEvent) -> Self {
+        if self.registered_total.is_err() {
+            return self;
+        }
         match event {
             ShiftEvent::Opened(e) => {
                 self.opening_float = e.opening_float;
-                self.registered_total = 0;
+                self.registered_total = Ok(0);
                 self.is_open = true;
             }
-            // Example values stay small; production aggregates use checked_add.
             ShiftEvent::TransactionRegistered(e) => {
-                self.registered_total += e.amount;
+                self.registered_total = self.total_after(e.amount)
             }
             ShiftEvent::Closed(_) => {
                 self.is_open = false;
@@ -158,12 +180,14 @@ impl AggregateState for ShiftState {
 #[mnesis::aggregate(state = ShiftState, error = ShiftError, id = CashierShiftId)]
 struct CashierShift;
 
-#[derive(Debug, thiserror::Error, PartialEq)]
+#[derive(Debug, Clone, thiserror::Error, PartialEq, Eq)]
 enum ShiftError {
     #[error("shift already opened")]
     AlreadyOpen,
     #[error("shift is not open")]
     NotOpen,
+    #[error("amount overflow: total {total}, added {amount}")]
+    AmountOverflow { total: u64, amount: u64 },
 }
 
 struct OpenShift {
@@ -183,6 +207,7 @@ impl Handle<OpenShift> for CashierShift {
         state: &ShiftState,
         cmd: OpenShift,
     ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
+        state.registered_total.clone()?;
         if state.is_open || state.closed {
             return Err(ShiftError::AlreadyOpen);
         }
@@ -197,9 +222,11 @@ impl Handle<RegisterTransaction> for CashierShift {
         state: &ShiftState,
         cmd: RegisterTransaction,
     ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
+        state.registered_total.clone()?;
         if !state.is_open {
             return Err(ShiftError::NotOpen);
         }
+        state.total_after(cmd.amount)?;
         Ok(Some(events![ShiftEvent::TransactionRegistered(
             TransactionRegistered { amount: cmd.amount }
         )]))
@@ -211,17 +238,26 @@ impl Handle<CloseShift> for CashierShift {
         state: &ShiftState,
         cmd: CloseShift,
     ) -> Result<Option<Events<ShiftEvent>>, ShiftError> {
+        let total = state.registered_total.clone()?;
         if !state.is_open {
             return Err(ShiftError::NotOpen);
         }
-        let expected = state.opening_float + state.registered_total;
+        let expected =
+            state
+                .opening_float
+                .checked_add(total)
+                .ok_or(ShiftError::AmountOverflow {
+                    total: state.opening_float,
+                    amount: total,
+                })?;
+        let difference = cmd.declared_tender.abs_diff(expected);
         let overage = if cmd.declared_tender > expected {
-            cmd.declared_tender - expected
+            difference
         } else {
             0
         };
         let shortage = if expected > cmd.declared_tender {
-            expected - cmd.declared_tender
+            difference
         } else {
             0
         };
@@ -269,29 +305,39 @@ struct SaleRegistered {
     amount: u64,
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 struct RegisterState {
-    float: u64,
+    float: Result<u64, RegisterError>,
     is_open: bool,
+}
+
+impl RegisterState {
+    fn float_after(&self, amount: u64) -> Result<u64, RegisterError> {
+        let total = self.float.clone()?;
+        total
+            .checked_add(amount)
+            .ok_or(RegisterError::AmountOverflow { total, amount })
+    }
 }
 
 impl AggregateState for RegisterState {
     type Event = RegisterEvent;
-
     fn initial() -> Self {
-        Self::default()
+        Self {
+            float: Ok(0),
+            is_open: false,
+        }
     }
-
     fn apply(mut self, event: &RegisterEvent) -> Self {
+        if self.float.is_err() {
+            return self;
+        }
         match event {
             RegisterEvent::Opened(e) => {
-                self.float = e.opening_float;
+                self.float = Ok(e.opening_float);
                 self.is_open = true;
             }
-            // Example values stay small; production aggregates use checked_add.
-            RegisterEvent::Sale(e) => {
-                self.float += e.amount;
-            }
+            RegisterEvent::Sale(e) => self.float = self.float_after(e.amount),
         }
         self
     }
@@ -300,12 +346,14 @@ impl AggregateState for RegisterState {
 #[mnesis::aggregate(state = RegisterState, error = RegisterError, id = RegisterId)]
 struct CashRegister;
 
-#[derive(Debug, thiserror::Error, PartialEq)]
+#[derive(Debug, Clone, thiserror::Error, PartialEq, Eq)]
 enum RegisterError {
     #[error("register already open")]
     AlreadyOpen,
     #[error("register is not open")]
     NotOpen,
+    #[error("amount overflow: total {total}, added {amount}")]
+    AmountOverflow { total: u64, amount: u64 },
 }
 
 struct OpenRegister {
@@ -321,6 +369,7 @@ impl Handle<OpenRegister> for CashRegister {
         state: &RegisterState,
         cmd: OpenRegister,
     ) -> Result<Option<Events<RegisterEvent>>, RegisterError> {
+        state.float.clone()?;
         // No CloseRegister command: a register has no lifecycle end, so (unlike
         // a shift) there is no `closed` state to guard against here.
         if state.is_open {
@@ -337,9 +386,11 @@ impl Handle<RegisterSale> for CashRegister {
         state: &RegisterState,
         cmd: RegisterSale,
     ) -> Result<Option<Events<RegisterEvent>>, RegisterError> {
+        state.float.clone()?;
         if !state.is_open {
             return Err(RegisterError::NotOpen);
         }
+        state.float_after(cmd.amount)?;
         Ok(Some(events![RegisterEvent::Sale(SaleRegistered {
             amount: cmd.amount,
         })]))
@@ -374,7 +425,11 @@ fn run_long_lived_demo() {
     println!(
         "long-lived CashRegister -> replaying all {} events recovers current float = {}",
         stream.len(),
-        root.state().float,
+        root.state()
+            .expect("aggregate state is available")
+            .float
+            .as_ref()
+            .expect("valid register arithmetic"),
     );
 }
 
@@ -446,7 +501,12 @@ fn run_cashier_shift_demo() {
     println!(
         "replaying ONLY the current shift ({} events) recovers registered total = {}",
         shift2_stream.len(),
-        shift2_root.state().registered_total,
+        shift2_root
+            .state()
+            .expect("aggregate state is available")
+            .registered_total
+            .as_ref()
+            .expect("valid shift arithmetic"),
     );
 }
 
@@ -530,5 +590,148 @@ mod tests {
                 declared_tender: 100,
             })
             .then_expect_error(ShiftError::NotOpen);
+    }
+}
+
+#[cfg(test)]
+mod audit_arithmetic {
+    use super::{
+        CashRegister, CashierShift, CloseShift, OpenRegister, OpenShift, RegisterError,
+        RegisterEvent, RegisterOpened, RegisterSale, RegisterState, RegisterTransaction,
+        SaleRegistered, ShiftError, ShiftEvent, ShiftOpened, ShiftState, TransactionRegistered,
+    };
+    use mnesis::{AggregateState, Handle};
+
+    #[test]
+    fn registered_total_overflow_rejects_before_emitting_an_event() {
+        let state = ShiftState {
+            registered_total: Ok(u64::MAX),
+            is_open: true,
+            ..ShiftState::initial()
+        };
+        assert!(matches!(
+            <CashierShift as Handle<RegisterTransaction>>::handle(
+                &state,
+                RegisterTransaction { amount: 1 }
+            ),
+            Err(ShiftError::AmountOverflow {
+                total: u64::MAX,
+                amount: 1
+            })
+        ));
+    }
+
+    #[test]
+    fn register_float_overflow_rejects_before_emitting_an_event() {
+        let state = RegisterState {
+            float: Ok(u64::MAX),
+            is_open: true,
+        };
+        assert!(matches!(
+            <CashRegister as Handle<RegisterSale>>::handle(&state, RegisterSale { amount: 1 }),
+            Err(RegisterError::AmountOverflow {
+                total: u64::MAX,
+                amount: 1
+            })
+        ));
+    }
+
+    #[test]
+    fn overflowing_expected_tender_rejects_during_close() {
+        let state = ShiftState {
+            opening_float: u64::MAX,
+            registered_total: Ok(1),
+            is_open: true,
+            closed: false,
+        };
+        assert!(matches!(
+            <CashierShift as Handle<CloseShift>>::handle(&state, CloseShift { declared_tender: 0 }),
+            Err(ShiftError::AmountOverflow {
+                total: u64::MAX,
+                amount: 1
+            })
+        ));
+    }
+
+    #[test]
+    fn register_boundary_and_invalid_history_are_exact() {
+        for (total, amount, expected) in [
+            (0, 0, 0),
+            (0, u64::MAX, u64::MAX),
+            (u64::MAX - 1, 1, u64::MAX),
+            (u64::MAX, 0, u64::MAX),
+        ] {
+            let state = RegisterState {
+                float: Ok(total),
+                is_open: true,
+            };
+            let events =
+                <CashRegister as Handle<RegisterSale>>::handle(&state, RegisterSale { amount })
+                    .unwrap()
+                    .unwrap();
+            assert_eq!(state.apply(events.first()).float, Ok(expected));
+        }
+        let invalid = RegisterState {
+            float: Ok(u64::MAX),
+            is_open: true,
+        }
+        .apply(&RegisterEvent::Sale(SaleRegistered { amount: 1 }));
+        let error = RegisterError::AmountOverflow {
+            total: u64::MAX,
+            amount: 1,
+        };
+        assert_eq!(invalid.float, Err(error.clone()));
+        assert!(
+            matches!(<CashRegister as Handle<OpenRegister>>::handle(&invalid, OpenRegister { opening_float: 0 }), Err(actual) if actual == error)
+        );
+        assert!(
+            matches!(<CashRegister as Handle<RegisterSale>>::handle(&invalid, RegisterSale { amount: 0 }), Err(actual) if actual == error)
+        );
+        assert_eq!(
+            invalid
+                .apply(&RegisterEvent::Opened(RegisterOpened { opening_float: 0 }))
+                .float,
+            Err(error)
+        );
+    }
+
+    #[test]
+    fn opening_float_is_part_of_the_transaction_limit_and_invalid_history_is_sticky() {
+        let state = ShiftState {
+            opening_float: u64::MAX,
+            registered_total: Ok(0),
+            is_open: true,
+            closed: false,
+        };
+        let error = ShiftError::AmountOverflow {
+            total: u64::MAX,
+            amount: 1,
+        };
+        assert!(
+            matches!(<CashierShift as Handle<RegisterTransaction>>::handle(&state, RegisterTransaction { amount: 1 }), Err(actual) if actual == error)
+        );
+        let zero = <CashierShift as Handle<RegisterTransaction>>::handle(
+            &state,
+            RegisterTransaction { amount: 0 },
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(state.clone().apply(zero.first()).registered_total, Ok(0));
+        let invalid = state.apply(&ShiftEvent::TransactionRegistered(TransactionRegistered {
+            amount: 1,
+        }));
+        assert_eq!(invalid.registered_total, Err(error.clone()));
+        assert!(
+            matches!(<CashierShift as Handle<OpenShift>>::handle(&invalid, OpenShift { opening_float: 0 }), Err(actual) if actual == error)
+        );
+        assert!(
+            matches!(<CashierShift as Handle<CloseShift>>::handle(&invalid, CloseShift { declared_tender: 0 }), Err(actual) if actual == error)
+        );
+        assert_eq!(
+            invalid
+                .apply(&ShiftEvent::Opened(ShiftOpened { opening_float: 0 }))
+                .registered_total,
+            Err(error)
+        );
     }
 }

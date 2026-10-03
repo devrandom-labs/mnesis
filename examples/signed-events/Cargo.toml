@@ -23,8 +23,10 @@ tokio = { workspace = true }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
+bytes = { workspace = true }
 ed25519-dalek = { workspace = true, features = ["rand_core"] }
 mnesis = { path = "../../crates/mnesis", features = ["derive", "testing"] }
+proptest = { workspace = true }
 rand_core = { workspace = true }
 
 [lints]

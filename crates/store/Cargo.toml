@@ -48,11 +48,6 @@ export = []
 import = []
 bytemuck = ["dep:bytemuck"]
 rkyv = ["dep:rkyv"]
-# Retired feature, kept as no-op until Task 6 removes the lingering
-# #[cfg(feature = "futures-bridge")] gates in stream/*. Deleting the
-# feature now would emit `unexpected_cfgs` warnings that fail clippy
-# `--deny warnings`. See deviations doc.
-futures-bridge = []
 # Default CBOR backup box (issue #145, Card 3). Implies export+import; the
 # inverse never holds (Agency enables export/import and brings its own CESR box,
 # pulling no CBOR).

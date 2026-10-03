@@ -13,7 +13,7 @@ Point it at a database via `DATABASE_URL`; integration tests boot a real Postgre
 
 ## MSRV & stability
 
-MSRV **1.95**. Ships in the **0.x tier** — the wire/schema surface iterates without forcing kernel major bumps. See [STABILITY.md](../../STABILITY.md).
+MSRV **1.99**. Ships in the **0.x tier** — the wire/schema surface iterates without forcing kernel major bumps. See [STABILITY.md](../../STABILITY.md).
 
 ## License
 

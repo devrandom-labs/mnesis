@@ -59,7 +59,7 @@ struct SingleAggregate;
 fn single_variant_event_enum() {
     let mut agg = AggregateRoot::<SingleAggregate>::new(AId::new(1));
     agg.replay(Version::INITIAL, &SingleEvent::Only).unwrap();
-    assert!(agg.state().triggered);
+    assert!(agg.state().unwrap().triggered);
 }
 
 // =============================================================================
@@ -150,7 +150,7 @@ fn very_long_type_names() {
         ),
     )
     .unwrap();
-    assert_eq!(agg.state().data, "hello");
+    assert_eq!(agg.state().unwrap().data, "hello");
 }
 
 // =============================================================================
@@ -196,7 +196,7 @@ fn aggregate_with_path_types() {
         .unwrap();
     agg.replay(Version::new(2).unwrap(), &inner::InnerEvent::Ping)
         .unwrap();
-    assert_eq!(agg.state().pings, 2);
+    assert_eq!(agg.state().unwrap().pings, 2);
 }
 
 // =============================================================================

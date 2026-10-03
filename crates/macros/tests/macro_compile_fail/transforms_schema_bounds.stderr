@@ -1,0 +1,35 @@
+error: from version must be >= 1
+ --> tests/macro_compile_fail/transforms_schema_bounds.rs:6:47
+  |
+6 | impl Marker { #[transform(event = "E", from = 0, to = 1)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(p...
+  |                                               ^
+
+error: to version must be >= 1
+  --> tests/macro_compile_fail/transforms_schema_bounds.rs:12:55
+   |
+12 | impl Marker { #[transform(event = "E", from = 1, to = 0)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(...
+   |                                                       ^
+
+error: schema version cannot advance past u32::MAX
+  --> tests/macro_compile_fail/transforms_schema_bounds.rs:18:47
+   |
+18 | impl Marker { #[transform(event = "E", from = 4294967295, to = 1)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallib...
+   |                                               ^^^^^^^^^^
+
+error: number too large to fit in target type
+  --> tests/macro_compile_fail/transforms_schema_bounds.rs:24:47
+   |
+24 | impl Marker { #[transform(event = "E", from = 18446744073709551615, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert...
+   |                                               ^^^^^^^^^^^^^^^^^^^^
+
+error: number too large to fit in target type
+  --> tests/macro_compile_fail/transforms_schema_bounds.rs:30:55
+   |
+30 | impl Marker { #[transform(event = "E", from = 1, to = 4294967296)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallib...
+   |                                                       ^^^^^^^^^^
+
+error: transform chain gap: no transform produces 'E@4294967294'; chains must start at schema 1
+  --> tests/macro_compile_fail/transforms_schema_bounds.rs:36:80
+   |
+36 | impl Marker { #[transform(event = "E", from = 4294967294, to = 4294967295)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert:...
+   |                                                                                ^^^^

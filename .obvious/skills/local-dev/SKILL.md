@@ -8,6 +8,10 @@ description: Verified bring-up and health-check recipe for the mnesis Rust works
 Durable record of the LOCAL-DEV onboarding run. Every command below was executed and
 verified in this sandbox (thread th_ebG2G77D); raw logs live at `~/onboarding-evidence/`.
 
+This is a historical Rust 1.95.0 environment record. The repository now pins
+1.99.0; use `rust-toolchain.toml` for current setup and see [the audit](../../../todo.md)
+for current verification. Versioned commands and results below record the original run.
+
 ## What this environment is
 
 - Debian 13 x86_64 sandbox, 8 vCPU, ~8 GB RAM, ~40 GB free disk. **No nix, no docker.**

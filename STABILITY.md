@@ -103,7 +103,7 @@ raw store bytes are not.
 ## MSRV
 
 `rust-version` in every published Cargo.toml equals the pinned stable
-toolchain we build and test with (currently **1.95.0**). Raising the MSRV is
+toolchain we build and test with (currently **1.99.0**). Raising the MSRV is
 a **minor** change, never a patch. We claim no trailing floor: the declared
 MSRV is the only supported toolchain lower bound, and cargo enforces it.
 

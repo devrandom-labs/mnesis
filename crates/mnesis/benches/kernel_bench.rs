@@ -2,7 +2,7 @@
 //!
 //! Measures the hot paths in the kernel:
 //! - replay: aggregate rehydration with N events
-//! - `apply_events`: post-persistence state advancement
+//! - `commit_persisted`: post-persistence state advancement
 //!
 //! Run: `cargo bench --bench kernel_bench`
 //! Reports: `target/criterion/report/index.html`
@@ -129,8 +129,8 @@ fn bench_replay(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_apply_events(c: &mut Criterion) {
-    let mut group = c.benchmark_group("apply_events");
+fn bench_commit_persisted(c: &mut Criterion) {
+    let mut group = c.benchmark_group("commit_persisted");
     for size in [1, 10, 100] {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
             b.iter_with_setup(
@@ -142,10 +142,8 @@ fn bench_apply_events(c: &mut Criterion) {
                     (agg, batches)
                 },
                 |(mut agg, batches)| {
-                    for (i, batch) in batches.iter().enumerate() {
-                        #[allow(clippy::as_conversions, reason = "bench index always fits u64")]
-                        let v = Version::new((i + 1) as u64).unwrap();
-                        agg.commit_persisted(v, batch);
+                    for batch in &batches {
+                        agg.commit_persisted(batch).expect("root is usable");
                     }
                     black_box(agg)
                 },
@@ -155,5 +153,5 @@ fn bench_apply_events(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_replay, bench_apply_events);
+criterion_group!(benches, bench_replay, bench_commit_persisted);
 criterion_main!(benches);

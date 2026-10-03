@@ -1,0 +1,31 @@
+error[E0308]: mismatched types
+ --> tests/compile_fail/invalid_upcast_schema.rs:5:44
+  |
+5 |     let _ = EventMorsel::borrowed("event", Version::INITIAL, b"payload");
+  |             ---------------------          ^^^^^^^^^^^^^^^^ expected `SchemaVersion`, found `Version`
+  |             |
+  |             arguments to this function are incorrect
+  |
+note: associated function defined here
+ --> src/upcasting.rs
+  |
+  |     pub const fn borrowed(
+  |                  ^^^^^^^^
+
+error[E0308]: mismatched types
+ --> tests/compile_fail/invalid_upcast_schema.rs:6:37
+  |
+6 |     let _ = SchemaVersion::from_u32(u64::MAX);
+  |             ----------------------- ^^^^^^^^ expected `u32`, found `u64`
+  |             |
+  |             arguments to this function are incorrect
+  |
+note: associated function defined here
+ --> src/value.rs
+  |
+  |     pub fn from_u32(value: u32) -> Result<Self, ValueError> {
+  |            ^^^^^^^^
+help: you can convert a `u64` to a `u32` and panic if the converted value doesn't fit
+  |
+6 |     let _ = SchemaVersion::from_u32(u64::MAX.try_into().unwrap());
+  |                                             ++++++++++++++++++++

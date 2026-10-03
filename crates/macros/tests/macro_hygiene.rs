@@ -64,7 +64,7 @@ fn user_variable_named_root_no_conflict() {
     let local = "I am a local variable named root";
     let mut agg = AggregateRoot::<AggWithRoot>::new(HId::new(1));
     agg.replay(Version::INITIAL, &HEvent::A).unwrap();
-    assert_eq!(agg.state().count, 1);
+    assert_eq!(agg.state().unwrap().count, 1);
     assert_eq!(local, "I am a local variable named root");
 }
 
@@ -87,8 +87,8 @@ fn two_aggregates_same_module_no_interference() {
     first.replay(Version::new(2).unwrap(), &HEvent::A).unwrap();
     second.replay(Version::INITIAL, &HEvent::A).unwrap();
 
-    assert_eq!(first.state().count, 2);
-    assert_eq!(second.state().count, 1);
+    assert_eq!(first.state().unwrap().count, 2);
+    assert_eq!(second.state().unwrap().count, 1);
 }
 
 // =============================================================================
@@ -136,7 +136,7 @@ fn aggregate_inside_function_body() {
         .unwrap();
     agg.replay(Version::new(3).unwrap(), &LocalEvent::Tick)
         .unwrap();
-    assert_eq!(agg.state().ticks, 3);
+    assert_eq!(agg.state().unwrap().ticks, 3);
 }
 
 // =============================================================================
@@ -167,7 +167,7 @@ mod user_has_own_aggregate_trait {
         let mut agg = AggregateRoot::<MyAgg>::new(HId::new(1));
         agg.replay(Version::INITIAL, &HEvent::A).unwrap(); // via AggregateRoot
         assert_eq!(MyAgg.custom_method(), "custom"); // from user's Aggregate
-        assert_eq!(agg.state().count, 1); // via AggregateRoot
+        assert_eq!(agg.state().unwrap().count, 1); // via AggregateRoot
     }
 }
 
@@ -196,7 +196,7 @@ mod user_has_own_aggregate_root_type {
         agg.replay(Version::INITIAL, &HEvent::A).unwrap();
 
         assert_eq!(user_root.data, "user");
-        assert_eq!(agg.state().count, 1);
+        assert_eq!(agg.state().unwrap().count, 1);
     }
 }
 
@@ -226,7 +226,7 @@ fn user_functions_named_like_trait_methods() {
     agg.replay(Version::INITIAL, &HEvent::A).unwrap();
 
     // AggregateRoot methods on agg
-    assert_eq!(agg.state().count, 1);
+    assert_eq!(agg.state().unwrap().count, 1);
     // replay advances the version to the replayed event.
     assert_eq!(agg.version(), Version::new(1));
     assert_eq!(agg.id(), &HId::new(1));

@@ -35,6 +35,15 @@ use crate::version::Version;
 use alloc::vec::Vec;
 use core::fmt::Debug;
 
+#[allow(
+    clippy::panic,
+    reason = "fixtures report failed integrity assertions as test panics"
+)]
+fn fixture_state<A: Aggregate>(root: &AggregateRoot<A>) -> &A::State {
+    root.state()
+        .unwrap_or_else(|error| panic!("fixture root is unavailable: {error}"))
+}
+
 /// Entry point. Carries the id used to construct the root for replay.
 pub struct AggregateFixture<A: Aggregate> {
     id: A::Id,
@@ -102,28 +111,33 @@ pub struct Given<A: Aggregate> {
 }
 
 impl<A: Aggregate> Given<A> {
-    /// Issue a command. Calls [`AggregateRoot::handle`] (which dispatches to
-    /// [`Handle::handle`]), and — when events were decided — folds them into
-    /// the root via [`AggregateRoot::apply_events`] so the root reaches the
+    /// Issue a command through [`Handle::handle`] against checked fixture state.
+    /// When events were decided, folds them into
+    /// the root via its owned state fold so the root reaches the
     /// post-command state, exactly as the repository does after a successful
-    /// persist. The fold uses the kernel's `mem::replace` path (no clone), so
+    /// persist. The fold uses the kernel's owned state fold (no clone), so
     /// the fixture imposes no `Clone` bound on `A::State`. The raw `Result`
     /// is captured for `then_expect_events` / `then_expect_ignored` /
     /// `then_expect_error`. On a rejected command — and on a no-op
     /// (`Ok(None)`) — the root is left at the rehydrated state.
+    ///
+    /// # Panics
+    /// Propagates application panics and reports an unavailable fixture root.
     #[must_use]
     pub fn when<C, const N: usize>(self, cmd: C) -> Acted<A, N>
     where
         A: Handle<C, N>,
     {
         let mut root = self.root;
-        let result = root.handle(cmd);
+        let result = A::handle(fixture_state(&root), cmd);
         // `Result::iter` yields the `Ok`, `flatten` drops the `None` — so the
         // fold runs exactly on `Ok(Some(_))` with no branch to get wrong.
-        result
-            .iter()
-            .flatten()
-            .for_each(|events| root.apply_events(events));
+        result.iter().flatten().for_each(|events| {
+            assert!(
+                root.apply_events(events).is_ok(),
+                "fixture root is unavailable"
+            );
+        });
         Acted { root, result }
     }
 
@@ -133,7 +147,7 @@ impl<A: Aggregate> Given<A> {
     /// silences `unused_must_use` for exactly this case.
     #[must_use]
     pub fn then_expect_state(self, assertion: impl FnOnce(&A::State)) -> Self {
-        assertion(self.root.state());
+        assertion(fixture_state(&self.root));
         self
     }
 }
@@ -268,7 +282,7 @@ impl<A: Aggregate, const N: usize> Acted<A, N> {
     /// chaining.
     #[must_use]
     pub fn then_expect_state(self, assertion: impl FnOnce(&A::State)) -> Self {
-        assertion(self.root.state());
+        assertion(fixture_state(&self.root));
         self
     }
 }
@@ -349,12 +363,15 @@ pub struct SagaGiven<S: Saga> {
 }
 
 impl<S: Saga> SagaGiven<S> {
-    /// Feed an incoming upstream event. Calls [`AggregateRoot::react`] and — when
-    /// it produces own-events — folds them into the root via the no-clone
-    /// [`AggregateRoot::apply_events`] (so state assertions need no `Clone`) and
+    /// Feed an incoming event through [`React::react`] against checked fixture
+    /// state. Folds produced own-events into the root via the no-clone
+    /// owned state fold (so state assertions need no `Clone`) and
     /// projects each produced event through [`Saga::intent_for`] (in order) to
     /// collect the outgoing intents. On `Ok(None)` or `Err` nothing is folded and
     /// no intents are collected.
+    ///
+    /// # Panics
+    /// Propagates application panics and reports an unavailable fixture root.
     #[must_use]
     pub fn when<E, const N: usize>(self, event: &E) -> SagaReacted<S, N>
     where
@@ -362,12 +379,15 @@ impl<S: Saga> SagaGiven<S> {
         E: DomainEvent,
     {
         let mut root = self.root;
-        let result = root.react::<E, N>(event);
+        let result = S::react(fixture_state(&root), event);
         let commands = match &result {
             Ok(Some(events)) => {
                 let cmds: Vec<S::Command> =
                     events.iter().filter_map(|e| S::intent_for(e)).collect();
-                root.apply_events(events);
+                assert!(
+                    root.apply_events(events).is_ok(),
+                    "fixture root is unavailable"
+                );
                 cmds
             }
             _ => Vec::new(),
@@ -382,7 +402,7 @@ impl<S: Saga> SagaGiven<S> {
     /// Assert against the rehydrated state (no event fed). Returns `Self`.
     #[must_use]
     pub fn then_expect_state(self, assertion: impl FnOnce(&S::State)) -> Self {
-        assertion(self.root.state());
+        assertion(fixture_state(&self.root));
         self
     }
 }
@@ -528,7 +548,7 @@ impl<S: Saga, const N: usize> SagaReacted<S, N> {
     /// equals the rehydrated state. Returns `Self`.
     #[must_use]
     pub fn then_expect_state(self, assertion: impl FnOnce(&S::State)) -> Self {
-        assertion(self.root.state());
+        assertion(fixture_state(&self.root));
         self
     }
 }

@@ -7,11 +7,6 @@
 //! Combinators still come from [`futures::StreamExt`](https://docs.rs/futures/latest/futures/stream/trait.StreamExt.html)
 //! and [`futures::TryStreamExt`](https://docs.rs/futures/latest/futures/stream/trait.TryStreamExt.html).
 //!
-//! This module replaced the previous GAT-lending `EventStream` trait
-//! family (cursor, combinators, progress, futures-bridge). The owned-
-//! `Bytes` envelope from PR1 removed the per-record lifetime cliff that
-//! motivated the GAT — the new shape is a marker over
-//! `futures_core::Stream<Item = Result<PersistedEnvelope, _>>`.
 
 use crate::envelope::PersistedEnvelope;
 

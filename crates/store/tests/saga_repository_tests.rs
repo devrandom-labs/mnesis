@@ -255,8 +255,8 @@ async fn dispatch_then_reload_then_dispatch_advances_the_saga() {
 
     // Reload from the store: both own-events replayed → terminal state.
     let loaded: AggregateRoot<OrderSaga> = repo.load(id).await.unwrap();
-    assert!(loaded.state().payment_requested);
-    assert!(loaded.state().completed);
+    assert!(loaded.state().unwrap().payment_requested);
+    assert!(loaded.state().unwrap().completed);
     assert_eq!(loaded.version(), Version::new(2));
 }
 
@@ -278,7 +278,7 @@ async fn reopen_facade_over_same_store_sees_prior_saga_events() {
     // A brand-new facade over the SAME shared store handle.
     let repo2: Repo = store.repository().codec(SagaCodec).build();
     let loaded: AggregateRoot<OrderSaga> = repo2.load(id).await.unwrap();
-    assert!(loaded.state().payment_requested);
+    assert!(loaded.state().unwrap().payment_requested);
     assert_eq!(loaded.version(), Some(Version::INITIAL));
 }
 
@@ -398,6 +398,6 @@ async fn concurrent_dispatch_one_wins_loser_conflicts_then_retry_converges() {
 
     // Final state: exactly one PaymentRequested recorded.
     let loaded: AggregateRoot<OrderSaga> = repo.load(id).await.unwrap();
-    assert!(loaded.state().payment_requested);
+    assert!(loaded.state().unwrap().payment_requested);
     assert_eq!(loaded.version(), Some(Version::INITIAL));
 }

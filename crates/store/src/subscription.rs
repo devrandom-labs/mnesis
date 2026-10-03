@@ -22,8 +22,8 @@
 //!
 //! There is no adapter-facing subscription trait. An adapter need only
 //! implement [`RawEventStore`] (the bounded scans) and
-//! [`WakeSource`](crate::wake::WakeSource) (the live wake); the generic loop is
-//! assembled here from [`StreamCatchup`] / [`AllCatchup`] + the internal
+//! [`WakeSource`] (the live wake); the generic loop is
+//! assembled here from stream/global catch-up readers + the internal
 //! `live_stepped` loop, one monomorphized state machine per call site.
 
 use alloc::sync::Arc;

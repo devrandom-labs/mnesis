@@ -22,6 +22,10 @@
 //! - **Atomicity is a caller policy** ([`Atomicity`]) — whole-chunk
 //!   (all-or-nothing, server bulk-restore) vs per-stream (a bad block stops
 //!   only its stream, mobile resilience).
+//! - **Distinct routes** — all section targets must be distinct within a
+//!   request, including empty/corrupt sections and repeated origins. Routing
+//!   is evaluated once per section and validated before any append under both
+//!   policies; malformed routes return `InvalidRoute`, never OCC conflict.
 //! - **Idempotency is a side-effect** of the version check — re-importing
 //!   already-present events is refused, with no dedup machinery.
 //!
@@ -29,6 +33,7 @@
 //! the report, the error) and the [`EventImporter`] trait. The concrete
 //! ingest impl is a later card.
 
+use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 
 use bytes::Bytes;
@@ -159,8 +164,14 @@ pub enum AbortReason {
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum ImportError<E> {
+    /// A raw atomic run was malformed; it is not a storage-head conflict.
+    #[error(transparent)]
+    InvalidRun(#[from] InvalidRun),
+    /// Routing is ambiguous; rejected before any section is appended.
+    #[error(transparent)]
+    InvalidRoute(#[from] InvalidRoute),
     // NOTE: there is no `Malformed` variant. Decoding the backup box is the
-    // box's job (`cbor::decode_chunk` → `ChunkError::Malformed`); `import` takes
+    // box's job (`cbor::decode_chunk` → `ChunkError`); `import` takes
     // already-decoded `&[StreamSection]`, and the only `EventImporter` impl is
     // the blanket one, so no code path here can produce a malformed-chunk error.
     // A variant nothing can construct would mislead callers; re-add additively
@@ -244,6 +255,12 @@ impl PlannedAppend {
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum AtomicAppendError<E> {
+    /// A run cannot follow its declared expected version; never retry as OCC.
+    #[error(transparent)]
+    InvalidRun(#[from] InvalidRun),
+    /// Two runs have the same target; this malformed request is not an OCC conflict.
+    #[error(transparent)]
+    InvalidRoute(#[from] InvalidRoute),
     /// Write at `index` had a head mismatch; `actual` is the target's real head.
     #[error("atomic append conflict at write {index}: actual head {actual:?}")]
     Conflict {
@@ -253,6 +270,89 @@ pub enum AtomicAppendError<E> {
     /// Adapter-level failure (I/O, encoding, global-seq overflow, …).
     #[error("atomic append store error: {0}")]
     Store(#[source] E),
+}
+
+/// Malformed versions supplied to the raw atomic-append interface.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+pub enum InvalidRun {
+    /// A gap, duplicate, regression or incorrect first version.
+    #[error("invalid atomic run {index}: expected version {expected}, got {actual}")]
+    NonSequential {
+        index: usize,
+        expected: Version,
+        actual: Version,
+    },
+    /// A supplied run requires a successor beyond the version ceiling.
+    #[error("atomic run {index} requires a version beyond u64::MAX")]
+    VersionOverflow { index: usize },
+}
+
+/// Check every run against its declared expected version before storage work.
+///
+/// # Errors
+/// Returns the first incorrect version or required successor overflow.
+pub fn validate_atomic_runs(writes: &[PlannedAppend]) -> Result<(), InvalidRun> {
+    for (index, write) in writes.iter().enumerate() {
+        let mut next = write
+            .expected_version
+            .map_or(Some(Version::INITIAL), Version::next);
+        for envelope in write.batch() {
+            let expected = next.ok_or(InvalidRun::VersionOverflow { index })?;
+            let actual = envelope.version();
+            if actual != expected {
+                return Err(InvalidRun::NonSequential {
+                    index,
+                    expected,
+                    actual,
+                });
+            }
+            next = expected.next();
+        }
+    }
+    Ok(())
+}
+
+/// A duplicate target in an import request, identified by lossless stream bytes.
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[error("duplicate import target {target}: writes {first_index} and {index}")]
+pub struct InvalidRoute {
+    pub target: StreamKey,
+    pub first_index: usize,
+    pub index: usize,
+}
+
+/// Validate every target before writing, preserving first and duplicate indices.
+/// Importers and adapters validate independently at their own boundaries.
+///
+/// # Errors
+/// Returns the first duplicate target with its first and duplicate indices.
+pub fn validate_distinct_targets<'a>(
+    targets: impl IntoIterator<Item = &'a StreamKey>,
+) -> Result<(), InvalidRoute> {
+    let mut seen = BTreeMap::new();
+    for (index, target) in targets.into_iter().enumerate() {
+        if let Some(&first_index) = seen.get(target.as_ref()) {
+            return Err(InvalidRoute {
+                target: target.clone(),
+                first_index,
+                index,
+            });
+        }
+        seen.insert(target.as_ref(), index);
+    }
+    Ok(())
+}
+
+fn route_sections<R>(sections: &[StreamSection], route: R) -> Result<Vec<StreamKey>, InvalidRoute>
+where
+    R: Fn(&[u8]) -> StreamKey,
+{
+    let targets: Vec<_> = sections
+        .iter()
+        .map(|section| route(section.origin.as_ref()))
+        .collect();
+    validate_distinct_targets(&targets)?;
+    Ok(targets)
 }
 
 /// Adapter capability: commit several per-stream runs in **one** atomic
@@ -271,11 +371,13 @@ pub enum AtomicAppendError<E> {
 ///   carrying that write's `index` and the target's real head.
 /// - Each write's `events` must be a contiguous run starting at
 ///   `expected_version + 1`. The caller (the importer's planner) guarantees
-///   this; implementations validate defensively at their own boundary.
-/// - Each write is validated against the target's **running** head, including
-///   prior writes to the same target in this batch. A non-injective route (two
-///   writes to one stream) therefore surfaces as [`AtomicAppendError::Conflict`]
-///   on the second write — never a silently concatenated, gap-creating stream.
+///   this; implementations validate defensively before storage work and return
+///   [`AtomicAppendError::InvalidRun`] for malformed versions. A run ending at
+///   `u64::MAX` is valid if it does not require another successor.
+/// - Targets must be distinct by raw bytes. Validate the whole request before
+///   storage work; duplicates return [`AtomicAppendError::InvalidRoute`] with
+///   first and duplicate indices, regardless of versions or existing heads.
+///   Input rejection is not a retryable OCC conflict. Runs are never merged.
 /// - On any failure, **no** write is applied.
 ///
 /// # Return value
@@ -489,6 +591,9 @@ impl<S: RawEventStore + AtomicAppend> EventImporter for S {
 /// `u64`. In either case sections already appended remain committed —
 /// `PerStream` performs no cross-stream rollback, and the partial report is
 /// discarded with the error.
+/// Routes for all sections, including empty/corrupt sections, are evaluated once
+/// and validated before appending. A repeated target (even a repeated origin)
+/// returns [`ImportError::InvalidRoute`] without writing any section.
 pub async fn import_per_stream<S, R>(
     store: &S,
     sections: &[StreamSection],
@@ -498,9 +603,9 @@ where
     S: RawEventStore,
     R: Fn(&[u8]) -> StreamKey + Send,
 {
+    let targets = route_sections(sections, route)?;
     let mut reports = Vec::with_capacity(sections.len());
-    for section in sections {
-        let target = route(section.origin.as_ref());
+    for (section, target) in sections.iter().zip(targets) {
         let plan = match plan_section(section) {
             Ok(plan) => plan,
             Err(PlanError::VersionOverflow) => return Err(ImportError::VersionOverflow),
@@ -550,7 +655,8 @@ where
 
 /// [`WholeChunk`] import: all-or-nothing across every section. Any halt (corrupt
 /// block or internal gap) or head conflict aborts the whole chunk — nothing
-/// lands. First offender (section order, then block order) wins.
+/// lands. Routing ambiguity is rejected first across the entire request.
+/// Otherwise the first offender (section order, then block order) wins.
 ///
 /// [`WholeChunk`]: Atomicity::WholeChunk
 async fn import_whole_chunk<S, R>(
@@ -562,12 +668,12 @@ where
     S: RawEventStore + AtomicAppend,
     R: Fn(&[u8]) -> StreamKey + Send,
 {
+    let targets = route_sections(sections, route)?;
     // Phase 1 — plan every section purely. Any halt is a hard abort here.
     let mut writes: Vec<PlannedAppend> = Vec::with_capacity(sections.len());
     let mut firsts: Vec<Version> = Vec::with_capacity(sections.len());
     let mut lasts: Vec<Version> = Vec::with_capacity(sections.len());
-    for section in sections {
-        let target = route(section.origin.as_ref());
+    for (section, target) in sections.iter().zip(targets) {
         let plan = match plan_section(section) {
             Ok(plan) => plan,
             Err(PlanError::VersionOverflow) => return Err(ImportError::VersionOverflow),
@@ -636,6 +742,8 @@ where
             Err(map_atomic_conflict(&firsts, &writes, index, actual))
         }
         Err(AtomicAppendError::Store(error)) => Err(ImportError::Store(error)),
+        Err(AtomicAppendError::InvalidRoute(error)) => Err(ImportError::InvalidRoute(error)),
+        Err(AtomicAppendError::InvalidRun(error)) => Err(ImportError::InvalidRun(error)),
     }
 }
 

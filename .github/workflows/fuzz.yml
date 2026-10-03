@@ -32,7 +32,7 @@ env:
   # `fuzz/rust-toolchain.toml` on purpose: such a file would make a plain
   # `cd fuzz && cargo test` corpus-replay pull nightly, breaking the "replay needs
   # no nightly" contract. Nightly stays quarantined to CI via this env var.
-  FUZZ_TOOLCHAIN: nightly-2026-06-15
+  FUZZ_TOOLCHAIN: nightly-2026-10-02
 
 jobs:
   deep-fuzz:

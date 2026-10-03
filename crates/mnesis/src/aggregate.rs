@@ -1,4 +1,4 @@
-use crate::error::KernelError;
+use crate::error::{DecisionError, KernelError};
 use crate::event::DomainEvent;
 use crate::events::Events;
 use crate::id::Id;
@@ -6,7 +6,6 @@ use crate::version::Version;
 use core::error::Error;
 use core::fmt;
 use core::fmt::Debug;
-use core::mem;
 use core::num::NonZeroUsize;
 
 /// State of an event-sourced aggregate. Mutated by applying domain events.
@@ -230,15 +229,16 @@ pub const DEFAULT_MAX_REHYDRATION_EVENTS: NonZeroUsize = NonZeroUsize::new(1_000
 ///
 /// # Panic safety
 ///
-/// [`replay`](Self::replay) and [`commit_persisted`](Self::commit_persisted)
-/// move the state out via [`mem::replace`] and fold it through
-/// [`AggregateState::apply`] — no clone. If `apply` panics (a state-machine
-/// bug), the state is left at [`AggregateState::initial`]: valid, never
-/// partially mutated.
+/// Folding owns state without cloning it. State is absent while application
+/// code runs. If application code panics, the root permanently rejects state
+/// access, decisions, replay and commit with a typed integrity error. Reload
+/// committed history into a new root. Already-persisted events are not rolled
+/// back; the version remains available as diagnostic metadata.
 pub struct AggregateRoot<A: Aggregate> {
     id: A::Id,
-    state: A::State,
+    state: Option<A::State>,
     version: Option<Version>,
+    replayed_events: usize,
 }
 
 impl<A: Aggregate> fmt::Debug for AggregateRoot<A> {
@@ -251,12 +251,13 @@ impl<A: Aggregate> fmt::Debug for AggregateRoot<A> {
 }
 
 impl<A: Aggregate> AggregateRoot<A> {
-    /// Create a new aggregate with default state and no version history.
+    /// Create a new aggregate with initial state, no history and a fresh replay budget.
     pub fn new(id: A::Id) -> Self {
         Self {
             id,
-            state: A::State::initial(),
+            state: Some(A::State::initial()),
             version: None,
+            replayed_events: 0,
         }
     }
 
@@ -265,15 +266,17 @@ impl<A: Aggregate> AggregateRoot<A> {
     /// The root is initialized with the given state and version,
     /// as if those events had already been replayed. Subsequent
     /// calls to [`replay`](Self::replay) will expect versions
-    /// starting at `version + 1`.
+    /// starting at `version + 1`. The replay work budget starts at zero;
+    /// events already represented by the snapshot do not consume it.
     ///
     /// Used by snapshot-aware repositories to skip full event replay.
     #[must_use]
     pub const fn restore(id: A::Id, state: A::State, version: Version) -> Self {
         Self {
             id,
-            state,
+            state: Some(state),
             version: Some(version),
+            replayed_events: 0,
         }
     }
 
@@ -283,11 +286,13 @@ impl<A: Aggregate> AggregateRoot<A> {
         &self.id
     }
 
-    /// The current state (read-only). Used by [`Handle`] implementations
-    /// to check invariants before producing events.
-    #[must_use]
-    pub const fn state(&self) -> &A::State {
-        &self.state
+    /// Borrow the current state.
+    ///
+    /// # Errors
+    /// Returns [`KernelError::PoisonedAggregate`] after an application fold
+    /// panics. No replacement or partially folded state is exposed.
+    pub fn state(&self) -> Result<&A::State, KernelError> {
+        self.state.as_ref().ok_or(KernelError::PoisonedAggregate)
     }
 
     /// The last persisted version, or `None` for a fresh aggregate with no history.
@@ -305,24 +310,22 @@ impl<A: Aggregate> AggregateRoot<A> {
     ///
     /// # Errors
     ///
-    /// Returns `A::Error` when the command violates a domain invariant.
+    /// Returns [`DecisionError::Domain`] for a domain rejection or
+    /// [`DecisionError::Kernel`] when the root is unusable.
     pub fn handle<C, const N: usize>(
         &self,
         cmd: C,
-    ) -> Result<Option<Events<EventOf<A>, N>>, A::Error>
+    ) -> Result<Option<Events<EventOf<A>, N>>, DecisionError<A::Error>>
     where
         A: Handle<C, N>,
     {
-        A::handle(self.state(), cmd)
+        A::handle(self.state()?, cmd).map_err(DecisionError::Domain)
     }
 
     /// Replay a single persisted event during rehydration.
     ///
-    /// Moves the current state out via [`mem::replace`] and folds it through
-    /// [`AggregateState::apply`] — no per-event clone, so the rehydration hot
-    /// path copies nothing (only a cheap [`initial`](AggregateState::initial)
-    /// placeholder is constructed). On version-validation failure the
-    /// aggregate is left untouched (the placeholder is never installed).
+    /// Folds owned state without cloning. Validation errors preserve the root;
+    /// application panics make its state unavailable and require a reload.
     ///
     /// Takes a borrowed event reference so zero-copy codecs (rkyv, flatbuffers)
     /// can pass views directly from database buffers without cloning.
@@ -336,24 +339,24 @@ impl<A: Aggregate> AggregateRoot<A> {
     ///
     /// # Errors
     ///
+    /// Returns [`KernelError::PoisonedAggregate`] if an earlier application fold panicked.
+    ///
     /// Returns [`KernelError::VersionMismatch`] if `version` is not the
     /// next expected version (gap, duplicate, or out-of-order).
     ///
-    /// Returns [`KernelError::RehydrationLimitExceeded`] if `version` exceeds
-    /// [`Aggregate::MAX_REHYDRATION_EVENTS`].
+    /// Returns [`KernelError::RehydrationLimitExceeded`] after this root has
+    /// successfully replayed [`Aggregate::MAX_REHYDRATION_EVENTS`] events.
+    /// Snapshots and committed command batches do not consume replay work.
+    /// Validation failures consume no budget.
     ///
     /// Returns [`KernelError::VersionOverflow`] if the version sequence
     /// is exhausted (aggregate already at `u64::MAX`).
     ///
     /// # Panics
     ///
-    /// Panics if `MAX_REHYDRATION_EVENTS` exceeds `u64::MAX` on the
-    /// current platform (impossible on 32/64-bit systems).
-    #[allow(
-        clippy::expect_used,
-        reason = "u64::try_from(usize) cannot fail on supported platforms (max 64-bit)"
-    )]
+    /// Propagates application `apply` panics, permanently making state unavailable.
     pub fn replay(&mut self, version: Version, event: &EventOf<A>) -> Result<(), KernelError> {
+        self.state()?;
         let expected = match self.version {
             None => Version::INITIAL,
             Some(v) => v.next().ok_or(KernelError::VersionOverflow)?,
@@ -364,81 +367,100 @@ impl<A: Aggregate> AggregateRoot<A> {
                 actual: version,
             });
         }
-        if version.as_u64()
-            > u64::try_from(A::MAX_REHYDRATION_EVENTS.get())
-                .expect("MAX_REHYDRATION_EVENTS exceeds u64 on this platform")
-        {
-            return Err(KernelError::RehydrationLimitExceeded {
-                max: A::MAX_REHYDRATION_EVENTS.get(),
-            });
+        let limit = A::MAX_REHYDRATION_EVENTS.get();
+        if self.replayed_events >= limit {
+            return Err(KernelError::RehydrationLimitExceeded { max: limit });
         }
-        // Move the state out and fold it through `apply` — no clone. If
-        // `apply` panics (a state-machine bug), the state is left at
-        // `initial()` (valid, never partially mutated).
-        let taken = mem::replace(&mut self.state, A::State::initial());
-        self.state = taken.apply(event);
+        let completed = self
+            .replayed_events
+            .checked_add(1)
+            .ok_or(KernelError::RehydrationLimitExceeded { max: limit })?;
+        self.fold_events(core::iter::once(event))?;
+        self.replayed_events = completed;
         self.version = Some(version);
         Ok(())
     }
 
-    /// Sync the aggregate after the store has durably persisted `events`.
+    /// Check root integrity and compute the last version of a prospective commit.
     ///
-    /// Call this **once** after the event store has committed `events`, with
-    /// `version` set to the version of the **last** persisted event. It folds
-    /// the two halves of post-persist bookkeeping — advancing the version and
-    /// applying the events to state — into a single atomic call, so the version
-    /// and state can never desync (the footgun of advancing one without the
-    /// other is unrepresentable).
+    /// Call before persistence so overflow cannot occur after writing events.
+    /// The nonempty batch supplies the count; callers cannot assign its version.
     ///
-    /// The fold uses the no-clone [`mem::replace`] path, identical to
-    /// [`replay`](Self::replay): if [`AggregateState::apply`] panics (a
-    /// state-machine bug) the state is left at [`AggregateState::initial`] —
-    /// valid, never partially mutated.
-    ///
-    /// This is the blessed post-persist seam: a repository drives it after a
-    /// successful write, and a manual / no-store flow calls it after deciding
-    /// events it considers committed.
-    pub fn commit_persisted<const N: usize>(
-        &mut self,
-        version: Version,
+    /// # Errors
+    /// Returns [`KernelError::PoisonedAggregate`] for an unusable root or
+    /// [`KernelError::VersionOverflow`] if the whole batch cannot fit.
+    pub fn commit_version<const N: usize>(
+        &self,
         events: &Events<EventOf<A>, N>,
-    ) {
-        self.advance_version(version);
-        self.apply_events(events);
+    ) -> Result<Version, KernelError> {
+        self.state()?;
+        let tail = u64::try_from(events.rest().len()).map_err(|_| KernelError::VersionOverflow)?;
+        let count = tail.checked_add(1).ok_or(KernelError::VersionOverflow)?;
+        let current = self.version.map_or(0, Version::as_u64);
+        let ending = current
+            .checked_add(count)
+            .ok_or(KernelError::VersionOverflow)?;
+        Version::new(ending).ok_or(KernelError::VersionOverflow)
     }
 
-    /// Advance the version to reflect newly persisted events.
+    /// Fold events that the caller has already persisted, exactly once.
     ///
-    /// Private primitive: advancing the version without also applying the
-    /// matching events leaves state behind the version. The only caller is
-    /// [`commit_persisted`](Self::commit_persisted), which always pairs it with
-    /// [`apply_events`](Self::apply_events) atomically.
-    const fn advance_version(&mut self, new_version: Version) {
-        self.version = Some(new_version);
+    /// The last version is derived from the current boundary plus event count,
+    /// checked before mutation, and recorded before
+    /// application folding, so it remains diagnostic metadata if a panic
+    /// consumes state. A whole batch installs state only after every fold
+    /// succeeds. Reload committed history after a panic; persistence is not
+    /// rolled back.
+    ///
+    /// # Errors
+    /// Returns [`KernelError::PoisonedAggregate`] without changing metadata if
+    /// the root was already unusable. Returns [`KernelError::VersionOverflow`]
+    /// without changing state or metadata if the batch cannot fit. Validate with
+    /// [`Self::commit_version`] before writing to external storage.
+    ///
+    /// # Panics
+    /// Propagates application `apply` panics, permanently making state unavailable.
+    pub fn commit_persisted<const N: usize>(
+        &mut self,
+        events: &Events<EventOf<A>, N>,
+    ) -> Result<(), KernelError> {
+        let version = self.commit_version(events)?;
+        // The caller has already persisted this boundary. Keep that fact even
+        // if application folding panics; unavailable state prevents reuse.
+        self.version = Some(version);
+        self.apply_events(events)
     }
 
     /// Apply already-persisted events to state without advancing the version.
     ///
     /// In-crate primitive (`pub(crate)`): [`commit_persisted`](Self::commit_persisted)
-    /// pairs it with [`advance_version`](Self::advance_version), and the
+    /// derives the version before folding, and the
     /// `testing` fixtures fold decided events without persisting (no version to
     /// advance). Not public — folding state without a version is exactly the
     /// desync the public API forbids.
-    pub(crate) fn apply_events<const N: usize>(&mut self, events: &Events<EventOf<A>, N>) {
-        for event in events {
-            self.apply_event(event);
-        }
+    pub(crate) fn apply_events<const N: usize>(
+        &mut self,
+        events: &Events<EventOf<A>, N>,
+    ) -> Result<(), KernelError> {
+        self.fold_events(events)
     }
 
-    /// Apply a single event to the aggregate state.
-    ///
-    /// Private primitive driving [`apply_events`](Self::apply_events). Moves the
-    /// state out via [`mem::replace`] and folds it through `apply` — no clone.
-    /// If `apply` panics (a state-machine bug), the state is left at
-    /// [`AggregateState::initial`] (valid, never partially mutated).
-    fn apply_event(&mut self, event: &EventOf<A>) {
-        let taken = mem::replace(&mut self.state, A::State::initial());
-        self.state = taken.apply(event);
+    fn fold_events<'a>(
+        &mut self,
+        events: impl IntoIterator<Item = &'a EventOf<A>>,
+    ) -> Result<(), KernelError>
+    where
+        EventOf<A>: 'a,
+    {
+        // Nothing usable stays in the root while application code owns state.
+        // Unwinding drops the local state and leaves None permanently. A whole
+        // batch installs its state only after every event folds successfully.
+        let mut current = self.state.take().ok_or(KernelError::PoisonedAggregate)?;
+        for event in events {
+            current = current.apply(event);
+        }
+        self.state = Some(current);
+        Ok(())
     }
 }
 
@@ -455,6 +477,7 @@ mod purist_dispatch_tests {
     use crate::events::Events;
     use crate::message::Message;
     use crate::version::Version;
+    use alloc::{vec, vec::Vec};
 
     #[derive(Debug, Clone, Hash, PartialEq, Eq)]
     struct CtrId([u8; 8]);
@@ -581,23 +604,25 @@ mod purist_dispatch_tests {
 
     #[test]
     fn surfaces_domain_error_from_handle() {
-        assert_eq!(
+        assert!(matches!(
             AggregateRoot::<Counter>::new(CtrId::new(1)).handle(Add(0)),
-            Err(CtrError)
-        );
+            Err(crate::DecisionError::Domain(CtrError))
+        ));
     }
 
     #[test]
     fn commit_persisted_advances_version_and_folds_state_atomically() {
         // The "can't desync" guarantee: one call must advance the version AND
         // fold every event into state. `CtrState: !Clone`, so this also proves
-        // the no-clone `mem::replace` fold is used.
+        // the owned fold is used without cloning.
         let v2 = Version::new(2).expect("nonzero");
         let persisted: Events<CtrEvent, 1> = events![CtrEvent::Added(10), CtrEvent::Added(5)];
         let mut committed = AggregateRoot::<Counter>::new(CtrId::new(42));
-        committed.commit_persisted(v2, &persisted);
+        committed
+            .commit_persisted(&persisted)
+            .expect("root is usable");
         assert_eq!(committed.version(), Some(v2));
-        assert_eq!(committed.state().total, 15);
+        assert_eq!(committed.state().expect("root is usable").total, 15);
 
         // The (version, state) reached via `commit_persisted` must equal the
         // (version, state) reached by replaying the same events one-by-one.
@@ -607,7 +632,10 @@ mod purist_dispatch_tests {
             .expect("replay v1");
         replayed.replay(v2, &CtrEvent::Added(5)).expect("replay v2");
         assert_eq!(committed.version(), replayed.version());
-        assert_eq!(committed.state().total, replayed.state().total);
+        assert_eq!(
+            committed.state().expect("root is usable").total,
+            replayed.state().expect("root is usable").total
+        );
     }
 
     // The following three tests cover the now-private primitives in isolation.
@@ -616,44 +644,47 @@ mod purist_dispatch_tests {
     // when the post-persist pair was folded into the public `commit_persisted`.
 
     #[test]
-    fn advance_version_sets_version_without_applying_state() {
-        let mut agg = AggregateRoot::<Counter>::new(CtrId::new(1));
-        assert_eq!(agg.version(), None);
-        agg.advance_version(Version::INITIAL);
-        assert_eq!(agg.version(), Version::new(1));
-        // advance_version moves the version only; state is untouched.
-        assert_eq!(agg.state().total, 0);
-        // Idempotent on version: calling again with the same version is a no-op.
-        agg.advance_version(Version::INITIAL);
-        assert_eq!(agg.version(), Version::new(1));
+    fn commit_version_checks_without_mutating_state_or_metadata() {
+        let root = AggregateRoot::<Counter>::new(CtrId::new(1));
+        let decided: Events<CtrEvent> = events![CtrEvent::Added(1)];
+        for _ in 0..2 {
+            assert_eq!(
+                root.commit_version(&decided).expect("fits"),
+                Version::INITIAL
+            );
+            assert_eq!(root.version(), None);
+            assert_eq!(root.state().expect("usable").total, 0);
+        }
     }
 
     #[test]
     fn apply_events_folds_state_without_advancing_version() {
         let mut agg = AggregateRoot::<Counter>::new(CtrId::new(1));
         let decided: Events<CtrEvent, 1> = events![CtrEvent::Added(2), CtrEvent::Added(3)];
-        agg.apply_events(&decided);
-        assert_eq!(agg.state().total, 5);
-        // apply_events does NOT advance version — that is advance_version's job.
+        agg.apply_events(&decided).expect("usable");
+        assert_eq!(agg.state().expect("root is usable").total, 5);
+        // Fixture-only folding does not advance persistence metadata.
         assert_eq!(agg.version(), None);
     }
 
     #[test]
     fn apply_event_accumulates_state_without_advancing_version() {
         let mut agg = AggregateRoot::<Counter>::new(CtrId::new(1));
-        agg.apply_event(&CtrEvent::Added(1));
-        assert_eq!(agg.state().total, 1);
-        agg.apply_event(&CtrEvent::Added(9));
-        assert_eq!(agg.state().total, 10);
+        agg.fold_events(core::iter::once(&CtrEvent::Added(1)))
+            .expect("usable");
+        assert_eq!(agg.state().expect("root is usable").total, 1);
+        agg.fold_events(core::iter::once(&CtrEvent::Added(9)))
+            .expect("usable");
+        assert_eq!(agg.state().expect("root is usable").total, 10);
         // apply_event does NOT advance version.
         assert_eq!(agg.version(), None);
     }
 
     #[test]
-    fn apply_events_mid_batch_panic_leaves_initial_state() {
+    fn apply_events_mid_batch_panic_poisoned_root_rejects_reuse() {
         // Relocated in-crate from `tests/kernel_tests/security_tests.rs` (h5):
-        // a panic mid-fold must leave state at `initial()` (no partial mutation)
-        // and must not touch the version (apply_events does not set version).
+        // A panic mid-fold must leave no accessible partial state and must not
+        // touch diagnostic version metadata (this fixture did not persist).
         use std::panic;
 
         #[derive(Debug, Clone)]
@@ -699,16 +730,18 @@ mod purist_dispatch_tests {
         let mut agg = AggregateRoot::<BoomAgg>::new(CtrId::new(1));
         let events: Events<BoomEvent, 1> = events![BoomEvent::Inc, BoomEvent::Boom];
         let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
-            agg.apply_events(&events);
+            agg.apply_events(&events).expect("usable before panic");
         }));
         assert!(result.is_err(), "apply_events should have panicked");
 
-        // mem::replace leaves a clean initial() placeholder when apply unwinds.
-        assert_eq!(
-            agg.state().count,
-            0,
-            "state must be left at initial() after a mid-batch panic"
-        );
+        assert!(matches!(
+            agg.state(),
+            Err(crate::KernelError::PoisonedAggregate)
+        ));
+        assert!(matches!(
+            agg.apply_events(&events),
+            Err(crate::KernelError::PoisonedAggregate)
+        ));
         assert_eq!(
             agg.version(),
             None,
@@ -719,14 +752,14 @@ mod purist_dispatch_tests {
     #[test]
     fn replay_folds_state_without_clone() {
         // `CtrState: !Clone` — this only compiles because `replay`/`apply`
-        // move the state out (mem::replace) instead of cloning it. If a
+        // move the state out instead of cloning it. If a
         // `Clone` bound creeps back onto `AggregateState`, this fails to build.
         let mut root = AggregateRoot::<Counter>::new(CtrId::new(7));
         root.replay(Version::INITIAL, &CtrEvent::Added(10))
             .expect("replay v1");
         root.replay(Version::new(2).expect("nonzero"), &CtrEvent::Added(5))
             .expect("replay v2");
-        assert_eq!(root.state().total, 15);
+        assert_eq!(root.state().expect("root is usable").total, 15);
         assert_eq!(root.version(), Version::new(2));
     }
 }

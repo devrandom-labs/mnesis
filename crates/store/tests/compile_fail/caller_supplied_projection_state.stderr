@@ -1,0 +1,33 @@
+error[E0061]: this method takes 1 argument but 2 arguments were supplied
+  --> tests/compile_fail/caller_supplied_projection_state.rs:26:24
+   |
+26 |     let _ = projection.advance(item, old_state).await;
+   |                        ^^^^^^^       --------- unexpected argument #2 of type `u64`
+   |
+note: method defined here
+  --> src/projection.rs
+   |
+   |     pub async fn advance<It>(
+   |                  ^^^^^^^
+help: remove the extra argument
+   |
+26 -     let _ = projection.advance(item, old_state).await;
+26 +     let _ = projection.advance(item).await;
+   |
+
+error[E0061]: this method takes 0 arguments but 1 argument was supplied
+  --> tests/compile_fail/caller_supplied_projection_state.rs:27:24
+   |
+27 |     let _ = projection.flush(&old_state).await;
+   |                        ^^^^^ ---------- unexpected argument of type `&u64`
+   |
+note: method defined here
+  --> src/projection.rs
+   |
+   |     pub async fn flush(&mut self) -> Result<(), ProjectionError<P::Error, CS::Error>> {
+   |                  ^^^^^
+help: remove the extra argument
+   |
+27 -     let _ = projection.flush(&old_state).await;
+27 +     let _ = projection.flush().await;
+   |

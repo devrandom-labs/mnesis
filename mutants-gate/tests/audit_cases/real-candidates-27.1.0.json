@@ -1,0 +1,98 @@
+[
+  {
+    "diff": "--- mutants-gate/src/main.rs\n+++ replace read_json -> Result<T, GateError> with Ok(Default::default())\n@@ -37,24 +37,17 @@\n     Parse {\n         path: PathBuf,\n         #[source]\n         source: serde_json::Error,\n     },\n }\n \n fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, GateError> {\n-    let raw = std::fs::read_to_string(path).map_err(|source| GateError::Io {\n-        path: path.to_owned(),\n-        source,\n-    })?;\n-    serde_json::from_str(&raw).map_err(|source| GateError::Parse {\n-        path: path.to_owned(),\n-        source,\n-    })\n+    Ok(Default::default()) /* ~ changed by cargo-mutants ~ */\n }\n \n fn run() -> Result<bool, GateError> {\n     let mut args = std::env::args().skip(1);\n     let Some(mode) = args.next() else {\n         return Err(GateError::Usage);\n     };\n     match mode.as_str() {\n",
+    "file": "mutants-gate/src/main.rs",
+    "function": {
+      "function_name": "read_json",
+      "return_type": "-> Result<T, GateError>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 53
+        },
+        "start": {
+          "column": 1,
+          "line": 44
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "mutants-gate/src/main.rs:45:5: replace read_json -> Result<T, GateError> with Ok(Default::default())",
+    "package": "mutants-gate",
+    "replacement": "Ok(Default::default())",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 52
+      },
+      "start": {
+        "column": 5,
+        "line": 45
+      }
+    }
+  },
+  {
+    "diff": "--- mutants-gate/src/main.rs\n+++ replace run -> Result<bool, GateError> with Ok(true)\n@@ -48,55 +48,17 @@\n     })?;\n     serde_json::from_str(&raw).map_err(|source| GateError::Parse {\n         path: path.to_owned(),\n         source,\n     })\n }\n \n fn run() -> Result<bool, GateError> {\n-    let mut args = std::env::args().skip(1);\n-    let Some(mode) = args.next() else {\n-        return Err(GateError::Usage);\n-    };\n-    match mode.as_str() {\n-        \"emit-baseline\" => {\n-            let Some(dir_arg) = args.next() else {\n-                return Err(GateError::Usage);\n-            };\n-            let out_dir = Path::new(&dir_arg);\n-            let report: Report = read_json(&out_dir.join(\"outcomes.json\"))?;\n-            if let Some(reason) = gate::unusable_reason(&report) {\n-                eprintln!(\"mutants-gate: cannot seed a baseline: {reason}\");\n-                return Ok(false);\n-            }\n-            println!(\"{}\", gate::emit_baseline(&report));\n-            Ok(true)\n-        }\n-        \"check\" => {\n-            let (Some(dir_arg), Some(baseline_path)) = (args.next(), args.next()) else {\n-                return Err(GateError::Usage);\n-            };\n-            let out_dir = Path::new(&dir_arg);\n-            let report: Report = read_json(&out_dir.join(\"outcomes.json\"))?;\n-            if let Some(reason) = gate::unusable_reason(&report) {\n-                eprintln!(\"mutants-gate FAIL: unusable run: {reason}\");\n-                return Ok(false);\n-            }\n-            let candidates: Vec<Candidate> = read_json(&out_dir.join(\"mutants.json\"))?;\n-            let baseline: Baseline = read_json(Path::new(&baseline_path))?;\n-            let verdict = gate::evaluate(&report, &candidates, &baseline);\n-            print!(\"{}\", gate::render_report(&verdict));\n-            for failure in &verdict.failures {\n-                eprintln!(\"mutants-gate FAIL: {failure:?}\");\n-            }\n-            Ok(verdict.passed())\n-        }\n-        _ => Err(GateError::Usage),\n-    }\n+    Ok(true) /* ~ changed by cargo-mutants ~ */\n }\n \n fn main() -> ExitCode {\n     match run() {\n         Ok(true) => ExitCode::SUCCESS,\n         Ok(false) => ExitCode::FAILURE,\n         Err(err) => {\n             eprintln!(\"mutants-gate: {err}\");\n",
+    "file": "mutants-gate/src/main.rs",
+    "function": {
+      "function_name": "run",
+      "return_type": "-> Result<bool, GateError>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 95
+        },
+        "start": {
+          "column": 1,
+          "line": 55
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "mutants-gate/src/main.rs:56:5: replace run -> Result<bool, GateError> with Ok(true)",
+    "package": "mutants-gate",
+    "replacement": "Ok(true)",
+    "span": {
+      "end": {
+        "column": 6,
+        "line": 94
+      },
+      "start": {
+        "column": 5,
+        "line": 56
+      }
+    }
+  },
+  {
+    "diff": "--- mutants-gate/src/main.rs\n+++ replace run -> Result<bool, GateError> with Ok(false)\n@@ -48,55 +48,17 @@\n     })?;\n     serde_json::from_str(&raw).map_err(|source| GateError::Parse {\n         path: path.to_owned(),\n         source,\n     })\n }\n \n fn run() -> Result<bool, GateError> {\n-    let mut args = std::env::args().skip(1);\n-    let Some(mode) = args.next() else {\n-        return Err(GateError::Usage);\n-    };\n-    match mode.as_str() {\n-        \"emit-baseline\" => {\n-            let Some(dir_arg) = args.next() else {\n-                return Err(GateError::Usage);\n-            };\n-            let out_dir = Path::new(&dir_arg);\n-            let report: Report = read_json(&out_dir.join(\"outcomes.json\"))?;\n-            if let Some(reason) = gate::unusable_reason(&report) {\n-                eprintln!(\"mutants-gate: cannot seed a baseline: {reason}\");\n-                return Ok(false);\n-            }\n-            println!(\"{}\", gate::emit_baseline(&report));\n-            Ok(true)\n-        }\n-        \"check\" => {\n-            let (Some(dir_arg), Some(baseline_path)) = (args.next(), args.next()) else {\n-                return Err(GateError::Usage);\n-            };\n-            let out_dir = Path::new(&dir_arg);\n-            let report: Report = read_json(&out_dir.join(\"outcomes.json\"))?;\n-            if let Some(reason) = gate::unusable_reason(&report) {\n-                eprintln!(\"mutants-gate FAIL: unusable run: {reason}\");\n-                return Ok(false);\n-            }\n-            let candidates: Vec<Candidate> = read_json(&out_dir.join(\"mutants.json\"))?;\n-            let baseline: Baseline = read_json(Path::new(&baseline_path))?;\n-            let verdict = gate::evaluate(&report, &candidates, &baseline);\n-            print!(\"{}\", gate::render_report(&verdict));\n-            for failure in &verdict.failures {\n-                eprintln!(\"mutants-gate FAIL: {failure:?}\");\n-            }\n-            Ok(verdict.passed())\n-        }\n-        _ => Err(GateError::Usage),\n-    }\n+    Ok(false) /* ~ changed by cargo-mutants ~ */\n }\n \n fn main() -> ExitCode {\n     match run() {\n         Ok(true) => ExitCode::SUCCESS,\n         Ok(false) => ExitCode::FAILURE,\n         Err(err) => {\n             eprintln!(\"mutants-gate: {err}\");\n",
+    "file": "mutants-gate/src/main.rs",
+    "function": {
+      "function_name": "run",
+      "return_type": "-> Result<bool, GateError>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 95
+        },
+        "start": {
+          "column": 1,
+          "line": 55
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "mutants-gate/src/main.rs:56:5: replace run -> Result<bool, GateError> with Ok(false)",
+    "package": "mutants-gate",
+    "replacement": "Ok(false)",
+    "span": {
+      "end": {
+        "column": 6,
+        "line": 94
+      },
+      "start": {
+        "column": 5,
+        "line": 56
+      }
+    }
+  }
+]

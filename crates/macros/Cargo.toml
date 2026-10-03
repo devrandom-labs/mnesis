@@ -27,9 +27,13 @@ syn = { version = "2.0.117", features = ["extra-traits", "parsing", "derive", "f
 workspace-hack = { version = "0.1.0", path = "../workspace-hack" }
 
 [dev-dependencies]
+futures = { workspace = true, features = ["std", "async-await", "executor"] }
 mnesis = { path = "../mnesis", features = ["derive"] }
-mnesis-store = { path = "../store" }
+mnesis-inmemory = { path = "../../adapters/inmemory" }
+mnesis-store = { path = "../store", features = ["json"] }
 proptest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 trybuild = "1"
 

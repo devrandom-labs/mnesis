@@ -30,9 +30,9 @@ use mnesis::Version;
 use mnesis_fjall::FjallStore;
 use mnesis_store::PendingBatch;
 use mnesis_store::StreamKey;
-use mnesis_store::cbor::{ChunkError, ChunkWriter, decode_chunk};
+use mnesis_store::cbor::{ChunkError, ChunkWriter, decode_chunk, salvage_chunk};
 use mnesis_store::envelope::{PersistedEnvelope, pending_envelope};
-use mnesis_store::export::{EventExporter, StreamLister};
+use mnesis_store::export::{ConsistentExporter, EventExporter, ExportSession, StreamLister};
 use mnesis_store::import::{AbortReason, Atomicity, EventImporter, ImportError, StreamOutcome};
 use mnesis_store::store::RawEventStore;
 
@@ -89,7 +89,11 @@ async fn collect_stream(store: &FjallStore, id: &StreamKey) -> Vec<PersistedEnve
 async fn build_chunk(store: &FjallStore) -> Vec<u8> {
     // Discover ids lazily, then sort for a deterministic chunk layout (list
     // order is unspecified).
-    let mut ids: Vec<Vec<u8>> = store
+    let session = store
+        .open_export_session(std::time::Duration::from_secs(60))
+        .await
+        .expect("session");
+    let mut ids: Vec<Vec<u8>> = session
         .list_streams()
         .await
         .expect("list opens")
@@ -101,8 +105,8 @@ async fn build_chunk(store: &FjallStore) -> Vec<u8> {
     let mut w = ChunkWriter::new(Vec::new(), None).expect("writer");
     for id_bytes in ids {
         let id = identity_route(&id_bytes);
-        let events = store
-            .read_stream(&id, Version::INITIAL)
+        let events = session
+            .export_stream(&id, Version::INITIAL)
             .await
             .expect("read opens");
         w.section(&id_bytes)
@@ -111,12 +115,12 @@ async fn build_chunk(store: &FjallStore) -> Vec<u8> {
             .await
             .expect("extend");
     }
-    w.into_sink()
+    session.close().await.expect("close session");
+    w.finish().expect("finish")
 }
 
-/// Assert two stores hold byte-identical streams **modulo `global_seq`** (export
-/// preserves version/schema/type/payload/metadata; import re-stamps a fresh
-/// `global_seq` on re-append).
+/// Assert identical stored envelope fields. Global positions are separate
+/// read-all attributes and are allocated afresh by import.
 async fn assert_streams_equal_modulo_global_seq(
     src: &FjallStore,
     dst: &FjallStore,
@@ -231,16 +235,24 @@ async fn on_disk_block_corruption_imports_as_stream_corrupt_not_malformed() {
     let chunk = build_chunk(&src).await;
     std::fs::write(&chunk_file, &chunk).expect("write");
 
-    // Corrupt the LAST byte on disk — the tail of the last block's body
-    // (payload "good-two"), so its stored crc no longer matches. Framing stays
-    // intact, so decode still parses the structure.
+    // Corrupt the actual last event payload. Normal restore rejects the whole
+    // artifact; explicit salvage retains the good prefix and corrupt marker.
     let mut bytes = std::fs::read(&chunk_file).expect("read");
-    let last = bytes.len() - 1;
-    bytes[last] ^= 0xFF;
+    let payload = bytes
+        .windows(8)
+        .position(|window| window == b"good-two")
+        .unwrap();
+    bytes[payload] ^= 0xFF;
     std::fs::write(&chunk_file, &bytes).expect("rewrite");
 
-    let sections = decode_chunk(&std::fs::read(&chunk_file).expect("read"))
-        .expect("framing still parses — only a block body is corrupt");
+    let damaged = std::fs::read(&chunk_file).expect("read");
+    assert!(
+        decode_chunk(&damaged).is_err(),
+        "normal restore rejects corruption"
+    );
+    let sections = salvage_chunk(&damaged)
+        .expect("framing still parses — only a block body is corrupt")
+        .into_sections_for_partial_recovery();
     assert_eq!(sections.len(), 1);
 
     // Import per-stream: v1 applies, the corrupt v2 block halts the stream.
@@ -274,10 +286,19 @@ async fn on_disk_block_corruption_aborts_whole_chunk_restore() {
     append_one(&src, &sk("s"), 1, "E", None, b"good-one").await;
     append_one(&src, &sk("s"), 2, "E", None, b"good-two").await;
     let mut chunk = build_chunk(&src).await;
-    let last = chunk.len() - 1;
-    chunk[last] ^= 0xFF; // corrupt the last block's body
+    let payload = chunk
+        .windows(8)
+        .position(|window| window == b"good-two")
+        .unwrap();
+    chunk[payload] ^= 0xFF; // corrupt the last block's body
 
-    let sections = decode_chunk(&chunk).expect("framing parses");
+    assert!(
+        decode_chunk(&chunk).is_err(),
+        "normal restore rejects corruption"
+    );
+    let sections = salvage_chunk(&chunk)
+        .expect("framing parses")
+        .into_sections_for_partial_recovery();
     let dst = open_store(&dir.path().join("dst"));
     let err = dst
         .import(&sections, identity_route, Atomicity::WholeChunk)
@@ -307,7 +328,7 @@ async fn malformed_chunk_framing_is_a_decode_error_not_a_corrupt_block() {
     // decode time — a distinct failure domain from a per-block crc failure.
     let garbage = b"this is definitely not a valid nxch chunk header";
     match decode_chunk(garbage) {
-        Err(ChunkError::Malformed(_)) => {}
+        Err(ChunkError::Malformed(_) | ChunkError::Decode { .. }) => {}
         other => panic!("expected Malformed, got {other:?}"),
     }
 
@@ -318,7 +339,7 @@ async fn malformed_chunk_framing_is_a_decode_error_not_a_corrupt_block() {
     let mut chunk = build_chunk(&src).await;
     chunk[3] ^= 0xFF; // the magic is the first bytes of the header map
     match decode_chunk(&chunk) {
-        Err(ChunkError::Malformed(_)) => {}
+        Err(ChunkError::Malformed(_) | ChunkError::Decode { .. }) => {}
         other => panic!("expected Malformed on bad magic, got {other:?}"),
     }
 }
@@ -346,7 +367,9 @@ async fn non_injective_route_aborts_whole_chunk_no_corruption_on_disk() {
         .import(&sections, to_same, Atomicity::WholeChunk)
         .await
         .expect_err("non-injective route must abort");
-    assert!(matches!(err, ImportError::Aborted { .. }));
+    assert!(
+        matches!(err, ImportError::InvalidRoute(error) if error.target == sk("merged") && error.first_index == 0 && error.index == 1)
+    );
     // The target never received the corrupt concatenation.
     assert!(collect_stream(&dst, &sk("merged")).await.is_empty());
 

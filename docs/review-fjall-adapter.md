@@ -1,5 +1,22 @@
 # Code review — `mnesis-fjall` adapter (`adapters/fjall/src/`)
 
+> **Historical review — superseded by the non-Postgres robustness audit.**
+> The conclusions and line references below describe an earlier implementation;
+> they are retained as history, not current acceptance evidence. The audit
+> reproduced defects in key limits, manifest compatibility, actual buffer
+> alignment, durability, async execution, state/checkpoint contracts and backup
+> boundaries (A01–A18 in [todo.md](../todo.md)). Current contracts and commands
+> are in [the adapter README](../adapters/fjall/README.md). Transactions remain
+> the consistency boundary; durable acknowledgment follows the explicit policy.
+> Scans and deadline cleanup now run on a bounded worker. Already aligned
+> buffers are reused, others realigned. Projections use revision checkpoints,
+> and consistent multi-stream exports require one shared session.
+> `subscription_id.rs` was removed; Bytes-backed `StreamKey` carries owned IDs.
+> Private-module `pub` remains intentional where strict Clippy rejects redundant
+> `pub(crate)`. Historical zero-copy and benchmark claims below must not be
+> applied to changed code without the current alignment/workload evidence.
+
+
 **Scope.** Fjall **usage** and Rust **idiom**, not the storage design. The
 partition layout, per-partition LZ4, one-atomic-`write_tx` model, and
 structural-not-fsync durability are settled (rules 1 & 9) and out of scope
