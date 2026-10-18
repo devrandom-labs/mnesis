@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7a-final-unbounded.Z4Oa2z/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.69s
+────────────
+ Nextest run ID 61934654-a102-4601-8b80-fda2dec10b1d with nextest profile: default
+    Starting 1 test across 1 binary (7 tests skipped)
+        FAIL [   0.255s] (1/1) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+  stdout ───
+
+    running 1 test
+    test first_id_does_not_load_the_whole_catalog ... FAILED
+
+    failures:
+
+    failures:
+        first_id_does_not_load_the_whole_catalog
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.23s
+
+  stderr ───
+
+    thread 'first_id_does_not_load_the_whole_catalog' (98496500) panicked at adapters/postgres/tests/listing_tests.rs:247:5:
+    first listing item allocated 3415431 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.256s] 1 test run: 0 passed, 1 failed, 7 skipped
+        FAIL [   0.255s] (1/1) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+error: test run failed

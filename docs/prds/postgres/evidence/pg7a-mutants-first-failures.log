@@ -1,0 +1,90 @@
+
+log/adapters__postgres__src__store__listing.rs_line_27_col_5.log
+408:    thread 'an_unrelated_held_transaction_does_not_hide_committed_streams' (98539841) panicked at adapters/postgres/tests/listing_tests.rs:291:5:
+409-    assertion `left == right` failed
+410-      left: []
+411-     right: [[99, 111, 109, 109, 105, 116, 116, 101, 100, 45, 97, 102, 116, 101, 114, 45, 104, 101, 108, 100, 45, 116, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110]]
+412-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+413-
+414-  Cancelling due to test failure:
+415-────────────
+416-     Summary [   9.830s] 92/192 tests run: 91 passed, 1 failed, 0 skipped
+417-        FAIL [   0.043s] ( 92/192) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+418-warning: 100/192 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+419-error: test run failed
+420-
+
+log/adapters__postgres__src__store__listing.rs_line_27_col_5_001.log
+53:error[E0599]: no variant, associated function, or constant named `new` found for enum `PageRow<T>` in the current scope
+54-  --> adapters/postgres/src/store/listing.rs:27:38
+55-   |
+56-27 |     Ok(VecDeque::from_iter([PageRow::new()])) /* ~ changed by cargo-mutants ~ */
+57-   |                                      ^^^ variant, associated function, or constant not found in `PageRow<_>`
+58-   |
+59-  ::: adapters/postgres/src/page.rs:55:1
+60-   |
+61-55 | pub enum PageRow<T> {
+62-   | ------------------- variant, associated function, or constant `new` not found for this enum
+63-   |
+64-   = help: items from traits can only be used if the trait is implemented and in scope
+65-   = note: the following traits define an item `new`, perhaps you need to implement one of them:
+
+log/adapters__postgres__src__store__listing.rs_line_27_col_5_002.log
+53:error[E0599]: no variant, associated function, or constant named `from_iter` found for enum `PageRow<T>` in the current scope
+54-  --> adapters/postgres/src/store/listing.rs:27:38
+55-   |
+56-27 |     Ok(VecDeque::from_iter([PageRow::from_iter([Default::default()])])) /* ~ changed by cargo-mutants ~ */
+57-   |                                      ^^^^^^^^^ variant, associated function, or constant not found in `PageRow<_>`
+58-   |
+59-  ::: adapters/postgres/src/page.rs:55:1
+60-   |
+61-55 | pub enum PageRow<T> {
+62-   | ------------------- variant, associated function, or constant `from_iter` not found for this enum
+63-   |
+64-   = help: items from traits can only be used if the trait is implemented and in scope
+65-   = note: the following trait defines an item `from_iter`, perhaps you need to implement it:
+
+log/adapters__postgres__src__store__listing.rs_line_27_col_5_003.log
+53:error[E0599]: no variant, associated function, or constant named `new` found for enum `PageRow<T>` in the current scope
+54-  --> adapters/postgres/src/store/listing.rs:27:38
+55-   |
+56-27 |     Ok(VecDeque::from_iter([PageRow::new(Default::default())])) /* ~ changed by cargo-mutants ~ */
+57-   |                                      ^^^ variant, associated function, or constant not found in `PageRow<_>`
+58-   |
+59-  ::: adapters/postgres/src/page.rs:55:1
+60-   |
+61-55 | pub enum PageRow<T> {
+62-   | ------------------- variant, associated function, or constant `new` not found for this enum
+63-   |
+64-   = help: items from traits can only be used if the trait is implemented and in scope
+65-   = note: the following traits define an item `new`, perhaps you need to implement one of them:
+
+log/adapters__postgres__src__store__listing.rs_line_27_col_5_004.log
+53:error[E0277]: the trait bound `PageRow<_>: Default` is not satisfied
+54-  --> adapters/postgres/src/store/listing.rs:27:43
+55-   |
+56-27 |     Ok(VecDeque::from_iter([PageRow::from(Default::default())])) /* ~ changed by cargo-mutants ~ */
+57-   |                                           ^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+58-   |
+59-help: the trait `Default` is not implemented for `PageRow<_>`
+60-  --> adapters/postgres/src/page.rs:55:1
+61-   |
+62-55 | pub enum PageRow<T> {
+63-   | ^^^^^^^^^^^^^^^^^^^
+64-
+65-For more information about this error, try `rustc --explain E0277`.
+
+log/adapters__postgres__src__store__listing.rs_line_59_col_9.log
+54:error[E0277]: the trait bound `dyn Stream<Item = Result<StreamKey, PostgresError>> + Send: Default` is not satisfied
+55-  --> adapters/postgres/src/store/listing.rs:59:12
+56-   |
+57-59 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+58-   |            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `dyn mnesis_store::Stream<Item = Result<StreamKey, error::PostgresError>> + std::marker::Send`
+59-   |
+60-help: the following other types implement trait `Default`
+61-  --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/alloc/src/boxed.rs:2056:0
+62-  ::: /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/alloc/src/boxed.rs:2059:20
+63-   |
+64-   = note: `Pin<Box<T>>`
+65-  --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/alloc/src/sync.rs:3893:0
+66-  ::: /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/alloc/src/sync.rs:3896:20

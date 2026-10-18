@@ -13,8 +13,8 @@ or local pass does not establish whole-adapter delivery.
 | PG3 | Transaction outcomes and retry safety | active | PG0 | PG5, PG6, PG8 |
 | PG4 | Schema, migrations and representation | feature-complete | PG0 | PG5, PG6, PG7, PG8 |
 | PG5 | Atomic writes and import | feature-complete | PG1, PG2, PG3, PG4 | PG7, PG9 |
-| PG6 | Aggregate snapshots and projection state | active | PG3, PG4 | PG7, PG9 |
-| PG7 | Export, backup and restore | blocked | PG1, PG4, PG5, PG6 | PG9 |
+| PG6 | Aggregate snapshots and projection state | feature-complete | PG3, PG4 | PG7, PG9 |
+| PG7 | Export, backup and restore | active | PG1, PG4, PG5, PG6 | PG9 |
 | PG8 | Secure operation, lifecycle and capacity | blocked | PG1, PG2, PG3, PG4 | PG9 |
 | PG9 | Complete verification, minimization and delivery | blocked | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
@@ -27,6 +27,7 @@ Protected focused merges:
 - PR380 lossless values and binary keys: `49ffe78f166b7d6a787ea898dfba454218a697e9`.
 - PR381 atomic writes and import: `be2e52ec3468657d36684506eed53fe060bef080`.
 - PR382 aggregate snapshots: `090504ae3b2081c03cfd8960f6edc5c0058fb3b2`.
+- PR383 projection checkpoints: `c482fb6a3762c74d7b10416029de22a642de2b71`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -45,16 +46,21 @@ artifact independently reviewed:21 caught,2 unviable,0 survivors/timeouts.
 The first mutation
 result was rejected for fixture poisoning; a later native suppression regression
 found and fixed a falsely acknowledged cache write. Conditional
-projection checkpoint implementation is active in `work/postgres-checkpoints`,
-based on merged snapshot commit `090504ae`. Native focused checks cover CAS races,
+projection checkpoints merged in PR383. Native checks cover CAS races,
 bounds, full unsigned values, stale/corrupt metadata, real projection consumers,
 commit uncertainty/cancellation, restricted LOGIN and migration collision/repair.
 All eight isolated feature combinations pass (118–184 native tests, zero skips),
 Linux passes184 plus three feature smokes, and16 mutations yield8 caught/8
 unviable/zero survivors. Three fresh controls reject actual lock omission,
 unbounded body transfer and mixed checkpoint reads. A native inheritance witness
-found and fixed unsafe schema acceptance. Full flake gate, CI and protected
-delivery remain required. All prerequisite edges stay visible.
+found and fixed unsafe schema acceptance. Full flake gate, all40 CI checks and
+protected delivery passed in [PR383](https://github.com/devrandom-labs/mnesis/pull/383).
+The downloaded CI mutation artifact confirms8 caught/8 unviable with every first
+failure reviewed. PG7 bounded listing starts from that merged source. Its native
+laws found and corrected committed-stream omission behind an unrelated held
+transaction, and caller search paths redirecting visibility functions. Eight
+listing laws now pass; final controls, regression, consistent sessions and restore
+remain. All prerequisite edges stay visible.
 
 PG10 requires a selected consumer and explicit acknowledgement contract before
 activation. Labcast owns command IDs, deduplication and stale-worker rejection.

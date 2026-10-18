@@ -1,0 +1,15 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-export/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+────────────
+ Nextest run ID 59cf709d-99f8-40e2-8ec7-4f839cb2dc8e with nextest profile: default
+    Starting 8 tests across 1 binary
+        PASS [   0.064s] (1/8) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+        PASS [   0.042s] (2/8) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_forge_transaction_visibility
+        PASS [   0.041s] (3/8) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_replace_the_captured_snapshot
+        PASS [   0.043s] (4/8) mnesis-postgres::listing_tests binary_ids_list_once_across_pages_and_reopen
+        PASS [   0.043s] (5/8) mnesis-postgres::listing_tests byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+        PASS [   0.034s] (6/8) mnesis-postgres::listing_tests empty_and_saved_state_keys_do_not_create_event_streams
+        PASS [   0.178s] (7/8) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+        PASS [   0.036s] (8/8) mnesis-postgres::listing_tests listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+────────────
+     Summary [   0.481s] 8 tests run: 8 passed, 0 skipped

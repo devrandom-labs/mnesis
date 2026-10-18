@@ -1,0 +1,13 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-export/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.79s
+────────────
+ Nextest run ID 6d464597-8950-4f75-9f34-d7f525001ce6 with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [   0.062s] (1/6) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+        PASS [   0.044s] (2/6) mnesis-postgres::listing_tests binary_ids_list_once_across_pages_and_reopen
+        PASS [   0.041s] (3/6) mnesis-postgres::listing_tests byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+        PASS [   0.033s] (4/6) mnesis-postgres::listing_tests empty_and_saved_state_keys_do_not_create_event_streams
+        PASS [   0.145s] (5/6) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+        PASS [   0.037s] (6/6) mnesis-postgres::listing_tests listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+────────────
+     Summary [   0.362s] 6 tests run: 6 passed, 0 skipped

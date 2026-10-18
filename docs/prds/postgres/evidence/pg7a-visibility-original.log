@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-export/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+────────────
+ Nextest run ID 5d7a9511-32e4-4d4a-bd19-e5d12dbf6c8f with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [   0.040s] (1/1) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+  stdout ───
+
+    running 1 test
+    test an_unrelated_held_transaction_does_not_hide_committed_streams ... FAILED
+
+    failures:
+
+    failures:
+        an_unrelated_held_transaction_does_not_hide_committed_streams
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'an_unrelated_held_transaction_does_not_hide_committed_streams' (98473549) panicked at adapters/postgres/tests/listing_tests.rs:249:5:
+    assertion `left == right` failed
+      left: []
+     right: [[99, 111, 109, 109, 105, 116, 116, 101, 100, 45, 97, 102, 116, 101, 114, 45, 104, 101, 108, 100, 45, 116, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110]]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.041s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [   0.040s] (1/1) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+error: test run failed

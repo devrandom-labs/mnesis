@@ -3117,3 +3117,357 @@ completed unchanged (last random-version case388.944s), no workload/deadline edi
 Fuzz replay reviews recorded separately above. Fresh complete hook output retained
 /tmp/mnesis-pg6b-commit.log and native artifacts already committed; docs-only
 amendment reruns normal hook and any cached checks receive no extra runtime credit.
+
+PG6b docs-only amendment7599588e3a0f1bbe318209accb3b831efac58f04 is signed G,
+normal hook passes all12 named checks from cache,0fresh runtime credit. Pushed
+work/postgres-checkpoints and openedPR383 https://github.com/devrandom-labs/mnesis/pull/383.
+CI39141316095, mutations39141316085, pushCI39141295836 in progress; reviewed
+artifacts/allchecks/threads/protectedmerge still required. Release378 remainsopen.
+
+PG7a begins in separate work/postgres-export from reviewed7599588e while parent
+CI runs. Exact pre-edit budget/falsifiers in HYPOTHESES; no production edits yet.
+Bounded event-only listing precedes consistent sessions and restore. Existing
+export/RR/pool facilities and native PG7 test workloads inspected; preparation
+notes/tmp/mnesis-pg7-pre-edit.md retain unresolved lifetime/foreign-history issues.
+No public history API, hidden SQLx constructor or detached pool connection chosen.
+
+PG7a first characterization: selected export native target does not compile,
+6E0599 missing list_streams methods,0runtime. Three reviews: (1) required existing
+StreamLister capability absent; (2) this proves API absence only, not a failing
+boundedness/visibility algorithm; (3) correct trait/feature selected, no unrelated
+errors, no test silently skipped by cfg. Native source/path and full compiler log
+/tmp/mnesis-pg7a-original.log retained. Five laws254lines within450; production0
+before implementation. Next bounded-keyset candidate within180Rust budget.
+
+PG7a initial implementation strict Clippy rejects shadow_unrelated on cursor
+cutoff binding,0runtime. Rename carried value ceiling consistently with existing
+read_all owner pattern. No lint allow/API/SQL behavior or test expectation change.
+
+PG7a next strict compile catches shadow_unrelated on second test lease name,
+0runtime. Give idle and buffered acquisition checks distinct local names; both
+3s acquisition assertions remain, no lint or workload change.
+
+PR383 CI mutation39141316085 completed; artifact downloaded to
+/tmp/mnesis-pg6b-ci-mutants-39141316085, baseline184/18429.787s,0skips. Three
+baseline reviews: complete native selected suite; real new state/overlap/fault
+laws on fresh physical cluster; actual workflow revision7599588e, no cached/
+installed-log replay credit. All16 artifact first failures inspected independently.
+For EACH case, three reviews against the canonical mutation table above:
+(1) exact source candidate and owner contract match the table; (2) native first
+failure matches the recorded oracle, including true Absent after acknowledged
+checkpoint no-op and37/37 exact-edge rejection; (3) phase results distinguish eight
+runtime catches from eight E0277/E0599/E0283 unviable builds, native fail-fast
+unrun cases not passes, fixture repairs BEFORE assertions, no checksum poison or
+hidden skips. All16 observed first-failure mappings match the table;8caught8
+unviable0survivors/timeouts. These are CI executions, distinct from local sweep.
+
+PG7a first native5/5 PASS0.297s,0skips. Three reviews: (1) empty/state-only IDs
+absent, binary IDs once across one-row pages/reopen, exact37byte edge, terminal
+oversized ID, finite visibility and released leases match declared listing contract;
+(2) actual native staged event writer with tokio::spawn+Barrier overlaps capture,
+old cache key gaining committed event and new key after capture stay out;20,000
+native keys/events first-item allocations and1MiB ID body omission meet262,144
+bound, sole data connection remains acquirable while cursor idle/buffered;
+(3) real PG17.10/serial dedicatedmnesis_pg7a, listener PID identified by per-process
+application name BEFORE lease assertion, exact row counts/membership/results,
+no cfg skip/unrelated compiler success or backend-error alias credited. Strict
+Clippy passes with names fixed, no lint/bound/deadline changes. Strong independent
+unbounded-list/body/cutoff controls remain required before retention.
+
+Additional PG9 inventory finding from existing fuzz.yml: embedded python3/tomllib
+AFL-version selector also conflicts with no-project-Python, beyond the already
+recorded scripts/check-features.py. Remove through maintained Cargo metadata+
+existing ecosystem tools under established Nix ownership; do not retain snippet
+or translate into new custom tooling. Audit existing AFL tee/crash gate evidence
+before claiming crashes reliably fail required CI; current source uploads crash
+artifacts even on exit0 and that alone is not a failing gate. No speculative
+production change now; verify actual behavior/official shell contract first.
+
+PR383 compiler owner job117716163410 completed: kernel2/2 PASS71.72s, macro1/1
+PASS2.63s, store1/1 PASS7.88s. Three reviews for EACH run: (1) original diagnostic/
+misuse contract owner and full feature/locked arguments selected; (2) actual
+trybuild fixtures and version-zero/macro/store compile-fail functions pass, all
+four functions excluded from Nix workspace accounted for; (3)0skipped/filtered,
+normal checkout paths, unchanged .stderr snapshots/fixtures, no native-database
+or extra function credit. Raw job log/tmp/mnesis-pg6b-ci-compiler.log.
+
+PR383 pushCI39141295836 native job117716106025:184/184 PASS22.242s,0skips.
+Three reviews: (1) complete compiled184/14binaries and all capabilities; (2) native
+state/wake/atomic/uncertainty/consumer/upgrade laws execute; (3) actual independent
+physical cluster with required psql check, second identical22.242s installed
+run.log display is SAME execution, not another native run. Three separate feature
+smokes atomic1/0.051s,snapshot1/0.041s,projection1/0.049s; EACH reviewed against
+its feature contract, real native conformance/consumer assertions, and strict
+--no-tests=fail/pipefail/filtered counts (14/15/2) not extra native coverage.
+PR CI's own separate native/full-flake runs remain in progress.
+
+PG7a fresh unbounded-list control native0/1 FAIL0.243s,4filtered: first item
+allocates3,415,412>262,144 bytes for20,000 actualkeys/events. Three reviews:
+(1) listing memory must depend on page, not catalogue; (2) replacing only row LIMIT
+with bound-parameter OFFSET0 fetches whole candidate catalogue and exact allocation
+assertion fails; (3) isolated proof adapter artifacts explicitly cleaned4.0GiB,
+source recompiled from/tmp/mnesis-pg7a-unbounded-control.xBPZbI, failure is real
+allocation, not SQL binding/setup/gate/timeout. Positive source untouched; raw log
+retained. Final source must retain equivalent falsification after any later fix.
+
+PG7a additional visibility falsifier BEFORE editing: <=70 native lines (total
+still<=450),0productyet. StreamLister promises every stream in selected committed
+view; unlike ordered read_all, it need not withhold already committed higher-xid
+streams behind an unrelated held transaction. tokio::spawn+Barrier holds assigned
+native lowxid while actual adapter appends higherxid; listing must include that
+committed stream. Capture output and release/rollback held transaction BEFORE
+assertions. Reject safe-xmin candidate if it omits a committed-at-open stream;
+never weaken trait/PRD by silently declaring this omission acceptable.
+
+PG7a visibility ORIGINAL native0/1 FAIL0.041s,5filtered. Three reviews:
+(1) listing must include committed streams at capture even when global ordered
+reader intentionally withholds them; (2) real spawned/Barrier-held lowerxid overlaps
+higher-xid adapter commit, actual listing[] instead of exact one committed ID;
+(3) native IDs prove higher>held, writer rollback/join BEFORE assertion, failure
+is membership omission rather than gate/timeout/setup. Fresh source compile.
+Reject xmin-only listing candidate; do NOT weaken StreamLister/PRD to accept it.
+
+Compare supported native full pg_snapshot visibility before any custom filter:
+pg_current_snapshot plus pg_visible_in_snapshot preserve frozen committed set
+without pinning read transaction or discarding committed higher-xid streams.
+Stored event xid8 comes from pg_current_xact_id (top-level); subtransaction-ID
+caveat must stay explicit. Snapshot representation costs active-xid list, bounded
+by database active transaction configuration rather than event backlog; PG8
+capacity must include that cost. Within existing180Rust budget, replace only
+snapshot capture/filter, no Rust parser, new type, dependency, runtime or API.
+
+PG7a full-snapshot FIXED native6/6 PASS0.362s,0skips. Three reviews: (1) listing
+includes committed-at-capture higher-xid stream while excluding active/future
+streams, retains binary/once/reopen/bounds/lease laws; (2) exact original empty→one
+membership defect fixed through maintained pg_snapshot visibility, real native
+Barrier-held transactions and first-item/body allocation laws still pass; (3)
+cleanup before original assertion, no parser/framework,0selected skips, unchanged
+allocation262144/deadline3s, no global read_all semantics changed. All six actual
+native cases from current export worktree; this supersedes five-case candidate.
+
+PR383 PR-CI native job117716163539 passes184/18427.936s,0skips, independently of
+push22.242s and local/Linux runs. Three reviews: complete14binary/capability suite;
+actual native regression/uncertainty/consumer/migration laws; installed27.936s log
+is SAME execution, no extra native credit. Separate native feature smokes1each:
+atomic0.078s,snapshot0.068s,projection0.076s. EACH reviewed for matching trait,
+actual conformance/consumer oracle, strict --no-tests=fail/pipefail and14/15/2
+filtered not credited. One full-flake CI check still pending, reviewthreads0.
+
+PG7a search-path falsifiers BEFORE edits: <=100 native lines (total<=450),
+<=2 production SQL name qualifications. Caller-supplied pool search_path can put
+foreign schema before explicit pg_catalog. Two fresh native pools separately
+shadow visibility and snapshot functions; both must still list exact committed
+ID through canonical builtins. Existing profile fixture prepares valid storage,
+close/drop foreign schema before assertions. Run original first, retain only real
+membership red; don't infer unsupported SQLx setup failure as correct falsification.
+
+PG7a search-path ORIGINAL native0/2 FAIL0.114s,6filtered. Three reviews for EACH
+native case: (1) caller pool search_path must not redirect canonical visibility
+or capture; (2) separate native false-visibility function and fake1:1 snapshot
+EACH yield actual[] instead of exact committed ID; (3) both selected execute via
+--no-fail-fast, fresh pools prevent prepared-plan reuse, each schema/reader pool
+cleaned BEFORE assertion, failures are exact membership, not constructor/setup/
+SQL error or missing feature. No fixture poison, deadline or assertion changes.
+Fix uses2 changed SQL lines qualifying2functions plus snapshot type (3canonical
+identifiers), within180productionRust budget, no lookup wrapper/runtime/tool.
+
+PR383 final CI39141316095 full-flake review:1563/1563 workspace97.334s,4 compiler
+functions excluded (all pass their owner job above); fresh Nix native184/23.503s,
+plus separate feature smokes1/0.057s,1/0.050s,1/0.059s. Three reviews for workspace:
+whole selected contract owners; actual unchanged property/adversarial cases;
+4exclusions separately accounted and DB-free adapter returns NOT native credit.
+Three reviews for Nix native run: all184/14binaries/capabilities; actual new
+state/concurrency/uncertainty/consumer/migration regression cases;0skips and distinct
+execution from27.936s integration job, whose installed replay is counted ONCE.
+Each native smoke reviewed for its matching contract, real conformance/consumer
+oracle, and --no-tests=fail/pipefail with filtered cases not credited. Three fuzz
+replay runs2/1/1 at1.00s reviewed individually for decoder/value contract, actual
+existing corpus targets, and finite replay/0skips/no native or long-fuzz claim.
+
+All24 isolated unit harness runs (8packages×default/no-default/all) reviewed THREE
+ways EACH: (1) actual requested library/features and owning unit contract;
+(2) real existing unit assertions with unchanged expected outputs; (3) no skips,
+zero-case harnesses are compile-only, and dev-dependency unification means these
+are not standalone no_std/dependency/adapter-native proofs. Separate library-only
+checks cover every advertised flag through existing workflow. Detailed command/
+count records in/tmp/mnesis-pg6b-ci.log; Python selector remains explicit PG9 debt.
+
+All8 deep-fuzz runs reviewed THREE ways EACH: wire/header/chunk/value owners for
+both libFuzzer and AFL; actual bounded engine execution (libFuzzer6,661,135/
+1,847,064/1,265,285/5,684,485 runs at61s, AFL60s with0crashes/0timeouts);
+actual revision/corpus/ASan or CMPLOG confirmation and empty crash artifacts,
+finite smokes do not prove every input or reliability of the existing AFL gate.
+No native-adapter credit. Existing crash-gate/Python debt retained for PG9 audit.
+
+Before protected merge: head7599588e3a0f1bbe318209accb3b831efac58f04 unchanged,
+40SUCCESS/1scheduledSKIPPED, CLEAN/MERGEABLE, reviewthreads0/reviews0. Required
+mutation artifact12142160368 sha256ffcd8a971a0cb86ce9422e3261e7cbe63635d28fd30dfae76a48c5082b21ac67
+was DOWNLOADED and all16 first failures reviewed above. No admin/bypass/auto-merge.
+
+PG7a canonical snapshot FIXED native8/8 PASS0.481s,0skips. Three reviews:
+(1) both caller search-path pools use actual canonical snapshot/visibility while
+retaining full committed-set, finite pages, event-only/binary/reopen contracts;
+(2) BOTH original[] function-shadow witnesses now yield exact committed ID,
+held-earlier-xid omission also stays fixed;20k-key/1MiB-body bounds and sole data
+connection checks still run; (3) original foreign schemas/pools cleaned before
+assertions, strict all-target/all-feature Clippy passes, no source hook or fake
+store/new parser/framework/API, unchanged3s and262144 thresholds.8selectedactual
+native cases, no filtered/cached/compiler/native replay credit.
+
+Protected PR383 merged2026-10-18T15:55:19Z:
+c482fb6a3762c74d7b10416029de22a642de2b71, matching reviewed signedhead7599588e.
+All40requiredgreen/1scheduledskip,0reviews/threads, CLEAN/MERGEABLE immediately
+before normal squash --match-head-commit; no admin/bypass/auto. Main tree identical
+to reviewed source. Mutationartifact12142160368 downloaded/per-case reviewed;
+CI39141316095 and mutations39141316085 exact delivery linked above. Projection
+checkpoint feature delivery complete; PG7–PG9, publication and clean registry
+consumer remain. Remote feature branch already automatically deleted on merge;
+explicit redundant delete reported absent, verify ls-remote before any cleanup.
+
+PG7a base aligned to merged checkpoints c482fb6a after verifying tree equality
+against reviewed7599588e. Named stash65981423d8263e5a00d6df11e62668b3ed4cd2b6
+retained, empty-range rebase then apply--index restores ALL tracked/untracked
+work without conflicts. Parent worktree stays clean at7599; root branch preserved.
+No source content change from rebase, no fresh runtime credit. Root progress now
+points to current export worktree, eight-law candidate and remaining controls.
+
+PG7a FINAL-source unbounded control native0/1 FAIL0.256s,7filtered. Three reviews:
+(1) whole catalogue must not be fetched for first item; (2) same current canonical
+full-snapshot source with ONLY LIMIT→OFFSET0 allocates3,415,431>262,144 bytes on
+20k real rows; (3) adapter-specific proof clean99.8MiB/recompile exact isolated
+manifest/tmp/mnesis-pg7a-final-unbounded.Z4Oa2z, failure is allocation invariant,
+not SQL/setup/timeout. This supersedes prior xmin-candidate control as FINAL
+source evidence; prior result retained. Positive product remains unchanged.
+
+PG7a wiring/documentation BEFORE edits: <=5 lines existing Nix integration gate
+for required listing selector, <=25 README lines/<=6 changelog/<=3 Limits doclines.
+No new job/tool/package/runtime; existing native archive remains all-features.
+Assert missing export selector exits4 with --no-tests=fail, full suite remains
+required. State captured visibility and ID+32 accounting/connection release;
+ordinary listing+per-stream export do not promise shared multi-stream backup.
+
+PG7a FINAL-source body control native0/1 FAIL0.074s,7filtered. Three reviews:
+(1) oversized IDs must error without body transfer; (2) only CASE ELSE returns
+stored1MiB key, original exact RowLimit still matches but actual allocation
+5,235,056>262,144 fails; (3) proof adapter clean103.8MiB/explicit recompile from
+/tmp/mnesis-pg7a-final-body.RwmWNg, first accepted37byte item unchanged, failure
+is unwanted allocation not decoding/setup/deadline, threshold untouched. Terminal
+poll assertions after this failure are unrun and not credited for mutant.
+
+PG7a FINAL-source visibility-omission control native0/1 FAIL0.042s,7filtered.
+Three reviews: (1) frozen listing excludes active/future stream membership;
+(2) removing ONLY native snapshot predicate returns exact forbiddenID'late'
+instead of'original' after real Barrier-held writer commits; (3) proof adapter
+clean103.8MiB/recompile isolated/tmp/mnesis-pg7a-final-visibility.IB3vFx, failure
+is membership equality, not overlap/pool/SQL setup or deadline. Later terminal/
+current-list assertions unrun in mutant are not successes. Allthree final-source
+controls now independently reject actual defects. Strict Clippy passes unchanged.
+
+PG7a complete all-feature native192/192 PASS20.846s,0skips,15binaries. Three
+reviews: (1) all prior184 contracts plus8 listing laws execute with import/state
+features present; (2) original bounded read/wake/atomic/commit uncertainty,
+projection reload/SIGKILL/upgrade and new visibility/search-path/byte/lease laws
+all run; (3) actual current export worktree compiled, dedicated realPG17.10 serial
+cluster,192 expected selected tests present,0skips, no installed replay, filtered
+or DB-free credit. Production88added/1removedRust including2doclines,1feature,
+5existingNixgatelines within budgets;334native within450. Linux gate still building.
+
+PG7a export-only native126/126 PASS15.041s,0skips. Three reviews: (1) default118
+plus8 export listing laws compile/run without import/snapshot/projection flags;
+(2) key-only saved state exclusion uses real installed tables independently of
+feature unification, all8 native visibility/body/allocation/lease/reopen laws and
+original default laws execute; (3)126 expected cases/15 compiled binaries with
+capability-only binaries empty as intended, selected tests0skips, exact standalone
+feature source/path. No optional capability runtime credit. Raw evidence retained.
+
+PG7a default native118/118 PASS14.857s,0skips. Three reviews: (1) installed schema4
+and original default contracts remain available with export disabled; (2) original
+bounded read/final-hint/watermark/outcome/native race/upgrade witnesses execute;
+(3)118 expected actual native cases/serialPG17.10, optional listing/state/import
+cases correctly absent and not successes, no feature unification or silent skip
+credited. No production change after last all/export-only tests.
+
+PG7a missing-export negative exits4/no tests:0runtime. Three reviews: (1) required
+listing gate must fail if feature/test absent; (2) same exact Linux selector under
+default feature yields0selected and nonzero4, paired with positive export-only
+binary/reopen law; (3) no compile/DB/setup error mistaken for absent suite,
+0skips/0successes, --no-tests=fail unchanged. No native runtime credit.
+
+PG7a mutation baseline native192/192 PASS21.730s,0skips, fresh separatePG18.6.
+Three reviews: complete15binary capability suite; actual8 listing+184prior laws;
+real cloned source/profile, no failed baseline, cache/DB-free/replay credit.
+All6 generated outcomes individually reviewed THREE ways:
+| Candidate | Review1 contract | Review2 first failure | Review3 provenance/limit |
+| --- | --- | --- | --- |
+| page27 empty | Committed IDs enumerated | Actual[] versus exact one held-xid committed stream | Native92/192,100unrun not passes, writer cleanup BEFORE assertion. |
+| page27 PageRow::new() | Typed page values | E0599 no such constructor | Unviable build,0native/no caught credit. |
+| page27 PageRow::from_iter | Typed page values | E0599 no such method | Unviable build,0native. |
+| page27 PageRow::new(default) | Typed page values | E0599 no such constructor | Unviable build,0native. |
+| page27 PageRow::from(default) | Typed page values | E0277 PageRow no Default | Unviable build,0native. |
+| listing59 default stream | Actual ID stream | E0277 dynStream no Default | Unviable build,0native. |
+
+Six=1caught5unviable0missed/timeout. Generated mutations cannot substitute for
+SQL-specific budgets/frozen membership: three fresh manual SQL controls provide
+those actual negative results. Default111s mutation timeout measured from native
+baseline, no exclusions/test/threshold changes. Exact artifacts retained.
+
+PG7a first Linux18.6 integration PASS192/19221.014s,0skips. Three reviews:
+(1) complete15binary adapter suite and all capabilities; (2) actual native new
+visibility/search-path/bounds/lease laws with original state/uncertainty/wake/
+upgrade; (3) freshly built archive on ARM builder, installed log SAME execution,
+0skipped selected tests. Artifact/nix/store/dwpj7m01m62f15239d35dz0wz58k9r1b-mnesis-postgres-integration.
+Four separate smokes atomic0.288s/snapshot0.324s/projection0.374s/listing0.388s,
+EACH3reviews: correct requested feature; real native conformance/consumer or
+binary/reopen listing law; --no-tests=fail/pipefail unchanged, filtered14/15/2/7
+and14otherbinaries not credited. No full-gate/CI/merge/publication claim.
+
+Final boundary audit: existing StreamKey constructors and keys BYTEA NOTNULL
+allow an empty rawID. Add emptyID to the existing binary/page/reopen expected
+set (within450testbudget),0product change. Expected vector4items, no sentinel
+empty-key treatment. Prior Linux/source test version has3IDs, not empty-ID
+coverage; fresh selected/native Linux verification required after this refinement.
+
+Empty-ID refinement native8/8 PASS0.530s,0skips. Three reviews: (1) full raw-byte
+ID domain includes empty ID independently of end-of-stream; (2) actual append of
+empty plus NUL/binary/8KiB IDs twice each, one-row listing and reopen preserve
+exact FOUR IDs without duplicates, all prior7 laws remain; (3) no sentinel special
+case/new production code or relaxed assertion, selected realPG17.10 cases all
+run,4-ID source path compiled, prior3-ID Linux result not claimed to cover empty.
+Fresh Linux artifact rebuilding same product with this stricter test source.
+
+PG7a FINAL test-source Linux18.6 integration192/192 PASS21.137s,0skips.
+Three reviews: (1) complete15binary/capability matrix with FOUR binary IDs incl
+empty in canonical page/reopen law; (2) native empty-ID refinement and all earlier
+actual visibility/search-path/bounds/lease plus184 prerequisite laws run;
+(3) fresh archive+execution source, not first21.014s run/installed replay, actual
+ARM builder/current production hash unchanged7bdaaad5. Artifact
+/nix/store/canfglrla50h2zr0y1vy46k943zfxyqf-mnesis-postgres-integration.
+Four separate feature smokes atomic0.266s/snapshot0.312s/projection0.374s/
+listing0.368s EACH reviewed3ways: exact trait/feature selector, real native
+conformance/consumer or FOUR-ID/reopen assertions, --no-tests=fail/pipefail plus
+14/15/2/7filtered and14otherbinaries not counted. No cache/replay credit.
+
+PG7a final minimization:88added/1removedRust(including2doclines),1Cargo feature,
+5Nixlines,339native lines. Existing BoxStream/try_unfold, SQLx, Limits/PageRow,
+key table and immutable event membership reused; zero dependency/lock/runtime/
+public-type changes. No snapshot parser, origin API, generic framework or new
+worker. Native full-snapshot visibility retained after real xmin counterexample;
+canonical function/type names after2real shadow counterexamples. Three fresh
+SQL controls plus actual generated mutation first failures retained; no exclusions
+or engineered percentage. ProductdiffSHA7bdaaad5165e36b38bfe88738acaac9df09f01ac28deaa7bb95a194ef89a8925.
+No applied migration change. Consistent multi-stream session/restore remainsPG7b,
+operations/capacityPG8 and full releasePG9. Normal full signed hook now required.
+
+Normal full signed hook passes at3ca0eaa15ed821c1801e2dacd2d2f1fb942c36d8 (G).
+Workspace1563/1563 PASS489.402s,14slow,4compiler-function exclusions. Three reviews:
+(1) entire default workspace contract owners execute; (2) existing property/
+resilience/state-machine and owner tests run unchanged while strict all-feature/
+all-target Clippy compiles current listing; (3) DB-free adapter early returns are
+NOT native evidence,4compiler functions assigned to existing CI owner job rather
+than counted successes, no slowed workload/deadline adjustments. Real192/Linux
+native and source controls remain independent evidence. Full unmodified gate
+passes12namedchecks, audit cached/11fresh, no bypass. Fuzz replay3runs2/1/1pass
+1.00s EACH reviewed3ways: matching header/chunk/value/frame owner; actual existing
+corpus decoder assertions;0filtered/ignored, finite replay not deep fuzz or native
+adapter evidence. Raw full gate and logs retained. Docs-only amendment runsnormal
+hook; cached checks receive0extra runtime credit.

@@ -1,0 +1,50 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-export/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-export/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-export/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-export/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-export/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-export/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-export/crates/store-testing)
+error[E0599]: no method named `list_streams` found for reference `&PostgresStore` in the current scope
+  --> adapters/postgres/tests/listing_tests.rs:74:10
+   |
+73 |       let rows: Vec<_> = store
+   |  ________________________-
+74 | |         .list_streams()
+   | |         -^^^^^^^^^^^^ method not found in `&PostgresStore`
+   | |_________|
+   |
+
+error[E0599]: no method named `list_streams` found for struct `PostgresStore` in the current scope
+  --> adapters/postgres/tests/listing_tests.rs:90:27
+   |
+90 |     let mut empty = store.list_streams().await.unwrap();
+   |                           ^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `list_streams` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/listing_tests.rs:163:29
+    |
+163 |     let mut listing = store.list_streams().await.unwrap();
+    |                             ^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `list_streams` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/listing_tests.rs:191:19
+    |
+191 |     assert!(store.list_streams().await.unwrap().next().await.is_none());
+    |                   ^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `list_streams` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/listing_tests.rs:199:29
+    |
+199 |     let mut listing = store.list_streams().await.unwrap();
+    |                             ^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `list_streams` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/listing_tests.rs:233:31
+    |
+233 |     let mut listing = limited.list_streams().await.unwrap();
+    |                               ^^^^^^^^^^^^ method not found in `PostgresStore`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mnesis-postgres` (test "listing_tests") due to 6 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test listing_tests --features export` exited with code 101

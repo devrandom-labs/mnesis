@@ -126,3 +126,13 @@ creates duplicate raw key with different state in child. Supported pg_inherits
 catalog is the existing schema-validation mechanism; no new dependency/license
 or runtime cost on ordinary reads/writes. PG17.10 native witness below determines
 whether the current adapter actually rejects this unsafe shape.
+
+2026-10-18 PG7a native membership correction: official PG17
+https://www.postgresql.org/docs/17/functions-info.html#FUNCTIONS-PG-SNAPSHOT,
+pg_current_snapshot/pg_visible_in_snapshot operate on top-level64bitxid8 and
+frozen active-xid list; pg_current_xact_id returns top-level ID even in subtx.
+Existing adapter stores that exact top-level function default. Native witness
+xmin-only omitted committed higher-xid ID behind unrelated active writer (red);
+full pg_snapshot filter passes exact membership and active/future exclusion.
+No extension/crate/license/lock cost. Snapshot string cost depends on concurrent
+active transaction list, not event backlog; measure in required PG8 capacity.

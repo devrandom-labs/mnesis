@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7a-final-visibility.IB3vFx/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.65s
+────────────
+ Nextest run ID 38dbd7ba-85a0-4a7f-a45d-732e70ddd471 with nextest profile: default
+    Starting 1 test across 1 binary (7 tests skipped)
+        FAIL [   0.041s] (1/1) mnesis-postgres::listing_tests listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+  stdout ───
+
+    running 1 test
+    test listing_freezes_event_presence_before_first_poll_and_releases_pool_leases ... FAILED
+
+    failures:
+
+    failures:
+        listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'listing_freezes_event_presence_before_first_poll_and_releases_pool_leases' (98501629) panicked at adapters/postgres/tests/listing_tests.rs:214:5:
+    assertion `left == right` failed
+      left: StreamKey(b"late")
+     right: StreamKey(b"original")
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.042s] 1 test run: 0 passed, 1 failed, 7 skipped
+        FAIL [   0.041s] (1/1) mnesis-postgres::listing_tests listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+error: test run failed

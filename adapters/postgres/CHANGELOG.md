@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Bounded event-only stream listing with frozen committed visibility, binary IDs,
+  released pool connections, and native allocation/visibility regressions.
 - Projection checkpoints with revision CAS, atomic state/position replacement,
   explicit rebuild, bounded reads, and preserved commit uncertainty.
 - Migration4 and native coverage for projection consumers, concurrent writers,

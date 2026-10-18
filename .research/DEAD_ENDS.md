@@ -12,3 +12,12 @@ Postgres LISTEN backends and the configured acquisition deadline instead.
   `Metadata` constructor rejects it (`MetadataEmpty`), so this is not an accepted
   envelope state. The retained test covers absent versus one-byte metadata;
   stored invalid metadata remains an error rather than weakening that contract.
+
+PG7a xmin-only ordinary stream listing REJECTED after initial5green native laws.
+A real held lower-xid transaction hides an already-committed higher-xid stream,
+returning[] instead of one ID. Ordered read_all legitimately withholds such rows;
+StreamLister must include committed streams at capture. Existing pg_snapshot+
+pg_visible_in_snapshot fixes exact membership without pinning connection; canonical
+pg_catalog function/type names also required after separate native shadow-function
+and fake-snapshot witnesses each returned[]. All8fixed laws pass. Do not retry
+xmin-only or unqualified native functions based on earlierfive-case pass.

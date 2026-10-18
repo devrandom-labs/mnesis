@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7a-final-body.RwmWNg/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+────────────
+ Nextest run ID a68643af-29e3-4e2e-9cf7-c3cf12091859 with nextest profile: default
+    Starting 1 test across 1 binary (7 tests skipped)
+        FAIL [   0.073s] (1/1) mnesis-postgres::listing_tests byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+  stdout ───
+
+    running 1 test
+    test byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body ... FAILED
+
+    failures:
+
+    failures:
+        byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body' (98499409) panicked at adapters/postgres/tests/listing_tests.rs:328:5:
+    oversized listing allocated 5235056 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.074s] 1 test run: 0 passed, 1 failed, 7 skipped
+        FAIL [   0.073s] (1/1) mnesis-postgres::listing_tests byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+error: test run failed
