@@ -1,0 +1,20 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+────────────
+ Nextest run ID 49a8f6b6-ae5a-42cc-8f8c-3107e26cbac4 with nextest profile: default
+    Starting 13 tests across 12 binaries (142 tests skipped)
+        PASS [   0.008s] ( 1/13) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+        PASS [   1.030s] ( 2/13) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+        PASS [   0.057s] ( 3/13) mnesis-postgres::outcome_tests caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair
+        PASS [   0.030s] ( 4/13) mnesis-postgres::outcome_tests snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state
+        PASS [   0.027s] ( 5/13) mnesis-postgres::outcome_tests uncertain_snapshot_commit_preserves_the_native_source_through_the_codec
+        PASS [   0.031s] ( 6/13) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+        PASS [   0.026s] ( 7/13) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_empty_state_round_trips
+        PASS [   0.027s] ( 8/13) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_extreme_positions_round_trip
+        PASS [   0.027s] ( 9/13) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_overwrite_latest_wins
+        PASS [   0.026s] (10/13) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_stale_on_schema_change
+        PASS [   0.030s] (11/13) mnesis-postgres::snapshot_tests real_snapshotting_repository_skips_the_cached_prefix
+        PASS [   0.032s] (12/13) mnesis-postgres::snapshot_tests stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+        PASS [   0.032s] (13/13) mnesis-postgres::snapshot_tests stale_cache_and_rejected_replacement_do_not_change_committed_aggregate_history
+────────────
+     Summary [   1.383s] 13 tests run: 13 passed, 142 skipped

@@ -1,0 +1,16 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.75s
+────────────
+ Nextest run ID de4c8700-1b03-41b7-8cd3-ccf26c8decd7 with nextest profile: default
+    Starting 9 tests across 1 binary
+        PASS [   0.042s] (1/9) mnesis-postgres::snapshot_tests byte_ceiling_precedes_storage_and_stale_bodies_are_not_fetched
+        PASS [   0.032s] (2/9) mnesis-postgres::snapshot_tests concurrent_hydration_sees_complete_old_or_new_pairs
+        PASS [   0.028s] (3/9) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+        PASS [   0.028s] (4/9) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_empty_state_round_trips
+        PASS [   0.028s] (5/9) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_extreme_positions_round_trip
+        PASS [   0.027s] (6/9) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_overwrite_latest_wins
+        PASS [   0.027s] (7/9) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_stale_on_schema_change
+        PASS [   0.027s] (8/9) mnesis-postgres::snapshot_tests corrupt_position_is_an_error_even_when_the_requested_schema_is_stale
+        PASS [   0.028s] (9/9) mnesis-postgres::snapshot_tests reopen_preserves_unsigned_extremes_and_unconditional_cache_replacement
+────────────
+     Summary [   0.267s] 9 tests run: 9 passed, 0 skipped

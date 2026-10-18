@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.90s
+────────────
+ Nextest run ID 86d84753-755b-4d38-9136-16186bd0298f with nextest profile: default
+    Starting 1 test across 1 binary (15 tests skipped)
+        PASS [  14.735s] (1/1) mnesis-postgres::snapshot_tests suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys
+────────────
+     Summary [  14.736s] 1 test run: 1 passed, 15 skipped

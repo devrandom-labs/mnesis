@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.94s
+────────────
+ Nextest run ID 1ee2673b-e9c0-41b6-9b16-6d9709a925e9 with nextest profile: default
+    Starting 1 test across 12 binaries (160 tests skipped)
+        PASS [   0.063s] (1/1) mnesis-postgres::outcome_tests cancelling_runtime_open_releases_its_view_and_preserves_the_callers_pool
+────────────
+     Summary [   0.068s] 1 test run: 1 passed, 160 skipped

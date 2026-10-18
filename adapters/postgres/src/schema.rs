@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 
 use mnesis::ErrorId;
 use sqlx::migrate::Migrator;
-use sqlx::{PgConnection, PgPool};
+use sqlx::{Connection, PgConnection, PgPool};
 
 use crate::error::PostgresError;
 
@@ -30,10 +30,20 @@ pub async fn migrate(pool: &PgPool) -> Result<(), PostgresError> {
 
 pub async fn validate_pool(pool: &PgPool) -> Result<(), PostgresError> {
     let mut connection = pool.acquire().await.map_err(PostgresError::Sqlx)?;
+    connection.close_on_drop();
     validate(&mut connection).await
 }
 
 async fn validate(connection: &mut PgConnection) -> Result<(), PostgresError> {
+    let mut view = connection
+        .begin_with("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        .await
+        .map_err(PostgresError::Sqlx)?;
+    validate_current(&mut view).await?;
+    view.rollback().await.map_err(PostgresError::Sqlx)
+}
+
+async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresError> {
     let ready: bool =
         sqlx::query_scalar("SELECT pg_catalog.to_regclass('mnesis._sqlx_migrations') IS NOT NULL")
             .fetch_one(&mut *connection)
@@ -62,7 +72,17 @@ async fn validate(connection: &mut PgConnection) -> Result<(), PostgresError> {
             "migration version, checksum or completion differs; use a compatible binary or repair the upgrade",
         ));
     }
-    validate_shape(connection, "mnesis.events").await
+    validate_shape(connection, "mnesis.events").await?;
+    let snapshots: bool = sqlx::query_scalar(include_str!("snapshot.sql"))
+        .fetch_one(connection)
+        .await
+        .map_err(PostgresError::Sqlx)?;
+    if !snapshots {
+        return Err(incompatible(
+            "snapshot columns, bounds, logging, primary key or identity reference differ",
+        ));
+    }
+    Ok(())
 }
 
 async fn validate_shape(connection: &mut PgConnection, table: &str) -> Result<(), PostgresError> {

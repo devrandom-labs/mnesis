@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s
+────────────
+ Nextest run ID babaf06e-0853-4284-ab3a-bfa89f0325f0 with nextest profile: default
+    Starting 1 test across 12 binaries (158 tests skipped)
+        FAIL [   0.058s] (1/1) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+  stdout ───
+
+    running 1 test
+    test runtime_schema_validation_keeps_one_read_only_database_view ... FAILED
+
+    failures:
+
+    failures:
+        runtime_schema_validation_keeps_one_read_only_database_view
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'runtime_schema_validation_keeps_one_read_only_database_view' (96979175) panicked at adapters/postgres/tests/outcome_tests.rs:258:5:
+    assertion `left == right` failed
+      left: ("idle", false)
+     right: ("idle in transaction", true)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.059s] 1 test run: 0 passed, 1 failed, 158 skipped
+        FAIL [   0.058s] (1/1) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+error: test run failed

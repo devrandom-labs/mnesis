@@ -1,0 +1,11 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.00s
+────────────
+ Nextest run ID e12b27a6-3910-46b7-b9a0-751f9ab55e97 with nextest profile: default
+    Starting 4 tests across 12 binaries (155 tests skipped)
+        PASS [   0.062s] (1/4) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+        PASS [   0.033s] (2/4) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+        PASS [   0.050s] (3/4) mnesis-postgres::snapshot_tests runtime_open_rejects_missing_reference_nullable_state_and_unlogged_cache
+        PASS [   0.037s] (4/4) mnesis-postgres::snapshot_tests runtime_role_writes_cache_without_mutating_keys_events_or_schema
+────────────
+     Summary [   0.183s] 4 tests run: 4 passed, 155 skipped

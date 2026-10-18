@@ -100,10 +100,17 @@ async fn fresh_install_is_explicit_and_repeated_migration_preserves_data() {
         None
     );
     PostgresStore::migrate(&pool).await.unwrap();
-    let installed: Vec<(i64, bool, i32)> = sqlx::query_as(
-        "SELECT version, success, octet_length(checksum) FROM mnesis._sqlx_migrations ORDER BY version",
-    ).fetch_all(&pool).await.unwrap();
-    assert_eq!(installed, [(1, true, 48), (2, true, 48)]);
+    let installed: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, success, checksum FROM mnesis._sqlx_migrations ORDER BY version",
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+    let expected: Vec<_> = sqlx::migrate!("./migrations")
+        .iter()
+        .map(|migration| (migration.version, true, migration.checksum.to_vec()))
+        .collect();
+    assert_eq!(installed, expected);
     sqlx::query(
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
         VALUES ($1, 1, 'Repeat', 1, 'data'::bytea)",
@@ -239,7 +246,7 @@ async fn concurrent_migrations_apply_one_record_and_release_locks() {
             .fetch_one(&pool)
             .await
             .unwrap(),
-        2
+        i64::try_from(sqlx::migrate!("./migrations").iter().count()).unwrap()
     );
     unlocked(&pool).await;
 }
@@ -301,7 +308,7 @@ async fn failed_legacy_move_rolls_back_and_can_be_repaired() {
 }
 
 #[tokio::test]
-async fn checksum_and_newer_schema_are_rejected_without_repair() {
+async fn checksum_is_rejected_without_repair() {
     let Some(pool) = clean().await else { return };
     PostgresStore::migrate(&pool).await.unwrap();
     let checksum: Vec<u8> =
@@ -313,45 +320,56 @@ async fn checksum_and_newer_schema_are_rejected_without_repair() {
         .execute(&pool)
         .await
         .unwrap();
-    assert!(matches!(
-        PostgresStore::from_pool(pool.clone()).await,
-        Err(PostgresError::Schema { .. })
-    ));
-    assert!(matches!(
-        PostgresStore::migrate(&pool).await,
-        Err(PostgresError::Migration(MigrateError::VersionMismatch(1)))
-    ));
-    assert_eq!(
-        sqlx::query_scalar::<_, Vec<u8>>(
-            "SELECT checksum FROM mnesis._sqlx_migrations WHERE version = 1"
-        )
-        .fetch_one(&pool)
-        .await
-        .unwrap(),
-        b"wrong"
-    );
+    let opened = PostgresStore::from_pool(pool.clone()).await;
+    let migrated = PostgresStore::migrate(&pool).await;
+    let unchanged = sqlx::query_scalar::<_, Vec<u8>>(
+        "SELECT checksum FROM mnesis._sqlx_migrations WHERE version = 1",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
     sqlx::query("UPDATE mnesis._sqlx_migrations SET checksum = $1 WHERE version = 1")
         .bind(checksum)
         .execute(&pool)
         .await
         .unwrap();
-    sqlx::query("INSERT INTO mnesis._sqlx_migrations (version, description, success, checksum, execution_time) \
-        VALUES (3, 'future', true, 'future'::bytea, 0)").execute(&pool).await.unwrap();
+    assert!(matches!(opened, Err(PostgresError::Schema { .. })));
     assert!(matches!(
-        PostgresStore::from_pool(pool.clone()).await,
-        Err(PostgresError::Schema { .. })
+        migrated,
+        Err(PostgresError::Migration(MigrateError::VersionMismatch(1)))
     ));
-    assert!(matches!(
-        PostgresStore::migrate(&pool).await,
-        Err(PostgresError::Migration(MigrateError::VersionMissing(3)))
-    ));
-    assert_eq!(
-        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis._sqlx_migrations")
+    assert_eq!(unchanged, b"wrong");
+}
+
+#[tokio::test]
+async fn newer_schema_is_rejected_without_repair() {
+    let Some(pool) = clean().await else { return };
+    PostgresStore::migrate(&pool).await.unwrap();
+    let (count, latest): (i64, i64) =
+        sqlx::query_as("SELECT count(*), max(version) FROM mnesis._sqlx_migrations")
             .fetch_one(&pool)
             .await
-            .unwrap(),
-        3
-    );
+            .unwrap();
+    let future = latest.checked_add(1).unwrap();
+    sqlx::query("INSERT INTO mnesis._sqlx_migrations (version, description, success, checksum, execution_time) \
+        VALUES ($1, 'future', true, 'future'::bytea, 0)").bind(future).execute(&pool).await.unwrap();
+    let opened = PostgresStore::from_pool(pool.clone()).await;
+    let migrated = PostgresStore::migrate(&pool).await;
+    let unchanged = sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis._sqlx_migrations")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    sqlx::query("DELETE FROM mnesis._sqlx_migrations WHERE version = $1")
+        .bind(future)
+        .execute(&pool)
+        .await
+        .unwrap();
+    assert!(matches!(opened, Err(PostgresError::Schema { .. })));
+    assert!(matches!(
+        migrated,
+        Err(PostgresError::Migration(MigrateError::VersionMissing(found))) if found == future
+    ));
+    assert_eq!(unchanged, count.checked_add(1).unwrap());
 }
 
 fn event() -> PendingEnvelope {
@@ -578,7 +596,7 @@ async fn cancelling_a_blocked_migration_releases_its_session_and_transaction() {
             .fetch_one(&pool)
             .await
             .unwrap(),
-        2
+        i64::try_from(sqlx::migrate!("./migrations").iter().count()).unwrap()
     );
 }
 

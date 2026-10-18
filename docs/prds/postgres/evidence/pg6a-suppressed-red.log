@@ -1,0 +1,30 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.47s
+────────────
+ Nextest run ID 6f999c03-d9c7-4550-8a02-6bdd3b899771 with nextest profile: default
+    Starting 1 test across 1 binary (15 tests skipped)
+        FAIL [  24.918s] (1/1) mnesis-postgres::snapshot_tests suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys
+  stdout ───
+
+    running 1 test
+    test suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys ... FAILED
+
+    failures:
+
+    failures:
+        suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 24.91s
+
+  stderr ───
+
+    thread 'suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys' (97664212) panicked at adapters/postgres/tests/snapshot_tests.rs:66:9:
+    suppressed write must fail before COMMIT, got Ok(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [  24.922s] 1 test run: 0 passed, 1 failed, 15 skipped
+        FAIL [  24.918s] (1/1) mnesis-postgres::snapshot_tests suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys
+error: test run failed

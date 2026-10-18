@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+────────────
+ Nextest run ID 56a85ba4-f044-49c0-9de9-4510b08fba04 with nextest profile: default
+    Starting 1 test across 12 binaries (155 tests skipped)
+        PASS [   0.065s] (1/1) mnesis-postgres::snapshot_tests acknowledged_cache_pair_survives_client_process_termination
+────────────
+     Summary [   0.066s] 1 test run: 1 passed, 155 skipped

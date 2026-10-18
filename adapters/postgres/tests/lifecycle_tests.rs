@@ -181,7 +181,7 @@ async fn listener_subscription_failure_recovers_after_the_acquired_backend_dies(
         .clone()
         .application_name("mnesis-listen-failure");
     let backing = PgPoolOptions::new()
-        .max_connections(2)
+        .max_connections(3)
         .before_acquire(move |connection, _| {
             let status = *phase.borrow();
             let completed = Arc::clone(&attempts);
@@ -200,9 +200,12 @@ async fn listener_subscription_failure_recovers_after_the_acquired_backend_dies(
         .connect_with(options)
         .await
         .unwrap();
-    // Holding one slot forces the listener to acquire the schema connection
-    // after its return to the pool, so before_acquire is the exact fault point.
+    // Validation closes its scoped session. Keep another idle session so
+    // LISTEN still receives the exact before_acquire termination fault.
     let held = backing.acquire().await.unwrap();
+    let first = backing.acquire().await.unwrap();
+    let second = backing.acquire().await.unwrap();
+    drop((first, second));
     let store = PostgresStore::from_pool(backing.clone()).await.unwrap();
     availability.send(Availability::Unavailable).unwrap();
     timeout(Duration::from_secs(1), async {

@@ -19,6 +19,8 @@ mod sections;
 use futures::{FutureExt, TryStreamExt};
 use std::future::pending;
 use std::io::{self, Write, stderr};
+#[cfg(feature = "snapshot")]
+use std::num::NonZeroU32;
 use std::path::PathBuf;
 use std::pin::pin;
 use std::str::FromStr;
@@ -26,7 +28,11 @@ use std::time::Duration;
 
 use mnesis::Version;
 use mnesis_postgres::{PostgresError, PostgresStore};
+#[cfg(feature = "snapshot")]
+use mnesis_store::JsonCodec;
 use mnesis_store::envelope::{PendingBatch, PendingEnvelope, pending_envelope};
+#[cfg(feature = "snapshot")]
+use mnesis_store::state::{CodecSnapshotStore, CodecSnapshotStoreError, Hydrated, SnapshotStore};
 use mnesis_store::{AppendError, RawEventStore, StreamKey};
 use sqlx::PgPool;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
@@ -47,6 +53,10 @@ enum Fault {
     HoldHint,
     #[cfg(feature = "import")]
     HoldSecondHead,
+    #[cfg(feature = "snapshot")]
+    HoldSnapshot,
+    #[cfg(feature = "snapshot")]
+    HoldValidation,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,6 +68,10 @@ enum Observation {
     Hint,
     #[cfg(feature = "import")]
     SecondHead,
+    #[cfg(feature = "snapshot")]
+    Snapshot,
+    #[cfg(feature = "snapshot")]
+    Validation,
 }
 
 struct Proxy {
@@ -169,6 +183,20 @@ async fn forward(
                     observed.send_replace(Observation::Committed);
                 }
                 let fault = *mode.borrow();
+                #[cfg(feature = "snapshot")]
+                if tag == b'D' && matches!(fault, Fault::HoldValidation)
+                    && body == [0, 1, 0, 0, 0, 1, 1] {
+                    observed.send_replace(Observation::Validation);
+                    let mut resume = mode.clone();
+                    resume.wait_for(|phase| matches!(phase, Fault::Pass)).await.map_err(io::Error::other)?;
+                }
+                #[cfg(feature = "snapshot")]
+                if tag == b'D' && matches!(fault, Fault::HoldSnapshot)
+                    && body.windows(SNAPSHOT_OLD.len()).any(|part| part == SNAPSHOT_OLD) {
+                    observed.send_replace(Observation::Snapshot);
+                    let mut resume = mode.clone();
+                    resume.wait_for(|phase| matches!(phase, Fault::Pass)).await.map_err(io::Error::other)?;
+                }
                 if tag == b'A' && matches!(fault, Fault::HoldHint) {
                     continue;
                 }
@@ -193,6 +221,190 @@ async fn forward(
             }
         } => result,
     }
+}
+
+#[cfg(feature = "snapshot")]
+const SNAPSHOT_OLD: &[u8] = b"snapshot-old-081";
+
+#[cfg(feature = "snapshot")]
+#[tokio::test]
+async fn runtime_schema_validation_keeps_one_read_only_database_view() {
+    let Some((mut proxy, _store, control)) = fixture().await else {
+        return;
+    };
+    let name = format!("mnesis-validation-{}", std::process::id());
+    let pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect_with(proxy.options.clone().application_name(&name))
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::HoldValidation);
+    let backing = pool.clone();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { PostgresStore::from_pool(backing).await });
+    proxy.observed(Observation::Validation).await;
+    let facts = timeout(Duration::from_secs(3), async {
+        loop {
+            let row: (String, bool) = sqlx::query_as("SELECT state, backend_xmin IS NOT NULL FROM pg_stat_activity WHERE application_name = $1 AND datname = current_database()")
+                .bind(&name).fetch_one(&control).await.unwrap();
+            if row.0 != "active" { break row; }
+            yield_now().await;
+        }
+    }).await.unwrap();
+    proxy.fault.send_replace(Fault::Pass);
+    let opened = pending.join_next().await.unwrap().unwrap().unwrap();
+    drop(opened);
+    pool.close().await;
+    assert_eq!(facts, ("idle in transaction".to_owned(), true));
+}
+
+#[cfg(feature = "snapshot")]
+#[tokio::test]
+async fn cancelling_runtime_open_releases_its_view_and_preserves_the_callers_pool() {
+    let Some((mut proxy, _store, control)) = fixture().await else {
+        return;
+    };
+    let name = format!("mnesis-validation-cancel-{}", std::process::id());
+    let pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect_with(proxy.options.clone().application_name(&name))
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::HoldValidation);
+    let backing = pool.clone();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { PostgresStore::from_pool(backing).await });
+    proxy.observed(Observation::Validation).await;
+    let pinned: bool = sqlx::query_scalar("SELECT EXISTS (SELECT FROM pg_stat_activity WHERE application_name = $1 AND backend_xmin IS NOT NULL)")
+        .bind(&name).fetch_one(&control).await.unwrap();
+    pending.abort_all();
+    assert!(matches!(pending.join_next().await, Some(Err(error)) if error.is_cancelled()));
+    timeout(Duration::from_secs(3), async {
+        loop {
+            let retained: bool = sqlx::query_scalar("SELECT EXISTS (SELECT FROM pg_stat_activity WHERE application_name = $1 AND backend_xmin IS NOT NULL)")
+                .bind(&name).fetch_one(&control).await.unwrap();
+            if !retained { break; }
+            yield_now().await;
+        }
+    }).await.expect("canceled constructor must release its actual native view");
+    proxy.fault.send_replace(Fault::Pass);
+    assert!(
+        pinned,
+        "constructor must hold a real view before cancellation"
+    );
+    assert_eq!(
+        sqlx::query_scalar::<_, i32>("SELECT 1")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        1
+    );
+    pool.close().await;
+}
+
+#[cfg(feature = "snapshot")]
+#[tokio::test]
+async fn snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state() {
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_bytes("snapshot-read-pair");
+    store
+        .commit(
+            &id,
+            NonZeroU32::MIN,
+            Version::INITIAL,
+            &SNAPSHOT_OLD.to_vec(),
+        )
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::HoldSnapshot);
+    let client = store.clone();
+    let target = id.clone();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { client.hydrate(&target, NonZeroU32::MIN).await });
+    proxy.observed(Observation::Snapshot).await;
+    let independent = PostgresStore::from_pool(control).await.unwrap();
+    independent
+        .commit(
+            &id,
+            NonZeroU32::MIN,
+            Version::new(2).unwrap(),
+            &b"snapshot-new-081".to_vec(),
+        )
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::Pass);
+    let captured = pending.join_next().await.unwrap().unwrap().unwrap();
+    assert_eq!(
+        captured,
+        Hydrated::Found {
+            position: Version::INITIAL,
+            state: SNAPSHOT_OLD.to_vec()
+        }
+    );
+    assert_eq!(
+        store.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
+        Hydrated::Found {
+            position: Version::new(2).unwrap(),
+            state: b"snapshot-new-081".to_vec()
+        }
+    );
+}
+
+#[cfg(feature = "snapshot")]
+#[tokio::test]
+async fn uncertain_snapshot_commit_preserves_the_native_source_through_the_codec() {
+    let Some((mut proxy, raw, control)) = fixture().await else {
+        return;
+    };
+    let store = CodecSnapshotStore::new(raw, JsonCodec::default());
+    let id = StreamKey::from_bytes("snapshot-unknown");
+    let state = mnesis_test_domains::CounterState { value: 7 };
+    let position = Version::new(u64::MAX).unwrap();
+    proxy.fault.send_replace(Fault::DropCommit);
+    let result = store.commit(&id, NonZeroU32::MIN, position, &state).await;
+    proxy.observed(Observation::Committed).await;
+    assert!(
+        matches!(result, Err(CodecSnapshotStoreError::Store(PostgresError::CommitUnknown(sqlx::Error::Io(ref cause))))
+        if cause.kind() == io::ErrorKind::UnexpectedEof)
+    );
+    let row: (String, i64, Vec<u8>) = sqlx::query_as("SELECT s.version::text, s.schema_version, s.state FROM mnesis.snapshots s JOIN mnesis.keys k ON k.number = s.key WHERE k.value = $1")
+        .bind(id.as_bytes()).fetch_one(&control).await.unwrap();
+    assert_eq!(row, (u64::MAX.to_string(), 1, b"{\"value\":7}".to_vec()));
+    assert_eq!(count(&control).await, 0);
+    proxy.fault.send_replace(Fault::Pass);
+    assert_eq!(
+        store.hydrate(&id, NonZeroU32::MIN).await.unwrap(),
+        Hydrated::Found { position, state }
+    );
+}
+
+#[cfg(feature = "snapshot")]
+#[tokio::test]
+async fn caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair() {
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_bytes("snapshot-cancel");
+    let state = b"committed".to_vec();
+    proxy.fault.send_replace(Fault::HoldCommit);
+    {
+        let mut attempt = pin!(store.commit(&id, NonZeroU32::MIN, Version::INITIAL, &state));
+        tokio::select! {
+            result = &mut attempt => panic!("snapshot commit response must remain held: {result:?}"),
+            () = proxy.observed(Observation::Committed) => {},
+        }
+        assert!(
+            timeout(Duration::from_millis(20), &mut attempt)
+                .await
+                .is_err()
+        );
+    }
+    let row: (String, Vec<u8>) = sqlx::query_as("SELECT s.version::text, s.state FROM mnesis.snapshots s JOIN mnesis.keys k ON k.number = s.key WHERE k.value = $1")
+        .bind(id.as_bytes()).fetch_one(&control).await.unwrap();
+    assert_eq!(row, ("1".to_owned(), state));
+    assert_eq!(count(&control).await, 0);
 }
 
 #[cfg(feature = "import")]

@@ -20,6 +20,13 @@ pub enum PostgresError {
     #[error("row requires {actual} bytes, exceeding configured limit {limit}")]
     RowLimit { actual: i64, limit: i64 },
 
+    /// Caller-provided byte lengths cannot be represented or added safely.
+    #[error("input row byte count overflow")]
+    SizeOverflow {
+        #[source]
+        source: Option<std::num::TryFromIntError>,
+    },
+
     /// The shared pool cannot accommodate both LISTEN and a data query.
     #[error("pool capacity {actual} cannot accommodate the listener and data queries")]
     PoolCapacity { actual: u32 },

@@ -1,9 +1,9 @@
 # Postgres adapter completion
 
-Status: active (PG5 verification; PG6–PG9 remain). Updated: 2026-10-18.
+Status: active (PG6 aggregate snapshots; projection and PG7–PG9 remain). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-atomic`.
+Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-state`.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
@@ -27,7 +27,7 @@ All requirements PG0–PG9 below are required for the production release. Existi
 capabilities count only when their acceptance evidence passes. Optional features
 may remain opt-in, following the Fjall adapter's feature arrangement.
 
-| Capability | Current source | Required result |
+| Capability | Baseline source | Required result |
 | --- | --- | --- |
 | Single-stream append | Implemented in `store.rs` | Atomic version validation and writes, exact conflict classification, durable acknowledgement, explicit uncertain outcome. |
 | Stream and `$all` reads | Eager `fetch_all`, followed by a second collection | Bounded, lazy reads with stable order, correct resume bounds, finite scans, and prompt resource release. |

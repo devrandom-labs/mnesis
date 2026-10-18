@@ -1,0 +1,27 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.80s
+────────────
+ Nextest run ID b2b7b91e-2ff2-428f-8138-f70044fd2f9d with nextest profile: default
+    Starting 2 tests across 12 binaries (148 tests skipped)
+        PASS [   0.062s] (1/2) mnesis-postgres::outcome_tests snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state
+  stdout ───
+
+    running 1 test
+    test snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.04s
+
+
+        PASS [   0.037s] (2/2) mnesis-postgres::snapshot_tests stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+  stdout ───
+
+    running 1 test
+    test stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.03s
+
+  stderr ───
+    snapshot1MiB stale_allocated=11306 oversized_allocated=9561 ceiling=262144
+
+────────────
+     Summary [   0.100s] 2 tests run: 2 passed, 148 skipped

@@ -1,0 +1,40 @@
+     Removed 4537 files, 807.1MiB total
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg6a-view-control.WrzCts/adapters/postgres)
+   Compiling mnesis v0.4.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/tmp/mnesis-pg6a-view-control.WrzCts/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.61s
+────────────
+ Nextest run ID 647ac2cf-d762-4187-87a9-4dba8756c4e1 with nextest profile: default
+    Starting 1 test across 12 binaries (159 tests skipped)
+       START [         ] (1/1) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+             command: /tmp/mnesis-pg6a-proof-target.z1jmzk/debug/deps/outcome_tests-d11c1a0e9c5b6b44 --exact runtime_schema_validation_keeps_one_read_only_database_view --nocapture
+        FAIL [   0.066s] (1/1) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+  stdout ───
+
+    running 1 test
+    test runtime_schema_validation_keeps_one_read_only_database_view ... FAILED
+
+    failures:
+
+    failures:
+        runtime_schema_validation_keeps_one_read_only_database_view
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'runtime_schema_validation_keeps_one_read_only_database_view' (97002993) panicked at adapters/postgres/tests/outcome_tests.rs:258:5:
+    assertion `left == right` failed
+      left: ("idle in transaction", false)
+     right: ("idle in transaction", true)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.068s] 1 test run: 0 passed, 1 failed, 159 skipped
+        FAIL [   0.066s] (1/1) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+error: test run failed

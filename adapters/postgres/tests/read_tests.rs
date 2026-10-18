@@ -6,10 +6,9 @@
 
 mod support;
 
-use std::alloc::{GlobalAlloc, Layout, System};
 use std::io::{Write, stderr};
 use std::str::FromStr;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 use futures::{StreamExt, TryStreamExt};
@@ -21,33 +20,9 @@ use sqlx::PgPool;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use tokio::time::timeout;
 
-struct Allocator;
-
-static LIVE: AtomicUsize = AtomicUsize::new(0);
-static PEAK: AtomicUsize = AtomicUsize::new(0);
-
-// Every allocation and matching deallocation contributes its exact layout.
-// No other state is published through the counter; relaxed operations suffice.
-unsafe impl GlobalAlloc for Allocator {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        // SAFETY: the allocator receives System's unchanged layout contract.
-        let ptr = unsafe { System.alloc(layout) };
-        if !ptr.is_null() {
-            let before = LIVE.fetch_add(layout.size(), Ordering::Relaxed);
-            PEAK.fetch_max(before.saturating_add(layout.size()), Ordering::Relaxed);
-        }
-        ptr
-    }
-
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        LIVE.fetch_sub(layout.size(), Ordering::Relaxed);
-        // SAFETY: pointer and layout are forwarded from the matching allocation.
-        unsafe { System.dealloc(ptr, layout) };
-    }
-}
-
-#[global_allocator]
-static ALLOCATOR: Allocator = Allocator;
+#[path = "support/memory.rs"]
+mod memory;
+use memory::{LIVE, PEAK};
 
 #[tokio::test]
 async fn first_event_does_not_retain_the_whole_backlog() {
