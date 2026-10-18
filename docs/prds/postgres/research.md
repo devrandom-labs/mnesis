@@ -638,3 +638,63 @@ Three-pass review:
    cannot be credited to this gate. Linux checks must rerun on the new PR head.
    No additional gate-local test weakness was found in this pass; later capacity,
    fail-closed CI and PG3–PG9 acceptance remain explicitly open.
+
+## Native mutation CI correction (pre-edit)
+
+PR376 mutation job failed in run39105034067:27 candidates,14 missed,13 unviable;
+its unmutated baseline reports0s tests. The job supplies no DATABASE_URL and uses
+`--exclude mnesis-postgres`, yet --in-diff still selects Postgres source. These
+results cannot grade its native cases. Preserve the failed job as evidence,
+start real locked Postgres in the existing Nix environment, remove the exclusion,
+and serialize nextest cases sharing the database. Keep cargo-mutants' measured
+timeouts and existing aggregate verdict. Do not clear red by excluding source,
+ignoring survivors, lowering thresholds or calling timeouts caught mutants.
+
+Budget: at most+45/−10 workflow lines,+1 Nix development-package entry, no Rust,
+new script, runtime, framework or dependency. Use standard initdb/pg_ctl/createdb,
+a fresh Unix-only socket directory and trap cleanup. Run the same in-diff sweep
+locally against real Postgres before retention; review every result under three
+lenses. First verify the Nix-provided executable: `cargo mutants` locally selected
+an unrelated broken~/.cargo/bin plugin (missing historical libiconv). Invoke the
+existing Nix cargo-mutants binary directly, as the archive job already does for
+cargo-nextest; do not install/repair host tools or change personal Cargo state.
+
+Real-database diff sweep completed: unmutated baseline79/79, zero skips,12.613s;
+27 candidates in2m:14 caught,13 unviable, zero missed/timeouts.
+[Individual verdicts and failing cases](evidence/native-mutation.log).
+Three post-run case reviews:
+1. Acceptance: all79 native cases really ran; each of14 viable mutations failed
+   an observable capacity, ordering, byte-bound, listener or wake assertion.
+2. Falsifiers: exact byte equality rejects both excessive and overstrict limits;
+   removed size validation is caught by rejected-tail atomicity. Disabled wake
+   fails the captured-generation deadline; disabled listener fails its exact
+   lifecycle witness. SQL payload-guard mutation remains a separate manual test
+   because cargo-mutants does not rewrite SQL string bodies.
+3. Loopholes: all13 unviable cases fail Rust compilation (missing Default,
+   private constructors or mismatched types); none counts as caught. Fail-fast
+   cancellations after the first genuine assertion are not skipped baseline
+   tests. No survivor, timeout, filter change or reduced assertion was hidden.
+
+CI-only full Darwin gate passes with all12 outputs reused unchanged. Three
+reviews: source/test hash is unchanged; native mutation proof is separately
+recorded; cached checks are not claimed as a fresh execution or Linux proof.
+The first local startup smoke command failed due to quoting added in that
+one-off command, before starting a server. Validate the workflow's exact heredoc
+instead, preserving its original correct `-h ''` argument and cleanup trap.
+
+Exact workflow heredoc validation on the locked default Postgres18.6 succeeded:
+fresh cluster, Unix-only socket, new empty database,27 mutants in2m:14 caught,
+13 compile-unviable,zero missed/timeouts; baseline79/79,zero skips.
+[Output and individual assertions](evidence/fresh-mutation.log). Server stopped
+and temporary cluster directory removed by the original EXIT trap.
+Three post-run case reviews:
+1. Acceptance: the fresh database actually executes all79 native cases; every
+   viable mutant fails. This independently checks the CI startup path and newer
+   locked default server, beyond the earlier17.10 existing-cluster run.
+2. Falsifiers: exact caught-mutant list equals the17.10 run; inspected first
+   failures still exercise capacity/byte-limit/order/listener/generation laws,
+   not connectivity errors or an unavailable database.
+3. Loopholes: zero missed/timeouts and identical13 compiler rejections; compile
+   failures are never counted as caught. Only local diff/output paths changed
+   when extracting the CI heredoc. No test source, assertion, timeout threshold
+   or skip behavior changed. Native Linux CI still must execute the correction.

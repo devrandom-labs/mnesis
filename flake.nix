@@ -493,6 +493,7 @@
             cargo-hakari
             cargo-mutants
             cargo-nextest
+            postgresql
             tree
             cloc
             cargo-edit

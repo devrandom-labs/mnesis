@@ -1,110 +1,98 @@
 # Progress
 
-Persistent PG0–PG9 delivery goal active, no token budget. Repository
-`/Users/joel/orca/workspaces/nexus/main`. Current branch **docs/postgres-prd**
-is in a resolved, **uncommitted merge** of origin/main `6faddb7f` (0.4.0 release).
-Do not discard the index: it preserves upstream audit/release work.
+Persistent PG0–PG9 delivery goal active, no token budget. Repository:
+/Users/joel/orca/workspaces/nexus/main. Read canonical devrandom-research SKILL.md
+and full references/protocol.md after compaction. Authoritative requirements:
+docs/prds/postgres.md and docs/prd-backlog/status.md. Evidence and budgets:
+docs/prds/postgres/research.md and evidence/. Preserve all worktrees/stash.
 
-Authoritative scope/backlog: docs/prds/postgres.md, docs/prd-backlog/status.md.
-Evidence/decisions/budgets: docs/prds/postgres/research.md and evidence/.
-Read full canonical devrandom-research protocol after compaction.
+User requires THREE case reviews AFTER EVERY test run: acceptance/contracts,
+original-defect/realistic-fault falsifiers, then assertions/skips/timing/oracle
+loopholes. Fix meaningful findings and rerun. Never weaken tests or hide outcomes.
 
-Committed/signed initial experiments: 87a9d054 (PRD/contracts), af6a43b4 (rescan
-wake deadline), 755ec8eb (bounded keyset rows), d4624e58 (listener recovery),
-674ed905 (byte-limited pages before body fetch). Each passed all 12 Darwin Nix
-checks. Latest pre-integration run: 1,374 workspace tests/four skips; native 79
-passed/zero skips. Current PR: https://github.com/devrandom-labs/mnesis/pull/376
-(initial read/wake slice). It was opened before incorporating newer main, so
-GitHub currently reports conflicts. Required checks started on its old head.
-
-MERGE IN PROGRESS: main advanced through non-Postgres audit #373/#374 and release
-#375. Preserve Rust 1.99.0 and all 0.4.0 dependencies/contracts. Only conflict was
-AtomicAppend documentation in crates/store/src/import.rs; resolved with BOTH
-new distinct-target/run validation and faithful remote commit uncertainty.
-PRD PG5 follows distinct raw targets; PG6 now uses projection CheckpointStore CAS
-(not unconditional snapshot state); PG7 includes finite consistent ExportSession
-and completed format-2 backups. These are required current owners, PG10 remains
-conditional standalone subscriber checkpoints. Incoming Python feature script
-and existing NixOS Python harness must be replaced with maintained Cargo/Nix
-facilities in PG9, preserving checks. Do not add custom replacement scripts.
-
-Integrated native source already passes fmt/strict Clippy and all79 Postgres
-tests/zero skips in12.568s. LIVE full gate **unified exec session48147**, log
-/tmp/mnesis-postgres-core04-flake.log. Source diff SHA256 relative origin/main
-(under postgres src/tests + core import/store docs) at invocation:
-1bdafa8dde90f40343ba98e283404906edf55dc4f1a0296ca113b4c8ac186153.
-Collect this existing handle, keep Rust unchanged until retained. Then update
-records, stage docs/evidence and commit the merge through normal signed hook;
-push docs/postgres-prd and resolve all protected CI/review failures before squash
-merge. No bypass. Main ruleset7146669 requires Nix Flake Check, Compile-fail tests,
-Feature isolation and resolved threads; native PG CI also required by PRD.
-
-IMPORTANT: uncommitted PG3 experiment safely saved in **stash@{0}** named
-`postgres PG3 outcome experiment before PR376 base integration`, originally on
-branch fix/postgres-outcomes at674ed905. It adds tempfile dev-dep, one private
-Unix transport test file and error/store changes. Original six phase tests: five
-pass, unrelated unique wrongly Conflict fails; actual COMMIT ack suppressed while
-independent connection proves3 durable rows returned ordinary Sqlx Io. Current
-experiment passes9 native outcome tests incl explicit CommitUnknown, cancelled
-ack, stalled hint bound, deferred SQLSTATE mapping40003 vs rollbackcodes and
-sequence-PK collision. Formatting and strict Clippy passed on old base. Logs
-/tmp/mnesis-outcome-original.log and /tmp/mnesis-outcome-tests-premerge.log.
-After merge commit, move fix/postgres-outcomes forward to reconciled base and
-apply (do not blindly pop/drop) stash; preserve both research records during
-expected docs conflicts and keep 0.4.0 lock/dependency versions. Reverify all PG3
-against newbase. Import/snapshot outcome reuse and wrapper propagation remain
-required; no full PG3 gate yet. No PG3 source is in current PR376.
-
-PG4 and all PG5–PG9 implementation/delivery still required. Migration candidate
-must use scoped close-on-drop connection and SQLx locks/transactions, no outer
-transaction outliving migrator unlock. Measure long incompressible key index
-limit; never replace identity with probabilistic hash. Audit advisory event-listener
-5.4.1: existing SQLx/wake uses Event<()> heap listeners; compatible patched>=5.4.2
-must be assessed PG9, no new ignore. Locked Nixpkgs cargo-hack is0.6.45; upstream
-supported --each-feature --no-dev-deps is candidate replacement for Python feature
-script, not implemented. No framework/tooling/runtime/Python addition authorized.
-
-Postgres17.10 running: cluster/tmp/mnesis-postgres-pg0, socket/tmp, port55432,
-DBmnesis_pg0; DATABASE_URL postgres:///mnesis_pg0?host=/tmp&port=55432. Serial tests
-only, shared TRUNCATE fixtures. Native commands use explicit Git Nix flake path,
-blank shellHook/filter optional rust-analyzer, exact command in research. No
-merge/publication/clean registry-consumer evidence yet; goal must stay active.
-
-USER STEERING: After every test run, review cases THREE times: acceptance,
-original-defect/realistic-fault falsifiers, then loopholes (assertions/skips/timing).
-Record all three before accepting evidence. Latest79-native run reviewed in
-research: peak-memory witness gap and any-listener cancellation oracle found.
-After collecting current gate, strengthen tests with PEAK tracking and a unique
-pool application name, run native again and perform all3 reviews, then matched
-full gate +3 reviews. Do not skip checks to avoid a rerun. PG3 stash tests also
-need exact EOF cause matching and real wrapper propagation, not just a variant.
-
-UPDATE: session48147 completed successfully (12 checks,1524 passes/four compiler
-exclusions,453.504s). Three case-review passes recorded. The strengthened native
-source passes all79/zero skips (12.654s), with a calibrated freed-allocation peak
-oracle and exact listener identity. Real payload-guard mutant fails; guard was
-restored unchanged. New LIVE full gate **session98721**, log
-/tmp/mnesis-postgres-strong-flake.log, source diff SHA256(relative6faddb7f):
+Root branch docs/postgres-prd, signed headc5a5ac340712970178fec00fcca4297505ab5c64,
+incorporates upstream0.4.0/Rust1.99 release6faddb7f. PR376:
+https://github.com/devrandom-labs/mnesis/pull/376. Initial bounded reads/recovery
+only.79 native tests pass,zero skips; full12 Darwin checks,1524 workspace passes,
+four compiler exclusions. Calibrated peak allocation and exact own-listener
+cancellation witnesses added after three reviews found weaker earlier oracles.
+Source hash relative6faddb7f (adapter src/tests + core docs):
 3f6f3b4697bbaa5d4788b4eb1304f0449c64764f93f88b899bdc844df405087c.
-After it finishes, perform3 reviews, stage records and commit the resolved merge
-through cached normal signed hook. Then pushPR376 and check all required jobs.
 
-To continue useful work while root gate is fixed, isolated checkout created at
-**/private/tmp/mnesis-postgres-outcomes**, branch work/postgres-outcomes. Its HEAD
-is origin/main6faddb7f; the current root read/wake patch is STAGED as its baseline,
-whose Git tree hash is in /tmp/mnesis-postgres-pg3-base-tree. The PG3 stash patch
-was applied on top; only research append conflict was resolved keeping BOTH
-blocks. No experiment was committed there. Extract future PG3-only patch using
-`git diff $(cat /tmp/mnesis-postgres-pg3-base-tree) --binary` from that checkout,
-not `git diff HEAD` (HEAD would include the entire read/wake base again).
-Named original stash remains preserved. Root Rust source is unchanged by this.
+Current root UNCOMMITTED slice: .github/workflows/mutants.yml, flake.nix,
+research and evidence. CI run39105034067 had14 missed mutations because no DB
+was supplied. Do not exclude Postgres to fix it. Workflow now starts fresh native
+Postgres with initdb/pg_ctl/createdb, Unix-only socket, trap cleanup, serialized
+nextest and direct Nix cargo-mutants (personal ~/.cargo/bin plugin is broken).
+Nix devShell adds existing postgresql package. Locked default is18.6; earlier
+native baseline uses17.10. First real17.10 diff sweep27 mutants:14 caught,
+13 compile-unviable,zero missed/timeouts; baseline79/79. Three reviews recorded.
+Fresh workflow-extracted sweep is LIVE unified exec31585, log
+/tmp/mnesis-fresh-mutation.log, output/tmp/mnesis-fresh-mutation/mutants.out.
+Collect results, review three times, verify fresh server stopped/directory gone,
+record evidence. Full root gate85712 completed with all12 outputs reused; no
+new test execution credited. Then signed normal-hook commit/push CI correction
+and resolve all PR376 checks/reviews before protected squash merge. All other
+current PR376 jobs (Nix, compiler, feature, native CI, fuzz, deny, CodeQL) passed
+atc5. Ruleset7146669 has no bypass. Never force main or bypass protected workflow.
 
-PG3 isolated checkout now asserts exact UnexpectedEof source in all phase cases
-and adds a real Counter/JSON repository execute/reload case using existing shared
-test-domain and codec dev facilities. Native fmt/Clippy/all-adapter run LIVE in
-**session41179**, log/tmp/mnesis-pg3-core04-native.log. Expected89cases but record
-actual output. Perform all3 case reviews after completion. Canonical Nix Git
-ref MUST use /private/tmp (not symlink/tmp); attempted/tmp ref was rejected before
-any compilation/test. Root and isolated native tests must stay serial because
-sameDB; root currently runs only DB-free full gate. Native CARGO_TARGET_DIR points
-to root target to reuse existing Cargo artifacts. NoPG3 full gate/PR yet.
+PG3 DELIVERABLE checkout /private/tmp/mnesis-postgres-pg3-delivery, branch
+fix/postgres-outcomes. Base reconciledc5; phase-only changes staged. Signed
+commit currently LIVE unified exec (see /tmp/mnesis-pg3-commit.log).90 native
+cases/zero skips,fmt/strict Clippy and all12 Darwin checks pass (1535 workspace
+passes/four compiler exclusions); phase diff hash:
+3f681b11f5b4c68b9986d70adf952e66c998a774bff3ba0de1c40a581bbcbc1c.
+Rechecked same hash and cached full gate on delivery checkout; three reviews
+recorded. Commit adds CommitUnknown preserving sqlx source; only verified commit
+rollback codes are definite,40003 unknown; unrelated unique failures not Conflict;
+confirmed hints bounded250ms. Scoped Unix backend forwarder suppresses actual
+COMMIT ack, independent control proves durable rows, exact EOF preserved. Typed
+Counter execute/reload reconciles without resubmission. Actual deadlock/SSI and
+PG5/PG6 reuse still required. Push branch, open focused PR (can stack temporarily
+on docs/postgres-prd). After376 squash merge, rebase ONLY phase commit onto new
+main using c5 as old boundary; do not reinclude first PR history. NoPG3 merged yet.
+
+PG3 RESEARCH checkout /private/tmp/mnesis-postgres-outcomes, branch
+work/postgres-outcomes, HEAD6faddb7f; root read/wake baseline staged, tree stored
+/tmp/mnesis-postgres-pg3-base-tree. Preserve original named stash@{0}. Extract
+phase-only diff against that TREE, not HEAD. Delivery patch safely committed
+before dropping any original; no need to drop it at all.
+
+PG4 checkout /private/tmp/mnesis-postgres-schema, branchwork/postgres-schema,
+HEAD6faddb7f, root+phase baseline staged, tree
+/tmp/mnesis-postgres-schema-base-tree. New representation_tests.rs203lines,
+all6 original cases fail against realPG: open readonly performsDDL, unsigned
+version/resume beyondi64, high version append, NUL EventType,5120B raw key.
+Log/tmp/mnesis-pg4-original.log + evidence,three reviews recorded there.
+NoPG4 production changes yet. Add reasoned test panic lint exception before
+Clippy. Budget+700/-200/net500 Rust,+350 SQL,no new engine/framework/dependency
+except supported SQLx migrate. Native hash EXCLUDE USING hash(key WITH =) with
+ON CONFLICT ON CONSTRAINT DO NOTHING supports5120B keys,23P01 duplicate,
+real colliding hashes remain distinct via equality recheck. Candidate native
+streams identity table + compact numeric FK avoids raw-key Btree tuple limit.
+Need actual adapter concurrency/plans/migration evidence before retention.
+NUMERIC(20,0) for fullu64 version,eventtypeBYTEA,xid8text parse preservesu64.
+Native xid index ordering remains uncast. Scoped SQLx migrator connection must
+close_on_drop (failure lock/search_path), no outer transaction beyond unlock.
+Explicit migration API; readonly runtime verifies version/checksum/critical shape;
+unknown newer fails; verified legacy adoption preserves positions. Bootstrap
+owned schema serialized; no second migration engine. Include.sql in Nix source.
+
+PG5–PG9 still REQUIRED: distinct-target/complete-run validation before storage,
+AtomicAppend, snapshots, projection CheckpointStore revision CAS, StreamLister,
+finite ConsistentExporter session and complete format2 CBOR restore, secure TLS,
+lifecycle/operations, actual capacity/30min soak/recovery, migration upgrades,
+fail-closed native CI, docs/minimization, protected merge, release-plz publication,
+clean registry consumer. PG10 conditional. Labcast owns command IDs/dedup/fencing.
+Incoming scripts/check-features.py and NixOS Python testScript must be removed
+through supported Cargo/Nix facilities byPG9, preserving checks. cargo-hack0.6.45
+candidate researched. Assess event-listener5.4.1 advisory patched>=5.4.2; no ignore.
+
+Nix dev profiles: /tmp/mnesis-postgres-shell-199 (Rust1.99, noPG binary),
+/tmp/mnesis-postgres-shell-ci (same +PG18.6). Use nix develop <profile> --command;
+no host installs. Native DB17.10 running cluster/tmp/mnesis-postgres-pg0,
+socket/tmp,port55432. DBs mnesis_pg0, mnesis_pg4, mnesis_pg_mutants isolate tests.
+DATABASE_URL='postgres:///mnesis_pg4?host=/tmp&port=55432'. Tests sharing tables
+must run serially. CARGO_TARGET_DIR root/target can reuse artifacts. /tmp is a
+symlink: Git Nix refs need /private/tmp worktree paths. No merged/publication/
+consumer proof exists; goal must stay active until complete delivery.
