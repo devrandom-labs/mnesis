@@ -1,7 +1,10 @@
+use std::collections::VecDeque;
 use std::num::NonZeroU32;
 use std::sync::Arc;
 
 use bytes::Bytes;
+use futures::StreamExt;
+use futures::stream::{BoxStream, try_unfold};
 use mnesis::{ErrorId, Version};
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::PersistedEnvelope;
@@ -9,10 +12,10 @@ use mnesis_store::error::{AppendError, AppendValidationError};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
 use mnesis_store::wire;
-use mnesis_store::{PendingBatch, PendingEnvelope};
+use mnesis_store::{BatchSize, PendingBatch, PendingEnvelope};
 use mnesis_wake::StreamNotifiers;
-use sqlx::PgPool;
 use sqlx::postgres::PgListener;
+use sqlx::{PgPool, Postgres, QueryBuilder};
 use tokio::task::JoinHandle;
 
 use crate::error::PostgresError;
@@ -33,6 +36,7 @@ const NOTIFY_CHANNEL: &str = "mnesis_events";
 /// is a thin `Arc<Inner>` handle rather than a bare `PgPool`).
 struct Inner {
     pool: PgPool,
+    batch_size: BatchSize,
     /// In-process wake registry. The `LISTEN/NOTIFY` listener task drives it:
     /// every `NOTIFY` becomes a `notifiers.wake(id)`, which rouses both the
     /// per-stream and `$all` armed registrations. Reusing this audited registry
@@ -73,12 +77,13 @@ impl PostgresStore {
     /// `LISTEN/NOTIFY` listener task, and wrap it all in the shared [`Inner`].
     ///
     /// Called by [`from_pool`](Self::from_pool) *after* the schema is ensured.
-    pub(crate) fn assemble(pool: PgPool) -> Self {
+    pub(crate) fn assemble(pool: PgPool, batch_size: BatchSize) -> Self {
         let notifiers = StreamNotifiers::new();
         let listener_task = spawn_listener(pool.clone(), Arc::clone(&notifiers));
         Self {
             inner: Arc::new(Inner {
                 pool,
+                batch_size,
                 notifiers,
                 listener_task,
             }),
@@ -102,18 +107,10 @@ impl PostgresStore {
 /// Spawn the single background task that owns a [`PgListener`] and forwards each
 /// `NOTIFY` into the store's [`StreamNotifiers`].
 ///
-/// # Correctness — this redundant catch-up scan must NOT be optimized away
-///
-/// `PgListener` **auto-reconnects** on connection loss and, per the sqlx 0.8
-/// docs, *"any notifications received while the connection was lost will not be
-/// returned"* — a `NOTIFY` can be silently dropped. This is tolerable ONLY
-/// because [`StreamNotifiers`] drives mnesis-store's arm-before-confirm-rescan
-/// discipline: every `wake()` (and every reopen of the generic live loop)
-/// re-scans the store via `read_stream`/`read_all`, so a dropped `NOTIFY` merely
-/// **delays** a wake until the next scan — it never loses the event. The
-/// `NOTIFY` is a *hint to scan sooner*, never the source of truth. A future
-/// refactor MUST NOT remove that redundant catch-up scan: without it, a dropped
-/// `NOTIFY` would become a lost event.
+/// `PgListener` reconnects but cannot replay notifications lost during an outage.
+/// The adapter's wake registration independently expires to trigger a rescan,
+/// including when a transaction watermark advances without another notification.
+/// Arm-before-confirm still prevents races with hints that do arrive.
 fn spawn_listener(pool: PgPool, notifiers: Arc<StreamNotifiers>) -> JoinHandle<()> {
     tokio::spawn(async move {
         // Obtain a dedicated listener connection from the pool and subscribe.
@@ -125,10 +122,8 @@ fn spawn_listener(pool: PgPool, notifiers: Arc<StreamNotifiers>) -> JoinHandle<(
         if listener.listen(NOTIFY_CHANNEL).await.is_err() {
             return;
         }
-        // `recv()` transparently reconnects on connection loss (dropping any
-        // NOTIFYs sent while disconnected — see the correctness note above). It
-        // only errors when the pool is closed, i.e. the store is being torn
-        // down; exit the loop then so the task ends cleanly.
+        // Reconnection can lose notifications. Other receive errors currently
+        // end this task; registration deadlines keep subscription scans live.
         while let Ok(notification) = listener.recv().await {
             // The payload is the hex-encoded raw stream id. A malformed payload
             // is dropped (see `hex::decode`): a mis-routed wake could rouse the
@@ -474,24 +469,10 @@ impl PostgresStore {
 // `RawEventStore` impl
 // ---------------------------------------------------------------------------
 
-/// Per-stream stream type: owned, `Send`, `'static` iterator-backed stream of
-/// `Result<PersistedEnvelope, PostgresError>`.
-///
-/// Materialized from a `Vec` via `futures::stream::iter`. The whole result set
-/// is fetched eagerly — this is the validation skeleton, not the production
-/// shape (see the plan's `fetch_all` note for the keyset-paginated follow-up).
-type Stream = futures::stream::Iter<std::vec::IntoIter<Result<PersistedEnvelope, PostgresError>>>;
-
-/// `$all` stream type: owned, `Send`, `'static` iterator-backed stream of
-/// `Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>`.
-///
-/// Distinct from [`Stream`] because `$all` items carry the `$all` position
-/// (`PgAllPos`) and the origin [`StreamKey`] beside the envelope, while
-/// per-stream items are the bare `PersistedEnvelope` (the id is the query
-/// argument there). Same eager-fetch caveat as [`Stream`].
-type AllStream = futures::stream::Iter<
-    std::vec::IntoIter<Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>>,
->;
+// One allocation owns each async scan; rows and pool leases are page-bounded.
+type Stream = BoxStream<'static, Result<PersistedEnvelope, PostgresError>>;
+type AllStream =
+    BoxStream<'static, Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>>;
 
 impl RawEventStore for PostgresStore {
     type Error = PostgresError;
@@ -547,103 +528,146 @@ impl RawEventStore for PostgresStore {
         let from_i64 = i64::try_from(from.as_u64())
             .map_err(|_| corrupt(label, "from version exceeds i64::MAX"))?;
 
-        let rows: Vec<EventRow> = sqlx::query_as(
-            "SELECT version, event_type, schema_version, payload, metadata \
-             FROM events \
-             WHERE stream_id = $1 AND version >= $2 \
-             ORDER BY version",
-        )
-        .bind(id.as_bytes())
-        .bind(from_i64)
-        .fetch_all(self.pool())
-        .await
-        .map_err(PostgresError::Sqlx)?;
+        let head: Option<i64> =
+            sqlx::query_scalar("SELECT MAX(version) FROM events WHERE stream_id = $1")
+                .bind(id.as_bytes())
+                .fetch_one(self.pool())
+                .await
+                .map_err(PostgresError::Sqlx)?;
+        let Some(upper) = head else {
+            return Ok(futures::stream::empty().boxed());
+        };
 
-        let envelopes: Vec<Result<PersistedEnvelope, PostgresError>> = rows
-            .into_iter()
-            .map(move |r| row_to_envelope(r, label))
-            .collect();
-        Ok(futures::stream::iter(envelopes))
+        // Appends cannot later insert below this committed head. A fixed upper
+        // bound gives a repeatable finite history without a retained transaction.
+        let limit = self.inner.batch_size.get().to_string();
+        let state = (
+            self.pool().clone(),
+            id.clone(),
+            None,
+            VecDeque::<EventRow>::new(),
+            limit,
+        );
+        Ok(try_unfold(
+            state,
+            move |(pool, key, after, mut rows, page_limit)| async move {
+                if rows.is_empty() {
+                    let mut query = QueryBuilder::<Postgres>::new(
+                        "SELECT version, event_type, schema_version, payload, metadata \
+                         FROM events WHERE stream_id = ",
+                    );
+                    query
+                        .push_bind(key.as_bytes())
+                        .push(" AND version >= ")
+                        .push_bind(from_i64)
+                        .push(" AND version <= ")
+                        .push_bind(upper);
+                    if let Some(position) = after {
+                        query.push(" AND version > ").push_bind(position);
+                    }
+                    query
+                        .push(" ORDER BY version LIMIT ")
+                        .push_bind(&page_limit)
+                        .push("::text::bigint");
+                    rows = query
+                        .build_query_as::<EventRow>()
+                        .fetch_all(&pool)
+                        .await
+                        .map_err(PostgresError::Sqlx)?
+                        .into();
+                }
+                let Some(row) = rows.pop_front() else {
+                    return Ok(None);
+                };
+                let next = row.version;
+                let event = row_to_envelope(row, label)?;
+                Ok(Some((event, (pool, key, Some(next), rows, page_limit))))
+            },
+        )
+        .boxed())
     }
 
     async fn read_all(&self, from: Option<PgAllPos>) -> Result<Self::AllStream, Self::Error> {
-        let label = ErrorId::default();
-
-        // Absence is expressed as SQL NULL, NOT a magic sentinel (CLAUDE rule 3 —
-        // "unknown values must be Option, not sentinels"). `from = None` binds two
-        // NULLs and the `$1::bigint IS NULL` guard short-circuits the resume
-        // predicate, so the read starts from the very beginning. `from = Some`
-        // binds the pair and the row-value comparison applies. One query, no
-        // out-of-band `-1`.
-        let (from_txid, from_seq): (Option<i64>, Option<i64>) = match from {
-            Some(p) => (
-                Some(
-                    i64::try_from(p.txid())
-                        .map_err(|_| corrupt(label, "from txid exceeds i64::MAX"))?,
-                ),
-                Some(
-                    i64::try_from(p.seq())
-                        .map_err(|_| corrupt(label, "from seq exceeds i64::MAX"))?,
-                ),
-            ),
-            None => (None, None),
-        };
-
-        // Way-2 read. TWO predicates, both required for by-construction correctness:
-        //
-        //   1. Watermark `txid < pg_snapshot_xmin(pg_current_snapshot())` — never
-        //      consume a row whose writing txn (or any older still-in-flight txn)
-        //      hasn't settled, so no smaller `(txid, seq)` can appear *after* a
-        //      larger one is delivered. This is what makes the live `$all` gap-free.
-        //
-        //   2. Exclusive resume `$1::bigint IS NULL OR (txid::text::bigint, global_seq)
-        //      > ($1, $2)` — `Ord`-based strict-after when resuming, unbounded-below
-        //      when starting fresh; matches `PgAllPos`'s lexicographic `derive(Ord)`.
-        //
-        // `ORDER BY (txid, global_seq)` is native xid8/bigint ascending — the same
-        // order `PgAllPos` sorts by (xid8 is an unsigned 64-bit, non-wrapping count).
-        //
-        // SQL note: `xid8` has no direct cast to `bigint`; `txid::text::bigint`
-        // round-trips it (valid while the xid8 value ≤ `i64::MAX`, i.e. effectively
-        // forever). `pg_snapshot_xmin(...)` returns `xid8`, so the watermark
-        // comparison `txid < pg_snapshot_xmin(...)` stays native (no cast). The
-        // `::text::bigint` cast defeats the `events_watermark_idx` for the resume
-        // predicate — acceptable for the validation skeleton (materialize-all). For
-        // a later keyset-paginated cursor, bind the resume position back *to* `xid8`
-        // (`WHERE (txid, global_seq) > ($1::text::xid8, $2)`) rather than casting
-        // the column down to `bigint`.
-        let rows: Vec<AllEventRow> = sqlx::query_as(
-            "SELECT stream_id, txid::text::bigint AS txid, global_seq, \
-                    version, event_type, schema_version, payload, metadata \
-             FROM events \
-             WHERE ($1::bigint IS NULL OR (txid::text::bigint, global_seq) > ($1, $2)) \
-               AND txid < pg_snapshot_xmin(pg_current_snapshot()) \
-             ORDER BY txid, global_seq",
-        )
-        .bind(from_txid)
-        .bind(from_seq)
-        .fetch_all(self.pool())
-        .await
-        .map_err(PostgresError::Sqlx)?;
-
-        let tagged: Vec<Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>> = rows
-            .into_iter()
-            .map(move |r| {
-                // Label each row's corruption error with ITS OWN stream id
-                // (available per row) — not the empty outer `label`, which is
-                // only meaningful for the stream-less pre-fetch conversions.
-                let stream = StreamKey::from_bytes(r.stream_id);
-                let row_label = ErrorId::from_display(&stream);
-                let txid =
-                    u64::try_from(r.txid).map_err(|_| corrupt(row_label, "txid out of range"))?;
-                let seq = u64::try_from(r.global_seq)
-                    .map_err(|_| corrupt(row_label, "global_seq <= 0 or out of range"))?;
-                // `r.event` is the flattened `EventRow` — reuse the single rebuild path.
-                let env = row_to_envelope(r.event, row_label)?;
-                Ok((PgAllPos::new(txid, seq), stream, env))
+        let start = from
+            .map(|position| {
+                i64::try_from(position.seq())
+                    .map(|seq| (position.txid(), seq))
+                    .map_err(|_| corrupt(ErrorId::default(), "from seq exceeds i64::MAX"))
             })
-            .collect();
-        Ok(futures::stream::iter(tagged))
+            .transpose()?;
+
+        // Every transaction below this cutoff has already settled. Later
+        // commits cannot extend this scan, and no old row can appear behind it.
+        let upper: String =
+            sqlx::query_scalar("SELECT pg_snapshot_xmin(pg_current_snapshot())::text")
+                .fetch_one(self.pool())
+                .await
+                .map_err(PostgresError::Sqlx)?;
+        let state = (
+            self.pool().clone(),
+            start,
+            VecDeque::<AllEventRow>::new(),
+            upper,
+            self.inner.batch_size.get().to_string(),
+        );
+        Ok(try_unfold(
+            state,
+            move |(pool, after, mut rows, ceiling, page_limit)| {
+                async move {
+                    if rows.is_empty() {
+                        let mut query = QueryBuilder::<Postgres>::new(
+                            "SELECT stream_id, txid::text::bigint AS txid, global_seq, \
+                         version, event_type, schema_version, payload, metadata \
+                         FROM events WHERE txid < ",
+                        );
+                        query.push_bind(&ceiling).push("::text::xid8");
+                        if let Some((transaction, sequence)) = after {
+                            query
+                                .push(" AND (txid, global_seq) > (")
+                                .push_bind(transaction.to_string())
+                                .push("::text::xid8, ")
+                                .push_bind(sequence)
+                                .push(")");
+                        }
+                        // Qualify the native column: the output alias is bigint.
+                        query
+                            .push(" ORDER BY events.txid, global_seq LIMIT ")
+                            .push_bind(&page_limit)
+                            .push("::text::bigint");
+                        rows = query
+                            .build_query_as::<AllEventRow>()
+                            .fetch_all(&pool)
+                            .await
+                            .map_err(PostgresError::Sqlx)?
+                            .into();
+                    }
+                    let Some(row) = rows.pop_front() else {
+                        return Ok(None);
+                    };
+                    let stream = StreamKey::from_bytes(row.stream_id);
+                    let row_label = ErrorId::from_display(&stream);
+                    let txid = u64::try_from(row.txid)
+                        .map_err(|_| corrupt(row_label, "txid out of range"))?;
+                    let seq = u64::try_from(row.global_seq)
+                        .map_err(|_| corrupt(row_label, "global_seq out of range"))?;
+                    if seq == 0 {
+                        return Err(corrupt(row_label, "global_seq is zero"));
+                    }
+                    let event = row_to_envelope(row.event, row_label)?;
+                    Ok(Some((
+                        (PgAllPos::new(txid, seq), stream, event),
+                        (
+                            pool,
+                            Some((txid, row.global_seq)),
+                            rows,
+                            ceiling,
+                            page_limit,
+                        ),
+                    )))
+                }
+            },
+        )
+        .boxed())
     }
 }
 

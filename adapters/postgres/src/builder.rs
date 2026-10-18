@@ -1,3 +1,4 @@
+use mnesis_store::BatchSize;
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 
@@ -29,7 +30,18 @@ impl PostgresStore {
     ///
     /// Returns [`PostgresError::Sqlx`] if the schema DDL fails.
     pub async fn from_pool(pool: PgPool) -> Result<Self, PostgresError> {
+        Self::from_pool_with_batch_size(pool, BatchSize::DEFAULT).await
+    }
+
+    /// Build from a shared pool with a validated maximum resident row count.
+    ///
+    /// # Errors
+    /// Returns [`PostgresError::Sqlx`] if schema creation fails.
+    pub async fn from_pool_with_batch_size(
+        pool: PgPool,
+        batch_size: BatchSize,
+    ) -> Result<Self, PostgresError> {
         ensure_schema(&pool).await?;
-        Ok(Self::assemble(pool))
+        Ok(Self::assemble(pool, batch_size))
     }
 }
