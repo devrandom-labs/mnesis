@@ -60,3 +60,21 @@ maintenance before retrying. Foreign `public.events` views are rejected and
 preserved. Never rewrite an applied migration checksum. Future snapshot and
 projection capabilities can share raw key identity; a key alone does not prove
 that an event stream exists.
+
+## Atomic writes
+
+The `import` feature implements `AtomicAppend` and the existing blanket importer.
+It validates every route, version run and row size before storage, then checks
+all heads before any key or event write. One transaction covers every target.
+Success returns the highest position; empty input touches no database. This
+preserves transaction delivery order even when a batch follows another stream's
+concurrent predecessor. A definite failure commits no event or new key.
+
+A lost COMMIT acknowledgement returns `CommitUnknown` with the SQLx source.
+A caller timeout can occur after the whole batch committed. Reload committed
+history before deciding what to do; never infer rollback or retry safety from
+that timeout. Command reconciliation and deduplication remain application-owned.
+A native stream/version race reports the observed committed head after rollback;
+if that observation fails, the original database error remains a store error.
+All local wakes precede one bounded native-hint deadline for the whole batch.
+The completion PRD still tracks required import, recovery and capacity evidence.

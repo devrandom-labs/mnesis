@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.78s
+────────────
+ Nextest run ID bdcfbdb3-8684-4c9d-9f0c-ced28a743f1c with nextest profile: default
+    Starting 2 tests across 1 binary (19 tests skipped)
+        PASS [   3.047s] (1/2) mnesis-postgres::outcome_tests real_deadlock_aborts_the_atomic_writer_without_optimistic_reclassification
+  stdout ───
+
+    running 1 test
+    test real_deadlock_aborts_the_atomic_writer_without_optimistic_reclassification ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 3.04s
+
+  stderr ───
+    native option parsing elapsed=694.958µs
+
+        PASS [  21.633s] (2/2) mnesis-postgres::outcome_tests real_serialization_failure_preserves_definite_rejection_and_no_owned_event
+  stdout ───
+
+    running 1 test
+    test real_serialization_failure_preserves_definite_rejection_and_no_owned_event ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 21.62s
+
+  stderr ───
+    native option parsing elapsed=531.958µs
+
+────────────
+     Summary [  24.682s] 2 tests run: 2 passed, 19 skipped

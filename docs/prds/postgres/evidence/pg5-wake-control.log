@@ -1,0 +1,35 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-pg5-wake-control.uMdGY8/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.84s
+────────────
+ Nextest run ID 6680967d-4dfd-418c-89fb-036c7bf6e0bf with nextest profile: default
+    Starting 1 test across 11 binaries (138 tests skipped)
+        FAIL [   0.209s] (1/1) mnesis-postgres::outcome_tests every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+  stdout ───
+
+    running 1 test
+    test every_local_atomic_target_wakes_before_the_first_native_hint_finishes ... FAILED
+
+    failures:
+
+    failures:
+        every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.19s
+
+  stderr ───
+
+    thread 'every_local_atomic_target_wakes_before_the_first_native_hint_finishes' (96668630) panicked at adapters/postgres/tests/outcome_tests.rs:854:9:
+    every stream and global wait must already be ready while native hints are blocked
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.219s] 1 test run: 0 passed, 1 failed, 138 skipped
+        FAIL [   0.209s] (1/1) mnesis-postgres::outcome_tests every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+error: test run failed

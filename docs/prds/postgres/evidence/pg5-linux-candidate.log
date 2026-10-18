@@ -1,0 +1,1652 @@
+warning: Git tree '/private/tmp/mnesis-postgres-atomic' has uncommitted changes
+these 5 derivations will be built:
+  /nix/store/v6wf4qqm04v3nb4fmbn84vha4w8syb0i-Cargo.toml.drv
+  /nix/store/28kmfs8sbfyq0234lsilf3w70xbvk9jk-source.drv
+  /nix/store/69bss1k929l04b4xbh9w0wxpd46wcmwm-mnesis-deps-0.4.0.drv
+  /nix/store/kc0n3y0v5dldllqfgk6irh7n8sq0hnkx-mnesis-postgres-tests-0.4.0.drv
+  /nix/store/9c75cp45bkb4zkmscvkrpppax4vaapi7-mnesis-postgres-integration.drv
+building '/nix/store/v6wf4qqm04v3nb4fmbn84vha4w8syb0i-Cargo.toml.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+building '/nix/store/v6wf4qqm04v3nb4fmbn84vha4w8syb0i-Cargo.toml.drv'...
+copying 1 paths...
+copying path '/nix/store/gd3m2b4fmpa4n59r8zxxkcdn4bdcbisa-Cargo.toml' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/28kmfs8sbfyq0234lsilf3w70xbvk9jk-source.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+building '/nix/store/28kmfs8sbfyq0234lsilf3w70xbvk9jk-source.drv'...
+copying 1 paths...
+copying path '/nix/store/chhp2w8wdna2x19vld1q73vxy6ibcq9b-source' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/69bss1k929l04b4xbh9w0wxpd46wcmwm-mnesis-deps-0.4.0.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+building '/nix/store/69bss1k929l04b4xbh9w0wxpd46wcmwm-mnesis-deps-0.4.0.drv'...
+mnesis-deps> cargoArtifacts not set, will not reuse any cargo artifacts
+mnesis-deps> Running phase: unpackPhase
+mnesis-deps> unpacking source archive /nix/store/chhp2w8wdna2x19vld1q73vxy6ibcq9b-source
+mnesis-deps> source root is source
+mnesis-deps> Running phase: patchPhase
+mnesis-deps> Executing configureCargoCommonVars
+mnesis-deps> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-deps> Running phase: configurePhase
+mnesis-deps> will append /build/source/.cargo-home/config.toml with contents of /nix/store/kjl1yizam0zc2fn2408kvy0aqk1q7m8l-vendor-cargo-deps/config.toml
+mnesis-deps> default configurePhase, nothing to do
+mnesis-deps> Running phase: buildPhase
+mnesis-deps> +++ command cargo --version
+mnesis-deps> cargo 1.99.0 (5f94df478 2026-08-27)
+mnesis-deps> +++ command cargo check --release --locked --all-targets
+mnesis-deps>    Compiling proc-macro2 v1.0.107
+mnesis-deps>    Compiling quote v1.0.47
+mnesis-deps>    Compiling unicode-ident v1.0.24
+mnesis-deps>    Compiling syn v2.0.119
+mnesis-deps>    Compiling libc v0.2.189
+mnesis-deps>    Compiling serde_core v1.0.229
+mnesis-deps>    Compiling syn v3.0.3
+mnesis-deps>    Compiling serde v1.0.229
+mnesis-deps>    Compiling serde_derive v1.0.229
+mnesis-deps>    Compiling synstructure v0.13.2
+mnesis-deps>    Compiling zerofrom-derive v0.1.7
+mnesis-deps>    Compiling yoke-derive v0.8.2
+mnesis-deps>    Compiling zerovec-derive v0.11.3
+mnesis-deps>    Compiling displaydoc v0.2.6
+mnesis-deps>    Compiling parking_lot_core v0.9.12
+mnesis-deps>    Compiling version_check v0.9.5
+mnesis-deps>     Checking cfg-if v1.0.4
+mnesis-deps>    Compiling crossbeam-utils v0.8.22
+mnesis-deps>    Compiling generic-array v0.14.7
+mnesis-deps>    Compiling getrandom v0.4.3
+mnesis-deps>    Compiling zmij v1.0.23
+mnesis-deps>    Compiling icu_properties_data v2.2.0
+mnesis-deps>    Compiling icu_normalizer_data v2.2.0
+mnesis-deps>    Compiling serde_json v1.0.151
+mnesis-deps>    Compiling futures-macro v0.3.33
+mnesis-deps>    Compiling tokio-macros v2.7.1
+mnesis-deps>    Compiling autocfg v1.5.1
+mnesis-deps>    Compiling num-traits v0.2.19
+mnesis-deps>    Compiling typenum v1.20.1
+mnesis-deps>    Compiling tracing-attributes v0.1.31
+mnesis-deps>    Compiling zerofrom v0.1.8
+mnesis-deps>    Compiling stable_deref_trait v1.2.1
+mnesis-deps>    Compiling yoke v0.8.3
+mnesis-deps>    Compiling zerocopy v0.8.55
+mnesis-deps>    Compiling smallvec v1.15.2
+mnesis-deps>    Compiling zerovec v0.11.6
+mnesis-deps>    Compiling zerocopy-derive v0.8.55
+mnesis-deps>    Compiling semver v1.0.28
+mnesis-deps>    Compiling thiserror v2.0.19
+mnesis-deps>    Compiling rustc_version v0.4.1
+mnesis-deps>    Compiling pin-project-lite v0.2.17
+mnesis-deps>    Compiling thiserror-impl v2.0.19
+mnesis-deps>    Compiling futures-core v0.3.33
+mnesis-deps>    Compiling tinystr v0.8.3
+mnesis-deps>    Compiling httparse v1.10.1
+mnesis-deps>    Compiling litemap v0.8.2
+mnesis-deps>    Compiling writeable v0.6.3
+mnesis-deps>    Compiling scopeguard v1.2.0
+mnesis-deps>    Compiling lock_api v0.4.14
+mnesis-deps>    Compiling icu_locale_core v2.2.0
+mnesis-deps>    Compiling potential_utf v0.1.5
+mnesis-deps>    Compiling zerotrie v0.2.4
+mnesis-deps>    Compiling futures-sink v0.3.33
+mnesis-deps>    Compiling utf8_iter v1.0.4
+mnesis-deps>    Compiling itoa v1.0.18
+mnesis-deps>    Compiling once_cell v1.21.4
+mnesis-deps>    Compiling bytes v1.12.1
+mnesis-deps>    Compiling memchr v2.8.3
+mnesis-deps>    Compiling icu_collections v2.2.0
+mnesis-deps>    Compiling futures-channel v0.3.33
+mnesis-deps>    Compiling icu_provider v2.2.0
+mnesis-deps>    Compiling parking_lot v0.12.5
+mnesis-deps>    Compiling errno v0.3.14
+mnesis-deps>    Compiling signal-hook-registry v1.4.8
+mnesis-deps>    Compiling block-buffer v0.10.4
+mnesis-deps>    Compiling crypto-common v0.1.7
+mnesis-deps>    Compiling mio v1.2.2
+mnesis-deps>    Compiling socket2 v0.6.5
+mnesis-deps>    Compiling futures-task v0.3.33
+mnesis-deps>    Compiling slab v0.4.12
+mnesis-deps>    Compiling futures-io v0.3.33
+mnesis-deps>    Compiling futures-util v0.3.33
+mnesis-deps>    Compiling tokio v1.53.1
+mnesis-deps>    Compiling icu_normalizer v2.2.0
+mnesis-deps>    Compiling icu_properties v2.2.0
+mnesis-deps>    Compiling digest v0.10.7
+mnesis-deps>    Compiling curve25519-dalek v4.1.3
+mnesis-deps>    Compiling target-triple v1.0.1
+mnesis-deps>    Compiling equivalent v1.0.2
+mnesis-deps>    Compiling idna_adapter v1.2.2
+mnesis-deps>    Compiling tracing-core v0.1.36
+mnesis-deps>    Compiling cpufeatures v0.2.17
+mnesis-deps>    Compiling allocator-api2 v0.2.21
+mnesis-deps>    Compiling foldhash v0.2.0
+mnesis-deps>    Compiling percent-encoding v2.3.2
+mnesis-deps>    Compiling rand_core v0.10.1
+mnesis-deps>    Compiling log v0.4.33
+mnesis-deps>    Compiling tracing v0.1.44
+mnesis-deps>    Compiling form_urlencoded v1.2.2
+mnesis-deps>    Compiling hashbrown v0.16.1
+mnesis-deps>    Compiling sha2 v0.10.9
+mnesis-deps>    Compiling idna v1.1.0
+mnesis-deps>    Compiling concurrent-queue v2.5.0
+mnesis-deps>    Compiling equator-macro v0.4.2
+mnesis-deps>    Compiling crc-catalog v2.5.0
+mnesis-deps>    Compiling parking v2.2.1
+mnesis-deps>    Compiling hashbrown v0.17.1
+mnesis-deps>    Compiling indexmap v2.14.0
+mnesis-deps>    Compiling event-listener v5.4.1
+mnesis-deps>    Compiling crc v3.4.0
+mnesis-deps>    Compiling url v2.5.8
+mnesis-deps>    Compiling hashlink v0.11.1
+mnesis-deps>    Compiling crossbeam-queue v0.3.13
+mnesis-deps>    Compiling tokio-stream v0.1.19
+mnesis-deps>    Compiling futures-intrusive v0.5.0
+mnesis-deps>    Compiling either v1.16.0
+mnesis-deps>    Compiling base64 v0.22.1
+mnesis-deps>    Compiling sqlx-core v0.9.0
+mnesis-deps>    Compiling http v1.4.2
+mnesis-deps>    Compiling try-lock v0.2.5
+mnesis-deps>    Compiling winnow v1.0.4
+mnesis-deps>    Compiling toml_parser v1.1.2+spec-1.1.0
+mnesis-deps>    Compiling want v0.3.1
+mnesis-deps>    Compiling http-body v1.1.0
+mnesis-deps>    Compiling getrandom v0.2.17
+mnesis-deps>    Compiling toml_datetime v1.1.1+spec-1.1.0
+mnesis-deps>    Compiling serde_spanned v1.1.1
+mnesis-deps>    Compiling toml_writer v1.1.2+spec-1.1.0
+mnesis-deps>    Compiling atomic-waker v1.1.2
+mnesis-deps>    Compiling httpdate v1.0.3
+mnesis-deps>    Compiling signature v2.2.0
+mnesis-deps>    Compiling subtle v2.6.1
+mnesis-deps>    Compiling zeroize v1.9.0
+mnesis-deps>    Compiling ed25519 v2.2.3
+mnesis-deps>    Compiling hyper v1.11.0
+mnesis-deps>    Compiling toml v1.1.3+spec-1.1.0
+mnesis-deps>    Compiling rand_core v0.6.4
+mnesis-deps>    Compiling equator v0.4.2
+mnesis-deps>    Compiling futures-executor v0.3.33
+mnesis-deps>    Compiling termcolor v1.4.1
+mnesis-deps>    Compiling dissimilar v1.0.11
+mnesis-deps>    Compiling glob v0.3.4
+mnesis-deps>    Compiling tower-service v0.3.3
+mnesis-deps>    Compiling regex-syntax v0.8.11
+mnesis-deps>    Compiling regex-automata v0.4.16
+mnesis-deps>    Compiling hyper-util v0.1.20
+mnesis-deps>    Compiling trybuild v1.0.118
+mnesis-deps>    Compiling futures v0.3.33
+mnesis-deps>    Compiling aligned-vec v0.6.4
+mnesis-deps>    Compiling ed25519-dalek v2.2.0
+mnesis-deps>    Compiling workspace-hack v0.1.0 (/build/source/crates/workspace-hack)
+mnesis-deps>    Compiling mnesis-macros v0.4.0 (/build/source/crates/macros)
+mnesis-deps>    Compiling mnesis v0.4.0 (/build/source/crates/mnesis)
+mnesis-deps>    Compiling ptr_meta_derive v0.3.1
+mnesis-deps>     Checking arrayvec v0.7.8
+mnesis-deps>    Compiling bytecheck_derive v0.8.2
+mnesis-deps>    Compiling crc32c v0.6.8
+mnesis-deps>    Compiling munge_macro v0.4.7
+mnesis-deps>    Compiling rkyv_derive v0.8.17
+mnesis-deps>    Compiling bytemuck_derive v1.11.0
+mnesis-deps>    Compiling minicbor-derive v0.19.5
+mnesis-deps>    Compiling mnesis-store v0.4.0 (/build/source/crates/store)
+mnesis-deps>     Checking ptr_meta v0.3.1
+mnesis-deps>     Checking rancor v0.1.2
+mnesis-deps>     Checking simdutf8 v0.1.5
+mnesis-deps>     Checking bytecheck v0.8.2
+mnesis-deps>     Checking bitflags v2.13.1
+mnesis-deps>    Compiling mnesis-wake v0.4.0 (/build/source/crates/wake)
+mnesis-deps>     Checking rend v0.5.4
+mnesis-deps>     Checking munge v0.4.7
+mnesis-deps>    Compiling rustix v1.1.4
+mnesis-deps>     Checking rkyv v0.8.17
+mnesis-deps>     Checking minicbor v2.2.3
+mnesis-deps>     Checking bytemuck v1.25.2
+mnesis-deps>     Checking linux-raw-sys v0.12.1
+mnesis-deps>    Compiling crossbeam-epoch v0.9.20
+mnesis-deps>     Checking fastrand v2.5.0
+mnesis-deps>     Checking tempfile v3.27.0
+mnesis-deps>    Compiling getrandom v0.3.4
+mnesis-deps>    Compiling find-msvc-tools v0.1.9
+mnesis-deps>    Compiling shlex v2.0.1
+mnesis-deps>    Compiling cc v1.3.0
+mnesis-deps>     Checking compare v0.0.6
+mnesis-deps>     Checking twox-hash v2.1.3
+mnesis-deps>     Checking byteorder-lite v0.1.0
+mnesis-deps>     Checking xxhash-rust v0.8.18
+mnesis-deps>     Checking sfa v1.0.0
+mnesis-deps>     Checking lz4_flex v0.13.1
+mnesis-deps>     Checking interval-heap v0.0.5
+mnesis-deps>     Checking crossbeam-skiplist v0.1.3
+mnesis-deps>     Checking quick_cache v0.6.24
+mnesis-deps>     Checking spin v0.9.9
+mnesis-deps>    Compiling enum_dispatch v0.3.13
+mnesis-deps>     Checking varint-rs v2.2.1
+mnesis-deps>     Checking hashbrown v0.14.5
+mnesis-deps>    Compiling mnesis-inmemory v0.4.0 (/build/source/adapters/inmemory)
+mnesis-deps>     Checking self_cell v1.3.0
+mnesis-deps>     Checking byteview v0.10.1
+mnesis-deps>     Checking rustc-hash v2.1.3
+mnesis-deps>     Checking lsm-tree v3.1.8
+mnesis-deps>     Checking dashmap v6.2.1
+mnesis-deps>     Checking flume v0.12.0
+mnesis-deps>    Compiling mnesis-fjall v0.4.0 (/build/source/adapters/fjall)
+mnesis-deps>     Checking rand_core v0.9.5
+mnesis-deps>     Checking fjall v3.1.8
+mnesis-deps>    Compiling cfg_aliases v0.2.2
+mnesis-deps>    Compiling crossbeam-deque v0.8.7
+mnesis-deps>    Compiling nix v0.31.3
+mnesis-deps>     Checking ppv-lite86 v0.2.21
+mnesis-deps>     Checking wait-timeout v0.2.1
+mnesis-deps>     Checking fnv v1.0.7
+mnesis-deps>    Compiling anyhow v1.0.104
+mnesis-deps>     Checking bit-vec v0.8.0
+mnesis-deps>    Compiling rayon-core v1.13.0
+mnesis-deps>     Checking quick-error v1.2.3
+mnesis-deps>     Checking rusty-fork v0.3.1
+mnesis-deps>     Checking bit-set v0.8.0
+mnesis-deps>     Checking rand_chacha v0.9.0
+mnesis-deps>     Checking rand_xorshift v0.4.0
+mnesis-deps>     Checking rand v0.9.5
+mnesis-deps>    Compiling codspeed v5.0.1
+mnesis-deps>     Checking half v2.7.1
+mnesis-deps>     Checking approx v0.5.1
+mnesis-deps>     Checking anstyle v1.0.14
+mnesis-deps>     Checking unarray v0.1.4
+mnesis-deps>     Checking ciborium-io v0.2.2
+mnesis-deps>     Checking plotters-backend v0.3.7
+mnesis-deps>     Checking clap_lex v1.1.0
+mnesis-deps>     Checking clap_builder v4.6.2
+mnesis-deps>     Checking plotters-svg v0.3.7
+mnesis-deps>     Checking ciborium-ll v0.2.2
+mnesis-deps>     Checking proptest v1.11.0
+mnesis-deps>     Checking statrs v0.18.0
+mnesis-deps>     Checking itertools v0.10.5
+mnesis-deps>    Compiling hybrid-array v0.4.15
+mnesis-deps>     Checking same-file v1.0.6
+mnesis-deps>     Checking colored v3.1.1
+mnesis-deps>     Checking cast v0.3.0
+mnesis-deps>     Checking criterion-plot v0.5.0
+mnesis-deps>     Checking walkdir v2.5.0
+mnesis-deps>     Checking rayon v1.12.0
+mnesis-deps>     Checking ciborium v0.2.2
+mnesis-deps>     Checking plotters v0.3.7
+mnesis-deps>     Checking clap v4.6.4
+mnesis-deps>     Checking regex v1.13.1
+mnesis-deps>     Checking tinytemplate v1.2.1
+mnesis-deps>     Checking is-terminal v0.4.17
+mnesis-deps>    Compiling cmov v0.5.4
+mnesis-deps>     Checking oorandom v11.1.5
+mnesis-deps>     Checking anes v0.1.6
+mnesis-deps>    Compiling mnesis-store-testing v0.4.0 (/build/source/crates/store-testing)
+mnesis-deps>    Compiling codspeed-criterion-compat v5.0.1
+mnesis-deps>     Checking codspeed-criterion-compat-walltime v5.0.1
+mnesis-deps>    Compiling ctutils v0.4.3
+mnesis-deps>    Compiling crypto-common v0.2.2
+mnesis-deps>    Compiling block-buffer v0.12.1
+mnesis-deps>    Compiling digest v0.11.3
+mnesis-deps>    Compiling tinyvec_macros v0.1.1
+mnesis-deps>    Compiling tinyvec v1.12.0
+mnesis-deps>     Checking lazy_static v1.5.0
+mnesis-deps>     Checking tower-layer v0.3.3
+mnesis-deps>    Compiling mnesis-test-domains v0.0.0 (/build/source/crates/test-domains)
+mnesis-deps>     Checking sharded-slab v0.1.7
+mnesis-deps>    Compiling unicode-normalization v0.1.25
+mnesis-deps>    Compiling hmac v0.13.0
+mnesis-deps>     Checking matchers v0.2.0
+mnesis-deps>     Checking tracing-log v0.2.0
+mnesis-deps>    Compiling chacha20 v0.10.2
+mnesis-deps>    Compiling cpufeatures v0.3.0
+mnesis-deps>     Checking thread_local v1.1.10
+mnesis-deps>     Checking console v0.16.4
+mnesis-deps>    Compiling unicode-properties v0.1.4
+mnesis-deps>     Checking nu-ansi-term v0.50.3
+mnesis-deps>     Checking similar v2.7.0
+mnesis-deps>     Checking sync_wrapper v1.0.2
+mnesis-deps>    Compiling unicode-bidi v0.3.18
+mnesis-deps>    Compiling stringprep v0.1.5
+mnesis-deps>     Checking insta v1.48.0
+mnesis-deps>     Checking tracing-subscriber v0.3.23
+mnesis-deps>    Compiling sha2 v0.11.1
+mnesis-deps>    Compiling rand v0.10.3
+mnesis-deps>    Compiling hkdf v0.13.0
+mnesis-deps>    Compiling md-5 v0.11.0
+mnesis-deps>    Compiling blake3 v1.8.5
+mnesis-deps>     Checking http-body-util v0.1.4
+mnesis-deps>    Compiling atoi v2.0.0
+mnesis-deps>    Compiling strsim v0.11.1
+mnesis-deps>    Compiling ident_case v1.0.1
+mnesis-deps>     Checking ryu v1.0.23
+mnesis-deps>    Compiling whoami v2.1.3
+mnesis-deps>    Compiling dotenvy v0.15.7
+mnesis-deps>    Compiling hex v0.4.3
+mnesis-deps>    Compiling byteorder v1.5.0
+mnesis-deps>     Checking mime v0.3.17
+mnesis-deps>    Compiling sqlx-postgres v0.9.0
+mnesis-deps>     Checking axum-core v0.5.6
+mnesis-deps>     Checking serde_urlencoded v0.7.1
+mnesis-deps>    Compiling darling_core v0.20.11
+mnesis-deps>     Checking tower v0.5.3
+mnesis-deps>     Checking serde_path_to_error v0.1.20
+mnesis-deps>     Checking constant_time_eq v0.4.2
+mnesis-deps>     Checking matchit v0.8.4
+mnesis-deps>    Compiling mnesis-example-signed-events v0.0.0 (/build/source/examples/signed-events)
+mnesis-deps>    Compiling mnesis-example-projection-tokio v0.0.0 (/build/source/examples/projection-tokio)
+mnesis-deps>     Checking arrayref v0.3.9
+mnesis-deps>    Compiling mnesis-example-axum-todos v0.0.0 (/build/source/examples/axum-todos)
+mnesis-deps>    Compiling mnesis-example-fjall-end-to-end v0.0.0 (/build/source/examples/fjall-end-to-end)
+mnesis-deps>    Compiling heck v0.5.0
+mnesis-deps>    Compiling sqlx-macros-core v0.9.0
+mnesis-deps>     Checking axum v0.8.9
+mnesis-deps>    Compiling darling_macro v0.20.11
+mnesis-deps>     Checking tower-http v0.7.0
+mnesis-deps>     Checking proptest-state-machine v0.8.0
+mnesis-deps>     Checking uuid v1.24.0
+mnesis-deps>     Checking static_assertions v1.1.0
+mnesis-deps>    Compiling darling v0.20.11
+mnesis-deps>    Compiling sqlx-macros v0.9.0
+mnesis-deps>    Compiling mnesis-example-store-and-kernel v0.0.0 (/build/source/examples/store-and-kernel)
+mnesis-deps>    Compiling mnesis-example-store-inmemory v0.0.0 (/build/source/examples/store-inmemory)
+mnesis-deps>    Compiling embassy-executor v0.10.0
+mnesis-deps>    Compiling litrs v1.0.0
+mnesis-deps>    Compiling mnesis-cross-crate-test v0.0.0 (/build/source/crates/macros/tests/cross_crate_test)
+mnesis-deps>    Compiling mnesis-example-inmemory v0.0.0 (/build/source/examples/inmemory)
+mnesis-deps>    Compiling mnesis-example-closing-the-books v0.0.0 (/build/source/examples/closing-the-books)
+mnesis-deps>    Compiling mnesis-postgres v0.4.0 (/build/source/adapters/postgres)
+mnesis-deps>    Compiling mutants-gate v0.0.0 (/build/source/mutants-gate)
+mnesis-deps>    Compiling mnesis-nostd-smoketest v0.0.0 (/build/source/crates/nostd-smoketest)
+mnesis-deps>    Compiling mnesis-wake-nostd v0.4.0 (/build/source/crates/wake-nostd)
+mnesis-deps>    Compiling document-features v0.2.12
+mnesis-deps>     Checking sqlx v0.9.0
+mnesis-deps>    Compiling embassy-executor-macros v0.8.0
+mnesis-deps>     Checking embassy-executor-timer-queue v0.1.0
+mnesis-deps>     Checking critical-section v1.2.0
+mnesis-deps>     Checking cordyceps v0.3.4
+mnesis-deps>     Finished `release` profile [optimized] target(s) in 1m 17s
+mnesis-deps> +++ command cargo build --release --locked
+mnesis-deps>    Compiling serde_core v1.0.229
+mnesis-deps>    Compiling libc v0.2.189
+mnesis-deps>    Compiling cfg-if v1.0.4
+mnesis-deps>    Compiling serde v1.0.229
+mnesis-deps>    Compiling pin-project-lite v0.2.17
+mnesis-deps>    Compiling smallvec v1.15.2
+mnesis-deps>    Compiling bytes v1.12.1
+mnesis-deps>    Compiling typenum v1.20.1
+mnesis-deps>    Compiling itoa v1.0.18
+mnesis-deps>    Compiling futures-core v0.3.33
+mnesis-deps>    Compiling zerofrom v0.1.8
+mnesis-deps>    Compiling once_cell v1.21.4
+mnesis-deps>    Compiling scopeguard v1.2.0
+mnesis-deps>    Compiling stable_deref_trait v1.2.1
+mnesis-deps>    Compiling yoke v0.8.3
+mnesis-deps>    Compiling lock_api v0.4.14
+mnesis-deps>    Compiling log v0.4.33
+mnesis-deps>    Compiling memchr v2.8.3
+mnesis-deps>    Compiling parking_lot_core v0.9.12
+mnesis-deps>    Compiling zerovec v0.11.6
+mnesis-deps>    Compiling futures-sink v0.3.33
+mnesis-deps>    Compiling futures-channel v0.3.33
+mnesis-deps>    Compiling crossbeam-utils v0.8.22
+mnesis-deps>    Compiling tracing-core v0.1.36
+mnesis-deps>    Compiling slab v0.4.12
+mnesis-deps>    Compiling futures-io v0.3.33
+mnesis-deps>    Compiling futures-task v0.3.33
+mnesis-deps>    Compiling futures-util v0.3.33
+mnesis-deps>    Compiling tinystr v0.8.3
+mnesis-deps>    Compiling parking_lot v0.12.5
+mnesis-deps>    Compiling errno v0.3.14
+mnesis-deps>    Compiling writeable v0.6.3
+mnesis-deps>    Compiling litemap v0.8.2
+mnesis-deps>    Compiling icu_locale_core v2.2.0
+mnesis-deps>    Compiling generic-array v0.14.7
+mnesis-deps>    Compiling signal-hook-registry v1.4.8
+mnesis-deps>    Compiling zmij v1.0.23
+mnesis-deps>    Compiling tracing v0.1.44
+mnesis-deps>    Compiling potential_utf v0.1.5
+mnesis-deps>    Compiling zerotrie v0.2.4
+mnesis-deps>    Compiling socket2 v0.6.5
+mnesis-deps>    Compiling mio v1.2.2
+mnesis-deps>    Compiling utf8_iter v1.0.4
+mnesis-deps>    Compiling equivalent v1.0.2
+mnesis-deps>    Compiling rand_core v0.10.1
+mnesis-deps>    Compiling icu_collections v2.2.0
+mnesis-deps>    Compiling tokio v1.53.1
+mnesis-deps>    Compiling serde_json v1.0.151
+mnesis-deps>    Compiling icu_provider v2.2.0
+mnesis-deps>    Compiling percent-encoding v2.3.2
+mnesis-deps>    Compiling foldhash v0.2.0
+mnesis-deps>    Compiling allocator-api2 v0.2.21
+mnesis-deps>    Compiling hashbrown v0.16.1
+mnesis-deps>    Compiling icu_properties_data v2.2.0
+mnesis-deps>    Compiling icu_normalizer_data v2.2.0
+mnesis-deps>    Compiling getrandom v0.4.3
+mnesis-deps>    Compiling thiserror v2.0.19
+mnesis-deps>    Compiling crypto-common v0.1.7
+mnesis-deps>    Compiling block-buffer v0.10.4
+mnesis-deps>    Compiling http v1.4.2
+mnesis-deps>    Compiling http-body v1.1.0
+mnesis-deps>    Compiling digest v0.10.7
+mnesis-deps>    Compiling icu_normalizer v2.2.0
+mnesis-deps>    Compiling icu_properties v2.2.0
+mnesis-deps>    Compiling form_urlencoded v1.2.2
+mnesis-deps>    Compiling idna_adapter v1.2.2
+mnesis-deps>    Compiling concurrent-queue v2.5.0
+mnesis-deps>    Compiling cpufeatures v0.2.17
+mnesis-deps>    Compiling parking v2.2.1
+mnesis-deps>    Compiling tower-service v0.3.3
+mnesis-deps>    Compiling event-listener v5.4.1
+mnesis-deps>    Compiling sha2 v0.10.9
+mnesis-deps>    Compiling idna v1.1.0
+mnesis-deps>    Compiling hashbrown v0.17.1
+mnesis-deps>    Compiling crc-catalog v2.5.0
+mnesis-deps>    Compiling try-lock v0.2.5
+mnesis-deps>    Compiling want v0.3.1
+mnesis-deps>    Compiling crc v3.4.0
+mnesis-deps>    Compiling indexmap v2.14.0
+mnesis-deps>    Compiling num-traits v0.2.19
+mnesis-deps>    Compiling httparse v1.10.1
+mnesis-deps>    Compiling url v2.5.8
+mnesis-deps>    Compiling hashlink v0.11.1
+mnesis-deps>    Compiling tokio-stream v0.1.19
+mnesis-deps>    Compiling futures-intrusive v0.5.0
+mnesis-deps>    Compiling futures-executor v0.3.33
+mnesis-deps>    Compiling crossbeam-queue v0.3.13
+mnesis-deps>    Compiling equator v0.4.2
+mnesis-deps>    Compiling either v1.16.0
+mnesis-deps>    Compiling arrayvec v0.7.8
+mnesis-deps>    Compiling base64 v0.22.1
+mnesis-deps>    Compiling regex-syntax v0.8.11
+mnesis-deps>    Compiling atomic-waker v1.1.2
+mnesis-deps>    Compiling httpdate v1.0.3
+mnesis-deps>    Compiling winnow v1.0.4
+mnesis-deps>    Compiling toml_parser v1.1.2+spec-1.1.0
+mnesis-deps>    Compiling hyper v1.11.0
+mnesis-deps>    Compiling regex-automata v0.4.16
+mnesis-deps>    Compiling sqlx-core v0.9.0
+mnesis-deps>    Compiling aligned-vec v0.6.4
+mnesis-deps>    Compiling futures v0.3.33
+mnesis-deps>    Compiling getrandom v0.2.17
+mnesis-deps>    Compiling serde_spanned v1.1.1
+mnesis-deps>    Compiling toml_datetime v1.1.1+spec-1.1.0
+mnesis-deps>    Compiling zeroize v1.9.0
+mnesis-deps>    Compiling subtle v2.6.1
+mnesis-deps>    Compiling toml_writer v1.1.2+spec-1.1.0
+mnesis-deps>    Compiling signature v2.2.0
+mnesis-deps>    Compiling ed25519 v2.2.3
+mnesis-deps>    Compiling toml v1.1.3+spec-1.1.0
+mnesis-deps>    Compiling curve25519-dalek v4.1.3
+mnesis-deps>    Compiling rand_core v0.6.4
+mnesis-deps>    Compiling target-triple v1.0.1
+mnesis-deps>    Compiling mnesis v0.4.0 (/build/source/crates/mnesis)
+mnesis-deps>    Compiling hyper-util v0.1.20
+mnesis-deps>    Compiling dissimilar v1.0.11
+mnesis-deps>    Compiling termcolor v1.4.1
+mnesis-deps>    Compiling glob v0.3.4
+mnesis-deps>    Compiling trybuild v1.0.118
+mnesis-deps>    Compiling zerocopy v0.8.55
+mnesis-deps>    Compiling ed25519-dalek v2.2.0
+mnesis-deps>    Compiling workspace-hack v0.1.0 (/build/source/crates/workspace-hack)
+mnesis-deps>    Compiling mnesis-store v0.4.0 (/build/source/crates/store)
+mnesis-deps>    Compiling minicbor v2.2.3
+mnesis-deps>    Compiling crc32c v0.6.8
+mnesis-deps>    Compiling bitflags v2.13.1
+mnesis-deps>    Compiling mnesis-wake v0.4.0 (/build/source/crates/wake)
+mnesis-deps>    Compiling linux-raw-sys v0.12.1
+mnesis-deps>    Compiling rustix v1.1.4
+mnesis-deps>    Compiling crossbeam-epoch v0.9.20
+mnesis-deps>    Compiling hybrid-array v0.4.15
+mnesis-deps>    Compiling fastrand v2.5.0
+mnesis-deps>    Compiling byteorder-lite v0.1.0
+mnesis-deps>    Compiling xxhash-rust v0.8.18
+mnesis-deps>    Compiling compare v0.0.6
+mnesis-deps>    Compiling twox-hash v2.1.3
+mnesis-deps>    Compiling lz4_flex v0.13.1
+mnesis-deps>    Compiling interval-heap v0.0.5
+mnesis-deps>    Compiling sfa v1.0.0
+mnesis-deps>    Compiling tempfile v3.27.0
+mnesis-deps>    Compiling crossbeam-skiplist v0.1.3
+mnesis-deps>    Compiling quick_cache v0.6.24
+mnesis-deps>    Compiling spin v0.9.9
+mnesis-deps>    Compiling varint-rs v2.2.1
+mnesis-deps>    Compiling self_cell v1.3.0
+mnesis-deps>    Compiling hashbrown v0.14.5
+mnesis-deps>    Compiling rustc-hash v2.1.3
+mnesis-deps>    Compiling byteview v0.10.1
+mnesis-deps>    Compiling cmov v0.5.4
+mnesis-deps>    Compiling ctutils v0.4.3
+mnesis-deps>    Compiling lsm-tree v3.1.8
+mnesis-deps>    Compiling dashmap v6.2.1
+mnesis-deps>    Compiling flume v0.12.0
+mnesis-deps>    Compiling block-buffer v0.12.1
+mnesis-deps>    Compiling crypto-common v0.2.2
+mnesis-deps>    Compiling mnesis-fjall v0.4.0 (/build/source/adapters/fjall)
+mnesis-deps>    Compiling digest v0.11.3
+mnesis-deps>    Compiling fjall v3.1.8
+mnesis-deps>    Compiling tinyvec_macros v0.1.1
+mnesis-deps>    Compiling tower-layer v0.3.3
+mnesis-deps>    Compiling mnesis-inmemory v0.4.0 (/build/source/adapters/inmemory)
+mnesis-deps>    Compiling tinyvec v1.12.0
+mnesis-deps>    Compiling sync_wrapper v1.0.2
+mnesis-deps>    Compiling sqlx-postgres v0.9.0
+mnesis-deps>    Compiling unicode-normalization v0.1.25
+mnesis-deps>    Compiling hmac v0.13.0
+mnesis-deps>    Compiling http-body-util v0.1.4
+mnesis-deps>    Compiling chacha20 v0.10.2
+mnesis-deps>    Compiling cpufeatures v0.3.0
+mnesis-deps>    Compiling mime v0.3.17
+mnesis-deps>    Compiling ryu v1.0.23
+mnesis-deps>    Compiling unicode-bidi v0.3.18
+mnesis-deps>    Compiling lazy_static v1.5.0
+mnesis-deps>    Compiling unicode-properties v0.1.4
+mnesis-deps>    Compiling stringprep v0.1.5
+mnesis-deps>    Compiling sharded-slab v0.1.7
+mnesis-deps>    Compiling serde_urlencoded v0.7.1
+mnesis-deps>    Compiling axum-core v0.5.6
+mnesis-deps>    Compiling sqlx-macros-core v0.9.0
+mnesis-deps>    Compiling sha2 v0.11.1
+mnesis-deps>    Compiling rand v0.10.3
+mnesis-deps>    Compiling hkdf v0.13.0
+mnesis-deps>    Compiling tower v0.5.3
+mnesis-deps>    Compiling md-5 v0.11.0
+mnesis-deps>    Compiling matchers v0.2.0
+mnesis-deps>    Compiling atoi v2.0.0
+mnesis-deps>    Compiling tracing-log v0.2.0
+mnesis-deps>    Compiling serde_path_to_error v0.1.20
+mnesis-deps>    Compiling thread_local v1.1.10
+mnesis-deps>    Compiling hex v0.4.3
+mnesis-deps>    Compiling whoami v2.1.3
+mnesis-deps>    Compiling matchit v0.8.4
+mnesis-deps>    Compiling arrayref v0.3.9
+mnesis-deps>    Compiling dotenvy v0.15.7
+mnesis-deps>    Compiling constant_time_eq v0.4.2
+mnesis-deps>    Compiling byteorder v1.5.0
+mnesis-deps>    Compiling nu-ansi-term v0.50.3
+mnesis-deps>    Compiling tracing-subscriber v0.3.23
+mnesis-deps>    Compiling blake3 v1.8.5
+mnesis-deps>    Compiling axum v0.8.9
+mnesis-deps>    Compiling sqlx-macros v0.9.0
+mnesis-deps>    Compiling tower-http v0.7.0
+mnesis-deps>    Compiling uuid v1.24.0
+mnesis-deps>    Compiling mnesis-store-testing v0.4.0 (/build/source/crates/store-testing)
+mnesis-deps>    Compiling mnesis-test-domains v0.0.0 (/build/source/crates/test-domains)
+mnesis-deps>    Compiling mnesis-example-axum-todos v0.0.0 (/build/source/examples/axum-todos)
+mnesis-deps>    Compiling sqlx v0.9.0
+mnesis-deps>    Compiling mnesis-example-fjall-end-to-end v0.0.0 (/build/source/examples/fjall-end-to-end)
+mnesis-deps>    Compiling mnesis-example-projection-tokio v0.0.0 (/build/source/examples/projection-tokio)
+mnesis-deps>    Compiling mnesis-example-signed-events v0.0.0 (/build/source/examples/signed-events)
+mnesis-deps>    Compiling mnesis-macros v0.4.0 (/build/source/crates/macros)
+mnesis-deps>    Compiling mnesis-postgres v0.4.0 (/build/source/adapters/postgres)
+mnesis-deps>    Compiling mnesis-example-inmemory v0.0.0 (/build/source/examples/inmemory)
+mnesis-deps>    Compiling mnesis-cross-crate-test v0.0.0 (/build/source/crates/macros/tests/cross_crate_test)
+mnesis-deps>    Compiling mnesis-example-store-inmemory v0.0.0 (/build/source/examples/store-inmemory)
+mnesis-deps>    Compiling mnesis-nostd-smoketest v0.0.0 (/build/source/crates/nostd-smoketest)
+mnesis-deps>    Compiling mutants-gate v0.0.0 (/build/source/mutants-gate)
+mnesis-deps>    Compiling mnesis-example-closing-the-books v0.0.0 (/build/source/examples/closing-the-books)
+mnesis-deps>    Compiling mnesis-wake-nostd v0.4.0 (/build/source/crates/wake-nostd)
+mnesis-deps>    Compiling mnesis-example-store-and-kernel v0.0.0 (/build/source/examples/store-and-kernel)
+mnesis-deps>     Finished `release` profile [optimized] target(s) in 1m 33s
+mnesis-deps> buildPhase completed in 2 minutes 52 seconds
+mnesis-deps> Running phase: checkPhase
+mnesis-deps> +++ command cargo test --release --locked --no-run
+mnesis-deps>    Compiling ptr_meta v0.3.1
+mnesis-deps>    Compiling rancor v0.1.2
+mnesis-deps>    Compiling simdutf8 v0.1.5
+mnesis-deps>    Compiling bytecheck v0.8.2
+mnesis-deps>    Compiling rend v0.5.4
+mnesis-deps>    Compiling munge v0.4.7
+mnesis-deps>    Compiling rkyv v0.8.17
+mnesis-deps>    Compiling bytemuck v1.25.2
+mnesis-deps>    Compiling mnesis-store v0.4.0 (/build/source/crates/store)
+mnesis-deps>    Compiling mnesis-wake v0.4.0 (/build/source/crates/wake)
+mnesis-deps>    Compiling getrandom v0.3.4
+mnesis-deps>    Compiling rand_core v0.9.5
+mnesis-deps>    Compiling mnesis-inmemory v0.4.0 (/build/source/adapters/inmemory)
+mnesis-deps>    Compiling mnesis-fjall v0.4.0 (/build/source/adapters/fjall)
+mnesis-deps>    Compiling ppv-lite86 v0.2.21
+mnesis-deps>    Compiling wait-timeout v0.2.1
+mnesis-deps>    Compiling quick-error v1.2.3
+mnesis-deps>    Compiling fnv v1.0.7
+mnesis-deps>    Compiling bit-vec v0.8.0
+mnesis-deps>    Compiling bit-set v0.8.0
+mnesis-deps>    Compiling rusty-fork v0.3.1
+mnesis-deps>    Compiling rand_chacha v0.9.0
+mnesis-deps>    Compiling rand v0.9.5
+mnesis-deps>    Compiling rand_xorshift v0.4.0
+mnesis-deps>    Compiling unarray v0.1.4
+mnesis-deps>    Compiling proptest v1.11.0
+mnesis-deps>    Compiling crossbeam-deque v0.8.7
+mnesis-deps>    Compiling half v2.7.1
+mnesis-deps>    Compiling approx v0.5.1
+mnesis-deps>    Compiling ciborium-io v0.2.2
+mnesis-deps>    Compiling plotters-backend v0.3.7
+mnesis-deps>    Compiling anstyle v1.0.14
+mnesis-deps>    Compiling clap_lex v1.1.0
+mnesis-deps>    Compiling clap_builder v4.6.2
+mnesis-deps>    Compiling plotters-svg v0.3.7
+mnesis-deps>    Compiling ciborium-ll v0.2.2
+mnesis-deps>    Compiling statrs v0.18.0
+mnesis-deps>    Compiling rayon-core v1.13.0
+mnesis-deps>    Compiling nix v0.31.3
+mnesis-deps>    Compiling anyhow v1.0.104
+mnesis-deps>    Compiling itertools v0.10.5
+mnesis-deps>    Compiling cast v0.3.0
+mnesis-deps>    Compiling same-file v1.0.6
+mnesis-deps>    Compiling colored v3.1.1
+mnesis-deps>    Compiling codspeed v5.0.1
+mnesis-deps>    Compiling walkdir v2.5.0
+mnesis-deps>    Compiling criterion-plot v0.5.0
+mnesis-deps>    Compiling rayon v1.12.0
+mnesis-deps>    Compiling mnesis-store-testing v0.4.0 (/build/source/crates/store-testing)
+mnesis-deps>    Compiling ciborium v0.2.2
+mnesis-deps>    Compiling plotters v0.3.7
+mnesis-deps>    Compiling clap v4.6.4
+mnesis-deps>    Compiling regex v1.13.1
+mnesis-deps>    Compiling tinytemplate v1.2.1
+mnesis-deps>    Compiling is-terminal v0.4.17
+mnesis-deps>    Compiling oorandom v11.1.5
+mnesis-deps>    Compiling anes v0.1.6
+mnesis-deps>    Compiling codspeed-criterion-compat-walltime v5.0.1
+mnesis-deps>    Compiling codspeed-criterion-compat v5.0.1
+mnesis-deps>    Compiling mnesis-test-domains v0.0.0 (/build/source/crates/test-domains)
+mnesis-deps>    Compiling linux-raw-sys v0.12.1
+mnesis-deps>    Compiling arrayvec v0.7.8
+mnesis-deps>    Compiling mnesis v0.4.0 (/build/source/crates/mnesis)
+mnesis-deps>    Compiling rustix v1.1.4
+mnesis-deps>    Compiling crc32c v0.6.8
+mnesis-deps>    Compiling minicbor v2.2.3
+mnesis-deps>    Compiling console v0.16.4
+mnesis-deps>    Compiling similar v2.7.0
+mnesis-deps>    Compiling fastrand v2.5.0
+mnesis-deps>    Compiling tempfile v3.27.0
+mnesis-deps>    Compiling insta v1.48.0
+mnesis-deps>    Compiling static_assertions v1.1.0
+mnesis-deps>    Compiling sqlx v0.9.0
+mnesis-deps>    Compiling embassy-executor-timer-queue v0.1.0
+mnesis-deps>    Compiling critical-section v1.2.0
+mnesis-deps>    Compiling cordyceps v0.3.4
+mnesis-deps>    Compiling embassy-executor v0.10.0
+mnesis-deps>    Compiling mnesis-example-axum-todos v0.0.0 (/build/source/examples/axum-todos)
+mnesis-deps>    Compiling mnesis-example-signed-events v0.0.0 (/build/source/examples/signed-events)
+mnesis-deps>    Compiling mnesis-example-projection-tokio v0.0.0 (/build/source/examples/projection-tokio)
+mnesis-deps>    Compiling mnesis-example-fjall-end-to-end v0.0.0 (/build/source/examples/fjall-end-to-end)
+mnesis-deps>    Compiling proptest-state-machine v0.8.0
+mnesis-deps>    Compiling mnesis-postgres v0.4.0 (/build/source/adapters/postgres)
+mnesis-deps>    Compiling mnesis-wake-nostd v0.4.0 (/build/source/crates/wake-nostd)
+mnesis-deps>    Compiling mnesis-example-closing-the-books v0.0.0 (/build/source/examples/closing-the-books)
+mnesis-deps>    Compiling mnesis-example-inmemory v0.0.0 (/build/source/examples/inmemory)
+mnesis-deps>    Compiling mnesis-example-store-inmemory v0.0.0 (/build/source/examples/store-inmemory)
+mnesis-deps>    Compiling mutants-gate v0.0.0 (/build/source/mutants-gate)
+mnesis-deps>    Compiling mnesis-example-store-and-kernel v0.0.0 (/build/source/examples/store-and-kernel)
+mnesis-deps>    Compiling mnesis-macros v0.4.0 (/build/source/crates/macros)
+mnesis-deps>    Compiling mnesis-cross-crate-test v0.0.0 (/build/source/crates/macros/tests/cross_crate_test)
+mnesis-deps>    Compiling mnesis-nostd-smoketest v0.0.0 (/build/source/crates/nostd-smoketest)
+mnesis-deps>    Compiling workspace-hack v0.1.0 (/build/source/crates/workspace-hack)
+mnesis-deps>     Finished `release` profile [optimized] target(s) in 37.19s
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis-3eb3d07ace1de206)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_cross_crate_test-c586ab6ab0696f23)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_example_axum_todos-520695f506586abc)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_axum_todos-24528b7bd6cddf67)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_closing_the_books-a8ddd9462d37a435)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_example_fjall_end_to_end-46a28be3e45f8d23)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_fjall_end_to_end-dff79409be5c78d1)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_inmemory-48ff85b2ad28aae6)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_example_projection_tokio-331ae017b108c68e)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_projection_tokio-e50e764793c71956)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_example_signed_events-e56a5bc08783bf30)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_signed_events-e52084f6d95a8de7)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_store_and_kernel-df37ccbf1eead848)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mnesis_example_store_inmemory-bc673b8fe69f514b)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_fjall-5f57f3abd51a7ba9)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_inmemory-dd0f1cbbb62ca6b8)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_macros-4c24dbb18aafd642)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_nostd_smoketest-adac705c249d7868)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_postgres-dd146415685e06c7)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_store-6c3dae9c6f9e258f)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_store_testing-d346e47fda8fdb30)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_test_domains-df450df1aa192773)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_wake-fb59c40fcff7af0b)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/mnesis_wake_nostd-c9612ed83fcf5aff)
+mnesis-deps>   Executable unittests src/main.rs (target/release/deps/mutants_gate-1358dfeb064b3e93)
+mnesis-deps>   Executable unittests src/lib.rs (target/release/deps/workspace_hack-55d0b561a7be3757)
+mnesis-deps> checkPhase completed in 37 seconds
+mnesis-deps> Running phase: installPhase
+mnesis-deps> no previous artifacts found, compressing and installing full archive of target to /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0/target.tar.zst
+mnesis-deps> /*stdin*\            : 24.01%   (  1.26 GiB =>    309 MiB, /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0/target.tar.zst)
+mnesis-deps> Running phase: fixupPhase
+mnesis-deps> shrinking RPATHs of ELF executables and libraries in /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0
+mnesis-deps> checking for references to /build/ in /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0...
+mnesis-deps> patching script interpreter paths in /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0
+copying 1 paths...
+copying path '/nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/kc0n3y0v5dldllqfgk6irh7n8sq0hnkx-mnesis-postgres-tests-0.4.0.drv' on 'ssh-ng://builder@linux-builder'...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+copying 1 paths...
+copying path '/nix/store/1ipgnda1fs5dzaxxp6bvapf6smn1pid0-source' to 'ssh-ng://builder@linux-builder'...
+building '/nix/store/kc0n3y0v5dldllqfgk6irh7n8sq0hnkx-mnesis-postgres-tests-0.4.0.drv'...
+mnesis-postgres-tests> Running phase: unpackPhase
+mnesis-postgres-tests> unpacking source archive /nix/store/1ipgnda1fs5dzaxxp6bvapf6smn1pid0-source
+mnesis-postgres-tests> source root is source
+mnesis-postgres-tests> Running phase: patchPhase
+mnesis-postgres-tests> Executing configureCargoCommonVars
+mnesis-postgres-tests> decompressing cargo artifacts from /nix/store/ssxpa2p277fws2fzq4hq291kycl1768p-mnesis-deps-0.4.0/target.tar.zst to target
+mnesis-postgres-tests> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-postgres-tests> Running phase: configurePhase
+mnesis-postgres-tests> will append /build/source/.cargo-home/config.toml with contents of /nix/store/kjl1yizam0zc2fn2408kvy0aqk1q7m8l-vendor-cargo-deps/config.toml
+mnesis-postgres-tests> default configurePhase, nothing to do
+mnesis-postgres-tests> Running phase: buildPhase
+mnesis-postgres-tests> +++ command cargo --version
+mnesis-postgres-tests> cargo 1.99.0 (5f94df478 2026-08-27)
+mnesis-postgres-tests> +++ command cargo nextest archive --package mnesis-postgres --all-features --archive-file /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst
+mnesis-postgres-tests>    Compiling proc-macro2 v1.0.107
+mnesis-postgres-tests>    Compiling quote v1.0.47
+mnesis-postgres-tests>    Compiling unicode-ident v1.0.24
+mnesis-postgres-tests>    Compiling syn v2.0.119
+mnesis-postgres-tests>    Compiling libc v0.2.189
+mnesis-postgres-tests>    Compiling serde_core v1.0.229
+mnesis-postgres-tests>    Compiling syn v3.0.3
+mnesis-postgres-tests>    Compiling cfg-if v1.0.4
+mnesis-postgres-tests>    Compiling serde v1.0.229
+mnesis-postgres-tests>    Compiling serde_derive v1.0.229
+mnesis-postgres-tests>    Compiling synstructure v0.13.2
+mnesis-postgres-tests>    Compiling typenum v1.20.1
+mnesis-postgres-tests>    Compiling zerofrom-derive v0.1.7
+mnesis-postgres-tests>    Compiling zerofrom v0.1.8
+mnesis-postgres-tests>    Compiling yoke-derive v0.8.2
+mnesis-postgres-tests>    Compiling stable_deref_trait v1.2.1
+mnesis-postgres-tests>    Compiling yoke v0.8.3
+mnesis-postgres-tests>    Compiling smallvec v1.15.2
+mnesis-postgres-tests>    Compiling zerovec-derive v0.11.3
+mnesis-postgres-tests>    Compiling zerovec v0.11.6
+mnesis-postgres-tests>    Compiling displaydoc v0.2.6
+mnesis-postgres-tests>    Compiling pin-project-lite v0.2.17
+mnesis-postgres-tests>    Compiling futures-core v0.3.33
+mnesis-postgres-tests>    Compiling version_check v0.9.5
+mnesis-postgres-tests>    Compiling generic-array v0.14.7
+mnesis-postgres-tests>    Compiling parking_lot_core v0.9.12
+mnesis-postgres-tests>    Compiling tinystr v0.8.3
+mnesis-postgres-tests>    Compiling itoa v1.0.18
+mnesis-postgres-tests>    Compiling memchr v2.8.3
+mnesis-postgres-tests>    Compiling writeable v0.6.3
+mnesis-postgres-tests>    Compiling scopeguard v1.2.0
+mnesis-postgres-tests>    Compiling litemap v0.8.2
+mnesis-postgres-tests>    Compiling bytes v1.12.1
+mnesis-postgres-tests>    Compiling futures-sink v0.3.33
+mnesis-postgres-tests>    Compiling futures-channel v0.3.33
+mnesis-postgres-tests>    Compiling icu_locale_core v2.2.0
+mnesis-postgres-tests>    Compiling lock_api v0.4.14
+mnesis-postgres-tests>    Compiling zerotrie v0.2.4
+mnesis-postgres-tests>    Compiling potential_utf v0.1.5
+mnesis-postgres-tests>    Compiling icu_properties_data v2.2.0
+mnesis-postgres-tests>    Compiling icu_normalizer_data v2.2.0
+mnesis-postgres-tests>    Compiling utf8_iter v1.0.4
+mnesis-postgres-tests>    Compiling icu_collections v2.2.0
+mnesis-postgres-tests>    Compiling icu_provider v2.2.0
+mnesis-postgres-tests>    Compiling parking_lot v0.12.5
+mnesis-postgres-tests>    Compiling errno v0.3.14
+mnesis-postgres-tests>    Compiling futures-macro v0.3.33
+mnesis-postgres-tests>    Compiling zmij v1.0.23
+mnesis-postgres-tests>    Compiling crossbeam-utils v0.8.22
+mnesis-postgres-tests>    Compiling futures-task v0.3.33
+mnesis-postgres-tests>    Compiling futures-io v0.3.33
+mnesis-postgres-tests>    Compiling slab v0.4.12
+mnesis-postgres-tests>    Compiling futures-util v0.3.33
+mnesis-postgres-tests>    Compiling signal-hook-registry v1.4.8
+mnesis-postgres-tests>    Compiling block-buffer v0.10.4
+mnesis-postgres-tests>    Compiling crypto-common v0.1.7
+mnesis-postgres-tests>    Compiling mio v1.2.2
+mnesis-postgres-tests>    Compiling socket2 v0.6.5
+mnesis-postgres-tests>    Compiling tokio-macros v2.7.1
+mnesis-postgres-tests>    Compiling once_cell v1.21.4
+mnesis-postgres-tests>    Compiling thiserror v2.0.19
+mnesis-postgres-tests>    Compiling serde_json v1.0.151
+mnesis-postgres-tests>    Compiling tokio v1.53.1
+mnesis-postgres-tests>    Compiling digest v0.10.7
+mnesis-postgres-tests>    Compiling icu_normalizer v2.2.0
+mnesis-postgres-tests>    Compiling icu_properties v2.2.0
+mnesis-postgres-tests>    Compiling thiserror-impl v2.0.19
+mnesis-postgres-tests>    Compiling autocfg v1.5.1
+mnesis-postgres-tests>    Compiling rand_core v0.10.1
+mnesis-postgres-tests>    Compiling equivalent v1.0.2
+mnesis-postgres-tests>    Compiling getrandom v0.4.3
+mnesis-postgres-tests>    Compiling num-traits v0.2.19
+mnesis-postgres-tests>    Compiling idna_adapter v1.2.2
+mnesis-postgres-tests>    Compiling tracing-core v0.1.36
+mnesis-postgres-tests>    Compiling cpufeatures v0.2.17
+mnesis-postgres-tests>    Compiling tracing-attributes v0.1.31
+mnesis-postgres-tests>    Compiling foldhash v0.2.0
+mnesis-postgres-tests>    Compiling log v0.4.33
+mnesis-postgres-tests>    Compiling percent-encoding v2.3.2
+mnesis-postgres-tests>    Compiling allocator-api2 v0.2.21
+mnesis-postgres-tests>    Compiling hashbrown v0.16.1
+mnesis-postgres-tests>    Compiling form_urlencoded v1.2.2
+mnesis-postgres-tests>    Compiling tracing v0.1.44
+mnesis-postgres-tests>    Compiling sha2 v0.10.9
+mnesis-postgres-tests>    Compiling idna v1.1.0
+mnesis-postgres-tests>    Compiling concurrent-queue v2.5.0
+mnesis-postgres-tests>    Compiling parking v2.2.1
+mnesis-postgres-tests>    Compiling hashbrown v0.17.1
+mnesis-postgres-tests>    Compiling crc-catalog v2.5.0
+mnesis-postgres-tests>    Compiling crc v3.4.0
+mnesis-postgres-tests>    Compiling indexmap v2.14.0
+mnesis-postgres-tests>    Compiling event-listener v5.4.1
+mnesis-postgres-tests>    Compiling url v2.5.8
+mnesis-postgres-tests>    Compiling hashlink v0.11.1
+mnesis-postgres-tests>    Compiling crossbeam-queue v0.3.13
+mnesis-postgres-tests>    Compiling tokio-stream v0.1.19
+mnesis-postgres-tests>    Compiling futures-intrusive v0.5.0
+mnesis-postgres-tests>    Compiling hybrid-array v0.4.15
+mnesis-postgres-tests>    Compiling either v1.16.0
+mnesis-postgres-tests>    Compiling base64 v0.22.1
+mnesis-postgres-tests>    Compiling sqlx-core v0.9.0
+mnesis-postgres-tests>    Compiling semver v1.0.28
+mnesis-postgres-tests>    Compiling cmov v0.5.4
+mnesis-postgres-tests>    Compiling ctutils v0.4.3
+mnesis-postgres-tests>    Compiling rustc_version v0.4.1
+mnesis-postgres-tests>    Compiling block-buffer v0.12.1
+mnesis-postgres-tests>    Compiling crypto-common v0.2.2
+mnesis-postgres-tests>    Compiling httparse v1.10.1
+mnesis-postgres-tests>    Compiling digest v0.11.3
+mnesis-postgres-tests>    Compiling curve25519-dalek v4.1.3
+mnesis-postgres-tests>    Compiling http v1.4.2
+mnesis-postgres-tests>    Compiling equator-macro v0.4.2
+mnesis-postgres-tests>    Compiling target-triple v1.0.1
+mnesis-postgres-tests>    Compiling winnow v1.0.4
+mnesis-postgres-tests>    Compiling try-lock v0.2.5
+mnesis-postgres-tests>    Compiling want v0.3.1
+mnesis-postgres-tests>    Compiling toml_parser v1.1.2+spec-1.1.0
+mnesis-postgres-tests>    Compiling equator v0.4.2
+mnesis-postgres-tests>    Compiling http-body v1.1.0
+mnesis-postgres-tests>    Compiling futures-executor v0.3.33
+mnesis-postgres-tests>    Compiling getrandom v0.2.17
+mnesis-postgres-tests>    Compiling toml_datetime v1.1.1+spec-1.1.0
+mnesis-postgres-tests>    Compiling serde_spanned v1.1.1
+mnesis-postgres-tests>    Compiling tinyvec_macros v0.1.1
+mnesis-postgres-tests>    Compiling toml_writer v1.1.2+spec-1.1.0
+mnesis-postgres-tests>    Compiling zeroize v1.9.0
+mnesis-postgres-tests>    Compiling subtle v2.6.1
+mnesis-postgres-tests>    Compiling atomic-waker v1.1.2
+mnesis-postgres-tests>    Compiling httpdate v1.0.3
+mnesis-postgres-tests>    Compiling zerocopy v0.8.55
+mnesis-postgres-tests>    Compiling signature v2.2.0
+mnesis-postgres-tests>    Compiling ed25519 v2.2.3
+mnesis-postgres-tests>    Compiling hyper v1.11.0
+mnesis-postgres-tests>    Compiling toml v1.1.3+spec-1.1.0
+mnesis-postgres-tests>    Compiling tinyvec v1.12.0
+mnesis-postgres-tests>    Compiling rand_core v0.6.4
+mnesis-postgres-tests>    Compiling futures v0.3.33
+mnesis-postgres-tests>    Compiling aligned-vec v0.6.4
+mnesis-postgres-tests>    Compiling zerocopy-derive v0.8.55
+mnesis-postgres-tests>    Compiling dissimilar v1.0.11
+mnesis-postgres-tests>    Compiling tower-service v0.3.3
+mnesis-postgres-tests>    Compiling regex-syntax v0.8.11
+mnesis-postgres-tests>    Compiling glob v0.3.4
+mnesis-postgres-tests>    Compiling termcolor v1.4.1
+mnesis-postgres-tests>    Compiling trybuild v1.0.118
+mnesis-postgres-tests>    Compiling regex-automata v0.4.16
+mnesis-postgres-tests>    Compiling hyper-util v0.1.20
+mnesis-postgres-tests>    Compiling ed25519-dalek v2.2.0
+mnesis-postgres-tests>    Compiling unicode-normalization v0.1.25
+mnesis-postgres-tests>    Compiling hmac v0.13.0
+mnesis-postgres-tests>    Compiling chacha20 v0.10.2
+mnesis-postgres-tests>    Compiling cpufeatures v0.3.0
+mnesis-postgres-tests>    Compiling unicode-properties v0.1.4
+mnesis-postgres-tests>    Compiling unicode-bidi v0.3.18
+mnesis-postgres-tests>    Compiling stringprep v0.1.5
+mnesis-postgres-tests>    Compiling sha2 v0.11.1
+mnesis-postgres-tests>    Compiling rand v0.10.3
+mnesis-postgres-tests>    Compiling hkdf v0.13.0
+mnesis-postgres-tests>    Compiling workspace-hack v0.1.0 (/build/source/crates/workspace-hack)
+mnesis-postgres-tests>    Compiling md-5 v0.11.0
+mnesis-postgres-tests>    Compiling atoi v2.0.0
+mnesis-postgres-tests>    Compiling dotenvy v0.15.7
+mnesis-postgres-tests>    Compiling arrayvec v0.7.8
+mnesis-postgres-tests>    Compiling hex v0.4.3
+mnesis-postgres-tests>    Compiling byteorder v1.5.0
+mnesis-postgres-tests>    Compiling whoami v2.1.3
+mnesis-postgres-tests>    Compiling mnesis v0.4.0 (/build/source/crates/mnesis)
+mnesis-postgres-tests>    Compiling bitflags v2.13.1
+mnesis-postgres-tests>    Compiling sqlx-postgres v0.9.0
+mnesis-postgres-tests>    Compiling heck v0.5.0
+mnesis-postgres-tests>    Compiling sqlx-macros-core v0.9.0
+mnesis-postgres-tests>    Compiling mnesis-store v0.4.0 (/build/source/crates/store)
+mnesis-postgres-tests>    Compiling rustix v1.1.4
+mnesis-postgres-tests>    Compiling sqlx-macros v0.9.0
+mnesis-postgres-tests>    Compiling linux-raw-sys v0.12.1
+mnesis-postgres-tests>    Compiling mnesis-postgres v0.4.0 (/build/source/adapters/postgres)
+mnesis-postgres-tests>    Compiling sqlx v0.9.0
+mnesis-postgres-tests>    Compiling mnesis-wake v0.4.0 (/build/source/crates/wake)
+mnesis-postgres-tests>    Compiling fastrand v2.5.0
+mnesis-postgres-tests>    Compiling tempfile v3.27.0
+mnesis-postgres-tests>    Compiling mnesis-store-testing v0.4.0 (/build/source/crates/store-testing)
+mnesis-postgres-tests>    Compiling mnesis-test-domains v0.0.0 (/build/source/crates/test-domains)
+mnesis-postgres-tests>     Finished `test` profile [unoptimized + debuginfo] target(s) in 52.19s
+mnesis-postgres-tests>    Archiving 11 binaries, 1 build script output directory, and 1 standard library to /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst
+mnesis-postgres-tests>     Archived 14 files to /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst in 1.99s
+mnesis-postgres-tests> buildPhase completed in 54 seconds
+mnesis-postgres-tests> Running phase: installPhase
+mnesis-postgres-tests> Running phase: fixupPhase
+mnesis-postgres-tests> shrinking RPATHs of ELF executables and libraries in /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0
+mnesis-postgres-tests> checking for references to /build/ in /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0...
+mnesis-postgres-tests> patching script interpreter paths in /nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0
+copying 1 paths...
+copying path '/nix/store/ycpgc9566nvzlh29pnw4wzbww19mla61-mnesis-postgres-tests-0.4.0' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/9c75cp45bkb4zkmscvkrpppax4vaapi7-mnesis-postgres-integration.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+building '/nix/store/9c75cp45bkb4zkmscvkrpppax4vaapi7-mnesis-postgres-integration.drv'...
+mnesis-postgres-integration> Running phase: unpackPhase
+mnesis-postgres-integration> unpacking source archive /nix/store/1ipgnda1fs5dzaxxp6bvapf6smn1pid0-source
+mnesis-postgres-integration> source root is source
+mnesis-postgres-integration> Running phase: patchPhase
+mnesis-postgres-integration> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-postgres-integration> Running phase: configurePhase
+mnesis-postgres-integration> no configure script, doing nothing
+mnesis-postgres-integration> Running phase: checkPhase
+mnesis-postgres-integration> initializing postgresql
+mnesis-postgres-integration> The files belonging to this database system will be owned by user "nixbld".
+mnesis-postgres-integration> This user must also own the server process.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> The database cluster will be initialized with locale "C".
+mnesis-postgres-integration> The default text search configuration will be set to "english".
+mnesis-postgres-integration> 
+mnesis-postgres-integration> Data page checksums are enabled.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> creating directory /build/postgresql ... ok
+mnesis-postgres-integration> creating subdirectories ... ok
+mnesis-postgres-integration> selecting dynamic shared memory implementation ... posix
+mnesis-postgres-integration> selecting default "max_connections" ... 100
+mnesis-postgres-integration> selecting default "shared_buffers" ... 128MB
+mnesis-postgres-integration> selecting default time zone ... UTC
+mnesis-postgres-integration> creating configuration files ... ok
+mnesis-postgres-integration> running bootstrap script ... ok
+mnesis-postgres-integration> performing post-bootstrap initialization ... ok
+mnesis-postgres-integration> syncing data to disk ... ok
+mnesis-postgres-integration> 
+mnesis-postgres-integration> initdb: warning: enabling "trust" authentication for local connections
+mnesis-postgres-integration> initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> Success. You can now start the database server using:
+mnesis-postgres-integration> 
+mnesis-postgres-integration>     pg_ctl -D /build/postgresql -l logfile start
+mnesis-postgres-integration> 
+mnesis-postgres-integration> starting postgresql
+mnesis-postgres-integration> waiting for server to start....2026-10-18 09:36:12.008 UTC [85] LOG:  starting PostgreSQL 18.6 on aarch64-unknown-linux-gnu, compiled by clang version 21.1.8, 64-bit
+mnesis-postgres-integration> 2026-10-18 09:36:12.012 UTC [85] LOG:  listening on Unix socket "/build/run/postgresql/.s.PGSQL.5432"
+mnesis-postgres-integration> 2026-10-18 09:36:12.030 UTC [91] LOG:  database system was shut down at 2026-10-18 09:36:11 UTC
+mnesis-postgres-integration> 2026-10-18 09:36:12.035 UTC [85] LOG:  database system is ready to accept connections
+mnesis-postgres-integration>  done
+mnesis-postgres-integration> server started
+mnesis-postgres-integration> setting up postgresql
+mnesis-postgres-integration> CREATE ROLE
+mnesis-postgres-integration> CREATE DATABASE
+mnesis-postgres-integration>   Extracting 11 binaries and 1 build script output directory to /build/nextest-archive-CeVzXu
+mnesis-postgres-integration>    Extracted 14 files to /build/nextest-archive-CeVzXu in 0.59s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID c9ff4938-5b18-4018-911f-207bbc1eedb2 with nextest profile: default
+mnesis-postgres-integration>     Starting 125 tests across 11 binaries
+mnesis-postgres-integration>         PASS [   0.002s] (  1/125) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+mnesis-postgres-integration>         PASS [   0.001s] (  2/125) mnesis-postgres error::tests::satisfies_error_send_sync_static
+mnesis-postgres-integration>         PASS [   0.001s] (  3/125) mnesis-postgres hex::tests::decode_accepts_uppercase
+mnesis-postgres-integration>         PASS [   0.001s] (  4/125) mnesis-postgres hex::tests::empty_round_trips
+mnesis-postgres-integration>         PASS [   0.001s] (  5/125) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+mnesis-postgres-integration>         PASS [   0.001s] (  6/125) mnesis-postgres hex::tests::non_hex_char_is_rejected
+mnesis-postgres-integration>         PASS [   0.001s] (  7/125) mnesis-postgres hex::tests::odd_length_is_rejected
+mnesis-postgres-integration>         PASS [   0.001s] (  8/125) mnesis-postgres hex::tests::round_trips_all_byte_values
+mnesis-postgres-integration>         PASS [   0.001s] (  9/125) mnesis-postgres position::tests::accessors_round_trip
+mnesis-postgres-integration>         PASS [   0.001s] ( 10/125) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+mnesis-postgres-integration>         PASS [   4.798s] ( 11/125) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+mnesis-postgres-integration>         PASS [   0.053s] ( 12/125) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+mnesis-postgres-integration> 2026-10-18 09:36:17.678 UTC [162] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:17.679 UTC [162] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.035s] ( 13/125) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+mnesis-postgres-integration>         PASS [   0.095s] ( 14/125) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_duplicate_targets_reject_all
+mnesis-postgres-integration>         PASS [   0.020s] ( 15/125) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_empty_batch_is_noop
+mnesis-postgres-integration> 2026-10-18 09:36:18.350 UTC [235] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:18.350 UTC [235] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.556s] ( 16/125) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_malformed_runs_reject_all
+mnesis-postgres-integration>         PASS [   0.378s] ( 17/125) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+mnesis-postgres-integration>         PASS [   0.027s] ( 18/125) mnesis-postgres::atomic_tests invalid_requests_are_rejected_before_a_closed_pool_is_touched
+mnesis-postgres-integration>         PASS [   0.030s] ( 19/125) mnesis-postgres::atomic_tests readers_cannot_observe_the_staged_prefix
+mnesis-postgres-integration> 2026-10-18 09:36:18.813 UTC [263] ERROR:  native atomic rejection
+mnesis-postgres-integration> 2026-10-18 09:36:18.813 UTC [263] CONTEXT:  PL/pgSQL function atomic_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:18.813 UTC [263] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.039s] ( 20/125) mnesis-postgres::atomic_tests rejected_final_insert_rolls_back_all_events_and_new_keys
+mnesis-postgres-integration>         PASS [   0.027s] ( 21/125) mnesis-postgres::atomic_tests reopen_preserves_every_run_and_the_highest_position
+mnesis-postgres-integration> 2026-10-18 09:36:18.885 UTC [278] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 09:36:18.886 UTC [281] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.033s] ( 22/125) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+mnesis-postgres-integration>         PASS [   0.043s] ( 23/125) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+mnesis-postgres-integration> 2026-10-18 09:36:18.950 UTC [294] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:18.950 UTC [294] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.020s] ( 24/125) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+mnesis-postgres-integration> 2026-10-18 09:36:18.979 UTC [301] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:18.979 UTC [301] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.030s] ( 25/125) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+mnesis-postgres-integration>         PASS [   0.028s] ( 26/125) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+mnesis-postgres-integration>         PASS [   0.021s] ( 27/125) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+mnesis-postgres-integration>         PASS [   0.018s] ( 28/125) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+mnesis-postgres-integration>         PASS [   0.043s] ( 29/125) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+mnesis-postgres-integration>         PASS [   0.039s] ( 30/125) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+mnesis-postgres-integration>         PASS [   0.041s] ( 31/125) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+mnesis-postgres-integration> 2026-10-18 09:36:19.201 UTC [369] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:19.201 UTC [369] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 09:36:19.202 UTC [367] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.032s] ( 32/125) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+mnesis-postgres-integration>         PASS [   0.736s] ( 33/125) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+mnesis-postgres-integration> 2026-10-18 09:36:20.001 UTC [399] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 09:36:20.004 UTC [401] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.004 UTC [401] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.068s] ( 34/125) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [413] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [413] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [413] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [417] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [417] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [417] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [416] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [416] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.070 UTC [416] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [414] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [414] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [414] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [419] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [419] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [419] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [415] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [415] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [415] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [418] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [418] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:20.071 UTC [418] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.071s] ( 35/125) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+mnesis-postgres-integration>         PASS [   0.161s] ( 36/125) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+mnesis-postgres-integration>         PASS [   0.073s] ( 37/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+mnesis-postgres-integration>         PASS [   0.027s] ( 38/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+mnesis-postgres-integration> 2026-10-18 09:36:20.377 UTC [454] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.377 UTC [454] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.041s] ( 39/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+mnesis-postgres-integration>         PASS [   0.045s] ( 40/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+mnesis-postgres-integration>         PASS [   0.029s] ( 41/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+mnesis-postgres-integration>         PASS [   0.030s] ( 42/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+mnesis-postgres-integration> 2026-10-18 09:36:20.484 UTC [478] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.485 UTC [478] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 09:36:20.535 UTC [483] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.535 UTC [483] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.054s] ( 43/125) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+mnesis-postgres-integration> 2026-10-18 09:36:20.537 UTC [486] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.537 UTC [486] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.024s] ( 44/125) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+mnesis-postgres-integration>         PASS [   0.035s] ( 45/125) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+mnesis-postgres-integration>         PASS [   0.032s] ( 46/125) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+mnesis-postgres-integration>         PASS [   0.030s] ( 47/125) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+mnesis-postgres-integration>         PASS [   0.015s] ( 48/125) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+mnesis-postgres-integration> 2026-10-18 09:36:20.673 UTC [521] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.673 UTC [521] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.092s] ( 49/125) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+mnesis-postgres-integration> 2026-10-18 09:36:20.782 UTC [535] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:20.782 UTC [535] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.020s] ( 50/125) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+mnesis-postgres-integration>         PASS [   0.024s] ( 51/125) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+mnesis-postgres-integration>         PASS [   0.035s] ( 52/125) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+mnesis-postgres-integration>         PASS [   0.026s] ( 53/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+mnesis-postgres-integration>         PASS [   0.033s] ( 54/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+mnesis-postgres-integration>         PASS [   0.027s] ( 55/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+mnesis-postgres-integration>         PASS [   0.048s] ( 56/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+mnesis-postgres-integration>         PASS [   0.125s] ( 57/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+mnesis-postgres-integration>         PASS [   0.047s] ( 58/125) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+mnesis-postgres-integration> 2026-10-18 09:36:21.173 UTC [604] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.028s] ( 59/125) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+mnesis-postgres-integration>         PASS [   0.075s] ( 60/125) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+mnesis-postgres-integration>         PASS [   0.002s] ( 61/125) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+mnesis-postgres-integration>         PASS [   0.004s] ( 62/125) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+mnesis-postgres-integration>         PASS [   1.044s] ( 63/125) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+mnesis-postgres-integration> 2026-10-18 09:36:22.353 UTC [629] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:22.353 UTC [629] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.054s] ( 64/125) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+mnesis-postgres-integration> 2026-10-18 09:36:22.356 UTC [627] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:22.356 UTC [627] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.022s] ( 65/125) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+mnesis-postgres-integration>         PASS [   1.132s] ( 66/125) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+mnesis-postgres-integration> 2026-10-18 09:36:23.635 UTC [655] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration>         PASS [   1.166s] ( 67/125) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+mnesis-postgres-integration> 2026-10-18 09:36:24.745 UTC [665] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration> 2026-10-18 09:36:24.745 UTC [665] STATEMENT:  SELECT pg_terminate_backend(pg_backend_pid())
+mnesis-postgres-integration>         PASS [   1.079s] ( 68/125) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+mnesis-postgres-integration>         PASS [   1.381s] ( 69/125) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+mnesis-postgres-integration> 2026-10-18 09:36:27.304 UTC [678] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:27.304 UTC [678] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.176s] ( 70/125) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+mnesis-postgres-integration> 2026-10-18 09:36:27.354 UTC [688] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration> 2026-10-18 09:36:27.460 UTC [693] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:27.460 UTC [693] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   1.151s] ( 71/125) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+mnesis-postgres-integration>         PASS [   0.016s] ( 72/125) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+mnesis-postgres-integration> 2026-10-18 09:36:28.531 UTC [705] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:28.531 UTC [705] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.054s] ( 73/125) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+mnesis-postgres-integration> 2026-10-18 09:36:28.533 UTC [707] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:28.533 UTC [707] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.055s] ( 74/125) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+mnesis-postgres-integration> 2026-10-18 09:36:28.621 UTC [722] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:28.621 UTC [722] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 09:36:28.623 UTC [722] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 09:36:28.623 UTC [722] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 09:36:28.646 UTC [723] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.060s] ( 75/125) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+mnesis-postgres-integration>         PASS [   0.050s] ( 76/125) mnesis-postgres::migration_tests checksum_and_newer_schema_are_rejected_without_repair
+mnesis-postgres-integration>         PASS [   0.045s] ( 77/125) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+mnesis-postgres-integration> 2026-10-18 09:36:28.761 UTC [742] ERROR:  relation "events_watermark_idx" already exists in schema "mnesis"
+mnesis-postgres-integration> 2026-10-18 09:36:28.761 UTC [742] CONTEXT:  SQL statement "ALTER TABLE public.events SET SCHEMA mnesis"
+mnesis-postgres-integration>    PL/pgSQL function inline_code_block line 47 at SQL statement
+mnesis-postgres-integration> 2026-10-18 09:36:28.761 UTC [742] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 09:36:28.763 UTC [742] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:28.763 UTC [742] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.101s] ( 78/125) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+mnesis-postgres-integration>         PASS [   0.062s] ( 79/125) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+mnesis-postgres-integration> 2026-10-18 09:36:28.960 UTC [755] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 09:36:28.961 UTC [758] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:28.961 UTC [758] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.056s] ( 80/125) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+mnesis-postgres-integration> 2026-10-18 09:36:29.010 UTC [764] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:29.010 UTC [764] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.049s] ( 81/125) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+mnesis-postgres-integration>         PASS [   0.025s] ( 82/125) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+mnesis-postgres-integration>         PASS [   0.015s] ( 83/125) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+mnesis-postgres-integration>         PASS [   0.070s] ( 84/125) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+mnesis-postgres-integration> 2026-10-18 09:36:29.141 UTC [787] ERROR:  incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration
+mnesis-postgres-integration> 2026-10-18 09:36:29.141 UTC [787] CONTEXT:  PL/pgSQL function inline_code_block line 44 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:29.141 UTC [787] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration>         PASS [   0.046s] ( 85/125) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+mnesis-postgres-integration> 2026-10-18 09:36:29.201 UTC [796] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:29.201 UTC [796] DETAIL:  Key (stream_id, version)=(2, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:29.201 UTC [796] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 09:36:29.203 UTC [797] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:29.203 UTC [797] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 09:36:29.231 UTC [803] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:29.231 UTC [803] DETAIL:  Key (stream_id, version)=(2, 2) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:29.231 UTC [803] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.067s] ( 86/125) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+mnesis-postgres-integration>         PASS [   0.392s] ( 87/125) mnesis-postgres::outcome_tests atomic_hint_deadline_covers_every_target_together
+mnesis-postgres-integration> 2026-10-18 09:36:29.775 UTC [822] WARNING:  there is no transaction in progress
+mnesis-postgres-integration>         PASS [   0.167s] ( 88/125) mnesis-postgres::outcome_tests caller_timeout_after_atomic_commit_is_not_rollback
+mnesis-postgres-integration> 2026-10-18 09:36:29.849 UTC [832] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.059s] ( 89/125) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+mnesis-postgres-integration>         PASS [   0.032s] ( 90/125) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+mnesis-postgres-integration> 2026-10-18 09:36:29.912 UTC [850] ERROR:  duplicate key value violates unique constraint "events_pkey"
+mnesis-postgres-integration> 2026-10-18 09:36:29.912 UTC [850] DETAIL:  Key (global_seq)=(1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:29.912 UTC [850] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.040s] ( 91/125) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+mnesis-postgres-integration> 2026-10-18 09:36:29.943 UTC [859] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 09:36:29.943 UTC [859] LOG:  unexpected EOF on client connection with an open transaction
+mnesis-postgres-integration>         PASS [   0.021s] ( 92/125) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+mnesis-postgres-integration> 2026-10-18 09:36:29.971 UTC [867] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 09:36:29.971 UTC [867] LOG:  unexpected EOF on client connection with an open transaction
+mnesis-postgres-integration>         PASS [   0.028s] ( 93/125) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+mnesis-postgres-integration> 2026-10-18 09:36:29.997 UTC [876] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.031s] ( 94/125) mnesis-postgres::outcome_tests lost_atomic_commit_ack_preserves_the_whole_transaction_and_source
+mnesis-postgres-integration> 2026-10-18 09:36:30.032 UTC [886] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.031s] ( 95/125) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+mnesis-postgres-integration> 2026-10-18 09:36:30.065 UTC [894] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 09:36:30.065 UTC [894] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:30.065 UTC [894] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 09:36:30.065 UTC [894] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 09:36:30.092 UTC [900] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 09:36:30.092 UTC [900] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:30.092 UTC [900] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 09:36:30.093 UTC [900] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 09:36:30.124 UTC [906] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 09:36:30.124 UTC [906] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:30.124 UTC [906] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 09:36:30.125 UTC [906] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 09:36:30.153 UTC [912] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 09:36:30.153 UTC [912] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:30.153 UTC [912] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 09:36:30.154 UTC [912] WARNING:  there is no transaction in progress
+mnesis-postgres-integration>         PASS [   0.128s] ( 96/125) mnesis-postgres::outcome_tests server_rejections_at_commit_preserve_the_code_and_outcome
+mnesis-postgres-integration> 2026-10-18 09:36:30.517 UTC [920] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.363s] ( 97/125) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+mnesis-postgres-integration> 2026-10-18 09:36:30.571 UTC [930] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:30.571 UTC [930] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.047s] ( 98/125) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+mnesis-postgres-integration> 2026-10-18 09:36:30.603 UTC [939] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.035s] ( 99/125) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+mnesis-postgres-integration> 2026-10-18 09:36:30.627 UTC [948] ERROR:  duplicate key value violates unique constraint "test_outcome_type"
+mnesis-postgres-integration> 2026-10-18 09:36:30.627 UTC [948] DETAIL:  Key (event_type)=(\x4f7574636f6d65) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:30.627 UTC [948] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.027s] (100/125) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+mnesis-postgres-integration>         PASS [   0.028s] (101/125) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+mnesis-postgres-integration>         PASS [   0.083s] (102/125) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+mnesis-postgres-integration> 2026-10-18 09:36:30.770 UTC [966] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.025s] (103/125) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+mnesis-postgres-integration>         PASS [   0.022s] (104/125) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+mnesis-postgres-integration>         PASS [   0.123s] (105/125) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+mnesis-postgres-integration>         PASS [   0.082s] (106/125) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+mnesis-postgres-integration>         PASS [   0.066s] (107/125) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+mnesis-postgres-integration>         PASS [   0.011s] (108/125) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+mnesis-postgres-integration> 2026-10-18 09:36:31.076 UTC [997] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:31.076 UTC [997] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.577s] (109/125) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+mnesis-postgres-integration> 2026-10-18 09:36:31.684 UTC [1016] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 09:36:31.684 UTC [1016] DETAIL:  Key (stream_id, version)=(1, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 09:36:31.684 UTC [1016] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.037s] (110/125) mnesis-postgres::representation_tests concurrent_large_key_writers_share_one_identity_and_one_winner
+mnesis-postgres-integration>         PASS [   0.035s] (111/125) mnesis-postgres::representation_tests full_unsigned_maximum_round_trips_and_overflow_leaves_it_unchanged
+mnesis-postgres-integration>         PASS [   0.021s] (112/125) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+mnesis-postgres-integration> 2026-10-18 09:36:31.773 UTC [1037] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.029s] (113/125) mnesis-postgres::representation_tests real_hash_collision_keeps_both_binary_identities
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1042] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1042] DETAIL:  Failing row contains (1, 0, 1603, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1042] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1041] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1041] DETAIL:  Failing row contains (2, -1, 1604, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.788 UTC [1041] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] DETAIL:  Failing row contains (3, 18446744073709551616, 1605, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] DETAIL:  Failing row contains (4, NaN, 1606, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] DETAIL:  Failing row contains (5, 1, 1607, \x496e76616c6964, 0, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1042] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] DETAIL:  Failing row contains (6, 1, 1608, \x496e76616c6964, -1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.789 UTC [1041] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 09:36:31.790 UTC [1042] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 09:36:31.790 UTC [1042] DETAIL:  Failing row contains (7, 1, 1609, \x496e76616c6964, 4294967296, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 09:36:31.790 UTC [1042] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration>         PASS [   0.019s] (114/125) mnesis-postgres::representation_tests scalar_constraints_reject_invalid_stored_values
+mnesis-postgres-integration>         PASS [   0.020s] (115/125) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+mnesis-postgres-integration> 2026-10-18 09:36:31.848 UTC [1056] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:31.849 UTC [1056] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.037s] (116/125) mnesis-postgres::representation_tests startup_rejects_missing_key_equality_and_scalar_guards
+mnesis-postgres-integration> 2026-10-18 09:36:31.920 UTC [1062] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:31.920 UTC [1062] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 09:36:31.921 UTC [1061] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:31.921 UTC [1061] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.073s] (117/125) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+mnesis-postgres-integration>         PASS [   0.024s] (118/125) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+mnesis-postgres-integration> 2026-10-18 09:36:31.969 UTC [1076] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:31.969 UTC [1076] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.022s] (119/125) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+mnesis-postgres-integration>         PASS [   1.187s] (120/125) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+mnesis-postgres-integration>         PASS [   1.064s] (121/125) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+mnesis-postgres-integration>         PASS [   1.065s] (122/125) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+mnesis-postgres-integration> 2026-10-18 09:36:35.361 UTC [1103] ERROR:  public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading
+mnesis-postgres-integration> 2026-10-18 09:36:35.361 UTC [1103] CONTEXT:  PL/pgSQL function inline_code_block line 8 at RAISE
+mnesis-postgres-integration> 2026-10-18 09:36:35.361 UTC [1103] STATEMENT:  -- Maintenance upgrade: preserve event identity and transaction positions.
+mnesis-postgres-integration>    SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.keys (
+mnesis-postgres-integration>        number BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>        value BYTEA NOT NULL,
+mnesis-postgres-integration>        CONSTRAINT keys_value_key EXCLUDE USING hash (value WITH =)
+mnesis-postgres-integration>    );
+mnesis-postgres-integration>    INSERT INTO mnesis.keys (value) SELECT DISTINCT stream_id FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration>    -- Only an adopted legacy table has this compatibility guard.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF (SELECT relkind FROM pg_class WHERE oid = 'public.events'::regclass) <> 'v'
+mnesis-postgres-integration>               OR regexp_replace(pg_get_viewdef('public.events'::regclass), '\s+', '', 'g')
+mnesis-postgres-integration>                   <> 'SELECTglobal_seq,stream_id,version,txid,event_type,schema_version,payload,metadataFROMmnesis.events;'
+mnesis-postgres-integration>            THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            DROP VIEW public.events;
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events ADD COLUMN key_number BIGINT;
+mnesis-postgres-integration>    UPDATE mnesis.events e SET key_number = k.number FROM mnesis.keys k
+mnesis-postgres-integration>        WHERE e.stream_id = k.value;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        DROP CONSTRAINT events_stream_id_version_key,
+mnesis-postgres-integration>        DROP COLUMN stream_id,
+mnesis-postgres-integration>        ALTER COLUMN key_number SET NOT NULL,
+mnesis-postgres-integration>        ALTER COLUMN version TYPE NUMERIC(20, 0),
+mnesis-postgres-integration>        ALTER COLUMN event_type TYPE BYTEA USING convert_to(event_type, 'UTF8');
+mnesis-postgres-integration>    ALTER TABLE mnesis.events RENAME COLUMN key_number TO stream_id;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_version_key UNIQUE (stream_id, version),
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_fkey FOREIGN KEY (stream_id) REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        ADD CONSTRAINT events_version_check CHECK (version > 0 AND version <= 18446744073709551615),
+mnesis-postgres-integration>        ADD CONSTRAINT events_schema_version_check CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        ADD CONSTRAINT events_global_seq_check CHECK (global_seq > 0);
+mnesis-postgres-integration>    CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 09:36:35.364 UTC [1103] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:35.364 UTC [1103] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.097s] (123/125) mnesis-postgres::upgrade_tests foreign_public_view_is_rejected_without_replacement
+mnesis-postgres-integration>         PASS [   0.076s] (124/125) mnesis-postgres::upgrade_tests populated_version_one_preserves_position_and_next_identity
+mnesis-postgres-integration> 2026-10-18 09:36:35.493 UTC [1120] ERROR:  check constraint "events_version_check" of relation "events" is violated by some row
+mnesis-postgres-integration> 2026-10-18 09:36:35.493 UTC [1120] STATEMENT:  -- Maintenance upgrade: preserve event identity and transaction positions.
+mnesis-postgres-integration>    SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.keys (
+mnesis-postgres-integration>        number BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>        value BYTEA NOT NULL,
+mnesis-postgres-integration>        CONSTRAINT keys_value_key EXCLUDE USING hash (value WITH =)
+mnesis-postgres-integration>    );
+mnesis-postgres-integration>    INSERT INTO mnesis.keys (value) SELECT DISTINCT stream_id FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration>    -- Only an adopted legacy table has this compatibility guard.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF (SELECT relkind FROM pg_class WHERE oid = 'public.events'::regclass) <> 'v'
+mnesis-postgres-integration>               OR regexp_replace(pg_get_viewdef('public.events'::regclass), '\s+', '', 'g')
+mnesis-postgres-integration>                   <> 'SELECTglobal_seq,stream_id,version,txid,event_type,schema_version,payload,metadataFROMmnesis.events;'
+mnesis-postgres-integration>            THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            DROP VIEW public.events;
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events ADD COLUMN key_number BIGINT;
+mnesis-postgres-integration>    UPDATE mnesis.events e SET key_number = k.number FROM mnesis.keys k
+mnesis-postgres-integration>        WHERE e.stream_id = k.value;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        DROP CONSTRAINT events_stream_id_version_key,
+mnesis-postgres-integration>        DROP COLUMN stream_id,
+mnesis-postgres-integration>        ALTER COLUMN key_number SET NOT NULL,
+mnesis-postgres-integration>        ALTER COLUMN version TYPE NUMERIC(20, 0),
+mnesis-postgres-integration>        ALTER COLUMN event_type TYPE BYTEA USING convert_to(event_type, 'UTF8');
+mnesis-postgres-integration>    ALTER TABLE mnesis.events RENAME COLUMN key_number TO stream_id;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_version_key UNIQUE (stream_id, version),
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_fkey FOREIGN KEY (stream_id) REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        ADD CONSTRAINT events_version_check CHECK (version > 0 AND version <= 18446744073709551615),
+mnesis-postgres-integration>        ADD CONSTRAINT events_schema_version_check CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        ADD CONSTRAINT events_global_seq_check CHECK (global_seq > 0);
+mnesis-postgres-integration>    CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 09:36:35.496 UTC [1120] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 09:36:35.496 UTC [1120] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.063s] (125/125) mnesis-postgres::upgrade_tests rejected_version_two_rolls_back_and_preserves_repairable_version_one
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [  22.743s] 125 tests run: 125 passed, 0 skipped
+mnesis-postgres-integration> stopping postgresql
+mnesis-postgres-integration> 2026-10-18 09:36:35.557 UTC [85] LOG:  received fast shutdown request
+mnesis-postgres-integration> waiting for server to shut down....2026-10-18 09:36:35.562 UTC [85] LOG:  aborting any active transactions
+mnesis-postgres-integration> 2026-10-18 09:36:35.564 UTC [85] LOG:  background worker "logical replication launcher" (PID 94) exited with exit code 1
+mnesis-postgres-integration> 2026-10-18 09:36:35.564 UTC [89] LOG:  shutting down
+mnesis-postgres-integration> 2026-10-18 09:36:35.569 UTC [89] LOG:  checkpoint starting: shutdown immediate
+mnesis-postgres-integration> 2026-10-18 09:36:35.843 UTC [89] LOG:  checkpoint complete: wrote 1052 buffers (6.4%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=0.087 s, sync=0.166 s, total=0.280 s; sync files=1773, longest=0.064 s, average=0.001 s; distance=15671 kB, estimate=15671 kB; lsn=0/26B3920, redo lsn=0/26B3920
+mnesis-postgres-integration> 2026-10-18 09:36:35.863 UTC [85] LOG:  database system is shut down
+mnesis-postgres-integration>  done
+mnesis-postgres-integration> server stopped
+mnesis-postgres-integration> Running phase: installPhase
+mnesis-postgres-integration> Running phase: fixupPhase
+mnesis-postgres-integration> shrinking RPATHs of ELF executables and libraries in /nix/store/fcx5dzazwb3x89ky9by2kzfgdzqfzgd7-mnesis-postgres-integration
+mnesis-postgres-integration> checking for references to /build/ in /nix/store/fcx5dzazwb3x89ky9by2kzfgdzqfzgd7-mnesis-postgres-integration...
+mnesis-postgres-integration> patching script interpreter paths in /nix/store/fcx5dzazwb3x89ky9by2kzfgdzqfzgd7-mnesis-postgres-integration
+copying 1 paths...
+copying path '/nix/store/fcx5dzazwb3x89ky9by2kzfgdzqfzgd7-mnesis-postgres-integration' from 'ssh-ng://builder@linux-builder'...

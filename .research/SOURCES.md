@@ -81,3 +81,28 @@ The0.8 migration-feature alternative fails our actual CargoAudit gate on RSA.
 The0.9 source options/mod.rs uses whoami2 then anonymous fallback; parser/parse.rs
 explicitly supports and tests the user URL query parameter. Supply the intended
 role in native test and CI URLs. Preserve library-owned connection semantics.
+
+2026-10-18 SQLx0.9 source, native object scope and session ownership:
+https://github.com/transact-rs/sqlx/blob/v0.9.0/sqlx-postgres/src/error.rs
+schema() reads backend field s; supported DatabaseError::try_downcast_ref in
+sqlx-core/src/error.rs preserves native fields without parsing display text.
+https://github.com/transact-rs/sqlx/blob/v0.9.0/sqlx-postgres/src/options/mod.rs
+PGUSER bypasses whoami2 at construction; URL username overrides occur later.
+Native traces show sporadic Darwin setup tails; attribution still needs timing.
+https://github.com/transact-rs/sqlx/blob/v0.9.0/sqlx-core/src/transaction.rs
+and pool/maybe.rs: public doc-hidden Transaction::begin accepts owned
+PoolConnection through From. For PG7, preset supported close_on_drop then use
+owned transaction rather than actor/manual transaction framework. Verify this
+candidate against public APIs and native expiry/cancellation before retention;
+doc-hidden constructor is a pinned-version maintenance limitation.
+
+PG6 preparation, accessed2026-10-18: PostgreSQL18 native row-lock/visibility
+contracts read at https://www.postgresql.org/docs/18/explicit-locking.html and
+https://www.postgresql.org/docs/18/transaction-iso.html. FOR NO KEY UPDATE is
+self-conflicting while compatible with KEY SHARE, a candidate for serializing
+checkpoint creation on an existing raw-key catalog row without blocking event
+foreign-key checks. READ COMMITTED statements obtain fresh statement snapshots;
+REPEATABLE READ/SERIALIZABLE can reject changed rows with40001 instead. This is
+candidate protocol evidence, not runtime checkpoint acceptance. Use owning
+CheckpointWrite::next_revision under the chosen lock and retain source errors;
+verify real creation/CAS races and native key-share overlap before retaining.

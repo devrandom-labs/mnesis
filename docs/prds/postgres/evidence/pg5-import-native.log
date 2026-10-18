@@ -1,0 +1,12 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.45s
+────────────
+ Nextest run ID 77e09c6c-1dbe-42dc-b9a5-9b7fffc9d438 with nextest profile: default
+    Starting 5 tests across 11 binaries (133 tests skipped)
+        PASS [   0.029s] (1/5) mnesis-postgres::atomic_tests import_corrupt_prefix_reports_exact_persisted_progress
+        PASS [   0.019s] (2/5) mnesis-postgres::atomic_tests import_duplicate_routes_reject_before_any_catalog_or_event_write
+        PASS [   0.034s] (3/5) mnesis-postgres::atomic_tests import_policies_preserve_final_conflict_and_exact_partial_reports
+        PASS [   0.037s] (4/5) mnesis-postgres::atomic_tests import_storage_error_preserves_only_previous_per_stream_transactions
+        PASS [   0.045s] (5/5) mnesis-postgres::outcome_tests import_wrapper_preserves_uncertainty_for_both_policies_without_resubmission
+────────────
+     Summary [   0.166s] 5 tests run: 5 passed, 133 skipped

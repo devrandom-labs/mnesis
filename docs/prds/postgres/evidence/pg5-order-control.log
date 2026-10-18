@@ -1,0 +1,38 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-pg5-order-control.94pFqI/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.32s
+────────────
+ Nextest run ID 4eaedefb-3edf-4072-8775-9602f01f53b2 with nextest profile: default
+    Starting 1 test across 1 binary (15 tests skipped)
+        FAIL [   0.037s] (1/1) mnesis-postgres::outcome_tests every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id
+  stdout ───
+
+    running 1 test
+    test every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id ... FAILED
+
+    failures:
+
+    failures:
+        every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id' (96361387) panicked at adapters/postgres/tests/outcome_tests.rs:896:5:
+    assertion `left == right` failed: a successor must not obtain a transaction id before its committed predecessor; prior writer xid=Some("30738")
+      left: [2, 1]
+     right: [1, 2]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.038s] 1 test run: 0 passed, 1 failed, 15 skipped
+        FAIL [   0.037s] (1/1) mnesis-postgres::outcome_tests every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id
+error: test run failed
+controlled early-write mutation exit: 100

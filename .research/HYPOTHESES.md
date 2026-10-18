@@ -42,7 +42,7 @@ explicit waited cleanup remain required. Investigate native PostgreSQL17
 transaction_timeout plus existing SQLx connection ownership before custom machinery.
 
 PG5 next experiment (after retained PG4 representations): existing AtomicAppend
-under import feature, no new public method/error/runtime/dep. Budget <=+190/-60
+under import feature, no new public method/error/runtime/dep. Budget <=+210/-60/net170
 production Rust, <=+420 native test lines and <=20 manifest/feature registration
 lines. Use a private child module of store so internal SQL owners stay private.
 Validate distinct targets, all run versions and ALL row sizes before BEGIN; then
@@ -69,3 +69,91 @@ to rebuild all12 checks although tested adapter source bytes are unchanged.
 Falsifier: derivation identity remains unchanged after a docs SQL edit. Compare
 supported cleanSourceWith filtering scoped to crate-owned SQL before retaining
 any Nix change; do not bypass the current hook/gate. No custom validation tool.
+
+PG5B native schedules before closing PG5: actual final-run unique collision must
+roll back an earlier staged run and report a freshly observed actual head. Revoke
+only keys SELECT from a dedicated native runtime role while its INSERT is waiting,
+then release the winner: failed reconciliation must retain the ORIGINAL23505
+Store source, never invent a fresh/unknown Conflict. No extra proxy framework.
+Demonstrate all-heads-before-XID ordering with a blocked second-head query and a
+concurrent predecessor; control must either reject the stale batch or preserve
+per-stream global order. Add actualSSI/deadlock observations, and test existing
+WholeChunk/PerStream import composition. Small separate test budgets per retained
+experiment; no capability acceptance is dropped to fit the first slice budget.
+
+PG5B1 ordering proof budget BEFORE test change: <=65 lines extending the EXISTING
+private Unix forwarder to hold a Bind carrying one distinctive raw second-head
+key, plus <=100 native test lines; no production changes/framework. Startup and
+framed frontend traffic use existing Tokio I/O, only this selected mode frames
+frontend packets. Hold BEFORE Bind reaches server (inside/after SELECT is too
+late because its snapshot already exists). While held, controller commits B1;
+atomic request expects B1 and writes A1+B2. Correct algorithm has no xid yet and
+all delivery shows B1 before B2; early A-write mutant obtains earlier xid and
+would show B2 before B1. Require actual observed hold, independent backend_xid,
+real controller commit, exact full delivery and returned-position checks. Keep
+mode private to tests and default relay unchanged. Kill an archived early-write
+mutation before retaining this verification pass.
+
+PG5B2 race/reconciliation pass budget: <=240 native test/fixture lines, zero
+production changes. Private Collision fixture owns a native winning transaction
+and one JoinSet client so failure drops abort pending work. Force actual final
+INSERT wait after first run staged, then commit winner: Conflict(index1,actual1),
+only winner persists and new prefix key is absent. Dedicated no-DDL runtime role
+then loses only keys SELECT while INSERT waits; metadata query must fail42501,
+but exposed Store error must preserve ORIGINAL23505/expectedconstraint. Restore
+permissions/close pool/drop owned test role before assertions. No synthetic codes,
+new test runner, public adapter seam or runtime added.
+
+PG5B3 classifier scope budget: <=95 native test/helper lines, <=8 production Rust
+lines (still within cumulative core+210). A real mirror trigger violates another
+schema.events/events_stream_id_version_key on an existing owned stream. Both raw
+and atomic requests must retain Store(Sqlx23505) with native foreign schema, never
+OCC. Test red before adding supported PgDatabaseError.schema() via fallible native
+DatabaseError downcast. Exact upstream0.9 error.rs schema()/try_downcast_ref() read;
+no custom message parsing, error replacement or new public variant. Record
+failure, fix predicate, rerun positive native collision plus negative namespace.
+
+PG3 real-failure proof (PG5B4) BEFORE changes: <=210 native test lines, no production
+changes. Create actual SSI read/write cycle with two SERIALIZABLE transactions
+and a test-only native trigger reading B then blocking after SUT inserts A;
+controller reads A then writes/commits B, release SUT and require actual40001,
+only B durable. Deadlock test: controller holds B, atomic SUT writes A and waitsB,
+controller then waitsA; SUT shorter native deadlock_timeout, controller longer,
+require actual40P01 and no SUT rows. Native locks and independent committed rows
+must witness both. Do not use RAISE for these codes or call a controller-only
+error proof of adapter handling. Existing fake deferred triggers remain mapping
+coverage only. Fix failing schedules honestly; no skips or synthetic substitutes.
+
+PG6 preparation (no implementation yet): separate aggregate snapshotsVersion and
+projection checkpointsPgAllPos, share raw key catalog without copying IDs just
+for lookup. Unconditional aggregate cache replacements differ from checkpoint
+revisionCAS; reuse CheckpointWrite::next_revision as sole revision/schema/order
+policy. Native key-row NO KEY UPDATE candidate permits event FK KEY SHARE; prove
+with blocked checkpoint and real append, including absent-row creator races.
+Schema3 must be feature-independent and versioned, preserve earlier positions,
+validate metadata before stale return, condition body fetching on matching schema
+and byte limit, allow empty state and all valid unsigned extrema. Save/read full
+state+position pair in one SQL transaction/query. Error/cancel requires reload.
+First add shared/native characterization against absent implementations.
+
+PG6/PG9 input error finding: current validate_sizes maps input byte-count overflow
+to CorruptRow. Arithmetic remains checked but failure domain is wrong: oversized
+caller input is not persisted corruption. Avoid copying that classification into
+state writes. Research a narrow common typed size-overflow error and shared byte
+accounting before extending state storage; preserve original persisted corruption
+detection. No saturating arithmetic, sentinel actual sizes or fake envelope.
+
+PG9 minimization candidate: atomic prepared Vec currently retains (index, write
+reference, key), duplicating index/reference already authoritative in writes.
+Compare retaining only keys and zipping the original tail after all-heads phase;
+measure request memory and keep ordering/race/mutation tests. Defer until final
+minimization rather than change reviewed behavior without matching verification.
+
+PG8 durability candidate: verify supported native Nix hook startup flags/settings
+before claiming crash durability. Explicitly test fsync/full_page_writes/logged
+relations and per-connection synchronous_commit; builder-only validation cannot
+prove later pool connections' session settings. Reject incompatible write-session
+settings before writes or use supported scoped settings with explicit operator
+contract. Preserve independent replication/failover guarantees. No passing native
+suite by itself establishes this profile, and no server setting may be silently
+weakened to speed tests.

@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.71s
+────────────
+ Nextest run ID 0b74c34e-ab3d-464b-8b47-45be92464964 with nextest profile: default
+    Starting 0 tests across 1 binary (10 binaries skipped)
+────────────
+     Summary [   0.000s] 0 tests run: 0 passed, 0 skipped
+error: no tests to run

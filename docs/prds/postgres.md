@@ -1,9 +1,9 @@
 # Postgres adapter completion
 
-Status: active (PG4 migrations and representation; PG0–PG9 delivery open). Updated: 2026-10-18.
+Status: active (PG5 verification; PG6–PG9 remain). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Branch: `docs/postgres-prd`.
+Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-atomic`.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
@@ -69,6 +69,11 @@ system, generic transaction framework, or application controller.
 
 This is source inspection for PRD preparation, not passing runtime evidence.
 Recheck the selected lock and affected contracts before each implementation slice.
+
+The table records planning-baseline versions. Subsequent protected slices select
+Rust1.99.0 and SQLx0.9.0, with PostgreSQL17.10 local and18.6 native Linux evidence.
+Exact dependency decisions and checks are in the linked research record; the
+workspace manifests, toolchain file and locks remain authoritative.
 
 | Selected owner | Version or revision | Verified surface and remaining evidence |
 | --- | --- | --- |
@@ -562,8 +567,8 @@ actual original failures, database profile, commands and selected first experime
 | Locked Nix package evaluation | `nix eval --raw --expr 'let f = builtins.getFlake (toString ./.); p = import f.inputs.nixpkgs { system = builtins.currentSystem; }; in p.postgresql.version' --impure` returned `17.10`. |
 | Native defect reproduction | Existing 56 tests pass; new bounded-read, stream/global final-hint and watermark-release tests fail against original production source. See characterization. |
 | Broader baseline and dependency audit | Pending PG0/PG8; individual read-memory and timing samples are characterization, not capacity evidence. |
-| Production implementation and acceptance gates | Pending PG1–PG9. |
-| Merge and publication | No implementation PR, merge, release or consumer adoption claimed. |
+| Production implementation and acceptance gates | Read/wake/outcome/migration/value slices merged; PG5 candidate under verification. Remaining PG1–PG9 acceptance is tracked in the backlog and research record. |
+| Merge and publication | Focused protected PRs376/377/379/380 merged. No whole-adapter release or registry-consumer verification yet. |
 
 ## Primary sources
 

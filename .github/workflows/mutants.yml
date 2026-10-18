@@ -78,6 +78,7 @@ jobs:
             # Direct binary avoids a personal Cargo plugin shadowing Nix's tool.
             # Native fixtures share tables and must run serially in each mutant.
             cargo-mutants mutants \
+              --all-features \
               --in-diff pr.diff \
               --test-tool nextest \
               --no-shuffle --colors never \

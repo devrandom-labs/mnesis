@@ -1,0 +1,11 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.06s
+────────────
+ Nextest run ID 3665cd27-1ae5-4395-837f-c3d53926c4ab with nextest profile: default
+    Starting 4 tests across 1 binary (15 tests skipped)
+        PASS [   0.072s] (1/4) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+        PASS [  24.356s] (2/4) mnesis-postgres::outcome_tests failed_atomic_head_reconciliation_retains_the_original_unique_source
+        PASS [   0.032s] (3/4) mnesis-postgres::outcome_tests final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_head
+        PASS [   0.034s] (4/4) mnesis-postgres::outcome_tests identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+────────────
+     Summary [  24.495s] 4 tests run: 4 passed, 15 skipped

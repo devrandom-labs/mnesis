@@ -1,6 +1,6 @@
 //! `PostgresStore` conformance against the executable store contract (#281).
 //!
-//! Skips (passes vacuously) when `DATABASE_URL` is unset — the nixosTest
+//! Skips (passes vacuously) when `DATABASE_URL` is unset — the native test hook
 //! supplies a real URL in CI and runs serially (`--test-threads=1`), so each
 //! test's fresh-store factory TRUNCATEs for isolation.
 
@@ -21,10 +21,10 @@ async fn open_fresh() -> (PostgresStore, ()) {
         .connect(&url)
         .await
         .expect("connect pool");
-    // Ensure the schema exists FIRST (`from_pool` runs `CREATE TABLE IF NOT
-    // EXISTS`), THEN truncate: on a fresh database the `events` table does
+    // Migrate explicitly FIRST, then validate and truncate: on a fresh
+    // database the `events` table does
     // not exist yet, so truncating before creation would fail. Tests run
-    // serially (the nixosTest invokes nextest with `--test-threads=1`), so
+    // serially (the native hook invokes nextest with `--test-threads=1`), so
     // TRUNCATE gives each test a clean, isolated slate against the shared
     // table.
     PostgresStore::migrate(&pool).await.unwrap();
@@ -38,9 +38,7 @@ async fn open_fresh() -> (PostgresStore, ()) {
     (store, ())
 }
 
-// No `conformance_atomic_append!` / `conformance_snapshot!` here: PostgresStore
-// implements neither `AtomicAppend` nor `SnapshotStore` — their absence is by
-// design, not an omission.
+// Optional atomic laws live in atomic_tests.rs with the import feature.
 mnesis_store_testing::conformance! {
     factory: open_fresh,
     skip_unless: have_db,

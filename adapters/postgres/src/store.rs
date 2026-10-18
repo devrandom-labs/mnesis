@@ -25,9 +25,13 @@ use crate::hex;
 use crate::page::{self, Order, PageRow};
 use crate::position::PgAllPos;
 
+#[cfg(feature = "import")]
+mod atomic;
+
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
 /// (`notify_committed`) publishes on it; each store's listener task subscribes.
 const NOTIFY_CHANNEL: &str = "mnesis_events";
+const HINT_TIMEOUT: Duration = Duration::from_millis(250);
 
 /// Shared, `Arc`-owned interior of a [`PostgresStore`].
 ///
@@ -283,10 +287,9 @@ fn corrupt_value(stream_id: ErrorId, err: &impl core::fmt::Display) -> PostgresE
 async fn insert_one(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     id: &StreamKey,
-    expected: Option<Version>,
     number: i64,
     row: &PendingEnvelope,
-) -> Result<PgAllPos, AppendError<PostgresError>> {
+) -> Result<PgAllPos, PostgresError> {
     let returned: Result<(i64, String), sqlx::Error> = sqlx::query_as(
         "INSERT INTO mnesis.events \
          (stream_id, version, event_type, schema_version, payload, metadata) \
@@ -304,30 +307,62 @@ async fn insert_one(
 
     match returned {
         Ok((global_seq, txid)) => {
-            let seq = u64::try_from(global_seq).map_err(|_| {
-                AppendError::Store(PostgresError::CorruptRow {
-                    stream_id: ErrorId::from_display(id),
-                    reason: ErrorId::from_display(&"assigned global_seq is negative"),
-                })
+            let seq = u64::try_from(global_seq).map_err(|_| PostgresError::CorruptRow {
+                stream_id: ErrorId::from_display(id),
+                reason: ErrorId::from_display(&"assigned global_seq is negative"),
             })?;
-            let txid_u64 = txid.parse::<u64>().map_err(|_| {
-                AppendError::Store(PostgresError::CorruptRow {
-                    stream_id: ErrorId::from_display(id),
-                    reason: ErrorId::from_display(&"assigned txid is negative"),
-                })
+            let txid_u64 = txid.parse::<u64>().map_err(|_| PostgresError::CorruptRow {
+                stream_id: ErrorId::from_display(id),
+                reason: ErrorId::from_display(&"assigned txid out of range"),
             })?;
             Ok(PgAllPos::new(txid_u64, seq))
         }
-        // A UNIQUE(stream_id, version) violation means a concurrent writer
-        // claimed this version first — a conflict, not a Store error (CLAUDE
-        // rule 3: one variant = one failure domain).
-        Err(e) if is_stream_conflict(&e) => Err(AppendError::Conflict {
+        Err(error) => Err(PostgresError::Sqlx(error)),
+    }
+}
+
+/// Reuse the nonempty run structure without an optional last position.
+async fn insert_run(
+    tx: &mut sqlx::Transaction<'_, Postgres>,
+    id: &StreamKey,
+    number: i64,
+    envelopes: PendingBatch<'_>,
+) -> Result<PgAllPos, PostgresError> {
+    let mut assigned = insert_one(tx, id, number, envelopes.first()).await?;
+    for row in envelopes.iter().skip(1) {
+        assigned = insert_one(tx, id, number, row).await?;
+    }
+    Ok(assigned)
+}
+
+fn append_error(
+    id: &StreamKey,
+    expected: Option<Version>,
+    error: PostgresError,
+) -> AppendError<PostgresError> {
+    if matches!(&error, PostgresError::Sqlx(source) if is_stream_conflict(source)) {
+        return AppendError::Conflict {
             stream_id: ErrorId::from_display(id),
             expected,
-            actual: None, // a racer committed; exact actual unknown here
-        }),
-        Err(e) => Err(AppendError::Store(PostgresError::Sqlx(e))),
+            actual: None,
+        };
     }
+    AppendError::Store(error)
+}
+
+/// A catalog key can exist without an event head. Invalid scalar data is not absence.
+fn head_version(
+    head: Option<&(i64, Option<String>)>,
+    id: &StreamKey,
+) -> Result<Option<Version>, PostgresError> {
+    head.and_then(|value| value.1.as_deref())
+        .map(|raw| {
+            raw.parse::<u64>()
+                .ok()
+                .and_then(Version::new)
+                .ok_or_else(|| corrupt(ErrorId::from_display(id), "invalid stored version"))
+        })
+        .transpose()
 }
 
 /// Map the kernel-neutral [`AppendValidationError`] (the append contract) into
@@ -428,8 +463,9 @@ fn store_err<E: Into<sqlx::Error>>(e: E) -> AppendError<PostgresError> {
 /// Only the intended stream/version arbiter proves optimistic contention.
 fn is_stream_conflict(e: &sqlx::Error) -> bool {
     matches!(e, sqlx::Error::Database(db) if db.is_unique_violation()
-        && db.table() == Some("events")
-        && db.constraint() == Some("events_stream_id_version_key"))
+        && db.try_downcast_ref::<sqlx::postgres::PgDatabaseError>().is_some_and(|native|
+            native.schema() == Some("mnesis") && native.table() == Some("events")
+            && native.constraint() == Some("events_stream_id_version_key")))
 }
 
 // ---------------------------------------------------------------------------
@@ -442,6 +478,10 @@ impl PostgresStore {
     /// append (the catch-up scan will still pick the event up on the next poll).
     pub(crate) async fn notify_committed(&self, stream: &[u8]) {
         self.wake_registry().wake(stream);
+        let _ = tokio::time::timeout(HINT_TIMEOUT, self.publish_hint(stream)).await;
+    }
+
+    async fn publish_hint(&self, stream: &[u8]) {
         // NOTIFY permits fewer than 8000 bytes. Oversized IDs still use durable
         // fallback scans; avoid allocating a hint the server cannot accept.
         if stream.len() >= 4000 {
@@ -452,12 +492,11 @@ impl PostgresStore {
         // reverses this via `hex::decode` before calling `wake` — one shared,
         // unit-tested codec on both ends (see `crate::hex`).
         let payload = hex::encode(stream);
-        let hint = sqlx::query("SELECT pg_notify($1, $2)")
+        let _ = sqlx::query("SELECT pg_notify($1, $2)")
             .bind(NOTIFY_CHANNEL)
             .bind(payload)
-            .execute(self.pool());
-        // An acknowledged commit cannot be held behind auxiliary pool/query work.
-        let _ = tokio::time::timeout(Duration::from_millis(250), hint).await;
+            .execute(self.pool())
+            .await;
     }
 }
 
@@ -493,15 +532,9 @@ impl RawEventStore for PostgresStore {
         let mut tx = self.pool().begin().await.map_err(store_err)?;
 
         let head = read_head(&mut tx, id).await.map_err(AppendError::Store)?;
-        let current = head
-            .as_ref()
-            .and_then(|value| value.1.as_deref())
-            .map(str::parse::<u64>)
-            .transpose()
-            .map_err(|_| {
-                AppendError::Store(corrupt(ErrorId::from_display(id), "invalid stored version"))
-            })?
-            .unwrap_or(0);
+        let current = head_version(head.as_ref(), id)
+            .map_err(AppendError::Store)?
+            .map_or(0, Version::as_u64);
         // Validate the complete run before the first write.
         mnesis_store::store::validate_append_versions(current, expected_version, envelopes, id)
             .map_err(|e| postgres_validation_err(id, &e))?;
@@ -510,15 +543,9 @@ impl RawEventStore for PostgresStore {
             None => create_key(&mut tx, id).await.map_err(AppendError::Store)?,
         };
 
-        // The head insert seeds the assigned position; each tail insert
-        // overwrites it, so the value after the loop is the LAST row's — the
-        // position `append` returns (#330). No `Option`, because
-        // `PendingBatch` guarantees the head exists.
-        let mut assigned =
-            insert_one(&mut tx, id, expected_version, number, envelopes.first()).await?;
-        for row in envelopes.iter().skip(1) {
-            assigned = insert_one(&mut tx, id, expected_version, number, row).await?;
-        }
+        let assigned = insert_run(&mut tx, id, number, envelopes)
+            .await
+            .map_err(|error| append_error(id, expected_version, error))?;
 
         tx.commit()
             .await
