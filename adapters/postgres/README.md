@@ -41,3 +41,22 @@ and new binaries are unsupported. Failed transactional steps retain old data and
 can be rerun after repairing the reported cause. Never reset migration metadata
 to conceal an error. Roll back through a verified backup under maintenance, or
 repair forward with the matching migration version.
+
+The representation upgrade adds `mnesis.keys` and `mnesis.keys_number_seq` to
+those runtime grants: `SELECT, INSERT` on keys and `USAGE` on its sequence.
+Binary keys use exact native equality with a hash exclusion index; hash collisions
+remain distinct keys. Events reference compact internal key numbers, keeping
+large raw keys out of the stream/version Btree. Internal key numbers are not
+application command IDs or subscriber identities. Versions use `NUMERIC(20,0)`
+to preserve the full nonzero `u64` range; event types use UTF8 bytes, including
+NUL. Global identity remains positive `BIGINT`, a database capacity limit;
+a caller's valid larger resume sequence still permits later transactions.
+
+Version1 and legacy upgrades preserve existing `(txid, seq)` positions and the
+next sequence. The second migration removes the redundant stream index and
+retains the unique stream/version and global watermark indexes. Invalid stored
+scalar values abort the upgrade transaction; repair the reported data under
+maintenance before retrying. Foreign `public.events` views are rejected and
+preserved. Never rewrite an applied migration checksum. Future snapshot and
+projection capabilities can share raw key identity; a key alone does not prove
+that an event stream exists.

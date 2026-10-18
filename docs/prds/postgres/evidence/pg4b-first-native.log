@@ -1,0 +1,12 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-representation/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.74s
+────────────
+ Nextest run ID 3ab1589b-5042-4257-98ec-475b79dec34f with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.036s] (1/5) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+        PASS [   0.022s] (2/5) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+        PASS [   0.022s] (3/5) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+        PASS [   0.022s] (4/5) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+        PASS [   0.020s] (5/5) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+────────────
+     Summary [   0.123s] 5 tests run: 5 passed, 0 skipped

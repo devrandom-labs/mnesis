@@ -9,6 +9,8 @@
 )]
 #![allow(clippy::missing_panics_doc, reason = "test assertions")]
 
+mod support;
+
 use std::future::pending;
 use std::io::{self, Write, stderr};
 use std::path::PathBuf;
@@ -256,14 +258,13 @@ async fn loss_during_inserts_rolls_back_the_uncommitted_prefix() {
     let Some((mut proxy, store, control)) = fixture().await else {
         return;
     };
+    let id = StreamKey::from_bytes("during-insert");
+    // The suppressed INSERT must be an event, after key setup has committed.
+    support::key(&control, id.as_bytes()).await;
     proxy.fault.send_replace(Fault::DropInsert);
     let rows = events();
     let result = store
-        .append(
-            &StreamKey::from_bytes("during-insert"),
-            None,
-            PendingBatch::new(&rows).unwrap(),
-        )
+        .append(&id, None, PendingBatch::new(&rows).unwrap())
         .await;
     proxy.observed(Observation::Inserted).await;
     assert!(matches!(
@@ -556,12 +557,13 @@ async fn a_native_unique_collision_preserves_the_callers_expected_head() {
                 .unwrap();
         }
         let number = expected.map_or(0, Version::as_u64).checked_add(1).unwrap();
+        let key_number = support::key(&control, key.as_bytes()).await;
         let mut winner = control.begin().await.unwrap();
         sqlx::query(
             "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
             VALUES ($1, $2, 'Winner', 1, 'winner'::bytea)",
         )
-        .bind(key.as_bytes())
+        .bind(key_number)
         .bind(i64::try_from(number).unwrap())
         .execute(&mut *winner)
         .await
@@ -580,7 +582,7 @@ async fn a_native_unique_collision_preserves_the_callers_expected_head() {
         winner.commit().await.unwrap();
         let result = contender.await.unwrap();
         let stored: Vec<(i64, Vec<u8>)> =
-            sqlx::query_as("SELECT version, payload FROM mnesis.events ORDER BY version")
+            sqlx::query_as("SELECT version::bigint, payload FROM mnesis.events ORDER BY version")
                 .fetch_all(&control)
                 .await
                 .unwrap();

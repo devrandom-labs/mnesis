@@ -3,6 +3,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used, reason = "test assertions")]
 #![allow(clippy::missing_panics_doc, reason = "test assertions")]
 
+mod support;
+
 use std::pin::pin;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -74,7 +76,7 @@ async fn insert(backing: &PgPool, id: &StreamKey) {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 1, 'Final', 1, 'payload'::bytea)",
     )
-    .bind(id.as_bytes())
+    .bind(support::key(backing, id.as_bytes()).await)
     .execute(backing)
     .await
     .unwrap();

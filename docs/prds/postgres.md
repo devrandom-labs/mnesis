@@ -1,6 +1,6 @@
 # Postgres adapter completion
 
-Status: active (PG1/PG2 experiments). Updated: 2026-10-18.
+Status: active (PG4 migrations and representation; PG0–PG9 delivery open). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
 Branch: `docs/postgres-prd`.

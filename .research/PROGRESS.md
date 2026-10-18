@@ -72,9 +72,62 @@ Root docs/postgres-prd remains8357 local only; merged remote deleted, do not pus
 Root docs/research uncommitted preserved; active delivery records in PG4a checkout.
 Find original stashes BY NAME, never blind stash@{0}; later autostashes preserved.
 
-PG4a matched gates NOW PASS:12 Darwin,1549 workspace/four compiler exclusions,
-467.299s; fresh ARM18.6 native104/zero skips13.409s. Deliberately missing-role
-pipeline run rejects as expected with Nix exit1 and server cleanup; no masked tee
-failure. Three post-run reviews recorded per run. Source frozen hashd5983519.
-Current source ready for normal signed commit, rebase onto mergedf87afc12, focused
-PR and protected CI. Only evidence/records changed since matching source gate.
+Update2026-10-18: PG4a signed commit a0f422178ab45f086512f58205445837defa4505
+rebased cleanly onto protected PG3 merge; tree identical to cf7deb6f. PR379 open
+https://github.com/devrandom-labs/mnesis/pull/379, CI queued/running, no failures
+at last inspection. All local matched gates/controlled failure proof retained.
+PG4b candidate in representation checkout: normalized binary keys with native hash
+exclusion, compactFK events, NUMERIC(20,0) versions, BYTEA event types, text xid8,
+unsigned resume fix, removed PreparedInsert allocation/four mirror unit cases.
+Native110 all pass before adding3 genuine version1 upgrade cases. Foreign-view
+case exposed candidate's destructive DROP; now ownership checked under catalog
+search_path. Upgrade3 all pass; full113 fourth run62pass/51 old-candidate-checksum
+failures before migration fixtures installed current2. Never edited checksum
+metadata; rerun113 LIVE4879? actual latest handle from tool history,
+/tmp/mnesis-pg4b-fifth-native.log. All failed runs and3reviews retained.
+Next: collect113/3reviews, clean obsolete comments/README, capacity/head/page query
+plans and mutated numeric/collision guards, matched full gates/nativeLinux, focused
+PG4b commit/PR. Do not edit published migration1. Then PG5 all-heads-before-writes.
+
+Latest PG4b state:113/113 native17.10+freshARM18.6 pass,zero skips.19 native
+mutants:14caught/5compile-unviable,zero survivors/timeouts. Manual SQL txid >=
+mutant killed2rows!=1 in archived /tmp/mnesis-pg4b-control.TLSUgG; live source
+untouched.40,960x4096B retention1,094,103/1,100,611B below4,194,304B; generic
+head/index/page plans bounded at0/40000. Single latency samples not SLO evidence.
+Source diff vs frozenPG4a341eba SHA2567ea6c9a1220b94a201ad49269a91de014f517e44aca622b7e3f2207a43f39d79.
+LIVE fullDarwin gate41329 /tmp/mnesis-pg4b-full-gate.log, still native Fjall
+property child doing real work; do not restart or claim it passed. Linux artifact
+/nix/store/iw2bpshrp0slzl0954l5ikwmk6i1qdcp-mnesis-postgres-integration.
+PG4a PR379onlytwoNixCIchecks pending, othersgreen lastinspection. No failures.
+PG4b not committed or PR yet. Baseline mixed stage includesPG4a; after matched
+fullgate complete align branch baseline with a0f422 (preserve working tree and
+all records), then signed normal-hook PG4b commit and stacked/main PR. Parent
+records/evidence have been reconciled into this checkout; no history discarded.
+Exact production-source hashes are unchanged. PG5 plan/budget appendedHYPOTHESES;
+read all heads before any XID-allocating key/event write, one nativehint deadline
+forwholebatch. All requiredremainingPG5–PG9/release/consumer work stillopen.
+
+PG4b full gate NOW PASS all12,1558 cases/four compiler exclusions,461.040s.
+Three reviews recorded, source hash7ea6c9a1 unchanged. Need baseline alignment,
+signed commit/normal hook and focused PR; actual pendingCI379stilltwoNixjobs.
+
+PG4a PR379 MERGED as e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1 at09:16:24Z.
+PG4b signed d0442282 normal hook also passes12,1558/four,456.756s. Only new SQL
+proof caused full rebuild, no adapter source change. Amend records, rebase onto
+main e1ee then focused PR. PG5 research /private/tmp/mnesis-postgres-atomic,
+branchwork/postgres-atomic, HEADa0 plusPG4b baseline staged; tree file
+/tmp/mnesis-pg5-base-tree. Initial AtomicAppend API missing (compileE0277), then
+5 shared+4 owner laws9/9 native pass,zero skips8.938s; strictClippy. Current draft
+private store/atomic.rs + parent shared insert/head/hint owners. All heads precede
+writes; after unique rejection rollback+observe actual head or retain original
+Store source; COMMIT unknown stays separate. One250ms native-hint budget perbatch.
+Thirdreview: tighten exact process/query advisory wait, unexplained8.170s case tail
+recordedPG8. Need forced order/race, COMMIT loss, import and actualSSI/deadlock.
+Do not extract PG5 relativeHEADa0: baseline includesPG4b; align safely after PG4b
+commits/rebases, preserving every record. No PG5 full feature CI/delivery proof yet.
+
+PG4b PR380 https://github.com/devrandom-labs/mnesis/pull/380 head a32cd743665d735e400072a244ba98c9de840a4f
+opened against main e1ee1dc2. Stronger event-prefix transport test found during PG5
+cross-capability review: preseed key before DropInsert so fault is after EVENT
+INSERT, not key catalog INSERT. Selected1+full113 native pass,zero skips; changes
+pending next signed commit/hook and CI. Do not merge old head without correction.

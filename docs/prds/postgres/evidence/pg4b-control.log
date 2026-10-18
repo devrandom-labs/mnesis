@@ -1,0 +1,38 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-pg4b-control.TLSUgG/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.14s
+────────────
+ Nextest run ID 0846616f-eebc-4888-88d4-e5095fad7181 with nextest profile: default
+    Starting 1 test across 1 binary (9 tests skipped)
+        FAIL [   0.640s] (1/1) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+  stdout ───
+
+    running 1 test
+    test unsigned_global_sequence_still_includes_later_transactions ... FAILED
+
+    failures:
+
+    failures:
+        unsigned_global_sequence_still_includes_later_transactions
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.62s
+
+  stderr ───
+
+    thread 'unsigned_global_sequence_still_includes_later_transactions' (95647081) panicked at adapters/postgres/tests/representation_tests.rs:84:5:
+    assertion `left == right` failed: a high sequence only excludes its own transaction
+      left: 2
+     right: 1
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.658s] 1 test run: 0 passed, 1 failed, 9 skipped
+        FAIL [   0.640s] (1/1) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+error: test run failed
+controlled mutation exit: 100

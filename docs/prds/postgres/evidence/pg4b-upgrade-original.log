@@ -1,0 +1,30 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-representation/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.67s
+────────────
+ Nextest run ID cee85022-fe52-49f6-8ea3-f778608a234b with nextest profile: default
+    Starting 3 tests across 1 binary
+        FAIL [   0.036s] (1/3) mnesis-postgres::upgrade_tests foreign_public_view_is_rejected_without_replacement
+  stdout ───
+
+    running 1 test
+    test foreign_public_view_is_rejected_without_replacement ... FAILED
+
+    failures:
+
+    failures:
+        foreign_public_view_is_rejected_without_replacement
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'foreign_public_view_is_rejected_without_replacement' (95526713) panicked at adapters/postgres/tests/upgrade_tests.rs:163:5:
+    foreign view must not be dropped: Ok(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        PASS [   0.037s] (2/3) mnesis-postgres::upgrade_tests populated_version_one_preserves_position_and_next_identity
+        PASS [   0.035s] (3/3) mnesis-postgres::upgrade_tests rejected_version_two_rolls_back_and_preserves_repairable_version_one
+────────────
+     Summary [   0.109s] 3 tests run: 2 passed, 1 failed, 0 skipped
+        FAIL [   0.036s] (1/3) mnesis-postgres::upgrade_tests foreign_public_view_is_rejected_without_replacement
+error: test run failed

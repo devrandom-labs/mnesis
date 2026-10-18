@@ -1300,3 +1300,214 @@ Three reviews: acceptance/source hash unchanged, native proof remains separately
 104 cases, cached workspace checks are not counted as fresh execution. New build
 transcripts retain diagnostic content with trailing spaces removed for diff hygiene;
 raw temporary originals are preserved. No production source changed after gates.
+
+PG4b baseline on the frozen PG4a tree341eba45b88d066c183548e4fd2a4f515481533b:
+PostgreSQL17.10, explicit userjoel, five selected representation cases:0 pass,
+5 fail,0 skips,0.865s. Raw output /tmp/mnesis-pg4b-original.log.
+Three post-run reviews:
+1. Contract: nonzero unsigned versions, arbitrary UTF8 event types including NUL,
+   arbitrary binary keys and lexicographic global resume remain core obligations.
+2. Original defects: actual Btree tuple5144>2704 rejection, BIGINT narrowing,
+   SQLSTATE22021 NUL rejection and high-sequence resume rejection all reach storage
+   or adapter conversion. No setup or compiler failure is mistaken for a witness.
+3. Oracle: each case asserts returned content/position or exact empty boundary;
+   the later transaction is real and has a strictly greater transaction ID. All
+   five ran with a real URL and no concurrent native suite on their cluster.
+   Read-only startup moved unchanged to migration tests; no contract was deleted.
+
+PG4b experiment budget: retain PG4 total +700/-200/net500 production Rust,
++350 SQL; target compact internal binary-key catalog, native full-u64 numeric
+versions, BYTEA event types, native xid8 comparison and unsigned resume handling.
+No extra runtime, numeric codec, command retry or custom hash identity. Migration1
+stays frozen; migration2 must preserve existing rows, positions and sequence.
+Remove the obsolete PreparedInsert allocation and its four implementation-only
+unit tests only together with native batch/schema-range coverage. Core append
+validation remains authoritative; a stored maximum version must reject overflow.
+Falsifiers include real hash collisions, large-key races, migration preservation,
+late-page corruption and all earlier outcome/read/wake regressions.
+
+PG4b first candidate: five original native representation witnesses now pass,
+zero skips/no filter,0.123s. Three post-run reviews:
+1. Contract: full unsigned read bounds and lexicographic resume, NUL UTF8 type,
+   large binary origin and signed-boundary append preserve exact results.
+2. Falsifiers: original raw failure log remains; only boundary seed SQL now uses
+   the compact foreign key, all original assertions remain unchanged.
+3. Gaps FOUND: current latest-shape validator does not yet verify the new keys
+   table, numeric precision/checks/FK or type generation; full-u64 maximum and real
+   equal-hash/concurrent-key cases remain missing. The five-case pass is not full
+   adapter or migration acceptance. Add those before retaining this candidate.
+
+PG4b full first native run:105 cases,98 pass/7 fail,zero skips,13.205s.
+Three post-run reviews: (1) existing read/wake/outcome behavior executes, but
+migration and collision acceptance is not yet green; (2) actual failures are
+old one-migration expectations, old raw-key/numeric decoding and runtime role
+missing new catalog grants, not SUT data-loss suppression; (3) preserve every
+assertion's meaning while updating independent SQL inspection for the new schema,
+assert both migration records and unknown version3, grant only SELECT/INSERT
+plus sequence use on new keys. Late-page corruption now injects invalid UTF8
+bytes because new scalar CHECK prevents the former schema_version0 injection;
+its original termination/no-skip assertions are unchanged. Add explicit scalar
+CHECK negatives rather than count that stronger boundary as tested already.
+
+PG4b second native run:110 cases,109 pass/1 fail,zero skips,13.497s.
+Three post-run reviews: (1) all13 updated migration laws and forced-conflict law
+now pass, maximum-u64/u32 append and overflow immutability pass; (2) scalar invalid
+values are rejected and missing catalog/version guards prevent startup; (3) new
+collision fixture FAILED before SUT because hashvarlena(bytea) is not a callable
+SQL signature. Do not count it as a caught product defect or collision proof.
+Use the original native probe's hash_record(ROW(bytea)) plus an actual index
+recheck witness, retaining exact binary identity assertions. No oracle is relaxed.
+
+PG4b third native run:110/110 pass,zero skips/no filter,13.439s.
+Three post-run reviews:
+1. Contract: full unsigned maximum/version overflow, schema maximum, exact raw
+   keys, native hash collisions, concurrency and all prior regressions pass.
+2. Falsifiers: collision actually removes one index entry during native equality
+   recheck; large-key race has one success/one Conflict/one catalog identity;
+   invalid scalars leave zero events; missing required guards reject startup.
+3. Remaining gap: versioned-v1-to-v2 upgrade failure/repair is not yet independently
+   tested, and migration2 currently drops public.events without proving ownership.
+   Add a foreign-view collision witness before changing that behavior. This pass
+   does not certify the upgrade or pending capacity/query-plan evidence.
+
+Upgrade characterization:3 native cases,2 pass/1 fail,zero skips,0.109s.
+Three post-run reviews: (1) genuine SQLx version1 installation upgrades with exact
+positions, schema/metadata/body and increasing next sequence; invalid legacy
+version aborts all migration2 DDL and remains repairable under version1 metadata;
+(2) foreign-view witness fails because migration returns Ok and replaces a view
+it does not own, an actual destructive-ownership defect in this candidate;
+(3) setup uses supported Migrator::with_migrations from the embedded immutable
+version1, not manually fabricated checksums. Preserve failure and add fail-closed
+view ownership check under a catalog-only migration search_path before DROP.
+
+PG4b fourth native run:113 cases,62 pass/51 fail,zero skips,5.863s.
+Three post-run reviews: (1) all three actual upgrade cases pass, including the
+previously destructive foreign-view scenario; (2) each of51 earlier failures is
+VersionMismatch(2): this disposable DB still had the earlier UNPUBLISHED candidate
+migration2 checksum. Checksum rejection is correct; never rewrite recorded metadata
+or weaken validation. The migration suite then creates fresh owned fixtures and
+last upgrade leaves the current checksum. (3) 62 passes are not full-suite proof;
+rerun all113 against that freshly installed current test schema, retaining this
+failed run. Published migration1 has not changed. Candidate2 will freeze before
+its focused PR. No application database or production migration metadata changed.
+
+PG4b fifth native run:113/113 pass,zero skips/no filter,13.411s.
+Three post-run reviews:
+1. Contract: all original outcomes/read/wake/migration cases plus13 representation/
+   versioned-upgrade laws pass. Native count changes from104 are -4 obsolete pure
+   scalar-conversion mirror tests,+10 representation,+3 actual upgrade cases.
+2. Falsifiers: foreign view is preserved/rejected then upgrade succeeds after
+   explicit removal; negative old version leaves v1 bytes and metadata untouched
+   before repair; positions/sequence and subsequent binary type append survive.
+3. Loopholes: no checksum was rewritten, no assertion loosened, invalid UTF8
+   retains later-page corruption termination. New scalar checks have independent
+   real rejection cases. Earlier failures remain logged. Still require native
+   query-plan/capacity/mutation and full cross-platform delivery proof.
+
+PG4b capacity probe: selected native first-event case,40,960x4096B,1 pass/8 filtered,
+0.633s. Retained stream1,094,103B/all1,100,611B, unchanged4,194,304B ceiling.
+Three post-run reviews: (1) same tenfold history and four-page bound as retained
+baseline; (2) peak allocator calibration and original retained-backlog falsifier
+remain, actual large database workload ran; (3) only one case credited, no filtered
+case counted. Single latency samples5.164/14.101ms occurred while independent
+mutation compilation ran; not a fair throughput or latency comparison. All-scan
+join cost needs native plans and repeated isolated measurements before retention.
+
+PG4b native prepared generic-plan study, PostgreSQL17.10,40,960x4096B:
+all-page seeks at0/40000 each examine exactly256 event headers via native
+watermark index,256 primary-key body lookups,1 memoized key lookup per side;
+779/781 shared buffer hits,0.381/0.350ms server execution. Stream seeks use
+native numeric version/compact-key unique index, exactly256 headers and bodies,
+780/779 buffer hits,0.379/0.330ms. Head uses backward unique index-only LIMIT1,
+0 heap fetches,0.064ms; one-row keys relation is appropriately sequential.
+Three post-run reviews for EACH SQL study: (1) row/body prefix and ordering match
+current page.rs including raw key accounting and nullable oversized bodies;
+(2) generic plans at deep resume do not scan40,960 histories or cast indexed
+columns, redundant stream index is absent; (3) SQL copies were compared to source,
+prepared parameters include explicit casts on parameters only. These single server
+samples are evidence of bounded access, not latency SLOs or broad cardinality proof.
+Many-key cardinality, capacity/soak and final profile remain PG8 obligations.
+
+Fresh independent PostgreSQL18.6 mutation baseline113/113 pass,zero skips,
+13.545s. Three reviews: acceptance includes new upgrade laws; original fault and
+collision assertions are present; cluster physically separate from17.10 memory/
+plan workload, no same-cluster interference. Sweep19 candidates still running;
+no final mutation verdict until every result and first failure is inspected.
+
+PG4b automated native diff sweep complete:19 candidates,14 caught/5 compile-
+unviable,zero missed/timeouts, fresh18.6 cluster removed after server stop.
+Three post-run reviews for the sweep and each candidate outcome:
+1. Acceptance: unmutated113/zero skips baseline; each viable mutant has a real
+   native test failure, all five unviable results have actual missing-Default
+   compiler diagnostics and are not counted caught.
+2. Falsifiers: omitted page finishing fails real out-of-order resume; absent or
+   false heads fail payload replay/conflict immutability; fabricated key numbers
+   fail actual append/read identity. First failing case in every log inspected.
+3. Loopholes: no exclusions, timeouts, survivors or changed oracles. SQL string
+   contents are not mutated by cargo-mutants; original representation failures,
+   guard-removal native tests and upgrade failure witnesses cover those separately.
+   Do not claim this sweep exhausts SQL behavior or final adapter mutation coverage.
+
+PG4b matched ARM Linux package /nix/store/iw2bpshrp0slzl0954l5ikwmk6i1qdcp-mnesis-postgres-integration:
+fresh18.6,113/113 pass,zero skips,16.066s, normal supported-hook server shutdown.
+Three post-run reviews: (1) all old and new native cases ran including3 genuine
+version1 upgrades; (2) collision/index recheck, foreign-view preservation, corrupt
+row/rollback and real outcome faults execute; (3) no filtered cases, source matches
+the staged candidate used by the live Darwin gate, cache is not claimed fresh.
+Candidate native direct SQL mutation attempt initially aborted before test because
+rustfmt split query.push across lines; no test/result credited. Corrected exact
+.push string replacement is running in an archived copy; live delivery source
+and its matching checks stay untouched.
+
+Controlled SQL resume mutation, archived staged tree only: replace high-sequence
+branch txid > with txid >=. Native exclusive-resume case FAILS as required with
+2 rows instead of1,0/1 pass,9 filtered,exit100,0.658s. Three post-run reviews:
+(1) exact contract is high sequence excludes only its own transaction; (2) two
+real committed transactions exist and the original assertion catches reintroduced
+first transaction, not setup/timing; (3) mutation was confined to an archived
+copy, delivery source unchanged,9 filtered not credited. Control wrapper exits
+success only for the observed nextest failure100. No claim of full test coverage
+from this selected controlled mutant. Raw output retained.
+
+PG4b MATCHED Darwin gate complete:all12 checks pass,1558 workspace cases pass,
+four compiler exclusions require separate Linux compiler jobs,461.040s nextest.
+Three post-run reviews: (1) workspace count changes by9 vsPG4a as documented,
+all feature compilation/doc/audit/license/style gates pass; (2) original five
+representation failures, foreign-view failure and controlled resume mutation
+remain evidence, native113 proof separately executes real storage; (3) no filter
+or threshold change, DB-free returns are not native proof, source hash remains
+7ea6c9a1220b94a201ad49269a91de014f517e44aca622b7e3f2207a43f39d79.
+Separate native ARM package passed113 without skips. Complete release gates and
+unimplemented capabilities remain open. Property tests ran normally; no timeout
+or process was suppressed to obtain this result.
+
+Normal PG4b signed-commit hook also passes all12 checks, fresh1558 cases/four
+compiler exclusions,456.756s; adapter source bytes unchanged, only new SQL evidence
+entered the broad Nix source filter. Three reviews: complete feature/style/audit
+matrix retained, native113 proof separate, no skipped compiler or cached run
+counted as fresh native execution. Initial commitd044228227148ecbded3269b2790174fe34611d8.
+PG4a protected PR379 is MERGED2026-10-18T09:16:24Z as
+e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1; head a0f422178ab45f086512f58205445837defa4505
+had40 green/1 scheduled skip, native104 zero skips,1549 workspace and21 mutation
+candidates17caught/4unviable,zero misses/timeouts. See CI39112792409 and39112792431.
+No publication or full-adapter acceptance claim follows these focused deliveries.
+
+Post-PR cross-capability review found a PG4b test loophole: DropInsert could now
+intercept new catalog insertion before an event existed. Key setup is committed
+before enabling that fault, so the next native INSERT necessarily stages an event
+inside the append transaction. Tightened selected case passes1/1,11 filtered,
+zero runtime skips credited,0.057s. Three reviews: (1) transaction source error
+and zero committed event assertion remain; (2) actual event statement now reaches
+CommandComplete before response loss, restoring the intended prefix rollback
+falsifier; (3) preseeded key does not bypass event writes and filtered cases are
+not counted. Earlier113-run evidence remains valid for its actual weaker fault
+point; it is not proof of event-prefix transport loss. Rerun full113 and commit
+this stronger oracle before PR380 merge. No production policy changed.
+
+PR380 stronger-event-prefix full native run:113/113 pass,zero skips/no filter,
+13.573s. Three post-run reviews: (1) all representation/migration/read/wake/outcome
+laws remain; (2) DropInsert now necessarily acknowledges an event statement before
+loss because its key already exists and no other INSERT precedes events; (3) no
+production behavior/filter/deadline changed, selected1-run not double-counted,
+all original failures retained. Normal signed hook and fresh protected CI must
+pass this stronger head before merge.

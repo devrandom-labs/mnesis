@@ -1,0 +1,103 @@
+TRUNCATE TABLE
+INSERT 0 1
+INSERT 0 40960
+ANALYZE
+SET
+PREPARE
+                                                                                  QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1175.54..1175.92 rows=153 width=232) (actual rows=256 loops=1)
+   Sort Key: events.txid, events.global_seq
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=779
+   ->  Nested Loop  (cost=1.32..1169.99 rows=153 width=232) (actual rows=256 loops=1)
+         Buffers: shared hit=779
+         ->  Nested Loop  (cost=1.16..1162.77 rows=153 width=139) (actual rows=256 loops=1)
+               Buffers: shared hit=777
+               ->  Subquery Scan on ranked  (cost=0.87..191.72 rows=153 width=16) (actual rows=256 loops=1)
+                     Filter: ((ranked.total_bytes <= ($5)::numeric) OR (ranked.ordinal = 1))
+                     Buffers: shared hit=9
+                     ->  WindowAgg  (cost=0.87..183.76 rows=455 width=84) (actual rows=256 loops=1)
+                           Buffers: shared hit=9
+                           ->  Subquery Scan on candidates  (cost=0.46..174.66 rows=455 width=24) (actual rows=256 loops=1)
+                                 Buffers: shared hit=9
+                                 ->  Limit  (cost=0.46..170.11 rows=455 width=44) (actual rows=256 loops=1)
+                                       Buffers: shared hit=9
+                                       ->  Nested Loop  (cost=0.46..1697.30 rows=4551 width=44) (actual rows=256 loops=1)
+                                             Buffers: shared hit=9
+                                             ->  Index Scan using events_watermark_idx on events events_1  (cost=0.30..1446.69 rows=4551 width=117) (actual rows=256 loops=1)
+                                                   Index Cond: ((txid < ($1)::xid8) AND (ROW(txid, global_seq) > ROW(($2)::xid8, $3)))
+                                                   Buffers: shared hit=7
+                                             ->  Memoize  (cost=0.16..0.19 rows=1 width=40) (actual rows=1 loops=256)
+                                                   Cache Key: events_1.stream_id
+                                                   Cache Mode: logical
+                                                   Hits: 255  Misses: 1  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                                   Buffers: shared hit=2
+                                                   ->  Index Scan using keys_pkey on keys keys_1  (cost=0.15..0.18 rows=1 width=40) (actual rows=1 loops=1)
+                                                         Index Cond: (number = events_1.stream_id)
+                                                         Buffers: shared hit=2
+               ->  Index Scan using events_pkey on events  (cost=0.29..6.35 rows=1 width=131) (actual rows=1 loops=256)
+                     Index Cond: (global_seq = ranked.global_seq)
+                     Buffers: shared hit=768
+         ->  Memoize  (cost=0.16..0.18 rows=1 width=40) (actual rows=1 loops=256)
+               Cache Key: events.stream_id
+               Cache Mode: logical
+               Hits: 255  Misses: 1  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+               Buffers: shared hit=2
+               ->  Index Scan using keys_pkey on keys  (cost=0.15..0.17 rows=1 width=40) (actual rows=1 loops=1)
+                     Index Cond: (number = events.stream_id)
+                     Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=60
+ Planning Time: 0.246 ms
+ Execution Time: 0.381 ms
+(45 rows)
+
+                                                                                  QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1175.54..1175.92 rows=153 width=232) (actual rows=256 loops=1)
+   Sort Key: events.txid, events.global_seq
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=781
+   ->  Nested Loop  (cost=1.32..1169.99 rows=153 width=232) (actual rows=256 loops=1)
+         Buffers: shared hit=781
+         ->  Nested Loop  (cost=1.16..1162.77 rows=153 width=139) (actual rows=256 loops=1)
+               Buffers: shared hit=779
+               ->  Subquery Scan on ranked  (cost=0.87..191.72 rows=153 width=16) (actual rows=256 loops=1)
+                     Filter: ((ranked.total_bytes <= ($5)::numeric) OR (ranked.ordinal = 1))
+                     Buffers: shared hit=11
+                     ->  WindowAgg  (cost=0.87..183.76 rows=455 width=84) (actual rows=256 loops=1)
+                           Buffers: shared hit=11
+                           ->  Subquery Scan on candidates  (cost=0.46..174.66 rows=455 width=24) (actual rows=256 loops=1)
+                                 Buffers: shared hit=11
+                                 ->  Limit  (cost=0.46..170.11 rows=455 width=44) (actual rows=256 loops=1)
+                                       Buffers: shared hit=11
+                                       ->  Nested Loop  (cost=0.46..1697.30 rows=4551 width=44) (actual rows=256 loops=1)
+                                             Buffers: shared hit=11
+                                             ->  Index Scan using events_watermark_idx on events events_1  (cost=0.30..1446.69 rows=4551 width=117) (actual rows=256 loops=1)
+                                                   Index Cond: ((txid < ($1)::xid8) AND (ROW(txid, global_seq) > ROW(($2)::xid8, $3)))
+                                                   Buffers: shared hit=9
+                                             ->  Memoize  (cost=0.16..0.19 rows=1 width=40) (actual rows=1 loops=256)
+                                                   Cache Key: events_1.stream_id
+                                                   Cache Mode: logical
+                                                   Hits: 255  Misses: 1  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                                   Buffers: shared hit=2
+                                                   ->  Index Scan using keys_pkey on keys keys_1  (cost=0.15..0.18 rows=1 width=40) (actual rows=1 loops=1)
+                                                         Index Cond: (number = events_1.stream_id)
+                                                         Buffers: shared hit=2
+               ->  Index Scan using events_pkey on events  (cost=0.29..6.35 rows=1 width=131) (actual rows=1 loops=256)
+                     Index Cond: (global_seq = ranked.global_seq)
+                     Buffers: shared hit=768
+         ->  Memoize  (cost=0.16..0.18 rows=1 width=40) (actual rows=1 loops=256)
+               Cache Key: events.stream_id
+               Cache Mode: logical
+               Hits: 255  Misses: 1  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+               Buffers: shared hit=2
+               ->  Index Scan using keys_pkey on keys  (cost=0.15..0.17 rows=1 width=40) (actual rows=1 loops=1)
+                     Index Cond: (number = events.stream_id)
+                     Buffers: shared hit=2
+ Planning Time: 0.004 ms
+ Execution Time: 0.350 ms
+(43 rows)
+
+DEALLOCATE

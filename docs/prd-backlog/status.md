@@ -28,7 +28,10 @@ PG10 requires its own consumer contract,
 acceptance criteria and dependency edges before activation. Labcast command IDs,
 deduplication and stale-worker rejection remain downstream responsibilities.
 
-Initial implementation PR: #376 (read/wake); migration and outcome slices pending. Required acceptance/CI: pending. Merge: none.
+Read/wake slice merged as PR376; outcome slice merged as PR377. Migration PR379
+is in CI. Representation candidate passes113 native cases and mutation checks;
+its full gate and focused PR remain pending. Required whole-adapter acceptance
+and release delivery remain open.
 Published adapter version and registry-consumer verification: pending.
 
 2026-10-18 delivery update: PG3 first phase slice merged as protected PR377,

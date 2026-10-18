@@ -1,6 +1,8 @@
 //! Native schema rejection witnesses; fixtures always restore their mutation.
 #![allow(clippy::unwrap_used, clippy::expect_used, reason = "test assertions")]
 
+mod support;
+
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -101,11 +103,12 @@ async fn fresh_install_is_explicit_and_repeated_migration_preserves_data() {
     let installed: Vec<(i64, bool, i32)> = sqlx::query_as(
         "SELECT version, success, octet_length(checksum) FROM mnesis._sqlx_migrations ORDER BY version",
     ).fetch_all(&pool).await.unwrap();
-    assert_eq!(installed, [(1, true, 48)]);
+    assert_eq!(installed, [(1, true, 48), (2, true, 48)]);
     sqlx::query(
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
-        VALUES ('repeat'::bytea, 1, 'Repeat', 1, 'data'::bytea)",
+        VALUES ($1, 1, 'Repeat', 1, 'data'::bytea)",
     )
+    .bind(support::key(&pool, b"repeat").await)
     .execute(&pool)
     .await
     .unwrap();
@@ -130,7 +133,7 @@ async fn legacy_adoption_preserves_payload_metadata_and_checkpoint() {
         .unwrap();
     assert_eq!(stored, assigned);
     let body: (Vec<u8>, Vec<u8>, i64, Option<Vec<u8>>) =
-        sqlx::query_as("SELECT stream_id, payload, schema_version, metadata FROM mnesis.events")
+        sqlx::query_as("SELECT keys.value, payload, schema_version, metadata FROM mnesis.events JOIN mnesis.keys ON keys.number = events.stream_id")
             .fetch_one(&pool)
             .await
             .unwrap();
@@ -236,7 +239,7 @@ async fn concurrent_migrations_apply_one_record_and_release_locks() {
             .fetch_one(&pool)
             .await
             .unwrap(),
-        1
+        2
     );
     unlocked(&pool).await;
 }
@@ -333,21 +336,21 @@ async fn checksum_and_newer_schema_are_rejected_without_repair() {
         .await
         .unwrap();
     sqlx::query("INSERT INTO mnesis._sqlx_migrations (version, description, success, checksum, execution_time) \
-        VALUES (2, 'future', true, 'future'::bytea, 0)").execute(&pool).await.unwrap();
+        VALUES (3, 'future', true, 'future'::bytea, 0)").execute(&pool).await.unwrap();
     assert!(matches!(
         PostgresStore::from_pool(pool.clone()).await,
         Err(PostgresError::Schema { .. })
     ));
     assert!(matches!(
         PostgresStore::migrate(&pool).await,
-        Err(PostgresError::Migration(MigrateError::VersionMissing(2)))
+        Err(PostgresError::Migration(MigrateError::VersionMissing(3)))
     ));
     assert_eq!(
         sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis._sqlx_migrations")
             .fetch_one(&pool)
             .await
             .unwrap(),
-        2
+        3
     );
 }
 
@@ -421,6 +424,8 @@ async fn runtime_role_reads_and_appends_without_schema_creation_rights() {
         "DROP ROLE IF EXISTS mnesis_pg4_runtime; CREATE ROLE mnesis_pg4_runtime LOGIN; \
         GRANT USAGE ON SCHEMA mnesis TO mnesis_pg4_runtime; \
         GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_pg4_runtime; \
+        GRANT SELECT, INSERT ON mnesis.keys TO mnesis_pg4_runtime; \
+        GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_pg4_runtime; \
         GRANT SELECT, INSERT ON mnesis.events TO mnesis_pg4_runtime; \
         GRANT USAGE ON SEQUENCE mnesis.events_global_seq_seq TO mnesis_pg4_runtime",
     )
@@ -573,7 +578,7 @@ async fn cancelling_a_blocked_migration_releases_its_session_and_transaction() {
             .fetch_one(&pool)
             .await
             .unwrap(),
-        1
+        2
     );
 }
 

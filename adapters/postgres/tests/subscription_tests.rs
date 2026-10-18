@@ -3,6 +3,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used, reason = "test assertions")]
 #![allow(clippy::missing_panics_doc, reason = "test assertions")]
 
+mod support;
+
 use std::pin::pin;
 use std::time::Duration;
 
@@ -49,7 +51,7 @@ async fn commit_without_hint(pool: &PgPool, id: &StreamKey) {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 1, 'Final', 1, 'payload'::bytea)",
     )
-    .bind(id.as_bytes())
+    .bind(support::key(pool, id.as_bytes()).await)
     .execute(pool)
     .await
     .unwrap();
