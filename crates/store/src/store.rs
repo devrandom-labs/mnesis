@@ -132,7 +132,7 @@ pub trait RawEventStore: Send + Sync {
 
     /// The adapter-defined `$all` resume position. See [`AllPosition`].
     ///
-    /// A scalar for an embedded store (fjall's `GlobalSeq`), a commit-ordered
+    /// A scalar for an embedded store (fjall's `GlobalSeq`), a transaction-ordered
     /// composite for a concurrent SQL store (postgres's `(txid, seq)`). It rides
     /// *alongside* `$all` events on [`AllStream`](Self::AllStream); the
     /// (position-free) [`PersistedEnvelope`] never carries it.
@@ -187,8 +187,9 @@ pub trait RawEventStore: Send + Sync {
     /// resumes from. It is **not** carried on the [`PersistedEnvelope`]; on the
     /// read path it is surfaced as a tag on each
     /// [`AllStream`](Self::AllStream) item. The position **must** be
-    /// monotonically increasing across *all* streams in commit order but is
-    /// **not** required to be gapless — an adapter may skip values (e.g. after
+    /// monotonically increasing across *all* streams in the stable delivery
+    /// order defined by [`AllPosition`], but is **not** required to be gapless —
+    /// an adapter may skip values (e.g. after
     /// an aborted append), and readers must tolerate gaps.
     ///
     /// # Return value
@@ -366,12 +367,17 @@ impl<S: RawEventStore> RawEventStore for Store<S> {
 
 /// Where an `$all` subscription resumes — **adapter-defined**.
 ///
-/// A scalar for an embedded store (fjall's `GlobalSeq`), a commit-ordered
+/// A scalar for an embedded store (fjall's `GlobalSeq`), a transaction-ordered
 /// composite for a concurrent SQL store (postgres's `(txid, seq)`), an LSN for
 /// a WAL tail. `mnesis-store` owns only this trait — the *abstraction*; the
 /// concrete position lives in the adapter (dependency direction: the store
 /// cannot reference its adapters), and it is **never** carried on the
 /// position-free [`PersistedEnvelope`].
+///
+/// Delivery order must respect non-overlapping appends: if one append completes
+/// before another begins, its positions precede the later append's positions.
+/// Overlapping appends may be ordered differently from their commit responses.
+/// Once a position is delivered, no earlier committed event may appear later.
 ///
 /// # Carried alongside events, not derived from them
 ///

@@ -1,0 +1,4 @@
+{"date":"2026-10-18","kind":"planning","feature":"postgres","result":"prd-prepared","record":"docs/prds/postgres.md","implementation_experiments":"not-run"}
+{"date":"2026-10-18","kind":"characterization","feature":"postgres","baseline":"747aea2881938d6a7f10a85aec1475bc8b8289e3","existing_tests_passed":56,"new_regressions_failed":4,"record":"docs/prds/postgres/research.md","production_changes":0}
+{"date":"2026-10-18","kind":"experiment","feature":"postgres","hypotheses":["H1","H2"],"result":"targeted-pass-full-gate-pending","database_tests_passed":63,"skipped":0,"record":"docs/prds/postgres/research.md","commit":"pending"}
+{"date":"2026-10-18","kind":"verification","feature":"postgres","hypotheses":["H1","H2"],"result":"full-darwin-gate-pass","checks":12,"database_tests_passed":63,"rust_diff_sha256":"18dda4e3770c6f357ec1c4043e22654c444f1af5c3aff3f58ae5cc2cc5d4f762","log":"/tmp/mnesis-postgres-flake-final.log","record":"docs/prds/postgres/research.md"}
