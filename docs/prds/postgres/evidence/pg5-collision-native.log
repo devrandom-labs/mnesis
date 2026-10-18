@@ -1,0 +1,13 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-atomic/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/store-testing)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-atomic/crates/test-domains)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.21s
+────────────
+ Nextest run ID 28f938b6-bd45-44a6-b608-2485a8560ee6 with nextest profile: default
+    Starting 2 tests across 1 binary (16 tests skipped)
+        PASS [   0.061s] (1/2) mnesis-postgres::outcome_tests failed_atomic_head_reconciliation_retains_the_original_unique_source
+        PASS [   0.028s] (2/2) mnesis-postgres::outcome_tests final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_head
+────────────
+     Summary [   0.090s] 2 tests run: 2 passed, 16 skipped

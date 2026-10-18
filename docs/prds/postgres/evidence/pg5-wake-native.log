@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.64s
+────────────
+ Nextest run ID 8b9cf072-9f8f-43c6-9689-762b7b8f2d45 with nextest profile: default
+    Starting 1 test across 11 binaries (138 tests skipped)
+        PASS [   0.385s] (1/1) mnesis-postgres::outcome_tests every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+────────────
+     Summary [   0.392s] 1 test run: 1 passed, 138 skipped

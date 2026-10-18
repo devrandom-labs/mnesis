@@ -1,0 +1,130 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-atomic/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-atomic/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/store-testing)
+error[E0277]: the trait bound `PostgresStore: mnesis_store::import::AtomicAppend` is not satisfied
+   --> adapters/postgres/tests/atomic_tests.rs:28:1
+    |
+ 28 | / mnesis_store_testing::conformance_atomic_append! {
+ 29 | |     factory: fixture,
+ 30 | |     skip_unless: || std::env::var("DATABASE_URL").is_ok(),
+ 31 | | }
+    | |_^ the trait `mnesis_store::import::AtomicAppend` is not implemented for `PostgresStore`
+    |
+help: the trait `mnesis_store::import::AtomicAppend` is implemented for `mnesis_store::store::Store<S>`
+   --> crates/store/src/import.rs:411:1
+    |
+411 | impl<S: AtomicAppend> AtomicAppend for Store<S> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `mnesis_store_testing::atomic::check_atomic_multi_stream_commits_all`
+   --> crates/store-testing/src/atomic.rs:22:8
+    |
+ 20 | pub async fn check_atomic_multi_stream_commits_all<S, C, F, Fut>(factory: &F)
+    |              ------------------------------------- required by a bound in this function
+ 21 | where
+ 22 |     S: AtomicAppend + WakeSource,
+    |        ^^^^^^^^^^^^ required by this bound in `check_atomic_multi_stream_commits_all`
+    = note: this error originates in the macro `$crate::__conformance_case` which comes from the expansion of the macro `mnesis_store_testing::conformance_atomic_append` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `PostgresStore: mnesis_store::import::AtomicAppend` is not satisfied
+   --> adapters/postgres/tests/atomic_tests.rs:28:1
+    |
+ 28 | / mnesis_store_testing::conformance_atomic_append! {
+ 29 | |     factory: fixture,
+ 30 | |     skip_unless: || std::env::var("DATABASE_URL").is_ok(),
+ 31 | | }
+    | |_^ the trait `mnesis_store::import::AtomicAppend` is not implemented for `PostgresStore`
+    |
+help: the trait `mnesis_store::import::AtomicAppend` is implemented for `mnesis_store::store::Store<S>`
+   --> crates/store/src/import.rs:411:1
+    |
+411 | impl<S: AtomicAppend> AtomicAppend for Store<S> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `mnesis_store_testing::atomic::check_atomic_conflict_aborts_all`
+   --> crates/store-testing/src/atomic.rs:97:8
+    |
+ 95 | pub async fn check_atomic_conflict_aborts_all<S, C, F, Fut>(factory: &F)
+    |              -------------------------------- required by a bound in this function
+ 96 | where
+ 97 |     S: AtomicAppend + WakeSource,
+    |        ^^^^^^^^^^^^ required by this bound in `check_atomic_conflict_aborts_all`
+    = note: this error originates in the macro `$crate::__conformance_case` which comes from the expansion of the macro `mnesis_store_testing::conformance_atomic_append` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `PostgresStore: mnesis_store::import::AtomicAppend` is not satisfied
+   --> adapters/postgres/tests/atomic_tests.rs:28:1
+    |
+ 28 | / mnesis_store_testing::conformance_atomic_append! {
+ 29 | |     factory: fixture,
+ 30 | |     skip_unless: || std::env::var("DATABASE_URL").is_ok(),
+ 31 | | }
+    | |_^ the trait `mnesis_store::import::AtomicAppend` is not implemented for `PostgresStore`
+    |
+help: the trait `mnesis_store::import::AtomicAppend` is implemented for `mnesis_store::store::Store<S>`
+   --> crates/store/src/import.rs:411:1
+    |
+411 | impl<S: AtomicAppend> AtomicAppend for Store<S> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `mnesis_store_testing::atomic::check_atomic_empty_batch_is_noop`
+   --> crates/store-testing/src/atomic.rs:154:8
+    |
+152 | pub async fn check_atomic_empty_batch_is_noop<S, C, F, Fut>(factory: &F)
+    |              -------------------------------- required by a bound in this function
+153 | where
+154 |     S: AtomicAppend + WakeSource,
+    |        ^^^^^^^^^^^^ required by this bound in `check_atomic_empty_batch_is_noop`
+    = note: this error originates in the macro `$crate::__conformance_case` which comes from the expansion of the macro `mnesis_store_testing::conformance_atomic_append` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `PostgresStore: mnesis_store::import::AtomicAppend` is not satisfied
+   --> adapters/postgres/tests/atomic_tests.rs:28:1
+    |
+ 28 | / mnesis_store_testing::conformance_atomic_append! {
+ 29 | |     factory: fixture,
+ 30 | |     skip_unless: || std::env::var("DATABASE_URL").is_ok(),
+ 31 | | }
+    | |_^ the trait `mnesis_store::import::AtomicAppend` is not implemented for `PostgresStore`
+    |
+help: the trait `mnesis_store::import::AtomicAppend` is implemented for `mnesis_store::store::Store<S>`
+   --> crates/store/src/import.rs:411:1
+    |
+411 | impl<S: AtomicAppend> AtomicAppend for Store<S> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `mnesis_store_testing::atomic::check_atomic_duplicate_targets_reject_all`
+   --> crates/store-testing/src/atomic.rs:244:8
+    |
+242 | pub async fn check_atomic_duplicate_targets_reject_all<S, C, F, Fut>(factory: &F)
+    |              ----------------------------------------- required by a bound in this function
+243 | where
+244 |     S: AtomicAppend + WakeSource,
+    |        ^^^^^^^^^^^^ required by this bound in `check_atomic_duplicate_targets_reject_all`
+    = note: this error originates in the macro `$crate::__conformance_case` which comes from the expansion of the macro `mnesis_store_testing::conformance_atomic_append` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `PostgresStore: mnesis_store::import::AtomicAppend` is not satisfied
+   --> adapters/postgres/tests/atomic_tests.rs:28:1
+    |
+ 28 | / mnesis_store_testing::conformance_atomic_append! {
+ 29 | |     factory: fixture,
+ 30 | |     skip_unless: || std::env::var("DATABASE_URL").is_ok(),
+ 31 | | }
+    | |_^ the trait `mnesis_store::import::AtomicAppend` is not implemented for `PostgresStore`
+    |
+help: the trait `mnesis_store::import::AtomicAppend` is implemented for `mnesis_store::store::Store<S>`
+   --> crates/store/src/import.rs:411:1
+    |
+411 | impl<S: AtomicAppend> AtomicAppend for Store<S> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `mnesis_store_testing::atomic::check_atomic_malformed_runs_reject_all`
+   --> crates/store-testing/src/atomic.rs:191:8
+    |
+189 | pub async fn check_atomic_malformed_runs_reject_all<S, C, F, Fut>(factory: &F)
+    |              -------------------------------------- required by a bound in this function
+190 | where
+191 |     S: AtomicAppend + WakeSource,
+    |        ^^^^^^^^^^^^ required by this bound in `check_atomic_malformed_runs_reject_all`
+    = note: this error originates in the macro `$crate::__conformance_case` which comes from the expansion of the macro `mnesis_store_testing::conformance_atomic_append` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `mnesis-postgres` (test "atomic_tests") due to 10 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test atomic_tests --all-features` exited with code 101

@@ -1,0 +1,1673 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 22.511766958,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 21.371368417,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:293:5: replace insert_one -> Result<PgAllPos, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "insert_one",
+            "return_type": "-> Result<PgAllPos, PostgresError>",
+            "span": {
+              "start": {
+                "line": 278,
+                "column": 1
+              },
+              "end": {
+                "line": 322,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 293,
+              "column": 5
+            },
+            "end": {
+              "line": 321,
+              "column": 6
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_293_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_293_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.484273291,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:331:5: replace insert_run -> Result<PgAllPos, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "insert_run",
+            "return_type": "-> Result<PgAllPos, PostgresError>",
+            "span": {
+              "start": {
+                "line": 324,
+                "column": 1
+              },
+              "end": {
+                "line": 336,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 331,
+              "column": 5
+            },
+            "end": {
+              "line": 335,
+              "column": 17
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_331_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_331_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.622137125,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:343:5: replace append_error -> AppendError<PostgresError> with AppendError::new()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "append_error",
+            "return_type": "-> AppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 338,
+                "column": 1
+              },
+              "end": {
+                "line": 351,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 343,
+              "column": 5
+            },
+            "end": {
+              "line": 350,
+              "column": 30
+            }
+          },
+          "replacement": "AppendError::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_343_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_343_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.680423916,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:343:5: replace append_error -> AppendError<PostgresError> with AppendError::from_iter([Default::default()])",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "append_error",
+            "return_type": "-> AppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 338,
+                "column": 1
+              },
+              "end": {
+                "line": 351,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 343,
+              "column": 5
+            },
+            "end": {
+              "line": 350,
+              "column": 30
+            }
+          },
+          "replacement": "AppendError::from_iter([Default::default()])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_343_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_343_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.653516875,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:343:5: replace append_error -> AppendError<PostgresError> with AppendError::new(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "append_error",
+            "return_type": "-> AppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 338,
+                "column": 1
+              },
+              "end": {
+                "line": 351,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 343,
+              "column": 5
+            },
+            "end": {
+              "line": 350,
+              "column": 30
+            }
+          },
+          "replacement": "AppendError::new(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_343_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_343_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.590363834,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:343:5: replace append_error -> AppendError<PostgresError> with AppendError::from(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "append_error",
+            "return_type": "-> AppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 338,
+                "column": 1
+              },
+              "end": {
+                "line": 351,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 343,
+              "column": 5
+            },
+            "end": {
+              "line": 350,
+              "column": 30
+            }
+          },
+          "replacement": "AppendError::from(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_343_col_5_003.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_343_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.626509,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:358:5: replace head_version -> Result<Option<Version>, PostgresError> with Ok(None)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "head_version",
+            "return_type": "-> Result<Option<Version>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 353,
+                "column": 1
+              },
+              "end": {
+                "line": 366,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 358,
+              "column": 5
+            },
+            "end": {
+              "line": 365,
+              "column": 21
+            }
+          },
+          "replacement": "Ok(None)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_358_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_358_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 12.251182125,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.621712792,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:358:5: replace head_version -> Result<Option<Version>, PostgresError> with Ok(Some(Default::default()))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "head_version",
+            "return_type": "-> Result<Option<Version>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 353,
+                "column": 1
+              },
+              "end": {
+                "line": 366,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 358,
+              "column": 5
+            },
+            "end": {
+              "line": 365,
+              "column": 21
+            }
+          },
+          "replacement": "Ok(Some(Default::default()))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_358_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_358_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.632833833,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:465:5: replace is_stream_conflict -> bool with true",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "is_stream_conflict",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 463,
+                "column": 1
+              },
+              "end": {
+                "line": 469,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 465,
+              "column": 5
+            },
+            "end": {
+              "line": 468,
+              "column": 77
+            }
+          },
+          "replacement": "true",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_465_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_465_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.05153925,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.1936995,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:465:5: replace is_stream_conflict -> bool with false",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "is_stream_conflict",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 463,
+                "column": 1
+              },
+              "end": {
+                "line": 469,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 465,
+              "column": 5
+            },
+            "end": {
+              "line": 468,
+              "column": 77
+            }
+          },
+          "replacement": "false",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_465_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_465_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.7228052080000005,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.0347765,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:480:9: replace PostgresStore::notify_committed with ()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "PostgresStore::notify_committed",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 476,
+                "column": 5
+              },
+              "end": {
+                "line": 482,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 480,
+              "column": 9
+            },
+            "end": {
+              "line": 481,
+              "column": 85
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_480_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_480_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.913116458,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 22.026271709,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:487:9: replace PostgresStore::publish_hint with ()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "PostgresStore::publish_hint",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 484,
+                "column": 5
+              },
+              "end": {
+                "line": 500,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 487,
+              "column": 9
+            },
+            "end": {
+              "line": 499,
+              "column": 20
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_487_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_487_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.668167958,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 10.232767,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:524:9: replace <impl RawEventStore for PostgresStore>::append -> Result<Self::AllPosition, AppendError<Self::Error>> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "<impl RawEventStore for PostgresStore>::append",
+            "return_type": "-> Result<Self::AllPosition, AppendError<Self::Error>>",
+            "span": {
+              "start": {
+                "line": 518,
+                "column": 5
+              },
+              "end": {
+                "line": 557,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 524,
+              "column": 9
+            },
+            "end": {
+              "line": 556,
+              "column": 21
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_524_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_524_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.646179792,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:18:5: replace prepare -> Result<Option<i64>, AtomicAppendError<PostgresError>> with Ok(None)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "prepare",
+            "return_type": "-> Result<Option<i64>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 18,
+              "column": 5
+            },
+            "end": {
+              "line": 25,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(None)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_18_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_18_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.974331209,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.928740792,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:18:5: replace prepare -> Result<Option<i64>, AtomicAppendError<PostgresError>> with Ok(Some(0))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "prepare",
+            "return_type": "-> Result<Option<i64>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 18,
+              "column": 5
+            },
+            "end": {
+              "line": 25,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some(0))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_18_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_18_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.61000775,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.470418,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:18:5: replace prepare -> Result<Option<i64>, AtomicAppendError<PostgresError>> with Ok(Some(1))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "prepare",
+            "return_type": "-> Result<Option<i64>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 18,
+              "column": 5
+            },
+            "end": {
+              "line": 25,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some(1))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_18_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_18_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.228418709,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.53235325,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:18:5: replace prepare -> Result<Option<i64>, AtomicAppendError<PostgresError>> with Ok(Some(-1))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "prepare",
+            "return_type": "-> Result<Option<i64>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 18,
+              "column": 5
+            },
+            "end": {
+              "line": 25,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some(-1))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_18_col_5_003.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_18_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 7.863503875,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.528464417,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:22:15: replace != with == in prepare",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "prepare",
+            "return_type": "-> Result<Option<i64>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 22,
+              "column": 15
+            },
+            "end": {
+              "line": 22,
+              "column": 17
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_22_col_15.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_22_col_15.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.623230417,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.017134417,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:33:5: replace insert -> Result<PgAllPos, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "insert",
+            "return_type": "-> Result<PgAllPos, PostgresError>",
+            "span": {
+              "start": {
+                "line": 28,
+                "column": 1
+              },
+              "end": {
+                "line": 38,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 33,
+              "column": 5
+            },
+            "end": {
+              "line": 37,
+              "column": 71
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_33_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_33_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.277011083,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:49:9: replace PostgresStore::rejected -> AtomicAppendError<PostgresError> with AtomicAppendError::new()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "PostgresStore::rejected",
+            "return_type": "-> AtomicAppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 49,
+              "column": 9
+            },
+            "end": {
+              "line": 65,
+              "column": 40
+            }
+          },
+          "replacement": "AtomicAppendError::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_49_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_49_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.942538375,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:49:9: replace PostgresStore::rejected -> AtomicAppendError<PostgresError> with AtomicAppendError::from_iter([Default::default()])",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "PostgresStore::rejected",
+            "return_type": "-> AtomicAppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 49,
+              "column": 9
+            },
+            "end": {
+              "line": 65,
+              "column": 40
+            }
+          },
+          "replacement": "AtomicAppendError::from_iter([Default::default()])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_49_col_9_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_49_col_9_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.09253075,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:49:9: replace PostgresStore::rejected -> AtomicAppendError<PostgresError> with AtomicAppendError::new(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "PostgresStore::rejected",
+            "return_type": "-> AtomicAppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 49,
+              "column": 9
+            },
+            "end": {
+              "line": 65,
+              "column": 40
+            }
+          },
+          "replacement": "AtomicAppendError::new(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_49_col_9_002.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_49_col_9_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.908723625,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:49:9: replace PostgresStore::rejected -> AtomicAppendError<PostgresError> with AtomicAppendError::from(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "PostgresStore::rejected",
+            "return_type": "-> AtomicAppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 49,
+              "column": 9
+            },
+            "end": {
+              "line": 65,
+              "column": 40
+            }
+          },
+          "replacement": "AtomicAppendError::from(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_49_col_9_003.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_49_col_9_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.393988333,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:50:13: replace && with || in PostgresStore::rejected",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "PostgresStore::rejected",
+            "return_type": "-> AtomicAppendError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 50,
+              "column": 13
+            },
+            "end": {
+              "line": 50,
+              "column": 15
+            }
+          },
+          "replacement": "||",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_50_col_13.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_50_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 14.075986334,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 8.282835833,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:74:9: replace <impl AtomicAppend for PostgresStore>::atomic_append_many -> Result<Option<PgAllPos>, AtomicAppendError<PostgresError>> with Ok(None)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "<impl AtomicAppend for PostgresStore>::atomic_append_many",
+            "return_type": "-> Result<Option<PgAllPos>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 70,
+                "column": 5
+              },
+              "end": {
+                "line": 128,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 74,
+              "column": 9
+            },
+            "end": {
+              "line": 127,
+              "column": 27
+            }
+          },
+          "replacement": "Ok(None)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_74_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_74_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 18.944978375,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.838356916,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/atomic.rs:74:9: replace <impl AtomicAppend for PostgresStore>::atomic_append_many -> Result<Option<PgAllPos>, AtomicAppendError<PostgresError>> with Ok(Some(Default::default()))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/atomic.rs",
+          "function": {
+            "function_name": "<impl AtomicAppend for PostgresStore>::atomic_append_many",
+            "return_type": "-> Result<Option<PgAllPos>, AtomicAppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 70,
+                "column": 5
+              },
+              "end": {
+                "line": 128,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 74,
+              "column": 9
+            },
+            "end": {
+              "line": 127,
+              "column": 27
+            }
+          },
+          "replacement": "Ok(Some(Default::default()))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__atomic.rs_line_74_col_9_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__atomic.rs_line_74_col_9_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.049521709,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 26,
+  "missed": 0,
+  "caught": 12,
+  "timeout": 0,
+  "unviable": 14,
+  "success": 0,
+  "start_time": "2026-10-18T10:53:50.25933Z",
+  "end_time": "2026-10-18T11:00:01.105696Z",
+  "cargo_mutants_version": "27.1.0"
+}

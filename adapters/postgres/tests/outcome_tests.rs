@@ -11,6 +11,12 @@
 
 mod support;
 
+#[cfg(feature = "import")]
+#[path = "support/sections.rs"]
+mod sections;
+
+#[cfg(feature = "import")]
+use futures::{FutureExt, TryStreamExt};
 use std::future::pending;
 use std::io::{self, Write, stderr};
 use std::path::PathBuf;
@@ -39,6 +45,8 @@ enum Fault {
     DropCommit,
     HoldCommit,
     HoldHint,
+    #[cfg(feature = "import")]
+    HoldSecondHead,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -48,6 +56,8 @@ enum Observation {
     Inserted,
     Committed,
     Hint,
+    #[cfg(feature = "import")]
+    SecondHead,
 }
 
 struct Proxy {
@@ -67,6 +77,10 @@ impl Drop for Proxy {
 
 impl Proxy {
     fn start(options: &PgConnectOptions) -> Self {
+        Self::start_with(options, Fault::Pass)
+    }
+
+    fn start_with(options: &PgConnectOptions, initial: Fault) -> Self {
         let target = options
             .get_socket()
             .expect("fault profile requires a Unix socket")
@@ -78,7 +92,7 @@ impl Proxy {
                 .join(format!(".s.PGSQL.{}", options.get_port())),
         )
         .unwrap();
-        let (fault, mode) = watch::channel(Fault::Pass);
+        let (fault, mode) = watch::channel(initial);
         let (observed, seen) = watch::channel(Observation::Waiting);
         let task = tokio::spawn(async move {
             let mut connections = JoinSet::new();
@@ -131,8 +145,16 @@ async fn forward(
     let server = UnixStream::connect(destination).await?;
     let (mut client_read, mut client_write) = client.into_split();
     let (mut server_read, mut server_write) = server.into_split();
+    #[cfg(feature = "import")]
+    let initial = *mode.borrow();
     tokio::select! {
-        result = tokio::io::copy(&mut client_read, &mut server_write) => result.map(|_| ()),
+        result = async {
+            #[cfg(feature = "import")]
+            if matches!(initial, Fault::HoldSecondHead) {
+                return forward_heads(&mut client_read, &mut server_write, mode.clone(), observed.clone()).await;
+            }
+            tokio::io::copy(&mut client_read, &mut server_write).await.map(|_| ())
+        } => result,
         result = async {
             loop {
                 // Backend protocol: one-byte tag, four-byte BE length including
@@ -147,6 +169,9 @@ async fn forward(
                     observed.send_replace(Observation::Committed);
                 }
                 let fault = *mode.borrow();
+                if tag == b'A' && matches!(fault, Fault::HoldHint) {
+                    continue;
+                }
                 let outcome = match (tag, body.as_slice(), fault) {
                     (b'C', b"BEGIN\0", Fault::DropBegin) => Some(Observation::Begun),
                     (b'C', b"COMMIT\0", Fault::DropCommit | Fault::HoldCommit) => Some(Observation::Committed),
@@ -170,6 +195,52 @@ async fn forward(
     }
 }
 
+#[cfg(feature = "import")]
+const SECOND_HEAD: &[u8] = b"pg5-order-second";
+
+#[cfg(feature = "import")]
+async fn forward_heads(
+    client: &mut tokio::net::unix::OwnedReadHalf,
+    server: &mut tokio::net::unix::OwnedWriteHalf,
+    mut mode: watch::Receiver<Fault>,
+    observed: watch::Sender<Observation>,
+) -> io::Result<()> {
+    // SSL is disabled for this Unix-only fixture. Startup has no message tag.
+    let startup = client.read_u32().await?;
+    let size = startup
+        .checked_sub(4)
+        .filter(|n| *n <= 1_048_576)
+        .ok_or_else(|| io::Error::other("invalid test startup packet"))?;
+    let mut parameters = vec![0; usize::try_from(size).unwrap()];
+    client.read_exact(&mut parameters).await?;
+    server.write_u32(startup).await?;
+    server.write_all(&parameters).await?;
+    loop {
+        let tag = client.read_u8().await?;
+        let length = client.read_u32().await?;
+        let body_size = length
+            .checked_sub(4)
+            .filter(|n| *n <= 1_048_576)
+            .ok_or_else(|| io::Error::other("invalid test frontend packet"))?;
+        let mut body = vec![0; usize::try_from(body_size).unwrap()];
+        client.read_exact(&mut body).await?;
+        if tag == b'B'
+            && body
+                .windows(SECOND_HEAD.len())
+                .any(|part| part == SECOND_HEAD)
+            && matches!(*mode.borrow(), Fault::HoldSecondHead)
+        {
+            observed.send_replace(Observation::SecondHead);
+            mode.wait_for(|phase| !matches!(phase, Fault::HoldSecondHead))
+                .await
+                .map_err(io::Error::other)?;
+        }
+        server.write_u8(tag).await?;
+        server.write_u32(length).await?;
+        server.write_all(&body).await?;
+    }
+}
+
 async fn fixture() -> Option<(Proxy, PostgresStore, PgPool)> {
     let url = std::env::var("DATABASE_URL").ok()?;
     let options = PgConnectOptions::from_str(&url)
@@ -181,6 +252,8 @@ async fn fixture() -> Option<(Proxy, PostgresStore, PgPool)> {
         .await
         .unwrap();
     PostgresStore::migrate(&control).await.unwrap();
+    sqlx::raw_sql("DROP TRIGGER IF EXISTS ssi_read ON mnesis.events; DROP TRIGGER IF EXISTS foreign_unique ON mnesis.events; DROP FUNCTION IF EXISTS mnesis.ssi_read(); DROP FUNCTION IF EXISTS mnesis.foreign_unique(); DROP SCHEMA IF EXISTS mnesis_foreign CASCADE")
+        .execute(&control).await.unwrap();
     let setup = PostgresStore::from_pool(control.clone()).await.unwrap();
     sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&control)
@@ -641,4 +714,656 @@ async fn wait_for_insert(control: &PgPool) {
     })
     .await
     .expect("the actual INSERT must wait on the uncommitted winning row");
+}
+
+#[cfg(feature = "import")]
+fn atomic_writes(count: usize) -> Vec<mnesis_store::import::PlannedAppend> {
+    let mut rows = events().into_iter();
+    let head = rows.next().unwrap();
+    let tail: Vec<_> = rows.collect();
+    (0..count)
+        .map(|number| mnesis_store::import::PlannedAppend {
+            target: StreamKey::from_bytes(format!("atomic-{number}")),
+            expected_version: None,
+            head: head.clone(),
+            tail: tail.clone(),
+        })
+        .collect()
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn lost_atomic_commit_ack_preserves_the_whole_transaction_and_source() {
+    use mnesis_store::import::{AtomicAppend, AtomicAppendError};
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    proxy.fault.send_replace(Fault::DropCommit);
+    let result = store.atomic_append_many(&atomic_writes(2)).await;
+    proxy.observed(Observation::Committed).await;
+    assert_eq!(
+        count(&control).await,
+        6,
+        "both complete runs really committed"
+    );
+    assert!(
+        matches!(result, Err(AtomicAppendError::Store(PostgresError::CommitUnknown(sqlx::Error::Io(ref source)))) if source.kind() == io::ErrorKind::UnexpectedEof)
+    );
+    assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(DISTINCT txid::text) FROM mnesis.events")
+            .fetch_one(&control)
+            .await
+            .unwrap(),
+        1
+    );
+    proxy.fault.send_replace(Fault::Pass);
+    let reconciled: Vec<_> = store
+        .read_all(None)
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(reconciled.len(), 6);
+    for key in ["atomic-0", "atomic-1"] {
+        assert_eq!(
+            reconciled
+                .iter()
+                .filter(|row| row.1.as_bytes() == key.as_bytes())
+                .map(|row| row.2.version().as_u64())
+                .collect::<Vec<_>>(),
+            [1, 2, 3]
+        );
+    }
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn import_wrapper_preserves_uncertainty_for_both_policies_without_resubmission() {
+    use mnesis_store::Store;
+    use mnesis_store::import::{Atomicity, EventImporter, ImportError};
+    for policy in [Atomicity::WholeChunk, Atomicity::PerStream] {
+        let Some((mut proxy, raw, control)) = fixture().await else {
+            return;
+        };
+        let input = sections::pair();
+        let store = Store::new(raw);
+        proxy.fault.send_replace(Fault::DropCommit);
+        let result = store.import(&input, StreamKey::from_slice, policy).await;
+        proxy.observed(Observation::Committed).await;
+        assert!(
+            matches!(result, Err(ImportError::Store(PostgresError::CommitUnknown(sqlx::Error::Io(ref source))))
+            if source.kind() == io::ErrorKind::UnexpectedEof),
+            "lost import acknowledgement: {result:?}"
+        );
+        let rows: Vec<(Vec<u8>, String)> = sqlx::query_as(
+            "SELECT k.value, e.version::text FROM mnesis.events e JOIN mnesis.keys k ON k.number = e.stream_id ORDER BY e.global_seq",
+        ).fetch_all(&control).await.unwrap();
+        let first = [
+            (input[0].origin.to_vec(), "1".to_owned()),
+            (input[0].origin.to_vec(), "2".to_owned()),
+        ];
+        match policy {
+            Atomicity::WholeChunk => assert_eq!(
+                rows,
+                [
+                    first[0].clone(),
+                    first[1].clone(),
+                    (input[1].origin.to_vec(), "1".to_owned()),
+                    (input[1].origin.to_vec(), "2".to_owned())
+                ]
+            ),
+            Atomicity::PerStream => assert_eq!(rows, first),
+        }
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(DISTINCT txid::text) FROM mnesis.events")
+                .fetch_one(&control)
+                .await
+                .unwrap(),
+            1
+        );
+    }
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn every_local_atomic_target_wakes_before_the_first_native_hint_finishes() {
+    use mnesis_store::import::AtomicAppend;
+    use mnesis_store::wake::{WakeRegistration, WakeSource};
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let writes = atomic_writes(3);
+    let mut registrations: Vec<_> = writes
+        .iter()
+        .map(|write| store.register(Some(write.target.as_bytes())).unwrap())
+        .collect();
+    registrations.push(store.register(None).unwrap());
+    let start = std::time::Instant::now();
+    let waiting: Vec<_> = registrations.iter().map(WakeRegistration::arm).collect();
+    proxy.fault.send_replace(Fault::HoldHint);
+    let client = store.clone();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { client.atomic_append_many(&writes).await });
+    proxy.observed(Observation::Hint).await;
+    assert!(
+        start.elapsed() < Duration::from_secs(1),
+        "the periodic fallback must not satisfy the local-wake oracle"
+    );
+    for wait in waiting {
+        assert!(
+            wait.now_or_never().is_some(),
+            "every stream and global wait must already be ready while native hints are blocked"
+        );
+    }
+    assert_eq!(count(&control).await, 9);
+    proxy.fault.send_replace(Fault::Pass);
+    assert!(pending.join_next().await.unwrap().unwrap().is_ok());
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn caller_timeout_after_atomic_commit_is_not_rollback() {
+    use mnesis_store::import::AtomicAppend;
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    proxy.fault.send_replace(Fault::HoldCommit);
+    let writes = atomic_writes(2);
+    let timed_out = {
+        let mut save = pin!(store.atomic_append_many(&writes));
+        tokio::select! {
+            () = proxy.observed(Observation::Committed) => {},
+            result = &mut save => panic!("commit acknowledgement was not held: {result:?}"),
+        }
+        assert_eq!(count(&control).await, 6);
+        timeout(Duration::from_millis(100), save).await.is_err()
+    };
+    assert!(timed_out);
+    assert_eq!(
+        count(&control).await,
+        6,
+        "dropping the timed-out future cannot undo this commit"
+    );
+    proxy.fault.send_replace(Fault::Pass);
+    assert_eq!(
+        store
+            .read_all(None)
+            .await
+            .unwrap()
+            .try_collect::<Vec<_>>()
+            .await
+            .unwrap()
+            .len(),
+        6
+    );
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn atomic_hint_deadline_covers_every_target_together() {
+    use mnesis_store::import::AtomicAppend;
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    proxy.fault.send_replace(Fault::HoldHint);
+    let writes = atomic_writes(16);
+    let mut save = pin!(store.atomic_append_many(&writes));
+    tokio::select! {
+        () = proxy.observed(Observation::Hint) => {},
+        result = &mut save => panic!("first native hint acknowledgement was not held: {result:?}"),
+    }
+    let committed = timeout(Duration::from_millis(900), save)
+        .await
+        .expect("native hint waits must not multiply by the16 targets")
+        .unwrap()
+        .unwrap();
+    assert_eq!(count(&control).await, 48);
+    assert_eq!(committed.seq(), 48);
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id() {
+    use mnesis_store::import::{AtomicAppend, PlannedAppend};
+    let Some((old_proxy, old_store, control)) = fixture().await else {
+        return;
+    };
+    drop(old_store);
+    drop(old_proxy);
+    let controller = PostgresStore::from_pool(control.clone()).await.unwrap();
+    let mut proxy = Proxy::start_with(&control.connect_options(), Fault::HoldSecondHead);
+    let backing = PgPoolOptions::new()
+        .max_connections(4)
+        .connect_with(proxy.options.clone())
+        .await
+        .unwrap();
+    let writer = PostgresStore::from_pool(backing).await.unwrap();
+    let first = StreamKey::from_bytes("pg5-order-first");
+    let second = StreamKey::from_bytes(SECOND_HEAD);
+    let make = |target, expected_version, version| PlannedAppend {
+        target,
+        expected_version,
+        head: pending_envelope(Version::new(version).unwrap())
+            .event_type("Order")
+            .payload(b"value".as_slice())
+            .build()
+            .unwrap(),
+        tail: Vec::new(),
+    };
+    let requests = [
+        make(first.clone(), None, 1),
+        make(second.clone(), Some(Version::INITIAL), 2),
+    ];
+    let mut append = pin!(writer.atomic_append_many(&requests));
+    tokio::select! {
+        () = proxy.observed(Observation::SecondHead) => {},
+        result = &mut append => panic!("second head never reached the observed Bind boundary: {result:?}"),
+    }
+    let before_xid: Option<String> = sqlx::query_scalar("SELECT backend_xid::text FROM pg_stat_activity WHERE datname = current_database() AND application_name = $1 AND state = 'idle in transaction'")
+        .bind(control.connect_options().get_application_name().unwrap()).fetch_one(&control).await.unwrap();
+    let seed = events();
+    let predecessor = controller
+        .append(&second, None, PendingBatch::new(&seed[..1]).unwrap())
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::Pass);
+    let assigned = timeout(Duration::from_secs(3), append)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    let delivered: Vec<_> = writer
+        .read_all(None)
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(delivered.len(), 3);
+    let versions: Vec<_> = delivered
+        .iter()
+        .filter(|row| row.1 == second)
+        .map(|row| row.2.version().as_u64())
+        .collect();
+    assert_eq!(
+        versions,
+        [1, 2],
+        "a successor must not obtain a transaction id before its committed predecessor; prior writer xid={before_xid:?}"
+    );
+    assert!(
+        before_xid.is_none(),
+        "head inspection allocated xid before the first write: {before_xid:?}"
+    );
+    assert!(assigned > predecessor);
+    assert_eq!(delivered.last().unwrap().0, assigned);
+    assert_eq!(delivered[0].0, predecessor);
+    assert_eq!(delivered.iter().filter(|row| row.1 == first).count(), 1);
+}
+
+#[cfg(feature = "import")]
+struct Collision {
+    pending: JoinSet<
+        Result<
+            Option<mnesis_postgres::PgAllPos>,
+            mnesis_store::import::AtomicAppendError<PostgresError>,
+        >,
+    >,
+    winner: sqlx::Transaction<'static, sqlx::Postgres>,
+    prefix: StreamKey,
+}
+
+#[cfg(feature = "import")]
+impl Collision {
+    async fn start(store: PostgresStore, control: &PgPool) -> Self {
+        use mnesis_store::import::AtomicAppend;
+        let target = StreamKey::from_bytes(format!("atomic-race-final-{}", std::process::id()));
+        let number = support::key(control, target.as_bytes()).await;
+        let mut winner = control.begin().await.unwrap();
+        sqlx::query("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Winner', 1, 'winner'::bytea)")
+            .bind(number).execute(&mut *winner).await.unwrap();
+        let prefix = StreamKey::from_bytes(format!("atomic-race-prefix-{}", std::process::id()));
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis.keys WHERE value = $1")
+                .bind(prefix.as_bytes())
+                .fetch_one(control)
+                .await
+                .unwrap(),
+            0
+        );
+        let mut requests = atomic_writes(2);
+        requests[0].target = prefix.clone();
+        requests[1].target = target;
+        let mut pending = JoinSet::new();
+        pending.spawn(async move { store.atomic_append_many(&requests).await });
+        wait_for_insert(control).await;
+        Self {
+            pending,
+            winner,
+            prefix,
+        }
+    }
+
+    async fn finish(
+        mut self,
+        control: &PgPool,
+    ) -> mnesis_store::import::AtomicAppendError<PostgresError> {
+        self.winner.commit().await.unwrap();
+        let result = self
+            .pending
+            .join_next()
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap_err();
+        let rows: Vec<(String, Vec<u8>)> =
+            sqlx::query_as("SELECT version::text, payload FROM mnesis.events")
+                .fetch_all(control)
+                .await
+                .unwrap();
+        assert_eq!(rows, [("1".to_owned(), b"winner".to_vec())]);
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis.keys WHERE value = $1")
+                .bind(self.prefix.as_bytes())
+                .fetch_one(control)
+                .await
+                .unwrap(),
+            0
+        );
+        result
+    }
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_head() {
+    use mnesis_store::import::AtomicAppendError;
+    let Some((_proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let race = Collision::start(store, &control).await;
+    let result = race.finish(&control).await;
+    assert!(
+        matches!(result, AtomicAppendError::Conflict { index: 1, actual: Some(version) } if version == Version::INITIAL),
+        "wrong native race outcome: {result:?}"
+    );
+}
+
+#[cfg(feature = "import")]
+async fn restricted_writer(control: &PgPool) -> (PostgresStore, PgPool) {
+    sqlx::raw_sql("DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mnesis_atomic_writer') THEN CREATE ROLE mnesis_atomic_writer; END IF; END $$; GRANT USAGE ON SCHEMA mnesis TO mnesis_atomic_writer; GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_atomic_writer; GRANT SELECT, INSERT ON mnesis.keys, mnesis.events TO mnesis_atomic_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq, mnesis.events_global_seq_seq TO mnesis_atomic_writer")
+        .execute(control).await.unwrap();
+    let pool = PgPoolOptions::new()
+        .max_connections(4)
+        .after_connect(|connection, _| {
+            Box::pin(async move {
+                sqlx::query("SET ROLE mnesis_atomic_writer")
+                    .execute(connection)
+                    .await?;
+                Ok(())
+            })
+        })
+        .connect_with(control.connect_options().as_ref().clone())
+        .await
+        .unwrap();
+    assert_eq!(
+        sqlx::query_scalar::<_, String>("SELECT current_user::text")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        "mnesis_atomic_writer"
+    );
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    (store, pool)
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn failed_atomic_head_reconciliation_retains_the_original_unique_source() {
+    use mnesis_store::import::AtomicAppendError;
+    let Some((_proxy, old_store, control)) = fixture().await else {
+        return;
+    };
+    drop(old_store);
+    let (store, pool) = restricted_writer(&control).await;
+    let race = Collision::start(store, &control).await;
+    sqlx::query("REVOKE SELECT ON mnesis.keys FROM mnesis_atomic_writer")
+        .execute(&control)
+        .await
+        .unwrap();
+    let denied = sqlx::query_scalar::<_, i64>("SELECT number FROM mnesis.keys LIMIT 1")
+        .fetch_optional(&pool)
+        .await
+        .unwrap_err();
+    assert_eq!(
+        denied.as_database_error().unwrap().code().as_deref(),
+        Some("42501")
+    );
+    let result = race.finish(&control).await;
+    sqlx::query("GRANT SELECT ON mnesis.keys TO mnesis_atomic_writer")
+        .execute(&control)
+        .await
+        .unwrap();
+    pool.close().await;
+    sqlx::raw_sql("DROP OWNED BY mnesis_atomic_writer; DROP ROLE mnesis_atomic_writer")
+        .execute(&control)
+        .await
+        .unwrap();
+    assert!(
+        matches!(result, AtomicAppendError::Store(PostgresError::Sqlx(ref source))
+        if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("23505")
+        && source.as_database_error().and_then(sqlx::error::DatabaseError::constraint) == Some("events_stream_id_version_key")),
+        "original native unique source was replaced or misclassified: {result:?}"
+    );
+}
+
+#[cfg(feature = "import")]
+fn assert_foreign_unique(error: PostgresError) {
+    let PostgresError::Sqlx(sqlx::Error::Database(database)) = error else {
+        panic!("foreign unique source was not retained: {error:?}")
+    };
+    let native = database
+        .try_downcast_ref::<sqlx::postgres::PgDatabaseError>()
+        .unwrap();
+    assert_eq!(native.schema(), Some("mnesis_foreign"));
+    assert_eq!(native.table(), Some("events"));
+    assert_eq!(native.constraint(), Some("events_stream_id_version_key"));
+    assert_eq!(native.code(), "23505");
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts() {
+    use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+    let Some((_proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_bytes("foreign-schema");
+    let rows = events();
+    store
+        .append(&id, None, PendingBatch::new(&rows[..1]).unwrap())
+        .await
+        .unwrap();
+    sqlx::raw_sql("CREATE SCHEMA mnesis_foreign; CREATE TABLE mnesis_foreign.events (stream_id bigint, version bigint, CONSTRAINT events_stream_id_version_key UNIQUE (stream_id, version)); INSERT INTO mnesis_foreign.events VALUES (1, 1); CREATE FUNCTION mnesis.foreign_unique() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN INSERT INTO mnesis_foreign.events VALUES (1, 1); RETURN NEW; END $$; CREATE TRIGGER foreign_unique BEFORE INSERT ON mnesis.events FOR EACH ROW EXECUTE FUNCTION mnesis.foreign_unique()")
+        .execute(&control).await.unwrap();
+    let native = sqlx::query("INSERT INTO mnesis_foreign.events VALUES (1, 1)")
+        .execute(&control)
+        .await
+        .unwrap_err();
+    assert_foreign_unique(PostgresError::Sqlx(native));
+    let raw = store
+        .append(
+            &id,
+            Some(Version::INITIAL),
+            PendingBatch::new(&rows[1..2]).unwrap(),
+        )
+        .await;
+    let atomic = store
+        .atomic_append_many(&[PlannedAppend {
+            target: id.clone(),
+            expected_version: Some(Version::INITIAL),
+            head: rows[1].clone(),
+            tail: Vec::new(),
+        }])
+        .await;
+    sqlx::raw_sql("DROP TRIGGER foreign_unique ON mnesis.events; DROP FUNCTION mnesis.foreign_unique(); DROP SCHEMA mnesis_foreign CASCADE")
+        .execute(&control).await.unwrap();
+    assert_eq!(count(&control).await, 1);
+    match (raw, atomic) {
+        (Err(AppendError::Store(first)), Err(AtomicAppendError::Store(second))) => {
+            assert_foreign_unique(first);
+            assert_foreign_unique(second);
+        }
+        wrong => panic!("foreign-schema unique errors misclassified: {wrong:?}"),
+    }
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn real_serialization_failure_preserves_definite_rejection_and_no_owned_event() {
+    let Some((_proxy, unused, control)) = fixture().await else {
+        return;
+    };
+    drop(unused);
+    let first = StreamKey::from_bytes("ssi-a");
+    let second = StreamKey::from_bytes("ssi-b");
+    let first_number = support::key(&control, first.as_bytes()).await;
+    let second_number = support::key(&control, second.as_bytes()).await;
+    sqlx::raw_sql("CREATE OR REPLACE FUNCTION mnesis.ssi_read() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN PERFORM count(*) FROM mnesis.events WHERE stream_id = (SELECT number FROM mnesis.keys WHERE value = 'ssi-b'::bytea); PERFORM pg_advisory_xact_lock(319878); RETURN NEW; END $$; CREATE TRIGGER ssi_read AFTER INSERT ON mnesis.events FOR EACH ROW WHEN (NEW.event_type = 'Ssi'::bytea) EXECUTE FUNCTION mnesis.ssi_read()")
+        .execute(&control).await.unwrap();
+    let pool = PgPoolOptions::new()
+        .max_connections(4)
+        .after_connect(|connection, _| {
+            Box::pin(async move {
+                sqlx::query("SET default_transaction_isolation = 'serializable'")
+                    .execute(connection)
+                    .await?;
+                Ok(())
+            })
+        })
+        .connect_with(control.connect_options().as_ref().clone())
+        .await
+        .unwrap();
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let mut gate = control.begin().await.unwrap();
+    sqlx::query("SELECT pg_advisory_xact_lock(319878)")
+        .execute(&mut *gate)
+        .await
+        .unwrap();
+    let mut other = control.begin().await.unwrap();
+    sqlx::query("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+        .execute(&mut *other)
+        .await
+        .unwrap();
+    assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis.events WHERE stream_id = $1")
+            .bind(first_number)
+            .fetch_one(&mut *other)
+            .await
+            .unwrap(),
+        0
+    );
+    let mut pending = JoinSet::new();
+    pending.spawn(async move {
+        let event = pending_envelope(Version::INITIAL)
+            .event_type("Ssi")
+            .payload(b"sut".as_slice())
+            .build()
+            .unwrap();
+        store
+            .append(&first, None, PendingBatch::new(&[event]).unwrap())
+            .await
+    });
+    wait_for_ssi_insert(&control).await;
+    sqlx::query("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Other', 1, 'other'::bytea)")
+        .bind(second_number).execute(&mut *other).await.unwrap();
+    other.commit().await.unwrap();
+    gate.commit().await.unwrap();
+    let result = timeout(Duration::from_secs(3), pending.join_next())
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    sqlx::raw_sql("DROP TRIGGER ssi_read ON mnesis.events; DROP FUNCTION mnesis.ssi_read()")
+        .execute(&control)
+        .await
+        .unwrap();
+    pool.close().await;
+    assert!(
+        matches!(result, Err(AppendError::Store(PostgresError::Sqlx(ref source))) if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("40001")),
+        "actual serialization outcome: {result:?}"
+    );
+    let rows: Vec<(i64, Vec<u8>)> = sqlx::query_as("SELECT stream_id, payload FROM mnesis.events")
+        .fetch_all(&control)
+        .await
+        .unwrap();
+    assert_eq!(rows, [(second_number, b"other".to_vec())]);
+}
+
+#[cfg(feature = "import")]
+#[tokio::test]
+async fn real_deadlock_aborts_the_atomic_writer_without_optimistic_reclassification() {
+    use mnesis_store::import::{AtomicAppend, AtomicAppendError};
+    let Some((_proxy, unused, control)) = fixture().await else {
+        return;
+    };
+    drop(unused);
+    let requests = atomic_writes(2);
+    let first = support::key(&control, requests[0].target.as_bytes()).await;
+    let second = support::key(&control, requests[1].target.as_bytes()).await;
+    let pool = PgPoolOptions::new()
+        .max_connections(4)
+        .after_connect(|connection, _| {
+            Box::pin(async move {
+                sqlx::query("SET deadlock_timeout = '3s'")
+                    .execute(connection)
+                    .await?;
+                Ok(())
+            })
+        })
+        .connect_with(control.connect_options().as_ref().clone())
+        .await
+        .unwrap();
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let mut other = control.begin().await.unwrap();
+    sqlx::query("SET LOCAL deadlock_timeout = '30s'")
+        .execute(&mut *other)
+        .await
+        .unwrap();
+    sqlx::query("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Control', 1, 'control'::bytea)")
+        .bind(second).execute(&mut *other).await.unwrap();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { store.atomic_append_many(&requests).await });
+    wait_for_insert(&control).await;
+    timeout(Duration::from_secs(10), sqlx::query("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Control', 1, 'control'::bytea)")
+        .bind(first).execute(&mut *other)).await.expect("native detector must break the real wait cycle").unwrap();
+    other.commit().await.unwrap();
+    let result = pending.join_next().await.unwrap().unwrap();
+    pool.close().await;
+    assert!(
+        matches!(result, Err(AtomicAppendError::Store(PostgresError::Sqlx(ref source))) if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("40P01")),
+        "actual deadlock outcome: {result:?}"
+    );
+    let rows: Vec<Vec<u8>> = sqlx::query_scalar("SELECT payload FROM mnesis.events")
+        .fetch_all(&control)
+        .await
+        .unwrap();
+    assert_eq!(rows, [b"control".to_vec(), b"control".to_vec()]);
+}
+
+#[cfg(feature = "import")]
+async fn wait_for_ssi_insert(control: &PgPool) {
+    let name = control
+        .connect_options()
+        .get_application_name()
+        .unwrap()
+        .to_owned();
+    timeout(Duration::from_secs(3), async {
+        loop {
+            let waiting: bool = sqlx::query_scalar("SELECT EXISTS (SELECT FROM pg_locks l JOIN pg_stat_activity a ON a.pid = l.pid WHERE l.locktype = 'advisory' AND l.objid = 319878 AND NOT l.granted AND a.datname = current_database() AND a.application_name = $1 AND a.query LIKE 'INSERT INTO %events %')")
+                .bind(&name).fetch_one(control).await.unwrap();
+            if waiting { break }
+            yield_now().await;
+        }
+    }).await.expect("SUT must read B then block in its actual A insert");
 }

@@ -1511,3 +1511,450 @@ loss because its key already exists and no other INSERT precedes events; (3) no
 production behavior/filter/deadline changed, selected1-run not double-counted,
 all original failures retained. Normal signed hook and fresh protected CI must
 pass this stronger head before merge.
+
+PG5 shared atomic conformance characterization: compilation fails with E0277,
+PostgresStore does not implement AtomicAppend. Zero runtime cases ran; no pass or
+caught runtime defect is claimed. Three reviews: (1) all5 shared atomic laws are
+registered under the intended import feature; (2) missing real capability prevents
+building each invocation, not missing database setup; (3) macro skip requires a
+URL only for ordinary DB-free workspace checks, native CI must use all features
+and a real URL. Add owner-local boundary/lifecycle/isolation/fault cases before
+implementation. Existing whole-request validation functions remain the authority.
+
+PG5 contract check: AtomicAppend documents actual committed head in Conflict.
+A native unique collision occurs after the transaction aborts; unlike append's
+explicitly optional unknown actual, do not silently report a fresh head for an
+unknown racer. Resolve by rolling back and reading the monotonic committed head
+before returning atomic Conflict, or retain the original typed database error as
+Store if the extra observation cannot be made. Never turn a COMMIT failure into
+Conflict or assume timeout rollback. Record native forced-race evidence for this
+choice before closing the slice; no new command identity or retry protocol.
+
+PG4a protected CI completed: head a0f422178ab45f086512f58205445837defa4505,
+40 successes/1 scheduled mutation-sweep skip, no unresolved threads. CI39112792409:
+1549 workspace/four compiler exclusions (separate compiler jobs pass), native104
+on fresh Linux PostgreSQL,zero skips,13.308s, clean shutdown. Installed run.log
+printed a second time is the SAME run and not another104 tests. Mutation CI
+39112792431:21 candidates,17 caught/4 compilation-unviable,zero missed/timeouts,
+real fresh native baseline. Three post-run reviews: (1) complete selected native
+set and feature/compiler matrix pass; (2) migration/real lock/SQL artifact and
+phase fault cases execute; (3) cached/replayed output and scheduled skip not
+credited as new execution, no exclusions or softened assertions. Protected merge
+requested with exact matching head after all40 checks completed; collect exact
+merge SHA/time before calling delivery verified. No release or full-PG4 claim.
+
+PG5 first native run:9/9 pass,zero skips,8.938s; strict all-target Clippy passes.
+Three post-run reviews:
+1. Contract:5 shared laws plus whole-batch reopen/highest-position, final-insert
+   real SQL rejection with zero events/keys, native blocked-prefix readers and
+   pre-storage malformed/duplicate/oversize rejection against a closed pool.
+2. Falsifiers: actual AFTER INSERT trigger blocks on second row; independent
+   control and both scan interfaces observe no uncommitted prefix, then4 rows
+   share one transaction. Empty input does not touch a closed pool.
+3. Gap FOUND: advisory-wait witness filters database/object but not exact caller
+   process/query. Tag the pool and observe its INSERT wait to exclude unrelated
+   sessions. Isolation case took8.170s despite scoped3s waits passing; preserve
+   this unexplained tail for PG8, do not label it a latency pass. Forced race/head
+   ordering, true commit uncertainty and import composition still pending.
+
+PG5 revised draft budget before retention: <=+210/-60/net+170 production Rust,
+<=420 native test lines, <=20 feature/manifest/archive lines. Original+190 bound
+was5 lines short of current shared insert/head parsing and required real-head
+reconciliation after a unique rejection. Actual first draft +195/-41/net154:
+129 private child-module lines +66/-41 parent. No public API or error type added.
+Whole-batch hint wait is bounded once, not once per target. Additional native
+schedule/import/SSI acceptance is a separate small verification slice, remains
+required and cannot be omitted from PG5 completion. Existing project Python is
+not extended; supported cargo-hack replacement/complete CI matrix remains PG9.
+
+PG5 second native run:125/125 pass,zero skips/no filter,15.991s; strict all-target
+Clippy passes. Three post-run reviews:
+1. Contract:113 existing cases plus9 atomic laws plus3 real transport fault laws
+run. Acknowledged atomic COMMIT loss leaves6 rows under one transaction ID with
+exact UnexpectedEof source in CommitUnknown, followed by explicit read-only
+reconciliation. Caller timeout occurs after confirmed backend commit and retains
+all6 rows, never interpreted as rollback.
+2. Falsifiers:16-target hint fault is observed after actual commit, then success
+must complete within900ms measured FROM first held hint, rejecting multiplication
+of250ms per target.48 committed rows and lastseq48 independently checked. The
+advisory wait now names the exact process and INSERT, preserving prefix isolation.
+3. Remaining gaps: native unique-collision reconciliation (including failed head
+observation), all-heads-before-XID ordering schedule, actual SSI/deadlock and
+import composition need their own next verification slice. No claim of PG5
+completion follows125 passes. Earlier8.170s isolation tail remains recorded;
+its later result must be inspected without silently deleting that outlier.
+
+PG5 feature execution policy: native archive and in-diff mutation CI explicitly
+select all advertised features. Without this, import's implementation and tests
+would be compiled out in mutation/native delivery. The existing feature matrix
+still uses project Python; do not extend it here. Its supported cargo-hack
+replacement and complete isolated-feature CI remain a required PG9 slice.
+Tokio time is selected directly because this owner uses timers, rather than
+relying on another crate's feature unification. No new dependency family/runtime.
+
+PG5 mutation evidence REOPENS verification: first completed viable survivors are
+prepare->Ok(None) and rejected's &&->||. Each ran125 native cases successfully.
+Three reviews per survived run: (1) current five shared laws only test an occupied
+stream claimed fresh, not a missing stream claimed present; (2) uniqueness can
+reject the occupied case late, so missing head validation escaped. New shared
+law must reject a valid version2 run whose expected1 does not exist, and preserve
+all streams. (3) &&->|| survives because unrelated injected errors hit fresh
+streams; after rollback no existing head is observed, hiding misclassification.
+Add a Postgres unique-payload rejection on an EXISTING stream so the wrong guard
+would invent Conflict. These are meaningful survivors, never exclusions/equivalent
+mutants or passing evidence. Current125-case full gates are candidate-only until
+both gaps are fixed and the entire fresh native sweep is rerun.
+PG5 verification refinement: +40 shared law/+7 macro lines and <=65 adapter-negative
+lines are a separate narrowly budgeted test pass. No production API/contract
+change. Existing pending ordering/real-race/import/SSI acceptance remains required.
+
+First PG5 sweep FINAL:24 candidates,8 caught/14 compile-unviable/2 MISSED,
+zero timeouts; fresh cluster stopped. Three post-run reviews: (1) actual125 native
+baseline,13 child-module candidates included and --all-features verified; (2)
+both survivors explained by missing-head and existing-head unrelated-error gaps,
+not marked equivalent; (3) fourteen compilation failures are not kills. Add owner
+cases and rerun full fresh sweep before any retention/delivery claim. Candidate
+Nix/native gates on125 cases are not sufficient and are superseded as final proof.
+
+PG5 initial all-feature Linux candidate:125/125 native cases pass,zero skips,
+22.743s on fresh PostgreSQL18.6, supported-hook cleanup completes; artifact
+/nix/store/fcx5dzazwb3x89ky9by2kzfgdzqfzgd7-mnesis-postgres-integration.
+Three post-run reviews: (1) all features really selected and125 cases run; (2)
+committed/timeout/hint and native prefix witnesses execute; (3) this snapshot
+precedes the two mutation-gap cases and CANNOT be final feature proof. Mutation
+failure still blocks retention. New shared-law Clippy requires equality assertions
+that print unexpected rows; retain full empty-row invariant while fixing style.
+
+Oracle ownership/minimization review: keep the missing-head falsifier with the
+Postgres adapter, where omitting prepare permits a native version2 insert into a
+fresh stream. The existing shared AtomicAppend law already defines the contract;
+adding a new public test-kit helper is unnecessary for this adapter defect. Move
+the SAME input/error/whole-batch assertions into native atomic_tests and add an
+independent zero-keys check. No coverage or contract is removed; the shared-law
+draft was only compiled, never credited as runtime proof, and is preserved at
+/tmp/mnesis-pg5-shared-law-draft.diff. No mutation exclusions or fake-store
+calibration tests added. Refined test-only guard pass budget <=100 native lines,
+zero production/public-surface changes, replacing +40 shared/+7 macro proposal.
+
+PG5 guard cases native:2/2 pass,9 filtered,0.930s; strict all-target Clippy passes.
+Three post-run reviews: (1) missing declared head returns Conflict(index1,actualNone)
+with independently zero events AND keys; existing-head unrelated unique-payload
+failure retains that exact constraint in Store(Sqlx) and version1 remains intact;
+(2) these inputs distinguish both survived mutations' behavior directly; (3) no
+filtered case credited, no mutation config changed, and no public test-kit helper
+or calibration wrapper retained. Full127 native and complete fresh sweep required.
+
+PR380 event-prefix correction signed headf4f4a1bdbfbb3770559d834f7aea9b0c332c0bce:
+normal hook12 checks pass,1558 workspace/four compiler exclusions,613.324s.
+Three post-run reviews: (1) the only functional change is the stronger fault
+placement; native113 passes separately; (2) event statement rather than key setup
+is now suppressed; (3) no threshold/filter change, slower whole-workspace property
+run retained honestly. Source/test diff vs frozenPG4a tree SHA256
+e095e0f0798d1a338c279f0e00bd7d9e237d01c3238a530be9fc15088b558af7.
+Protected CI must finish again on this corrected head before merge.
+
+PG5 full guard baseline:127/127 native17.10 pass,zero skips,50.657s. Fresh18.6
+mutation baseline127/127 pass,zero skips,42.739s; full sweep24:10 caught/14 compile-
+unviable,zero missed/timeouts. Each of the two prior survivors is now killed by
+its exact new native case. Three post-run reviews for EACH full run and every
+mutation outcome: (1) all old and new cases execute under import, no filtered or
+DB-free case counted; (2) missing-head mutation fails its new gap/prefix law,
+wrong boolean guard fails existing-head unique-payload negative; native hints
+and actual-head comparison mutations fail their corresponding fault/conflict
+laws. First failure in every log inspected. (3)14 actual missing constructors/
+Default/type-inference compiler failures remain unviable, never kills; no config
+exclusions/threshold changes. Physically separate clusters avoid watermark
+interference. Concurrent Nix builds make these timings unsuitable for SLO claims.
+
+Initial125-source Darwin candidate gate also passes12 checks,1558 DEFAULT-feature
+workspace tests/four compiler exclusions,502.511s. Three reviews: (1) this nextest
+workspace gate does NOT select the new optional import tests; Clippy separately
+compiles all features and native archive explicitly does; (2)125 native proof and
+failed-first/fixed127 mutation evidence remain separate; (3) this old snapshot
+precedes new guard tests and cannot certify final source. Keep default/feature
+claims precise and rerun matched source checks before retaining the feature.
+
+PG5 ordering schedule native:1/1 pass,15 filtered,0.042s; strict Clippy passes.
+Three post-run reviews: (1) actual frontend Bind is held before second-head
+snapshot, independent server observation shows no writer xid, real controller
+commits B1 then atomic A1+B2 follows; (2) full delivery has3 rows, Bversions[1,2],
+returned position beyond predecessor and equal to delivered highest; (3) this
+is not an inside-query lock delay or uncontrolled task race, but still requires
+an archived early-write mutant to prove the test rejects actual reversed order.
+Default proxy relay remains unframed; only selected test mode parses frontend.
+Linux Nix check/package derivations evaluate identically, so the existing protected
+Nix check now includes the SAME supported native package on Linux. A psql preflight
+makes absence of DATABASE_URL/live database fail before nextest. Final matched
+native all-feature/check proof remains required after these changes.
+
+PR380 corrected headf4f4a1bdbfbb3770559d834f7aea9b0c332c0bce protected CI:
+40green/1scheduled skip, clean merge state, zero unresolved threads. CI39116344952
+has1558 default workspace/four separate compiler cases and native113/0skips,
+17.578s; installed run.log replay is not another113 executions. Fresh mutation
+CI39116345048:19 candidates14caught/5compile-unviable/0missed/0timeouts.
+Three post-run reviews: (1) full selected native/migration/representation and
+compiler/feature matrix runs; (2) actual event-prefix transport witness retained
+alongside original value/ordering/upgrade falsifiers; (3) no exclusion or threshold
+change, replayed/cached output and scheduled skip not credited. Matching-head
+protected squash merge may proceed; exact merge SHA/time must be collected.
+
+Controlled EARLY-WRITE ordering mutant, archived source only:
+insert first A run before preparing B's head, then continue normally. Native test
+FAILS with actually delivered Bversions[2,1] versus required[1,2]; independent
+before-head writer xid was30738.0/1 pass,15filtered,0.038s,nextestexit100.
+Three reviews: (1) actual committed predecessor and successor are out of order,
+not a synthetic error-code assertion; (2) first assertion names the reversed
+versions, before later no-xid/highest-position assertions; (3) delivery source
+unchanged, only archived /tmp/mnesis-pg5-order-control.94pFqI mutated, no skipped
+case credited. Original body moved early, not deleted to force a setup failure.
+This proves the all-heads-before-any-write rule protects stream/global order.
+
+PG4 representation protected PR380 is MERGED2026-10-18T10:05:58Z as
+49ffe78f166b7d6a787ea898dfba454218a697e9, exact headf4f4a1bd.
+The source/value/migration PG4 acceptance is feature-complete at this focused
+merge. Deployment/capacity, later capability migrations and final publication
+remain required PG6–PG9. No complete-adapter or registry delivery claim.
+
+PG5 native race/reconciliation cases:2/2 pass,16 filtered,0.090s. Three reviews:
+1. Actual final INSERT waits on winner while first run is staged. Releasing winner
+   returns Conflict(index1,actual1), only winner remains and new prefix key is gone.
+   Removing key SELECT on the dedicated runtime role yields Store with ORIGINAL
+   23505/expected constraint, preserving definite rejection without invented head.
+2. Native wait and independent version/payload/key queries reject partial commit;
+   no synthetic SQLSTATE or fake adapter. Role is verified with current_user and
+   permissions restored/pool closed/owned role dropped before result assertion.
+3. Tighten permission proof by issuing a separate runtime SELECT and checking42501
+   while writer waits. Further classifier audit finds owned schema is not checked:
+   another schema's events with the same constraint name can falsely become OCC.
+   Reproduce it through a real native trigger before changing the shared classifier.
+
+Native foreign-schema reproduction FAILS as intended:0/1 pass,18filtered,26.139s.
+Both real calls falsely return Conflict (raw actualNone, atomic actualSome1) when
+an auditing trigger violates another schema's events_stream_id_version_key.
+Three reviews: (1) definite unrelated rejection must retain Store/native source,
+not OCC; (2) schema/table/constraint are real Postgres objects and duplicate rows,
+not fabricated SQLSTATE/context; (3) cleanup occurs before assertion, original
+owned event remains1, no query/filter/deadline relaxed.26.134s case tail is another
+unexplained latency outlier recorded for PG8, not counted as a timing SLO pass.
+Add independent native schema/error-field probe, then require owned mnesis schema
+in the shared classifier via supported SQLx native downcast/schema accessor.
+
+Scoped-classifier fix native:4/4 pass,15filtered,24.495s; strict Clippy passes.
+Three post-run reviews: (1) foreign-schema raw/atomic errors retain exact native
+23505/schema/table/constraint, while true owned-schema collisions still classify
+correctly including caller expected metadata and actual atomic head; (2) a direct
+native duplicate probe independently confirms foreign object error fields, and
+runtime SELECT denial now independently proves42501 before finishing the race;
+(3) no replacement error/message parser or retry inference. Role case24.356s is
+an outlier, namespace case0.034s. Need investigate setup versus storage latency.
+Upstream SQLx0.9 options/mod.rs67–74 calls whoami2 before URL overrides unless
+PGUSER is set. Local explicit URL user does not avoid that default construction.
+This is a candidate explanation for Darwin tails, not a proven storage slowdown.
+Set supported PGUSER in an isolated local comparison and record option-parse
+elapsed time; native Nix hook already supplies PGUSER=mnesis. No library/global
+environment mutation or new user-lookup machinery is proposed.
+
+Actual server failures:2/2 native cases pass,19filtered,24.682s. Real wait-cycle
+forces SUT deadlock40P01 (3.047s from native3s detector) and only controller rows
+persist. Actual SERIALIZABLE read/write cycle produces SUT40001, no owned A row,
+only controller B durable. No RAISE for either code. Three post-run reviews:
+1. Both exact server codes stay Store(Sqlx), never OCC or CommitUnknown; independent
+   data rejects partial/uncertain classification.2. Native lock gates ensure both
+   actual cycles, controller commits, and only SUT failure satisfies assertions.
+3. SSI case21.633s tail remains unexplained. PGUSER made option parsing0.532ms,
+   so user lookup alone does NOT explain this tail. Add phase timing before any
+   lifecycle change; do not call this a latency SLO pass or weaken timeouts.
+Fixture cleanup now removes only owned fault triggers/constraint before each case
+so a failed mutant cannot leave native DDL that falsely kills the next candidate.
+
+SSI timing follow-up: strict Clippy initially rejected diagnostic additions
+(semicolon and 81/80 lines); no native cases ran on those attempts. Corrected
+without lint exceptions, then selected real SSI case passed1/1,132 filtered,
+4.267s. Option parsing1.080ms, entire proxy fixture29.197ms, native insert gate
+4.244s, completed close4.245s. The long phase is after the proxy fixture and before
+its blocked INSERT, not migration, option parsing or final pool close. Cause
+remains open for PG8; no latency improvement or SLO is claimed.
+Three reviews after this run: (1) exact40001 remains source-preserved Sqlx and
+only the independent controller row persists; (2) real read/write cycle and
+native advisory gate remain unchanged, so diagnostic code cannot supply the
+failure oracle; (3) only1 selected case executed,132 filtered are not successes;
+all prior assertions/deadlines remain. Diagnostic print statements are temporary.
+
+PG5 import composition pre-edit budget: <=230 native test lines, zero production
+changes/dependencies/public interfaces. Exercise the existing EventImporter on
+Store<PostgresStore> with both policies: final conflict and corrupt-prefix exact
+reports, partial persistence on later SQL failure, and suppressed real COMMIT
+acknowledgement retaining typed ImportError::Store(CommitUnknown). Independent
+server rows and transaction IDs reject whole-chunk degradation. Reuse current
+atomic fixture and Unix protocol fault fixture. Full format-2 interchange stays
+PG7. Native Nix gate budget <=12 lines: nonempty URL, supported nextest exact
+atomic smoke test with --no-tests=fail before complete archive; same derivation
+already aliases into Linux checks. No new checker or baseline calibration.
+
+Import composition native5/5 pass,133 filtered,0.166s; strict all-target Clippy
+passes after correcting ordinary style findings (no native run on lint failures).
+Three reviews after this run:
+1. Public Store<PostgresStore>/EventImporter executes both policies. Final conflict
+   returns exact offender/versions versus exact partial reports. Corrupt-prefix
+   reports agree with native rows and byte/type/metadata preservation. Repeated
+   routes write neither catalog nor events. Final native23514 rolls back every
+   whole-chunk row/key, while per-stream retains only its previous transaction.
+2. Whole-chunk changed to per-stream would leave the first run on conflict/error;
+   independent complete row sets reject that defect. Protocol proxy sees actual
+   COMMIT before losing its response; exact ImportError::Store(CommitUnknown(Io
+   UnexpectedEof)) survives the facade under both policies, one durable XID and
+   exact rows prove no automatic resubmission or later per-stream write.
+3. Five selected tests execute;133 filtered are not credited. No report is
+   fabricated after storage errors. Native RAISE23514 is deliberate insert-failure
+   coverage, not a claimed real SSI/deadlock. Shared routing/report planner laws
+   retain ownership in core; these only prove native adapter composition.
+Import test budget revised to <=320 lines before retention: explicit complete row
+sets, facade fault assertions and a separate route case needed ~300 formatted
+lines versus estimated230. No production line/public interface/dependency added.
+Temporary timing instrumentation removed after retaining its raw evidence.
+
+PG5 complete selected native suite:138/138 pass,0 skipped/no filter,28.741s on
+local PostgreSQL17.10, following alignment to protected main49ffe78f. Production
+Rust diff199 added/43 removed, net156, within declared210/60/net170. Parent PR380
+records and stronger event-prefix evidence preserved; root worktree untouched.
+Three reviews after this run:
+1. Contract: all113 existing cases plus25 import/atomic/schedule/real fault cases
+   pass. Highest-position/reopen, exact route/run/size rejection, native isolation,
+   all-heads-before-XID, collision metadata, error namespace and both import modes
+   remain exercised; ordinary append retains its documented expected-head data.
+2. Falsifiers: archived early-write mutant produced B[2,1]; corrected head gives
+   B[1,2]. Both prior automated survivors now have direct native rejection cases.
+   Server COMMIT loss/caller cancellation leave full durable batches, true SSI/
+   deadlock native errors remain exact; no uncertain outcome is made retry-safe.
+3. No ignored/filtered case counted; ten ordinary unit cases are part of138,
+   not138 independently database-using laws. Import error case9.107s is another
+   unexplained setup tail, while selected identical case0.037s and SSI0.076s in
+   this run. Do not invent a storage SLO; PG8 timing investigation remains open.
+
+Feature-absence negative check: default/no-import package with the EXACT native
+atomic smoke selector and --no-tests=fail exits4: zero tests, 'no tests to run'.
+Three reviews: (1) advertised import absence cannot satisfy required atomic suite;
+(2) production archive includes --all-features and gate uses same selector before
+full unfiltered suite; (3) zero cases are expected FAILURE evidence, no vacuous
+passes credited. The missing-database pipeline's prior native28000/exit1 evidence
+remains valid; new final Linux gate must pass both smoke and full suite.
+
+Default/no-import real Postgres suite113/113 passes,zero skipped/no filter,25.249s.
+Three reviews: (1) common append/read/wake/migration/value laws run without import,
+including changed shared insert_run and namespace predicate compilation; (2) native
+prefix rollback and original read/wake regressions remain; (3) optional25 cases
+are absent by requested feature selection, not counted as passing. This is native
+execution, separate from DB-free default workspace results and all-feature138.
+
+Fresh Linux ARM PostgreSQL18.6 gate passes at current source:
+/nix/store/9ja47b32ws7r6lrb7rs95dkvhini3ndr-mnesis-postgres-integration.
+Feature smoke1/1 passes0.333s; complete138/138 passes28.637s,zero skipped. Actual
+fresh server initialization/start, SQL preflight, tests and shutdown recorded.
+Three reviews of smoke: exact shared atomic law executes, native rows back its
+assertions,14 filtered plus10 excluded binaries are not successes. Three reviews
+of full run: (1) all required selected native cases present, including optional
+import; (2) real scheduling/lock/transport faults retain their independent server
+oracles and all original regressions; (3) no filter/skip, smoke law is a repeated
+subset and NOT added to138. Both feature.log/run.log are installed. Linux check
+aliases the existing package; Darwin's default workspace is not native evidence.
+
+Post-138 adversarial review found missing direct evidence for waking EVERY local
+atomic target before hints finish. Existing shared atomic laws inspect data, and
+held-hint batch law proves one time budget but not each registration. Required
+PG5 follow-up budget <=65 private native test lines, zero production changes:
+reuse HoldHint proxy, arm each stream plus global registration, start atomic
+write, observe first held native hint after commit, then require all armed waits
+already ready before one-second fallback can possibly fire. Explicit elapsed<1s
+is an oracle-validity check, not a new throughput target. Missing any local wake
+must fail while native hint is held. No sleep-based fault injection or test seam.
+The138 gates remain honest evidence of that snapshot; final suite will be139.
+Before running the new wake case, source review caught another oracle hazard:
+holding a pg_notify RESPONSE alone does not prevent its notification waking the
+first target. HoldHint now discards native NotificationResponse frames in the
+existing private proxy as well; the first hint still genuinely executes, but it
+cannot satisfy ANY local registration. No new adapter seam. A first-target local
+wake omission control must fail; elapsed fallback guard remains required. Initial
+Clippy similar_names finding prevented execution, then ordinary local rename.
+
+Local wake law1/1 native passes0.392s,138 filtered; strict Clippy passes.
+Three reviews: (1) three distinct targets plus global arm before actual atomic
+commit; all ready while first native hint response is held;9 rows really durable;
+(2) native NotificationResponse frames are deliberately dropped, so server hint
+cannot hide omitted local wakes; (3) elapsed<1s rejects fallback-timer false pass,
+no filtered cases credited, pending task owned by JoinSet. Run archived
+first-target wake omission control before accepting this stronger oracle.
+
+Archived first-target wake omission control truly FAILS the new case:exit100,
+0/1,138 filtered,0.219s. Failure is 'every stream and global wait must already be
+ready', NOT fallback-validity/time/setup. Three reviews: (1) exactly first local
+wake is omitted, remaining production behavior unchanged in archived tree;
+(2) native notifications are dropped and observed hint confirms actual committed
+write, so the missing wake itself fails; (3) elapsed<1s passes, excluding timer
+fallback; current source remains untouched and positive selected case passes.
+
+Final production-diff automated mutation sweep (snapshot138 cases):26 completed,
+12 caught,14 compilation-unviable,zero missed/timeout; baseline138 passes21s,
+auto test timeout107s, fresh physically separate18.6 cluster shut down cleanly.
+All first failures and compile errors inspected. Three reviews for each outcome:
+1. Contract mapping: head_version=None, prepare=Some(0/1/-1), prepare!= inversion
+   and atomic=Ok(None) fail exact shared conflict/head laws; prepare=None fails
+   missing expected-head1/actualNone/zero-prefix law. Classifier=true fails exact
+   preserved23514 import outcome; classifier=false fails real concurrent winner
+   law. Rejected&&->|| fails existing-head unrelated-unique source law.
+2. Meaningful original survivors prepare=None and rejected|| are now killed by
+   their specific native cases, not unrelated fixture failures. Two hint removal
+   outcomes are fault-entry guards (observed command absent), not independent
+   data-corruption witnesses; do not inflate their strength. Separate new archived
+   local-wake omission control fails the observable ready-wait invariant itself.
+3. All14 unviable are actual missing Default/new/from_iter or type-inference
+   compilation errors, never credited as caught. Fail-fast unrun cases are not
+   successes. No exclusion, calibration wrapper, synthetic substitute or relaxed
+   deadline. New139th test changes no production bytes; final CI reruns the diff
+   with that stronger test set before merge.
+
+Final139 native suite passes139/139,zero skipped/no filter,66.891s on17.10 under
+concurrent whole-workspace disk load. Three reviews: (1) all previously138 laws
+plus direct all-target wake law execute; (2) omitted-first-wake archived control
+fails its readiness assertion0.219s, positive case0.428s keeps fallback guard
+valid; actual deadlock3.200s and SSI0.139s retain real native codes/data; (3) no
+skips or softened assertions, ten ordinaryunit cases remain within139. Import
+storage case14.697s is further setup/load noise evidence, not a production SLO.
+Production diff SHA256 d21bb61135c2f6abb82cc1ceef6e1bea979817cea0c38c5e706d00b97a992941
+is unchanged from the completed26-candidate mutation sweep; only test coverage
+strengthened. FinalLinux139 and normal signed hook must pass before delivery.
+
+Final fresh Linux ARM PostgreSQL18.6 suite139/139 passes21.938s,zero skips, plus
+one separately counted feature smoke0.449s. Artifact:
+/nix/store/h1afzq97r02p31k35pnzly9s4gpyi7c7-mnesis-postgres-integration.
+Three reviews of each run: (1) smoke selects exact shared atomic case and full run
+includes all139; (2) stronger HoldHint drops native hints, and positive local-wake
+law runs alongside real native errors, transport uncertainty and prior regressions;
+(3) filtered smoke cases are not successes, full run has no filter/skips, repeated
+smoke is not added to139, clean fresh server shutdown and installed logs retained.
+Package/check evaluation produced identical drv paths; Linux protected flake
+check now owns this same complete native derivation. Darwin verification is
+separate. Full signed-commit hook and protected PR/CI/review/merge remain required.
+
+Earlier138-source full Nix gate's default nextest run completes1558 passed,
+4 explicit compiler exclusions,545.710s (14 slow existing Fjall cases). Three
+reviews after this run: (1) default workspace/conformance/property/state-machine
+coverage runs normally; optional import runtime laws are separately139 native,
+not inferred from this default feature run; (2) no regression or propertycase
+was cut short to accelerate the gate; (3) four compile-fail exclusions are NOT
+successes and require their existing separate CI jobs, DB-free adapter returns
+are NOT native evidence. Source strengthened after this snapshot; normal commit
+hook is running the final139-source gate separately. Earlier gate install/fixup
+completion still being collected, no failure hidden.
+
+Normal signed commit493f7e68361e5815c5927699bef6be5ac84ddfc7 passes all12 Darwin
+flake checks (two unchanged checks cached,10 built), including fresh1558 default
+workspace cases/4 explicit compiler exclusions,447.021s. Earlier138-source gate
+also completes12 checks/1558 cases,545.710s; it is not counted as final139 proof.
+Three reviews after final hook: (1) source matches final139 native proof, strict
+Clippy all targets/features, formatting, dependency/advisory and no_std/wasm/doc/
+fuzz gates preserved; (2) ordinary full256-case properties/state-machine laws
+run, no slow case suppressed; (3) four compiler exclusions require separate CI,
+optional runtime laws rely on real139 suite, cached checks and DB-free returns
+are not counted as fresh native execution. Exact reviewed source requires CI at
+its pushed head before merge. Documentation-only amendment uses the same tested
+source and still runs the normal hook; no bypass or fresh-test claim on cache.

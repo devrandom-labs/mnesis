@@ -1,0 +1,25 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.38s
+────────────
+ Nextest run ID bf39a09f-1cd6-45fc-b792-c93d3733b774 with nextest profile: default
+    Starting 1 test across 11 binaries (132 tests skipped)
+        PASS [   4.264s] (1/1) mnesis-postgres::outcome_tests real_serialization_failure_preserves_definite_rejection_and_no_owned_event
+  stdout ───
+
+    running 1 test
+    test real_serialization_failure_preserves_definite_rejection_and_no_owned_event ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 4.25s
+
+  stderr ───
+    native option parsing elapsed=1.080417ms
+    control connected elapsed=5.462542ms
+    migrated elapsed=12.161834ms
+    control validated elapsed=20.456ms
+    proxy connected elapsed=25.315875ms
+    proxy validated elapsed=29.197334ms
+    SSI insert blocked elapsed=4.244723042s
+    SSI pool closed elapsed=4.24545475s
+
+────────────
+     Summary [   4.267s] 1 test run: 1 passed, 132 skipped

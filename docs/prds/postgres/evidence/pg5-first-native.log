@@ -1,0 +1,16 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.45s
+────────────
+ Nextest run ID 410e91c0-c4d7-4d63-bb88-eb4d76f7e929 with nextest profile: default
+    Starting 9 tests across 1 binary
+        PASS [   0.091s] (1/9) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+        PASS [   0.145s] (2/9) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_duplicate_targets_reject_all
+        PASS [   0.035s] (3/9) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_empty_batch_is_noop
+        PASS [   0.220s] (4/9) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_malformed_runs_reject_all
+        PASS [   0.026s] (5/9) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+        PASS [   0.037s] (6/9) mnesis-postgres::atomic_tests invalid_requests_are_rejected_before_a_closed_pool_is_touched
+        PASS [   8.170s] (7/9) mnesis-postgres::atomic_tests readers_cannot_observe_the_staged_prefix
+        PASS [   0.078s] (8/9) mnesis-postgres::atomic_tests rejected_final_insert_rolls_back_all_events_and_new_keys
+        PASS [   0.102s] (9/9) mnesis-postgres::atomic_tests reopen_preserves_every_run_and_the_highest_position
+────────────
+     Summary [   8.938s] 9 tests run: 9 passed, 0 skipped

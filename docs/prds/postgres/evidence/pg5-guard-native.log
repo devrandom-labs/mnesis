@@ -1,0 +1,10 @@
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-atomic/crates/store-testing)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.98s
+────────────
+ Nextest run ID 800340de-306a-468a-ba76-1a169e527e7d with nextest profile: default
+    Starting 2 tests across 1 binary (9 tests skipped)
+        PASS [   0.462s] (1/2) mnesis-postgres::atomic_tests missing_expected_head_cannot_create_a_version_gap_or_commit_a_prefix
+        PASS [   0.458s] (2/2) mnesis-postgres::atomic_tests unrelated_unique_failure_on_an_existing_head_is_not_a_conflict
+────────────
+     Summary [   0.930s] 2 tests run: 2 passed, 9 skipped

@@ -111,11 +111,11 @@
         fuzzCargoArtifacts = craneLib.vendorCargoDeps { cargoLock = ./fuzz/Cargo.lock; };
 
         # mnesis-postgres's DB-backed tests are built once as a cargo-nextest
-        # archive, then executed *inside* the NixOS VM below against a live
-        # PostgreSQL — so the VM needs no Rust toolchain, only the archive plus
+        # archive, then executed by the native Postgres test hook against a live
+        # PostgreSQL — so the test needs no Rust toolchain, only the archive plus
         # `cargo-nextest`. The tests skip (pass) when DATABASE_URL is unset, so
-        # they are inert under the normal `nix flake check`; this archive + the
-        # Linux-only `postgres-integration` package are what actually run them.
+        # they are inert under Darwin's normal checks. Linux also gates the
+        # native `postgres-integration` package through the flake checks.
         postgresTests = craneLib.mkCargoDerivation (
           commonArgs
           // {
@@ -124,7 +124,7 @@
             doInstallCargoArtifacts = false;
             buildPhaseCargoCommand = ''
               mkdir -p $out
-              cargo nextest archive --package mnesis-postgres \
+              cargo nextest archive --package mnesis-postgres --all-features \
                 --archive-file $out/mnesis-postgres.tar.zst
             '';
             nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ]) ++ [ pkgs.cargo-nextest ];
@@ -299,6 +299,9 @@
               '';
             }
           );
+        }
+        // lib.optionalAttrs stdenv.hostPlatform.isLinux {
+          postgres-integration = self.packages.${system}.postgres-integration;
         };
 
         packages =
@@ -431,7 +434,14 @@
               checkPhase = ''
                 runHook preCheck
                 export DATABASE_URL="postgres:///$PGDATABASE?host=$PGHOST&user=$PGUSER"
+                test -n "$DATABASE_URL"
+                psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -Atc 'SELECT 1'
                 set -o pipefail
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  -E 'binary(atomic_tests) & test(conformance_atomic::check_atomic_multi_stream_commits_all)' \
+                  2>&1 | tee postgres-feature.log
                 cargo-nextest nextest run --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
@@ -441,6 +451,7 @@
               installPhase = ''
                 mkdir -p "$out"
                 cp postgres.log "$out/run.log"
+                cp postgres-feature.log "$out/feature.log"
               '';
             };
           };

@@ -1,0 +1,28 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-atomic/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.38s
+────────────
+ Nextest run ID d4d06c63-1d1b-44bf-9012-737cc306133e with nextest profile: default
+    Starting 1 test across 1 binary (18 tests skipped)
+        FAIL [  26.134s] (1/1) mnesis-postgres::outcome_tests identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+  stdout ───
+
+    running 1 test
+    test identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts ... FAILED
+
+    failures:
+
+    failures:
+        identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 26.12s
+
+  stderr ───
+
+    thread 'identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts' (96399985) panicked at adapters/postgres/tests/outcome_tests.rs:1119:18:
+    foreign-schema unique errors misclassified: (Err(Conflict { stream_id: "foreign-schema", expected: Some(Version(1)), actual: None }), Err(Conflict { index: 0, actual: Some(Version(1)) }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [  26.139s] 1 test run: 0 passed, 1 failed, 18 skipped
+        FAIL [  26.134s] (1/1) mnesis-postgres::outcome_tests identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+error: test run failed
