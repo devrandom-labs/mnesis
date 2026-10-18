@@ -1,58 +1,42 @@
 # Progress
 
-Persistent goal active, no token budget. Worktree:
+Persistent goal active, no token budget. Repository
 `/Users/joel/orca/workspaces/nexus/main`, branch `docs/postgres-prd`.
-Requirements and dependency states: `docs/prds/postgres.md` and
-`docs/prd-backlog/status.md`. Full evidence and contract decisions:
-`docs/prds/postgres/research.md`; raw evidence is checked in beside it.
+Canonical scope/dependencies: `docs/prds/postgres.md`, `docs/prd-backlog/status.md`.
+Exact evidence, contracts and pre-edit budgets: `docs/prds/postgres/research.md`.
 
-Previous goal turn made progress: original real-Postgres failures were captured,
-read/wake fixes passed native regressions and the matched Darwin gate. This
-turn committed them and added the remaining listener lifecycle experiment.
+Signed commits: 87a9d054 (PRD/contract/evidence), af6a43b4 (wake deadlines),
+755ec8eb (bounded keyset rows), d4624e58 (listener lifecycle). All passed the
+required full Darwin gate before retention. Latest committed suite: 74 native
+Postgres tests, zero skips; 1,369 workspace tests, four skips. No PR/merge/release.
 
-## Committed
+Current PG1 byte-budget experiment ready to retain: 16MiB default page/row budget,
+Limits replaces unpublished batch-only constructor, SQL header-window prefix
+selection before fetching bodies. Original large-row witness failed (24–26MB).
+Current 79 native tests pass, zero skips, 12.601s; large-row retained bytes ~15MB,
+oversized legacy body is not fetched, atomic rejection and cancellation pass.
+Targeted Clippy/fmt pass; actual production net +124, cumulative net +190; no
+new dependencies. Native plans retain header index seeks but add primary-key
+lookups; full capacity evidence remains PG8.
 
-- `87a9d054`: PRD, contracts and characterization evidence.
-- `af6a43b4`: independent fallback rescan deadline.
-- `755ec8eb`: finite bounded keyset reads and native regression tests.
+COMPLETED matched gate: unified exec session **46146**, log
+`/tmp/mnesis-postgres-byte-flake.log`; source/test diff SHA-256
+`0644165e71d4a033df307670ae3027ddf38f8a5b0422f9e99e17d277a6222c5f`.
+All 12 checks passed, 1,374 workspace tests passed and four skipped (301.257s
+nextest). Retain through the normal signed pre-commit hook, then open the
+focused initial read/wake PR. PG3 fault experiment pre-edit record is ready in feature research.
 
-All three commits are signed. The first matched Darwin gate passed all 12
-configured checks, including 1,358 workspace tests, four skips and fuzz replay.
-Its log is `/tmp/mnesis-postgres-flake-final.log`; source hash and native
-read-memory comparisons are in the feature research. No PR, merge or release.
+Postgres 17.10 cluster `/tmp/mnesis-postgres-pg0` is running, Unix socket `/tmp`,
+port 55432, DB `mnesis_pg0`. Native tests must be serial (fixtures truncate events).
+Use explicit git+file Nix dev shell, filter optional rust-analyzer and blank
+shellHook; exact command in research. Rooted shell `/tmp/mnesis-postgres-shell`.
 
-## Current experiment
-
-The listener now retries setup and terminal receive errors, exits on pool close,
-and rejects capacity below two before DDL. Two original lifecycle regressions
-failed against `755ec8eb`; all 74 native adapter tests now pass, zero skips,
-12.273 seconds. Targeted Clippy and formatting pass. Eleven lifecycle campaigns
-cover setup/receive failure, disconnect, routing noise, held snapshot, pool close,
-first-poll races and eight cleanup cycles with 128 clones/registrations.
-
-Stage Rust source +37/−23/net +14, tests +539 lines, no dependency or new public
-type. Cumulative Rust source +250/−184/net +66. Details/budgets live in the PRD.
-The matched full Darwin gate also passes all 12 checks, 1,369 workspace tests
-and four skips. These changes and their records are ready to retain.
-
-Completed full matched gate: unified exec session **45611**, log
-`/tmp/mnesis-postgres-lifecycle-flake.log`. Source/test diff SHA-256 at invocation:
-`5eda6d45949078d950302945d31ce21aa6bdac689aba6b4919882752337a2707`.
-Gate output is retained in the feature evidence. Commit this experiment and
-open a focused PR once the reviewable batch is ready.
-
-## Environment and next work
-
-Postgres 17.10 from locked Nixpkgs remains running: cluster
-`/tmp/mnesis-postgres-pg0`, Unix socket `/tmp`, port 55432, DB `mnesis_pg0`.
-Use serial tests; setup truncates events. Native commands use the locked Nix
-shell with optional rust-analyzer filtered, using an explicit Git flake reference
-so ignored `target/` data is not copied. Exact invocation is in the research.
-`/tmp/mnesis-postgres-shell` roots the realized environment.
-
-After the gate/commit, continue PG1 practical byte bounds/cancellation and PG3
-commit uncertainty. PG3 must suppress an actual server COMMIT acknowledgement
-and independently prove durable rows; arbitrary backend termination is not a
-substitute. PG4 still needs migrations, full unsigned versions/positions, binary
-event types, structural validation and least-privilege startup. All later
-PG5–PG9 capabilities and delivery gates remain required. PG10 stays conditional.
+Continue PG3 with actual server COMMIT acknowledgement suppression and independent
+row proof (not arbitrary backend termination). PG4 migration facility constraint:
+SQLx per-migration transactions and session advisory lock; close scoped migration
+connections on drop, never wrap migrator in an outer transaction that outlives
+its unlock. Full unsigned values, binary event types and read-only open pending.
+All PG5–PG9 capabilities and delivery remain required; PG10 conditional. Main is
+protected by ruleset7146669: squash PRs, resolved threads, Nix Flake Check,
+Compile-fail tests and Feature isolation, no bypass. Native Postgres CI also
+required by PRD. No publication or clean registry-consumer proof yet.

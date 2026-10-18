@@ -20,8 +20,10 @@ this PRD does not satisfy their acceptance gates.
 
 PG0 characterization and contract decisions are recorded in
 [the feature research](../prds/postgres/research.md). PG1/PG2 first experiments
-pass the 63-test real-database suite; their remaining acceptance and full checks
-are open. Prerequisite edges remain visible after prerequisite acceptance.
+pass the 79-test real-database suite, with zero skips. Row and byte bounds,
+notification deadlines and listener lifecycle have native regression evidence;
+remaining acceptance and final delivery checks are open. Prerequisite edges
+remain visible after prerequisite acceptance.
 PG10 requires its own consumer contract,
 acceptance criteria and dependency edges before activation. Labcast command IDs,
 deduplication and stale-worker rejection remain downstream responsibilities.

@@ -19,11 +19,14 @@
 mod builder;
 mod error;
 mod hex;
+mod limits;
+mod page;
 mod position;
 mod schema;
 mod store;
 mod wake;
 
 pub use error::PostgresError;
+pub use limits::Limits;
 pub use position::PgAllPos;
 pub use store::PostgresStore;

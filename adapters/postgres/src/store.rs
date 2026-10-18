@@ -13,14 +13,16 @@ use mnesis_store::error::{AppendError, AppendValidationError};
 use mnesis_store::store::RawEventStore;
 use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
 use mnesis_store::wire;
-use mnesis_store::{BatchSize, PendingBatch, PendingEnvelope};
+use mnesis_store::{PendingBatch, PendingEnvelope};
 use mnesis_wake::StreamNotifiers;
 use sqlx::postgres::PgListener;
 use sqlx::{Error as SqlxError, PgPool, Postgres, QueryBuilder};
 use tokio::task::JoinHandle;
 
+use crate::Limits;
 use crate::error::PostgresError;
 use crate::hex;
+use crate::page::{self, Order, PageRow};
 use crate::position::PgAllPos;
 
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
@@ -37,7 +39,7 @@ const NOTIFY_CHANNEL: &str = "mnesis_events";
 /// is a thin `Arc<Inner>` handle rather than a bare `PgPool`).
 struct Inner {
     pool: PgPool,
-    batch_size: BatchSize,
+    limits: Limits,
     /// In-process wake registry. The `LISTEN/NOTIFY` listener task drives it:
     /// every `NOTIFY` becomes a `notifiers.wake(id)`, which rouses both the
     /// per-stream and `$all` armed registrations. Reusing this audited registry
@@ -78,13 +80,13 @@ impl PostgresStore {
     /// `LISTEN/NOTIFY` listener task, and wrap it all in the shared [`Inner`].
     ///
     /// Called by [`from_pool`](Self::from_pool) *after* the schema is ensured.
-    pub(crate) fn assemble(pool: PgPool, batch_size: BatchSize) -> Self {
+    pub(crate) fn assemble(pool: PgPool, limits: Limits) -> Self {
         let notifiers = StreamNotifiers::new();
         let listener_task = spawn_listener(pool.clone(), Arc::clone(&notifiers));
         Self {
             inner: Arc::new(Inner {
                 pool,
-                batch_size,
+                limits,
                 notifiers,
                 listener_task,
             }),
@@ -414,6 +416,34 @@ fn postgres_validation_err(
 // IO helpers
 // ---------------------------------------------------------------------------
 
+fn validate_sizes(
+    id: &StreamKey,
+    envelopes: PendingBatch<'_>,
+    limits: Limits,
+) -> Result<(), PostgresError> {
+    for event in envelopes {
+        let lengths = [
+            id.as_bytes().len(),
+            event.event_type().len(),
+            event.payload().len(),
+            event.metadata().map_or(0, <[u8]>::len),
+        ];
+        let actual = lengths
+            .into_iter()
+            .try_fold(32_i64, |total, length| {
+                i64::try_from(length)
+                    .ok()
+                    .and_then(|size| total.checked_add(size))
+            })
+            .ok_or_else(|| corrupt(ErrorId::from_display(id), "row byte count overflow"))?;
+        let limit = i64::from(limits.bytes.get());
+        if actual > limit {
+            return Err(PostgresError::RowLimit { actual, limit });
+        }
+    }
+    Ok(())
+}
+
 /// Read the stream's current (max) version inside `conn`. Absent stream → 0.
 ///
 /// A *negative* stored version is corruption surfaced as an error, NOT a silent
@@ -489,6 +519,7 @@ impl RawEventStore for PostgresStore {
         expected_version: Option<Version>,
         envelopes: PendingBatch<'_>,
     ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
+        validate_sizes(id, envelopes, self.inner.limits).map_err(AppendError::Store)?;
         // Runs at the pool default (READ COMMITTED). That is sufficient here
         // ONLY because `UNIQUE(stream_id, version)` arbitrates two concurrent
         // appends racing on the same next version: the loser's INSERT fails with
@@ -543,23 +574,19 @@ impl RawEventStore for PostgresStore {
 
         // Appends cannot later insert below this committed head. A fixed upper
         // bound gives a repeatable finite history without a retained transaction.
-        let limit = self.inner.batch_size.get().to_string();
+        let limits = self.inner.limits;
         let state = (
             self.pool().clone(),
             id.clone(),
             None,
-            VecDeque::<EventRow>::new(),
-            limit,
+            VecDeque::<PageRow<EventRow>>::new(),
         );
-        Ok(try_unfold(
-            state,
-            move |(pool, key, after, mut rows, page_limit)| async move {
+        Ok(
+            try_unfold(state, move |(pool, key, after, mut rows)| async move {
                 if rows.is_empty() {
-                    let mut query = QueryBuilder::<Postgres>::new(
-                        "SELECT version, event_type, schema_version, payload, metadata \
-                         FROM events WHERE stream_id = ",
-                    );
+                    let mut query = QueryBuilder::<Postgres>::new(page::START);
                     query
+                        .push("stream_id = ")
                         .push_bind(key.as_bytes())
                         .push(" AND version >= ")
                         .push_bind(from_i64)
@@ -568,26 +595,24 @@ impl RawEventStore for PostgresStore {
                     if let Some(position) = after {
                         query.push(" AND version > ").push_bind(position);
                     }
-                    query
-                        .push(" ORDER BY version LIMIT ")
-                        .push_bind(&page_limit)
-                        .push("::text::bigint");
+                    page::finish(&mut query, Order::Stream, limits);
                     rows = query
-                        .build_query_as::<EventRow>()
+                        .build_query_as::<PageRow<EventRow>>()
                         .fetch_all(&pool)
                         .await
                         .map_err(PostgresError::Sqlx)?
                         .into();
                 }
-                let Some(row) = rows.pop_front() else {
+                let Some(buffered) = rows.pop_front() else {
                     return Ok(None);
                 };
+                let row = buffered.into_value()?;
                 let next = row.version;
                 let event = row_to_envelope(row, label)?;
-                Ok(Some((event, (pool, key, Some(next), rows, page_limit))))
-            },
+                Ok(Some((event, (pool, key, Some(next), rows))))
+            })
+            .boxed(),
         )
-        .boxed())
     }
 
     async fn read_all(&self, from: Option<PgAllPos>) -> Result<Self::AllStream, Self::Error> {
@@ -606,71 +631,58 @@ impl RawEventStore for PostgresStore {
                 .fetch_one(self.pool())
                 .await
                 .map_err(PostgresError::Sqlx)?;
+        let limits = self.inner.limits;
         let state = (
             self.pool().clone(),
             start,
-            VecDeque::<AllEventRow>::new(),
+            VecDeque::<PageRow<AllEventRow>>::new(),
             upper,
-            self.inner.batch_size.get().to_string(),
         );
-        Ok(try_unfold(
-            state,
-            move |(pool, after, mut rows, ceiling, page_limit)| {
-                async move {
-                    if rows.is_empty() {
-                        let mut query = QueryBuilder::<Postgres>::new(
-                            "SELECT stream_id, txid::text::bigint AS txid, global_seq, \
-                         version, event_type, schema_version, payload, metadata \
-                         FROM events WHERE txid < ",
-                        );
-                        query.push_bind(&ceiling).push("::text::xid8");
-                        if let Some((transaction, sequence)) = after {
-                            query
-                                .push(" AND (txid, global_seq) > (")
-                                .push_bind(transaction.to_string())
-                                .push("::text::xid8, ")
-                                .push_bind(sequence)
-                                .push(")");
-                        }
-                        // Qualify the native column: the output alias is bigint.
+        Ok(
+            try_unfold(state, move |(pool, after, mut rows, ceiling)| async move {
+                if rows.is_empty() {
+                    let mut query = QueryBuilder::<Postgres>::new(page::START);
+                    query
+                        .push("txid < ")
+                        .push_bind(&ceiling)
+                        .push("::text::xid8");
+                    if let Some((transaction, sequence)) = after {
                         query
-                            .push(" ORDER BY events.txid, global_seq LIMIT ")
-                            .push_bind(&page_limit)
-                            .push("::text::bigint");
-                        rows = query
-                            .build_query_as::<AllEventRow>()
-                            .fetch_all(&pool)
-                            .await
-                            .map_err(PostgresError::Sqlx)?
-                            .into();
+                            .push(" AND (txid, global_seq) > (")
+                            .push_bind(transaction.to_string())
+                            .push("::text::xid8, ")
+                            .push_bind(sequence)
+                            .push(")");
                     }
-                    let Some(row) = rows.pop_front() else {
-                        return Ok(None);
-                    };
-                    let stream = StreamKey::from_bytes(row.stream_id);
-                    let row_label = ErrorId::from_display(&stream);
-                    let txid = u64::try_from(row.txid)
-                        .map_err(|_| corrupt(row_label, "txid out of range"))?;
-                    let seq = u64::try_from(row.global_seq)
-                        .map_err(|_| corrupt(row_label, "global_seq out of range"))?;
-                    if seq == 0 {
-                        return Err(corrupt(row_label, "global_seq is zero"));
-                    }
-                    let event = row_to_envelope(row.event, row_label)?;
-                    Ok(Some((
-                        (PgAllPos::new(txid, seq), stream, event),
-                        (
-                            pool,
-                            Some((txid, row.global_seq)),
-                            rows,
-                            ceiling,
-                            page_limit,
-                        ),
-                    )))
+                    page::finish(&mut query, Order::All, limits);
+                    rows = query
+                        .build_query_as::<PageRow<AllEventRow>>()
+                        .fetch_all(&pool)
+                        .await
+                        .map_err(PostgresError::Sqlx)?
+                        .into();
                 }
-            },
+                let Some(buffered) = rows.pop_front() else {
+                    return Ok(None);
+                };
+                let row = buffered.into_value()?;
+                let stream = StreamKey::from_bytes(row.stream_id);
+                let row_label = ErrorId::from_display(&stream);
+                let txid =
+                    u64::try_from(row.txid).map_err(|_| corrupt(row_label, "txid out of range"))?;
+                let seq = u64::try_from(row.global_seq)
+                    .map_err(|_| corrupt(row_label, "global_seq out of range"))?;
+                if seq == 0 {
+                    return Err(corrupt(row_label, "global_seq is zero"));
+                }
+                let event = row_to_envelope(row.event, row_label)?;
+                Ok(Some((
+                    (PgAllPos::new(txid, seq), stream, event),
+                    (pool, Some((txid, row.global_seq)), rows, ceiling),
+                )))
+            })
+            .boxed(),
         )
-        .boxed())
     }
 }
 

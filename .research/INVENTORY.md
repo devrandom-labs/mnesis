@@ -14,3 +14,12 @@ Reference projects inspected: Bombay PRD backlog and feature records;
 mnesis-bombay instructions, manifest and lock; Trive's Nix environment entry
 point and flake; CESR's repository guidance, environment entry point and layout.
 Their patterns inform the PRD; they do not change Mnesis's dependency selection.
+
+First retained implementation batches preserve all existing owners and executable
+core contracts. Adapter now has one Arc-owned listener, one timer per armed
+registration and one boxed owned cursor per raw scan. Finite immutable history
+releases leases between pages. Remaining credible audit findings: practical byte
+bounds (current experiment), phase-aware commit errors, qualified conflicts,
+non-narrowed unsigned scalar storage, versioned migrations and real DB gate.
+These prevent any fixed-point or production-completion claim. Full capability
+and public surface minimization remain PG9 obligations.

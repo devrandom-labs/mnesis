@@ -8,6 +8,10 @@ use mnesis_store::envelope::EnvelopeError;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum PostgresError {
+    /// A row exceeds the configured read/write byte ceiling. No row is skipped.
+    #[error("row requires {actual} bytes, exceeding configured limit {limit}")]
+    RowLimit { actual: i64, limit: i64 },
+
     /// The shared pool cannot accommodate both LISTEN and a data query.
     #[error("pool capacity {actual} cannot accommodate the listener and data queries")]
     PoolCapacity { actual: u32 },

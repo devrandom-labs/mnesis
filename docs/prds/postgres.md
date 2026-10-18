@@ -512,7 +512,15 @@ Start with PG0 and the real failing witnesses. The first production slice covers
 PG1–PG3 after their contract decisions: expected owners are Postgres `store.rs`,
 `wake.rs`, `builder.rs`, `error.rs`, `position.rs`, adapter tests and manifests.
 Touch shared error/contract or wake files only when PG0 proves the need.
-Planning budget: at most 12 changed implementation/test files, net +400 production
+PG1 byte-limit pre-edit refinement: add a private page-query owner and a `Limits`
+configuration alongside the existing store/builder/error owners. Budget +260/−45,
+net +215 production lines, one configuration type replacing the unpublished
+batch-only overload, zero dependencies. Native tests: at most +350 lines for
+large-row memory, exact byte edges, metadata/key accounting, whole-batch rejection,
+oversized legacy rows and cancellation. Full falsifiers, comparison and actual
+deltas are in [the research](postgres/research.md#pg1-byte-limit-experiment-pre-edit).
+
+Revised first-slice budget: at most 14 changed implementation/test files, net +500 production
 lines, and two new public types; record actual additions/deletions before edits
 and at each checkpoint. Cursor associated types count in the public-surface audit.
 Reuse existing position, batch, wake, pool and stream contracts. No new crate.

@@ -277,3 +277,147 @@ fault transition deterministic before the first listener attempt.
 
 Primary facility sources and versions are linked in the parent PRD. Source and
 advisory verification must be refreshed at the delivery revision.
+
+## PG1 byte-limit experiment (pre-edit)
+
+Threat: a bounded number of legal envelope rows still retains arbitrarily large
+payloads and metadata. The default witness uses 24 rows of 1MiB each and requires
+first-event retained memory below 20MiB for both scan paths. Original row-only
+pages must fail it. Proposed default: 16MiB of row bytes per page; configurable
+positive budget, row ceiling remains `BatchSize`. Count raw stream ID, event
+type, payload, metadata and 32 bytes of scalar fields. Reject any individual row
+exceeding the configured budget before append begins; legacy oversized rows
+produce a typed limit error at their exact place, without fetching their body
+or silently advancing. Consumers may reopen with an explicitly larger budget.
+
+Compare supported Postgres window functions with a two-query header/body scan.
+Select a bounded header candidate set, compute its ordered running byte sum,
+then join only the fitting prefix to immutable events within one SQL statement.
+Return a size diagnostic for an oversized first row, with byte columns NULL.
+This reuses native SQL window/CASE evaluation and SQLx FromRow rather than a
+custom public cursor framework or new dependency. Falsifiers: byte retention
+still scales with page row count; metadata/keys escape accounting; read order,
+resume, source error or connection-release laws regress; writes partially commit
+before size rejection; or query plans scan the backlog.
+
+Budget: existing store/builder/error/lib plus private limits/page owners, no more
+than +260/−45/net +215 production lines, one configuration type replacing the
+unpublished batch-only constructor, no dependency; native tests at most +240
+lines. This refines cumulative first-slice budget to net +500 production lines
+and 14 implementation/test files, explicitly including practical byte bounds.
+Record actual delta and query plans before retention.
+
+Primary sources checked 2026-10-18:
+[Postgres 17 window functions](https://www.postgresql.org/docs/17/functions-window.html),
+[conditional evaluation](https://www.postgresql.org/docs/17/functions-conditional.html),
+and locked SQLx 0.8.6 `FromRow`/`QueryBuilder` implementations. Window sums operate
+on header rows; CASE guards actual byte columns. No literal-error CASE branches
+or aggregate expressions inside guarded branches are used.
+
+Pre-implementation witness failed on `d4624e58`: 26,203,952 retained stream
+bytes and 24,125,055 global bytes, versus a 20MiB test ceiling. See
+[original byte witness](evidence/original-byte-limit.log). No row was individually
+oversized; this proves the missing aggregate page bound.
+
+Test budget refined before adding cancellation evidence: +350 lines, including
+readable exact-edge, metadata/key accounting, atomic tail rejection, oversized
+legacy-body exclusion and pool-wait cancellation witnesses. The earlier +240
+estimate omitted Rust formatting and the independent cancellation law. Production
+budget and dependency/public-type ceilings are unchanged.
+
+Byte-limited implementation passes all 79 native Postgres tests, zero skips,
+12.601 seconds; targeted Clippy and formatting pass. On the 24 x 1MiB witness,
+retained stream/global bytes are 15,718,465/15,735,472. Small 4096-byte rows retain
+1,088,719/1,090,052 bytes, preserving the earlier row-count bound. A raw legacy
+8MiB row is reported exactly at version 3, with less than 1MiB extra retained
+memory and a terminal error; explicitly raising the budget reads all four rows.
+Binary keys, UTF-8 byte lengths, absent/nonempty metadata, exact acceptance and
+one-byte rejection, whole-batch rejection and dropped pool requests pass.
+[Native output](evidence/byte-tests.log).
+
+The header-window query retains index seeks with forced generic plans. At early
+and 40,000-row checkpoints in 40,960 rows, header selection visits 256 rows and
+7/9 buffers. Payload lookup adds 256 primary-key seeks (768 buffers) and a bounded
+256-row sort; execution samples are 0.272/0.279ms. This is a real extra lookup
+cost, accepted provisionally for a single-statement byte bound that never fetches
+rejected bodies. These diagnostic samples do not establish throughput or latency
+capacity; PG8 must measure the tradeoff on representative data and load.
+[Plans](evidence/byte-plans.log).
+
+Actual byte-stage Rust source delta: +209/−85/net +124 including docs; tests
++347/−10. Cumulative production net +190, no dependencies; two public types
+(Registration and Limits). `Limits` replaces the unpublished batch-only overload
+and owns row/byte facts together. The matched full Darwin gate passed in
+session 46146: all 12 checks, 1,374 passing workspace tests and four skips;
+nextest took 301.257 seconds. [Gate output](evidence/byte-gate.log).
+Full log: `/tmp/mnesis-postgres-byte-flake.log`, source/test diff SHA-256
+`0644165e71d4a033df307670ae3027ddf38f8a5b0422f9e99e17d277a6222c5f`.
+This retains the byte-limit experiment; Linux CI and delivery remain pending.
+
+## PG3 transaction-outcome experiment (pre-edit)
+
+Threat: all unique violations currently become retry-eligible conflicts, and
+transport failure awaiting COMMIT has no distinct outcome. Reproduce unrelated
+unique failure and suppress the server's actual `CommandComplete(COMMIT)` response,
+then inspect committed rows using an independent control connection. Compare
+ordinary SQLx callbacks and backend termination first: neither can selectively
+hide a successful COMMIT response. Use a private test-only Unix socket forwarder
+with existing Tokio I/O and workspace-managed tempfile; parse only the documented
+backend frame boundary and command tag, forwarding all other bytes unchanged.
+A normal forwarding control and before-BEGIN failure must establish the oracle.
+No production fault seam, transport framework or new runtime.
+
+Model unknown commit with a source-preserving Postgres error alternative. Keep
+ordinary pre-commit errors and verified server rollbacks as definite failures;
+never infer rollback from class 40 wholesale (`40003` means completion unknown).
+Qualify stream/version conflicts by constraint identity. Bound post-commit hint
+work and wake local registrations after confirmed commit. Cancellation delivers
+no result, and an application timeout remains insufficient evidence of rollback.
+Do not add retry policy or application command IDs to the adapter.
+
+Budget: existing store/error owners plus a private transaction helper if needed,
+at most +100/−25/net +75 production lines, zero public types and one existing
+workspace dev dependency, at most 650 native test lines including the scoped
+forwarder. Falsifiers: the proxy cannot prove its phase; durable rows exist after
+a definite failure; any unknown outcome becomes conflict; an unrelated constraint
+becomes conflict; a dropped future leaks a task/connection; or auxiliary hint
+work can hold acknowledged success indefinitely. Atomic import and snapshot
+paths must reuse the outcome rule when added in PG5/PG6.
+
+Primary sources refreshed 2026-10-18: locked SQLx 0.8.6
+`sqlx-postgres/src/transaction.rs` and `sqlx-core/src/transaction.rs` (COMMIT awaits
+server responses; dropping queues rollback and does not undo an already committed
+transaction), [Postgres error codes](https://www.postgresql.org/docs/17/errcodes-appendix.html)
+(distinct `40001`, `40P01`, `40003`, `08007` and constraint-name fields), and
+[backend message format](https://www.postgresql.org/docs/17/protocol-message-formats.html)
+(CommandComplete includes a NUL-terminated tag). These support the planned fault
+oracle and conservative classification, not a completed experiment.
+
+Protected delivery inspection: main uses active ruleset 7146669 (classic branch
+protection endpoint is absent). Pull requests, squash merges, resolved threads
+and Nix Flake Check / Compile-fail tests / Feature isolation are required;
+no bypass actors. The separate native-Postgres CI job must also pass by this PRD.
+
+The current byte-limited source also passes the 40,960-row x 4,096-byte
+allocation witness: retained stream/global bytes are exactly 1,088,719/1,090,052,
+matching the 4,096-row workload. This run overlaps the full gate, so its elapsed
+read times are not controlled latency evidence. [Output](evidence/byte-large-history.log).
+
+PG4 preparation notes (candidate, not implementation): compare owned `mnesis`
+schema with public tables and application-shared SQLx metadata. An owned schema
+can isolate migration identity and qualify runtime SQL without mutating caller
+search paths. SQLx's session lock must also cover first-time schema bootstrap;
+`CREATE SCHEMA IF NOT EXISTS` alone is not proof against concurrent catalog
+creation. Any nested use of SQLx's reentrant advisory lock must release by closing
+the scoped connection, with a native concurrent-start witness. Runtime open must
+validate without DDL, unknown versions/checksums must fail, and explicit migration
+must adopt only a verified legacy shape. Do not build a second migration engine.
+
+Lossless candidates: numeric(20,0) with positive/u64-range checks for versions,
+bytea for UTF-8 event-type bytes (including NUL), and text parsing of native xid8
+on output. Keep indexed native columns uncast. A supplied resume sequence above
+native bigint capacity still has a valid lexicographic meaning: exclude that
+transaction and seek later transaction IDs, rather than fail signed conversion.
+These choices require exact round-trip, upgrade, rollback, least-privilege and
+plan evidence before selection. Long incompressible stream keys remain a separate
+credible native-index limitation to measure, not solved by event-type conversion.

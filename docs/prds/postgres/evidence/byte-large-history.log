@@ -1,0 +1,16 @@
+warning: Git tree '/Users/joel/orca/workspaces/nexus/main' has uncommitted changes
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+────────────
+ Nextest run ID 21443661-9d75-41e3-8498-d00ceb8f9f23 with nextest profile: default
+    Starting 1 test across 6 binaries (78 tests skipped)
+       START [         ] (1/1) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+
+running 1 test
+40960 rows x 4096 bytes: stream=1088719 bytes/13.924542ms, all=1090052 bytes/7.949209ms; budget=4194304
+test first_event_does_not_retain_the_whole_backlog ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 4.94s
+
+        PASS [   4.957s] (1/1) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+────────────
+     Summary [   4.963s] 1 test run: 1 passed, 78 skipped
