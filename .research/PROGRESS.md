@@ -122,3 +122,59 @@ choices. No PG7bPRyet. ProductsourceunchangedSHAd5e7,572nativelines. Rootmirrore
 LATEST3: signed commitcd3ec0355299b574c5fefe3dfa50830b20bcf987(G), normalfullhook
 12cached/0fresh-runtimecredit. Docs-only signedamendment now records actualcommit
 and samehook withoutsourcechanges. Push/openfocusedPR next; do notstopgoal.
+
+LATEST4 USERSTEERING: fix failingreleaseASGO, preservewholePG0–9goal. PG7b
+signedamendedheadf94333c7649a1a69e875728bc4a5553355f11fa7 pushed, PR385OPEN
+https://github.com/devrandom-labs/mnesis/pull/385,38green2Nixpending0fail atlastpoll.
+ParentworktreeviewsCLEAN, doNOTedit/pushwhileCIexacthead. NeedallCI/download actual
+mutationartifact/firstfailures3reviews/normalprotectedmerge (notyetdelivered).
+CURRENTworktree /private/tmp/mnesis-release-checks work/release-checks based88main,
+45line releaseworkflow fixUNCOMMITTED. Full Nixgate session79394running, log
+/tmp/mnesis-release-fix-full-gate.log (5fresh otherscached).45<=80pre-editbudget,
+0Rust/deps/scripts/runtime/framework. Main-only release job; separate PRcheckout;
+selectivecargo update2paths per2fuzz locks; GitHubApp signed conditionalCAScommit;
+noPRguard prs_created true (upstreamnonepr={}!). Actionlintpasses. Exact YAMLbody
+controls: realSTaleData nativeAPI rejects stalehead/no branchwrite, currentmain
+0lockupdates/noAPI/payload, originalreleaseCargo--locked101=>corrected metadata0.
+All3reviews/detailsdocs/prds/postgres/research.md. Never remove --locked/maskjobs.
+ReleasePR378 head8836a37c4ffc046adde6a2f425da801ba01ab28d OPENunmerged;4AFLbuilds
+failed39147192934 stale fuzz-afl.lock beforefuzz. Coremnesis/storeversion0.4.1
+not reflectedisolatedlocks. Manualproofworktree /private/tmp/mnesis-release-locks
+work/release-locks,4versionedits2locksUNCOMMITTED; probe/detachedworktree
+/private/tmp/mnesis-release-workflow-probe at8836 hasSAMEupdates, preserved.
+Planmergefocusedworkflowrepair throughnormalgate/CI/protectedpath, then dispatch
+ReleaseonMAIN torefreshPR378locksautomatically (rootpublisherstillmain0.4.0).
+DO NOTMERGEPR378or publishpendingadapter beforewholeacceptance. No liveworkflow
+executionyet. Userauthorizationfixreleaseexplicit, normalprotectedworkflowremains.
+CodSpeed117734118722 releasePR3decodecases501.7ns=>560ns-10.42%; actualpublicSSR
+showsAMD EPYC7763vsbaseline9V74 equalflags, sameRust1.99.0/LLVM23.1.1/cargo-codspeed
+5.0.3/Ubuntuimage. CPUdifference NOTproofcause. No CodSpeedtool/registeredrepo
+selfhostedrunner. Don'traise thresholds/acknowledge/removebench/switchmetrics to
+forcegreen. Needactualtrace orcontrolledsame-environment proof. Publicdata/tmp/
+mnesis-release-codspeed-data.log,detail.log,page.html,selectedenvironments.log;
+rootCIlogs/tmp/mnesis-release-378-codspeed.log and-main-88a4575-codspeed.log. Official
+variance docs/tmp/mnesis-codspeed-regression-causes.md and-reducing-variance.md.
+Fullgoalincomplete: afterPG7bdelivery/repair resumePG7c (preeditnotes/tmp/mnesis-pg7c-pre-edit.md),
+PG8security/lifecycle/restore/capacity30minsoak,PG9remainingPython/advisories/etc,
+publication+cleanregistryconsumer. Rootdocsbranchpreserved. Allworktrees/stasheskeep.
+
+LATEST5: PG7bPR385 ALREADYMERGED byjoeldsouzax17:41:10Z actualevent,merge
+12fd839c7b08e2eda1a8020bae9f52dd898c1d15,branchdeleted17:41:12Z. Agent didNOTissue
+merge (discoveredstateMERGED whilemergeableUNKNOWN).40green1scheduledskip, all
+native4x203,workspace2x1563,compiler2/1/1x2,fuzz8,22mutation firstfailures reviewed
+3ways+evidence in currentrepairbranch. Actualartifact12144836614 SHA74c563874ac99...
+9caught13unviable0missed/timeout. NEXT fullgatefixbranch afterrebase to12fdmain,
+normalhook/sign/focusedPR/protectedmerge thenReleaseMAINdispatch. No livefixyet.
+ReleasePR378now9aab7b894f21637ffdf7aad924183a6a58b54b20,oldAFLfailure repeats.
+Repairstash preserved OID in/tmp/mnesis-release-repair-stash-oid; all5append
+conflicts resolvedpreserving mainrecords+onlynewrepair/CIrecords, no production
+sourceedit. Prior gate79394 on88source stillrunning; no current12fdgate credit.
+Preserved repair stash219c6aaf1dfc8ea83f6ff6d3a0389b8a8ba0449f. Actualartifact
+12144836614 digest74c563874ac9918daa08b868a7e56cb6b91afcb26102ae0ea480d22d1ac12648.
+LATEST6: releasefix signed111d0b8a normalhookPASS12checks9cached3freshcompileONLY,
+0fresh runtime. Pregate88alsoPASS1563/508.004s, not rebasedsourceproof. Records
+3reviews inresearch. Amenddocs/backlog now thenpushfocusedPR. CodSpeedACTUALtrace
+retrieved /tmp/mnesis-codspeed-{base,head}-callgraph.log andevidence: largepayload
+bothir35ns, all58.333nsdelta fromONE extra L1+LLmisspair in decode_frame self,
+10nodes9edgesboth. ActualcostchangeNOTinstructions; causehardwarevslayoutunseparated,
+noack/threshold/workloadchange. Nextall3traces andmeasured causalminimalimprovement.

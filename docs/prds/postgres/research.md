@@ -3830,3 +3830,176 @@ passes normal unmodified pre-commit nixflakecheck,12cached checks,0new runtime
 credit. Full actual gate1563/519.852s recorded above. Docs-only record amendment
 uses same normal hook; source/native controls/LINUX/mutation evidence unchanged.
 No source change or bypass; focused protected PR still required before delivery.
+User-directed release repair while PG7bPR385 runs CI. ReleasePR378 head8836a37c,
+failedrun39147192934:4AFLtargets each `cargo afl build --release --locked` exits101
+stale fuzz-afl/Cargo.lock;0fuzz executions. Three reviews: (1) required locked
+harness builds blocked; (2) actualCargo lock mismatch, not decoder crash;
+(3) all4buildfailures retained, nonecounted runtime/caught input, fuzz-gate correctly
+fails. LibFuzzer successes don't rescue absent AFL runs. CodSpeed check117734118722
+also reports3decodecases-10.42% and differentruntimeenvironments; cause UNPROVEN,
+no performance acknowledgement or gate relaxation. Branch-local repair budget in
+HYPOTHESES, PG7bsource kept separate. Publication remainswhole-adapter-gated.
+
+Release lock reproduction at original8836a37c: actual Cargo metadata--locked
+--offline exits101 with same stale-lock error as four AFLbuilds,0runtime. Three
+reviews:1lockedgraph must resolve;2exactCargo config rejection not a decoder crash;
+3nativeCargo/SUTmanifestactualhead, no --locked removal. Initial selective update
+attempt incorrectly included mnesis-macros (not in either harness's selected
+feature graph), aborts/no file changes; corrected actual graph has only mnesis
+and mnesis-store local packages to update. Native Cargo selected updates produce
+ONLY4version edits across2locks (.4.0=>.4.1), allregistry/checksum pins unchanged.
+Both corrected Cargo metadata--locked--offline pass. Three reviews each graph:
+1same locked harness graph resolves;2original version-mismatch rejected by original
+control now corrected;3resolver-only,0AFLbuild/fuzz runtime credit, no dep upgrade.
+
+Release workflow candidate45lines, no Rust/dependency/tool/script additions. Reuse
+supported release-plz outputs; upstream v0.5 source shows missing PR is {} and
+prs_created=false, so gate BOTH post-steps on that true output. Actual current
+GitHub schema confirms CommittableBranch.branchName (not older docs' refName).
+Separate release-pr checkout leaves root publisher on triggering main commit;
+manual dispatch job also requires refs/heads/main. Cargo updates only2local paths
+in each isolated workspace; GitHub App createCommitOnBranch retains PR metadata,
+produces verified commits and expectedHeadOid prevents overwrites. Full original
+--locked AFL builds/gates untouched. Existing user's Cesr uses same App/signing
+owner; no new bot, runner or framework. Official release-plz output and GitHub
+GraphQL primary docs inspected; actual schema checked against live endpoint.
+
+Native workflow controls use EXACT YAML-extracted shell body, not reimplemented
+logic. Fresh release-head probe8836 runs its Cargo/JQ body, emits valid exact
+2lock payload/4version edits. Only expectedHeadOid deliberately changed to stale
+88a4575b; REAL GitHub API returns STALE_DATA, createCommitOnBranch=null, and
+remote PR378 head remains8836. Three reviews:1concurrent head must never overwrite;
+2actual conditional write rejected at server;3only changed fault input, no mock,
+no external write/nativefuzz credit, API response+exactremotehead recorded.
+Already-current main88a4575b runs FULL exact workflow body: Cargo locks0updates,
+exit0 before payload/API; no release-locks.json created, both locks unchanged,
+rootHEAD unchanged. Three reviews:1idempotent refresh;2actual no-change path makes
+no write;3actualshell/Cargo, no mocked API; not live publisher proof. Locked
+nixpkgs actionlint passes candidate and corrected final workflow; three reviews:
+valid native action/schema references; existing publish/gate steps retained;
+static check only, no live Actions or publication credit.45<=80budget.
+
+CodSpeed public report's ACTUAL environment data: release8836 on AMD EPYC7763,
+base88a4575 on EPYC9V74, equal recorded CPU flag lists. Compiler1.99.0b940084d7,
+LLVM23.1.1, cargo-codspeed5.0.3 and Ubuntu20261012.334.1 match both logs. Three
+pure decode cases report501.7ns=>560ns (-10.42%); root release diff only versions/
+changelogs, no decoder source change. Different CPU is EVIDENCE of environment
+change, NOT yet proof of entire cause. No threshold, workload, mode, binary or
+acknowledgement changed. Raw publicHTML/JSON kept outside repo (contains unrelated
+page metadata); selected environment facts in.log. Actual trace/counter comparison
+or controlled same-environment reproduction still needed before closing this
+failure. No registered repo self-hosted runner, no new infrastructure selected.
+
+PG7b protected CI reviewed at exact signed head
+f94333c7649a1a69e875728bc4a5553355f11fa7. All40checks SUCCESS,1 scheduled sweep
+SKIPPED,0reviews/threads; mergeability currently UNKNOWN (not yet merged).
+PR39149415319/push39149411578 actual native203 each in28.025/33.572 and
+35.239/35.414s respectively. EACH of FOUR executions reviewed THREE ways:
+1complete all-capability native contract;2all11 new real session adversaries plus
+192 prior laws;3actual fresh execution,203 selected0skips, installed duplicate
+summary is replay, no additional run. Each of20 feature smokes reviewed THREE
+ways: exact atomic/snapshot/projection/listing/session capability; actual native
+owner assertion; --no-tests=fail/pipefail retained,1 actual each,14/15/2/7/10
+filtered not passes. Timing/counts in pg7b-ci-summaries.log.
+
+Both full CI workspace runs1563/1563 PASS120.722/107.856s,4compiler functions
+excluded. EACH reviewed THREE ways: workspace owner contracts; actual unchanged
+property/resilience/state-machine assertions; DB-free early returns not native,
+compiler exclusions covered by separate owner job. Compiler owner jobs EACH
+reviewed THREE ways: exact intended diagnostic contract; real rejected fixture
+compilation; kernel2/macro1/store1 functions,0skips and no fixture rewrites.
+PR109.07/3.94/11.84s, push109.11/3.92/11.69s. Each of six replay runs2/1/1 per
+CI invocation reviewed THREE ways: actual decoder owner; corpus assertions;
+finite replay,0filtered, not new deep fuzz or Postgres evidence. Feature-unit
+matrix summaries retained; EACH run reviewed THREE ways: isolated owning feature
+contract; actual unit assertion or compilation obligation; 0-test harnesses are
+compilation-only and receive0runtime credit, none substitute for native adapter.
+No gate, workload, expected output, timeout or lint weakened.
+
+Deep-fuzz39149415450 four LibFuzzer executions PASS61s each: wire6528881,
+header3230413,chunk2229169,value10361584 inputs. EACH reviewed THREE ways:
+matching production decoder contract; actual mutated-input execution no crash;
+finite campaign, not exhaustive or native database evidence. Four actual AFL
+runs PASS60s, wire37.25%/header47.61%/chunk43.39%/value8.31% reported bitmap
+coverage,0crashes/timeouts each. EACH reviewed THREE ways: same required target;
+actual locked build and execution reaches time limit; percentages are AFL bitmap
+coverage, not product line coverage; known separate crash-exit gate gap remains
+PG9, not erased by these no-crash campaigns.
+
+PG7b actual CI mutation artifact12144836614/run39149415324 SHA256
+74c563874ac9918daa08b868a7e56cb6b91afcb26102ae0ea480d22d1ac12648,
+22=9caught13unviable0missed/timeout. Downloaded actual outcomes AND every first
+failure inspected; not inferred from aggregate green. Native baseline203/203
+PASS29.328s reviewed THREE ways: whole-capability contract; real203 actual laws;
+0skips and native source, not local-baseline replay. Per-outcome THREE reviews:
+
+| Candidate | Review1 contract | Review2 actual first fault | Review3 provenance/limit |
+| --- | --- | --- | --- |
+| stream_query562 new() | Valid query construction | E0061 missing argument | Unviable,0runtime/caught credit. |
+| stream_query562 from_iter | Valid query construction | E0599 unsupported function | Unviable,0runtime. |
+| stream_query562 new(default) | Typed query construction | E0283 ambiguous type | Unviable,0runtime. |
+| stream_query562 from(default) | Committed event fidelity | Actual[] vs exact v1/E/payload9 |14pass1fail188UNRUN, actual atomic conformance row oracle. |
+| read_stream634 default | Event stream type | E0277 dynStream no Default | Unviable,0runtime. |
+| listing27 empty | Committed stream enumeration | Actual[] vs exact committed-after-held-transaction ID |91pass1fail111UNRUN; actual visibility oracle. |
+| listing27 new() | Typed page | E0599 PageRow::new missing | Unviable,0runtime. |
+| listing27 from_iter | Typed page | E0599 PageRow::from_iter missing | Unviable,0runtime. |
+| listing27 new(default) | Typed page | E0599 PageRow::new missing | Unviable,0runtime. |
+| listing27 from(default) | Typed page | E0277 PageRow no Default | Unviable,0runtime. |
+| live59 Ok | Expiry includes buffered rows | Actual buffered.next fails exact Expired match |174pass1fail28UNRUN;1.060s actual expiry. |
+| live59 >= to < | Live view permits reads | Premature Expired at pre-termination list.unwrap |168pass1fail34UNRUN; entry guard, NOT57P01 fault coverage. |
+| unavailable67 default | Original error type | E0277 ExportError no Default | Unviable,0runtime. |
+| unavailable67 >= to < | Expired abandoned read reports expiry | Actual cursor.next wrong error |172pass1fail30UNRUN;1.061s native blocked-read law. |
+| request80 default | Generic request response | E0277 T no Default | Unviable,0runtime. |
+| open98 default | Session type | E0277 Session no Default | Unviable,0runtime. |
+| open98 OR to AND | Reject zero/MAX lifetime before pool | Exact InvalidLifetime match fails |175pass1fail27UNRUN; original boundary assertion retained. |
+| own149 Ok | Owner must establish view | ExportReply RecvError at session startup |168pass1fail34UNRUN; startup guard, NOT native termination cleanup. |
+| serve170 Ok | Owner must serve view | ExportReply RecvError at session startup |168pass1fail34UNRUN; startup guard only. |
+| list236 default | Listing stream type | E0277 dynStream no Default | Unviable,0runtime. |
+| export262 default | Event stream type | E0277 dynStream no Default | Unviable,0runtime. |
+| close303 Ok | Cleanup errors preserved | Actual57P01 close incorrectly acknowledged: closed.is_err fails |168pass1fail34UNRUN; error fidelity, NOT temporal rollback-ACK proof. |
+
+Separate fresh READCOMMITTED and disabled-native-disconnect controls remain the
+SQL/cleanup defect witnesses. No generated percentage substitutes for those
+or the blocked pool-close/drop laws. Artifact and summary records retained;
+normal protected exact-head merge still pending GitHub mergeability result.
+
+PG7b DELIVERY UPDATE: actual GitHub event reports PR385 merged by joeldsouzax at
+2026-10-18T17:41:10Z, merge12fd839c7b08e2eda1a8020bae9f52dd898c1d15, exact signed
+headf94333c7649a1a69e875728bc4a5553355f11fa7; remote branch deletion17:41:12Z.
+This agent discovered the merge while inspecting UNKNOWN mergeability and did
+not issue that merge request. All40green/1scheduledskip and downloaded artifact
+reviews above refer to exact delivered head. Parent views worktree kept clean.
+Workflow repair rebased onto actual main12fd, preserving both append histories;
+pre-rebase work retained in named stash (OID in progress). No publication claim.
+ReleasePR378 refreshed to9aab7b894f21637ffdf7aad924183a6a58b54b20; same AFL locked
+build failure repeats before execution. Original8836 reproduction remains valid
+for diagnosed stale isolated lock graph. CodSpeed new report still in progress.
+
+Release repair pre-rebase gate at88a finished unmodified12checks PASS; actual
+workspace1563/1563 PASS508.004s,14slow4compiler functions excluded. Three reviews:
+1whole default workspace contract;2actual property/resilience/state-machine owner
+assertions, original workloads;3native database early returns NOT native proof,
+compiler functions remain separately owned CI, this older source gate is not
+claimed for rebased12fd. Eight named checks cached, four final named checks fresh
+(clippy/nextest/store-nostd/wasm) plus shared dependencies; evaluation's '5 checks'
+includes dependencies, not five new test executions. No new replay/runtime credit
+from cached fuzz check. First signed normal-hook commit111d0b8a396ea5f85e9fe77c2bb62f761433e365(G)
+on12fd passes full12checks,9cached+3fresh(clippy/nostd/wasm). THREE reviews:
+1entire unchanged gate retained;2actual source compilation and strict lints;
+3all runtime tests cached,0fresh runtime/cross-architecture credit. No bypass.
+
+CodSpeed trace discovery resolves one part of the diagnosis: actual public
+FindBenchmarkCallGraph query (from CodSpeed's shipped client) retrieves base and
+head large-decode callgraphs. Their complete node self totals match reported
+501.6667/560ns. Instruction contribution IDENTICAL35ns; L1 miss contribution
+22.2222=>25ns and last-level miss444.4444=>500ns explain ALL58.3333ns delta.
+Actual decode_frame self instruction contribution IDENTICAL7.7778ns; one extra
+simulated L1/last-level miss pair accounts for delta.10nodes9edges both, no
+allocation or syscall contribution. This establishes a cold-cache cost difference
+rather than extra decoder instructions for this benchmark. Hardware/layout root
+cause still not separated; it does NOT justify a manual acknowledgement or
+threshold change. Other payload traces and a causal retained improvement pending.
+Raw callgraphs retained without expiring signed download URLs. Initial read-only
+GraphQL query rejected wrong enum GitHub; native schema response says GITHUB,
+corrected query succeeds. Initial jq on gzip bytes rejected; proper gzip decode
+used. Neither inspection rejection is a native test or performance proof.
