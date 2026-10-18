@@ -10,7 +10,7 @@ this PRD does not satisfy their acceptance gates.
 | PG1 | Bounded reads and stable positions | active | PG0 | PG5, PG7, PG8 |
 | PG2 | Recovery without notifications | active | PG0 | PG5, PG8 |
 | PG3 | Transaction outcomes and retry safety | active | PG0 | PG5, PG6, PG8 |
-| PG4 | Schema, migrations and representation | candidate | PG0 | PG5, PG6, PG7, PG8 |
+| PG4 | Schema, migrations and representation | active | PG0 | PG5, PG6, PG7, PG8 |
 | PG5 | Atomic writes and import | blocked | PG1, PG2, PG3, PG4 | PG7, PG9 |
 | PG6 | Aggregate snapshots and projection state | blocked | PG3, PG4 | PG7, PG9 |
 | PG7 | Export, backup and restore | blocked | PG1, PG4, PG5, PG6 | PG9 |
@@ -28,5 +28,12 @@ PG10 requires its own consumer contract,
 acceptance criteria and dependency edges before activation. Labcast command IDs,
 deduplication and stale-worker rejection remain downstream responsibilities.
 
-Implementation PR: none. Required acceptance/CI: pending. Merge: none.
+Initial implementation PR: #376 (read/wake); migration and outcome slices pending. Required acceptance/CI: pending. Merge: none.
 Published adapter version and registry-consumer verification: pending.
+
+2026-10-18 delivery update: PG3 first phase slice merged as protected PR377,
+f87afc12dd6dabe4acd7847e98756858f5fb4c86 (40 green checks/1 scheduled skip).
+Actual SSI/deadlock and propagation through pending capabilities keep PG3 active.
+PG4 migration slice passes104 native laws on fresh PostgreSQL18.6 and1549 workspace
+cases; supported Nix hook proves real failures reject builds. Representation
+upgrade is separate pending work; PG4 remains active. No release/consumer proof.

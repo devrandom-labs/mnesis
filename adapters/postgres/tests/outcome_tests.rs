@@ -178,8 +178,9 @@ async fn fixture() -> Option<(Proxy, PostgresStore, PgPool)> {
         .connect_with(options.clone())
         .await
         .unwrap();
+    PostgresStore::migrate(&control).await.unwrap();
     let setup = PostgresStore::from_pool(control.clone()).await.unwrap();
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&control)
         .await
         .unwrap();
@@ -207,7 +208,7 @@ fn events() -> Vec<PendingEnvelope> {
 }
 
 async fn count(control: &PgPool) -> i64 {
-    sqlx::query_scalar("SELECT count(*) FROM events")
+    sqlx::query_scalar("SELECT count(*) FROM mnesis.events")
         .fetch_one(control)
         .await
         .unwrap()
@@ -332,7 +333,7 @@ async fn unrelated_unique_constraint_is_not_an_optimistic_conflict() {
     let Some((_proxy, store, control)) = fixture().await else {
         return;
     };
-    sqlx::query("CREATE UNIQUE INDEX test_outcome_type ON events (event_type)")
+    sqlx::query("CREATE UNIQUE INDEX test_outcome_type ON mnesis.events (event_type)")
         .execute(&control)
         .await
         .unwrap();
@@ -346,7 +347,7 @@ async fn unrelated_unique_constraint_is_not_an_optimistic_conflict() {
         .await;
     let persisted = count(&control).await;
     // Always remove the injected constraint before any assertion can panic.
-    sqlx::query("DROP INDEX test_outcome_type")
+    sqlx::query("DROP INDEX mnesis.test_outcome_type")
         .execute(&control)
         .await
         .unwrap();
@@ -389,12 +390,13 @@ async fn server_rejections_at_commit_preserve_the_code_and_outcome() {
         };
         // Inject exact server error codes in a DEFERRED trigger. This verifies
         // commit-stage mapping; it does not claim a real SSI/deadlock campaign.
-        sqlx::raw_sql(&format!(
+        // Only the four literal SQLSTATEs above enter this test DDL.
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
             "CREATE FUNCTION test_commit_reject() RETURNS trigger LANGUAGE plpgsql AS \
              $$ BEGIN RAISE EXCEPTION USING ERRCODE = '{code}', MESSAGE = 'commit rejection witness'; END $$; \
-             CREATE CONSTRAINT TRIGGER test_commit_reject AFTER INSERT ON events \
+             CREATE CONSTRAINT TRIGGER test_commit_reject AFTER INSERT ON mnesis.events \
              DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION test_commit_reject();"
-        )).execute(&control).await.unwrap();
+        ))).execute(&control).await.unwrap();
         let rows = events();
         let result = store
             .append(
@@ -405,7 +407,7 @@ async fn server_rejections_at_commit_preserve_the_code_and_outcome() {
             .await;
         let persisted = count(&control).await;
         sqlx::raw_sql(
-            "DROP TRIGGER test_commit_reject ON events; DROP FUNCTION test_commit_reject();",
+            "DROP TRIGGER test_commit_reject ON mnesis.events; DROP FUNCTION test_commit_reject();",
         )
         .execute(&control)
         .await
@@ -438,7 +440,7 @@ async fn identity_sequence_collision_is_not_an_optimistic_conflict() {
         )
         .await
         .unwrap();
-    sqlx::query("ALTER SEQUENCE events_global_seq_seq RESTART WITH 1")
+    sqlx::query("ALTER SEQUENCE mnesis.events_global_seq_seq RESTART WITH 1")
         .execute(&control)
         .await
         .unwrap();
@@ -450,7 +452,7 @@ async fn identity_sequence_collision_is_not_an_optimistic_conflict() {
         )
         .await;
     // Repair the deliberately rewound sequence before assertions.
-    sqlx::query("SELECT setval('events_global_seq_seq', 3)")
+    sqlx::query("SELECT setval('mnesis.events_global_seq_seq', 3)")
         .execute(&control)
         .await
         .unwrap();
@@ -556,7 +558,7 @@ async fn a_native_unique_collision_preserves_the_callers_expected_head() {
         let number = expected.map_or(0, Version::as_u64).checked_add(1).unwrap();
         let mut winner = control.begin().await.unwrap();
         sqlx::query(
-            "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+            "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
             VALUES ($1, $2, 'Winner', 1, 'winner'::bytea)",
         )
         .bind(key.as_bytes())
@@ -578,7 +580,7 @@ async fn a_native_unique_collision_preserves_the_callers_expected_head() {
         winner.commit().await.unwrap();
         let result = contender.await.unwrap();
         let stored: Vec<(i64, Vec<u8>)> =
-            sqlx::query_as("SELECT version, payload FROM events ORDER BY version")
+            sqlx::query_as("SELECT version, payload FROM mnesis.events ORDER BY version")
                 .fetch_all(&control)
                 .await
                 .unwrap();

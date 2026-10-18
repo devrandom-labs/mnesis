@@ -24,8 +24,9 @@ async fn fresh() -> Option<(Store<PostgresStore>, PgPool)> {
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();
@@ -45,7 +46,7 @@ async fn park<T>(cursor: &mut (impl Stream<Item = Result<Step<T>, PostgresError>
 
 async fn commit_without_hint(pool: &PgPool, id: &StreamKey) {
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 1, 'Final', 1, 'payload'::bytea)",
     )
     .bind(id.as_bytes())

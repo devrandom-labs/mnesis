@@ -64,6 +64,8 @@
           fileset = lib.fileset.unions [
             (craneLib.fileset.commonCargoSources unfilteredSrc)
             (lib.fileset.fileFilter (f: f.hasExt "snap") unfilteredSrc)
+            # SQLx embeds checked-in migrations and read-only schema validation.
+            (lib.fileset.fileFilter (f: f.hasExt "sql") unfilteredSrc)
             # Compile diagnostics and input fixtures must survive source filtering.
             (lib.fileset.fileFilter (f: f.hasExt "stderr" || f.hasExt "json" || f.hasExt "c") unfilteredSrc)
             # Per-crate mutation-gate ratchets (`.mutants-baselines/<crate>.json`).
@@ -409,62 +411,36 @@
           in
           perCrate
           // lib.optionalAttrs isLinux {
-            # NixOS integration tests require Linux VMs — Linux-only `packages`
-            # attribute, deliberately NOT a `checks` entry, so the darwin
-            # `nix flake check` dev gate never builds a test archive or boots a VM.
-            # Boots a NixOS VM with services.postgresql (a `mnesis_test` DB, local
-            # trust auth), then runs the pre-built nextest archive against it with
-            # DATABASE_URL pointing at the VM's unix-socket Postgres — so the
-            # mnesis-postgres tests that skip without DATABASE_URL actually execute.
-            # Run on Linux/CI with: nix build .#postgres-integration
-            postgres-integration = pkgs.testers.runNixOSTest {
+            # The supported Postgres test hook is Linux-only. Native fixtures
+            # use the same compiled archive and a fresh Unix-only database.
+            postgres-integration = pkgs.stdenv.mkDerivation {
               name = "mnesis-postgres-integration";
-              nodes.machine = { pkgs, ... }: {
-                services.postgresql = {
-                  enable = true;
-                  ensureDatabases = [ "mnesis_test" ];
-                  # `local all all trust` lets the test process connect over the
-                  # unix socket as any role without a password — the simplest auth
-                  # for a throwaway CI VM (no networked Postgres, no TLS).
-                  authentication = lib.mkForce ''
-                    local all all trust
-                  '';
-                };
-                environment.systemPackages = [
-                  pkgs.cargo-nextest
-                  pkgs.zstd
-                ];
-              };
-              testScript = ''
-                machine.wait_for_unit("postgresql.service")
-                # The unix-socket DATABASE_URL form needs a role matching the OS
-                # user running the tests. The test script runs as root, so create a
-                # `root` superuser role; `mnesis_test` is owned by `postgres` and
-                # granted to root so the tests can create/truncate the events table.
-                machine.succeed("su postgres -c \"psql -c \\\"CREATE ROLE root LOGIN SUPERUSER;\\\"\"")
-                machine.copy_from_host(
-                    "${postgresTests}/mnesis-postgres.tar.zst", "/tmp/tests.tar.zst"
-                )
-                # The nextest archive ships the compiled test binaries but NOT the
-                # source, yet nextest still needs the workspace manifest at run
-                # time (it records the build-time path, which doesn't exist here).
-                # Copy the toolchain-free source tree in and point --workspace-remap
-                # at it; chmod so nextest can write scratch under it if needed.
-                machine.copy_from_host("${src}", "/tmp/src")
-                machine.succeed("chmod -R u+w /tmp/src")
-                # Invoke `cargo-nextest` DIRECTLY, not `cargo nextest`: the VM has
-                # no Rust toolchain (only the cargo-nextest binary + the prebuilt
-                # archive), so `cargo` is not on PATH. Running from an archive is
-                # self-contained and needs no cargo/rustc.
-                # --test-threads=1: the DB-backed tests share one `events` table
-                # and isolate via TRUNCATE in setup(), so they MUST run serially —
-                # parallel tests would clobber each other's rows (and race on
-                # CREATE TABLE IF NOT EXISTS).
-                machine.succeed(
-                    "DATABASE_URL='postgres:///mnesis_test?host=/run/postgresql' "
-                    "cargo-nextest nextest run --test-threads=1 "
-                    "--workspace-remap /tmp/src --archive-file /tmp/tests.tar.zst 2>&1 | tee /tmp/out"
-                )
+              inherit src;
+              dontBuild = true;
+              doCheck = true;
+              nativeCheckInputs = with pkgs; [
+                postgresql
+                postgresqlTestHook
+                cargo-nextest
+              ];
+              PGUSER = "mnesis";
+              PGDATABASE = "mnesis_test";
+              # Administrative fault fixtures create their own restricted role.
+              postgresqlTestUserOptions = "LOGIN SUPERUSER";
+              postgresqlExtraSettings = "";
+              checkPhase = ''
+                runHook preCheck
+                export DATABASE_URL="postgres:///$PGDATABASE?host=$PGHOST&user=$PGUSER"
+                set -o pipefail
+                cargo-nextest nextest run --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  2>&1 | tee postgres.log
+                runHook postCheck
+              '';
+              installPhase = ''
+                mkdir -p "$out"
+                cp postgres.log "$out/run.log"
               '';
             };
           };

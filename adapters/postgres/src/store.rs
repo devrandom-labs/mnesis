@@ -349,7 +349,7 @@ async fn insert_one(
     row: &PreparedInsert<'_>,
 ) -> Result<PgAllPos, AppendError<PostgresError>> {
     let returned: Result<(i64, i64), sqlx::Error> = sqlx::query_as(
-        "INSERT INTO events \
+        "INSERT INTO mnesis.events \
          (stream_id, version, event_type, schema_version, payload, metadata) \
          VALUES ($1, $2, $3, $4, $5, $6) \
          RETURNING global_seq, txid::text::bigint",
@@ -453,12 +453,13 @@ async fn read_current_version(
     conn: &mut sqlx::PgConnection,
     id: &StreamKey,
 ) -> Result<u64, AppendError<PostgresError>> {
-    let current: i64 =
-        sqlx::query_scalar("SELECT COALESCE(MAX(version), 0) FROM events WHERE stream_id = $1")
-            .bind(id.as_bytes())
-            .fetch_one(&mut *conn)
-            .await
-            .map_err(store_err)?;
+    let current: i64 = sqlx::query_scalar(
+        "SELECT COALESCE(MAX(version), 0) FROM mnesis.events WHERE stream_id = $1",
+    )
+    .bind(id.as_bytes())
+    .fetch_one(&mut *conn)
+    .await
+    .map_err(store_err)?;
     u64::try_from(current).map_err(|_| {
         AppendError::Store(PostgresError::CorruptRow {
             stream_id: ErrorId::from_display(id),
@@ -575,7 +576,7 @@ impl RawEventStore for PostgresStore {
             .map_err(|_| corrupt(label, "from version exceeds i64::MAX"))?;
 
         let head: Option<i64> =
-            sqlx::query_scalar("SELECT MAX(version) FROM events WHERE stream_id = $1")
+            sqlx::query_scalar("SELECT MAX(version) FROM mnesis.events WHERE stream_id = $1")
                 .bind(id.as_bytes())
                 .fetch_one(self.pool())
                 .await

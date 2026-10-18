@@ -27,10 +27,11 @@ async fn open_fresh() -> (PostgresStore, ()) {
     // serially (the nixosTest invokes nextest with `--test-threads=1`), so
     // TRUNCATE gives each test a clean, isolated slate against the shared
     // table.
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone())
         .await
         .expect("from_pool");
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .expect("truncate events");

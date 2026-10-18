@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+────────────
+ Nextest run ID 81a4bcd8-80d7-4510-8e3e-2c71516df0d8 with nextest profile: default
+    Starting 1 test across 1 binary (8 tests skipped)
+        PASS [   7.347s] (1/1) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+  stdout ───
+
+    running 1 test
+    test first_event_does_not_retain_the_whole_backlog ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 7.34s
+
+  stderr ───
+    40960 rows x 4096 bytes: stream=1089173 bytes/2.325291ms, all=1090271 bytes/2.829208ms; budget=4194304
+
+────────────
+     Summary [   7.364s] 1 test run: 1 passed, 8 skipped

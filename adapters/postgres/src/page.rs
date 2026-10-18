@@ -10,7 +10,7 @@ use crate::{Limits, PostgresError};
 pub const START: &str = "WITH candidates AS (SELECT global_seq, version, txid, \
     32 + octet_length(stream_id)::bigint + octet_length(event_type)::bigint + \
     octet_length(payload)::bigint + COALESCE(octet_length(metadata)::bigint, 0) \
-    AS row_bytes FROM events WHERE ";
+    AS row_bytes FROM mnesis.events WHERE ";
 
 #[derive(Clone, Copy)]
 pub enum Order {
@@ -18,7 +18,7 @@ pub enum Order {
     All,
 }
 
-pub fn finish(query: &mut QueryBuilder<'_, Postgres>, order: Order, limits: Limits) {
+pub fn finish(query: &mut QueryBuilder<Postgres>, order: Order, limits: Limits) {
     let ordering = match order {
         Order::Stream => "version",
         Order::All => "txid, global_seq",
@@ -42,7 +42,7 @@ pub fn finish(query: &mut QueryBuilder<'_, Postgres>, order: Order, limits: Limi
                CASE WHEN row_bytes <= byte_limit THEN events.event_type END AS event_type, \
                CASE WHEN row_bytes <= byte_limit THEN events.payload END AS payload, \
                CASE WHEN row_bytes <= byte_limit THEN events.metadata END AS metadata \
-               FROM ranked JOIN events USING (global_seq) CROSS JOIN settings \
+               FROM ranked JOIN mnesis.events USING (global_seq) CROSS JOIN settings \
                WHERE total_bytes <= byte_limit OR ordinal = 1 ORDER BY ",
         );
     query.push(match order {

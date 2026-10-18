@@ -1,42 +1,86 @@
-use sqlx::PgPool;
+use std::sync::LazyLock;
+
+use mnesis::ErrorId;
+use sqlx::migrate::Migrator;
+use sqlx::{PgConnection, PgPool};
 
 use crate::error::PostgresError;
 
-/// The events table and indexes. See the plan's schema section for rationale.
-///
-/// - `BIGINT GENERATED ALWAYS AS IDENTITY` (not `BIGSERIAL`) — SQL-standard,
-///   prevents manual inserts into the id column.
-/// - `txid xid8 DEFAULT pg_current_xact_id()` — writing transaction id, the
-///   Way-2 watermark key. `xid8` is 64-bit, non-wrapping.
-/// - `UNIQUE (stream_id, version)` — per-stream conflict arbiter; a
-///   concurrent INSERT that races the same version raises a unique violation →
-///   `AppendError::Conflict`. Atomic, no `SELECT … FOR UPDATE` needed.
-const SCHEMA_SQL: &str = r"
-CREATE TABLE IF NOT EXISTS events (
-    global_seq     BIGINT GENERATED ALWAYS AS IDENTITY,
-    stream_id      BYTEA    NOT NULL,
-    version        BIGINT   NOT NULL,
-    txid           xid8     NOT NULL DEFAULT pg_current_xact_id(),
-    event_type     TEXT     NOT NULL,
-    schema_version BIGINT   NOT NULL,
-    payload        BYTEA    NOT NULL,
-    metadata       BYTEA,
-    PRIMARY KEY (global_seq),
-    UNIQUE (stream_id, version)
-);
-CREATE INDEX IF NOT EXISTS events_stream_idx    ON events (stream_id, version);
-CREATE INDEX IF NOT EXISTS events_watermark_idx ON events (txid, global_seq);
-";
+static MIGRATIONS: LazyLock<Migrator> = LazyLock::new(|| {
+    let mut migrator = sqlx::migrate!("./migrations");
+    migrator.dangerous_set_table_name("mnesis._sqlx_migrations");
+    migrator.create_schema("mnesis");
+    migrator
+});
+const SHAPE: &str = include_str!("schema.sql");
 
-/// Apply the schema if absent. Idempotent — safe to call on every open.
-///
-/// # Errors
-///
-/// Returns [`PostgresError::Sqlx`] if the DDL statements fail.
-pub async fn ensure_schema(pool: &PgPool) -> Result<(), PostgresError> {
-    sqlx::raw_sql(SCHEMA_SQL)
-        .execute(pool)
+/// Run explicit, checked-in migrations with a scoped administrative connection.
+pub async fn migrate(pool: &PgPool) -> Result<(), PostgresError> {
+    let mut connection = pool.acquire().await.map_err(PostgresError::Sqlx)?;
+    // SQLx can return early before unlocking on errors. Never return a session
+    // lock to the caller's shared pool, even on cancellation.
+    connection.close_on_drop();
+    // SQLx serializes schema creation, validation and each migration transaction.
+    MIGRATIONS
+        .run_direct(None, &mut *connection, false)
         .await
-        .map(|_| ())
-        .map_err(PostgresError::Sqlx)
+        .map_err(PostgresError::Migration)?;
+    validate(&mut connection).await
+}
+
+pub async fn validate_pool(pool: &PgPool) -> Result<(), PostgresError> {
+    let mut connection = pool.acquire().await.map_err(PostgresError::Sqlx)?;
+    validate(&mut connection).await
+}
+
+async fn validate(connection: &mut PgConnection) -> Result<(), PostgresError> {
+    let ready: bool =
+        sqlx::query_scalar("SELECT pg_catalog.to_regclass('mnesis._sqlx_migrations') IS NOT NULL")
+            .fetch_one(&mut *connection)
+            .await
+            .map_err(PostgresError::Sqlx)?;
+    if !ready {
+        return Err(incompatible(
+            "schema is not migrated; run PostgresStore::migrate with the migration role",
+        ));
+    }
+    let applied: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, success, checksum FROM mnesis._sqlx_migrations ORDER BY version",
+    )
+    .fetch_all(&mut *connection)
+    .await
+    .map_err(PostgresError::Sqlx)?;
+    if applied.len() != MIGRATIONS.iter().count()
+        || !applied
+            .iter()
+            .zip(MIGRATIONS.iter())
+            .all(|(actual, known)| {
+                actual.0 == known.version && actual.1 && actual.2 == known.checksum.as_ref()
+            })
+    {
+        return Err(incompatible(
+            "migration version, checksum or completion differs; use a compatible binary or repair the upgrade",
+        ));
+    }
+    validate_shape(connection, "mnesis.events").await
+}
+
+async fn validate_shape(connection: &mut PgConnection, table: &str) -> Result<(), PostgresError> {
+    let valid: bool = sqlx::query_scalar(SHAPE)
+        .bind(table)
+        .fetch_one(connection)
+        .await
+        .map_err(PostgresError::Sqlx)?;
+    if !valid {
+        return Err(incompatible(
+            "events columns, defaults, constraints or watermark index differ from the required schema",
+        ));
+    }
+    Ok(())
+}
+
+fn incompatible(reason: &str) -> PostgresError {
+    PostgresError::Schema {
+        reason: ErrorId::from_display(&reason),
+    }
 }

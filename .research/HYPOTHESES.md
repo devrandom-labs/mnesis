@@ -26,3 +26,17 @@ adapter subscription recovery witness after a foreign-DB transaction ends with
 no later writes, and document cluster-level long-transaction limits/diagnostics.
 Never run independent native suites concurrently on one cluster; database-only
 fixture separation does not isolate snapshot xmin. No unsafe shortcut authorized.
+PG5 ordering hypothesis: validate ALL target heads using reads before ANY
+transaction write can allocate its xid8. A new-key/catalog write or the first
+run's event insert before reading another target could give its later version a
+lower txid than its predecessor committed concurrently. Require a native schedule
+that can reverse per-stream global delivery under such an interleaving; no custom
+identity/fencing protocol. Resolve native key IDs only after all heads validate.
+
+PG7 owner contract verified in crates/store/src/export.rs: ExportSession exposes
+listing and per-stream reads, deliberately no global-read/write capability.
+Use one repeatable MVCC view for complete visible histories; do not apply the
+ordinary $all safety cutoff and omit visible rows. Do not implement RawEventStore
+on the session merely to reuse code. Borrowed cursors, independent expiry and
+explicit waited cleanup remain required. Investigate native PostgreSQL17
+transaction_timeout plus existing SQLx connection ownership before custom machinery.

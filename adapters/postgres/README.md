@@ -23,3 +23,21 @@ MSRV **1.99**. Ships in the **0.x tier** — the wire/schema surface iterates wi
 ## License
 
 Licensed under your choice of [MIT](../../LICENSE-MIT) or [Apache-2.0](../../LICENSE-APACHE).
+
+## Migrations
+
+Before runtime open, run `PostgresStore::migrate(&migration_pool).await` using an
+administrative pool. `connect`, `from_pool` and `from_pool_with_limits` validate
+migration checksums and the installed shape without changing the schema. They
+reject an absent, incompatible or newer schema. Runtime roles need `USAGE` on
+`mnesis`, `SELECT` on `mnesis._sqlx_migrations`, `SELECT, INSERT` on `mnesis.events`
+and `USAGE` on `mnesis.events_global_seq_seq`; they need no schema creation rights.
+
+Migrations live in the published crate and use SQLx transactions and locks.
+Adoption of a verified legacy `public.events` table preserves its rows, positions
+and identity sequence. A compatibility view prevents older constructors from
+creating a second event table. Stop old writers for this upgrade; overlapping old
+and new binaries are unsupported. Failed transactional steps retain old data and
+can be rerun after repairing the reported cause. Never reset migration metadata
+to conceal an error. Roll back through a verified backup under maintenance, or
+repair forward with the matching migration version.

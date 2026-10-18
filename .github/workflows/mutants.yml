@@ -67,13 +67,14 @@ jobs:
             task_pg_data="$task_pg_root/data"
             task_pg_socket="$task_pg_root/socket"
             task_pg_database=mnesis_mutants
+            task_pg_user=mnesis
             mkdir "$task_pg_socket"
-            initdb -D "$task_pg_data" --auth=trust --no-locale --encoding=UTF8
+            initdb -D "$task_pg_data" --username="$task_pg_user" --auth=trust --no-locale --encoding=UTF8
             trap 'pg_ctl -D "$task_pg_data" -m immediate -w stop; rm -rf "$task_pg_root"' EXIT
             pg_ctl -D "$task_pg_data" -l "$task_pg_root/server.log" \
               -w -o "-h '' -k $task_pg_socket" start
-            createdb -h "$task_pg_socket" "$task_pg_database"
-            export DATABASE_URL="postgres:///$task_pg_database?host=$task_pg_socket"
+            createdb -h "$task_pg_socket" -U "$task_pg_user" "$task_pg_database"
+            export DATABASE_URL="postgres:///$task_pg_database?host=$task_pg_socket&user=$task_pg_user"
             # Direct binary avoids a personal Cargo plugin shadowing Nix's tool.
             # Native fixtures share tables and must run serially in each mutant.
             cargo-mutants mutants \

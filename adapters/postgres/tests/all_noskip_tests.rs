@@ -71,10 +71,11 @@ async fn setup() -> Option<(PostgresStore, PgPool)> {
     // Create the schema FIRST, then truncate (see conformance_tests::setup — a
     // fresh DB has no `events` table yet; tests run serially via nextest
     // `--test-threads=1` so TRUNCATE isolates each one).
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone())
         .await
         .expect("from_pool");
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .expect("truncate");
@@ -124,7 +125,7 @@ async fn all_noskip_out_of_order_commits() {
     // INSERT to stream X inside tx_a. This claims a `txid` (lower, because A
     // opened first) but the row is not visible until tx_a commits.
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(stream_x.as_bytes())
@@ -143,7 +144,7 @@ async fn all_noskip_out_of_order_commits() {
     // then when A commits (lower seq), A's event would be missed forever.
     let mut tx_b = pool.begin().await.expect("BEGIN tx_b");
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(stream_y.as_bytes())
@@ -236,7 +237,7 @@ async fn all_noskip_exclusive_resume_after_out_of_order_commits() {
     // then A commits.
     let mut tx_a = pool.begin().await.expect("BEGIN tx_a");
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(stream_x.as_bytes())
@@ -250,7 +251,7 @@ async fn all_noskip_exclusive_resume_after_out_of_order_commits() {
 
     let mut tx_b = pool.begin().await.expect("BEGIN tx_b");
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(stream_y.as_bytes())

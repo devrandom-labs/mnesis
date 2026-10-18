@@ -1,0 +1,49 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-schema/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+────────────
+ Nextest run ID 7f9bad2c-838f-4c74-8688-963d16916050 with nextest profile: default
+    Starting 2 tests across 1 binary
+        FAIL [   0.016s] (1/2) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+  stdout ───
+
+    running 1 test
+    test opening_rejects_a_missing_optimistic_constraint ... FAILED
+
+    failures:
+
+    failures:
+        opening_rejects_a_missing_optimistic_constraint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'opening_rejects_a_missing_optimistic_constraint' (94782811) panicked at adapters/postgres/tests/migration_tests.rs:22:5:
+    open ignored the missing conflict arbiter
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.015s] (2/2) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+  stdout ───
+
+    running 1 test
+    test opening_rejects_a_wrong_optimistic_constraint_with_the_right_name ... FAILED
+
+    failures:
+
+    failures:
+        opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'opening_rejects_a_wrong_optimistic_constraint_with_the_right_name' (94782817) panicked at adapters/postgres/tests/migration_tests.rs:35:5:
+    a constraint name alone does not prove its contract
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.032s] 2 tests run: 0 passed, 2 failed, 0 skipped
+        FAIL [   0.016s] (1/2) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+        FAIL [   0.015s] (2/2) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+error: test run failed

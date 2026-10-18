@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-migrations/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.16s
+────────────
+ Nextest run ID abd7a314-f033-468e-b793-ddd24a7565a3 with nextest profile: default
+    Starting 1 test across 1 binary (12 tests skipped)
+        FAIL [   0.031s] (1/1) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+  stdout ───
+
+    running 1 test
+    test shipped_sql_rejects_legacy_mismatch_without_rust_preflight ... FAILED
+
+    failures:
+
+    failures:
+        shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.02s
+
+  stderr ───
+
+    thread 'shipped_sql_rejects_legacy_mismatch_without_rust_preflight' (95298961) panicked at adapters/postgres/tests/migration_tests.rs:619:5:
+    the shipped migration must reject an incompatible legacy table itself: Ok(PgQueryResult { rows_affected: 0 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.031s] 1 test run: 0 passed, 1 failed, 12 skipped
+        FAIL [   0.031s] (1/1) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+error: test run failed
