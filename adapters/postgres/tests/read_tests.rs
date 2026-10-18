@@ -4,6 +4,8 @@
 #![allow(clippy::missing_panics_doc, reason = "test assertions")]
 #![allow(clippy::arithmetic_side_effects, reason = "bounded test measurements")]
 
+mod support;
+
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::io::{Write, stderr};
 use std::str::FromStr;
@@ -71,7 +73,7 @@ async fn first_event_does_not_retain_the_whole_backlog() {
          SELECT $1, n, 'Memory', 1, decode(repeat('42', 4096), 'hex') \
          FROM generate_series(1, $2) AS n",
     )
-    .bind(id.as_bytes())
+    .bind(support::key(&pool, id.as_bytes()).await)
     .bind(rows)
     .execute(&pool)
     .await
@@ -127,7 +129,7 @@ async fn seed(pool: &PgPool, id: &StreamKey, count: usize) {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          SELECT $1, n, 'Page', 1, 'payload'::bytea FROM generate_series(1, $2) AS n",
     )
-    .bind(id.as_bytes())
+    .bind(support::key(pool, id.as_bytes()).await)
     .bind(i64::try_from(count).unwrap())
     .execute(pool)
     .await
@@ -253,7 +255,7 @@ async fn finite_scans_exclude_later_appends_and_release_the_connection_between_p
             "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 4, 'Later', 1, 'later'::bytea)",
         )
-        .bind(id.as_bytes())
+        .bind(support::key(&pool, id.as_bytes()).await)
         .execute(&pool),
     )
     .await
@@ -297,7 +299,7 @@ async fn corruption_on_a_later_page_terminates_without_skipping() {
     .unwrap();
     let id = StreamKey::from_bytes("corrupt-page");
     seed(&pool, &id, 4).await;
-    sqlx::query("UPDATE mnesis.events SET schema_version = 0 WHERE version = 3")
+    sqlx::query("UPDATE mnesis.events SET event_type = decode('ff', 'hex') WHERE version = 3")
         .execute(&pool)
         .await
         .unwrap();
@@ -347,7 +349,7 @@ async fn large_rows_obey_the_default_byte_budget() {
          SELECT $1, n, 'Large', 1, decode(repeat('42', 1048576), 'hex') \
          FROM generate_series(1, 24) AS n",
     )
-    .bind(id.as_bytes())
+    .bind(support::key(&pool, id.as_bytes()).await)
     .execute(&pool)
     .await
     .unwrap();

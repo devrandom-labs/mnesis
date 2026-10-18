@@ -40,3 +40,32 @@ ordinary $all safety cutoff and omit visible rows. Do not implement RawEventStor
 on the session merely to reuse code. Borrowed cursors, independent expiry and
 explicit waited cleanup remain required. Investigate native PostgreSQL17
 transaction_timeout plus existing SQLx connection ownership before custom machinery.
+
+PG5 next experiment (after retained PG4 representations): existing AtomicAppend
+under import feature, no new public method/error/runtime/dep. Budget <=+190/-60
+production Rust, <=+420 native test lines and <=20 manifest/feature registration
+lines. Use a private child module of store so internal SQL owners stay private.
+Validate distinct targets, all run versions and ALL row sizes before BEGIN; then
+read/validate ALL committed heads before ANY key or event write assigns xid8.
+Only then resolve missing key IDs and insert every run in one transaction. Shared
+single-row persistence returns PostgresError; append/atomic boundaries separately
+map only the exact optimistic constraint into their existing conflict metadata.
+Keep server rejection/unknown commit mapping and exact sqlx source unchanged.
+Return highest position, empty input performs no storage. Whole-batch local wakes
+must precede one bounded native hint deadline so N targets cannot multiply the
+post-commit auxiliary wait. No actor/transaction framework or controller IDs.
+Falsifiers: malformed final run/route and oversize tail on a closed pool reject
+before storage; stale final head/no writes; injected later SQL fault rolls back
+all keys/events; actual native race rollback; real backend COMMIT loss leaves
+all runs durable/unknown; head/XID interleaving cannot deliver a stream successor
+before its predecessor; import WholeChunk/PerStream and ordinary subscribers see
+only complete committed transactions. Register shared atomic conformance plus
+owner-local faults; every run gets three reviews. Native SSI/deadlock evidence
+and final import checkpoint resume laws remain PG3/PG5 obligations.
+
+PG9 Nix-input hypothesis: current SQL source inclusion is an unscoped suffix
+filter. Adding a docs-only SQL query-plan artifact caused the normal commit hook
+to rebuild all12 checks although tested adapter source bytes are unchanged.
+Falsifier: derivation identity remains unchanged after a docs SQL edit. Compare
+supported cleanSourceWith filtering scoped to crate-owned SQL before retaining
+any Nix change; do not bypass the current hook/gate. No custom validation tool.

@@ -50,6 +50,8 @@
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 #![allow(clippy::panic, reason = "tests")]
 
+mod support;
+
 use futures::StreamExt;
 use mnesis_postgres::{PgAllPos, PostgresStore};
 use mnesis_store::StreamKey;
@@ -120,6 +122,8 @@ async fn all_noskip_out_of_order_commits() {
     //
     // We use an explicit `sqlx::Transaction` so we can hold it open across awaits.
     // `pool.begin()` acquires a connection and issues `BEGIN`.
+    let x_number = support::key(&pool, stream_x.as_bytes()).await;
+    let y_number = support::key(&pool, stream_y.as_bytes()).await;
     let mut tx_a = pool.begin().await.expect("BEGIN tx_a");
 
     // INSERT to stream X inside tx_a. This claims a `txid` (lower, because A
@@ -128,9 +132,9 @@ async fn all_noskip_out_of_order_commits() {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
-    .bind(stream_x.as_bytes())
+    .bind(x_number)
     .bind(1_i64)
-    .bind("XEvent")
+    .bind(b"XEvent".as_slice())
     .bind(1_i32)
     .bind(b"payload-x".as_slice())
     .execute(&mut *tx_a)
@@ -147,9 +151,9 @@ async fn all_noskip_out_of_order_commits() {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
-    .bind(stream_y.as_bytes())
+    .bind(y_number)
     .bind(1_i64)
-    .bind("YEvent")
+    .bind(b"YEvent".as_slice())
     .bind(1_i32)
     .bind(b"payload-y".as_slice())
     .execute(&mut *tx_b)
@@ -235,14 +239,16 @@ async fn all_noskip_exclusive_resume_after_out_of_order_commits() {
 
     // Set up: A inserts X (opens first, lower txid), B inserts Y and commits,
     // then A commits.
+    let x_number = support::key(&pool, stream_x.as_bytes()).await;
+    let y_number = support::key(&pool, stream_y.as_bytes()).await;
     let mut tx_a = pool.begin().await.expect("BEGIN tx_a");
     sqlx::query(
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
-    .bind(stream_x.as_bytes())
+    .bind(x_number)
     .bind(1_i64)
-    .bind("XEvent2")
+    .bind(b"XEvent2".as_slice())
     .bind(1_i32)
     .bind(b"x".as_slice())
     .execute(&mut *tx_a)
@@ -254,9 +260,9 @@ async fn all_noskip_exclusive_resume_after_out_of_order_commits() {
         "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, $2, $3, $4, $5)",
     )
-    .bind(stream_y.as_bytes())
+    .bind(y_number)
     .bind(1_i64)
-    .bind("YEvent2")
+    .bind(b"YEvent2".as_slice())
     .bind(1_i32)
     .bind(b"y".as_slice())
     .execute(&mut *tx_b)

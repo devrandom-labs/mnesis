@@ -8,9 +8,9 @@ use crate::{Limits, PostgresError};
 // Scalar accounting: version, schema version, transaction and sequence (8 each).
 // Widen lengths before addition; metadata NULL and empty remain distinct bodies.
 pub const START: &str = "WITH candidates AS (SELECT global_seq, version, txid, \
-    32 + octet_length(stream_id)::bigint + octet_length(event_type)::bigint + \
+    32 + octet_length(keys.value)::bigint + octet_length(event_type)::bigint + \
     octet_length(payload)::bigint + COALESCE(octet_length(metadata)::bigint, 0) \
-    AS row_bytes FROM mnesis.events WHERE ";
+    AS row_bytes FROM mnesis.events JOIN mnesis.keys ON keys.number = events.stream_id WHERE ";
 
 #[derive(Clone, Copy)]
 pub enum Order {
@@ -36,13 +36,13 @@ pub fn finish(query: &mut QueryBuilder<Postgres>, order: Order, limits: Limits) 
         .push(" ROWS UNBOUNDED PRECEDING)), settings AS (SELECT ")
         .push_bind(i64::from(limits.bytes.get()))
         .push(
-            " AS byte_limit) SELECT row_bytes, byte_limit, events.version, \
-               events.schema_version, events.global_seq, events.txid::text::bigint AS txid, \
-               CASE WHEN row_bytes <= byte_limit THEN events.stream_id END AS stream_id, \
+            " AS byte_limit) SELECT row_bytes, byte_limit, events.version::text AS version, \
+               events.schema_version, events.global_seq, events.txid::text AS txid, \
+               CASE WHEN row_bytes <= byte_limit THEN keys.value END AS stream_id, \
                CASE WHEN row_bytes <= byte_limit THEN events.event_type END AS event_type, \
                CASE WHEN row_bytes <= byte_limit THEN events.payload END AS payload, \
                CASE WHEN row_bytes <= byte_limit THEN events.metadata END AS metadata \
-               FROM ranked JOIN mnesis.events USING (global_seq) CROSS JOIN settings \
+               FROM ranked JOIN mnesis.events USING (global_seq) JOIN mnesis.keys ON keys.number = events.stream_id CROSS JOIN settings \
                WHERE total_bytes <= byte_limit OR ordinal = 1 ORDER BY ",
         );
     query.push(match order {

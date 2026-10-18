@@ -1,0 +1,1274 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 14.577330375,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 13.847792625,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/page.rs:22:5: replace finish with ()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/page.rs",
+          "function": {
+            "function_name": "finish",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 52,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 22,
+              "column": 5
+            },
+            "end": {
+              "line": 51,
+              "column": 8
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__page.rs_line_22_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__page.rs_line_22_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 4.843520208,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.574766584,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:197:5: replace row_to_envelope -> Result<PersistedEnvelope, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "row_to_envelope",
+            "return_type": "-> Result<PersistedEnvelope, PostgresError>",
+            "span": {
+              "start": {
+                "line": 189,
+                "column": 1
+              },
+              "end": {
+                "line": 249,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 197,
+              "column": 5
+            },
+            "end": {
+              "line": 248,
+              "column": 7
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_197_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_197_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.675986375,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:290:5: replace insert_one -> Result<PgAllPos, AppendError<PostgresError>> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "insert_one",
+            "return_type": "-> Result<PgAllPos, AppendError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 274,
+                "column": 1
+              },
+              "end": {
+                "line": 331,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 290,
+              "column": 5
+            },
+            "end": {
+              "line": 330,
+              "column": 6
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_290_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_290_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.6246665,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(None)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(None)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.830551708,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.732339333,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((0, None)))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((0, None)))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.007742459,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.458539042,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((0, Some(String::new()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((0, Some(String::new()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.844920167,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.451645584,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((0, Some(\"xyzzy\".into()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((0, Some(\"xyzzy\".into()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_003.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.570469042,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.525958375,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((1, None)))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((1, None)))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_004.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_004.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 9.519968417,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.53233875,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((1, Some(String::new()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((1, Some(String::new()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_005.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_005.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 7.007889375,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.529779459,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((1, Some(\"xyzzy\".into()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((1, Some(\"xyzzy\".into()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_006.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_006.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.615332083,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.575887666,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((-1, None)))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((-1, None)))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_007.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_007.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.674324292,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.571795083,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((-1, Some(String::new()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((-1, Some(String::new()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_008.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_008.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.431229417,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.577935709,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:392:5: replace read_head -> Result<Option<(i64, Option<String>)>, PostgresError> with Ok(Some((-1, Some(\"xyzzy\".into()))))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "read_head",
+            "return_type": "-> Result<Option<(i64, Option<String>)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 387,
+                "column": 1
+              },
+              "end": {
+                "line": 400,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 392,
+              "column": 5
+            },
+            "end": {
+              "line": 399,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(Some((-1, Some(\"xyzzy\".into()))))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_392_col_5_009.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_392_col_5_009.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.432738834,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.634588,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:404:5: replace create_key -> Result<i64, PostgresError> with Ok(0)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "create_key",
+            "return_type": "-> Result<i64, PostgresError>",
+            "span": {
+              "start": {
+                "line": 402,
+                "column": 1
+              },
+              "end": {
+                "line": 421,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 404,
+              "column": 5
+            },
+            "end": {
+              "line": 420,
+              "column": 38
+            }
+          },
+          "replacement": "Ok(0)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_404_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_404_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.2108982919999995,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.646210541,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:404:5: replace create_key -> Result<i64, PostgresError> with Ok(1)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "create_key",
+            "return_type": "-> Result<i64, PostgresError>",
+            "span": {
+              "start": {
+                "line": 402,
+                "column": 1
+              },
+              "end": {
+                "line": 421,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 404,
+              "column": 5
+            },
+            "end": {
+              "line": 420,
+              "column": 38
+            }
+          },
+          "replacement": "Ok(1)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_404_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_404_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.796813042,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.635057125,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:404:5: replace create_key -> Result<i64, PostgresError> with Ok(-1)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "create_key",
+            "return_type": "-> Result<i64, PostgresError>",
+            "span": {
+              "start": {
+                "line": 402,
+                "column": 1
+              },
+              "end": {
+                "line": 421,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 404,
+              "column": 5
+            },
+            "end": {
+              "line": 420,
+              "column": 38
+            }
+          },
+          "replacement": "Ok(-1)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store.rs_line_404_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_404_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 5.847110708,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.634298958,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:485:9: replace <impl RawEventStore for PostgresStore>::append -> Result<Self::AllPosition, AppendError<Self::Error>> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "<impl RawEventStore for PostgresStore>::append",
+            "return_type": "-> Result<Self::AllPosition, AppendError<Self::Error>>",
+            "span": {
+              "start": {
+                "line": 479,
+                "column": 5
+              },
+              "end": {
+                "line": 530,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 485,
+              "column": 9
+            },
+            "end": {
+              "line": 529,
+              "column": 21
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_485_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_485_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.53390075,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:537:9: replace <impl RawEventStore for PostgresStore>::read_stream -> Result<Self::Stream, Self::Error> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "<impl RawEventStore for PostgresStore>::read_stream",
+            "return_type": "-> Result<Self::Stream, Self::Error>",
+            "span": {
+              "start": {
+                "line": 532,
+                "column": 5
+              },
+              "end": {
+                "line": 595,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 537,
+              "column": 9
+            },
+            "end": {
+              "line": 594,
+              "column": 18
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_537_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_537_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.561696667,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store.rs:598:9: replace <impl RawEventStore for PostgresStore>::read_all -> Result<Self::AllStream, Self::Error> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store.rs",
+          "function": {
+            "function_name": "<impl RawEventStore for PostgresStore>::read_all",
+            "return_type": "-> Result<Self::AllStream, Self::Error>",
+            "span": {
+              "start": {
+                "line": 597,
+                "column": 5
+              },
+              "end": {
+                "line": 668,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 598,
+              "column": 9
+            },
+            "end": {
+              "line": 667,
+              "column": 10
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store.rs_line_598_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store.rs_line_598_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.538855291,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 19,
+  "missed": 0,
+  "caught": 14,
+  "timeout": 0,
+  "unviable": 5,
+  "success": 0,
+  "start_time": "2026-10-18T08:56:32.653095Z",
+  "end_time": "2026-10-18T08:58:45.800196Z",
+  "cargo_mutants_version": "27.1.0"
+}

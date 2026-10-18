@@ -1,0 +1,114 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-representation/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-representation/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-representation/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.81s
+────────────
+ Nextest run ID 39b2553f-944a-43fc-90fa-b483c333a953 with nextest profile: default
+    Starting 5 tests across 1 binary
+        FAIL [   0.217s] (1/5) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+  stdout ───
+
+    running 1 test
+    test incompressible_binary_key_beyond_notify_limit_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        incompressible_binary_key_beyond_notify_limit_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.20s
+
+  stderr ───
+
+    thread 'incompressible_binary_key_beyond_notify_limit_round_trips' (95385721) panicked at adapters/postgres/tests/representation_tests.rs:142:33:
+    large raw key rejected: store error: postgres error: error returned from database: index row size 5144 exceeds btree version 4 maximum 2704 for index "events_stream_idx" at line 5126
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.114s] (2/5) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+  stdout ───
+
+    running 1 test
+    test sequential_append_crosses_the_signed_version_boundary ... FAILED
+
+    failures:
+
+    failures:
+        sequential_append_crosses_the_signed_version_boundary
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.11s
+
+  stderr ───
+
+    thread 'sequential_append_crosses_the_signed_version_boundary' (95385755) panicked at adapters/postgres/tests/representation_tests.rs:177:10:
+    called `Result::unwrap()` on an `Err` value: Store(CorruptRow { stream_id: "version-boundary", reason: "version exceeds i64::MAX" })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.131s] (3/5) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+  stdout ───
+
+    running 1 test
+    test unsigned_global_sequence_still_includes_later_transactions ... FAILED
+
+    failures:
+
+    failures:
+        unsigned_global_sequence_still_includes_later_transactions
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.12s
+
+  stderr ───
+
+    thread 'unsigned_global_sequence_still_includes_later_transactions' (95385762) panicked at adapters/postgres/tests/representation_tests.rs:80:10:
+    called `Result::unwrap()` on an `Err` value: CorruptRow { stream_id: "", reason: "from seq exceeds i64::MAX" }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.152s] (4/5) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+  stdout ───
+
+    running 1 test
+    test utf8_event_type_with_nul_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        utf8_event_type_with_nul_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.14s
+
+  stderr ───
+
+    thread 'utf8_event_type_with_nul_round_trips' (95385777) panicked at adapters/postgres/tests/representation_tests.rs:112:10:
+    called `Result::unwrap()` on an `Err` value: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "22021", message: "invalid byte sequence for encoding \"UTF8\": 0x00", detail: None, hint: None, position: None, where: Some("unnamed portal parameter $3"), schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("mbutils.c"), line: Some(1853), routine: Some("report_invalid_encoding_int") })))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.184s] (5/5) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+  stdout ───
+
+    running 1 test
+    test valid_unsigned_stream_bound_returns_empty_instead_of_narrowing ... FAILED
+
+    failures:
+
+    failures:
+        valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.16s
+
+  stderr ───
+
+    thread 'valid_unsigned_stream_bound_returns_empty_instead_of_narrowing' (95385784) panicked at adapters/postgres/tests/representation_tests.rs:53:14:
+    called `Result::unwrap()` on an `Err` value: CorruptRow { stream_id: "unsigned-bound", reason: "from version exceeds i64::MAX" }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.865s] 5 tests run: 0 passed, 5 failed, 0 skipped
+        FAIL [   0.217s] (1/5) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+        FAIL [   0.114s] (2/5) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+        FAIL [   0.131s] (3/5) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+        FAIL [   0.152s] (4/5) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+        FAIL [   0.184s] (5/5) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+error: test run failed

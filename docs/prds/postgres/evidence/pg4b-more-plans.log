@@ -1,0 +1,107 @@
+SET
+ANALYZE
+PREPARE
+                                                                          QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Seq Scan on keys  (cost=0.00..1.35 rows=1 width=40) (actual rows=1 loops=1)
+   Filter: (value = $1)
+   Buffers: shared hit=4
+   SubPlan 2
+     ->  Result  (cost=0.32..0.34 rows=1 width=32) (actual rows=1 loops=1)
+           Buffers: shared hit=3
+           InitPlan 1
+             ->  Limit  (cost=0.29..0.32 rows=1 width=6) (actual rows=1 loops=1)
+                   Buffers: shared hit=3
+                   ->  Index Only Scan Backward using events_stream_id_version_key on events  (cost=0.29..1353.09 rows=40960 width=6) (actual rows=1 loops=1)
+                         Index Cond: (stream_id = keys.number)
+                         Heap Fetches: 0
+                         Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=125
+ Planning Time: 0.332 ms
+ Execution Time: 0.064 ms
+(17 rows)
+
+DEALLOCATE
+PREPARE
+                                                                                     QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=93.65..93.67 rows=7 width=230) (actual rows=256 loops=1)
+   Sort Key: events.version
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=780
+   ->  Nested Loop  (cost=2.27..93.55 rows=7 width=230) (actual rows=256 loops=1)
+         Join Filter: (events.stream_id = keys.number)
+         Buffers: shared hit=777
+         ->  Seq Scan on keys  (cost=0.00..1.01 rows=1 width=19) (actual rows=1 loops=1)
+               Buffers: shared hit=1
+         ->  Nested Loop  (cost=2.27..92.31 rows=7 width=139) (actual rows=256 loops=1)
+               Buffers: shared hit=776
+               ->  Subquery Scan on ranked  (cost=1.98..34.16 rows=7 width=16) (actual rows=256 loops=1)
+                     Filter: ((ranked.total_bytes <= ($6)::numeric) OR (ranked.ordinal = 1))
+                     Buffers: shared hit=8
+                     ->  WindowAgg  (cost=1.98..33.81 rows=20 width=70) (actual rows=256 loops=1)
+                           Buffers: shared hit=8
+                           ->  Subquery Scan on candidates  (cost=0.30..33.46 rows=20 width=22) (actual rows=256 loops=1)
+                                 Buffers: shared hit=8
+                                 ->  Limit  (cost=0.30..33.26 rows=20 width=30) (actual rows=256 loops=1)
+                                       Buffers: shared hit=8
+                                       ->  Nested Loop  (cost=0.30..338.09 rows=205 width=30) (actual rows=256 loops=1)
+                                             Buffers: shared hit=8
+                                             ->  Index Scan using events_stream_id_version_key on events events_1  (cost=0.30..328.37 rows=205 width=115) (actual rows=256 loops=1)
+                                                   Index Cond: ((stream_id = $1) AND (version >= ($2)::numeric) AND (version <= ($3)::numeric) AND (version > ($4)::numeric))
+                                                   Buffers: shared hit=7
+                                             ->  Materialize  (cost=0.00..1.02 rows=1 width=19) (actual rows=1 loops=256)
+                                                   Buffers: shared hit=1
+                                                   ->  Seq Scan on keys keys_1  (cost=0.00..1.01 rows=1 width=19) (actual rows=1 loops=1)
+                                                         Filter: (number = $1)
+                                                         Buffers: shared hit=1
+               ->  Index Scan using events_pkey on events  (cost=0.29..8.31 rows=1 width=131) (actual rows=1 loops=256)
+                     Index Cond: (global_seq = ranked.global_seq)
+                     Buffers: shared hit=768
+ Planning:
+   Buffers: shared hit=95
+ Planning Time: 0.250 ms
+ Execution Time: 0.379 ms
+(37 rows)
+
+                                                                                     QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=93.65..93.67 rows=7 width=230) (actual rows=256 loops=1)
+   Sort Key: events.version
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=779
+   ->  Nested Loop  (cost=2.27..93.55 rows=7 width=230) (actual rows=256 loops=1)
+         Join Filter: (events.stream_id = keys.number)
+         Buffers: shared hit=779
+         ->  Seq Scan on keys  (cost=0.00..1.01 rows=1 width=19) (actual rows=1 loops=1)
+               Buffers: shared hit=1
+         ->  Nested Loop  (cost=2.27..92.31 rows=7 width=139) (actual rows=256 loops=1)
+               Buffers: shared hit=778
+               ->  Subquery Scan on ranked  (cost=1.98..34.16 rows=7 width=16) (actual rows=256 loops=1)
+                     Filter: ((ranked.total_bytes <= ($6)::numeric) OR (ranked.ordinal = 1))
+                     Buffers: shared hit=10
+                     ->  WindowAgg  (cost=1.98..33.81 rows=20 width=70) (actual rows=256 loops=1)
+                           Buffers: shared hit=10
+                           ->  Subquery Scan on candidates  (cost=0.30..33.46 rows=20 width=22) (actual rows=256 loops=1)
+                                 Buffers: shared hit=10
+                                 ->  Limit  (cost=0.30..33.26 rows=20 width=30) (actual rows=256 loops=1)
+                                       Buffers: shared hit=10
+                                       ->  Nested Loop  (cost=0.30..338.09 rows=205 width=30) (actual rows=256 loops=1)
+                                             Buffers: shared hit=10
+                                             ->  Index Scan using events_stream_id_version_key on events events_1  (cost=0.30..328.37 rows=205 width=115) (actual rows=256 loops=1)
+                                                   Index Cond: ((stream_id = $1) AND (version >= ($2)::numeric) AND (version <= ($3)::numeric) AND (version > ($4)::numeric))
+                                                   Buffers: shared hit=9
+                                             ->  Materialize  (cost=0.00..1.02 rows=1 width=19) (actual rows=1 loops=256)
+                                                   Buffers: shared hit=1
+                                                   ->  Seq Scan on keys keys_1  (cost=0.00..1.01 rows=1 width=19) (actual rows=1 loops=1)
+                                                         Filter: (number = $1)
+                                                         Buffers: shared hit=1
+               ->  Index Scan using events_pkey on events  (cost=0.29..8.31 rows=1 width=131) (actual rows=1 loops=256)
+                     Index Cond: (global_seq = ranked.global_seq)
+                     Buffers: shared hit=768
+ Planning Time: 0.004 ms
+ Execution Time: 0.330 ms
+(35 rows)
+
+DEALLOCATE

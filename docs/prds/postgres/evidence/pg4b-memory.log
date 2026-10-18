@@ -1,0 +1,21 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-representation/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.13s
+────────────
+ Nextest run ID d98f9692-2739-4b4c-b844-f3d96d5fa2cc with nextest profile: default
+    Starting 1 test across 1 binary (8 tests skipped)
+        PASS [   0.633s] (1/1) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+  stdout ───
+
+    running 1 test
+    test first_event_does_not_retain_the_whole_backlog ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.62s
+
+  stderr ───
+    40960 rows x 4096 bytes: stream=1094103 bytes/5.16425ms, all=1100611 bytes/14.101084ms; budget=4194304
+
+────────────
+     Summary [   0.633s] 1 test run: 1 passed, 8 skipped
