@@ -19,12 +19,12 @@ The full implementation gate commands remain in PG9.
 ## Measurements
 
 Initial failure traces and single read-memory/timing samples are recorded in the
-characterization. Broader allocation/RSS scaling, latency/throughput distributions
-and query plans remain pending. No comparative performance claim is established.
+characterization. Paired allocation/RSS scaling and generic-plan diagnostics
+are now recorded there; release latency/throughput distributions remain pending.
 
 ## Rust surface
 
-Two new native test files; no production, dependency or public API changes yet.
-Baseline Postgres exports
+At baseline there were no production, dependency or public API changes.
+Postgres exported
 `PostgresStore`, `PostgresError` and `PgAllPos`; their existing capabilities and
 gaps are listed in the PRD. Per-slice and cumulative budgets belong there.

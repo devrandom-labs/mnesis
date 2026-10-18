@@ -24,11 +24,13 @@ impl PostgresStore {
     /// Build from an existing pool and ensure the schema exists.
     ///
     /// Prefer this when the caller already holds a `PgPool` (e.g. a shared
-    /// pool across multiple stores in an application).
+    /// pool across multiple stores in an application). The pool must accommodate
+    /// the dedicated listener alongside data queries.
     ///
     /// # Errors
     ///
-    /// Returns [`PostgresError::Sqlx`] if the schema DDL fails.
+    /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
+    /// [`PostgresError::Sqlx`] if the schema DDL fails.
     pub async fn from_pool(pool: PgPool) -> Result<Self, PostgresError> {
         Self::from_pool_with_batch_size(pool, BatchSize::DEFAULT).await
     }
@@ -36,11 +38,16 @@ impl PostgresStore {
     /// Build from a shared pool with a validated maximum resident row count.
     ///
     /// # Errors
-    /// Returns [`PostgresError::Sqlx`] if schema creation fails.
+    /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
+    /// [`PostgresError::Sqlx`] if schema creation fails.
     pub async fn from_pool_with_batch_size(
         pool: PgPool,
         batch_size: BatchSize,
     ) -> Result<Self, PostgresError> {
+        let capacity = pool.options().get_max_connections();
+        if capacity < 2 {
+            return Err(PostgresError::PoolCapacity { actual: capacity });
+        }
         ensure_schema(&pool).await?;
         Ok(Self::assemble(pool, batch_size))
     }

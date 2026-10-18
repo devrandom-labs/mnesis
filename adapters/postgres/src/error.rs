@@ -8,6 +8,10 @@ use mnesis_store::envelope::EnvelopeError;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum PostgresError {
+    /// The shared pool cannot accommodate both LISTEN and a data query.
+    #[error("pool capacity {actual} cannot accommodate the listener and data queries")]
+    PoolCapacity { actual: u32 },
+
     /// A `sqlx`/postgres I/O, connection, or query error.
     #[error("postgres error: {0}")]
     Sqlx(#[source] sqlx::Error),

@@ -490,6 +490,24 @@ finite visibility, corruption and connection release, reusing existing database
 fixtures and standard streams. Keep shared contract wording corrections scoped
 to the recorded PG0 decisions; no core executable change.
 
+PG2 lifecycle experiment pre-edit record: the first fallback experiment is
+committed as `af6a43b4`; bounded reads are `755ec8eb`. Add native lifecycle
+regressions before changing the listener. Prove initial acquisition failure with
+SQLx's supported connection callbacks and a bounded acquisition deadline, then
+restore service and require LISTEN to return. Also cover disconnect plus a final
+unnotified commit, one shared listener across clones, last-clone cleanup,
+caller-owned pool closure, malformed/duplicate hints and an overlong binary ID.
+Reject a one-connection pool explicitly: SQLx's listener reserves a connection.
+Expected changes: `store.rs`, `builder.rs`, `error.rs`, and a new
+`tests/lifecycle_tests.rs`; at most +90/−30/net +60 production lines, no new public
+type or dependency. Refined native-test budget: at most 600 lines for the
+independent connection, LISTEN, snapshot, routing and cleanup cases with readable
+formatting; the original 450-line estimate omitted that separation. Reuse the one listener task,
+SQLx reconnect and close events, the wake registry and Tokio timers. Retry setup
+and terminal receive errors with a one-second bounded delay until the pool closes.
+No per-subscriber tasks or new lifecycle framework. Preserve the original errors
+in diagnostics when PG8 adds the existing tracing feature.
+
 Start with PG0 and the real failing witnesses. The first production slice covers
 PG1–PG3 after their contract decisions: expected owners are Postgres `store.rs`,
 `wake.rs`, `builder.rs`, `error.rs`, `position.rs`, adapter tests and manifests.

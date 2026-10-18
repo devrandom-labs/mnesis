@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use std::num::NonZeroU32;
 use std::sync::Arc;
+use std::time::Duration;
 
 use bytes::Bytes;
 use futures::StreamExt;
@@ -15,7 +16,7 @@ use mnesis_store::wire;
 use mnesis_store::{BatchSize, PendingBatch, PendingEnvelope};
 use mnesis_wake::StreamNotifiers;
 use sqlx::postgres::PgListener;
-use sqlx::{PgPool, Postgres, QueryBuilder};
+use sqlx::{Error as SqlxError, PgPool, Postgres, QueryBuilder};
 use tokio::task::JoinHandle;
 
 use crate::error::PostgresError;
@@ -113,28 +114,30 @@ impl PostgresStore {
 /// Arm-before-confirm still prevents races with hints that do arrive.
 fn spawn_listener(pool: PgPool, notifiers: Arc<StreamNotifiers>) -> JoinHandle<()> {
     tokio::spawn(async move {
-        // Obtain a dedicated listener connection from the pool and subscribe.
-        // On setup failure there is nothing to wake from; exit — the store
-        // still works, wakes just fall back entirely to the catch-up scan.
-        let Ok(mut listener) = PgListener::connect_with(&pool).await else {
-            return;
-        };
-        if listener.listen(NOTIFY_CHANNEL).await.is_err() {
-            return;
-        }
-        // Reconnection can lose notifications. Other receive errors currently
-        // end this task; registration deadlines keep subscription scans live.
-        while let Ok(notification) = listener.recv().await {
-            // The payload is the hex-encoded raw stream id. A malformed payload
-            // is dropped (see `hex::decode`): a mis-routed wake could rouse the
-            // wrong stream, whereas a dropped one is caught by the next scan.
-            if let Some(stream) = hex::decode(notification.payload()) {
-                // `wake` bumps BOTH the per-stream and `$all` paths, so one
-                // NOTIFY rouses per-stream and `$all` armed registrations alike.
-                notifiers.wake(&stream);
+        loop {
+            // Session failures are discharged by retry; pool closure terminates
+            // ownership. Registration deadlines provide progress during recovery.
+            let _ = listen(&pool, &notifiers).await;
+            if pool.is_closed() {
+                return;
+            }
+            tokio::select! {
+                () = tokio::time::sleep(Duration::from_secs(1)) => {},
+                () = pool.close_event() => return,
             }
         }
     })
+}
+
+async fn listen(pool: &PgPool, notifiers: &StreamNotifiers) -> Result<(), SqlxError> {
+    let mut listener = PgListener::connect_with(pool).await?;
+    listener.listen(NOTIFY_CHANNEL).await?;
+    loop {
+        let notification = listener.recv().await?;
+        if let Some(stream) = hex::decode(notification.payload()) {
+            notifiers.wake(&stream);
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -158,8 +158,9 @@ Current changed Rust source files: +213/−161/net +52 including documentation;
 core executable changes: zero. Public surface: one registration associated type
 and one `BatchSize` constructor overload. Native tests: 465 lines across two
 files, including 189 read-campaign lines versus the 180-line estimate after
-formatting. Full flake checks and minimization are pending, so these experiments
-have not been committed or represented as delivered.
+formatting. The first experiments are committed separately as `af6a43b4` (wake)
+and `755ec8eb` (reads), after the matching local gate passed. They are not merged
+or released, and remaining feature acceptance is open.
 
 The query-plan follow-up exposed two additional defects in the first read
 experiment: a nullable resume predicate prevents a generic prepared plan from
@@ -199,6 +200,54 @@ or completion of PG1/PG2's remaining acceptance criteria.
 Temporary shell invocations use an explicit Git source to avoid copying ignored
 `target/` data. `/tmp/mnesis-postgres-shell` roots the realized Nix environment.
 
+## Listener lifecycle experiment
+
+New native tests reproduce two failures against `755ec8eb`: a one-connection
+pool is accepted despite its dedicated listener, and a failed initial listener
+acquisition never recovers after service returns. Six original lifecycle tests
+run: four pass, two fail, zero skips in 5.380 seconds.
+[Original output](evidence/original-lifecycle.log).
+
+SQLx 0.8.6 source shows `PgListener::connect_with` acquires a pool connection;
+its destructor issues `UNLISTEN *` before returning that connection. It retries
+some transport disconnects internally, but setup errors and failed reconnect
+acquisition can escape to the owner. The adapter now retries a complete listener
+session after one second, or exits on the pool's existing close event. It rejects
+pool capacity below two before DDL. Clones still share one existing task and
+registry; no dependency, public type or additional task was introduced.
+
+Eleven native lifecycle campaigns now pass as part of 74 passing adapter tests,
+zero skips, 12.273 seconds. They cover acquisition and LISTEN setup failures,
+terminal receive/reconnect failure, a disconnected final unnotified commit,
+eight open/drop cycles with 128 clones and registrations, pool closure, hints
+arriving before the first armed poll, malformed/duplicate/unrelated hints,
+overlong binary IDs, and release of a held snapshot without a later hint.
+[Current output](evidence/lifecycle-tests.log). Formatting and targeted Clippy
+pass. The setup fault uses supported SQLx callbacks and a 100ms acquisition
+deadline; the LISTEN fault returns a terminated backend from `before_acquire`,
+proving the failure occurs after acquisition. Restored hints must arrive within
+500ms, before the one-second fallback can mask a dead listener.
+
+Stage Rust source delta: +37/−23/net +14 including docs; native tests: +539
+lines, within the refined 600-line budget. Cumulative Rust source including the
+first experiment: +250/−184/net +66. Public surface remains one registration
+associated type and one batch-size constructor; this stage adds one typed
+capacity-error alternative. The full source-matched Darwin gate passed in
+session 45611: all 12 configured checks, 1,369 passing workspace tests and four
+skips; nextest took 279.821 seconds. [Gate output](evidence/lifecycle-gate.log).
+Full log: `/tmp/mnesis-postgres-lifecycle-flake.log`. Its Rust
+source/test diff SHA-256 at invocation is
+`5eda6d45949078d950302945d31ce21aa6bdac689aba6b4919882752337a2707`.
+This retains the lifecycle experiment. Final production capacity evidence,
+diagnostics and Linux release verification remain PG8/PG9 obligations.
+
+Additional primary sources checked 2026-10-18:
+[SQLx listener lifecycle](https://docs.rs/sqlx/0.8.6/sqlx/postgres/struct.PgListener.html)
+and locked `listener.rs`/`pool/options.rs`;
+[Tokio spawn](https://docs.rs/tokio/1.53.1/tokio/task/fn.spawn.html), which does not
+poll a newly spawned task synchronously. This makes the current-thread startup
+fault transition deterministic before the first listener attempt.
+
 ## Existing upstream work and facility comparison
 
 - [Issue 348](https://github.com/devrandom-labs/mnesis/issues/348) already owns
@@ -216,6 +265,15 @@ Temporary shell invocations use an explicit Git source to avoid copying ignored
 - SQLx transactions and migrator remain the selected facilities. Keyset pages
   must be compared with SQLx streaming for ownership and connection occupancy;
   do not invent a public cursor framework before the concrete experiment.
+- PG4 preparation inspected locked SQLx `migrate.rs` and `migrator.rs`:
+  `run_direct` owns a session advisory lock, while each Postgres migration owns
+  its DDL/bookkeeping transaction. Error returns can precede unlock. Use an
+  explicitly scoped connection that closes on drop when integrating migrations;
+  do not return a session carrying an advisory lock or changed search path to
+  the caller's pool. Do not wrap the whole migrator in an outer transaction that
+  remains uncommitted after its advisory unlock. Concurrent and failed-migration
+  tests must verify this integration. This is a facility constraint, not a
+  completed migration implementation.
 
 Primary facility sources and versions are linked in the parent PRD. Source and
 advisory verification must be refreshed at the delivery revision.
