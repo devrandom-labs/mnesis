@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Finite consistent export sessions with one native view across listing and
+  stream reads, bounded pages, and cleanup on expiry, Drop, or caller pool close.
 - Bounded event-only stream listing with frozen committed visibility, binary IDs,
   released pool connections, and native allocation/visibility regressions.
 - Projection checkpoints with revision CAS, atomic state/position replacement,

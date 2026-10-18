@@ -23,3 +23,24 @@ bounds (current experiment), phase-aware commit errors, qualified conflicts,
 non-narrowed unsigned scalar storage, versioned migrations and real DB gate.
 These prevent any fixed-point or production-completion claim. Full capability
 and public surface minimization remain PG9 obligations.
+
+2026-10-18 PG7b uncommitted candidate audit: private store/export module owns one
+read-only RR transaction/task/pool lease per public associated Session. Session
+is reachable through existing ConsistentExporter, no constructor/public mode knob
+or independent runner. Requests are a private Key/List/Events sum, typed bounded
+channel plus original one-shot/task causes; Window is immutable deadline+Limits.
+Existing core GAT lifetime/ExportError and existing page SQL/row decoding reused;
+no new dependency/lockfile/framework/runtime/tool, no unwrap/expect/unsafe/panic
+in the318-line module. Pool authoritative bounds, no detach/leak. Driver socket
+closure required supported local native client checks for blocked SQL; preserve
+shorter caller check interval, one parameter owns its1000ms value. Native203 and
+fresh source controls reviewed. All-default/export strict Clippy passes, native
+Linux plus5required smokes pass. Full workspace Nix gate running, not final
+whole-repository convergence: existing Python feature/fuzz machinery, AFL crash
+gate proof, advisories, native TLS/durability/pool/session profiles, backup/
+restore/foreign history, capacity and release remain explicit PG7–PG9 work.
+Credible native lifecycle follow-ups: canceled pending close while SQL blocked;
+caller stricter check interval; session outliving original store; connection-loss
+profiles hidden from server socket check. No claims these were proven by initial
+native11 or mutation percentages. Two final fresh whole-repository audits still
+required before whole-adapter completion.

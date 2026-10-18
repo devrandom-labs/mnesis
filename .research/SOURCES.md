@@ -136,3 +136,28 @@ xmin-only omitted committed higher-xid ID behind unrelated active writer (red);
 full pg_snapshot filter passes exact membership and active/future exclusion.
 No extension/crate/license/lock cost. Snapshot string cost depends on concurrent
 active transaction list, not event backlog; measure in required PG8 capacity.
+
+2026-10-18 PG7b active-query cleanup primary research:
+- PostgreSQL17 client_connection_check_interval official Connections section:
+  https://www.postgresql.org/docs/17/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL
+  periodic socket checks during active queries on Linux/macOS/BSD/illumos;
+  detects kernel-reported closure, NOT arbitrary network/proxy failure.
+- Exact17 server implementation REL_17_STABLE/src/backend/tcop/postgres.c,
+  ProcessInterrupts/pq_check_connection: check timer armed during query, interrupts
+  lock waits; matching src/backend/libpq/pqcomm.c checks socket readiness.
+  https://github.com/postgres/postgres/blob/REL_17_STABLE/src/backend/tcop/postgres.c
+  https://github.com/postgres/postgres/blob/REL_17_STABLE/src/backend/libpq/pqcomm.c
+  Local exact fetched source /tmp/mnesis-pg7b-server-postgres.c and-pqcomm.c.
+- SQLx0.9 pool source Pool::close_event is supported and independently waitable.
+  No public cancel-query/token in selected sqlx-postgres0.9 source, no dependency
+  or private wire protocol justified. Separate cleanup lease would cost2leases/
+  session and require atomic admission absent in existing pool; reject speculative
+  redesign before simpler supported socket-check witness.
+Candidate: LOCAL1s check interval, preserve existing shorter nonzero setting via
+pg_settings normalized milliseconds. It limits disconnect-detection latency, NOT
+query execution time. Same one data lease/task; no change to lifetime range or
+write timeouts. Original5s native cleanup witness decides fitness. PG8 still
+must test network loss/TLS/pool resource behavior; local success not partition proof.
+Transaction_timeout researched alternative terminates native session, but17int32
+milliseconds restricts lifetime domain and doesn't independently make early Drop
+cleanup prompt; not needed for first socket-check experiment.

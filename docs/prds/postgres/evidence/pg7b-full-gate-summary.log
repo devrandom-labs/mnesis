@@ -1,0 +1,16 @@
+✅ checks.aarch64-darwin.mnesis-audit (previously built)
+✅ checks.aarch64-darwin.mnesis-toml-fmt (previously built)
+mnesis-fuzz-replay> test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+mnesis-nextest>      Summary [ 519.852s] 1563 tests run: 1563 passed (13 slow), 4 skipped
+✅ checks.aarch64-darwin.mnesis-nextest
+✅ checks.aarch64-darwin.mnesis-fuzz-replay
+✅ checks.aarch64-darwin.mnesis-wasm
+✅ checks.aarch64-darwin.mnesis-store-nostd
+✅ checks.aarch64-darwin.mnesis-fmt
+✅ checks.aarch64-darwin.mnesis-deny
+✅ checks.aarch64-darwin.mnesis-hakari
+✅ checks.aarch64-darwin.mnesis-doc
+✅ checks.aarch64-darwin.mnesis-nostd
+✅ checks.aarch64-darwin.mnesis-clippy

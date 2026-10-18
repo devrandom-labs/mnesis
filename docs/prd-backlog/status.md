@@ -28,6 +28,7 @@ Protected focused merges:
 - PR381 atomic writes and import: `be2e52ec3468657d36684506eed53fe060bef080`.
 - PR382 aggregate snapshots: `090504ae3b2081c03cfd8960f6edc5c0058fb3b2`.
 - PR383 projection checkpoints: `c482fb6a3762c74d7b10416029de22a642de2b71`.
+- PR384 bounded listing: `88a4575b3a3d0c5db8aaac2b92241c76b19f9a60`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -56,11 +57,15 @@ unbounded body transfer and mixed checkpoint reads. A native inheritance witness
 found and fixed unsafe schema acceptance. Full flake gate, all40 CI checks and
 protected delivery passed in [PR383](https://github.com/devrandom-labs/mnesis/pull/383).
 The downloaded CI mutation artifact confirms8 caught/8 unviable with every first
-failure reviewed. PG7 bounded listing starts from that merged source. Its native
+failure reviewed. PG7 bounded listing merged in PR384. Its native
 laws found and corrected committed-stream omission behind an unrelated held
 transaction, and caller search paths redirecting visibility functions. Eight
-listing laws now pass; final controls, regression, consistent sessions and restore
-remain. All prerequisite edges stay visible.
+listing laws pass, with three fresh SQL controls and the downloaded CI mutation
+artifact reviewed before protected merge. Consistent sessions are under native
+verification. Their first five passing laws missed blocked-query and caller-pool
+cleanup defects; both original reds are retained, with supported native socket
+checks and pool-close ownership now passing eleven focused laws. Final controls,
+regressions, backup composition and restore remain. All prerequisite edges stay visible.
 
 PG10 requires a selected consumer and explicit acknowledgement contract before
 activation. Labcast owns command IDs, deduplication and stale-worker rejection.

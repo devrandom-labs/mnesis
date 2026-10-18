@@ -37,6 +37,9 @@ mod checkpoint;
 #[cfg(feature = "export")]
 mod listing;
 
+#[cfg(feature = "export")]
+mod export;
+
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
 /// (`notify_committed`) publishes on it; each store's listener task subscribes.
 const NOTIFY_CHANNEL: &str = "mnesis_events";
@@ -549,6 +552,33 @@ type Stream = BoxStream<'static, Result<PersistedEnvelope, PostgresError>>;
 type AllStream =
     BoxStream<'static, Result<(PgAllPos, StreamKey, PersistedEnvelope), PostgresError>>;
 
+fn stream_query(
+    key: i64,
+    lower: &str,
+    upper: &str,
+    after: Option<&str>,
+    limits: Limits,
+) -> QueryBuilder<Postgres> {
+    let mut query = QueryBuilder::<Postgres>::new(page::START);
+    query
+        .push("stream_id = ")
+        .push_bind(key)
+        .push(" AND version >= ")
+        .push_bind(lower)
+        .push("::text::numeric")
+        .push(" AND version <= ")
+        .push_bind(upper)
+        .push("::text::numeric");
+    if let Some(position) = after {
+        query
+            .push(" AND version > ")
+            .push_bind(position)
+            .push("::text::numeric");
+    }
+    page::finish(&mut query, Order::Stream, limits);
+    query
+}
+
 impl RawEventStore for PostgresStore {
     type Error = PostgresError;
     type Stream = Stream;
@@ -625,23 +655,7 @@ impl RawEventStore for PostgresStore {
             state,
             move |(pool, key, after, mut rows, floor, ceiling)| async move {
                 if rows.is_empty() {
-                    let mut query = QueryBuilder::<Postgres>::new(page::START);
-                    query
-                        .push("stream_id = ")
-                        .push_bind(key)
-                        .push(" AND version >= ")
-                        .push_bind(&floor)
-                        .push("::text::numeric")
-                        .push(" AND version <= ")
-                        .push_bind(&ceiling)
-                        .push("::text::numeric");
-                    if let Some(position) = after {
-                        query
-                            .push(" AND version > ")
-                            .push_bind(position)
-                            .push("::text::numeric");
-                    }
-                    page::finish(&mut query, Order::Stream, limits);
+                    let mut query = stream_query(key, &floor, &ceiling, after.as_deref(), limits);
                     rows = query
                         .build_query_as::<PageRow<EventRow>>()
                         .fetch_all(&pool)

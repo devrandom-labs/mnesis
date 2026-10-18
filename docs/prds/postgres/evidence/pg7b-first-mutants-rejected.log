@@ -1,0 +1,262 @@
+waiting for server to start.... done
+server started
+Found 22 mutants to test
+FAILED   Unmutated baseline in 19s build + 0s test
+
+*** baseline
+
+*** cargo nextest run --no-run --verbose --package=mnesis-postgres@0.4.0 --all-features
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.189
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.4
+   Compiling serde v1.0.229
+   Compiling typenum v1.20.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling version_check v0.9.5
+   Compiling futures-core v0.3.33
+   Compiling parking_lot_core v0.9.12
+   Compiling memchr v2.8.3
+   Compiling bytes v1.12.1
+   Compiling scopeguard v1.2.0
+   Compiling itoa v1.0.18
+   Compiling writeable v0.6.3
+   Compiling futures-sink v0.3.33
+   Compiling litemap v0.8.2
+   Compiling lock_api v0.4.14
+   Compiling futures-channel v0.3.33
+   Compiling icu_properties_data v2.2.0
+   Compiling generic-array v0.14.7
+   Compiling utf8_iter v1.0.4
+   Compiling icu_normalizer_data v2.2.0
+   Compiling zmij v1.0.23
+   Compiling futures-task v0.3.33
+   Compiling crossbeam-utils v0.8.22
+   Compiling slab v0.4.12
+   Compiling futures-io v0.3.33
+   Compiling thiserror v2.0.19
+   Compiling once_cell v1.21.4
+   Compiling serde_json v1.0.151
+   Compiling equivalent v1.0.2
+   Compiling getrandom v0.4.3
+   Compiling autocfg v1.5.1
+   Compiling rand_core v0.10.1
+   Compiling tracing-core v0.1.36
+   Compiling num-traits v0.2.19
+   Compiling percent-encoding v2.3.2
+   Compiling allocator-api2 v0.2.21
+   Compiling foldhash v0.2.0
+   Compiling log v0.4.33
+   Compiling hashbrown v0.16.1
+   Compiling form_urlencoded v1.2.2
+   Compiling hashbrown v0.17.1
+   Compiling crc-catalog v2.5.0
+   Compiling parking v2.2.1
+   Compiling crc v3.4.0
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling indexmap v2.14.0
+   Compiling hashlink v0.11.1
+   Compiling hybrid-array v0.4.15
+   Compiling base64 v0.22.1
+   Compiling cmov v0.5.4
+   Compiling semver v1.0.28
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling errno v0.3.14
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling socket2 v0.6.5
+   Compiling signal-hook-registry v1.4.8
+   Compiling mio v1.2.2
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling rustc_version v0.4.1
+   Compiling sha2 v0.10.9
+   Compiling ctutils v0.4.3
+   Compiling httparse v1.10.1
+   Compiling curve25519-dalek v4.1.3
+   Compiling http v1.4.2
+   Compiling winnow v1.0.4
+   Compiling digest v0.11.3
+   Compiling try-lock v0.2.5
+   Compiling target-triple v1.0.1
+   Compiling want v0.3.1
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling getrandom v0.2.17
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling signature v2.2.0
+   Compiling tinyvec_macros v0.1.1
+   Compiling zerocopy v0.8.55
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.19
+   Compiling http-body v1.1.0
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling atomic-waker v1.1.2
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.13
+   Compiling zeroize v1.9.0
+   Compiling httpdate v1.0.3
+   Compiling subtle v2.6.1
+   Compiling event-listener v5.4.1
+   Compiling toml v1.1.3+spec-1.1.0
+   Compiling tinyvec v1.12.0
+   Compiling ed25519 v2.2.3
+   Compiling rand_core v0.6.4
+   Compiling regex-syntax v0.8.11
+   Compiling glob v0.3.4
+   Compiling synstructure v0.13.2
+   Compiling dissimilar v1.0.11
+   Compiling tower-service v0.3.3
+   Compiling termcolor v1.4.1
+   Compiling unicode-normalization v0.1.25
+   Compiling hmac v0.13.0
+   Compiling cpufeatures v0.3.0
+   Compiling chacha20 v0.10.2
+   Compiling unicode-properties v0.1.4
+   Compiling unicode-bidi v0.3.18
+   Compiling rand v0.10.3
+   Compiling sha2 v0.11.1
+   Compiling hkdf v0.13.0
+   Compiling md-5 v0.11.0
+   Compiling whoami v2.1.3
+   Compiling stringprep v0.1.5
+   Compiling byteorder v1.5.0
+   Compiling arrayvec v0.7.8
+   Compiling dotenvy v0.15.7
+   Compiling hex v0.4.3
+   Compiling atoi v2.0.0
+   Compiling regex-automata v0.4.16
+   Compiling bitflags v2.13.1
+   Compiling heck v0.5.0
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+   Compiling tracing-attributes v0.1.31
+   Compiling equator-macro v0.4.2
+   Compiling zerocopy-derive v0.8.55
+   Compiling rustix v1.1.4
+   Compiling equator v0.4.2
+   Compiling ed25519-dalek v2.2.0
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/adapters/postgres)
+   Compiling futures-util v0.3.33
+   Compiling mnesis v0.4.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/mnesis)
+   Compiling fastrand v2.5.0
+   Compiling zerofrom v0.1.8
+   Compiling tracing v0.1.44
+   Compiling smallvec v1.15.2
+   Compiling either v1.16.0
+   Compiling trybuild v1.0.118
+   Compiling aligned-vec v0.6.4
+   Compiling parking_lot v0.12.5
+   Compiling tokio v1.53.1
+   Compiling futures-intrusive v0.5.0
+   Compiling yoke v0.8.3
+   Compiling tempfile v3.27.0
+   Compiling futures-executor v0.3.33
+   Compiling futures v0.3.33
+   Compiling mnesis-store v0.4.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/store)
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling tokio-stream v0.1.19
+   Compiling hyper v1.11.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling hyper-util v0.1.20
+   Compiling sqlx-core v0.9.0
+   Compiling sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/crates/store-testing)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+   Compiling sqlx v0.9.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.01s
+
+*** result: Success
+
+*** cargo nextest run --verbose --package=mnesis-postgres@0.4.0 --all-features --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s
+────────────
+ Nextest run ID 4814fd7c-6339-4ab8-8659-6f97eba86fd8 with nextest profile: default
+    Starting 203 tests across 16 binaries
+       START [         ] (  1/203) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact error::tests::corrupt_row_display_truncates_overlong_stream_id --nocapture
+        PASS [   0.007s] (  1/203) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+       START [         ] (  2/203) mnesis-postgres error::tests::satisfies_error_send_sync_static
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact error::tests::satisfies_error_send_sync_static --nocapture
+        PASS [   0.007s] (  2/203) mnesis-postgres error::tests::satisfies_error_send_sync_static
+       START [         ] (  3/203) mnesis-postgres hex::tests::decode_accepts_uppercase
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::decode_accepts_uppercase --nocapture
+        PASS [   0.007s] (  3/203) mnesis-postgres hex::tests::decode_accepts_uppercase
+       START [         ] (  4/203) mnesis-postgres hex::tests::empty_round_trips
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::empty_round_trips --nocapture
+        PASS [   0.006s] (  4/203) mnesis-postgres hex::tests::empty_round_trips
+       START [         ] (  5/203) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::encodes_known_vector_lowercase --nocapture
+        PASS [   0.007s] (  5/203) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+       START [         ] (  6/203) mnesis-postgres hex::tests::non_hex_char_is_rejected
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::non_hex_char_is_rejected --nocapture
+        PASS [   0.007s] (  6/203) mnesis-postgres hex::tests::non_hex_char_is_rejected
+       START [         ] (  7/203) mnesis-postgres hex::tests::odd_length_is_rejected
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::odd_length_is_rejected --nocapture
+        PASS [   0.006s] (  7/203) mnesis-postgres hex::tests::odd_length_is_rejected
+       START [         ] (  8/203) mnesis-postgres hex::tests::round_trips_all_byte_values
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact hex::tests::round_trips_all_byte_values --nocapture
+        PASS [   0.006s] (  8/203) mnesis-postgres hex::tests::round_trips_all_byte_values
+       START [         ] (  9/203) mnesis-postgres position::tests::accessors_round_trip
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact position::tests::accessors_round_trip --nocapture
+        PASS [   0.007s] (  9/203) mnesis-postgres position::tests::accessors_round_trip
+       START [         ] ( 10/203) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact position::tests::ord_is_txid_first_then_seq --nocapture
+        PASS [   0.006s] ( 10/203) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+       START [         ] ( 11/203) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/mnesis_postgres-4fd6bf2c0f3fde01 --exact store::caller_byte_overflow_is_distinct_from_persisted_corruption --nocapture
+        PASS [   0.006s] ( 11/203) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+       START [         ] ( 12/203) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+             command: /private/tmp/nix-shell.YSSmwF/cargo-mutants-mnesis-postgres-views-P0zHtB.tmp/target/debug/deps/all_noskip_tests-33ca64aa661219a1 --exact all_noskip_exclusive_resume_after_out_of_order_commits --nocapture
+        FAIL [   0.012s] ( 12/203) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+  stdout ───
+
+    running 1 test
+    test all_noskip_exclusive_resume_after_out_of_order_commits ... FAILED
+
+    failures:
+
+    failures:
+        all_noskip_exclusive_resume_after_out_of_order_commits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (98850090) panicked at adapters/postgres/tests/all_noskip_tests.rs:72:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"joel\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(804), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.085s] 12/203 tests run: 11 passed, 1 failed, 0 skipped
+        FAIL [   0.012s] ( 12/203) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+warning: 191/203 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+
+ERROR cargo test failed in an unmutated tree, so no mutants were tested

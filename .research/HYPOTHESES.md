@@ -231,3 +231,43 @@ no whole-catalog fetch or connection retained while idle between pages. First
 characterization is missing trait API (zero runtime), then real native tests and
 an isolated unbounded-list control must reject actual whole-backlog loading.
 PG6b parent delivery still must complete; no PG7 release/readiness claim.
+
+PG7b pre-edit: consistent ExportSession uses existing ConsistentExporter and
+ExportSession contracts, shared bounded list/event pages and one repeatable-read
+read-only native view established BEFORE return. Budget<=450 added/80 removed
+productionRust, at most1publicSession type and3typed dispatch/cleanup errorvariants,
+zero newdeps/framework/runtime/tool; <=600 initial native lines. Compare supported
+SQLx ownership/lifetime alternatives before retaining mechanism: ownedtransaction+
+Mutex can be pinned by unpolled queryfuture; bounded activelydriven Tokio owner
+can own borrowed Connection::begin_with plus public PoolConnection.close_on_drop.
+Pool leases remain authoritative resource bound, no detach/leak. Expiry must
+release idle/buffered/blocked views without callerpoll; close awaits cleanup,
+opening cancellation before/after view creation leaves no view. Source original
+missing trait counts0runtime, not actual cleanup/atomicity evidence. Native
+fourcategories BEFORE subtle implementation; reject/refine owner if actual
+backend_xmin, shared snapshot, cancellation, byte or resource laws fail. No custom
+CancelRequest protocol (selectedSQLxpostgres has no located public cancel API).
+No new histories/contexts until real foreign-restore witness demonstrates gap.
+
+PG7b adversarial refinement before retention: initial five passing native laws do
+not show cleanup of an ACTIVE lock-waiting read, nor caller-owned pool closure.
+Native lock an events table after session key lookup, poll actual cursor once,
+prove its pid wait_event_type='Lock', abandon next future but keep cursor/session
+unpolled; unchanged1s lifetime must remove backend_xmin within5s BEFORE blocker
+release. Always rollback independent blocker BEFORE failing assertion. Separate
+idle60s session must let pool.close finish within3s; always drop session before
+assertion. Any red reopens owner lifecycle design, no bound/test relaxation.
+PG7b native red refinement: add supported LOCAL client_connection_check_interval
+at1s (preserve shorter caller setting) before ready; native kernel socket check
+must remove blocked view after driver closes it. This bounds disconnect detection
+without shortening queries or changing lifetimes. Watch supported Pool::close_event
+alongside drop signal in owner, so caller close is independent of60s session.
+Original two reds unchanged; zero new leases/deps/knobs. Retain only if BOTH data/
+resource assertions pass; partition behavior remains PG8, not inferred.
+PG7b gate extension before edit:5lines in existing native Nix feature smokes to
+require actual session close/drop/reopen selector with --no-tests=fail. No custom
+runner/checksuite. Full203 includes actual sessions; missing export must fail
+selector, default skip not a successful native session. Same product450/80,
+600initial native budget. Update docs to disclose one pool lease/task per session,
+per-cursor bounds, finite lifetime, LOCAL1s disconnect checks preserving shorter
+caller interval, pool close/cleanup, retained native MVCC cost and network limits.

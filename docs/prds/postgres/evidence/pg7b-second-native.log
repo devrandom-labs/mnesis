@@ -1,0 +1,14 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.85s
+────────────
+ Nextest run ID b590c7f2-b31c-4239-ae93-fa789e41b528 with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.065s] (1/5) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+        PASS [   0.037s] (2/5) mnesis-postgres::session_tests explicit_close_and_drop_release_native_views_and_allow_reopen
+        PASS [   1.038s] (3/5) mnesis-postgres::session_tests idle_expiration_releases_a_view_with_buffered_and_unpolled_cursors
+        PASS [   0.031s] (4/5) mnesis-postgres::session_tests invalid_lifetimes_reject_before_a_closed_pool_is_touched
+        PASS [   0.038s] (5/5) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+────────────
+     Summary [   1.210s] 5 tests run: 5 passed, 0 skipped

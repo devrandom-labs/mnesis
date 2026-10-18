@@ -1,0 +1,20 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.51s
+────────────
+ Nextest run ID 4ee4a694-7d1a-42f2-a8c8-f614828042e5 with nextest profile: default
+    Starting 11 tests across 1 binary
+        PASS [   0.094s] ( 1/11) mnesis-postgres::session_tests a_native_backend_failure_preserves_its_sqlstate_and_ends_the_cursor
+        PASS [   0.037s] ( 2/11) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+        PASS [   0.034s] ( 3/11) mnesis-postgres::session_tests closing_the_callers_pool_releases_an_idle_session_before_its_lifetime
+        PASS [   1.040s] ( 4/11) mnesis-postgres::session_tests dropping_a_long_lived_session_releases_its_blocked_query
+        PASS [   2.057s] ( 5/11) mnesis-postgres::session_tests expiry_releases_a_native_view_while_an_abandoned_read_is_blocked
+        PASS [   0.070s] ( 6/11) mnesis-postgres::session_tests explicit_close_and_drop_release_native_views_and_allow_reopen
+        PASS [   1.049s] ( 7/11) mnesis-postgres::session_tests idle_expiration_releases_a_view_with_buffered_and_unpolled_cursors
+        PASS [   0.056s] ( 8/11) mnesis-postgres::session_tests invalid_lifetimes_reject_before_a_closed_pool_is_touched
+        PASS [   0.040s] ( 9/11) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+        PASS [   0.038s] (10/11) mnesis-postgres::session_tests session_pages_preserve_inclusive_versions_and_terminal_row_limits
+        PASS [   0.145s] (11/11) mnesis-postgres::session_tests sessions_use_the_callers_pool_bound_and_acquisition_error_without_extra_connections
+────────────
+     Summary [   4.663s] 11 tests run: 11 passed, 0 skipped

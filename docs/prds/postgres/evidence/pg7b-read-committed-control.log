@@ -1,0 +1,38 @@
+     Removed 13694 files, 2.1GiB total
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/adapters/postgres)
+   Compiling mnesis v0.4.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/store)
+   Compiling mnesis-wake v0.4.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/store-testing)
+   Compiling mnesis-test-domains v0.0.0 (/tmp/mnesis-pg7b-read-committed.i5KkHe/crates/test-domains)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
+────────────
+ Nextest run ID 9f3f351d-f39c-4d3d-839f-7146d0fbb7e4 with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   0.068s] (1/1) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+  stdout ───
+
+    running 1 test
+    test one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read ... FAILED
+
+    failures:
+
+    failures:
+        one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read' (98817832) panicked at adapters/postgres/tests/session_tests.rs:163:9:
+    assertion `left == right` failed
+      left: 2
+     right: 1
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.072s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   0.068s] (1/1) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+error: test run failed

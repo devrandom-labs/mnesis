@@ -1,0 +1,88 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+error[E0599]: the method `open_export_session` exists for struct `mnesis_store::Store<PostgresStore>`, but its trait bounds were not satisfied
+   --> adapters/postgres/tests/session_tests.rs:112:10
+    |
+111 |       let session = store
+    |  ___________________-
+112 | |         .open_export_session(Duration::from_secs(60))
+    | |         -^^^^^^^^^^^^^^^^^^^ method cannot be called on `mnesis_store::Store<PostgresStore>` due to unsatisfied trait bounds
+    | |_________|
+    |
+    |
+   ::: crates/store/src/store.rs:35:1
+    |
+ 35 |   pub struct Store<S> {
+    |   ------------------- doesn't satisfy `_: ConsistentExporter`
+    |
+   ::: adapters/postgres/src/store.rs:87:1
+    |
+ 87 |   pub struct PostgresStore {
+    |   ------------------------ doesn't satisfy `PostgresStore: ConsistentExporter`
+    |
+    = note: the following trait bounds were not satisfied:
+            `PostgresStore: ConsistentExporter`
+            which is required by `mnesis_store::Store<PostgresStore>: ConsistentExporter`
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:196:10
+    |
+195 |       let session = store
+    |  ___________________-
+196 | |         .open_export_session(Duration::from_secs(1))
+    | |         -^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:231:38
+    |
+231 |     let mut opening = Box::pin(store.open_export_session(Duration::from_secs(60)));
+    |                                      ^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:237:10
+    |
+236 | /     store
+237 | |         .open_export_session(Duration::from_secs(60))
+    | |         -^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:252:32
+    |
+252 |         assert!(matches!(store.open_export_session(lifetime).await,
+    |                                ^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:263:10
+    |
+262 |       let session = store
+    |  ___________________-
+263 | |         .open_export_session(Duration::from_secs(60))
+    | |         -^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:277:10
+    |
+276 |       let another = store
+    |  ___________________-
+277 | |         .open_export_session(Duration::from_secs(60))
+    | |         -^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `open_export_session` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/session_tests.rs:284:10
+    |
+283 | /     store
+284 | |         .open_export_session(Duration::from_secs(60))
+    | |         -^^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mnesis-postgres` (test "session_tests") due to 8 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test session_tests --all-features` exited with code 101

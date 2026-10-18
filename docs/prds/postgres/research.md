@@ -3471,3 +3471,362 @@ passes12namedchecks, audit cached/11fresh, no bypass. Fuzz replay3runs2/1/1pass
 corpus decoder assertions;0filtered/ignored, finite replay not deep fuzz or native
 adapter evidence. Raw full gate and logs retained. Docs-only amendment runsnormal
 hook; cached checks receive0extra runtime credit.
+
+PG7a docs-only signed amendmentf1380837e4b52beb3d963b6b6fabd95c75ce7d58 passes
+normalfullhook12cached,0newruntimecredit. Pushedwork/postgres-export, openedPR384
+https://github.com/devrandom-labs/mnesis/pull/384; exactCI/artifact/review/protected
+merge still required. PG7b starts separately inwork/postgres-views from reviewed
+f138source while parentCI runs. New pre-edit budget/falsifiers in HYPOTHESES;
+read/tmp/mnesis-pg7-pre-edit.md for supported API research, no mechanism chosen
+without native cleanup evidence. Existing immutable contract/protocol retained.
+
+PG7b first compile fails10errors,0runtime: required session trait absent plus two
+fixture mistakes (StreamKey is Eq/Hash, not Ord; PendingEnvelope slice input needs
+static lifetime or ownership). Three reviews: (1) five initial laws target real
+adapter/shared-view/idle/cancel/closed-pool contracts; (2) no actual native cleanup
+or consistency evidence from failed compilation; (3) first result is NOT credited
+as clean API-absence characterization until fixture errors fixed. Compare sorted
+raw byte slices, and mark literal-only payload helper &'static[u8]. Preserve all
+assertions/deadlines, no lint relaxation, producer/storage inputs unchanged.
+
+PG7b corrected initial characterization:8E0599 missing ConsistentExporter /
+open_export_session methods,0runtime. Three reviews: (1) required consistent
+session capability absent; (2) missing trait is ONLY API absence, no native
+atomicity/expiry/cancellation evidence; (3) fixture Ord/lifetime defects fixed,
+no unrelated compile error, all five laws within600-line budget. Original and
+corrected logs retained separately. Next smallest candidate uses existing Tokio
+bounded requests/owned task and SQLx borrowed read-only transaction; actively
+driven owner needed to avoid unpolled query retaining cleanup mutex. Drop-only
+oneshot signal cancels owner independently of queued/unpolled requests; pool
+leases remain admission bound. Exact native laws, not assumed cleanup, decide
+retention. No raw cancellation protocol, new crate/runtime/framework or hidden
+SQLx constructor.3typed dispatch/task variants preserve original sources.
+
+PG7b initial candidate compiles library but strict Clippy rejects owner6arguments
+(limit5),0runtime. Represent each view's immutable deadline+page Limits together
+as a private Window product shared by session and owner; this owns their common
+bounds rather than an arbitrary tuple/allow. Existing lifetime and byte decisions
+stay, no public knob, lint relaxation or test change. Candidate291modulelines,
+shared-query31/17 and3typed errors15lines stay within450/80 production budget.
+
+PG7b second Clippy rejects83/80 lines in atomic-view test,0runtime. Replaced
+three repeated PlannedAppend literals with fixed-array map, same targets, versions,
+payloads and all assertions; no lint/limit relaxation. Third strict Clippy passes.
+First native attempt run2928c955-d79f-41f8-a764-158562930e1c:0/1 failed3.051s,
+four UNRUN. Three reviews: (1) required five session laws still unverified;
+(2) failure is fixture priming at line56 before opening any export session, NOT
+proof of a session defect; (3) unchanged3s timeout waiting pool.num_idle with
+cooperative yield does not itself drive SQLx idle-return work; investigate actual
+pool ownership before changing fixture. Do not credit other four as passing.
+Raw /tmp/mnesis-pg7b-first-native.log retained. No timeout increased.
+
+PR384 actual downloaded mutation artifact12143007654 digest
+39ab9563a2313d030929765dad2e0f83230f6cd3a97fee988b2600785ecdf154,headf1380837,
+/tmp/mnesis-pg7a-ci-mutants-39145116667/mutants. Baseline192/28.814s all native,
+0skips. Three baseline reviews: contract owners execute actual PostgreSQL18.6;
+all eight listing laws included; no ignored/filtered or installed replay credit.
+Each generated case reviewed THREE ways (contract; falsifier; oracle/provenance):
+| Mutation | Contract | First failure/falsifier | Oracle review |
+| --- | --- | --- | --- |
+| page=>empty | committed streams must be listed | actual held-transaction law exact[] vs committed-after-held-transaction ID | native assertion at listing_tests296;91passed1failed100UNRUN,0skips,not100successes |
+| page=>PageRow::new() | real page construction retained | E0599 missing enum constructor | build-only,0runtime,NOTcaught |
+| page=>PageRow::from_iter(default) | real page construction retained | E0599 missing associated constructor | build-only,0runtime,NOTcaught |
+| page=>PageRow::new(default) | real page construction retained | E0599 missing enum constructor | build-only,0runtime,NOTcaught |
+| page=>PageRow::from(default) | real page representation retained | E0277 PageRow lacks Default | build-only,0runtime,NOTcaught |
+| list_streams=>default | valid bounded stream required | E0277 dynStream lacks Default | build-only,0runtime,NOTcaught |
+Total6=1caught5unviable,0missed/timeout; no engineered percentage. Fresh final
+SQL controls in previous records separately reject unbounded scan/body fetch/
+missing snapshot predicate. Full current CI native runs192/28.621s and192/24.836s
+are separate; installed28.621s log is replay of FIRST run, not third execution.
+
+PG7b fixture diagnosis CORRECTION: the sole existing listener permanently takes
+the only initial idle lease, so polling num_idle alone cannot create a second
+lease. SQLx drop DOES spawn return work; that was an unproven earlier suggestion,
+not the cause. Reuse existing listing fixture native LISTEN-readiness query before
+priming idle count; it acquires a separate observer lease and waits for actual
+listener ownership. Same3s bound, same SUT and assertions. This is fixture setup,
+not product rescue. Second strict Clippy passes; native b590c7f2-b31c-4239-ae93-fa789e41b528
+5/5 PASS1.210s,0skips. Three reviews after run:
+1. Contract: one frozen view across listing/both old streams/new stream and actual
+atomic commit before first read; close waits native rollback; idle expiration and
+canceled startup release actual backend_xmin; invalid ZERO/MAX before storage.
+2. Falsifier: live reads independently see both committed second events while
+session exact old payload/version remains; native pg_stat_activity proves a real
+view existed before cancellation/expiry and disappears without cursor/session
+poll. No synthetic reimplementation or successful error-string matching.
+3. Assertions/setup: all5 actually ran with DATABASE_URL,0skip/ignored; identical
+1s lifetime,3s startup and5s cleanup bounds; cancellation drops pinned BOX future,
+not a reference; no detach/leak workaround. These tests do NOT yet prove blocked
+SQL cancellation, bounded session admission, caller pool close, all byte/corrupt
+paths or backup composition. Add adversaries before retaining candidate.
+
+PG7b actual adversarial run3d416f36-ec1b-4a1a-ac75-7edcbd537d48:7run5pass2FAIL
+9.402s0skip. StrictClippypasses. Three reviews after run:
+1. Contract: pool.close must terminate outstanding view ownership before60s;
+1s expiry must release native backend_xmin despite an abandoned lock-waiting read.
+2. Falsifiers: pool.close actually times out3.039s, then succeeds after session
+Drop; native pg_stat_activity confirms Lock wait and still-pinned xmin after5s
+5.084s, independent table blocker rolled back BEFORE failure. These are real
+resource-contract defects, not fixture setup or predicted driver behavior.
+3. Oracle/setup: all7 ran, same prior5pass,0skips; timeout bounds unchanged,
+blocked next/session/cursor unpolled during observation; native rollback cleanup
+precedes assertions, no wire proxy. Owner task + connection.close alone is
+INSUFFICIENT for active blocked SQL. Do not credit this candidate as retained.
+Research supported server transaction timeout (PG17+ supported profile) and SQLx
+pool close event; no custom PostgreSQL cancellation protocol or new dependency.
+
+PR384 CI reviews after completed actual runs (headf138,run39145116648 and push
+39145081397). Each summary retained separately; installed native run.log replay
+not credited again. Three independent reviews for EVERY listed run:
+| Runs | Contract review | Fault review | Assertions/provenance review |
+| --- | --- | --- | --- |
+| Native192/28.621s,192/24.836s,192/28.320s,192/28.447s | all adapter capabilities and8listing laws | original xmin/search_path and bounded behavior assertions execute | four distinct native executions,0skips; duplicated installed summaries not extra |
+| Atomic smoke1 each .079/.063/.075/.078s | import feature actual commit | conformance asserts complete streams |14filtered per run, not14passes |
+| Snapshot smoke1 each .062/.074/.062/.067s | snapshot feature | absent/commit/found exact state |15filtered each, only1run |
+| Projection smoke1 each .077/.055/.078/.075s | checkpoint feature actual Projection | reload exact state/position/resume |2filtered each, only1run |
+| Listing smoke1 each .103/.071/.095/.095s | export feature actual binary IDs |4IDs exactly once incl empty +reopen |7filtered each, only1run |
+| Workspace1563/98.446s and1563/120.776s | unchanged workspace contracts | properties/resilience/model owners still run |4compiler functions skipped intentionally with own jobs below; DB-free returns NOTnative |
+| Kernel compiler2/107.53s and2/67.16s | static misuse rejects | existing compiler fixtures exact diagnostics |0filtered/ignored; complements4workspace exclusions |
+| Macro compiler1/3.82s and1/2.45s | generated misuse rejects | actual trybuild diagnostics |0filtered/ignored, no fixture blessing |
+| Store compiler1/11.74s and1/7.26s | static store misuse rejects | actual trybuild diagnostic owner |0filtered/ignored |
+| Features,3runs each job in EACH CI: mnesis15,macros1,store217,wake17,fjall131,inmemory25/25/30 | selected no-default/default/all contract owners | unchanged unit properties/errors execute under each feature set |0filtered/ignored; native absence NOT claimed as adapter runtime |
+| Feature wake-nostd and store-testing,3each perCI,0tests | isolated compilation only | no runtime falsifier |0test result explicitly no runtime credit |
+| Fuzz replay2/1/1 each1s in EACH CI | header/chunk/value/frame corpus owners | real decoder corpus assertions |0filtered/ignored; finite replay not new deep fuzz |
+| LibFuzzer chunk1245257, value5831023, wire6580783, header2955147 iterations,61s EACH | four production decoder targets | actual fuzz inputs/no crash | bounded smoke only, not proof of completeness or adapter runtime |
+| AFL wire60s,chunk61s,header60s,value60s | same actual four decoder owners |0crashes/timeouts; corpus new0/12/1/0 | actual CMPLOG validation; artifact absence not proof current crash gate catches injected crash, PG9 remains |
+40green/1scheduledskip, CLEAN/MERGEABLE, exactheadf138,0reviews/0threads verified.
+Mutation artifact per-case reviewed above BEFORE merge. Normal protected squash
+now permitted by existing user authorization. No approval bypass/admin merge.
+
+PG7b supported connection-check +pool-close experiment run93da317b-eb5d-470d-9d70-02deb5052781:
+7/7 PASS2.348s,0skips, strictClippyPass. Three reviews after run:
+1. Contract: unchanged five original laws and both newly-red cleanup laws now
+execute successfully; fixed consistent snapshot, exact events, expiry and close
+semantics preserved. No lifetime validation/range or public API change.
+2. Falsifiers: SAME actual native Lock wait now loses pinned xmin in1.046s
+without releasing independent blocker; same60s idle session permits caller close
+.033s rather than original3s timeout. Supported LOCAL socket checking addresses
+actual blocked-query mechanism, existing pool close_event drives idle ownership.
+3. Oracle/provenance: all7actual native,0skip; independent blocker rolled back
+BEFORE assertions; lifetime1s/cleanup5s/startup3s unchanged, no ignored/adapted
+expected errors. Narrower caller interval preservation/drop while long-lived SQL
+blocked/cursor bounds/storage-error source/backup still need their own witnesses.
+No inference about packet loss/proxies: socket-close check only sees kernel state.
+
+PR384 merged through normal protected squash at2026-10-18T16:52:53Z,
+88a4575b3a3d0c5db8aaac2b92241c76b19f9a60, reviewedheadf1380837e4b52beb3d963b6b6fabd95c75ce7d58.
+All40green1scheduledskip/CLEAN,0reviewthreads, downloaded mutation per-case reviews
+preceded merge. Remote work/postgres-export absent by exact ls-remote verification.
+Parent worktree preserved clean at reviewedhead; no push/recreation. Listing
+feature complete; consistent session/backup/restore and PG8/PG9 still outstanding.
+
+PG7b resource-law attempt first stopped at strictClippy due explicit test panic,
+0runtime/no native credit. Replaced match/panic with exact source+SQLSTATE
+assertion; added fused-none assertion, no lint allow. Native run4ee4a694-7d1a-42f2-a8c8-f614828042e5
+11/11 PASS4.663s0skips; strictClippyPass. Three reviews after run:
+1. Contract: original7 plus long-lived Drop/blocked SQL, pool-bound admission,
+original SQLSTATE, inclusive read/terminal row limits. One borrowed native view,
+no writes/commit classification change. Export-only still needs separate feature run.
+2. Falsifiers: actual60s view Drop removes Lock-pinned xmin1.040s; pool max2
+(listener+view) rejects second open with ORIGINAL PoolTimedOut then reopens after
+close; native pg_stat_activity EXACT2connections; real pg_terminate_backend gives
+original57P01;37-byte exact event then74-byte overflow, listing33 then72 limit.
+3. Assertions/provenance:11actualnative0skip, all prior deadlines unchanged;
+blocker released before failing assertions, error cursor fused and cleanup awaited;
+no source string remapping/defaults.568native lines <=600budget;317modulelines,
+shared SQL/Error helpers still <=450/80production. Allocation proof still owned
+by existing shared query controls; this test proves result/order, not RSS or
+network partition safety. Caller-stricter connection-check setting remains to
+prove with independent wire/source control or supported native metadata.
+
+PG7b full native all-feature203/203 PASS24.551s0skips. Three reviews:
+1. Contract: all previous192 adapter owner laws plus11new session laws execute,
+including reads/wakes/outcomes/migrations/binary/import/snapshot/projection.
+2. Falsifier: original no-hint/native transaction rollback/actual COMMIT-watch/
+process-kill and new real active lock-pinned session cleanup assertions remain;
+shared stream SQL refactor preserves original bounds/corruption/read properties.
+3. Oracle/provenance: actual17.10 DATABASE_URL,serialsamecluster,0filtered/ignored,
+no setup-only success claimed, no shortened workload/loosened deadlines. New
+11focused source unchanged since4.663s pass; lifetime/static error constraints
+still pending controls/current isolated features/Linux/gate/mutations.203pass is
+not PG7 complete or merged/released delivery.
+
+PG7b export-only136/136 PASS18.969s0skips. Three reviews:
+1. Contract: all default owner118 plus8listing and10session laws run without
+import/projection/snapshot capabilities, required11th atomic-session law is
+import-gated by its real consumer, not silently counted.
+2. Falsifier: real pool-bound/57P01/native lock cleanup/page byte limits and
+original default reads/wakes/migrations still execute. No all-feature unification
+credited to this isolated build.
+3. Oracle/setup: actual17.10 DATABASE_URL0skip, serialphysicalcluster. Four unused
+imports from import-only atomic case warn (Arc/TryStreamExt/Store/Barrier);
+fix with narrow matching cfg imports, not allow. Native assertions unchanged;
+strict isolated Clippy must pass before final gate.136 green isn't warning-free
+readiness. Raw run retained, not replaced by corrected result.
+
+PG7b fresh read-committed source control /tmp/mnesis-pg7b-read-committed.i5KkHe,
+owned proof target explicit adapter clean/recompile from THAT path:0/1 FAIL.072s,
+actualrows2 expected1 at session_tests163. Three reviews:
+1. Contract: atomic multi-stream commit must be absent from the established view.
+2. Falsifier: ONLY transaction isolation lowered, listing's captured visibility
+still applies; actual stream data includes forbidden second row, not API absence.
+3. Oracle/provenance: clean+explicit compile path in raw log,1run10filteredNOT10
+successes; no fixture/lint/bound changes. Control source before import-cfg tidy
+and equivalent local-timeout parameter binding; no final-source claim yet. Need
+final current-source controls because later source changed (semantic-neutral
+cfg imports and one SQL parameter owning1000 once). Preserve this real witness.
+Minimization binds1000_i64 once instead of three duplicated interval constants;
+current all/default/export strict Clippy runs, no lints relaxed.
+
+PG7b FINAL-source socket-check control /tmp/mnesis-pg7b-disconnect-disabled.LqroYB:
+ONLY native interval bound1000_i64=>0_i64, owned proof adapter clean+explicit
+source recompile, d663f243-0223-4e46-822d-98bcc823d71c0/1 FAIL5.062s. Three reviews:
+1. Contract: canceled/dropped60s session must release actual native read view.
+2. Falsifier: kernel-close detection disabled; actual Lock-waiting backend_xmin
+persists beyond5s and original cleanup assertion fails. Independent blocker
+rollback precedes assertion; normal1s interval same testpassed1.040s.
+3. Oracle/provenance: final parameterized SQL/current test-importsource, explicit
+compilepath/clean in raw log;1run10filteredNOT10passes, no deadline/expectation
+change. Pure supported timeout causal control, not test-only driver simulation.
+Strict current all/default/export all-target Clippy each passes warning-free;
+no runtime credit from compilation. Native136 earlier raw warnings retained.
+
+PG7b current default-only118/118 PASS15.435s0skip. Three reviews:
+1. Contract: raw adapter default owners remain available without export capability.
+2. Falsifier: unchanged read/all bounds, no-hint recovery, commit uncertainty,
+migrations/legacy upgrades/corrupt schema/property boundary laws still execute.
+3. Oracle/provenance: actual native17.10,serialphysicalcluster,0skip/filtered;
+export API absence is NOT tested by118 and gets no session runtime credit.
+Exact absent feature selector --no-tests=fail still required separately.
+
+PG7b FINAL-source isolation control /tmp/mnesis-pg7b-final-isolation.qxqkA0:
+explicit proof adapter clean/recompile, same current parameterized SQL/cfg imports,
+ONLY RR=>READCOMMITTED.0/1 FAIL.057s, exact actual2 expected1. Three reviews:
+1. Contract: one cross-stream view includes no part of later atomic commit.
+2. Falsifier: actual forbidden second event despite frozen listing; independent
+live raw store confirms commit, no synthetic source/API-only failure.
+3. Oracle/provenance: explicit compile path/clean,1run10filtered, zero loosened
+limits/oracles. Supersedes earlier pre-parameter control for final source proof;
+both original logs retained. Final production stays unchanged during controls.
+
+PG7b FINAL current export-only136/136 PASS19.915s0skip after native interval
+parameterization and cfg-import fixes. Three reviews:
+1. Contract: actual118default+8listing+10session laws with onlyexport enabled.
+2. Falsifier: native blocked-query expiry/drop/pool-close/resource saturation/
+original57P01/terminal37-byte bounds and all default defects execute unchanged.
+3. Oracle/provenance: current source warning-free, real17.10,0skips/filtered;
+import-only atomic-view case excluded by actual capability, not credited here.
+All-feature203 prior parameterization remains earlier evidence; final Linux
+current203 running separately. Default118 current passing. No final-release claim.
+
+PG7b missing-export selector run39a1f513-60da-480e-995a-c70310e0a639 exits4,
+0tests. Three reviews: (1) required native session smoke must not succeed when
+feature absent; (2) exact session_tests close/drop selector unavailable yields
+no-tests error via existing nextest --no-tests=fail; (3)0runtime/15binariesfiltered,
+not an export behavioral pass. Final native Linux package succeeds at
+/nix/store/0vv8gv9db3m8ikrml0pqrzmlh2s7335f-mnesis-postgres-integration. Review
+separate5feature smokes and203whole native run below; installedlognotextraexecution.
+
+PG7b Linux current203/203 PASS27.703s0skip, source diff
+SHA256d5e7e35be8b81624f892832f7979b9075405987ffd829b919e145c68841941c3.
+Three reviews after EACH native run:
+| Run | Contract | Actual falsifier | Oracle/provenance |
+| --- | --- | --- | --- |
+| atomic1/.313s | import actual multi-stream transaction | exact all targets committed |14filtered not14successes |
+| snapshot1/.256s | saved cache composition | absent/commit/found exactpair |15filtered,1actual |
+| projection1/.204s | actual stepper resume | exact state/nativeposition |2filtered,1actual |
+| listing1/.271s | export binary discovery |4exactIDs+reopen |7filtered,1actual |
+| session1/.106s | export native view lifecycle | actual xmin/close ACK/Drop/reopen |10filtered,1actual |
+| all203/27.703s | all adapter owners+11session laws | real blocked SQL/pool/drop/native error/bounds |0skips,18.6 ARM Linux fresh nativeexecution; installed log not extra |
+Raw /tmp/mnesis-pg7b-linux.log and immutable result retained; strictClippy all/
+export/default compiled warning-free. Five native smokes required with missing
+selector exits4. No inferred partition/durability/capacity acceptance.
+
+PG7b first22-candidate mutation attempt REJECTED baseline failure:12/203run,
+11unitpass1nativefailure,191UNRUN. Three reviews: (1) no successful native
+baseline,0mutants tested; (2) actual failure is database role28000 'joel does not
+exist', not adapter regression; (3) selected existing18.6 mutation cluster belongs
+to mnesis, ordinary17.10 cluster usesjoel. Correct CONNECTION USER only, preserve
+all test/source/bounds and original failed logs. No survivor/caught count claimed.
+Reused test cluster automatic crash replay is not a controlled durability drill.
+
+PG7b corrected current22 generated mutations:9caught13unviable0missed/timeout,
+203/26.294s baseline0skips. Every first failure inspected before retention;
+/tmp/mnesis-pg7b-corrected-mutants/mutants.out preserved, outcomes/first failures
+copied as.log. Three reviews after EVERY run/case:
+| Case | Contract | First falsifier | Oracle/provenance |
+| --- | --- | --- | --- |
+| baseline | all203actual owners | unchanged native regressions execute |18.6 independentcluster,0skips,correctusermnesis |
+| stream_query=>new() | valid native stream query required | E0061missingarg |0runtime,unviableNOTcaught |
+| stream_query=>from_iter | same query ownership | E0599missingmethod |0runtime,unviable |
+| stream_query=>new(default) | same bound query | E0283inference |0runtime,unviable |
+| stream_query=>from(default) | committed history cannot disappear | actual[]vsone ConformanceRow(version1,E,payload9) atomic duplicate-target preservation |14pass1fail188UNRUN, data failureNOTtypeerror |
+| raw read_stream=>default | valid stream required | E0277dynStreamDefault |0runtime,unviable |
+| listing page=>empty | committed streams discoverable | actual[]vsheld-transaction committedID |91pass1fail111UNRUN, real listing assertion |
+| listing page=>new() | page representation valid | E0599PageRownew |0runtime,unviable |
+| listing page=>from_iter | page representation valid | E0599PageRowfrom_iter |0runtime,unviable |
+| listing page=>new(default) | page representation valid | E0599PageRownew |0runtime,unviable |
+| listing page=>from(default) | page representation valid | E0277PageRowDefault |0runtime,unviable |
+| Windowlive=>Ok | expired buffered data must stop | actual second buffered item notExpired at session211 |174pass1fail28UNRUN; actual native idle expiry |
+| Windowlive>= to< | available pre-expiry reads permitted | list creation incorrectlyExpired at session482 |168pass1fail34UNRUN; entry guard,NOTbackendSQLSTATE proof |
+| Windowunavailable=>default | typed original errors required | E0277ExportErrorDefault |0runtime,unviable |
+| Windowunavailable>= to< | expired pending reads must reportExpired | native lock-read terminal error wrong at session339 |172pass1fail30UNRUN, real expiry assertion |
+| request=>default | typed reply cannot invent value | E0277TDefault |0runtime,unviable |
+| open=>default | actual Session must exist | E0277SessionDefault |0runtime,unviable |
+| open lifetime OR=>AND | ZERO/MAX reject before closed pool | exact InvalidLifetime assertion fails session258 |175pass1fail27UNRUN; actual input/storage precedence |
+| own=>Ok | opening must establish real ready view | originalExportReplyRecvError onopen at474 |168pass1fail34UNRUN; startup guard,NOTcleanup proof |
+| serve=>Ok | same real native startup | originalExportReplyRecvError onopen at474 |168pass1fail34UNRUN; startup guard,NOTcleanup proof |
+| sessionlist=>default | valid borrowed stream required | E0277dynStreamDefault |0runtime,unviable |
+| sessionevents=>default | valid borrowed events required | E0277dynStreamDefault |0runtime,unviable |
+| close=>Ok | cleanup failures cannot be acknowledged | actual57P01 owner shutdown incorrectly returnsOk, closed.is_err fails493 |168pass1fail34UNRUN; failure propagation,NOTtemporalACK proof |
+No new exclusions/config changes or engineered percentage. Explicit normal-close
+native xmin oracle and source controls remain separate; robust pending-close
+cancellation and strictly shorter caller interval profiles remain credible
+follow-up lifecycle/security work (PG8), not claimed by generated totals.
+Current product371added24removedRust,572native lines,5Nix lines;1Sessiontype,
+3typederror variants;0deps/runtime/framework/tools. Final source diff SHA256
+d5e7e35be8b81624f892832f7979b9075405987ffd829b919e145c68841941c3.
+
+PG7b full flake gate IN PROGRESS, source unchanged. Three reviews immediately
+after each completed replay run: (1)2-case CBOR corpus replay targets actual
+header/chunk decoder owner; actual decoder assertions run;0ignored/filtered1.00s,
+not deepfuzz/native adapter evidence. (2)1-case value corpus replay targets actual
+value validation; original corpus assertions execute;0ignored/filtered1.00s,
+not capacity evidence. (3)1-case wire corpus replay targets real frame decoder;
+actual frame checks execute;0ignored/filtered1.00s, not new input coverage proof.
+These are three distinct contract/fault/oracle reviews PER run; replay counts
+2/1/1 retained in raw full gate. Owned mutation cluster stoppedFAST/ACK, data kept.
+
+PG7b full unmodified nixflakecheck passes12namedchecks:10fresh, audit+toml-fmt
+cached. Workspace1563/1563 PASS519.852s,13slow,4compiler-function exclusions.
+Three reviews after workspace run:
+1. Contract: unchanged whole-workspace kernel/store/adapters/examples/property/
+state-machine/resilience owners execute, including existing persistent backup
+composition; current session code separately compiled under all-feature Clippy.
+2. Falsifier: actual pre-existing property/recovery workloads retained; no cases,
+loops, deadlines, persistence settings or exclusions altered. Sourcecontrols and
+203nativeLinux remain independent original-defect rejection evidence.
+3. Oracle/provenance:4compiler functions NOT counted passes, assigned existing
+CI owner jobs; DB-free Postgres returns NOT native runtime.13slow completed
+unchanged; timing difference vs prior489s not treated as adapter capacity result.
+Replays2/1/1each1s separately reviewed above. NativeLinux203/27.703s+5smokes was
+actual earlier final-source execution, not repeated by Darwin gate. Incompatible
+architecture warning not additional platform verification. Raw fullgate retained
+/tmp/mnesis-pg7b-full-gate.log; concise extracted summary in evidence. Strict
+source/test/Nix whitespace check passes; original raw negative logs preserve
+nextest trailing whitespace. No gate bypass, lints relaxed, test allowances added
+or Cargo/lockfile changes. Signed normal commit hook still required and will
+receive0fresh runtime credit for cached checks.
+
+Protocol chronology correction: the5-line native session smoke budget note was
+written immediately AFTER that small gate edit, not before as its wording said.
+The prior450/80Rust and600native-line budgets were recorded before production
+implementation; final371/24Rust and572native stay within them. No source or gate
+relaxation is justified by this record correction. Before further scope changes,
+record the new budget and falsifier first.
+
+PG7b signed conventional commitcd3ec0355299b574c5fefe3dfa50830b20bcf987 (G)
+passes normal unmodified pre-commit nixflakecheck,12cached checks,0new runtime
+credit. Full actual gate1563/519.852s recorded above. Docs-only record amendment
+uses same normal hook; source/native controls/LINUX/mutation evidence unchanged.
+No source change or bypass; focused protected PR still required before delivery.
