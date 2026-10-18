@@ -1,0 +1,1495 @@
+warning: Git tree '/private/tmp/mnesis-postgres-path' has uncommitted changes
+these 20 derivations will be built:
+  /nix/store/1hg9ixgfyx1ycj55rsvdxkrxnsys111b-cargo-package-either-1.16.0.drv
+  /nix/store/5g609by3xg77py2xvqarvwdz08zhxkmw-cargo-package-futures-sink-0.3.33.drv
+  /nix/store/6xqb2g6apwm0yq274ya9bcc68iq8la37-cargo-package-litemap-0.8.2.drv
+  /nix/store/9jwmbp87kajmsa79wyzbsxld7009a7v4-cargo-src-curve25519-dalek-4.1.3.drv
+  /nix/store/9y419g33861dsifbjlkv724adq635vjg-cargo-package-trybuild-1.0.118.drv
+  /nix/store/c2qqzwmqf4alm53fd7kd0i3bmfzf7gy5-cargo-package-aho-corasick-1.1.4.drv
+  /nix/store/dbkfqiz2bnqfjnk0ai261h8gw15qjs5s-cargo-package-curve25519-dalek-4.1.3.drv
+  /nix/store/di206k7v4z1r6fviycpvrsm9ypfjfggh-cargo-package-arrayref-0.3.9.drv
+  /nix/store/glbz94gydb29izg8ffzgzxmdwmfy1lwi-cargo-package-js-sys-0.3.103.drv
+  /nix/store/wbmbvsxbjvn7lfmiy3mrc5y4fxgf2ilr-rust-1.99.0-with-std-2026-10-01.drv
+  /nix/store/nnqimxkjsygvab1jfm3h68lsa1jxgjnb-rust-1.99.0.drv
+  /nix/store/nk4qsrjs5knw7b7kszz1bfyfg7hys17x-cargo-package-unarray-0.1.4.drv
+  /nix/store/q8ksbsfnvi8v843k8lx9x9phymdki4zn-cargo-package-approx-0.5.1.drv
+  /nix/store/y16nm7qiwa1dzxyi8v4g34c7axqbhah1-cargo-package-codspeed-criterion-compat-5.0.1.drv
+  /nix/store/ziad7f26ml413wl8p70zl9bngrva0g44-cargo-package-libsqlite3-sys-0.30.1.drv
+  /nix/store/jmsc2w1hxlmwczqsz2bbkrhgwvx63vzf-vendor-registry.drv
+  /nix/store/vm3mqklhi817hwlqwga4mqcx8k677x9q-vendor-cargo-deps.drv
+  /nix/store/kzg2hgnal3l9mbh59jbwpipdkcfjql8d-mnesis-deps-0.4.0.drv
+  /nix/store/h9r93n9jraxbm42avj150xxih1p1d8pz-mnesis-postgres-tests-0.4.0.drv
+  /nix/store/ngf1bdv1czdjk78rj08bhnnbv6lvc9bw-mnesis-postgres-integration.drv
+these 43 paths will be fetched (112.2 MiB download, 354.3 MiB unpacked):
+  /nix/store/26iph7ac516fzzrm51mjcnp22bkfgza0-audit-4.2.1-lib
+  /nix/store/j2f02jl7pb3wcljmqh602j0pa6rkxd31-binutils-2.46
+  /nix/store/j7hs7iam6fi7d9mk9iq8cc9sk0875hgg-binutils-wrapper-2.46
+  /nix/store/469y56py4phaa3byz0nd9ra3kmdnfqg4-cargo-package-ciborium-io-0.2.2
+  /nix/store/d290ngwks48m57v4vjr4q4h799bqc60a-cargo-package-crypto-common-0.2.2
+  /nix/store/h9br6p5nsq0ldj1r4fiydv8lwmhc6p3r-cargo-package-dashmap-6.2.1
+  /nix/store/lrfdm3y2g5va51vq3amqr8ijqv1s01dk-cargo-package-http-body-1.1.0
+  /nix/store/yjaj5k5hw2q2xa0bg08vddkf9y1a6y63-cargo-package-hybrid-array-0.4.15
+  /nix/store/knfj4h2ygb3hw2yvhhbf3b2sj6ddmzql-cargo-package-matchit-0.8.4
+  /nix/store/6g77lcqk42jdwga9k081kwrm4m2lammx-cargo-package-regex-syntax-0.8.11
+  /nix/store/lr979lqhkjrcax3x9i7m79p481b5iip1-cargo-package-rustc_version-0.4.1
+  /nix/store/06xib62fng6imjz3x3rqr62s35ybxn9w-cargo-package-wasi-0.11.1+wasi-snapshot-preview1
+  /nix/store/39cq2g3d3flq2lmb6hc09grxs4xaax8p-cmake-4.4.3
+  /nix/store/d05khq8gbpqw7ykgnjg8qixqyfa1idj5-curl-8.22.0
+  /nix/store/8kdawibp3831l16sx890nmxjyxii2a8i-curl-8.22.0-bin
+  /nix/store/i20y9dcw8r0bsgi34f9sf8p4fm3dk57a-curl-8.22.0-dev
+  /nix/store/l54xxyh3havpk0qwr0pdz4cdn0vrhjv3-curl-8.22.0-dev
+  /nix/store/r0kwnxiyl1053qzxzn02jrcqr55kp0fb-file-5.48
+  /nix/store/2bwpli20ff4f7hg5ck477p8s57kj857w-gawk-5.4.1
+  /nix/store/99zij8qfs8wzbb2njrj18ys8hpnrcj3p-gcc-wrapper-16.2.0
+  /nix/store/6yi5v7iswrvg0hsl8rai9bjrmgfhkhpl-libarchive-3.8.9-lib
+  /nix/store/q2pjg7wdh0dikxz506dcp72axrgf4rgg-libcap-ng-0.9.6
+  /nix/store/0jbwzbnms10m7xsi3r9gsz509zx1q86i-libssh2-1.11.1-dev
+  /nix/store/brl17nswbwilpngd8ar0w8qdipbdrgqf-libssh2-1.11.1-dev
+  /nix/store/ag002afcmk9gdsv38vpm1kbhh1mxm6zi-libuv-1.52.1
+  /nix/store/400kkdns1nq039a05qb24hnlc26na9hq-linux-pam-1.7.2
+  /nix/store/vyb6ifr4dyglgg2biwwa36ahjcmzd05w-llvm-21.1.8-dev
+  /nix/store/cj6f94005924dcq8says7xgrmydfwzif-ngtcp2-1.23.0
+  /nix/store/m28xvsp0sdvckkw63w9xyxn815v2d76m-ngtcp2-1.23.0-dev
+  /nix/store/58dh23yxglh50w33fikmi0dk6qix9zrk-openssl-3.5.8-bin
+  /nix/store/ga8ykzb3a9v356l75fnvfpa7rzbjpm66-openssl-3.5.8-dev
+  /nix/store/kcj2f7hq99xg8sr0d1gdfj9grgzgd6my-postgresql-18.6
+  /nix/store/s0d0v9c002hd3cbbx2wfxlgaxr3j7b1i-postgresql-18.6-dev
+  /nix/store/awiph4xig1a4mns1lj4909xvzjs66h9c-postgresql-18.6-lib
+  /nix/store/81ag9nxz1flw3xjkv1vvqg8y2ipx2ins-python3-3.14.7
+  /nix/store/33x3cyc63b5v4wwavz2hlxj60rzh6fq2-stdenv-linux
+  /nix/store/wc2yjib5jdx9pxxfbshmiffxzb03qx18-stdenv-linux-no-cc
+  /nix/store/6vc01m0905w5gjkf8slbc7sqzxahs3zn-util-linux-minimal-2.42.3
+  /nix/store/n0xzcpby7l548pmf1ny0mkkqcg6nkhca-util-linux-minimal-2.42.3-bin
+  /nix/store/z76b8fbchn5n0y101xsrnqn5k5azfbiy-util-linux-minimal-2.42.3-dev
+  /nix/store/d8aaaq83sdrzsqyxx19qfc14slcrdjix-xz-5.8.4
+  /nix/store/csrwf31hprwghnbyiglxa3p787lgrl67-xz-5.8.4-bin
+  /nix/store/xs601a79fywk3qwsz74gl66p7hv2p2sm-zlib-1.3.2-dev
+copying path '/nix/store/2bwpli20ff4f7hg5ck477p8s57kj857w-gawk-5.4.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/6vc01m0905w5gjkf8slbc7sqzxahs3zn-util-linux-minimal-2.42.3' from 'https://cache.nixos.org'...
+copying path '/nix/store/r0kwnxiyl1053qzxzn02jrcqr55kp0fb-file-5.48' from 'https://cache.nixos.org'...
+copying path '/nix/store/brl17nswbwilpngd8ar0w8qdipbdrgqf-libssh2-1.11.1-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/xs601a79fywk3qwsz74gl66p7hv2p2sm-zlib-1.3.2-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/cj6f94005924dcq8says7xgrmydfwzif-ngtcp2-1.23.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/d8aaaq83sdrzsqyxx19qfc14slcrdjix-xz-5.8.4' from 'https://cache.nixos.org'...
+copying path '/nix/store/j2f02jl7pb3wcljmqh602j0pa6rkxd31-binutils-2.46' from 'https://cache.nixos.org'...
+copying path '/nix/store/q2pjg7wdh0dikxz506dcp72axrgf4rgg-libcap-ng-0.9.6' from 'https://cache.nixos.org'...
+copying path '/nix/store/ag002afcmk9gdsv38vpm1kbhh1mxm6zi-libuv-1.52.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/d290ngwks48m57v4vjr4q4h799bqc60a-cargo-package-crypto-common-0.2.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/469y56py4phaa3byz0nd9ra3kmdnfqg4-cargo-package-ciborium-io-0.2.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/h9br6p5nsq0ldj1r4fiydv8lwmhc6p3r-cargo-package-dashmap-6.2.1' from 'https://nix-community.cachix.org'...
+copying path '/nix/store/lrfdm3y2g5va51vq3amqr8ijqv1s01dk-cargo-package-http-body-1.1.0' from 'https://nix-community.cachix.org'...
+copying path '/nix/store/knfj4h2ygb3hw2yvhhbf3b2sj6ddmzql-cargo-package-matchit-0.8.4' from 'https://nix-community.cachix.org'...
+copying path '/nix/store/yjaj5k5hw2q2xa0bg08vddkf9y1a6y63-cargo-package-hybrid-array-0.4.15' from 'https://nix-community.cachix.org'...
+copying path '/nix/store/lr979lqhkjrcax3x9i7m79p481b5iip1-cargo-package-rustc_version-0.4.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/6g77lcqk42jdwga9k081kwrm4m2lammx-cargo-package-regex-syntax-0.8.11' from 'https://cache.nixos.org'...
+copying path '/nix/store/06xib62fng6imjz3x3rqr62s35ybxn9w-cargo-package-wasi-0.11.1+wasi-snapshot-preview1' from 'https://cache.nixos.org'...
+copying path '/nix/store/58dh23yxglh50w33fikmi0dk6qix9zrk-openssl-3.5.8-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/26iph7ac516fzzrm51mjcnp22bkfgza0-audit-4.2.1-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/d05khq8gbpqw7ykgnjg8qixqyfa1idj5-curl-8.22.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/vyb6ifr4dyglgg2biwwa36ahjcmzd05w-llvm-21.1.8-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/m28xvsp0sdvckkw63w9xyxn815v2d76m-ngtcp2-1.23.0-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/n0xzcpby7l548pmf1ny0mkkqcg6nkhca-util-linux-minimal-2.42.3-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/6yi5v7iswrvg0hsl8rai9bjrmgfhkhpl-libarchive-3.8.9-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/81ag9nxz1flw3xjkv1vvqg8y2ipx2ins-python3-3.14.7' from 'https://cache.nixos.org'...
+copying path '/nix/store/csrwf31hprwghnbyiglxa3p787lgrl67-xz-5.8.4-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/400kkdns1nq039a05qb24hnlc26na9hq-linux-pam-1.7.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/ga8ykzb3a9v356l75fnvfpa7rzbjpm66-openssl-3.5.8-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/8kdawibp3831l16sx890nmxjyxii2a8i-curl-8.22.0-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/awiph4xig1a4mns1lj4909xvzjs66h9c-postgresql-18.6-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/39cq2g3d3flq2lmb6hc09grxs4xaax8p-cmake-4.4.3' from 'https://cache.nixos.org'...
+copying path '/nix/store/wc2yjib5jdx9pxxfbshmiffxzb03qx18-stdenv-linux-no-cc' from 'https://cache.nixos.org'...
+building '/nix/store/wbmbvsxbjvn7lfmiy3mrc5y4fxgf2ilr-rust-1.99.0-with-std-2026-10-01.drv' on 'ssh-ng://builder@linux-builder'...
+copying path '/nix/store/l54xxyh3havpk0qwr0pdz4cdn0vrhjv3-curl-8.22.0-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/z76b8fbchn5n0y101xsrnqn5k5azfbiy-util-linux-minimal-2.42.3-dev' from 'https://cache.nixos.org'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/j7hs7iam6fi7d9mk9iq8cc9sk0875hgg-binutils-wrapper-2.46' from 'https://cache.nixos.org'...
+copying path '/nix/store/ssm4ihsa9kzvnlb69amqwbm3y94ns7s7-rust-1.99.0-with-std-2026-10-01' from 'ssh-ng://builder@linux-builder'...
+copying path '/nix/store/kcj2f7hq99xg8sr0d1gdfj9grgzgd6my-postgresql-18.6' from 'https://cache.nixos.org'...
+copying path '/nix/store/0jbwzbnms10m7xsi3r9gsz509zx1q86i-libssh2-1.11.1-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/99zij8qfs8wzbb2njrj18ys8hpnrcj3p-gcc-wrapper-16.2.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/i20y9dcw8r0bsgi34f9sf8p4fm3dk57a-curl-8.22.0-dev' from 'https://cache.nixos.org'...
+copying path '/nix/store/33x3cyc63b5v4wwavz2hlxj60rzh6fq2-stdenv-linux' from 'https://cache.nixos.org'...
+building '/nix/store/nnqimxkjsygvab1jfm3h68lsa1jxgjnb-rust-1.99.0.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/b0yzrlbkijk4slpy941yx6fc4vz554jy-rust-1.99.0' from 'ssh-ng://builder@linux-builder'...
+copying path '/nix/store/s0d0v9c002hd3cbbx2wfxlgaxr3j7b1i-postgresql-18.6-dev' from 'https://cache.nixos.org'...
+building '/nix/store/c2qqzwmqf4alm53fd7kd0i3bmfzf7gy5-cargo-package-aho-corasick-1.1.4.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/zwxr1wwznqcnhbg9hjwpl3kqvv8bfsbs-cargo-package-aho-corasick-1.1.4' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/q8ksbsfnvi8v843k8lx9x9phymdki4zn-cargo-package-approx-0.5.1.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/hq7ziv6c45hb9q567pdn4lhk567dz96y-cargo-package-approx-0.5.1' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/di206k7v4z1r6fviycpvrsm9ypfjfggh-cargo-package-arrayref-0.3.9.drv' on 'ssh-ng://builder@linux-builder'...
+building '/nix/store/y16nm7qiwa1dzxyi8v4g34c7axqbhah1-cargo-package-codspeed-criterion-compat-5.0.1.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/9x6q7jh5b4w7lz19xdh4gbmdc0s1f1np-cargo-package-arrayref-0.3.9' from 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/0w3sbggdbn75v2pyhc2r5g92gxjfb1c6-cargo-package-codspeed-criterion-compat-5.0.1' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/1hg9ixgfyx1ycj55rsvdxkrxnsys111b-cargo-package-either-1.16.0.drv' on 'ssh-ng://builder@linux-builder'...
+building '/nix/store/5g609by3xg77py2xvqarvwdz08zhxkmw-cargo-package-futures-sink-0.3.33.drv' on 'ssh-ng://builder@linux-builder'...
+building '/nix/store/glbz94gydb29izg8ffzgzxmdwmfy1lwi-cargo-package-js-sys-0.3.103.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/hkm14xg9rhzq8x31ilfg8c8xacx6k0kc-cargo-package-either-1.16.0' from 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/fsf0vvv73zdp6vq2p8yq7d7diqabgy8h-cargo-package-futures-sink-0.3.33' from 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/plrg41529j9n6126szczk5b0wnlvsiyz-cargo-package-js-sys-0.3.103' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/ziad7f26ml413wl8p70zl9bngrva0g44-cargo-package-libsqlite3-sys-0.30.1.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/cqrlfi2hm62n7qzy8lr61kn493r3q80b-cargo-package-libsqlite3-sys-0.30.1' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/6xqb2g6apwm0yq274ya9bcc68iq8la37-cargo-package-litemap-0.8.2.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/sa2bsaki36w4ilpq7svkagi5fhx89y7b-cargo-package-litemap-0.8.2' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/9y419g33861dsifbjlkv724adq635vjg-cargo-package-trybuild-1.0.118.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/mqn07ifiklg2rxbx26qa4vx4p90gkhnp-cargo-package-trybuild-1.0.118' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/nk4qsrjs5knw7b7kszz1bfyfg7hys17x-cargo-package-unarray-0.1.4.drv' on 'ssh-ng://builder@linux-builder'...
+building '/nix/store/9jwmbp87kajmsa79wyzbsxld7009a7v4-cargo-src-curve25519-dalek-4.1.3.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/h16fl54vkyxgb7iivvwvvi2l70sz0k25-cargo-package-unarray-0.1.4' from 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/lr613227xb763a190i0m84wbh6galy82-cargo-src-curve25519-dalek-4.1.3' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/dbkfqiz2bnqfjnk0ai261h8gw15qjs5s-cargo-package-curve25519-dalek-4.1.3.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/jalsnisdkb1w0ird1laxq851wa3si4zz-cargo-package-curve25519-dalek-4.1.3' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/jmsc2w1hxlmwczqsz2bbkrhgwvx63vzf-vendor-registry.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/za8gv5112fi62lkimf9y7n67mn9xl78m-vendor-registry' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/vm3mqklhi817hwlqwga4mqcx8k677x9q-vendor-cargo-deps.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/kjl1yizam0zc2fn2408kvy0aqk1q7m8l-vendor-cargo-deps' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/kzg2hgnal3l9mbh59jbwpipdkcfjql8d-mnesis-deps-0.4.0.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+copying 1 paths...
+copying path '/nix/store/aqzg9jv6hnvgyz6k87d8i5sdlnfyxl1m-mnesis-deps-0.4.0' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/h9r93n9jraxbm42avj150xxih1p1d8pz-mnesis-postgres-tests-0.4.0.drv' on 'ssh-ng://builder@linux-builder'...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+copying 1 paths...
+copying path '/nix/store/xg6v6gnn0v7n8pwfmq7hsgdqpjbwgila-source' to 'ssh-ng://builder@linux-builder'...
+building '/nix/store/h9r93n9jraxbm42avj150xxih1p1d8pz-mnesis-postgres-tests-0.4.0.drv'...
+mnesis-postgres-tests> Running phase: unpackPhase
+mnesis-postgres-tests> unpacking source archive /nix/store/xg6v6gnn0v7n8pwfmq7hsgdqpjbwgila-source
+mnesis-postgres-tests> source root is source
+mnesis-postgres-tests> Running phase: patchPhase
+mnesis-postgres-tests> Executing configureCargoCommonVars
+mnesis-postgres-tests> decompressing cargo artifacts from /nix/store/aqzg9jv6hnvgyz6k87d8i5sdlnfyxl1m-mnesis-deps-0.4.0/target.tar.zst to target
+mnesis-postgres-tests> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-postgres-tests> Running phase: configurePhase
+mnesis-postgres-tests> will append /build/source/.cargo-home/config.toml with contents of /nix/store/kjl1yizam0zc2fn2408kvy0aqk1q7m8l-vendor-cargo-deps/config.toml
+mnesis-postgres-tests> default configurePhase, nothing to do
+mnesis-postgres-tests> Running phase: buildPhase
+mnesis-postgres-tests> +++ command cargo --version
+mnesis-postgres-tests> cargo 1.99.0 (5f94df478 2026-08-27)
+mnesis-postgres-tests> +++ command cargo nextest archive --package mnesis-postgres --all-features --archive-file /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst
+mnesis-postgres-tests>    Compiling proc-macro2 v1.0.107
+mnesis-postgres-tests>    Compiling unicode-ident v1.0.24
+mnesis-postgres-tests>    Compiling quote v1.0.47
+mnesis-postgres-tests>    Compiling syn v2.0.119
+mnesis-postgres-tests>    Compiling libc v0.2.189
+mnesis-postgres-tests>    Compiling serde_core v1.0.229
+mnesis-postgres-tests>    Compiling syn v3.0.3
+mnesis-postgres-tests>    Compiling cfg-if v1.0.4
+mnesis-postgres-tests>    Compiling serde v1.0.229
+mnesis-postgres-tests>    Compiling serde_derive v1.0.229
+mnesis-postgres-tests>    Compiling synstructure v0.13.2
+mnesis-postgres-tests>    Compiling typenum v1.20.1
+mnesis-postgres-tests>    Compiling zerofrom-derive v0.1.7
+mnesis-postgres-tests>    Compiling zerofrom v0.1.8
+mnesis-postgres-tests>    Compiling yoke-derive v0.8.2
+mnesis-postgres-tests>    Compiling stable_deref_trait v1.2.1
+mnesis-postgres-tests>    Compiling yoke v0.8.3
+mnesis-postgres-tests>    Compiling smallvec v1.15.2
+mnesis-postgres-tests>    Compiling zerovec-derive v0.11.3
+mnesis-postgres-tests>    Compiling zerovec v0.11.6
+mnesis-postgres-tests>    Compiling displaydoc v0.2.6
+mnesis-postgres-tests>    Compiling pin-project-lite v0.2.17
+mnesis-postgres-tests>    Compiling version_check v0.9.5
+mnesis-postgres-tests>    Compiling futures-core v0.3.33
+mnesis-postgres-tests>    Compiling generic-array v0.14.7
+mnesis-postgres-tests>    Compiling parking_lot_core v0.9.12
+mnesis-postgres-tests>    Compiling tinystr v0.8.3
+mnesis-postgres-tests>    Compiling itoa v1.0.18
+mnesis-postgres-tests>    Compiling writeable v0.6.3
+mnesis-postgres-tests>    Compiling litemap v0.8.2
+mnesis-postgres-tests>    Compiling futures-sink v0.3.33
+mnesis-postgres-tests>    Compiling bytes v1.12.1
+mnesis-postgres-tests>    Compiling scopeguard v1.2.0
+mnesis-postgres-tests>    Compiling memchr v2.8.3
+mnesis-postgres-tests>    Compiling lock_api v0.4.14
+mnesis-postgres-tests>    Compiling futures-channel v0.3.33
+mnesis-postgres-tests>    Compiling icu_locale_core v2.2.0
+mnesis-postgres-tests>    Compiling zerotrie v0.2.4
+mnesis-postgres-tests>    Compiling potential_utf v0.1.5
+mnesis-postgres-tests>    Compiling icu_normalizer_data v2.2.0
+mnesis-postgres-tests>    Compiling utf8_iter v1.0.4
+mnesis-postgres-tests>    Compiling icu_properties_data v2.2.0
+mnesis-postgres-tests>    Compiling icu_collections v2.2.0
+mnesis-postgres-tests>    Compiling icu_provider v2.2.0
+mnesis-postgres-tests>    Compiling parking_lot v0.12.5
+mnesis-postgres-tests>    Compiling errno v0.3.14
+mnesis-postgres-tests>    Compiling futures-macro v0.3.33
+mnesis-postgres-tests>    Compiling crossbeam-utils v0.8.22
+mnesis-postgres-tests>    Compiling futures-io v0.3.33
+mnesis-postgres-tests>    Compiling zmij v1.0.23
+mnesis-postgres-tests>    Compiling futures-task v0.3.33
+mnesis-postgres-tests>    Compiling slab v0.4.12
+mnesis-postgres-tests>    Compiling futures-util v0.3.33
+mnesis-postgres-tests>    Compiling signal-hook-registry v1.4.8
+mnesis-postgres-tests>    Compiling crypto-common v0.1.7
+mnesis-postgres-tests>    Compiling block-buffer v0.10.4
+mnesis-postgres-tests>    Compiling socket2 v0.6.5
+mnesis-postgres-tests>    Compiling mio v1.2.2
+mnesis-postgres-tests>    Compiling tokio-macros v2.7.1
+mnesis-postgres-tests>    Compiling once_cell v1.21.4
+mnesis-postgres-tests>    Compiling thiserror v2.0.19
+mnesis-postgres-tests>    Compiling serde_json v1.0.151
+mnesis-postgres-tests>    Compiling tokio v1.53.1
+mnesis-postgres-tests>    Compiling digest v0.10.7
+mnesis-postgres-tests>    Compiling icu_properties v2.2.0
+mnesis-postgres-tests>    Compiling icu_normalizer v2.2.0
+mnesis-postgres-tests>    Compiling thiserror-impl v2.0.19
+mnesis-postgres-tests>    Compiling rand_core v0.10.1
+mnesis-postgres-tests>    Compiling autocfg v1.5.1
+mnesis-postgres-tests>    Compiling equivalent v1.0.2
+mnesis-postgres-tests>    Compiling getrandom v0.4.3
+mnesis-postgres-tests>    Compiling num-traits v0.2.19
+mnesis-postgres-tests>    Compiling idna_adapter v1.2.2
+mnesis-postgres-tests>    Compiling tracing-core v0.1.36
+mnesis-postgres-tests>    Compiling cpufeatures v0.2.17
+mnesis-postgres-tests>    Compiling tracing-attributes v0.1.31
+mnesis-postgres-tests>    Compiling allocator-api2 v0.2.21
+mnesis-postgres-tests>    Compiling foldhash v0.2.0
+mnesis-postgres-tests>    Compiling percent-encoding v2.3.2
+mnesis-postgres-tests>    Compiling log v0.4.33
+mnesis-postgres-tests>    Compiling tracing v0.1.44
+mnesis-postgres-tests>    Compiling form_urlencoded v1.2.2
+mnesis-postgres-tests>    Compiling hashbrown v0.16.1
+mnesis-postgres-tests>    Compiling sha2 v0.10.9
+mnesis-postgres-tests>    Compiling idna v1.1.0
+mnesis-postgres-tests>    Compiling concurrent-queue v2.5.0
+mnesis-postgres-tests>    Compiling parking v2.2.1
+mnesis-postgres-tests>    Compiling hashbrown v0.17.1
+mnesis-postgres-tests>    Compiling crc-catalog v2.5.0
+mnesis-postgres-tests>    Compiling crc v3.4.0
+mnesis-postgres-tests>    Compiling indexmap v2.14.0
+mnesis-postgres-tests>    Compiling event-listener v5.4.1
+mnesis-postgres-tests>    Compiling url v2.5.8
+mnesis-postgres-tests>    Compiling hashlink v0.11.1
+mnesis-postgres-tests>    Compiling crossbeam-queue v0.3.13
+mnesis-postgres-tests>    Compiling tokio-stream v0.1.19
+mnesis-postgres-tests>    Compiling futures-intrusive v0.5.0
+mnesis-postgres-tests>    Compiling hybrid-array v0.4.15
+mnesis-postgres-tests>    Compiling either v1.16.0
+mnesis-postgres-tests>    Compiling base64 v0.22.1
+mnesis-postgres-tests>    Compiling sqlx-core v0.9.0
+mnesis-postgres-tests>    Compiling cmov v0.5.4
+mnesis-postgres-tests>    Compiling semver v1.0.28
+mnesis-postgres-tests>    Compiling rustc_version v0.4.1
+mnesis-postgres-tests>    Compiling ctutils v0.4.3
+mnesis-postgres-tests>    Compiling block-buffer v0.12.1
+mnesis-postgres-tests>    Compiling crypto-common v0.2.2
+mnesis-postgres-tests>    Compiling httparse v1.10.1
+mnesis-postgres-tests>    Compiling digest v0.11.3
+mnesis-postgres-tests>    Compiling curve25519-dalek v4.1.3
+mnesis-postgres-tests>    Compiling http v1.4.2
+mnesis-postgres-tests>    Compiling equator-macro v0.4.2
+mnesis-postgres-tests>    Compiling winnow v1.0.4
+mnesis-postgres-tests>    Compiling try-lock v0.2.5
+mnesis-postgres-tests>    Compiling target-triple v1.0.1
+mnesis-postgres-tests>    Compiling want v0.3.1
+mnesis-postgres-tests>    Compiling toml_parser v1.1.2+spec-1.1.0
+mnesis-postgres-tests>    Compiling equator v0.4.2
+mnesis-postgres-tests>    Compiling http-body v1.1.0
+mnesis-postgres-tests>    Compiling futures-executor v0.3.33
+mnesis-postgres-tests>    Compiling getrandom v0.2.17
+mnesis-postgres-tests>    Compiling serde_spanned v1.1.1
+mnesis-postgres-tests>    Compiling toml_datetime v1.1.1+spec-1.1.0
+mnesis-postgres-tests>    Compiling toml_writer v1.1.2+spec-1.1.0
+mnesis-postgres-tests>    Compiling zeroize v1.9.0
+mnesis-postgres-tests>    Compiling subtle v2.6.1
+mnesis-postgres-tests>    Compiling atomic-waker v1.1.2
+mnesis-postgres-tests>    Compiling tinyvec_macros v0.1.1
+mnesis-postgres-tests>    Compiling httpdate v1.0.3
+mnesis-postgres-tests>    Compiling signature v2.2.0
+mnesis-postgres-tests>    Compiling zerocopy v0.8.55
+mnesis-postgres-tests>    Compiling ed25519 v2.2.3
+mnesis-postgres-tests>    Compiling hyper v1.11.0
+mnesis-postgres-tests>    Compiling tinyvec v1.12.0
+mnesis-postgres-tests>    Compiling toml v1.1.3+spec-1.1.0
+mnesis-postgres-tests>    Compiling rand_core v0.6.4
+mnesis-postgres-tests>    Compiling futures v0.3.33
+mnesis-postgres-tests>    Compiling aligned-vec v0.6.4
+mnesis-postgres-tests>    Compiling zerocopy-derive v0.8.55
+mnesis-postgres-tests>    Compiling glob v0.3.4
+mnesis-postgres-tests>    Compiling regex-syntax v0.8.11
+mnesis-postgres-tests>    Compiling termcolor v1.4.1
+mnesis-postgres-tests>    Compiling tower-service v0.3.3
+mnesis-postgres-tests>    Compiling dissimilar v1.0.11
+mnesis-postgres-tests>    Compiling trybuild v1.0.118
+mnesis-postgres-tests>    Compiling hyper-util v0.1.20
+mnesis-postgres-tests>    Compiling regex-automata v0.4.16
+mnesis-postgres-tests>    Compiling ed25519-dalek v2.2.0
+mnesis-postgres-tests>    Compiling unicode-normalization v0.1.25
+mnesis-postgres-tests>    Compiling hmac v0.13.0
+mnesis-postgres-tests>    Compiling chacha20 v0.10.2
+mnesis-postgres-tests>    Compiling cpufeatures v0.3.0
+mnesis-postgres-tests>    Compiling unicode-properties v0.1.4
+mnesis-postgres-tests>    Compiling unicode-bidi v0.3.18
+mnesis-postgres-tests>    Compiling stringprep v0.1.5
+mnesis-postgres-tests>    Compiling sha2 v0.11.1
+mnesis-postgres-tests>    Compiling rand v0.10.3
+mnesis-postgres-tests>    Compiling hkdf v0.13.0
+mnesis-postgres-tests>    Compiling workspace-hack v0.1.0 (/build/source/crates/workspace-hack)
+mnesis-postgres-tests>    Compiling md-5 v0.11.0
+mnesis-postgres-tests>    Compiling atoi v2.0.0
+mnesis-postgres-tests>    Compiling byteorder v1.5.0
+mnesis-postgres-tests>    Compiling whoami v2.1.3
+mnesis-postgres-tests>    Compiling hex v0.4.3
+mnesis-postgres-tests>    Compiling arrayvec v0.7.8
+mnesis-postgres-tests>    Compiling dotenvy v0.15.7
+mnesis-postgres-tests>    Compiling mnesis v0.4.0 (/build/source/crates/mnesis)
+mnesis-postgres-tests>    Compiling bitflags v2.13.1
+mnesis-postgres-tests>    Compiling sqlx-postgres v0.9.0
+mnesis-postgres-tests>    Compiling heck v0.5.0
+mnesis-postgres-tests>    Compiling sqlx-macros-core v0.9.0
+mnesis-postgres-tests>    Compiling mnesis-store v0.4.0 (/build/source/crates/store)
+mnesis-postgres-tests>    Compiling rustix v1.1.4
+mnesis-postgres-tests>    Compiling sqlx-macros v0.9.0
+mnesis-postgres-tests>    Compiling mnesis-postgres v0.4.0 (/build/source/adapters/postgres)
+mnesis-postgres-tests>    Compiling linux-raw-sys v0.12.1
+mnesis-postgres-tests>    Compiling sqlx v0.9.0
+mnesis-postgres-tests>    Compiling mnesis-wake v0.4.0 (/build/source/crates/wake)
+mnesis-postgres-tests>    Compiling fastrand v2.5.0
+mnesis-postgres-tests>    Compiling tempfile v3.27.0
+mnesis-postgres-tests>    Compiling mnesis-store-testing v0.4.0 (/build/source/crates/store-testing)
+mnesis-postgres-tests>    Compiling mnesis-test-domains v0.0.0 (/build/source/crates/test-domains)
+mnesis-postgres-tests>     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 06s
+mnesis-postgres-tests>    Archiving 17 binaries, 1 build script output directory, and 1 standard library to /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst
+mnesis-postgres-tests>     Archived 20 files to /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0/mnesis-postgres.tar.zst in 2.49s
+mnesis-postgres-tests> buildPhase completed in 1 minutes 10 seconds
+mnesis-postgres-tests> Running phase: installPhase
+mnesis-postgres-tests> Running phase: fixupPhase
+mnesis-postgres-tests> shrinking RPATHs of ELF executables and libraries in /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0
+mnesis-postgres-tests> checking for references to /build/ in /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0...
+mnesis-postgres-tests> patching script interpreter paths in /nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0
+copying 1 paths...
+copying path '/nix/store/3pff558pns9a2n5fa5b9wrjpy7in9kx6-mnesis-postgres-tests-0.4.0' from 'ssh-ng://builder@linux-builder'...
+building '/nix/store/ngf1bdv1czdjk78rj08bhnnbv6lvc9bw-mnesis-postgres-integration.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file: 
+building '/nix/store/ngf1bdv1czdjk78rj08bhnnbv6lvc9bw-mnesis-postgres-integration.drv'...
+mnesis-postgres-integration> Running phase: unpackPhase
+mnesis-postgres-integration> unpacking source archive /nix/store/xg6v6gnn0v7n8pwfmq7hsgdqpjbwgila-source
+mnesis-postgres-integration> source root is source
+mnesis-postgres-integration> Running phase: patchPhase
+mnesis-postgres-integration> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-postgres-integration> Running phase: configurePhase
+mnesis-postgres-integration> no configure script, doing nothing
+mnesis-postgres-integration> Running phase: checkPhase
+mnesis-postgres-integration> initializing postgresql
+mnesis-postgres-integration> The files belonging to this database system will be owned by user "nixbld".
+mnesis-postgres-integration> This user must also own the server process.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> The database cluster will be initialized with locale "C".
+mnesis-postgres-integration> The default text search configuration will be set to "english".
+mnesis-postgres-integration> 
+mnesis-postgres-integration> Data page checksums are enabled.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> creating directory /build/postgresql ... ok
+mnesis-postgres-integration> creating subdirectories ... ok
+mnesis-postgres-integration> selecting dynamic shared memory implementation ... posix
+mnesis-postgres-integration> selecting default "max_connections" ... 100
+mnesis-postgres-integration> selecting default "shared_buffers" ... 128MB
+mnesis-postgres-integration> selecting default time zone ... UTC
+mnesis-postgres-integration> creating configuration files ... ok
+mnesis-postgres-integration> running bootstrap script ... ok
+mnesis-postgres-integration> performing post-bootstrap initialization ... ok
+mnesis-postgres-integration> syncing data to disk ... ok
+mnesis-postgres-integration> 
+mnesis-postgres-integration> initdb: warning: enabling "trust" authentication for local connections
+mnesis-postgres-integration> initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+mnesis-postgres-integration> 
+mnesis-postgres-integration> Success. You can now start the database server using:
+mnesis-postgres-integration> 
+mnesis-postgres-integration>     pg_ctl -D /build/postgresql -l logfile start
+mnesis-postgres-integration> 
+mnesis-postgres-integration> starting postgresql
+mnesis-postgres-integration> waiting for server to start....2026-10-18 20:26:50.953 UTC [85] LOG:  starting PostgreSQL 18.6 on aarch64-unknown-linux-gnu, compiled by clang version 21.1.8, 64-bit
+mnesis-postgres-integration> 2026-10-18 20:26:50.954 UTC [85] LOG:  listening on Unix socket "/build/run/postgresql/.s.PGSQL.5432"
+mnesis-postgres-integration> 2026-10-18 20:26:50.957 UTC [91] LOG:  database system was shut down at 2026-10-18 20:26:50 UTC
+mnesis-postgres-integration> 2026-10-18 20:26:50.959 UTC [85] LOG:  database system is ready to accept connections
+mnesis-postgres-integration>  done
+mnesis-postgres-integration> server started
+mnesis-postgres-integration> setting up postgresql
+mnesis-postgres-integration> CREATE ROLE
+mnesis-postgres-integration> CREATE DATABASE
+mnesis-postgres-integration> 1
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-AhybzH
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-AhybzH in 1.12s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID 613f3e69-5fa4-43d7-a6cc-1abf1b2b515b with nextest profile: default
+mnesis-postgres-integration>     Starting 1 test across 1 binary (14 tests and 16 binaries skipped)
+mnesis-postgres-integration>         PASS [   0.340s] (1/1) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [   0.341s] 1 test run: 1 passed, 14 skipped
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-XPEKkM
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-XPEKkM in 1.63s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID 831c2ea3-77ca-42d5-8763-0a5ecf35b3a8 with nextest profile: default
+mnesis-postgres-integration>     Starting 1 test across 1 binary (15 tests and 16 binaries skipped)
+mnesis-postgres-integration>         PASS [   0.349s] (1/1) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [   0.352s] 1 test run: 1 passed, 15 skipped
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-Y5HA6b
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-Y5HA6b in 2.40s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID a89e4897-f198-479b-a85f-df1e7896cd3a with nextest profile: default
+mnesis-postgres-integration>     Starting 1 test across 1 binary (2 tests and 16 binaries skipped)
+mnesis-postgres-integration>         PASS [   0.324s] (1/1) mnesis-postgres::projection_tests real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [   0.324s] 1 test run: 1 passed, 2 skipped
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-h9yLjY
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-h9yLjY in 1.82s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID aff5de8a-1613-467c-a4f7-af38c797e1ec with nextest profile: default
+mnesis-postgres-integration>     Starting 1 test across 1 binary (7 tests and 16 binaries skipped)
+mnesis-postgres-integration>         PASS [   0.432s] (1/1) mnesis-postgres::listing_tests binary_ids_list_once_across_pages_and_reopen
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [   0.434s] 1 test run: 1 passed, 7 skipped
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-XMyis2
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-XMyis2 in 1.29s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID c99981a3-4c69-446e-826c-4f6e02a2fa4f with nextest profile: default
+mnesis-postgres-integration>     Starting 1 test across 1 binary (10 tests and 16 binaries skipped)
+mnesis-postgres-integration> 2026-10-18 20:27:01.696 UTC [171] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:01.696 UTC [171] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.501s] (1/1) mnesis-postgres::session_tests explicit_close_and_drop_release_native_views_and_allow_reopen
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [   0.502s] 1 test run: 1 passed, 10 skipped
+mnesis-postgres-integration> 2026-10-18 20:27:01.707 UTC [172] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:01.707 UTC [172] FATAL:  connection to client lost
+mnesis-postgres-integration>   Extracting 17 binaries and 1 build script output directory to /build/nextest-archive-8XLfk4
+mnesis-postgres-integration>    Extracted 20 files to /build/nextest-archive-8XLfk4 in 1.08s
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>  Nextest run ID b580b40c-f3c4-4130-97de-1a09343c8b05 with nextest profile: default
+mnesis-postgres-integration>     Starting 215 tests across 17 binaries
+mnesis-postgres-integration>         PASS [   0.004s] (  1/215) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+mnesis-postgres-integration>         PASS [   0.003s] (  2/215) mnesis-postgres error::tests::satisfies_error_send_sync_static
+mnesis-postgres-integration>         PASS [   0.002s] (  3/215) mnesis-postgres hex::tests::decode_accepts_uppercase
+mnesis-postgres-integration>         PASS [   0.004s] (  4/215) mnesis-postgres hex::tests::empty_round_trips
+mnesis-postgres-integration>         PASS [   0.002s] (  5/215) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+mnesis-postgres-integration>         PASS [   0.003s] (  6/215) mnesis-postgres hex::tests::non_hex_char_is_rejected
+mnesis-postgres-integration>         PASS [   0.002s] (  7/215) mnesis-postgres hex::tests::odd_length_is_rejected
+mnesis-postgres-integration>         PASS [   0.002s] (  8/215) mnesis-postgres hex::tests::round_trips_all_byte_values
+mnesis-postgres-integration>         PASS [   0.002s] (  9/215) mnesis-postgres position::tests::accessors_round_trip
+mnesis-postgres-integration>         PASS [   0.002s] ( 10/215) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+mnesis-postgres-integration>         PASS [   0.003s] ( 11/215) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+mnesis-postgres-integration>         PASS [   0.741s] ( 12/215) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+mnesis-postgres-integration> 2026-10-18 20:27:03.894 UTC [248] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:03.894 UTC [248] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.198s] ( 13/215) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+mnesis-postgres-integration>         PASS [   0.205s] ( 14/215) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+mnesis-postgres-integration>         PASS [   0.191s] ( 15/215) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_cutoff_operator
+mnesis-postgres-integration>         PASS [   0.145s] ( 16/215) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+mnesis-postgres-integration>         PASS [   0.331s] ( 17/215) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_snapshot_xmin
+mnesis-postgres-integration> 2026-10-18 20:27:04.774 UTC [293] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:04.775 UTC [293] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.056s] ( 18/215) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+mnesis-postgres-integration> 2026-10-18 20:27:04.829 UTC [310] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:04.830 UTC [310] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.233s] ( 19/215) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_duplicate_targets_reject_all
+mnesis-postgres-integration>         PASS [   0.031s] ( 20/215) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_empty_batch_is_noop
+mnesis-postgres-integration> 2026-10-18 20:27:05.381 UTC [393] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:05.381 UTC [393] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.295s] ( 21/215) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_malformed_runs_reject_all
+mnesis-postgres-integration>         PASS [   0.049s] ( 22/215) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+mnesis-postgres-integration>         PASS [   0.036s] ( 23/215) mnesis-postgres::atomic_tests import_corrupt_prefix_reports_exact_persisted_progress
+mnesis-postgres-integration>         PASS [   0.033s] ( 24/215) mnesis-postgres::atomic_tests import_duplicate_routes_reject_before_any_catalog_or_event_write
+mnesis-postgres-integration>         PASS [   0.060s] ( 25/215) mnesis-postgres::atomic_tests import_policies_preserve_final_conflict_and_exact_partial_reports
+mnesis-postgres-integration> 2026-10-18 20:27:05.565 UTC [433] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:05.593 UTC [440] ERROR:  final import rejection
+mnesis-postgres-integration> 2026-10-18 20:27:05.593 UTC [440] CONTEXT:  PL/pgSQL function atomic_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:05.593 UTC [440] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:05.626 UTC [447] ERROR:  final import rejection
+mnesis-postgres-integration> 2026-10-18 20:27:05.626 UTC [447] CONTEXT:  PL/pgSQL function atomic_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:05.626 UTC [447] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.067s] ( 26/215) mnesis-postgres::atomic_tests import_storage_error_preserves_only_previous_per_stream_transactions
+mnesis-postgres-integration>         PASS [   0.036s] ( 27/215) mnesis-postgres::atomic_tests invalid_requests_are_rejected_before_a_closed_pool_is_touched
+mnesis-postgres-integration> 2026-10-18 20:27:05.696 UTC [459] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:05.696 UTC [459] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.031s] ( 28/215) mnesis-postgres::atomic_tests missing_expected_head_cannot_create_a_version_gap_or_commit_a_prefix
+mnesis-postgres-integration>         PASS [   0.043s] ( 29/215) mnesis-postgres::atomic_tests readers_cannot_observe_the_staged_prefix
+mnesis-postgres-integration> 2026-10-18 20:27:05.775 UTC [476] ERROR:  native atomic rejection
+mnesis-postgres-integration> 2026-10-18 20:27:05.775 UTC [476] CONTEXT:  PL/pgSQL function atomic_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:05.775 UTC [476] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.040s] ( 30/215) mnesis-postgres::atomic_tests rejected_final_insert_rolls_back_all_events_and_new_keys
+mnesis-postgres-integration>         PASS [   0.051s] ( 31/215) mnesis-postgres::atomic_tests reopen_preserves_every_run_and_the_highest_position
+mnesis-postgres-integration> 2026-10-18 20:27:05.868 UTC [493] ERROR:  duplicate key value violates unique constraint "atomic_payload_key"
+mnesis-postgres-integration> 2026-10-18 20:27:05.868 UTC [493] DETAIL:  Key (payload)=(\x76616c7565) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:05.868 UTC [493] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.043s] ( 32/215) mnesis-postgres::atomic_tests unrelated_unique_failure_on_an_existing_head_is_not_a_conflict
+mnesis-postgres-integration> 2026-10-18 20:27:05.930 UTC [503] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:05.930 UTC [503] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.066s] ( 33/215) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination
+mnesis-postgres-integration>         PASS [   0.078s] ( 34/215) mnesis-postgres::checkpoint_tests aggregate_cache_and_checkpoint_with_identical_ids_remain_independent
+mnesis-postgres-integration>         PASS [   0.069s] ( 35/215) mnesis-postgres::checkpoint_tests byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage
+mnesis-postgres-integration> 2026-10-18 20:27:06.159 UTC [528] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.160 UTC [528] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.169 UTC [531] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.169 UTC [531] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.179 UTC [533] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.179 UTC [533] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.187 UTC [534] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.187 UTC [534] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.195 UTC [535] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.195 UTC [535] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.205 UTC [537] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.205 UTC [537] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.215 UTC [536] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.215 UTC [536] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.223 UTC [530] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.223 UTC [530] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.231 UTC [532] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.231 UTC [532] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.144s] ( 36/215) mnesis-postgres::checkpoint_tests corrupt_metadata_is_not_stale_and_cannot_be_replaced
+mnesis-postgres-integration> 2026-10-18 20:27:06.235 UTC [539] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.235 UTC [539] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.050s] ( 37/215) mnesis-postgres::checkpoint_tests explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacement
+mnesis-postgres-integration> 2026-10-18 20:27:06.285 UTC [548] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.285 UTC [548] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.064s] ( 38/215) mnesis-postgres::checkpoint_tests foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+mnesis-postgres-integration> 2026-10-18 20:27:06.406 UTC [563] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.406 UTC [563] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.062s] ( 39/215) mnesis-postgres::checkpoint_tests missing_revision_and_invalid_rebuild_do_not_create_or_replace_state
+mnesis-postgres-integration>         PASS [   0.047s] ( 40/215) mnesis-postgres::checkpoint_tests original_too_small_ceiling_rejects_even_empty_scoped_state_before_storage
+mnesis-postgres-integration>         PASS [   0.153s] ( 41/215) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+mnesis-postgres-integration> 2026-10-18 20:27:06.732 UTC [588] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.732 UTC [588] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.733 UTC [590] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration>         PASS [   0.125s] ( 42/215) mnesis-postgres::checkpoint_tests reopen_preserves_unsigned_extremes_empty_state_and_revision_overflow
+mnesis-postgres-integration> 2026-10-18 20:27:06.736 UTC [590] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.830 UTC [600] ERROR:  permission denied for table keys
+mnesis-postgres-integration> 2026-10-18 20:27:06.830 UTC [600] STATEMENT:  UPDATE mnesis.keys SET value = 'changed'::bytea
+mnesis-postgres-integration> 2026-10-18 20:27:06.830 UTC [597] ERROR:  permission denied for table events
+mnesis-postgres-integration> 2026-10-18 20:27:06.830 UTC [597] STATEMENT:  UPDATE mnesis.events SET payload = 'changed'::bytea
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [600] ERROR:  permission denied for table events
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [600] STATEMENT:  DELETE FROM mnesis.events
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [597] ERROR:  permission denied for table checkpoints
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [597] STATEMENT:  DELETE FROM mnesis.checkpoints
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [600] ERROR:  permission denied for schema mnesis at character 14
+mnesis-postgres-integration> 2026-10-18 20:27:06.831 UTC [600] STATEMENT:  CREATE TABLE mnesis.forbidden (number int)
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [597] ERROR:  permission denied for table history
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [597] STATEMENT:  UPDATE mnesis.history SET value = value
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [600] ERROR:  permission denied for table history
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [600] STATEMENT:  DELETE FROM mnesis.history
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [600] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.832 UTC [600] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.143s] ( 43/215) mnesis-postgres::checkpoint_tests runtime_checkpoint_writer_needs_no_key_mutation_event_rewrite_or_ddl
+mnesis-postgres-integration> 2026-10-18 20:27:06.940 UTC [609] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration>         PASS [   0.064s] ( 44/215) mnesis-postgres::checkpoint_tests stale_and_oversized_reads_omit_the_megabyte_checkpoint_body
+mnesis-postgres-integration> 2026-10-18 20:27:06.943 UTC [609] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.992 UTC [614] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.992 UTC [614] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:06.993 UTC [617] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:06.994 UTC [617] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.056s] ( 45/215) mnesis-postgres::checkpoint_tests stale_schema_and_position_rejections_preserve_the_complete_pair
+mnesis-postgres-integration>         PASS [   0.085s] ( 46/215) mnesis-postgres::checkpoint_tests suppressed_creation_and_update_fail_without_fabricating_a_revision_conflict
+mnesis-postgres-integration>         PASS [   0.040s] ( 47/215) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+mnesis-postgres-integration>         PASS [   0.053s] ( 48/215) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+mnesis-postgres-integration> 2026-10-18 20:27:07.178 UTC [642] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.178 UTC [642] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.035s] ( 49/215) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+mnesis-postgres-integration> 2026-10-18 20:27:07.212 UTC [647] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.212 UTC [647] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.041s] ( 50/215) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+mnesis-postgres-integration> 2026-10-18 20:27:07.254 UTC [655] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.254 UTC [655] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:07.308 UTC [666] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.308 UTC [666] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:07.309 UTC [667] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration>         PASS [   0.061s] ( 51/215) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+mnesis-postgres-integration> 2026-10-18 20:27:07.314 UTC [667] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:07.341 UTC [674] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.341 UTC [674] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.031s] ( 52/215) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+mnesis-postgres-integration> 2026-10-18 20:27:07.369 UTC [681] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.369 UTC [681] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.027s] ( 53/215) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+mnesis-postgres-integration>         PASS [   0.056s] ( 54/215) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+mnesis-postgres-integration> 2026-10-18 20:27:07.428 UTC [694] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.428 UTC [694] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:07.429 UTC [691] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:07.429 UTC [691] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.068s] ( 55/215) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+mnesis-postgres-integration>         PASS [   0.284s] ( 56/215) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+mnesis-postgres-integration>         PASS [   0.070s] ( 57/215) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+mnesis-postgres-integration> 2026-10-18 20:27:08.088 UTC [742] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.088 UTC [742] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:08.092 UTC [746] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.092 UTC [746] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.245s] ( 58/215) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+mnesis-postgres-integration> 2026-10-18 20:27:08.166 UTC [761] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.166 UTC [761] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.078s] ( 59/215) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+mnesis-postgres-integration> 2026-10-18 20:27:08.210 UTC [779] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.210 UTC [779] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.210 UTC [779] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.211 UTC [783] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.211 UTC [783] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.211 UTC [783] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [781] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [781] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [781] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [780] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [780] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [780] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [776] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [776] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.212 UTC [776] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [778] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [778] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [778] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [782] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [782] DETAIL:  Key (stream_id, version)=(24, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:08.213 UTC [782] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.051s] ( 60/215) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+mnesis-postgres-integration>         PASS [   0.218s] ( 61/215) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+mnesis-postgres-integration>         PASS [   0.041s] ( 62/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+mnesis-postgres-integration> 2026-10-18 20:27:08.484 UTC [801] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:08.508 UTC [812] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.508 UTC [812] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.027s] ( 63/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+mnesis-postgres-integration>         PASS [   0.032s] ( 64/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+mnesis-postgres-integration>         PASS [   0.029s] ( 65/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+mnesis-postgres-integration> 2026-10-18 20:27:08.573 UTC [829] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.573 UTC [829] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.030s] ( 66/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+mnesis-postgres-integration> 2026-10-18 20:27:08.628 UTC [845] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:08.629 UTC [842] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.629 UTC [842] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.030s] ( 67/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+mnesis-postgres-integration>         PASS [   0.355s] ( 68/215) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+mnesis-postgres-integration> 2026-10-18 20:27:08.989 UTC [855] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:08.990 UTC [855] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.041s] ( 69/215) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+mnesis-postgres-integration>         PASS [   0.034s] ( 70/215) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+mnesis-postgres-integration>         PASS [   0.032s] ( 71/215) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+mnesis-postgres-integration>         PASS [   0.028s] ( 72/215) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+mnesis-postgres-integration>         PASS [   0.026s] ( 73/215) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+mnesis-postgres-integration>         PASS [   0.103s] ( 74/215) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+mnesis-postgres-integration>         PASS [   0.032s] ( 75/215) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+mnesis-postgres-integration> 2026-10-18 20:27:09.287 UTC [908] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:09.287 UTC [908] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.037s] ( 76/215) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+mnesis-postgres-integration> 2026-10-18 20:27:09.322 UTC [916] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:09.322 UTC [916] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.039s] ( 77/215) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+mnesis-postgres-integration> 2026-10-18 20:27:09.389 UTC [935] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:09.389 UTC [935] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.031s] ( 78/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+mnesis-postgres-integration>         PASS [   0.994s] ( 79/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+mnesis-postgres-integration> 2026-10-18 20:27:10.452 UTC [951] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:10.452 UTC [951] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.071s] ( 80/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+mnesis-postgres-integration> 2026-10-18 20:27:10.502 UTC [957] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.048s] ( 81/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+mnesis-postgres-integration>         PASS [   0.190s] ( 82/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+mnesis-postgres-integration>         PASS [   0.043s] ( 83/215) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+mnesis-postgres-integration> 2026-10-18 20:27:10.792 UTC [988] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.057s] ( 84/215) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+mnesis-postgres-integration>         PASS [   0.059s] ( 85/215) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+mnesis-postgres-integration>         PASS [   0.005s] ( 86/215) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+mnesis-postgres-integration>         PASS [   0.031s] ( 87/215) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+mnesis-postgres-integration>         PASS [   1.216s] ( 88/215) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+mnesis-postgres-integration>         PASS [   0.100s] ( 89/215) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+mnesis-postgres-integration> 2026-10-18 20:27:12.208 UTC [1023] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:12.208 UTC [1023] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.030s] ( 90/215) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+mnesis-postgres-integration>         PASS [   1.137s] ( 91/215) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+mnesis-postgres-integration> 2026-10-18 20:27:13.514 UTC [1051] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration>         PASS [   1.072s] ( 92/215) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+mnesis-postgres-integration> 2026-10-18 20:27:14.499 UTC [1063] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration> 2026-10-18 20:27:14.499 UTC [1063] STATEMENT:  SELECT pg_terminate_backend(pg_backend_pid())
+mnesis-postgres-integration>         PASS [   1.062s] ( 93/215) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+mnesis-postgres-integration>         PASS [   1.179s] ( 94/215) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+mnesis-postgres-integration> 2026-10-18 20:27:16.863 UTC [1082] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:16.863 UTC [1082] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.178s] ( 95/215) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+mnesis-postgres-integration> 2026-10-18 20:27:16.941 UTC [1090] FATAL:  terminating connection due to administrator command
+mnesis-postgres-integration>         PASS [   1.188s] ( 96/215) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+mnesis-postgres-integration>         PASS [   0.055s] ( 97/215) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+mnesis-postgres-integration>         PASS [   0.193s] ( 98/215) mnesis-postgres::listing_tests an_unrelated_held_transaction_does_not_hide_committed_streams
+mnesis-postgres-integration> 2026-10-18 20:27:18.305 UTC [1111] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.143s] ( 99/215) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_forge_transaction_visibility
+mnesis-postgres-integration>         PASS [   0.154s] (100/215) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_replace_the_captured_snapshot
+mnesis-postgres-integration>         PASS [   0.245s] (101/215) mnesis-postgres::listing_tests binary_ids_list_once_across_pages_and_reopen
+mnesis-postgres-integration> 2026-10-18 20:27:18.969 UTC [1150] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:18.970 UTC [1150] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.126s] (102/215) mnesis-postgres::listing_tests byte_edges_and_oversized_ids_are_terminal_without_fetching_the_body
+mnesis-postgres-integration>         PASS [   0.120s] (103/215) mnesis-postgres::listing_tests empty_and_saved_state_keys_do_not_create_event_streams
+mnesis-postgres-integration>         PASS [   0.380s] (104/215) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+mnesis-postgres-integration>         PASS [   0.187s] (105/215) mnesis-postgres::listing_tests listing_freezes_event_presence_before_first_poll_and_releases_pool_leases
+mnesis-postgres-integration> 2026-10-18 20:27:19.793 UTC [1179] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:19.793 UTC [1179] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.141s] (106/215) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+mnesis-postgres-integration>         PASS [   0.174s] (107/215) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+mnesis-postgres-integration> 2026-10-18 20:27:20.063 UTC [1195] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:20.063 UTC [1195] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:20.067 UTC [1195] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:20.067 UTC [1195] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:20.164 UTC [1198] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:20.164 UTC [1198] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.191s] (108/215) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+mnesis-postgres-integration> 2026-10-18 20:27:20.285 UTC [1202] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:20.285 UTC [1202] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.136s] (109/215) mnesis-postgres::migration_tests checksum_is_rejected_without_repair
+mnesis-postgres-integration>         PASS [   0.129s] (110/215) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+mnesis-postgres-integration> 2026-10-18 20:27:20.508 UTC [1216] ERROR:  relation "events_watermark_idx" already exists in schema "mnesis"
+mnesis-postgres-integration> 2026-10-18 20:27:20.508 UTC [1216] CONTEXT:  SQL statement "ALTER TABLE public.events SET SCHEMA mnesis"
+mnesis-postgres-integration>    PL/pgSQL function inline_code_block line 47 at SQL statement
+mnesis-postgres-integration> 2026-10-18 20:27:20.508 UTC [1216] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:20.517 UTC [1216] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:20.517 UTC [1216] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.177s] (111/215) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+mnesis-postgres-integration> 2026-10-18 20:27:20.653 UTC [1222] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:20.654 UTC [1222] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.165s] (112/215) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+mnesis-postgres-integration>         PASS [   0.163s] (113/215) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+mnesis-postgres-integration> 2026-10-18 20:27:21.032 UTC [1236] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:21.032 UTC [1236] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.124s] (114/215) mnesis-postgres::migration_tests newer_schema_is_rejected_without_repair
+mnesis-postgres-integration>         PASS [   0.155s] (115/215) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+mnesis-postgres-integration> 2026-10-18 20:27:21.288 UTC [1254] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:21.288 UTC [1254] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.082s] (116/215) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+mnesis-postgres-integration> 2026-10-18 20:27:21.355 UTC [1260] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:21.355 UTC [1260] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.069s] (117/215) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+mnesis-postgres-integration> 2026-10-18 20:27:21.473 UTC [1267] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:21.474 UTC [1267] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:21.501 UTC [1266] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:21.502 UTC [1266] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.150s] (118/215) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+mnesis-postgres-integration>         PASS [   0.157s] (119/215) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+mnesis-postgres-integration> 2026-10-18 20:27:21.713 UTC [1279] ERROR:  incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration
+mnesis-postgres-integration> 2026-10-18 20:27:21.713 UTC [1279] CONTEXT:  PL/pgSQL function inline_code_block line 44 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:21.713 UTC [1279] STATEMENT:  -- Legacy validation belongs inside the migration transaction, including CLI use.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF NOT (
+mnesis-postgres-integration>                -- Read-only validation, also used before adopting an unversioned legacy table.
+mnesis-postgres-integration>                WITH expected(position, name, kind, required, identity) AS (
+mnesis-postgres-integration>                    VALUES (1, 'global_seq', 'int8', true, 'a'),
+mnesis-postgres-integration>                           (2, 'stream_id', 'bytea', true, ''),
+mnesis-postgres-integration>                           (3, 'version', 'int8', true, ''),
+mnesis-postgres-integration>                           (4, 'txid', 'xid8', true, ''),
+mnesis-postgres-integration>                           (5, 'event_type', 'text', true, ''),
+mnesis-postgres-integration>                           (6, 'schema_version', 'int8', true, ''),
+mnesis-postgres-integration>                           (7, 'payload', 'bytea', true, ''),
+mnesis-postgres-integration>                           (8, 'metadata', 'bytea', false, '')
+mnesis-postgres-integration>                ), relation AS (SELECT pg_catalog.to_regclass('public.events') AS id)
+mnesis-postgres-integration>                SELECT
+mnesis-postgres-integration>                    (SELECT count(*) FROM pg_catalog.pg_attribute, relation
+mnesis-postgres-integration>                     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 8
+mnesis-postgres-integration>                    AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
+mnesis-postgres-integration>                         ON a.attnum = expected.position AND a.attname = expected.name
+mnesis-postgres-integration>                         AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
+mnesis-postgres-integration>                         AND a.attnotnull = expected.required AND a.attidentity::text = expected.identity,
+mnesis-postgres-integration>                         relation WHERE a.attrelid = id) = 8
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
+mnesis-postgres-integration>                                WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_pkey'
+mnesis-postgres-integration>                                AND contype = 'p' AND conkey = ARRAY[1]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+mnesis-postgres-integration>                                WHERE conrelid = id AND conname = 'events_stream_id_version_key'
+mnesis-postgres-integration>                                AND contype = 'u' AND conkey = ARRAY[2, 3]::smallint[]
+mnesis-postgres-integration>                                AND convalidated AND NOT condeferrable)
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_attrdef, relation
+mnesis-postgres-integration>                                WHERE adrelid = id AND adnum = 4
+mnesis-postgres-integration>                                AND pg_catalog.pg_get_expr(adbin, adrelid) = 'pg_current_xact_id()')
+mnesis-postgres-integration>                    AND EXISTS (SELECT FROM pg_catalog.pg_index i
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_class c ON c.oid = i.indexrelid
+mnesis-postgres-integration>                                JOIN pg_catalog.pg_am a ON a.oid = c.relam, relation
+mnesis-postgres-integration>                                WHERE i.indrelid = id AND a.amname = 'btree'
+mnesis-postgres-integration>                                AND i.indkey::text = '4 1' AND i.indisvalid AND i.indisready
+mnesis-postgres-integration>                                AND i.indpred IS NULL AND i.indexprs IS NULL)
+mnesis-postgres-integration>            ) THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'incompatible legacy public.events: verify columns, defaults, constraints and indexes before migration'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            ALTER TABLE public.events SET SCHEMA mnesis;
+mnesis-postgres-integration>            -- Block older constructors from creating a second empty events table.
+mnesis-postgres-integration>            CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration>        ELSE
+mnesis-postgres-integration>            CREATE TABLE mnesis.events (
+mnesis-postgres-integration>                global_seq BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>                stream_id BYTEA NOT NULL,
+mnesis-postgres-integration>                version BIGINT NOT NULL,
+mnesis-postgres-integration>                txid xid8 NOT NULL DEFAULT pg_current_xact_id(),
+mnesis-postgres-integration>                event_type TEXT NOT NULL,
+mnesis-postgres-integration>                schema_version BIGINT NOT NULL,
+mnesis-postgres-integration>                payload BYTEA NOT NULL,
+mnesis-postgres-integration>                metadata BYTEA,
+mnesis-postgres-integration>                UNIQUE (stream_id, version)
+mnesis-postgres-integration>            );
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_stream_idx ON mnesis.events (stream_id, version);
+mnesis-postgres-integration>    CREATE INDEX IF NOT EXISTS events_watermark_idx ON mnesis.events (txid, global_seq);
+mnesis-postgres-integration> 
+mnesis-postgres-integration>         PASS [   0.122s] (120/215) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+mnesis-postgres-integration> 2026-10-18 20:27:21.921 UTC [1291] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:21.921 UTC [1291] DETAIL:  Key (stream_id, version)=(2, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:21.921 UTC [1291] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:22.099 UTC [1298] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:22.099 UTC [1298] DETAIL:  Key (stream_id, version)=(2, 2) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:22.099 UTC [1298] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.322s] (121/215) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+mnesis-postgres-integration> 2026-10-18 20:27:22.537 UTC [1310] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.427s] (122/215) mnesis-postgres::outcome_tests atomic_hint_deadline_covers_every_target_together
+mnesis-postgres-integration> 2026-10-18 20:27:22.729 UTC [1318] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:22.741 UTC [1318] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.200s] (123/215) mnesis-postgres::outcome_tests caller_timeout_after_atomic_commit_is_not_rollback
+mnesis-postgres-integration> 2026-10-18 20:27:22.820 UTC [1329] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:22.824 UTC [1329] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.082s] (124/215) mnesis-postgres::outcome_tests caller_timeout_after_checkpoint_commit_preserves_every_saved_field
+mnesis-postgres-integration> 2026-10-18 20:27:22.976 UTC [1338] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:22.979 UTC [1338] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.150s] (125/215) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+mnesis-postgres-integration> 2026-10-18 20:27:23.100 UTC [1347] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:23.104 UTC [1347] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:23.108 UTC [1345] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:23.109 UTC [1345] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.130s] (126/215) mnesis-postgres::outcome_tests caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair
+mnesis-postgres-integration> 2026-10-18 20:27:23.301 UTC [1359] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:23.338 UTC [1361] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:23.339 UTC [1361] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:23.354 UTC [1359] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.245s] (127/215) mnesis-postgres::outcome_tests cancelled_projection_reloads_the_committed_pair_before_continuing
+mnesis-postgres-integration> 2026-10-18 20:27:23.407 UTC [1369] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:23.408 UTC [1369] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.065s] (128/215) mnesis-postgres::outcome_tests cancelling_runtime_open_releases_its_view_and_preserves_the_callers_pool
+mnesis-postgres-integration> 2026-10-18 20:27:23.546 UTC [1375] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:23.546 UTC [1375] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.130s] (129/215) mnesis-postgres::outcome_tests checkpoint_hydration_keeps_the_captured_revision_position_and_state_together
+mnesis-postgres-integration>         PASS [   0.112s] (130/215) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+mnesis-postgres-integration> 2026-10-18 20:27:23.749 UTC [1399] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.094s] (131/215) mnesis-postgres::outcome_tests codec_checkpoint_commit_retains_unknown_outcome_after_native_commit
+mnesis-postgres-integration>         PASS [   0.226s] (132/215) mnesis-postgres::outcome_tests every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id
+mnesis-postgres-integration> 2026-10-18 20:27:24.389 UTC [1425] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.411s] (133/215) mnesis-postgres::outcome_tests every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+mnesis-postgres-integration> 2026-10-18 20:27:24.535 UTC [1438] ERROR:  permission denied for table keys
+mnesis-postgres-integration> 2026-10-18 20:27:24.535 UTC [1438] STATEMENT:  SELECT number FROM mnesis.keys LIMIT 1
+mnesis-postgres-integration> 2026-10-18 20:27:24.536 UTC [1436] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:24.536 UTC [1436] DETAIL:  Key (stream_id, version)=(30, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.536 UTC [1436] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:24.538 UTC [1438] ERROR:  permission denied for table keys
+mnesis-postgres-integration> 2026-10-18 20:27:24.538 UTC [1438] STATEMENT:  SELECT number, (SELECT MAX(version)::text FROM mnesis.events WHERE stream_id = number) FROM mnesis.keys WHERE value = $1
+mnesis-postgres-integration>         PASS [   0.154s] (134/215) mnesis-postgres::outcome_tests failed_atomic_head_reconciliation_retains_the_original_unique_source
+mnesis-postgres-integration> 2026-10-18 20:27:24.662 UTC [1448] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:24.662 UTC [1448] DETAIL:  Key (stream_id, version)=(32, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.662 UTC [1448] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:24.669 UTC [1447] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:24.670 UTC [1447] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.124s] (135/215) mnesis-postgres::outcome_tests final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_head
+mnesis-postgres-integration> 2026-10-18 20:27:24.677 UTC [1450] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:24.677 UTC [1450] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:24.760 UTC [1456] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:24.760 UTC [1456] DETAIL:  Key (stream_id, version)=(1, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.760 UTC [1456] STATEMENT:  INSERT INTO mnesis_foreign.events VALUES (1, 1)
+mnesis-postgres-integration> 2026-10-18 20:27:24.762 UTC [1458] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:24.762 UTC [1458] DETAIL:  Key (stream_id, version)=(1, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.762 UTC [1458] CONTEXT:  SQL statement "INSERT INTO mnesis_foreign.events VALUES (1, 1)"
+mnesis-postgres-integration>    PL/pgSQL function foreign_unique() line 1 at SQL statement
+mnesis-postgres-integration> 2026-10-18 20:27:24.762 UTC [1458] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:24.765 UTC [1460] ERROR:  duplicate key value violates unique constraint "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:24.765 UTC [1460] DETAIL:  Key (stream_id, version)=(1, 1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.765 UTC [1460] CONTEXT:  SQL statement "INSERT INTO mnesis_foreign.events VALUES (1, 1)"
+mnesis-postgres-integration>    PL/pgSQL function foreign_unique() line 1 at SQL statement
+mnesis-postgres-integration> 2026-10-18 20:27:24.765 UTC [1460] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration> 2026-10-18 20:27:24.769 UTC [1456] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:24.769 UTC [1456] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.101s] (136/215) mnesis-postgres::outcome_tests identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+mnesis-postgres-integration> 2026-10-18 20:27:24.870 UTC [1468] ERROR:  duplicate key value violates unique constraint "events_pkey"
+mnesis-postgres-integration> 2026-10-18 20:27:24.870 UTC [1468] DETAIL:  Key (global_seq)=(1) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:24.870 UTC [1468] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.104s] (137/215) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+mnesis-postgres-integration> 2026-10-18 20:27:25.121 UTC [1485] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.277s] (138/215) mnesis-postgres::outcome_tests import_wrapper_preserves_uncertainty_for_both_policies_without_resubmission
+mnesis-postgres-integration> 2026-10-18 20:27:25.240 UTC [1494] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:25.240 UTC [1494] LOG:  unexpected EOF on client connection with an open transaction
+mnesis-postgres-integration>         PASS [   0.101s] (139/215) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+mnesis-postgres-integration> 2026-10-18 20:27:25.378 UTC [1504] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration> 2026-10-18 20:27:25.378 UTC [1504] LOG:  unexpected EOF on client connection with an open transaction
+mnesis-postgres-integration>         PASS [   0.126s] (140/215) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+mnesis-postgres-integration> 2026-10-18 20:27:25.484 UTC [1512] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.122s] (141/215) mnesis-postgres::outcome_tests lost_atomic_commit_ack_preserves_the_whole_transaction_and_source
+mnesis-postgres-integration> 2026-10-18 20:27:25.600 UTC [1523] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.103s] (142/215) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+mnesis-postgres-integration> 2026-10-18 20:27:28.772 UTC [1535] ERROR:  deadlock detected
+mnesis-postgres-integration> 2026-10-18 20:27:28.772 UTC [1535] DETAIL:  Process 1535 waits for ShareLock on transaction 2216; blocked by process 1530.
+mnesis-postgres-integration>    Process 1530 waits for ShareLock on transaction 2217; blocked by process 1535.
+mnesis-postgres-integration>    Process 1535: INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>    Process 1530: INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Control', 1, 'control'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:28.772 UTC [1535] HINT:  See server log for query details.
+mnesis-postgres-integration> 2026-10-18 20:27:28.772 UTC [1535] CONTEXT:  while inserting index tuple (0,5) in relation "events_stream_id_version_key"
+mnesis-postgres-integration> 2026-10-18 20:27:28.772 UTC [1535] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   3.183s] (143/215) mnesis-postgres::outcome_tests real_deadlock_aborts_the_atomic_writer_without_optimistic_reclassification
+mnesis-postgres-integration> 2026-10-18 20:27:28.906 UTC [1547] ERROR:  could not serialize access due to read/write dependencies among transactions
+mnesis-postgres-integration> 2026-10-18 20:27:28.906 UTC [1547] DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+mnesis-postgres-integration> 2026-10-18 20:27:28.906 UTC [1547] HINT:  The transaction might succeed if retried.
+mnesis-postgres-integration> 2026-10-18 20:27:28.906 UTC [1547] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 20:27:28.907 UTC [1547] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:28.911 UTC [1544] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.127s] (144/215) mnesis-postgres::outcome_tests real_serialization_failure_preserves_definite_rejection_and_no_owned_event
+mnesis-postgres-integration>         PASS [   0.091s] (145/215) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+mnesis-postgres-integration> 2026-10-18 20:27:29.069 UTC [1567] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 20:27:29.069 UTC [1567] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:29.069 UTC [1567] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 20:27:29.070 UTC [1567] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:29.158 UTC [1574] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 20:27:29.158 UTC [1574] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:29.158 UTC [1574] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 20:27:29.161 UTC [1574] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:29.255 UTC [1581] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 20:27:29.255 UTC [1581] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:29.255 UTC [1581] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 20:27:29.257 UTC [1581] WARNING:  there is no transaction in progress
+mnesis-postgres-integration> 2026-10-18 20:27:29.348 UTC [1588] ERROR:  commit rejection witness
+mnesis-postgres-integration> 2026-10-18 20:27:29.348 UTC [1588] CONTEXT:  PL/pgSQL function test_commit_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:29.348 UTC [1588] STATEMENT:  COMMIT
+mnesis-postgres-integration> 2026-10-18 20:27:29.351 UTC [1588] WARNING:  there is no transaction in progress
+mnesis-postgres-integration>         PASS [   0.353s] (146/215) mnesis-postgres::outcome_tests server_rejections_at_commit_preserve_the_code_and_outcome
+mnesis-postgres-integration>         PASS [   0.129s] (147/215) mnesis-postgres::outcome_tests snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state
+mnesis-postgres-integration> 2026-10-18 20:27:29.837 UTC [1609] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.357s] (148/215) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+mnesis-postgres-integration>         PASS [   0.099s] (149/215) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+mnesis-postgres-integration> 2026-10-18 20:27:30.015 UTC [1627] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.092s] (150/215) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+mnesis-postgres-integration> 2026-10-18 20:27:30.103 UTC [1638] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.076s] (151/215) mnesis-postgres::outcome_tests uncertain_snapshot_commit_preserves_the_native_source_through_the_codec
+mnesis-postgres-integration> 2026-10-18 20:27:30.203 UTC [1649] ERROR:  duplicate key value violates unique constraint "test_outcome_type"
+mnesis-postgres-integration> 2026-10-18 20:27:30.203 UTC [1649] DETAIL:  Key (event_type)=(\x4f7574636f6d65) already exists.
+mnesis-postgres-integration> 2026-10-18 20:27:30.203 UTC [1649] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ($1, $2::text::numeric, $3, $4, $5, $6) RETURNING global_seq, txid::text
+mnesis-postgres-integration>         PASS [   0.100s] (152/215) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+mnesis-postgres-integration>         PASS [   0.128s] (153/215) mnesis-postgres::projection_tests real_projection_rebuild_changes_schema_without_resetting_revision
+mnesis-postgres-integration>         PASS [   0.128s] (154/215) mnesis-postgres::projection_tests real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position
+mnesis-postgres-integration> 2026-10-18 20:27:30.579 UTC [1670] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.117s] (155/215) mnesis-postgres::projection_tests rejected_projection_cannot_continue_until_it_reloads_committed_state
+mnesis-postgres-integration>         PASS [   0.056s] (156/215) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+mnesis-postgres-integration>         PASS [   0.096s] (157/215) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+mnesis-postgres-integration>         PASS [   0.090s] (158/215) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+mnesis-postgres-integration>         PASS [   0.052s] (159/215) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+mnesis-postgres-integration>         PASS [   0.185s] (160/215) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+mnesis-postgres-integration>         PASS [   0.243s] (161/215) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+mnesis-postgres-integration>         PASS [   0.248s] (162/215) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+mnesis-postgres-integration>         PASS [   0.050s] (163/215) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+mnesis-postgres-integration>         PASS [   1.547s] (164/215) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+mnesis-postgres-integration>         PASS [   0.090s] (165/215) mnesis-postgres::representation_tests concurrent_large_key_writers_share_one_identity_and_one_winner
+mnesis-postgres-integration>         PASS [   0.101s] (166/215) mnesis-postgres::representation_tests full_unsigned_maximum_round_trips_and_overflow_leaves_it_unchanged
+mnesis-postgres-integration>         PASS [   0.080s] (167/215) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+mnesis-postgres-integration>         PASS [   0.100s] (168/215) mnesis-postgres::representation_tests real_hash_collision_keeps_both_binary_identities
+mnesis-postgres-integration> 2026-10-18 20:27:33.588 UTC [1781] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.588 UTC [1781] DETAIL:  Failing row contains (1, 0, 2398, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.588 UTC [1781] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.590 UTC [1783] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.590 UTC [1783] DETAIL:  Failing row contains (2, -1, 2399, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.590 UTC [1783] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.591 UTC [1781] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.591 UTC [1781] DETAIL:  Failing row contains (3, 18446744073709551616, 2400, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.591 UTC [1781] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1784] ERROR:  new row for relation "events" violates check constraint "events_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1784] DETAIL:  Failing row contains (4, NaN, 2401, \x496e76616c6964, 1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1784] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, $2::text::numeric, 'Invalid', 1, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1783] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1783] DETAIL:  Failing row contains (5, 1, 2402, \x496e76616c6964, 0, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.597 UTC [1783] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.598 UTC [1781] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.598 UTC [1781] DETAIL:  Failing row contains (6, 1, 2403, \x496e76616c6964, -1, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.598 UTC [1781] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration> 2026-10-18 20:27:33.600 UTC [1784] ERROR:  new row for relation "events" violates check constraint "events_schema_version_check"
+mnesis-postgres-integration> 2026-10-18 20:27:33.600 UTC [1784] DETAIL:  Failing row contains (7, 1, 2404, \x496e76616c6964, 4294967296, \x76616c7565, null, 1).
+mnesis-postgres-integration> 2026-10-18 20:27:33.600 UTC [1784] STATEMENT:  INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Invalid', $2, 'value'::bytea)
+mnesis-postgres-integration>         PASS [   0.083s] (169/215) mnesis-postgres::representation_tests scalar_constraints_reject_invalid_stored_values
+mnesis-postgres-integration>         PASS [   0.094s] (170/215) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+mnesis-postgres-integration> 2026-10-18 20:27:33.776 UTC [1797] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:33.777 UTC [1797] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:33.796 UTC [1799] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:33.796 UTC [1799] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.120s] (171/215) mnesis-postgres::representation_tests startup_rejects_missing_key_equality_and_scalar_guards
+mnesis-postgres-integration> 2026-10-18 20:27:33.902 UTC [1808] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.086s] (172/215) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+mnesis-postgres-integration>         PASS [   0.093s] (173/215) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+mnesis-postgres-integration>         PASS [   0.061s] (174/215) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+mnesis-postgres-integration>         PASS [   1.195s] (175/215) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+mnesis-postgres-integration>         PASS [   2.137s] (176/215) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+mnesis-postgres-integration>         PASS [   2.206s] (177/215) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+mnesis-postgres-integration>         PASS [   1.049s] (178/215) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+mnesis-postgres-integration>         PASS [   2.793s] (179/215) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+mnesis-postgres-integration> 2026-10-18 20:27:43.558 UTC [2042] FATAL:  terminating connection due to administrator command at character 174
+mnesis-postgres-integration> 2026-10-18 20:27:43.558 UTC [2042] STATEMENT:  WITH candidates AS ( SELECT k.number, 32 + octet_length(k.value)::bigint AS row_bytes FROM mnesis.keys k WHERE ($1::bigint IS NULL OR k.number > $1) AND EXISTS (SELECT FROM mnesis.events e WHERE e.stream_id = k.number AND pg_catalog.pg_visible_in_snapshot(e.txid, $2::text::pg_catalog.pg_snapshot)) ORDER BY k.number LIMIT $3::text::bigint ), ranked AS ( SELECT *, ROW_NUMBER() OVER w AS ordinal, SUM(row_bytes) OVER w AS total_bytes FROM candidates WINDOW w AS (ORDER BY number ROWS UNBOUNDED PRECEDING) ), settings AS (SELECT $4::bigint AS byte_limit) SELECT ranked.number, row_bytes, byte_limit, CASE WHEN row_bytes <= byte_limit THEN k.value END AS value FROM ranked JOIN mnesis.keys k USING (number) CROSS JOIN settings WHERE total_bytes <= byte_limit OR ordinal = 1 ORDER BY ranked.number
+mnesis-postgres-integration> 2026-10-18 20:27:43.562 UTC [2046] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:43.562 UTC [2045] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:43.562 UTC [2045] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:43.564 UTC [2046] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.124s] (180/215) mnesis-postgres::session_tests a_native_backend_failure_preserves_its_sqlstate_and_ends_the_cursor
+mnesis-postgres-integration> 2026-10-18 20:27:43.678 UTC [2051] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:43.679 UTC [2051] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.122s] (181/215) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+mnesis-postgres-integration> 2026-10-18 20:27:43.783 UTC [2059] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:43.784 UTC [2059] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.096s] (182/215) mnesis-postgres::session_tests closing_the_callers_pool_releases_an_idle_session_before_its_lifetime
+mnesis-postgres-integration> 2026-10-18 20:27:44.917 UTC [2066] FATAL:  connection to client lost at character 224
+mnesis-postgres-integration> 2026-10-18 20:27:44.917 UTC [2066] STATEMENT:  WITH candidates AS (SELECT global_seq, version, txid, 32 + octet_length(keys.value)::bigint + octet_length(event_type)::bigint + octet_length(payload)::bigint + COALESCE(octet_length(metadata)::bigint, 0) AS row_bytes FROM mnesis.events JOIN mnesis.keys ON keys.number = events.stream_id WHERE stream_id = $1 AND version >= $2::text::numeric AND version <= $3::text::numeric ORDER BY version LIMIT $4::text::bigint), ranked AS (SELECT *, ROW_NUMBER() OVER w AS ordinal, SUM(row_bytes) OVER w AS total_bytes FROM candidates WINDOW w AS (ORDER BY version ROWS UNBOUNDED PRECEDING)), settings AS (SELECT $5 AS byte_limit) SELECT row_bytes, byte_limit, events.version::text AS version, events.schema_version, events.global_seq, events.txid::text AS txid, CASE WHEN row_bytes <= byte_limit THEN keys.value END AS stream_id, CASE WHEN row_bytes <= byte_limit THEN events.event_type END AS event_type, CASE WHEN row_bytes <= byte_limit THEN events.payload END AS payload, CASE WHEN row_bytes <= byte_limit THEN events.metadata END AS metadata FROM ranked JOIN mnesis.events USING (global_seq) JOIN mnesis.keys ON keys.number = events.stream_id CROSS JOIN settings WHERE total_bytes <= byte_limit OR ordinal = 1 ORDER BY events.version
+mnesis-postgres-integration>         PASS [   1.140s] (183/215) mnesis-postgres::session_tests dropping_a_long_lived_session_releases_its_blocked_query
+mnesis-postgres-integration> 2026-10-18 20:27:47.086 UTC [2075] FATAL:  connection to client lost at character 224
+mnesis-postgres-integration> 2026-10-18 20:27:47.086 UTC [2075] STATEMENT:  WITH candidates AS (SELECT global_seq, version, txid, 32 + octet_length(keys.value)::bigint + octet_length(event_type)::bigint + octet_length(payload)::bigint + COALESCE(octet_length(metadata)::bigint, 0) AS row_bytes FROM mnesis.events JOIN mnesis.keys ON keys.number = events.stream_id WHERE stream_id = $1 AND version >= $2::text::numeric AND version <= $3::text::numeric ORDER BY version LIMIT $4::text::bigint), ranked AS (SELECT *, ROW_NUMBER() OVER w AS ordinal, SUM(row_bytes) OVER w AS total_bytes FROM candidates WINDOW w AS (ORDER BY version ROWS UNBOUNDED PRECEDING)), settings AS (SELECT $5 AS byte_limit) SELECT row_bytes, byte_limit, events.version::text AS version, events.schema_version, events.global_seq, events.txid::text AS txid, CASE WHEN row_bytes <= byte_limit THEN keys.value END AS stream_id, CASE WHEN row_bytes <= byte_limit THEN events.event_type END AS event_type, CASE WHEN row_bytes <= byte_limit THEN events.payload END AS payload, CASE WHEN row_bytes <= byte_limit THEN events.metadata END AS metadata FROM ranked JOIN mnesis.events USING (global_seq) JOIN mnesis.keys ON keys.number = events.stream_id CROSS JOIN settings WHERE total_bytes <= byte_limit OR ordinal = 1 ORDER BY events.version
+mnesis-postgres-integration> 2026-10-18 20:27:47.093 UTC [2079] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:47.094 UTC [2079] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   2.169s] (184/215) mnesis-postgres::session_tests expiry_releases_a_native_view_while_an_abandoned_read_is_blocked
+mnesis-postgres-integration> 2026-10-18 20:27:47.202 UTC [2086] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:47.202 UTC [2086] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.119s] (185/215) mnesis-postgres::session_tests explicit_close_and_drop_release_native_views_and_allow_reopen
+mnesis-postgres-integration>         PASS [   1.143s] (186/215) mnesis-postgres::session_tests idle_expiration_releases_a_view_with_buffered_and_unpolled_cursors
+mnesis-postgres-integration>         PASS [   0.127s] (187/215) mnesis-postgres::session_tests invalid_lifetimes_reject_before_a_closed_pool_is_touched
+mnesis-postgres-integration> 2026-10-18 20:27:48.618 UTC [2111] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.135s] (188/215) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+mnesis-postgres-integration>         PASS [   0.127s] (189/215) mnesis-postgres::session_tests session_pages_preserve_inclusive_versions_and_terminal_row_limits
+mnesis-postgres-integration>         PASS [   0.218s] (190/215) mnesis-postgres::session_tests sessions_use_the_callers_pool_bound_and_acquisition_error_without_extra_connections
+mnesis-postgres-integration> 2026-10-18 20:27:49.087 UTC [2139] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:49.089 UTC [2139] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.150s] (191/215) mnesis-postgres::snapshot_tests acknowledged_cache_pair_survives_client_process_termination
+mnesis-postgres-integration>         PASS [   0.136s] (192/215) mnesis-postgres::snapshot_tests byte_ceiling_precedes_storage_and_stale_bodies_are_not_fetched
+mnesis-postgres-integration>         PASS [   0.138s] (193/215) mnesis-postgres::snapshot_tests concurrent_hydration_sees_complete_old_or_new_pairs
+mnesis-postgres-integration> 2026-10-18 20:27:49.546 UTC [2169] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:49.546 UTC [2169] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.156s] (194/215) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+mnesis-postgres-integration>         PASS [   0.146s] (195/215) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_empty_state_round_trips
+mnesis-postgres-integration>         PASS [   0.149s] (196/215) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_extreme_positions_round_trip
+mnesis-postgres-integration>         PASS [   0.159s] (197/215) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_overwrite_latest_wins
+mnesis-postgres-integration>         PASS [   0.132s] (198/215) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_stale_on_schema_change
+mnesis-postgres-integration>         PASS [   0.145s] (199/215) mnesis-postgres::snapshot_tests corrupt_position_is_an_error_even_when_the_requested_schema_is_stale
+mnesis-postgres-integration>         PASS [   0.166s] (200/215) mnesis-postgres::snapshot_tests real_snapshotting_repository_skips_the_cached_prefix
+mnesis-postgres-integration> 2026-10-18 20:27:50.593 UTC [2220] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.154s] (201/215) mnesis-postgres::snapshot_tests reopen_preserves_unsigned_extremes_and_unconditional_cache_replacement
+mnesis-postgres-integration> 2026-10-18 20:27:50.730 UTC [2229] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:50.733 UTC [2229] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:50.759 UTC [2227] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:50.760 UTC [2227] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:50.783 UTC [2230] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:50.785 UTC [2230] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.213s] (202/215) mnesis-postgres::snapshot_tests runtime_open_rejects_missing_reference_nullable_state_and_unlogged_cache
+mnesis-postgres-integration> 2026-10-18 20:27:50.972 UTC [2242] ERROR:  permission denied for table keys
+mnesis-postgres-integration> 2026-10-18 20:27:50.972 UTC [2242] STATEMENT:  UPDATE mnesis.keys SET value = 'changed'::bytea
+mnesis-postgres-integration> 2026-10-18 20:27:50.976 UTC [2243] ERROR:  permission denied for table events
+mnesis-postgres-integration> 2026-10-18 20:27:50.976 UTC [2243] STATEMENT:  UPDATE mnesis.events SET payload = 'changed'::bytea
+mnesis-postgres-integration> 2026-10-18 20:27:50.977 UTC [2239] ERROR:  permission denied for table events
+mnesis-postgres-integration> 2026-10-18 20:27:50.977 UTC [2239] STATEMENT:  DELETE FROM mnesis.events
+mnesis-postgres-integration> 2026-10-18 20:27:50.977 UTC [2242] ERROR:  permission denied for schema mnesis at character 14
+mnesis-postgres-integration> 2026-10-18 20:27:50.977 UTC [2242] STATEMENT:  CREATE TABLE mnesis.forbidden (number int)
+mnesis-postgres-integration>         PASS [   0.180s] (203/215) mnesis-postgres::snapshot_tests runtime_role_writes_cache_without_mutating_keys_events_or_schema
+mnesis-postgres-integration>         PASS [   0.229s] (204/215) mnesis-postgres::snapshot_tests stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+mnesis-postgres-integration> 2026-10-18 20:27:51.226 UTC [2252] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:51.226 UTC [2252] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:51.382 UTC [2258] ERROR:  cache rejection
+mnesis-postgres-integration> 2026-10-18 20:27:51.382 UTC [2258] CONTEXT:  PL/pgSQL function snapshot_reject() line 1 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:51.382 UTC [2258] STATEMENT:  INSERT INTO mnesis.snapshots (key, schema_version, version, state) VALUES ($1, $2, $3::text::numeric, $4) ON CONFLICT (key) DO UPDATE SET schema_version = EXCLUDED.schema_version, version = EXCLUDED.version, state = EXCLUDED.state RETURNING key
+mnesis-postgres-integration>         PASS [   0.174s] (205/215) mnesis-postgres::snapshot_tests stale_cache_and_rejected_replacement_do_not_change_committed_aggregate_history
+mnesis-postgres-integration>         PASS [   0.203s] (206/215) mnesis-postgres::snapshot_tests suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys
+mnesis-postgres-integration>         PASS [   1.211s] (207/215) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+mnesis-postgres-integration>         PASS [   1.078s] (208/215) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+mnesis-postgres-integration>         PASS [   1.073s] (209/215) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+mnesis-postgres-integration> 2026-10-18 20:27:55.036 UTC [2301] ERROR:  relation "checkpoints" already exists
+mnesis-postgres-integration> 2026-10-18 20:27:55.036 UTC [2301] STATEMENT:  SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.checkpoints (
+mnesis-postgres-integration>        key BIGINT PRIMARY KEY REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        revision NUMERIC(20, 0) NOT NULL
+mnesis-postgres-integration>            CHECK (revision > 0 AND revision <= 18446744073709551615),
+mnesis-postgres-integration>        schema_version BIGINT NOT NULL
+mnesis-postgres-integration>            CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        txid NUMERIC(20, 0) NOT NULL
+mnesis-postgres-integration>            CHECK (txid >= 0 AND txid <= 18446744073709551615),
+mnesis-postgres-integration>        global_seq NUMERIC(20, 0) NOT NULL
+mnesis-postgres-integration>            CHECK (global_seq >= 0 AND global_seq <= 18446744073709551615),
+mnesis-postgres-integration>        state BYTEA NOT NULL
+mnesis-postgres-integration>    );
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:55.039 UTC [2301] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.039 UTC [2301] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.155s] (210/215) mnesis-postgres::upgrade_tests checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data
+mnesis-postgres-integration> 2026-10-18 20:27:55.173 UTC [2309] ERROR:  public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading
+mnesis-postgres-integration> 2026-10-18 20:27:55.173 UTC [2309] CONTEXT:  PL/pgSQL function inline_code_block line 8 at RAISE
+mnesis-postgres-integration> 2026-10-18 20:27:55.173 UTC [2309] STATEMENT:  -- Maintenance upgrade: preserve event identity and transaction positions.
+mnesis-postgres-integration>    SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.keys (
+mnesis-postgres-integration>        number BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>        value BYTEA NOT NULL,
+mnesis-postgres-integration>        CONSTRAINT keys_value_key EXCLUDE USING hash (value WITH =)
+mnesis-postgres-integration>    );
+mnesis-postgres-integration>    INSERT INTO mnesis.keys (value) SELECT DISTINCT stream_id FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration>    -- Only an adopted legacy table has this compatibility guard.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF (SELECT relkind FROM pg_class WHERE oid = 'public.events'::regclass) <> 'v'
+mnesis-postgres-integration>               OR regexp_replace(pg_get_viewdef('public.events'::regclass), '\s+', '', 'g')
+mnesis-postgres-integration>                   <> 'SELECTglobal_seq,stream_id,version,txid,event_type,schema_version,payload,metadataFROMmnesis.events;'
+mnesis-postgres-integration>            THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            DROP VIEW public.events;
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events ADD COLUMN key_number BIGINT;
+mnesis-postgres-integration>    UPDATE mnesis.events e SET key_number = k.number FROM mnesis.keys k
+mnesis-postgres-integration>        WHERE e.stream_id = k.value;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        DROP CONSTRAINT events_stream_id_version_key,
+mnesis-postgres-integration>        DROP COLUMN stream_id,
+mnesis-postgres-integration>        ALTER COLUMN key_number SET NOT NULL,
+mnesis-postgres-integration>        ALTER COLUMN version TYPE NUMERIC(20, 0),
+mnesis-postgres-integration>        ALTER COLUMN event_type TYPE BYTEA USING convert_to(event_type, 'UTF8');
+mnesis-postgres-integration>    ALTER TABLE mnesis.events RENAME COLUMN key_number TO stream_id;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_version_key UNIQUE (stream_id, version),
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_fkey FOREIGN KEY (stream_id) REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        ADD CONSTRAINT events_version_check CHECK (version > 0 AND version <= 18446744073709551615),
+mnesis-postgres-integration>        ADD CONSTRAINT events_schema_version_check CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        ADD CONSTRAINT events_global_seq_check CHECK (global_seq > 0);
+mnesis-postgres-integration>    CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:55.176 UTC [2309] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.176 UTC [2309] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.115s] (211/215) mnesis-postgres::upgrade_tests foreign_public_view_is_rejected_without_replacement
+mnesis-postgres-integration> 2026-10-18 20:27:55.307 UTC [2315] ERROR:  relation "history" already exists
+mnesis-postgres-integration> 2026-10-18 20:27:55.307 UTC [2315] STATEMENT:  SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.history (
+mnesis-postgres-integration>        value BYTEA PRIMARY KEY CHECK (octet_length(value) = 16),
+mnesis-postgres-integration>        system_id BIGINT NOT NULL,
+mnesis-postgres-integration>        database_id OID NOT NULL
+mnesis-postgres-integration>    );
+mnesis-postgres-integration>    CREATE UNIQUE INDEX history_singleton ON mnesis.history ((true));
+mnesis-postgres-integration>    INSERT INTO mnesis.history
+mnesis-postgres-integration>    SELECT uuid_send(gen_random_uuid()), system_identifier, d.oid
+mnesis-postgres-integration>    FROM pg_control_system() CROSS JOIN pg_database d WHERE d.datname = current_database();
+mnesis-postgres-integration>    ALTER TABLE mnesis.checkpoints ADD COLUMN history BYTEA;
+mnesis-postgres-integration>    UPDATE mnesis.checkpoints SET history = (SELECT value FROM mnesis.history);
+mnesis-postgres-integration>    ALTER TABLE mnesis.checkpoints ALTER COLUMN history SET NOT NULL;
+mnesis-postgres-integration>    ALTER TABLE mnesis.checkpoints ADD CONSTRAINT checkpoints_history_fkey
+mnesis-postgres-integration>        FOREIGN KEY (history) REFERENCES mnesis.history (value);
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:55.309 UTC [2315] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.310 UTC [2315] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.138s] (212/215) mnesis-postgres::upgrade_tests populated_version_four_history_upgrade_preserves_state_and_rolls_back_collision
+mnesis-postgres-integration>         PASS [   0.149s] (213/215) mnesis-postgres::upgrade_tests populated_version_one_preserves_position_and_next_identity
+mnesis-postgres-integration> 2026-10-18 20:27:55.574 UTC [2336] ERROR:  check constraint "events_version_check" of relation "events" is violated by some row
+mnesis-postgres-integration> 2026-10-18 20:27:55.574 UTC [2336] STATEMENT:  -- Maintenance upgrade: preserve event identity and transaction positions.
+mnesis-postgres-integration>    SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.keys (
+mnesis-postgres-integration>        number BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+mnesis-postgres-integration>        value BYTEA NOT NULL,
+mnesis-postgres-integration>        CONSTRAINT keys_value_key EXCLUDE USING hash (value WITH =)
+mnesis-postgres-integration>    );
+mnesis-postgres-integration>    INSERT INTO mnesis.keys (value) SELECT DISTINCT stream_id FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration>    -- Only an adopted legacy table has this compatibility guard.
+mnesis-postgres-integration>    DO $$
+mnesis-postgres-integration>    BEGIN
+mnesis-postgres-integration>        IF to_regclass('public.events') IS NOT NULL THEN
+mnesis-postgres-integration>            IF (SELECT relkind FROM pg_class WHERE oid = 'public.events'::regclass) <> 'v'
+mnesis-postgres-integration>               OR regexp_replace(pg_get_viewdef('public.events'::regclass), '\s+', '', 'g')
+mnesis-postgres-integration>                   <> 'SELECTglobal_seq,stream_id,version,txid,event_type,schema_version,payload,metadataFROMmnesis.events;'
+mnesis-postgres-integration>            THEN
+mnesis-postgres-integration>                RAISE EXCEPTION 'public.events is not the legacy compatibility view; preserve or move the foreign relation before upgrading'
+mnesis-postgres-integration>                    USING ERRCODE = '55000';
+mnesis-postgres-integration>            END IF;
+mnesis-postgres-integration>            DROP VIEW public.events;
+mnesis-postgres-integration>        END IF;
+mnesis-postgres-integration>    END
+mnesis-postgres-integration>    $$;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events ADD COLUMN key_number BIGINT;
+mnesis-postgres-integration>    UPDATE mnesis.events e SET key_number = k.number FROM mnesis.keys k
+mnesis-postgres-integration>        WHERE e.stream_id = k.value;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        DROP CONSTRAINT events_stream_id_version_key,
+mnesis-postgres-integration>        DROP COLUMN stream_id,
+mnesis-postgres-integration>        ALTER COLUMN key_number SET NOT NULL,
+mnesis-postgres-integration>        ALTER COLUMN version TYPE NUMERIC(20, 0),
+mnesis-postgres-integration>        ALTER COLUMN event_type TYPE BYTEA USING convert_to(event_type, 'UTF8');
+mnesis-postgres-integration>    ALTER TABLE mnesis.events RENAME COLUMN key_number TO stream_id;
+mnesis-postgres-integration>    ALTER TABLE mnesis.events
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_version_key UNIQUE (stream_id, version),
+mnesis-postgres-integration>        ADD CONSTRAINT events_stream_id_fkey FOREIGN KEY (stream_id) REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        ADD CONSTRAINT events_version_check CHECK (version > 0 AND version <= 18446744073709551615),
+mnesis-postgres-integration>        ADD CONSTRAINT events_schema_version_check CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        ADD CONSTRAINT events_global_seq_check CHECK (global_seq > 0);
+mnesis-postgres-integration>    CREATE VIEW public.events AS SELECT * FROM mnesis.events;
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:55.576 UTC [2336] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.578 UTC [2336] FATAL:  connection to client lost
+mnesis-postgres-integration>         PASS [   0.160s] (214/215) mnesis-postgres::upgrade_tests rejected_version_two_rolls_back_and_preserves_repairable_version_one
+mnesis-postgres-integration> 2026-10-18 20:27:55.684 UTC [2340] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.684 UTC [2340] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:55.765 UTC [2345] ERROR:  relation "snapshots" already exists
+mnesis-postgres-integration> 2026-10-18 20:27:55.765 UTC [2345] STATEMENT:  SET LOCAL search_path = pg_catalog;
+mnesis-postgres-integration>    CREATE TABLE mnesis.snapshots (
+mnesis-postgres-integration>        key BIGINT PRIMARY KEY REFERENCES mnesis.keys (number),
+mnesis-postgres-integration>        schema_version BIGINT NOT NULL
+mnesis-postgres-integration>            CHECK (schema_version > 0 AND schema_version <= 4294967295),
+mnesis-postgres-integration>        version NUMERIC(20, 0) NOT NULL
+mnesis-postgres-integration>            CHECK (version > 0 AND version <= 18446744073709551615),
+mnesis-postgres-integration>        state BYTEA NOT NULL
+mnesis-postgres-integration>    );
+mnesis-postgres-integration> 
+mnesis-postgres-integration> 2026-10-18 20:27:55.767 UTC [2345] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.767 UTC [2345] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:55.861 UTC [2350] LOG:  could not send data to client: Broken pipe
+mnesis-postgres-integration> 2026-10-18 20:27:55.861 UTC [2350] FATAL:  connection to client lost
+mnesis-postgres-integration> 2026-10-18 20:27:55.863 UTC [2347] LOG:  could not receive data from client: Connection reset by peer
+mnesis-postgres-integration>         PASS [   0.187s] (215/215) mnesis-postgres::upgrade_tests snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collision
+mnesis-postgres-integration> ────────────
+mnesis-postgres-integration>      Summary [  52.938s] 215 tests run: 215 passed, 0 skipped
+mnesis-postgres-integration> stopping postgresql
+mnesis-postgres-integration> 2026-10-18 20:27:56.009 UTC [85] LOG:  received fast shutdown request
+mnesis-postgres-integration> waiting for server to shut down....2026-10-18 20:27:56.017 UTC [85] LOG:  aborting any active transactions
+mnesis-postgres-integration> 2026-10-18 20:27:56.025 UTC [85] LOG:  background worker "logical replication launcher" (PID 94) exited with exit code 1
+mnesis-postgres-integration> 2026-10-18 20:27:56.025 UTC [89] LOG:  shutting down
+mnesis-postgres-integration> 2026-10-18 20:27:56.032 UTC [89] LOG:  checkpoint starting: shutdown immediate
+mnesis-postgres-integration> .2026-10-18 20:27:57.624 UTC [89] LOG:  checkpoint complete: wrote 1702 buffers (10.4%), wrote 4 SLRU buffers; 0 WAL file(s) added, 0 removed, 3 recycled; write=0.064 s, sync=1.445 s, total=1.599 s; sync files=5083, longest=0.023 s, average=0.001 s; distance=46403 kB, estimate=46403 kB; lsn=0/44B6900, redo lsn=0/44B6900
+mnesis-postgres-integration> 2026-10-18 20:27:57.659 UTC [85] LOG:  database system is shut down
+mnesis-postgres-integration>  done
+mnesis-postgres-integration> server stopped
+mnesis-postgres-integration> checkPhase completed in 1 minutes 7 seconds
+mnesis-postgres-integration> Running phase: installPhase
+mnesis-postgres-integration> Running phase: fixupPhase
+mnesis-postgres-integration> shrinking RPATHs of ELF executables and libraries in /nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration
+mnesis-postgres-integration> checking for references to /build/ in /nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration...
+mnesis-postgres-integration> patching script interpreter paths in /nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration
+copying 1 paths...
+copying path '/nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration' from 'ssh-ng://builder@linux-builder'...
+/nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration

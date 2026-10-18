@@ -1886,6 +1886,7 @@ dependencies = [
  "bytes",
  "futures",
  "mnesis",
+ "mnesis-fjall",
  "mnesis-store",
  "mnesis-store-testing",
  "mnesis-test-domains",

@@ -1,0 +1,13 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.98s
+────────────
+ Nextest run ID a1439219-0f6f-4f07-9f73-cf1b7edc29cf with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [   1.543s] (1/6) mnesis-postgres::backup_tests canceling_a_native_drain_cannot_complete_a_chunk
+        PASS [   5.967s] (2/6) mnesis-postgres::backup_tests completed_chunks_interchange_through_fjall_reopen
+        PASS [   4.338s] (3/6) mnesis-postgres::backup_tests completed_chunks_restore_postgres_with_new_history_and_continuations
+        PASS [   1.065s] (4/6) mnesis-postgres::backup_tests empty_backup_has_one_completed_chunk_and_no_sections
+        PASS [   1.865s] (5/6) mnesis-postgres::backup_tests every_incomplete_chunk_rejects_before_destination_writes
+        PASS [   1.026s] (6/6) mnesis-postgres::backup_tests native_source_failure_cannot_complete_a_chunk
+────────────
+     Summary [  15.842s] 6 tests run: 6 passed, 0 skipped

@@ -388,3 +388,35 @@ Falsifier: all four original-source native witnesses pass unchanged. If they
 fail, qualify only the proven builtin functions/operators, then re-run the same
 oracles and relevant native/conformance checks. Rollback boundary: this slice's
 test and store-query edits only. Research/PR delivery records are separate.
+# PG7 completed bounded backup composition — 2026-10-18
+
+Before logical-restore consumer law: refine test-only ceiling550->650 to reuse
+the existing actual Counter projector/repository fixture through backup, fresh
+history rebuild, pool close/reopen, saved-checkpoint reload and subsequent append.
+This addresses explicit PG7 restart acceptance. Other budgets stay unchanged.
+Physical operator-stop and capacity remain separate.
+
+Before adding native failure/cancellation cases: extend the test-only ceiling
+from500 to550 lines for two actual blocked-query faults and their native wait
+observation. Production0/dependencies2/lock-edge5 budgets remain unchanged.
+First four laws are356lines; the added cases must use actual session cursors,
+not synthetic failing streams, and preserve original native failure causes.
+
+Threatened invariants: one finite export view, completed bounded format2chunks,
+exact per-stream fields and continuation versions across chunks, logical restore
+assigning destination positions and rejecting source positions. Compose existing
+store/CBOR/session/import facilities, using lazy listing, two-event batches and
+one fixed16KiB sink reused per completed chunk. Restore reads at most that fixed
+size per file; reject oversized/truncated input before importing it. No whole
+catalog or whole backup materialization in the backup/restore paths.
+
+Pre-edit budget: <=500 native-test/helper lines, two existing-workspace dev-dep
+entries/feature edits, <=5 lockfile dependency-edge lines, no production/runtime/
+framework/tooling/newformat changes expected. Existing minicbor2.2.3 supports
+&mut[u8] sinks, ChunkWriter finish recovers unused capacity, existing Fjall
+adapter supplies the interoperability peer. Production dependency cost stays0;
+both dev dependencies already exist in the locked workspace. Falsifiers: actual
+roundtrip/interchange loses any field, bounded sink overflows accepted workload,
+normal decode accepts incomplete data, or a failed chunk is falsely completed.
+Any production defect needs a separate recorded budget before editing its owner.
+This first pass is not the complete PG7 operator/restart acceptance proof.

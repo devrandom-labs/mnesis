@@ -194,6 +194,24 @@ for network failures hidden from the server's kernel. Lifecycle and recovery
 profiles remain tracked in the completion PRD. Any export error means the backup
 is incomplete; normal import still requires completed format-2 chunks.
 
+Compose the session with the existing `mnesis-store` CBOR feature. Keep listing
+lazy, divide long streams into bounded batches, and reuse a fixed-capacity sink
+for each `ChunkWriter`. Only `finish` produces a completed chunk. Choose batch
+and sink limits that fit the configured maximum row, including encoding overhead;
+sink exhaustion, source failure and cancellation invalidate that chunk.
+
+Restore one bounded completed chunk at a time with `decode_chunk` and the existing
+importer. Continuation chunks retain stream versions. `WholeChunk` applies to
+each individual chunk; earlier completed chunks may already be committed when a
+later chunk fails. Record the complete expected chunk inventory separately and
+check it before declaring recovery complete: a valid chunk does not prove that
+other files arrived. Apply the deployment's file flush, backup publication and
+retention policy; `finish` does not sync a filesystem. Native tests cover
+Postgres round trips, Fjall interchange after reopen, incomplete chunks, source
+failure and cancellation. Logical restore rebuilds the existing projection
+consumer, reopens its saved checkpoint and processes a later append. Operator
+drills and physical projection restart acceptance remain in the PRD.
+
 ## History and recovery
 
 `PgAllPos` contains a `History` identity and the transaction and sequence
