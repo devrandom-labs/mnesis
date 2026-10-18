@@ -1,0 +1,17 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.18s
+────────────
+ Nextest run ID ac631243-d4cc-440f-a756-fe44ac39eb88 with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [   1.102s] (1/6) mnesis-postgres::backup_tests canceling_a_native_drain_cannot_complete_a_chunk
+        PASS [   0.676s] (2/6) mnesis-postgres::backup_tests completed_chunks_interchange_through_fjall_reopen
+        PASS [   0.301s] (3/6) mnesis-postgres::backup_tests completed_chunks_restore_postgres_with_new_history_and_continuations
+        PASS [   0.054s] (4/6) mnesis-postgres::backup_tests empty_backup_has_one_completed_chunk_and_no_sections
+        PASS [   0.159s] (5/6) mnesis-postgres::backup_tests every_incomplete_chunk_rejects_before_destination_writes
+        PASS [   0.129s] (6/6) mnesis-postgres::backup_tests native_source_failure_cannot_complete_a_chunk
+────────────
+     Summary [   2.426s] 6 tests run: 6 passed, 0 skipped

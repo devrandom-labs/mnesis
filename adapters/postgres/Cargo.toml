@@ -30,7 +30,8 @@ tokio = { workspace = true, features = ["rt", "sync", "time"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }
 
 [dev-dependencies]
-mnesis-store = { path = "../../crates/store", features = ["json"] }
+mnesis-fjall = { path = "../fjall", features = ["export", "import"] }
+mnesis-store = { path = "../../crates/store", features = ["json", "cbor"] }
 mnesis-store-testing = { path = "../../crates/store-testing", features = ["atomic-append", "snapshot"] }
 mnesis-test-domains = { path = "../../crates/test-domains", features = ["serde"] }
 tempfile = { workspace = true }

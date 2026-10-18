@@ -1,0 +1,10 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.15s
+────────────
+ Nextest run ID 2c642f0b-1e67-4b27-9380-90181482253e with nextest profile: default
+    Starting 1 test across 1 binary (6 tests skipped)
+        PASS [   0.224s] (1/1) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+────────────
+     Summary [   0.237s] 1 test run: 1 passed, 6 skipped

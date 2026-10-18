@@ -32,6 +32,7 @@ Protected focused merges:
 - PR385 consistent export sessions: `12fd839c7b08e2eda1a8020bae9f52dd898c1d15`.
 - PR386 release lock synchronization: `87e87d6e00b0d7703a93cf577ec4893a9d49d35e`.
 - PR387 history-scoped positions and coherent recovery: `2b181b12d1040f1527d6a28375fd5db91a9d1129`.
+- PR388 global ordering across caller search paths: `651aabf35e94b7b0e98e9e87eff19f6964df95f3`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -74,9 +75,12 @@ and restore remain. The active history slice rejects unsafe copied transaction
 IDs, scopes positions and checkpoint state, and tests physical recovery and
 populated migration rollback/backfill. Protected-merged in PR387 after all40checks
 and reviewed native mutation evidence; not released. Global-read search-path
-regressions are reproduced and the minimal query correction is under native
-verification. Bounded completed CBOR interchange and operator/projection restart
-remain PG7 acceptance work.
+regressions are protected-merged in PR388 after215native/Linux laws, all40checks
+and original-source/runtime-control falsification. Seven bounded completed CBOR
+backup laws now pass222native/Linux cases, including Postgres/Fjall interchange,
+source failure/cancellation and actual logical projection rebuild/restart. They
+are committed but not yet merged. Physical operator/projection restart and the
+remaining backup failure/route cases remain PG7 acceptance work.
 Release lock synchronization is protected-merged in PR386. Its live workflow
 created a verified App commit on release PR378; all four original locked AFL
 builds and campaigns pass. The independent decoder performance check still

@@ -1,0 +1,62 @@
+   Compiling crc32c v0.6.8
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/mnesis)
+   Compiling minicbor-derive v0.19.5
+   Compiling crossbeam-epoch v0.9.20
+   Compiling twox-hash v2.1.3
+   Compiling byteorder-lite v0.1.0
+   Compiling compare v0.0.6
+   Compiling xxhash-rust v0.8.18
+   Compiling quick_cache v0.6.24
+   Compiling enum_dispatch v0.3.13
+   Compiling spin v0.9.9
+   Compiling varint-rs v2.2.1
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-chunks/crates/workspace-hack)
+   Compiling self_cell v1.3.0
+   Compiling lz4_flex v0.13.1
+   Compiling interval-heap v0.0.5
+   Compiling byteview v0.10.1
+   Compiling rustc-hash v2.1.3
+   Compiling sfa v1.0.0
+   Compiling hashbrown v0.14.5
+   Compiling flume v0.12.0
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+   Compiling dashmap v6.2.1
+   Compiling crossbeam-skiplist v0.1.3
+   Compiling lsm-tree v3.1.8
+   Compiling minicbor v2.2.3
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-chunks/crates/test-domains)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store)
+   Compiling fjall v3.1.8
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/fjall)
+error[E0308]: mismatched types
+   --> adapters/postgres/tests/backup_tests.rs:58:44
+    |
+ 58 |         .schema_version(SchemaVersion::new(u32::MAX).unwrap());
+    |                         ------------------ ^^^^^^^^ expected `NonZero<u32>`, found `u32`
+    |                         |
+    |                         arguments to this function are incorrect
+    |
+    = note: expected struct `NonZero<u32>`
+                 found type `u32`
+note: associated function defined here
+   --> crates/store/src/value.rs:331:18
+    |
+331 |     pub const fn new(value: NonZeroU32) -> Self {
+    |                  ^^^
+help: consider calling `NonZero::new`
+    |
+ 58 |         .schema_version(SchemaVersion::new(NonZero::new(u32::MAX).unwrap()).unwrap());
+    |                                            +++++++++++++        ++++++++++
+
+error[E0599]: no method named `unwrap` found for struct `SchemaVersion` in the current scope
+  --> adapters/postgres/tests/backup_tests.rs:58:54
+   |
+58 |         .schema_version(SchemaVersion::new(u32::MAX).unwrap());
+   |                                                      ^^^^^^ method not found in `SchemaVersion`
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `mnesis-postgres` (test "backup_tests") due to 2 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test backup_tests --all-features` exited with code 101

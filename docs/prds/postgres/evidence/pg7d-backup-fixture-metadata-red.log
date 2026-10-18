@@ -1,0 +1,50 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.05s
+────────────
+ Nextest run ID 12a4faec-5104-41db-b90d-b4733666a900 with nextest profile: default
+    Starting 4 tests across 1 binary
+        FAIL [   0.676s] (1/4) mnesis-postgres::backup_tests completed_chunks_interchange_through_fjall_reopen
+  stdout ───
+
+    running 1 test
+    test completed_chunks_interchange_through_fjall_reopen ... FAILED
+
+    failures:
+
+    failures:
+        completed_chunks_interchange_through_fjall_reopen
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.67s
+
+  stderr ───
+
+    thread 'completed_chunks_interchange_through_fjall_reopen' (100990350) panicked at adapters/postgres/tests/backup_tests.rs:70:46:
+    called `Result::unwrap()` on an `Err` value: Value(MetadataEmpty)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.398s] (2/4) mnesis-postgres::backup_tests completed_chunks_restore_postgres_with_new_history_and_continuations
+  stdout ───
+
+    running 1 test
+    test completed_chunks_restore_postgres_with_new_history_and_continuations ... FAILED
+
+    failures:
+
+    failures:
+        completed_chunks_restore_postgres_with_new_history_and_continuations
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.39s
+
+  stderr ───
+
+    thread 'completed_chunks_restore_postgres_with_new_history_and_continuations' (100990393) panicked at adapters/postgres/tests/backup_tests.rs:70:46:
+    called `Result::unwrap()` on an `Err` value: Value(MetadataEmpty)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        PASS [   0.551s] (3/4) mnesis-postgres::backup_tests empty_backup_has_one_completed_chunk_and_no_sections
+        PASS [   1.080s] (4/4) mnesis-postgres::backup_tests every_incomplete_chunk_rejects_before_destination_writes
+────────────
+     Summary [   2.730s] 4 tests run: 2 passed, 2 failed, 0 skipped
+        FAIL [   0.676s] (1/4) mnesis-postgres::backup_tests completed_chunks_interchange_through_fjall_reopen
+        FAIL [   0.398s] (2/4) mnesis-postgres::backup_tests completed_chunks_restore_postgres_with_new_history_and_continuations
+error: test run failed

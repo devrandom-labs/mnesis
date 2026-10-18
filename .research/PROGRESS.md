@@ -1,5 +1,83 @@
 # Current work — 2026-10-18
 
+## Authoritative continuation — 2026-10-18 21:00 UTC
+
+Goal ACTIVE. PR388 normal protected squash merged20:59:59Z at
+651aabf35e94b7b0e98e9e87eff19f6964df95f3, all40checksSUCCESS/one scheduledskip,
+no review threads. Actual final native/workspace/fuzz/mutant evidence reviewed
+THREE ways per run and recorded in research. Twelve focused protected merges.
+
+Primary backup branch work/postgres-chunks rebased ONLY child above19e onto
+651aabf3, new signed00c5f67d2e58dc1766e8d1b946cdd5902d6ed4fa. Source identical
+to signed470d2ca2; seven native backup laws,222/222local32.681s/Linux69.380s,
+0skips, full workspace1571/1571PASS528.503s/14slow/4filtered and clean fixup.
+Final evidence/docs amended before focusedPR; normal unchanged signed hook
+required, source-equivalent/cached work is not a fresh test execution.
+
+Independent /tmp/mnesis-postgres-recovery WIP has physical operator saved-pair
+restart/advance, checked source stop, real pg_verifybackup manifest/WAL and exact
+corrupt/missing-file rejection. Three physical lawsPASS3.254s/4filtered, Clippy
+PASS0.69s. Prior wrong-reason green and expected-message red preserved. Shared
+consumer helper will replace private backup duplicate after rebase onto backup.
+Budget220newRust/15existing edits/100doc lines,0production/dependency changes.
+Need combined224native/Linux/full unchanged gate and focusedPR. Keep all stashes,
+worktrees and USER root research.md edit. Root remains docs/postgres-prd.
+
+No live own test handles:9207physicalDONE0,55320backupcommitDONE0,
+62488LinuxDONE0. PR388deliveryhandle21463DONE0. ReleasePR378 independentCodSpeed
+failure unresolved; no publication claimed. Whole PG7/PG8/PG9 acceptance remains.
+
+## Authoritative current continuation — 2026-10-18 20:43 UTC
+
+Goal ACTIVE. PR388 OPEN at signed19e706242412f31a8505b88c51340a4024104f2a:
+https://github.com/devrandom-labs/mnesis/pull/388. Query-only ordering fix passed
+215native42.586s and215Linux52.938s/0skips; normal signed full hook completed
+1571/1571workspace535.364s,14slow,4compilerunselected, cleanfixup. SignatureG/good
+EDDSA ultimate Joel DSouza. Exact downloaded history-mutants proof already in
+this parent. Pathworktree clean; currentPR388CI/artifact/review/merge pending.
+Prior statements below saying pathcommit/hook running or noPR are superseded.
+
+Current primary /tmp/mnesis-postgres-chunks branchwork/postgres-chunks now based
+19e70624 (unmerged query parent). Owned stashb7a00486375a4c92d25157262077a8841573be38
+preserved; reapplied byID after rebase. Two append-only record conflicts resolved
+by verifying old base content unchanged and concatenating complete parent records
+with complete child additions, never dropping either. Progress replaced with
+parent compact canonical state plus this update. Other changes auto-merged.
+No conflicted files remain. Keep all earlier stashes/worktrees and user's root
+research.md edit. Root main stays docs/postgres-prd; mirror only our progress.
+
+Backup slice:574native testlines within pre-recorded revised650ceiling; dev-only
+existingFjall+storeCBOR, lock+1localedge, zero production/API/tool/runtime changes.
+Six laws nativePASS15.842s; six-law source full217PASS135.905s/0skips; current
+seven-law source Clippyall/allPASS1.15s; export/import-without-projection six laws
+PASS2.426s/0skips. Seventh actual logical Projection recovery lawPASS0.237s with
+six others filtered: existing real Counter repository/projector, sourcecheckpoint4,
+completed2chunks, newhistory/Absentdestinationcheckpoint, rebuild4, close/reopen
+actualpool/reloadexactpair, appendthroughrepository, processandpersist5.
+Three reviews perrun in research, original compilation/invalidmetadatafixture
+reds retained. No MetadataSomeEmpty support: owning type explicitly forbids it.
+Lazy listing, two-event batches, fixed16KiB sink, row4096/page1. Assertions cover
+all event fields across Postgres/Fjallclose-reopen/Postgres,39chunks62events,
+initial/MAXschemas, absent/binarymetadata and small/3000bytepayloads. Native57P01
+source failure and blocked-query cancellation leave writerPoisoned; cancellation
+releases native view. Every truncated one-eventchunk rejects before writes.
+No whole-backup materialization in pipeline; expected62fixture records collected
+only as oracle. Per-chunk atomicity is not whole-backup atomicity. Inventory/
+missingfiles/oversizedartifact/route/finalconflict full acceptance still pending,
+as are physical actual Projection/operator-stop/RPO/RTO and PG8/PG9.
+
+Combined current native222/222PASS32.681s,0skips (211base+4path+7backup), current
+strictClippyall/allPASS1.26s. Local native63772DONE0. Current Linux session62488,
+/tmp/mnesis-pg7d-backup-combined-linux.log, native builder independent of localPG.
+Next normalSIGNEDhook/focusedPR. Do not repeat16matrix without new concern.
+Before backupPRdelivery wait for PR388 protected merge; rebase only child range
+onto squashmain, preserving identical product source and all records. Verify
+finalhead through requiredCI/actualmutants and normal protected exactheadmerge.
+Parent normalcommit session47801DONE0; push/PR84084DONE0; no remaining own gate
+processes. Rootsharedtarget cache only generated artifacts, last22GiBfree.
+ReleasePR378 current65ddfc0cc1a6024011de18cb62260830b85a3963 CodSpeedFAILURE;
+lockfix remains delivered. Publication gated on entire PG0-PG9, no waiver.
+
 Persistent goal ACTIVE, no token budget. ALL PG0–PG9 remain in scope through
 protected merges, publication and clean registry real-Postgres consumer. PG10 is
 conditional. Labcast owns command identity/deduplication/controller fencing.

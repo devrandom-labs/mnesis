@@ -1,0 +1,47 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-chunks/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/mnesis)
+    Checking crc32c v0.6.8
+    Checking minicbor v2.2.3
+    Checking crossbeam-epoch v0.9.20
+    Checking compare v0.0.6
+    Checking xxhash-rust v0.8.18
+    Checking byteorder-lite v0.1.0
+    Checking twox-hash v2.1.3
+    Checking quick_cache v0.6.24
+   Compiling enum_dispatch v0.3.13
+    Checking spin v0.9.9
+    Checking rustc-hash v2.1.3
+    Checking hashbrown v0.14.5
+    Checking varint-rs v2.2.1
+    Checking lz4_flex v0.13.1
+    Checking crossbeam-skiplist v0.1.3
+    Checking interval-heap v0.0.5
+    Checking byteview v0.10.1
+    Checking sfa v1.0.0
+    Checking self_cell v1.3.0
+    Checking flume v0.12.0
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/postgres)
+    Checking dashmap v6.2.1
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store)
+    Checking lsm-tree v3.1.8
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-chunks/crates/test-domains)
+    Checking fjall v3.1.8
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-chunks/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-chunks/adapters/fjall)
+error: `expected` shadows a previous, unrelated binding
+   --> adapters/postgres/tests/backup_tests.rs:250:50
+    |
+250 |             Err(PostgresError::HistoryMismatch { expected, actual })
+    |                                                  ^^^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/backup_tests.rs:230:9
+    |
+230 |     let expected = contents(&source).await;
+    |         ^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_unrelated
+    = note: requested on the command line with `-D clippy::shadow-unrelated`
+
+error: could not compile `mnesis-postgres` (test "backup_tests") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

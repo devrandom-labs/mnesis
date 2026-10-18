@@ -4821,3 +4821,182 @@ zero native tests executed and zero product-defect credit; (3) repair only the
 helper lifetime to &'static str, matching all literal callers; preserve all
 oracles, injections, SUT calls and cleanup. Raw /tmp/mnesis-pg8-path-original.log
 preserved separately before rerun.
+# PG7 bounded chunk composition — 2026-10-18
+
+Combined source now includes query parent19e706242412f31a8505b88c51340a4024104f2a
+(PR388 OPEN) and all seven backup laws. Strictall/all ClippyPASS1.26s and full
+native222/222PASS32.681s,0skips. THREE reviews: (1) complete combined owning suite
+211previous+4query+7backup, all optional capabilities enabled; (2) actual local
+17.10 and independent18.6restore processes execute, including blocked native
+faults, both adapter interchanges and actual logical consumer restart; (3) no
+filtered/ignored cases, all exact version/field/history/state/uncertainty oracles
+retained, no workload/deadline/limit/lint weakening. Earlier217suite is not
+misreported as current222. This is not whole PG7–PG9 delivery or capacity proof.
+Actual budget574newtestlines/650, devdependency2entry edits, lock1localedge/5,
+production0. README documents per-chunk atomicity, whole-inventory obligation
+and file-sync ownership. Current Linux verification remains in progress.
+
+Current projection-enabled backup source strict all-feature/all-target Clippy
+PASS1.15s. Separate export,import without projection native6/6PASS2.426s,0skips.
+THREE reviews: (1) all six non-projection laws remain available without the
+projection capability; (2) actual distinct feature build and native bodies run,
+including both blocked-query faults; (3) entire file-selected suite has zero
+skips, projection law excluded at compile time, no default/all16feature claim.
+
+Path normal SIGNED commit hook completed unchanged full Nix gate. Actual current
+workspace1571/1571PASS535.364s,14slow,four compiler cases unselected. THREE reviews:
+(1) full owning workspace laws include four added query regressions; (2) actual
+nextest execution, but absent DATABASE_URL still means zero native database
+credit from this Darwin gate; (3) unchanged property workload/deadlines/durability,
+no checks skipped/bypassed. Exact current nextest artifact
+/nix/store/xgdwqv92darvg56ya6r3ar1zjaqn9n2n-mnesis-nextest-0.4.0 has clean fixup
+with no classifier crash in its retrieved full log, unlike older recorded outputs.
+Do not generalize this to an upstream helper repair. Source artifact archives
+4.28GiB to1.01GiB under unchanged gate. New signed commit19e70624; exact full head
+and PR delivery will be checked before any merge claim.
+
+Actual logical projection recovery law1/1PASS0.237s,six other backup cases
+filtered. THREE reviews: (1) logical import must discard source checkpoint
+provenance and permit a fresh state rebuild, saved-pair restart and later progress;
+(2) existing actual Counter repository/projector saves source state4, exports two
+completed bounded chunks, fresh-history imports, confirms checkpointAbsent,
+rebuilds4, closes/reopens the actual pool, reloads the exact rebuilt position/state,
+then appends through the real repository and advances to5; (3) source/destination
+history differ, destination checkpoint retains its identity and strictly increases
+after append. No mock consumer, no copied source checkpoint, no physical-recovery
+or deployment RPO/RTO claim. Current574testlines fit650budget. This new law was
+not part of the earlier217-case full run; combined final suite is still required.
+
+Six-law source full native suite217/217PASS135.905s,0skips, strictall/all
+ClippyPASS. THREE reviews: (1) owning entire selected feature suite including
+new six backup laws and previous211; (2) native17.10 plus independent18.6restore
+processes actually execute; (3) source predates the next consumer-restart test,
+no capacity-parity claim from this slower concurrent-build run, no deadline/
+workload/oracle reduction. Parent path's four tests are on its separate branch,
+so combined acceptance will require222 after the additional seventh backup law.
+Before adding real logical projection restart, test-only budget550->650.
+
+Strict Clippy rejected one fixture pattern shadowing the expected-field map with
+an error's expected-history field. THREE reviews: exact HistoryMismatch bytes
+must still match; this is lint-only failure and full suite did not run; rename
+the pattern binding to current without changing assertions or lint policy.
+
+Current six native backup laws6/6PASS15.842s,0skips. THREE reviews:
+(1) retain all four exact roundtrip/empty/truncation laws, plus incomplete chunk
+on source failure and cancellation; (2) both new faults use actual session
+cursors, actual ACCESS EXCLUSIVE contention and pg_stat_activity Lock proof
+before terminating the in-flight backend or dropping the pending drain;
+(3) failure retains native57P01, both writers reject finish with exact Poisoned,
+and cancellation releases the actual backend view before its60slifetime. The
+independent blocker rolls back before final assertions. No synthetic failing
+stream substitutes for the adapter. Current477testlines fit revised550budget.
+Raw /tmp/mnesis-pg7d-backup-six.log retained; full owning suite/strict Clippy,
+inventory/missing-file acceptance, mapping/final-conflict recovery and operator/
+Projection restart evidence remain. Release PR378 currenthead65ddfc0cc1a6024011de18cb62260830b85a3963
+again has actual CodSpeed FAILURE; no publication or waiver.
+
+Previous path slice Linux native integration completed:215/215PASS52.938s,
+0skips; /nix/store/qb2rhvdhvb2qkh8hslg4v1r4mrk51v4m-mnesis-postgres-integration.
+THREE reviews: (1) complete selected all-feature suite includes all four new
+query laws and previous history/atomic/checkpoint/session tests; (2) independent
+native18.6server and current adapter archive actually execute on aarch64-linux;
+(3) zero runtime skips, exact source queries qualified, no deadline/workload/
+assertion changes, clean output fixup. Each of five one-case feature smokes also
+reviewed THREE ways: intended capability law, actual native execution, other
+cases filtered and no independent-feature-build credit. Parent path signed
+commit's unchanged full Nix hook remains running; no delivery claim yet.
+
+Corrected native first four laws4/4PASS8.001s,0skips. THREE reviews:
+(1) exact62-event field maps,39completed bounded chunks and both import policies,
+binary IDs, schema1/MAX and metadata absence/binary are compared;
+(2) actual Postgres->Postgres new-history restore and Postgres->Fjall(close/reopen)
+->Postgres execute, plus every truncation of a complete single-event artifact;
+(3) backup lists lazily, uses two-event batches and one16KiB fixed sink with4KiB
+source row bound; restore reads <=16KiB plus one reject byte. Assertion maps
+materialize only the62-event fixture, not the backup path. This is not capacity,
+operator recovery-point/time, missing-whole-chunk inventory or projection restart
+proof. Empty backup has one completed artifact, zero sections, and zero writes.
+Raw /tmp/mnesis-pg7d-backup-native-second.log retained. Before adding two actual
+blocked-query fault cases, test-only budget refined500->550lines; no product edits.
+
+First actual native run:4laws in2.730s,2pass/2fail/0skips. THREE reviews:
+(1) empty completed backup and every truncated prefix correctly reject/restore
+through the actual adapters; (2) both populated cases stop at PendingEnvelope
+construction with exact Value(MetadataEmpty), before export/import, so these
+are invalid-fixture failures, not adapter defects; (3) the owning Metadata type
+forbids Some(empty), not a supported serialized state. Remove only invalid empty
+metadata generation, retain absent/nonempty binary metadata, both schema
+extremes,3000-byte payloads, fixed bounds, exact field comparisons and both
+atomicity policies. Original native red remains /tmp/mnesis-pg7d-backup-native-first.log.
+
+Pre-edit budget is in HYPOTHESES:500test lines,2existing-workspace dev-dependency
+entries/feature edits,5lock-edge lines,0production changes expected. Reuses locked
+minicbor2.2.3 and Fjall3.1.8, existing MIT/Apache workspace adapters and CBOR box;
+no new production dependency or crate-version selection. Root lock changes only
+one local mnesis-fjall dev edge. First compile rejected a mistaken fixture call
+to SchemaVersion::new: this constructor takes NonZeroU32 and is infallible.
+THREE reviews: (1) all serialized fields and version continuations remain exact;
+(2) this is fixture E0308/E0599, zero executed native laws and zero product-defect
+credit; (3) use the owning constructor, keep every oracle, and broaden fixture
+fields before the first native run to initial/MAX schemas, absent/empty/binary
+metadata and both four-byte and3000-byte payloads under4096-byte row bounds.
+Raw /tmp/mnesis-pg7d-backup-first.log retained, not overwritten.
+PR388 final required gates independently downloaded: workspace1571/1571PASS
+121.690s/124.201s,4slow/4compiler cases filtered in each. EACH THREE reviews:
+owning workspace laws; actual nextest bodies execute; database-free workspace
+passes supply no native database credit and preserve all assertions/workloads.
+The same jobs actually build native integration215/215PASS44.012s/44.042s,
+zero skips. EACH THREE reviews: full advertised suite; fresh native derivation
+and real database; exact query source and no deadline/assertion reduction.
+Each of ten one-case native feature smokes also reviewed THREE ways: selected
+capability contract; native body executes; remaining tests filtered, no isolated
+feature-build claim. Each of eight bounded corpus-replay invocations (2/1/1 cases
+per job) reviewed THREE ways: owning decoder/value boundary; actual replay executes;
+one-second bounded replay, not a deep-fuzz or database proof.
+Downloaded /tmp/mnesis-pr388-flake-ci.log and -flake-call.log retained.
+
+PR388 deep-fuzz39164331910: wire/header/chunk/value LibFuzzer campaigns each61s,
+6,692,894/3,297,859/1,633,785/5,901,327 executions, no observed failure. EACH THREE
+reviews: actual owning decoder or value contract; instrumented real production
+target executes; unchanged4096 input cap and61s duration, finite campaign only.
+Corresponding four AFL++ campaigns each60s, zero saved crashes/timeouts. EACH
+THREE reviews: production owning target; actual instrumented campaign and locked
+build succeed; finite coverage and existing crash gate limitations remain PG9
+work, no exhaustive absence claim. Raw /tmp/mnesis-pr388-fuzz.log retained.
+GraphQL reviewThreads empty; all40checksSUCCESS/one scheduled sweepSKIPPED at
+signed19e706242412f31a8505b88c51340a4024104f2a. Reviewed mutant artifact remains
+zero runtime catches, one compile-unviable candidate; original native controls
+supply query falsification. Normal protected exact-head merge is now authorized.
+
+Backup slice normal signed hook completed0 at470d2ca229207fb97b1c59300c74075bb83c7f22,
+signatureG; workspace1571/1571PASS528.503s,14slow/4compiler cases filtered.
+THREE reviews: owning workspace and new backup test compilation; actual fresh
+nextest runs; absent DATABASE_URL means zero native proof, unchanged gate and no
+fixup crash in retrieved log. Independent Linux actual222/222PASS69.380s,0skips,
+artifact /nix/store/2wkr7bb03mnvlx4888rwxgqv4dgxb5gk-mnesis-postgres-integration.
+THREE reviews: complete seven-backup-law source plus four query laws and prior
+capabilities; independent native Linux server actually executes; zero skipped
+tests, no weakened data/limits/deadlines. Each of five one-case native smokes
+reviewed THREE ways: selected capability; actual body; other cases filtered and
+no independent feature-build credit. Raw /tmp/mnesis-pg7d-hook-final.log and
+/tmp/mnesis-pg7d-backup-combined-linux.log retained. Source is frozen pending
+parent protected merge and source-equivalent child rebase, not full delivery.
+
+
+PR388 protected squash merged2026-10-18T20:59:59Z at
+651aabf35e94b7b0e98e9e87eff19f6964df95f3 from reviewed signed19e70624.
+All40checksSUCCESS, one scheduled sweepSKIPPED, reviewThreads empty. No admin
+or performance waiver. Child backup rebased only above19e onto that squash;
+new signed00c5f67d2e58dc1766e8d1b946cdd5902d6ed4fa has identical adapter/core/
+manifest/lock/Nix/CI source to470d2ca2 (git diff --exit-code). Documentation now
+records final delivery evidence. Normal unchanged signed hook remains required
+for amended reviewable commit; no fresh native run claimed from a source-equivalent
+rebase or cached gate. PG7/PG8/PG9 and publication remain incomplete.
+
+Source-equivalent signed amendment unchanged Nix gate completed0 using existing
+outputs, not a new test execution. THREE reviews: all owning gate obligations
+remain selected; reused derivations have the previously recorded actual native/
+workspace evidence; cache reuse is not additional runtime coverage. Checked-in
+full-gate/Linux logs normalize terminal escapes, carriage-return progress and
+trailing whitespace only; original raw files above remain untouched. Initial
+whitespace review found raw terminal whitespace; repaired before PR publication.
