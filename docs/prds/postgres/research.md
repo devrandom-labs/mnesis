@@ -5215,3 +5215,185 @@ signed56007a30537d283a9276600ed3b79760aafbff5d; git diff --exit-code confirms
 adapter/core/manifests/locks/Nix/CI identical to reviewed f431999b. No native rerun
 or whole-goal delivery claimed by rebase. Final source-equivalent doc amendment
 uses unchanged gate, cached outputs are not additional runtime execution.
+
+# PG7 completed chunk routes and failures — 2026-10-18
+
+First strictall/all compile fails two shadow-unrelated bindings in final-conflict
+fixture. THREE reviews: exact final mismatch and unchanged-or-earlier policy
+state remain the contract; Clippy fails before any native run, zero product-defect
+credit; rename only expected-pattern to next and local key bytes to id, retaining
+strict lints, actual import calls and every oracle. Before execution source review
+also removed a redundant final assertion that assigned the actual destination
+back to its own expected variable; independent original/source/seed maps remain
+all oracles. No pass credit from self-comparison. Original compile red retained
+/tmp/mnesis-pg7f-routes-first.log.
+
+First native routes run fails before SUT assertions:0passed/1failed/4unrun,
+6other cases filtered,0.163s. THREE reviews: completed-chunk route/conflict/view
+oracles remain unexecuted; actual fixture migrate raises native58P01 cannot load
+$libdir/plpgsql, no adapter-defect credit; process13259 still runs exact17.10
+binary but its /nix/store/k5mjkij9d9fcikm1pshcads63fsyf08r-postgresql-17.10
+package is absent and Nix reports invalidpath. Restore exact supported package
+with a Nix root before rerun; do not alter migrations, bypass schema validation,
+weaken assertions, silently switch server major or restart solely on observation
+timeout. Raw /tmp/mnesis-pg7f-routes-current.log retained before next attempt.
+Strictall/all Clippy passed0.82s first. This is environment repair, not productfix.
+
+Exact17.10 package restoration via nix-store --realise --add-root completed0,
+fetching original binary and lib outputs,7.3MiB. New explicit package root
+/tmp/mnesis-postgres-pg0-package preserves the running server's tool/library
+closure. No server restart, major-version/data change or migration edit. Actual
+Postgres version/native PLpgSQL probe retained separately; next native route run
+must establish behavioral evidence from unchanged compiled test source.
+
+After exact package repair and successful native version/PLpgSQL probe, routes
+run0pass/1fail/4unrun0.539s,6other cases filtered. THREE reviews: final-conflict
+WholeChunk branch and unchanged target pass before PerStream report assertion;
+actual importer returns Mismatch reachedNone,got1 while target already has1;
+resolve against owner before changing any oracle. crates/store/tests/
+import_inline_tests.rs::per_stream_partial_overlap_is_picky_rejected and existing
+Postgres atomic_tests explicitly pin reachedNone for a section that committed
+nothing. StreamOutcome docs also say None=untouched, but introductory "where the
+stream sits" is misleading: this is this import request's committed progress,
+not a current target-head read (concurrent writers can advance it). Preserve the
+owner's established None report and independently assert exact existing seed and
+all newly imported fields. Do not return source versions as target progress or
+claim that None means an empty target. Original mismatch red retained at
+/tmp/mnesis-pg7f-routes-native.log. This is a fixture/wording correction, not a
+product fix or a passing original defect witness. Native probe reviews: exact
+17.10 target; actual DO executes the restored library; no restart/schema bypass,
+zero backup-law proof from that probe alone.
+
+Corrected owning-contract source5/5nativePASS2.982s,6other backup laws filtered,
+strictall/all ClippyPASS4.14s. THREE reviews: (1) four new completed-chunk laws plus
+existing empty law preserve exact routes/fields/late conflict and one sessionview;
+(2) actual native binary targets, both policies, fresh+nonempty late duplicate,
+Barrier/spawn atomic writer commits before later session reads, actual source
+advances3/3/3 while restored source view remains2/2/2; (3) report reachedNone is
+established request-progress semantics, exact independent seed and prior source
+maps verify physical target state separately. No self-derived expected map,
+no skip/deadline/lint reduction, filtered subset is not the full suite. Raw
+/tmp/mnesis-pg7f-routes-established.log retained. Need fault controls, missing/
+oversize inventory, malformed/corrupt salvage, combined owning/native/Linux/gate.
+
+Expanded backup compile-only run rejected one108line salvage fixture against
+unchanged80line policy. THREE reviews: exact parser provenance and native import
+outcomes remain required; Clippy stops before native execution, zero test credit;
+move pure damage/decode/provenance checks into a private typed SalvagedChunk
+helper, keep actual native import workflow in its test, no allow/lint/policy
+change or duplicate decoder implementation. Raw /tmp/mnesis-pg7f-backup-all-first.log
+retained. Original planned new650/45helper/doc15 budgets remain unchanged.
+
+Helper extraction's compile run fails needless-borrow at decode_chunk(&bytes),
+where bytes is now a slice. THREE reviews: exact two-block positive control stays;
+compile-only/zero native runs; remove that redundant reference only, no policy
+or oracle change. Raw /tmp/mnesis-pg7f-backup-all-second.log retained.
+
+Current completed-backup native13/13PASS19.973s,0skips; strictall/all ClippyPASS
+0.68s. THREE reviews: (1) all seven earlier plus six new laws preserve exact event
+fields, real route evaluation and policy progress, finite snapshot view and
+explicit damage recovery; (2) actual native final-file absence/size overflow
+reject before any writes under both policies, exact NotFound/FileTooLarge;
+repair restores all6events; same-length tail corruption yields exact completion
+Checksum and [Event1,Corrupt], deliberately chosen partial import reports Corrupt
+reached1 and exact original prefix; malformed headings reject both decoders and
+torn completion retains Missing plus producer identity; (3) zero skips, immutable
+owned file inventory explicitly required, one bounded file per preflight/import
+pass, no whole-backup materialization/atomicity/powerloss/authentication claim.
+Actual default-source view advances3/3/3 under Barrier/spawn atomic commit while
+completed CBOR restores2/2/2. Raw /tmp/mnesis-pg7f-backup-all-current.log retained.
+Actual additions503/removals23 fit650new/45helper edit budgets; core docs10+/8-
+clarify existing progress contract only, no executable core change.
+
+Fresh isolated session-composition control actualFAIL0.108s,1case/12filtered.
+THREE reviews: (1) same-view completed CBOR must exclude the overlapping atomic
+commit from every stream; (2) replacing ONLY later session exports with supported
+ordinary EventExporter compiles and restores exact2/3/3 instead of source oracle
+2/2/2 after actual spawned writer commits3/3/3; (3) runtime map assertion rejects
+mixed native view, not setup/timeout/compile error; correct source still uses the
+session. No fabricated mutator catch. Raw /tmp/mnesis-pg7f-independent-export-control.log
+and exact control source /tmp/mnesis-pg7f-independent-export-control.rs retained.
+
+Second fresh isolated control actualFAIL0.093s,1case/12filtered. THREE reviews:
+independent caller inventory must reject a missing final file before any import;
+remove ONLY preflight loop, retain ordinary imports, and native target contains
+exact earlier two streams rather than empty after NotFound; runtime exact-map
+oracle rejects actual early writes, not a compiler/environment/timeout error.
+This falsifies the caller's tested restore procedure, not a new adapter file API.
+Controlworktree /tmp/mnesis-backup-controls.9MH4i5 intentionally keeps this mutant;
+raw /tmp/mnesis-pg7f-no-inventory-control.log retained. Both controls terminal;
+no concurrent local native suite was started against the shared physicalcluster.
+
+Owned WIP saved by exact stash5a7ca8a2f2f4374ef732ed69228c3a500efa9b81 and
+reapplied after rebase onto physicalPR390signed5b717bde. Verified exact unchanged
+base prefixes before preserving full parent+child research/HYPOTHESES additions;
+backup import-only conflict keeps new typed imports and parent's shared consumer,
+never revives private duplicate. Logical restore still awaits fallible helper
+and reuses consumer::resume. Need current combined230-suite proof, not combining
+counts from separate source revisions. User root research edit remains untouched.
+
+Current combined source now includes physicalPR390 and all six new chunk laws.
+Full native230/230PASS42.979s,0skips. THREE reviews: complete selected capability
+suite (224parent+6new); actual local17.10 plus independent18.6 physical drills,
+shared logical/physical consumer and exact new native failures execute; zero
+filtered/ignored cases and no changed bytes/limits/deadlines/oracles. Separate
+export+import without projection12/12PASS12.571s,0skips. THREE reviews: all12
+non-projection backup laws remain available; actual isolated feature compilation
+and native test bodies execute; projection law excluded at compile-time, not
+misreported as an all-feature suite. Strict default/EXIM/allfeature all-target
+ClippyPASS4.35/2.60/1.79s EACH THREE-reviewed: selected feature surface; actual
+compiler/linter run; no native proof or weakened lint policy. Final matrix57179
+terminal0. Raw /tmp/mnesis-pg7f-*-native.log and *-clippy.log retained.
+
+PR390 final actual evidence reviewed at signed5b717bde9813ed776efcd23394fecc88ae4b7875:
+all40checksSUCCESS/one scheduledsweepSKIPPED, GraphQLreviewThreads empty.
+Mutants-in-diff39175498203 actual log No mutants to filter, no upload files and
+artifactsAPI empty. THREE reviews: no changed production expression; zero baseline/
+mutant tests execute; zero runtime catches/percentage, original native control
+remains the stopped-primary falsifier. No imaginary artifact or mutation score.
+
+Actual downloaded fullCI39175498308/reusable39175495005: workspace1571/1571PASS
+84.505s/121.933s,2/4slow/4compiler cases filtered. EACH THREE reviews: owning
+workspace laws; actual nextest runs; absentDATABASE_URL is no native proof.
+Four native224/224PASS41.841/42.403/44.291/48.779s,0skips EACH THREE reviews:
+complete current physical+logical/previous suite; actual native builds/bodies;
+zero skips/filtered cases and unchanged durability/deadline/oracles. Duplicate
+summary echoes are not extra runs. Twenty one-case native smokes EACH THREE
+reviews: selected capability; real native body; other cases filtered/no independent
+feature-build credit. Six bounded replay invocations (2/1/1 per job) EACH THREE
+reviews: owning decoder/value law; actual replay; one-second corpus run only.
+Six compiler-fixture invocations (2/1/1 per job) EACH THREE reviews: compile accept/
+reject contract; actual fixture compiler; diagnostics only, no database credit.
+Each of three feature runs per core15/store217/wake17/Fjall131/inmemory25/30/
+macros1/store-testing0/wake-nostd0 in both jobs THREE-reviewed: selected owner;
+actual bodies or explicitly zero-case compile; no native/omittedPostgresfeature
+CI credit. Raw /tmp/mnesis-pr390-ci.log and -call.log retained.
+
+Fuzz39175498286 actual wire/header/chunk/value LibFuzzer EACH61s:
+6,635,619/2,910,224/1,306,205/5,774,047 executions without observed failure. EACH
+THREE reviews: real owning production target; instrumented runs; unchanged4096
+input cap/61s finite campaign, not exhaustive proof. Corresponding four AFL++
+EACH60s,0savedcrashes/timeouts. EACH THREE reviews: target boundary; actual locked
+instrumented build/campaign; finite coverage and existing crash-gate limitations
+stayPG9 work. Raw /tmp/mnesis-pr390-fuzz.log retained. Normal exacthead protected
+merge authorized; whole PG0–PG9 and publication remain incomplete.
+
+Final backup slice normalSIGNEDhook26864completed0 at41c6732eb457953b7f29c3a17a6ef622c8a0a60d,
+signatureG. Workspace1571/1571PASS522.470s,13slow/4compiler cases filtered,
+cleanfixup. THREE reviews: full owning workspace and new source compile; actual
+fresh nextest execution; DATABASE_URL absent means no native test credit, no gate/
+workload/assertion weakening. Independent Linux64778completed0:230/230PASS58.457s,
+0skips, /nix/store/5y75jgpyxzg9xwpljkm2pfvmd0kdghvs-mnesis-postgres-integration.
+THREE reviews: full combined physical/backup suite; actual fresh native18.6server;
+zero skips/filtered/relaxed bounds, exact native errors and final maps asserted.
+Five one-case native smokes EACH THREE-reviewed: intended feature; actual body;
+other cases filtered, no independent feature-build proof. Raw
+/tmp/mnesis-pg7f-hook-final.log and -combined-linux.log retained. No new execution
+claimed from subsequent source-equivalent parent squash rebase or cached gate.
+
+PR390 protected squash merged2026-10-18T23:37:42Z at
+2247c739525f9d8765179b7d9f7f67c6b43bd32f from reviewed5b717bde,
+all40checksSUCCESS/one scheduledskip/no reviewthreads. No admin/waiver.
+Final backup source41c6732e already passed actual230native/Linux and unchanged
+full gate; append final evidence/docs, then source-equivalent child-only rebase
+onto physicalsquash. Cached subsequent gates are not extra runtime executions.

@@ -450,3 +450,49 @@ Pre-edit budget<=180new test/helper Rust lines,<=15existing test lines changed,
 <=100operator documentation lines;0production/API/dependency/runtime/tool changes.
 Keep current backup commit frozen. Add small shared consumer fixture for the
 logical/physical recovery owners; use it in logical tests after parent delivery.
+
+# PG7 completed backup routes and failure boundaries — 2026-10-18
+
+Previous goal turn PROGRESS: PR388 protected merge, signed backup PR389, shared
+physical/logical consumer plus224 actual native laws; live Linux31050 and full
+signed hook95312 verified, not restarted. Continue independent acceptance while
+those gates execute; do not mutate their worktree/index.
+
+Threatened invariants: completed CBOR must retain caller binary routes and exact
+fields; a late duplicate rejects before writes under both policies; a final
+storage-head conflict leaves WholeChunk untouched and PerStream retains exact
+reported earlier progress. Consistent CBOR must retain one session view even
+when an actual overlapping atomic writer commits between exported streams.
+Normal import rejects damaged/torn artifacts; deliberate salvage retains producer,
+completion uncertainty and exact recovered prefix. The caller's independent file
+inventory and fixed chunk cap must reject missing/oversized files before writes.
+
+Pre-edit budget: <=450 new native-test/helper lines and <=45 existing helper/call
+edits in backup_tests.rs,0production/API/dependency/runtime/tool changes. Reuse
+fixed16KiB sinks, real Postgres/Fjall/store import, existing CBOR APIs and native
+Barriers/atomic fixture. Read one chunk at a time; no whole-backup collection.
+Falsifiers: any mismapped/lost field, early write on ambiguous route, wrong final
+conflict/report, mixed cross-stream source view, silent normal salvage or absent
+file accepted using only completion evidence from the remaining files. Each test
+must distinguish intended native/typed failures from setup errors. No new backup
+format, manifest framework or production file orchestrator. File inventory is
+explicit caller evidence, not something completion records can infer. Rollback
+boundary is this test/doc slice if the actual owners cannot satisfy the contract;
+record a separate production budget and original-source witness before a fix.
+
+Before adding independent inventory and explicit salvage laws: refine new-test
+ceiling450->650 for completed-chunk source plus native malformed/CRC/salvage,
+missing-final-file and cap-edge checks. Current four laws/helper293added/1removed.
+Existing helper-edit ceiling45 remains: make read_chunk/restore fallible for actual
+file errors; restore first checks the caller's complete independent inventory,
+one bounded file at a time, before any import. It re-reads verified immutable
+files during import; no concurrent filesystem-mutation or whole-backup atomicity
+claim. This is test composition of existing primitives, not a production manifest,
+backup runtime or new tooling. Completion cannot infer missing files; expected
+count is independent caller evidence. Keep exact IO kinds and contents assertions.
+
+Before clarifying the demonstrated report ambiguity: allow <=15 core doc lines
+only, no shared executable change. Existing canonical import laws and adapter
+atomic tests pin reachedNone when this request commits nothing, even for a
+nonempty target; do not change those semantics. Clarify request progress vs
+current target head, retain independent exact destination contents assertions.

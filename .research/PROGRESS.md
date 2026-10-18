@@ -1,5 +1,77 @@
 # Current work — 2026-10-18
 
+## Latest protected delivery — 2026-10-18 23:38UTC
+
+Goal ACTIVE,14focusedprotectedmerges. PhysicalPR390 normal exacthead squash
+merged23:37:42Z at2247c739525f9d8765179b7d9f7f67c6b43bd32f from5b717bde,
+40SUCCESS/1scheduledskip/no reviewthreads. Actual CI/native/workspace/fuzz/
+no-mutant-artifact records downloaded and THREE-reviewed perrun in research.
+
+Final backup branchtest/postgres-backups signed41c6732eb457953b7f29c3a17a6ef622c8a0a60d
+normal unchanged hookDONE0:1571/1571workspace522.470s,13slow/4filtered,cleanfixup.
+LinuxDONE0:230/23058.457s0skips, artifact5y75jgpyxzg9xwpljkm2pfvmd0kdghvs.
+Localnative230/23042.979s, EXIM12/12, all strict checks/control evidence retained.
+Only finaldocs/evidence amendment pending, then rebase ONLY above5b717 onto2247,
+sourceequivalence check, signedhead/focusedPR/fullCI/review/normalprotectedmerge.
+Sessions26864/64778DONE0; do not restart. PG7 logical operator timing/profile
+still due; no wholePG7/readiness claim from native laws alone.
+
+Independent /tmp/mnesis-postgres-security branchwork/postgres-security based5b717.
+Private nativecluster lifecycle extracted at secondowner, restore-only methods
+staywithrestoretests; NixaddsOpenSSLCLI2existing lists, no newtool/framework/API.
+Actual original VerifyFull law FAIL12.684s exactTLSnotcompiled after healthy
+nativepsqlVerifyFullssl=t control. Candidate WebPKIroots rejected actuallicense
+gateCDLA; no policy change oroldrootpin. SQLx supportedRustls/ring/native-roots
+selected; actualpatchedRustls0.23.46,ring0.17.14,22newpackages207+/12locklines
+withinrevised24/350budget. Current check/licenses/strictClippyPASS; SAMEactual
+TLSopen/append/exactread/close/reopen1/1PASS2.145s0skips. Allruns3reviewed.
+Need wrongCA/hostname/auth/redaction, restrictedroles/concurrency, fulloriginal
+restoretests afterextract, currentLinux/feature/audit/cost/docs. No securityPRyet.
+NativeTLS22596DONE0, shell21614DONE0/currentclippy59356DONE0; no localnative live.
+Profile /tmp/mnesis-postgres-security-shell actualOpenSSL3.5.8/Rust1.99/PG18.6.
+Preserve allworktrees/stashes and USERrootresearch edit. PG8/9/release remains.
+
+## Authoritative PG7 final-composition continuation — 2026-10-18
+
+Goal ACTIVE. PR389 protectedmerge49b32374041843a87980fc6f74a945f51f0b9ea3,
+PR390 physical OPEN at5b717bde9813ed776efcd23394fecc88ae4b7875, CI running.
+Primary /tmp/mnesis-postgres-backups branchtest/postgres-backups now basedPR390
+5b717 (unmerged). Exact owned stash5a7ca8a2f2f4374ef732ed69228c3a500efa9b81
+preserved/reapplied; full parent/child records retained after exact baseprefix
+verification. Import conflict keeps new types+parent sharedconsumer; no duplicate
+logical helper. Preserve all other worktrees/stashes and userrootresearch edit.
+
+Six new completed-chunk laws now retained503newtest/helper lines/650,23oldhelper
+removals/45; shared core docs10+/8- clarify request committed progress,0executable
+production/API/dependency changes. Explicitbinaryroute once/exactfields, late
+duplicate beforewrites fresh/nonempty, finalconflict exact policy report/state,
+real Barrier/spawn atomicwriter3/3/3 while sessionCBOR view2/2/2, independent
+inventory MissingFinal/oversizedfinal rejection beforewrite underbothpolicies,
+cap/cap+1 edges/repairedsuccess, normal CRC/malformed/torn rejection and explicit
+salvage retaining origin/completion failure/exactnative prefix/report.
+
+Current combined230/230nativePASS42.979s0skips, EXIMwithoutprojection12/12PASS
+12.571s0skips, strict default/EXIM/allfeature alltargetClippyPASS4.35/2.60/1.79s.
+Prior13/13backupPASS19.973s; original env/report/lint reds retained with THREE
+reviews each, no claim these are productdefect witnesses. Exact running17.10
+Nixpackage had disappeared; restored same binary+lib via supported nix-store
+and rooted /tmp/mnesis-postgres-pg0-package WITHOUT restart/changeofmajor/data.
+Probe confirms actual17.10 and native DO load; no database bypass.
+
+Fresh native controls: ordinary laterexports restore2/3/3 vs exact2/2/2 FAIL
+0.108s; omittedinventorypreflight writesfirst2streams beforefinalNotFound FAIL
+0.093s. Eachactualruntime oracle failure, not compile/timeout. Three reviews and
+rawlogs in evidence/research. /tmp/mnesis-backup-controls.9MH4i5 intentionally
+contains secondmutant; firstexactsource /tmp/mnesis-pg7f-independent-export-control.rs.
+Both controlhandles51130/1252DONE100. Finalmatrix57179DONE0. No localnative live.
+
+Current independentLinux session64778, /tmp/mnesis-pg7f-combined-linux.log,
+fresh source staged. Next normalSIGNED full unchanged hook and focusedPR.
+After physicalPR390 protectedmerge rebase ONLY child above5b717 onto squash,
+confirm sourceequivalence and finalhead CI/reviews then normalexactheadmerge.
+No wholePG7complete claim before both physical/currentdelivery; all PG8/9 remain,
+releasePR378 independentCodSpeedfailure stillunresolved, publication/registrydue.
+
 ## Latest delivery continuation — 2026-10-18
 
 PR389 protected squash merged23:09:09Z at49b32374041843a87980fc6f74a945f51f0b9ea3,
@@ -258,3 +330,35 @@ b51e18ce53f0a3e9326676e014d3bdab26778392 fbcc7d919c5df03ee3216065de84a63ddb82599
 65981423d8263e5a00d6df11e62668b3ed4cd2b6 f4fc89d0b83d5411f13eebca269b0cf76c1ef0a5
 219c6aaf1dfc8ea83f6ff6d3a0389b8a8ba0449f c5bc39b383f1da5bfdf1d3ece2e1dc97075315a2.
 Old history candidate notes are outdated. Do not redo finished history design.
+
+## Current PG7 final composition — 2026-10-18
+
+Goal ACTIVE, previous turn PROGRESS: PR389 protectedmerge49b32374 and physical
+PR390 OPEN at signed5b717bde9813ed776efcd23394fecc88ae4b7875; source verified224
+native/Linux and normal signedfullgate1571. PR390CI running; no release claim.
+Primary /tmp/mnesis-postgres-backups branchtest/postgres-backups basedd301;
+new6 completed-chunk laws+helpers503added/23removed within650/45 budget,
+core docs10+/8- clarifies existing reachedNone=requestcommittednothing, no core
+executable change. Exact independent existing seed/source maps retained; initial
+wrongexpected report and library environment reds preserved. Nix root repaired
+EXACT running17.10 package without restart; original package had disappeared,
+new /tmp/mnesis-postgres-pg0-package keeps actual tools/libraries live.
+
+Current13/13backup nativePASS19.973s0skips, strictall/all Clippy0.68s. Explicit
+binaryroutes once, fresh/nonemptylate duplicates, finalconflict both policies,
+actual Barrier/spawn atomicwriter3/3/3 while sessionCBOR view2/2/2, independent
+inventory beforewrite MissingFinal/oversizedfinal exactIOtypes+repairedsuccess,
+normal corruption rejection, deliberate salvage exactprefix/report/provenance,
+malformedbothdecoders and torncompletionMissing. Records contain THREEreviews
+perrun and originalfixture failures, no weakened policy/lints/oracles.
+
+Live isolated control session51130 /tmp/mnesis-backup-controls.9MH4i5,
+/tmp/mnesis-pg7f-independent-export-control.log. Detachedd301 + exactnewbackupfile,
+ONLY later session reads->ordinary EventExporter (supportedtraitimport added).
+Proof target /tmp/mnesis-pg6a-proof-target.z1jmzk packageclean first. Nativecontrol
+DBmnesis_pg7c_controls shares physical55432 with mainDB: no other localnative
+suite until terminal. Need actual runtimefail at mixedview, not compilecredit.
+Next separate preflight-omission control, then rebaseownedWIP onto physical5b717
+(parentunmerged) preserving allrecords/stashes, combined230native/currentLinux,
+default/EXIMwithoutprojection strictfeaturechecks, unchanged signedgate/focusedPR.
+Still entire PG8/9, releaseperformance and verifiedpublication+registryconsumer.

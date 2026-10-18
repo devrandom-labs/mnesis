@@ -1,0 +1,6 @@
+these 2 paths will be fetched (7.3 MiB download, 24.1 MiB unpacked):
+  /nix/store/k5mjkij9d9fcikm1pshcads63fsyf08r-postgresql-17.10
+  /nix/store/chrd4xzfvh20skzq21p5q96cm1hwsr91-postgresql-17.10-lib
+copying path '/nix/store/chrd4xzfvh20skzq21p5q96cm1hwsr91-postgresql-17.10-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/k5mjkij9d9fcikm1pshcads63fsyf08r-postgresql-17.10' from 'https://cache.nixos.org'...
+/tmp/mnesis-postgres-pg0-package

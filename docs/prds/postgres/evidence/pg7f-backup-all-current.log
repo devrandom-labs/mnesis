@@ -1,0 +1,130 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.68s
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.36s
+────────────
+ Nextest run ID d7a49433-5b19-48dc-ae0d-b49e5eb723e9 with nextest profile: default
+    Starting 13 tests across 1 binary
+        PASS [  17.316s] ( 1/13) mnesis-postgres::backup_tests canceling_a_native_drain_cannot_complete_a_chunk
+  stdout ───
+
+    running 1 test
+    test canceling_a_native_drain_cannot_complete_a_chunk ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 17.30s
+
+
+        PASS [   0.314s] ( 2/13) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+  stdout ───
+
+    running 1 test
+    test completed_chunk_final_conflict_keeps_exact_policy_progress_and_report ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.30s
+
+
+        PASS [   0.221s] ( 3/13) mnesis-postgres::backup_tests completed_chunk_keeps_one_view_across_an_overlapping_atomic_commit
+  stdout ───
+
+    running 1 test
+    test completed_chunk_keeps_one_view_across_an_overlapping_atomic_commit ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.21s
+
+
+        PASS [   0.382s] ( 4/13) mnesis-postgres::backup_tests completed_chunk_late_duplicate_rejects_before_any_write_under_both_policies
+  stdout ───
+
+    running 1 test
+    test completed_chunk_late_duplicate_rejects_before_any_write_under_both_policies ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.37s
+
+
+        PASS [   0.125s] ( 5/13) mnesis-postgres::backup_tests completed_chunk_uses_each_binary_route_once_and_preserves_all_fields
+  stdout ───
+
+    running 1 test
+    test completed_chunk_uses_each_binary_route_once_and_preserves_all_fields ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.12s
+
+
+        PASS [   0.747s] ( 6/13) mnesis-postgres::backup_tests completed_chunks_interchange_through_fjall_reopen
+  stdout ───
+
+    running 1 test
+    test completed_chunks_interchange_through_fjall_reopen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.73s
+
+
+        PASS [   0.190s] ( 7/13) mnesis-postgres::backup_tests completed_chunks_restore_postgres_with_new_history_and_continuations
+  stdout ───
+
+    running 1 test
+    test completed_chunks_restore_postgres_with_new_history_and_continuations ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.18s
+
+
+        PASS [   0.099s] ( 8/13) mnesis-postgres::backup_tests damaged_chunk_requires_explicit_salvage_and_retains_prefix_report_and_provenance
+  stdout ───
+
+    running 1 test
+    test damaged_chunk_requires_explicit_salvage_and_retains_prefix_report_and_provenance ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.09s
+
+
+        PASS [   0.066s] ( 9/13) mnesis-postgres::backup_tests empty_backup_has_one_completed_chunk_and_no_sections
+  stdout ───
+
+    running 1 test
+    test empty_backup_has_one_completed_chunk_and_no_sections ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.06s
+
+
+        PASS [   0.084s] (10/13) mnesis-postgres::backup_tests every_incomplete_chunk_rejects_before_destination_writes
+  stdout ───
+
+    running 1 test
+    test every_incomplete_chunk_rejects_before_destination_writes ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.08s
+
+
+        PASS [   0.179s] (11/13) mnesis-postgres::backup_tests independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes
+  stdout ───
+
+    running 1 test
+    test independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.17s
+
+
+        PASS [   0.156s] (12/13) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+  stdout ───
+
+    running 1 test
+    test logical_restore_rebuilds_a_projection_then_restarts_and_advances_it ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.15s
+
+
+        PASS [   0.085s] (13/13) mnesis-postgres::backup_tests native_source_failure_cannot_complete_a_chunk
+  stdout ───
+
+    running 1 test
+    test native_source_failure_cannot_complete_a_chunk ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.08s
+
+
+────────────
+     Summary [  19.973s] 13 tests run: 13 passed, 0 skipped

@@ -310,3 +310,17 @@ chunk inventory, import completed chunks with explicit routing and atomicity,
 and rebuild projection state from the new event history. Old source positions
 cannot be resumed against that history. Logical event chunks do not carry the
 source's snapshot caches, checkpoints or native migration tables.
+
+Keep an independent inventory of every intended chunk and its source cutoff.
+Before importing, check every inventory entry for existence, the selected file
+size cap and successful normal decoding, one bounded chunk at a time. A valid
+completion record in the remaining files cannot reveal an entirely missing
+file. Keep verified files immutable while importing. This preflight does not
+make a multi-chunk restore atomic: storage failure during import may leave prior
+chunks committed under either policy.
+
+Import reports describe progress committed by that request. A mismatch with
+`reached: None` means that section committed nothing; the target may already
+contain events. Inspect its history before reconciling. Partial salvage requires
+an explicit choice, retention of producer/completion evidence, and examination
+of corrupt blocks and the resulting per-stream report.

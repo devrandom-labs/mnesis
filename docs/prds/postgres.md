@@ -3,7 +3,7 @@
 Status: active (PG7 listing/export/restore; PG8–PG9 remain). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-backup`.
+Planning branch: `docs/postgres-prd`. Current slice: `test/postgres-backups`.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
@@ -575,8 +575,8 @@ actual original failures, database profile, commands and selected first experime
 | Locked Nix package evaluation | `nix eval --raw --expr 'let f = builtins.getFlake (toString ./.); p = import f.inputs.nixpkgs { system = builtins.currentSystem; }; in p.postgresql.version' --impure` returned `17.10`. |
 | Native defect reproduction | Existing 56 tests pass; new bounded-read, stream/global final-hint and watermark-release tests fail against original production source. See characterization. |
 | Broader baseline and dependency audit | Pending PG0/PG8; individual read-memory and timing samples are characterization, not capacity evidence. |
-| Production implementation and acceptance gates | Read/wake/outcome/migration/value/atomic/snapshot/checkpoint/listing slices merged; consistent sessions under verification. Remaining PG1–PG9 acceptance is tracked in the backlog and research record. |
-| Merge and publication | Focused protected PRs376/377/379/380/381/382/383 merged. No whole-adapter release or registry-consumer verification yet. |
+| Production implementation and acceptance gates | Read/wake/outcome/migration/value/atomic/snapshot/checkpoint/listing/session/history and initial backup/recovery slices merged; final chunk-failure cases and PG8–PG9 remain. Exact acceptance is tracked in the backlog and research record. |
+| Merge and publication | Focused protected merges are recorded in the backlog. No whole-adapter release or registry-consumer verification yet. |
 
 ## Primary sources
 

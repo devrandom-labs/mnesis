@@ -59,25 +59,27 @@ pub enum Atomicity {
     PerStream,
 }
 
-/// How one stream's import ended, and where the stream sits afterward.
+/// How one stream's import ended, and the progress this request committed.
 ///
-/// "Where it sits" lives inside each variant so the success case always
+/// Committed progress lives inside each variant so the success case always
 /// carries a real [`Version`] while the trouble cases carry `Option`
-/// (`None` = the stream was never touched). Illegal states (a "complete"
+/// (`None` = this section committed nothing, even if its target was nonempty).
+/// This is not a read of the target's current head; concurrent writers can
+/// advance it independently. Illegal states (a "complete"
 /// stream with no version) are unrepresentable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StreamOutcome {
-    /// Every block offered for this stream was applied; it is now at `version`.
+    /// Every block offered for this stream was committed through `version`.
     Complete { version: Version },
     /// A block failed its per-block checksum. The good prefix (if any) was
-    /// applied, leaving the stream at `reached` (`None` = untouched). The
+    /// committed through `reached` (`None` = no progress by this request). The
     /// corrupt block's own version is deliberately absent — a failed checksum
     /// means its decoded header cannot be trusted; re-fetch from `reached`'s
     /// successor.
     Corrupt { reached: Option<Version> },
     /// A block's version did not match the stream's next expected version
-    /// (stale overlap or forward gap). Good prefix applied, stream left at
-    /// `reached`; `got` is trustworthy (the checksum passed, only the
+    /// (stale overlap or forward gap). This request committed its good prefix
+    /// through `reached`; `got` is trustworthy (the checksum passed, only the
     /// position was wrong).
     Mismatch {
         reached: Option<Version>,
@@ -92,7 +94,7 @@ impl StreamOutcome {
         matches!(self, Self::Complete { .. })
     }
 
-    /// Where the stream sits after import (`None` = still empty / untouched).
+    /// Last version this section committed (`None` = no progress by this request).
     #[must_use]
     pub const fn reached(&self) -> Option<Version> {
         match self {

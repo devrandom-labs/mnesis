@@ -1,0 +1,32 @@
+     Removed 871 files, 180.9MiB total
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-backup-controls.9MH4i5/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.81s
+────────────
+ Nextest run ID df01f73b-1bee-40df-90e5-d533595f963e with nextest profile: default
+    Starting 1 test across 1 binary (12 tests skipped)
+        FAIL [   0.093s] (1/1) mnesis-postgres::backup_tests independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes
+  stdout ───
+
+    running 1 test
+    test independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes ... FAILED
+
+    failures:
+
+    failures:
+        independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.08s
+
+  stderr ───
+
+    thread 'independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes' (102409863) panicked at adapters/postgres/tests/backup_tests.rs:910:9:
+    assertion `left == right` failed
+      left: {[1, 0, 255]: [Saved { version: Version(1), schema: 1, kind: "E\0漢", payload: [1, 0, 255, 1], metadata: None }, Saved { version: Version(2), schema: 4294967295, kind: "E\0漢", payload: [1, 0, 255, 1], metadata: Some([0, 255, 1]) }], [2, 0, 255]: [Saved { version: Version(1), schema: 1, kind: "E\0漢", payload: [2, 0, 255, 2], metadata: None }, Saved { version: Version(2), schema: 4294967295, kind: "E\0漢", payload: [2, 0, 255, 2], metadata: Some([0, 255, 2]) }]}
+     right: {}
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.093s] 1 test run: 0 passed, 1 failed, 12 skipped
+        FAIL [   0.093s] (1/1) mnesis-postgres::backup_tests independent_chunk_inventory_rejects_missing_or_oversized_final_file_before_writes
+error: test run failed
