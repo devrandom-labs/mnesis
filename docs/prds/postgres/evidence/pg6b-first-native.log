@@ -1,0 +1,25 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-checkpoints/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-checkpoints/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/store-testing)
+error[E0382]: use of moved value: `connection`
+  --> adapters/postgres/src/schema.rs:86:20
+   |
+46 | async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresError> {
+   |                           ---------- move occurs because `connection` has type `&mut PgConnection`, which does not implement the `Copy` trait
+...
+77 |         .fetch_one(connection)
+   |                    ---------- value moved here
+...
+86 |         .fetch_one(connection)
+   |                    ^^^^^^^^^^ value used here after move
+   |
+help: consider creating a fresh reborrow of `connection` here
+   |
+77 |         .fetch_one(&mut *connection)
+   |                    ++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `mnesis-postgres` (lib) due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test checkpoint_tests --features projection` exited with code 101

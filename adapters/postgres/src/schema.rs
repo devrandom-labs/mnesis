@@ -74,12 +74,21 @@ async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresE
     }
     validate_shape(connection, "mnesis.events").await?;
     let snapshots: bool = sqlx::query_scalar(include_str!("snapshot.sql"))
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await
         .map_err(PostgresError::Sqlx)?;
     if !snapshots {
         return Err(incompatible(
             "snapshot columns, bounds, logging, primary key or identity reference differ",
+        ));
+    }
+    let checkpoints: bool = sqlx::query_scalar(include_str!("checkpoint.sql"))
+        .fetch_one(connection)
+        .await
+        .map_err(PostgresError::Sqlx)?;
+    if !checkpoints {
+        return Err(incompatible(
+            "checkpoint columns, bounds, logging, primary key or identity reference differ",
         ));
     }
     Ok(())

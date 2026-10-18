@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+────────────
+ Nextest run ID 0260e7e0-bbf5-4f3d-8152-b65e2a2540b5 with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   0.042s] (1/1) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+  stdout ───
+
+    running 1 test
+    test overlapping_creators_and_advancers_have_one_complete_winner ... FAILED
+
+    failures:
+
+    failures:
+        overlapping_creators_and_advancers_have_one_complete_winner
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'overlapping_creators_and_advancers_have_one_complete_winner' (98187864) panicked at adapters/postgres/tests/checkpoint_tests.rs:197:18:
+    expected exact rejection Conflict { expected: Some(1), actual: Some(2) }, got Ok(2)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.042s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   0.042s] (1/1) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+error: test run failed

@@ -27,6 +27,50 @@ async fn fixture() -> Option<PgPool> {
 }
 
 #[tokio::test]
+async fn opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key() {
+    let Some(pool) = fixture().await else { return };
+    let number = support::key(&pool, b"inherited-checkpoint").await;
+    sqlx::raw_sql("CREATE TABLE mnesis.checkpoint_child () INHERITS (mnesis.checkpoints)")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 1, 1, 1, 1, 'parent'::bytea)")
+        .bind(number).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO mnesis.checkpoint_child (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 2, 1, 2, 2, 'child'::bytea)")
+        .bind(number).execute(&pool).await.unwrap();
+    let states: Vec<Vec<u8>> =
+        sqlx::query_scalar("SELECT state FROM mnesis.checkpoints WHERE key = $1 ORDER BY revision")
+            .bind(number)
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+    let opened = PostgresStore::from_pool(pool.clone()).await;
+    sqlx::query("DROP TABLE mnesis.checkpoint_child")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("DELETE FROM mnesis.checkpoints WHERE key = $1")
+        .bind(number)
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::raw_sql("CREATE TABLE mnesis.checkpoint_parent (key bigint NOT NULL); ALTER TABLE mnesis.checkpoints INHERIT mnesis.checkpoint_parent")
+        .execute(&pool).await.unwrap();
+    let inherited = PostgresStore::from_pool(pool.clone()).await;
+    sqlx::raw_sql("ALTER TABLE mnesis.checkpoints NO INHERIT mnesis.checkpoint_parent; DROP TABLE mnesis.checkpoint_parent")
+        .execute(&pool).await.unwrap();
+    assert_eq!(states, [b"parent".to_vec(), b"child".to_vec()]);
+    assert!(
+        matches!(opened, Err(PostgresError::Schema { .. })),
+        "startup must reject inherited checkpoint rows beyond parent uniqueness"
+    );
+    assert!(
+        matches!(inherited, Err(PostgresError::Schema { .. })),
+        "the checkpoint table must also reject an unsupported inheritance parent"
+    );
+}
+
+#[tokio::test]
 async fn opening_rejects_a_missing_optimistic_constraint() {
     let Some(pool) = fixture().await else { return };
     sqlx::query("ALTER TABLE mnesis.events DROP CONSTRAINT events_stream_id_version_key")

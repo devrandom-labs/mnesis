@@ -1,115 +1,139 @@
 # Progress
 
-Persistent goal ACTIVE, NO token budget. Finish ALL PG0–PG9, protected merges,
-existing release and exact clean registry consumer. PG10 conditional. Do not
-stop at local tests or one slice. PRD docs/prds/postgres.md; dependency backlog
- docs/prd-backlog/status.md; detailed evidence docs/prds/postgres/research.md.
+Persistent goal ACTIVE, no token budget: deliver all PG0–PG9 through protected
+merges, existing release and clean registry consumer. PG10 conditional. PRD
+`docs/prds/postgres.md`, dependency index `docs/prd-backlog/status.md`, detailed
+commands/budgets/THREE reviews after EVERY test run `docs/prds/postgres/research.md`.
+Read canonical devrandom-research SKILL.md and FULL references/protocol.md after
+recovery. Root/global CLAUDE apply. No agents authorized. Nix owns tooling;
+no framework/runtime/custom tooling/project Python. Max80 function lines/strict
+Clippy, no lint/test/deadline relaxation. Normal signed conventional commits,
+full nix flake check hook; protected squash matching reviewed head after allCI,
+reviews and downloaded per-case mutation artifacts. Release PR378 waits ALL
+acceptance. A capability slice/local pass is not whole delivery.
 
-Read canonical /Users/joel/nix-config/modules/home/devrandom-research/skill/SKILL.md
-and FULL references/protocol.md after recovery. Root/global CLAUDE apply. No
-subagents authorized. Nix owns tools; no new framework/runtime/custom tooling or
-project Python. Strict Clippy/max80 function lines. NORMAL signed conventional
-commits with nix flake check hook, no bypass. Protected squash after ALL CI,
-mutations, native checks and review threads resolve. Never merge release PR378
-before complete acceptance. Preserve worktrees/stashes by NAME. Root remains
- docs/postgres-prd8357 with own work preserved; remote deleted after376, don't
-recreate it. Three DISTINCT reviews after EVERY run (failed/filtered/cached/CI):
-contract; actual defect/fault; assertions/skips/timing/source provenance. Reject
-poisoned/cached/unviable/DB-free evidence, never weaken tests or hide survivors.
+MERGED focused PRs (all protected, no bypass):
+376 7db7cf83f74d9ae53b45ca9aae6c548572c73e91 reads/recovery;
+377 f87afc12dd6dabe4acd7847e98756858f5fb4c86 commit phases/races;
+379 e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1 migrations/SQLx0.9/native Nix;
+380 49ffe78f166b7d6a787ea898dfba454218a697e9 binary/unsigned;
+381 be2e52ec3468657d36684506eed53fe060bef080 atomic/import;
+382 090504ae3b2081c03cfd8960f6edc5c0058fb3b2 snapshots,2026-10-18T14:14:32Z.
+PG4/5 feature-complete, PG1/2/3 retain cross-capability/PG8 obligations. PG6 active.
+PG6a reviewed headc72f38cab09df220f2c1f78aad96757c51b7ab0c:40green/1scheduledskip,
+zero threads. CI39133566393 native163/25.347s and163/20.601s TWO actual runs,
+workspace1561/88.605s+4 separate compiler functions. Mutations39133566425 artifact
+12139461392 downloaded /tmp/mnesis-pg6a-ci-mutants-39133566425:23=21caught2E0277
+unviable0missed/timeout, each first failure reviewed. Full gate12checks passes;
+docs amendment11cached+sameWASM rebuild is no extra runtime credit. Remote parent
+branch deletion verified; parent state worktree clean atc72, preserve it.
+PG6a production SHA4862f765357b6549c691337c51b4353cffcc0b3dd16d2b9c5329f88a9081ccd1.
 
-MERGED:
-376 7db7cf83f74d9ae53b45ca9aae6c548572c73e91 bounded reads/recovery.
-377 f87afc12dd6dabe4acd7847e98756858f5fb4c86 commit phases/native races.
-379 e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1 migrations/SQLx0.9/native Nix.
-380 49ffe78f166b7d6a787ea898dfba454218a697e9 lossless binary/unsigned values.
-381 be2e52ec3468657d36684506eed53fe060bef080 atomic/import,40 green1skip,
-139 native/113default/1558workspace+4compiler. CI39122783424,mut39122783429.
-PG4/5 feature-complete; PG1/2/3 retain cross-capability/PG8 obligations.
+Honesty: first PG6a mutation result REJECTED because checksum test failed before
+repair and poisoned later cases. Later independent sweep accepted. Negatives must
+restore BEFORE assertions. No-op commit mutation caught at fault-entry guard,
+not independent data proof. Native zero-row suppression original red discovered
+falseOk/orphan key; RETURNING+fetch_one fixed it with exact RowNotFound+rollback.
+Shared-target archived controls were provisional; isolated controls fail actual
+invariants. Never credit filtered/skipped/cached/DB-free/installed-log replay or
+unviable controls as fresh runtime evidence. THREE reviews: contract; real original
+fault/falsifier; assertions/skips/timing/source provenance. Preserve rejected results.
 
-ACTIVE PARENT /private/tmp/mnesis-postgres-state, branch work/postgres-state.
-PR382 https://github.com/devrandom-labs/mnesis/pull/382, head475a73ff8e72566d029515e6c03f744e16623695.
-First signed1886d1cb, final initial amendment475a passed normal hook12 cached.
-Original full1561/557.266s+4compiler; native162/default116/import142/snapshot136,
-ARM162. CLEAN23mutants21caught2unviable. Parent source was retained but NOT merged.
-Candidate CI39130711194 and mut39130711227 at475a;40green1scheduledskip.
-Candidate native162/24.891s+separate smokes, fourcompiler functions pass. OldCI
-mutation summary23=21caught2unviable lacks individual artifacts; candidate only.
+CURRENT /private/tmp/mnesis-postgres-checkpoints branchwork/postgres-checkpoints,
+HEAD090504ae, all PG6b uncommitted/staged/untracked, NO PG6b PR yet. Root workspace
+/Users/joel/orca/workspaces/nexus/main stays docs/postgres-prd8357 with own work;
+root remote deleted after376, NEVER recreate. Safety stashes KEPT by OID/name:
+b51e18ce53f0a3e9326676e014d3bdab26778392 initial laws beforec72;
+fbcc7d919c5df03ee3216065de84a63ddb825992 implementation before merged090.
+Do not delete or pop unrelated work; stash indices can shift.
 
-REOPENED PARENT BEFORE MERGE: native BEFORE INSERT/UPDATE RETURN NULL makes
-snapshot execute falsely returnOk and commit orphan key. New law FAILED old
-code0/1 at24.922s; independent facts oldpair/missingcache/TWOkeys. Fix adds
-RETURNINGkey+SQLx fetch_one,2replacedlines. Fixed1/1 at14.736s proves exact
-SqlxRowNotFound beforeCOMMIT, oldpair/missingcache/ONEkey, all cleanup before
-assertions.64 test lines (budget75), production<=5. No new error/runtime/API.
-All-target/all-feature Clippy passes. Native startup14–24s tails remain unexplained
-PG8; no claimed cause or deadline relaxation. Current production170/22 within
-180/25,SQL43/100; final source diffSHA
-4862f765357b6549c691337c51b4353cffcc0b3dd16d2b9c5329f88a9081ccd1.
+PG6b implementation: projection feature, migration4 logged checkpoints, private
+190line module, coherent schema validation. SQLx FromRow flatten shares metadata;
+single-query bounded reads validate ALL metadata before Stale and omit large/
+stale bodies. SELECT FOR UPDATE plus sole CheckpointWrite::next_revision; static
+INSERT/UPDATE share bindings. Zero rows reobserve true winner or RowNotFound,
+never fabricated conflict/falseOk. COMMIT keeps CommitUnknown source, no retries.
+No key UPDATE privilege. All unsigned domains/zero position/empty body preserved.
+Budget260added/30removed Rust100SQL; actual203/1Rust,now51SQL after inheritancefix.
+No dependencies/runtime/public methods. Native test budgets independently recorded
+before edits: initial500, bounds260, transport230+35fixturechanges, consumers300+
+80shared+100outcome, role110, migration150 (revised110 before runtime), crash90,
+inheritance90+4SQL. Verify final deltas and retain transparent estimates/revisions.
 
-FINAL HARDENED local17.10: all163/45.275s,snapshot137/21.659s,default116/25.883s,
-import142/39.200s,zero skips. Eleven ordinary units included, not all distinctDBlaws.
-Final ARM18.6 all163/20.867s plus separateatomic1/0.146s,snapshot1/0.133s.
-Artifact/nix/store/1lh77qhvkks0fyhyjnflr9lrpbfm307v-mnesis-postgres-integration.
-Final fresh separate18.6 mutation23=21caught2E0277unviable,0missed/timeout,7min;
-baseline163/20.190s, server cleanly stopped. EVERY first failure inspected and
-3reviews recorded. Commit-noop catch is actual COMMIT fault-entry guard, not
-independent data oracle; wrong key constants can reject valid commit before
-uncertainty oracle. New native zero-row original red/fix is independent storage
-proof. EARLIER nominal23 result poisoned by checksum fixture was REJECTED, never
-credited. Fixed metadata negatives restore BEFORE assertions; records preserved.
+First complete native all-feature suite183/183 PASS20.158s,14binaries,0skips,
+PG17.10, full log feature evidence/pg6b-full-native.log. Three reviews RECORDED.
+Includes original snapshots/atomic/import/wakes and new checkpoint races, bounds,
+corruption/overflow, namespace independence, suppression, restricted real LOGIN,
+new child real COMMIT ACK→SIGKILL→exact reopen, frozen3→4 collision/repair,
+real Projection+Codec consumers resume/rebuild/stale/cancel reload.
+Focused prior runs:10checkpoint laws/3.017s;3transport/0.156s;3realconsumers/18.079s;
+cancelconsumer1/0.094s;role1/3.581s;upgrade1/0.057s. Filter counts not runtimecredit.
+Cancellation marks old seeding COMMIT seen BEFORE arming, requires NEW watch
+change, actual COMMIT before20ms timeout, ReloadRequired then independent exact
+rev1/state1/p1 reload, two events, no resubmit. E0615/E0382/lint compile failures
+recorded as zero runtime, never suppressed. Clippy passes after normal fixes.
+All feature-wide rename of snapshot wire probe verified in full183 run.
 
-HARDENED SOURCE RETAINED signed followup e2367cd0dfb15a84422453f4eb33f63cce85119a,
-normal hook ALL12 passes (2cached10built),1561workspace/489.257s+4compilerexclusions.
-Three reviews recorded; native/default DB-free evidence kept separate. Evidence
-amendment now uses NORMAL hook; cached reuse adds no fresh runs. Then push PR382,
-replace body from /tmp/mnesis-pg6a-pr-final.md. ALL CI must rerun
-at NEW head. Eight YAML lines add SAME stock upload-artifact@v4 pattern asfuzz.yml
-for mutants.out. Before merge DOWNLOAD artifact `mutants`, inspect EVERY CI first
-failure, no summary-only grading. No new tool/framework. All oldhead CI candidate
-only. Protected merge must match reviewed/new head. Do not auto-merge early.
-Final raw logs /tmp/mnesis-pg6a-final163*,final137*,final116*,final142* and feature
- evidence directory. Outcome JSON preserved byte-for-byte as .log: global JSON
-source filter otherwise rebuilds all. Earlier JSON-only amendment interrupted
-in compilation; no tests credited, normal hook rerun successfully, no bypass.
+LATEST adversarial finding AFTER183 run: checkpoint schema validator accepted
+native inherited child with duplicate key/different state. Original default-feature
+witness0/1 FAIL0.052s at exact Schema assertion; query proves[parent,child] rows,
+cleanup before assertions, all3 reviews recorded. Added TWO pg_inherits guard SQL
+lines, no Rust/migration changes. Fixed native1/1 PASS0.059s, expanded to both
+inheritance directions; metadata law now checks9 native corrupt scalar witnesses,
+repair BEFORE assertions. Fresh final source all EIGHT combinations pass,0skips:
+default118/14.182s;import144/18.901s;snapshot139/15.168s;projection136/15.449s;
+import+snapshot165/20.139s;import+projection162/21.371s;snapshot+projection158/16.442s;
+all184/20.811s. Linux18.6 native184/27.815s plus three separate smokes1each;
+artifact /nix/store/f7y3836m9snsim4rcmr965l4y4wqlc64-mnesis-postgres-integration.
+Missing projection selector exits4,no tests, with --no-tests=fail, no runtimecredit.
+Fresh isolated source controls ALL fail actual invariants: omitFORUPDATE returns
+TWO Ok2 instead of loserConflict; CASE ELSE state allocates6,306,290>262,144;
+splitread returns oldrev1/pos(1,9) withNEWstate. Proof target explicitly adapter-
+cleaned/recompiled for EACH source, logsincludeactualpaths; no staleartifactcredit.
+Mutations16=8caught8unviable0missed/timeout, native18.6 baseline184/21.461s;
+EVERY firstfailure and3reviews recorded in research table, outcomes/firstfailures
+kept as.log. No-op checkpoint commit caught by REAL acknowledged child→SIGKILL→
+Absent mismatch, independent data proof. Type errors E0277/E0599/E0283 NOTcaught.
+Product203added/1removedRust,51SQL,1Cargo feature,5Nixsmokelines;zeroAPI/deps/runtime.
+Changed Rust diff SHA4061f1d5647320d21429f71eb52d20d6dabcd100bc0e60e5d2866c728a013f50.
 
-CHILD PRESERVED /private/tmp/mnesis-postgres-checkpoints, branchwork/postgres-checkpoints,
-base475a. Projectionfeature + five initial native law cases/docs written BEFORE
-implementation. Initial22 E0599 missingCheckpointStore failures,0runtime,3reviews.
-NO checkpoint production/migration yet; pause until parent fix retained. Child
-DBmnesis_pg6b created on local cluster. Preserve all child files/staging; align
-onto corrected parent/merged main safely after retaining parent. Budget260/30
-Rust,100SQL,500native,100existingproxy; later consumer/recovery passes explicit.
-Existing CheckpointWrite::next_revision sole policy; native rowSELECTFORUPDATE.
-Absent full-valid INSERT ONCONFLICTNOTHING; loser observes actual winner under
-lock or errors if suppression left none. Never grant immutable key UPDATE just
-for CAS (native NO KEY UPDATE candidate rejected42501), no placeholders or
-unconditional checkpoint API. Nonzero revisions/schema, fullu64 txid/seq including
-zero position, empty state, bounded atomic pairs. Native actual overlapping
-creators/advancers preseed raw key to avoid key-creation serialization masking CAS.
-Require real Projection/codec, cancellation reload/CommitUnknown, rebuild/overflow,
-corruption/role/clientkill/upgrade and snapshot namespace separation.
+Normal signed commit d1b9c387574acfa7f3136c4aab9283c521a4da13 G verified, FULL
+unmodified nix flake check hook:12namedDarwinchecks green(auditcached11fresh),
+workspace1563/464.283s+4compiler-function exclusions;13slow, no workloadchanges.
+Workspace has noDATABASE_URL, NOT new nativecoverage. Fuzz2+1+1eachpassed1s,
+all3reviews recorded afterruns. Native/currentprodsource and Linux184 separate.
+NEXT docs-only signed amendment (normalhook again), push/openfocusedPR/allCI/
+downloadper-case mutationartifactreviews/protectedmerge. NoPG6bPRyet. No local
+native run. Ownmutationcluster safely stopped, data retained. Current research/
+evidence/progress edits muststagebeforeamend; do NOT mark wholePG6/deliverycomplete.
+PG7 preparatory notes ONLY in /tmp/mnesis-pg7-pre-edit.md, read afterrecovery;
+no PG7 branch/worktree/source yet. Compare supported SQLx transaction facilities
+before retaining privateowner task; exact native expiration/cancellation laws and
+foreignrestore witness required. No hidden SQLx constructors/detached pool leases.
 
-REMAINING PG7 bounded StreamLister (exclude snapshot-only keys), finite consistent
-ExportSession using existingTokio/SQLx, completedformat2/Fjall interchange, physical/
-logical restore/foreignhistory. Position-context issue OPEN: two scalar PgAllPos
-cannot identify foreign origin; native witness and compatible minimal owner
-change required, no guessed solution/unsupported promise. PG8 TLSVerifyFull,
-auth/redaction/immutable grants/deadlines/shutdown, durability inclfuturepoolconns,
-primaryrestart/restore/foreignDBwatermark,10k/100k/1m x1/16/128 consumers and30minsoak,
-search_path and variablelatency investigation. PG9 fullfeature/downstream/absence
-proof, remove EXISTING Python feature script via maintainedcargo-hack, patch
-event-listener/removeexistingignore, docs/example/changelog, twofreshwholeworkspace
-audits/minimization, ALL protected delivery/publication/registry consumer. Labcast
-owns command IDs/dedup/worker fencing. PG10 needs selectedconsumer.
+PG7 bounded event-only StreamLister, finite consistent export lifetime inclidlecleanup,
+format2/Fjall roundtrips, restore. Foreign position provenance OPEN: currenttwo-scalar
+constructor cannot identify history; realwitness then minimal compatible owner
+contract, never silently bless foreign checkpoints/oldunmarkedhistory.
+PG8 TLSVerifyFull/auth/redaction, immutablegrants/deadlines/shutdown, durability incl
+future sessions, restart/physical+logicalrestore/foreignwatermark;10k/100k/1m x
+1/16/128consumers,p50/95/99,alloc/resources/plans,30min mixedsoak. Repeatable first
+cold native fixture2–27s causeUNPROVEN, investigatewithout guessing/deadlineloosening.
+PG9 feature/downstream/absence gates; remove EXISTING Python feature script using
+maintainedcargo-hack; patch event-listener/removeignore; investigate actual registry
+yank audit missingindex errors despitegreen advisorycheck; docs/example/changelog,
+TWO fresh whole-workspace audits/minimization, complete protecteddelivery/release378,
+verify publicationexactrevision/checksums+cleanregistryconsumerrealDBallcapabilities.
+PG10 selectedconsumer only; Labcast owns commandIDs/dedup/controllerworkerfencing.
 
-ENV local17.10 /tmp/mnesis-postgres-pg0 socket/tmp port55432 PGUSERjoel.
-URLpostgres:///mnesis_pg6a?host=/tmp&port=55432&user=joel (child usesmnesis_pg6b).
-NEVER independent native suites concurrently in SAME CLUSTER even differentDBs:
-xmin clusterwide. Fresh physical18.6 for mutations/Linux. Nix recordedprofiles
-`nix develop /tmp/mnesis-postgres-shell-199 -c ...` and shell-ci; --profile records
-new instead ofreuses. Shared CARGO_TARGET_DIRrootworkspace/target. Direct
-cargo-mutants mutants avoids brokenpersonalplugin. ARMlinux-builderworks;
-x86nixos.localDNSfails, nohostfixes. Disk~12GiBfree; no broadGC/usercleanup.
-Task-owned state target cleaned545.9MiB; proof target left (missingCACHEDIR.TAG,
-Cargo refuses deletion). Fresh archived controls require isolated target AND
-forced adapter rebuild; original shared-target controls marked provisional.
+ENV localPG17.10 root/tmp/mnesis-postgres-pg0,Unix/tmp,port55432,userjoel.
+DATABASE_URL=postgres:///mnesis_pg6b?host=/tmp&port=55432&user=joel.
+ParentDBmnesis_pg6a staysv3. NEVER concurrent native suites in SAME CLUSTER even
+separateDBs (xminclusterwide). Freshphysical18.6formutations/Linux. Reuse profiles
+nix develop /tmp/mnesis-postgres-shell-199 -c ... and shell-ci; --profile records,
+doesnotreuse. Shared target /Users/joel/orca/workspaces/nexus/main/target.
+Direct cargo-mutants mutants (personal plugin brokenlibiconv). ARMlinux-builder
+works;x86nixos.localDNSfails,nohostfixes. Repo mutation JSON evidence stored.log:
+global JSON/SQL filter otherwise rebuildsALL; no newfilterexception/bypass.
+No broadGC/rawrecursivecachedeletion; automaticreviewrejectedrm-rf; Cargo cleaned
+onlygeneratedstate-worktree545.9MiB; refusedproofcachemissingCACHEDIR.TAG,leaveit.

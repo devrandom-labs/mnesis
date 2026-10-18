@@ -1,0 +1,14 @@
+BEGIN
+SET
+CREATE TABLE
+             conname              |                                    pg_get_constraintdef
+----------------------------------+--------------------------------------------------------------------------------------------
+ checkpoints_global_seq_check     | CHECK (((global_seq >= (0)::numeric) AND (global_seq <= '18446744073709551615'::numeric)))
+ checkpoints_key_fkey             | FOREIGN KEY (key) REFERENCES mnesis.keys(number)
+ checkpoints_pkey                 | PRIMARY KEY (key)
+ checkpoints_revision_check       | CHECK (((revision > (0)::numeric) AND (revision <= '18446744073709551615'::numeric)))
+ checkpoints_schema_version_check | CHECK (((schema_version > 0) AND (schema_version <= '4294967295'::bigint)))
+ checkpoints_txid_check           | CHECK (((txid >= (0)::numeric) AND (txid <= '18446744073709551615'::numeric)))
+(6 rows)
+
+ROLLBACK

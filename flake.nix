@@ -447,6 +447,11 @@
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   -E 'binary(snapshot_tests) & test(conformance_snapshot::check_snapshot_absent_then_commit_then_found)' \
                   2>&1 | tee -a postgres-feature.log
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  -E 'binary(projection_tests) & test(real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position)' \
+                  2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \

@@ -1,0 +1,10 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.98s
+────────────
+ Nextest run ID 4c76d6cf-8a0b-485d-a3fd-4924909ba6c8 with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        PASS [   0.057s] (1/1) mnesis-postgres::upgrade_tests checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data
+────────────
+     Summary [   0.057s] 1 test run: 1 passed, 4 skipped

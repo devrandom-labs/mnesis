@@ -1,0 +1,9 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.39s
+────────────
+ Nextest run ID abb32701-5b55-4335-9a2c-11ce97550d2f with nextest profile: default
+    Starting 2 tests across 2 binaries (24 tests skipped)
+        PASS [   0.115s] (1/2) mnesis-postgres::checkpoint_tests corrupt_metadata_is_not_stale_and_cannot_be_replaced
+        PASS [   0.033s] (2/2) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+────────────
+     Summary [   0.149s] 2 tests run: 2 passed, 24 skipped

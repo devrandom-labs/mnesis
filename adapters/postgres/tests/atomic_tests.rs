@@ -231,7 +231,7 @@ async fn fixture() -> (PostgresStore, sqlx::PgPool) {
     PostgresStore::migrate(&pool).await.unwrap();
     sqlx::raw_sql("DROP TRIGGER IF EXISTS atomic_pause ON mnesis.events; DROP TRIGGER IF EXISTS atomic_reject ON mnesis.events; ALTER TABLE mnesis.events DROP CONSTRAINT IF EXISTS atomic_payload_key")
         .execute(&pool).await.unwrap();
-    sqlx::query("TRUNCATE mnesis.events, mnesis.snapshots, mnesis.keys RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events, mnesis.snapshots, mnesis.checkpoints, mnesis.keys RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();

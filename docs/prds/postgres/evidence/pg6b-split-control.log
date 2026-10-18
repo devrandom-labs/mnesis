@@ -1,0 +1,30 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+────────────
+ Nextest run ID 2d7f999f-64c9-426c-8b16-30f2a536e2a9 with nextest profile: default
+    Starting 1 test across 1 binary (15 tests skipped)
+        FAIL [   0.044s] (1/1) mnesis-postgres::outcome_tests checkpoint_hydration_keeps_the_captured_revision_position_and_state_together
+  stdout ───
+
+    running 1 test
+    test checkpoint_hydration_keeps_the_captured_revision_position_and_state_together ... FAILED
+
+    failures:
+
+    failures:
+        checkpoint_hydration_keeps_the_captured_revision_position_and_state_together
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'checkpoint_hydration_keeps_the_captured_revision_position_and_state_together' (98206294) panicked at adapters/postgres/tests/outcome_tests.rs:471:5:
+    assertion `left == right` failed
+      left: Found { revision: 1, position: PgAllPos { txid: 1, seq: 9 }, state: [99, 104, 101, 99, 107, 112, 111, 105, 110, 116, 45, 110, 101, 119] }
+     right: Found { revision: 1, position: PgAllPos { txid: 1, seq: 9 }, state: [115, 110, 97, 112, 115, 104, 111, 116, 45, 111, 108, 100, 45, 48, 56, 49] }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.045s] 1 test run: 0 passed, 1 failed, 15 skipped
+        FAIL [   0.044s] (1/1) mnesis-postgres::outcome_tests checkpoint_hydration_keeps_the_captured_revision_position_and_state_together
+error: test run failed

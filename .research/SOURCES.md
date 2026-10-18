@@ -106,3 +106,23 @@ REPEATABLE READ/SERIALIZABLE can reject changed rows with40001 instead. This is
 candidate protocol evidence, not runtime checkpoint acceptance. Use owning
 CheckpointWrite::next_revision under the chosen lock and retain source errors;
 verify real creation/CAS races and native key-share overlap before retaining.
+
+PG6b,2026-10-18: locked SQLx0.9.0 registry source
+sqlx-macros-core/src/derives/row.rs (match attributes.flatten aroundline100)
+implements supported #[sqlx(flatten)] via nested FromRow. Use it for shared raw
+checkpoint metadata on read/lock paths instead of dummy body/size sentinel fields.
+Primary source https://github.com/transact-rs/sqlx/blob/v0.9.0/sqlx-macros-core/src/derives/row.rs.
+Static INSERT/UPDATE SQL literals satisfy0.9 SqlSafeStr; no dynamic SQL escape.
+Existing CheckpointWrite::next_revision remains sole validation policy, invoked
+again only after a zero-row write observes a different actual record. Native
+RETURNING optional distinguishes zero rows; never acknowledge a write that
+returned no row, even if owner revision validation permits a fresh attempt.
+
+2026-10-18 PG6b inherited-table falsifier: PostgreSQL17 official inheritance
+contract https://www.postgresql.org/docs/17/ddl-inherit.html (also18 current).
+Parent queries include descendants; primary/unique/FK constraints do not apply
+across descendants. Relevant to checkpoint exact-one-row profile; native test
+creates duplicate raw key with different state in child. Supported pg_inherits
+catalog is the existing schema-validation mechanism; no new dependency/license
+or runtime cost on ordinary reads/writes. PG17.10 native witness below determines
+whether the current adapter actually rejects this unsafe shape.

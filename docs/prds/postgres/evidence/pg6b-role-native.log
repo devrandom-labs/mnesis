@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.42s
+────────────
+ Nextest run ID b51726d7-e63d-421d-8ea3-dacfca0037dd with nextest profile: default
+    Starting 1 test across 1 binary (9 tests skipped)
+        PASS [   3.579s] (1/1) mnesis-postgres::checkpoint_tests runtime_checkpoint_writer_needs_no_key_mutation_event_rewrite_or_ddl
+────────────
+     Summary [   3.581s] 1 test run: 1 passed, 9 skipped

@@ -42,6 +42,125 @@ async fn previous(version: i64) -> Option<PgPool> {
 }
 
 #[tokio::test]
+async fn checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data() {
+    let Some(pool) = previous(3).await else {
+        return;
+    };
+    let id = StreamKey::from_slice(b"checkpoint-upgrade\0");
+    let key: i64 =
+        sqlx::query_scalar("INSERT INTO mnesis.keys (value) VALUES ($1) RETURNING number")
+            .bind(id.as_bytes())
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    let event: (i64, String) = sqlx::query_as("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Old', 1, 'old'::bytea) RETURNING global_seq, txid::text")
+        .bind(key).fetch_one(&pool).await.unwrap();
+    let old = PgAllPos::new(event.1.parse().unwrap(), u64::try_from(event.0).unwrap());
+    sqlx::query("INSERT INTO mnesis.snapshots (key, schema_version, version, state) VALUES ($1, 4294967295, 18446744073709551615, $2)")
+        .bind(key).bind(b"saved\0cache".as_slice()).execute(&pool).await.unwrap();
+    let before: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, success, checksum FROM mnesis._sqlx_migrations ORDER BY version",
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+    sqlx::raw_sql("CREATE TABLE mnesis.checkpoints (foreign_value text); INSERT INTO mnesis.checkpoints VALUES ('keep')")
+        .execute(&pool).await.unwrap();
+    let failure = PostgresStore::migrate(&pool).await;
+    let after: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, success, checksum FROM mnesis._sqlx_migrations ORDER BY version",
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+    let foreign: Vec<String> = sqlx::query_scalar("SELECT foreign_value FROM mnesis.checkpoints")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+    let failed_cache: (i64, i64, String, Vec<u8>) =
+        sqlx::query_as("SELECT key, schema_version, version::text, state FROM mnesis.snapshots")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    sqlx::query("ALTER TABLE mnesis.checkpoints RENAME TO saved_checkpoints")
+        .execute(&pool)
+        .await
+        .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
+    let repaired: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, success, checksum FROM mnesis._sqlx_migrations WHERE version <= 3 ORDER BY version",
+    ).fetch_all(&pool).await.unwrap();
+    let cache: (i64, i64, String, Vec<u8>) =
+        sqlx::query_as("SELECT key, schema_version, version::text, state FROM mnesis.snapshots")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert!(
+        matches!(failure, Err(PostgresError::Migration(MigrateError::ExecuteMigration(ref source, 4)))
+        if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("42P07"))
+    );
+    let versions: Vec<_> = before.iter().map(|row| row.0).collect();
+    assert_eq!(versions, [1, 2, 3]);
+    assert_eq!(after, before);
+    assert_eq!(repaired, before);
+    assert_eq!(foreign, ["keep".to_owned()]);
+    assert_eq!(failed_cache, cache);
+    assert_eq!(
+        cache,
+        (
+            key,
+            i64::from(u32::MAX),
+            u64::MAX.to_string(),
+            b"saved\0cache".to_vec()
+        )
+    );
+    assert_eq!(
+        sqlx::query_scalar::<_, String>("SELECT foreign_value FROM mnesis.saved_checkpoints")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        "keep"
+    );
+    checkpoint_upgrade_history(pool, &id, old).await;
+}
+
+async fn checkpoint_upgrade_history(pool: PgPool, id: &StreamKey, old: PgAllPos) {
+    let store = PostgresStore::from_pool(pool).await.unwrap();
+    let restored: Vec<_> = store
+        .read_all(None)
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(restored.len(), 1);
+    assert_eq!(restored[0].0, old);
+    assert_eq!(&restored[0].1, id);
+    assert_eq!(restored[0].2.payload(), b"old");
+    let pending = pending_envelope(Version::new(2).unwrap())
+        .event_type("New")
+        .payload(b"new".as_slice())
+        .build()
+        .unwrap();
+    let next = store
+        .append(id, Some(Version::INITIAL), PendingBatch::of(&pending))
+        .await
+        .unwrap();
+    assert!(next > old);
+    assert_eq!(next.seq(), old.seq().checked_add(1).unwrap());
+    let resumed: Vec<_> = store
+        .read_all(Some(old))
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(resumed.len(), 1);
+    assert_eq!(resumed[0].0, next);
+    assert_eq!(resumed[0].2.version(), Version::new(2).unwrap());
+}
+
+#[tokio::test]
 async fn snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collision() {
     let Some(pool) = previous(2).await else {
         return;

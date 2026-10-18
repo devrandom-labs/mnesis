@@ -1,0 +1,177 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-checkpoints/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-checkpoints/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/crates/store-testing)
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:280:21
+    |
+280 |             (client.commit_checkpoint(&target, advance(expected, position, &state)).await, position, state)
+    |                     ^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: the method `hydrate_checkpoint` exists for reference `&PostgresStore`, but its trait bounds were not satisfied
+   --> adapters/postgres/tests/checkpoint_tests.rs:303:15
+    |
+303 |         store.hydrate_checkpoint(id, NonZeroU32::MIN).await.unwrap(),
+    |               ^^^^^^^^^^^^^^^^^^ method cannot be called on `&PostgresStore` due to unsatisfied trait bounds
+    |
+   ::: adapters/postgres/src/store.rs:81:1
+    |
+ 81 | pub struct PostgresStore {
+    | ------------------------ doesn't satisfy `PostgresStore: CheckpointStore<_, _>`
+    |
+    = note: the following trait bounds were not satisfied:
+            `PostgresStore: CheckpointStore<_, _>`
+            which is required by `&PostgresStore: CheckpointStore<_, _>`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+  --> adapters/postgres/tests/checkpoint_tests.rs:71:10
+   |
+70 |       let first = store
+   |  _________________-
+71 | |         .commit_checkpoint(&id, advance(None, PgAllPos::new(0, 0), &initial))
+   | |         -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+   | |_________|
+   |
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+  --> adapters/postgres/tests/checkpoint_tests.rs:77:10
+   |
+76 |       let second = store
+   |  __________________-
+77 | |         .commit_checkpoint(&id, advance(Some(first), position, &latest))
+   | |         -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+   | |_________|
+   |
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+  --> adapters/postgres/tests/checkpoint_tests.rs:84:18
+   |
+83 | /             store
+84 | |                 .commit_checkpoint(&id, advance(expected, PgAllPos::new(2, 0), &initial))
+   | |                 -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+   | |_________________|
+   |
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+  --> adapters/postgres/tests/checkpoint_tests.rs:95:18
+   |
+94 | /             store
+95 | |                 .commit_checkpoint(&id, advance(Some(second), previous, &initial))
+   | |                 -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+   | |_________________|
+   |
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:101:15
+    |
+101 |         store.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap(),
+    |               ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:118:10
+    |
+117 |       let first = store
+    |  _________________-
+118 | |         .commit_checkpoint(&id, advance(None, PgAllPos::new(9, 9), &initial))
+    | |         -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:123:15
+    |
+123 |         store.hydrate_checkpoint(&id, schema).await.unwrap(),
+    |               ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:138:15
+    |
+138 |         store.commit_checkpoint(&id, proposal(CheckpointMode::Advance)).await,
+    |               ^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:145:10
+    |
+144 |       let next = store
+    |  ________________-
+145 | |         .commit_checkpoint(&id, proposal(CheckpointMode::Rebuild))
+    | |         -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:150:15
+    |
+150 |         store.commit_checkpoint(&id, proposal(CheckpointMode::Rebuild)).await,
+    |               ^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:157:15
+    |
+157 |         store.hydrate_checkpoint(&id, schema).await.unwrap(),
+    |               ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:176:10
+    |
+175 |       let revision = store
+    |  ____________________-
+176 | |         .commit_checkpoint(&id, CheckpointWrite {
+    | |         -^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:189:18
+    |
+189 |         reopened.hydrate_checkpoint(&id, schema).await.unwrap(),
+    |                  ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:197:18
+    |
+197 |         reopened.commit_checkpoint(&id, CheckpointWrite {
+    |         ---------^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:207:18
+    |
+207 |         reopened.hydrate_checkpoint(&id, schema).await.unwrap(),
+    |                  ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:223:11
+    |
+223 |     store.commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &state))
+    |           ^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:227:26
+    |
+227 |     let matching = store.hydrate_checkpoint(&id, NonZeroU32::MIN).await;
+    |                          ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:228:23
+    |
+228 |     let stale = store.hydrate_checkpoint(&id, NonZeroU32::new(2).unwrap()).await;
+    |                       ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `commit_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:229:23
+    |
+229 |     let write = store.commit_checkpoint(&id, advance(None, PgAllPos::new(2, 0), &vec![9])).await;
+    |                       ^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+error[E0599]: no method named `hydrate_checkpoint` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/checkpoint_tests.rs:255:26
+    |
+255 |     let saved = reopened.hydrate_checkpoint(&id, NonZeroU32::MIN).await.unwrap();
+    |                          ^^^^^^^^^^^^^^^^^^ method not found in `PostgresStore`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mnesis-postgres` (test "checkpoint_tests") due to 22 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test checkpoint_tests --features projection` exited with code 101

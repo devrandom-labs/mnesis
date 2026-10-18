@@ -1,0 +1,10 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.37s
+────────────
+ Nextest run ID e0c1c6df-f919-49c4-9c5a-1840fc2536e4 with nextest profile: default
+    Starting 3 tests across 1 binary
+        PASS [  18.001s] (1/3) mnesis-postgres::projection_tests real_projection_rebuild_changes_schema_without_resetting_revision
+        PASS [   0.042s] (2/3) mnesis-postgres::projection_tests real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position
+        PASS [   0.034s] (3/3) mnesis-postgres::projection_tests rejected_projection_cannot_continue_until_it_reloads_committed_state
+────────────
+     Summary [  18.079s] 3 tests run: 3 passed, 0 skipped

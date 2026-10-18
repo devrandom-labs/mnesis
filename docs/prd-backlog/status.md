@@ -26,25 +26,35 @@ Protected focused merges:
 - PR379 migrations and native CI: `e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1`.
 - PR380 lossless values and binary keys: `49ffe78f166b7d6a787ea898dfba454218a697e9`.
 - PR381 atomic writes and import: `be2e52ec3468657d36684506eed53fe060bef080`.
+- PR382 aggregate snapshots: `090504ae3b2081c03cfd8960f6edc5c0058fb3b2`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
-has merged actual native SSI/deadlock witnesses; snapshot uncertainty has candidate
-evidence and projection propagation remains required. PG4's supported upgrades preserve
+has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
+projection propagation is under native verification. PG4's supported upgrades preserve
 rows, resume positions and sequence state; later capability migrations remain
 subject to the same obligations.
 
 PG5 merged after139 native cases,113 default-feature cases,26 mutation candidates
 (12 caught/14 unviable/no survivors), all40 CI checks and no review threads.
-PG6 aggregate snapshot candidate passes163 native cases including codec/aggregate
+PG6 aggregate snapshots merged after163 native cases including codec/aggregate
 composition, client SIGKILL, restricted login, corruption/byte bounds, migration
 rollback/repair and coherent schema-view cancellation. All current feature
-combinations, corrected-source Linux and clean mutation sweep pass; final full
-gate, CI and focused delivery remain pending in
-[PR382](https://github.com/devrandom-labs/mnesis/pull/382). The first mutation
+combinations, corrected-source Linux, full gate and40 required checks passed in
+[PR382](https://github.com/devrandom-labs/mnesis/pull/382). Final CI mutation
+artifact independently reviewed:21 caught,2 unviable,0 survivors/timeouts.
+The first mutation
 result was rejected for fixture poisoning; a later native suppression regression
 found and fixed a falsely acknowledged cache write. Conditional
-projection checkpoint implementation remains the next PG6 slice.
-All prerequisite edges stay visible after prerequisite acceptance.
+projection checkpoint implementation is active in `work/postgres-checkpoints`,
+based on merged snapshot commit `090504ae`. Native focused checks cover CAS races,
+bounds, full unsigned values, stale/corrupt metadata, real projection consumers,
+commit uncertainty/cancellation, restricted LOGIN and migration collision/repair.
+All eight isolated feature combinations pass (118–184 native tests, zero skips),
+Linux passes184 plus three feature smokes, and16 mutations yield8 caught/8
+unviable/zero survivors. Three fresh controls reject actual lock omission,
+unbounded body transfer and mixed checkpoint reads. A native inheritance witness
+found and fixed unsafe schema acceptance. Full flake gate, CI and protected
+delivery remain required. All prerequisite edges stay visible.
 
 PG10 requires a selected consumer and explicit acknowledgement contract before
 activation. Labcast owns command IDs, deduplication and stale-worker rejection.
