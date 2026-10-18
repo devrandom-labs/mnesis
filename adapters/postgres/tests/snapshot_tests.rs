@@ -100,7 +100,7 @@ async fn runtime_role_writes_cache_without_mutating_keys_events_or_schema() {
         return;
     }
     let (_store, pool) = fixture().await;
-    sqlx::raw_sql("DROP ROLE IF EXISTS mnesis_snapshot_writer; CREATE ROLE mnesis_snapshot_writer LOGIN; GRANT USAGE ON SCHEMA mnesis TO mnesis_snapshot_writer; GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_snapshot_writer; GRANT SELECT, INSERT ON mnesis.keys TO mnesis_snapshot_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_snapshot_writer; GRANT SELECT, INSERT, UPDATE ON mnesis.snapshots TO mnesis_snapshot_writer")
+    sqlx::raw_sql("DROP ROLE IF EXISTS mnesis_snapshot_writer; CREATE ROLE mnesis_snapshot_writer LOGIN; GRANT USAGE ON SCHEMA mnesis TO mnesis_snapshot_writer; GRANT SELECT ON mnesis._sqlx_migrations, mnesis.history, mnesis.events TO mnesis_snapshot_writer; GRANT SELECT, INSERT ON mnesis.keys TO mnesis_snapshot_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_snapshot_writer; GRANT SELECT, INSERT, UPDATE ON mnesis.snapshots TO mnesis_snapshot_writer")
         .execute(&pool).await.unwrap();
     let runtime = PgPoolOptions::new()
         .max_connections(4)
@@ -360,6 +360,7 @@ async fn stale_cache_and_rejected_replacement_do_not_change_committed_aggregate_
     assert_eq!(
         position,
         mnesis_postgres::PgAllPos::new(
+            raw.history(),
             persisted.1.parse().unwrap(),
             u64::try_from(persisted.2).unwrap()
         )

@@ -1,0 +1,21 @@
+Benchmarking encoding/decode_frame/small_64B
+Benchmarking encoding/decode_frame/small_64B: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/small_64B: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/small_64B: Analyzing
+encoding/decode_frame/small_64B
+                        time:   [2.6132 ns 2.6404 ns 2.6819 ns]
+Benchmarking encoding/decode_frame/medium_1KB
+Benchmarking encoding/decode_frame/medium_1KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/medium_1KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/medium_1KB: Analyzing
+encoding/decode_frame/medium_1KB
+                        time:   [2.5938 ns 2.6067 ns 2.6238 ns]
+Found 6 outliers among 30 measurements (20.00%)
+  6 (20.00%) high mild
+Benchmarking encoding/decode_frame/large_64KB
+Benchmarking encoding/decode_frame/large_64KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/large_64KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/large_64KB: Analyzing
+encoding/decode_frame/large_64KB
+                        time:   [2.5579 ns 2.5699 ns 2.5837 ns]
+

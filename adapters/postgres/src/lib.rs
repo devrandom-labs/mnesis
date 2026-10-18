@@ -12,13 +12,14 @@
 //! [`WakeSource`](mnesis_store::wake::WakeSource) over `sqlx`-postgres, with
 //! `LISTEN/NOTIFY` wake and a `pg_snapshot_xmin` watermark on the `$all` read.
 //! Its [`AllPosition`](mnesis_store::AllPosition) is the composite
-//! [`PgAllPos`] `(txid, seq)` (the #213 ordering decision, made correct by
+//! [`PgAllPos`] `(history, txid, seq)` (the #213 ordering decision, made correct by
 //! construction via the #266 adapter-defined-position seam). The second
 //! adapter, written to validate the adapter contract before the 1.0 freeze.
 
 mod builder;
 mod error;
 mod hex;
+mod history;
 mod limits;
 mod page;
 mod position;
@@ -27,6 +28,7 @@ mod store;
 mod wake;
 
 pub use error::PostgresError;
+pub use history::History;
 pub use limits::Limits;
 pub use position::PgAllPos;
 pub use store::PostgresStore;

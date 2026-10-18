@@ -1,0 +1,28 @@
+/tmp/mnesis-release-repair-ci-compiler-push.log:2026-10-18T17:53:37.2560875Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 109.80s
+/tmp/mnesis-release-repair-ci-compiler-push.log:2026-10-18T17:53:59.6187079Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.95s
+/tmp/mnesis-release-repair-ci-compiler-push.log:2026-10-18T17:54:20.6495784Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.83s
+/tmp/mnesis-release-repair-ci-compiler-pr.log:2026-10-18T17:55:52.8678752Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 71.37s
+/tmp/mnesis-release-repair-ci-compiler-pr.log:2026-10-18T17:56:07.0019076Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.61s
+/tmp/mnesis-release-repair-ci-compiler-pr.log:2026-10-18T17:56:19.6752307Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.67s
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:00.5787814Z mnesis-postgres-integration>      Summary [   0.080s] 1 test run: 1 passed, 14 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:02.6927275Z mnesis-postgres-integration>      Summary [   0.065s] 1 test run: 1 passed, 15 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:04.8202585Z mnesis-postgres-integration>      Summary [   0.078s] 1 test run: 1 passed, 2 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:06.9710699Z mnesis-postgres-integration>      Summary [   0.095s] 1 test run: 1 passed, 7 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:09.1017966Z mnesis-postgres-integration>      Summary [   0.077s] 1 test run: 1 passed, 10 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:47.1848307Z mnesis-postgres-integration>      Summary [  35.986s] 203 tests run: 203 passed, 0 skipped
+/tmp/mnesis-release-repair-ci-native-push.log:2026-10-18T17:57:47.8600946Z      Summary [  35.986s] 203 tests run: 203 passed, 0 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:07.1090987Z mnesis-postgres-integration>      Summary [   0.076s] 1 test run: 1 passed, 14 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:09.3015350Z mnesis-postgres-integration>      Summary [   0.062s] 1 test run: 1 passed, 15 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:11.5133190Z mnesis-postgres-integration>      Summary [   0.075s] 1 test run: 1 passed, 2 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:13.7377614Z mnesis-postgres-integration>      Summary [   0.093s] 1 test run: 1 passed, 7 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:15.9437859Z mnesis-postgres-integration>      Summary [   0.073s] 1 test run: 1 passed, 10 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:51.0290264Z mnesis-postgres-integration>      Summary [  32.902s] 203 tests run: 203 passed, 0 skipped
+/tmp/mnesis-release-repair-ci-native-pr.log:2026-10-18T17:57:51.6844801Z      Summary [  32.902s] 203 tests run: 203 passed, 0 skipped
+deep-fuzz (cbor_decode_header)	Fuzz cbor_decode_header	2026-10-18T17:54:23.0092367Z Done 1763132 runs in 61 second(s)
+deep-fuzz (value_event_type)	Fuzz value_event_type	2026-10-18T17:54:08.1573186Z Done 5603167 runs in 61 second(s)
+deep-fuzz-afl (value_event_type)	Fuzz value_event_type (AFL++/CMPLOG)	2026-10-18T17:55:07.5087846Z ^[[1;94m[*] ^[[0mStatistics: 0 new corpus items found, 8.31% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz-afl (wire_decode_frame)	Fuzz wire_decode_frame (AFL++/CMPLOG)	2026-10-18T17:54:39.3109157Z ^[[1;94m[*] ^[[0mStatistics: 0 new corpus items found, 37.25% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz (wire_decode_frame)	Fuzz wire_decode_frame	2026-10-18T17:56:00.7561726Z Done 6613345 runs in 61 second(s)
+deep-fuzz-afl (cbor_decode_header)	Fuzz cbor_decode_header (AFL++/CMPLOG)	2026-10-18T17:56:48.7262951Z ^[[1;94m[*] ^[[0mStatistics: 1 new corpus items found, 47.61% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz (cbor_decode_chunk)	Fuzz cbor_decode_chunk	2026-10-18T17:55:59.4869442Z Done 1264851 runs in 61 second(s)
+deep-fuzz-afl (cbor_decode_chunk)	Fuzz cbor_decode_chunk (AFL++/CMPLOG)	2026-10-18T17:56:37.8694823Z ^[[1;94m[*] ^[[0mStatistics: 14 new corpus items found, 43.52% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m

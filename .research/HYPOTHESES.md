@@ -287,3 +287,87 @@ Current transient repair may update releasePR locks with exact evidence; protect
 PR378 MUSTremainunmerged until whole-adapter acceptance. Separate CodSpeed decode
 -10.42% across3payloads needs actualsame-environment evidence, no threshold raise,
 benchmark deletion or manualacknowledge. User explicitly requested fixing asgo.
+2026-10-18 PG7c FIRST native logical-restore characterization, main12fd839c.
+Actual PRD demands copied xid8 must not be assumed compatible with fresh cluster
+history. BEFORE choosing history metadata/API, use real PG18.6 initdb/pg_dump/
+psql to copy migrated events to an independent fresh counter. Actual adapter
+append/read_stream/read_all are SUT; SQL transaction allocation only establishes
+higher source counter. Expected coherent original stream/global visibility must
+fail if copied xid is filtered as future. Budget <=220 native test/fixture lines,
+0production/API/dependency/format changes for characterization. Independent Unix
+socket directories, TCP disabled, same server version; fixture cleanup even on
+assertion failure. Expose real original red first, then decide supported logical
+reimport/rebuild guard and identity context from evidence. No direct raw-restore
+support or context scheme promised by this initial probe. No custom project tool.
+2026-10-18 PG9 release performance experiment, parent12fd839c. Three downloaded
+actual CodSpeed base/head decoder traces (all payloads) show identical35ns
+instruction cost and one extra simulated cache-miss pair, adding58.333ns. Version
+PR changes no decoder/benchmark source, but compiler may place/optimize its body
+differently. Experiment ONLY supported #[inline] hint on existing public
+wire::decode_frame, not inline(always), not benchmark alteration. This makes body
+available across crate boundaries; LLVM remains free to choose. Before editing,
+measure unchanged actual existing three decoder workloads on pinned native Rust,
+then same command after single hint, inspect binary size and existing decoder/
+wire laws. Budget <=2productionRust lines,0API/dependency/runtime/test/benchmark/
+gate/threshold changes. Falsifier: runtime regression outside measured noise,
+code-size cost outweighs actual improvement, any changed error/decoder behavior,
+or unchanged release performance failure. Native ARM alone cannot prove x86
+CodSpeed result; retain only after all workload/CI/release-head evidence. Rollback
+single attribute; original failure remains in records. Do not accept a green
+benchmark by dropping cases, changing metric, cold-cache policy or threshold.
+
+2026-10-18 PG7c history experiment BEFORE product edits. Real native data-only
+restore red and PG17/18 unprivileged native identity witnesses justify context.
+Select one persisted16byte history generation plus native cluster/database
+binding. Native gen_random_uuid/uuid_send and SQLx0.9 fixed-array BYTEA decode
+reuse supported server/library facilities,0new dependencies. Native IDs alone
+cannot express a new logical history recreated within the same database.
+PgAllPos becomes history+txid+seq; one public History value with byte constructor/
+accessor and store/position history getters supports actual serialized consumers.
+Constructor now requires history (experimental0.x breaking minor per STABILITY;
+conventional breaking commit/release-plz handles version, NOmanualmainbump).
+Do not add an unscoped/zero sentinel fallback or silently attach foreign cursors.
+Migration5 ONLY adopts trusted current legacy rows under explicit migrate; old
+external2scalar cursors require explicit provenance verification before adoption.
+Checkpoint rows preserve history with revision/schema/state/position in SAME CAS
+transaction, never retag copied state. Physical recovery keeps coherent metadata;
+logical completed-CBOR reimport creates fresh history and projection rebuild.
+Bounded startup max-xid comparison uses captured snapshot XMAX (NOT xmin), native
+index ORDER BY txid DESC LIMIT1; raw copied future xids reject before use. Native
+binding copied to another cluster/database rejects too. Caller pool identifies
+one database; reconnect/failover profile remains PG8, not inferred here.
+Pre-edit budget <=300added/100removed productionRust, <=110SQLlines including
+newmigration5/schemaaudits, one new public type/3error variants/no kernel changes,
+<=500new native testlines including189existing characterization, <=90old callsite
+or fixture edits for explicit scope/metadata, no assertion/limit/lint weakening.
+Falsifiers: old committed values/txid/seq/state/revisions change onupgrade; same-
+history ordering/resume changes; foreign cursors accepted; raw copied profiles/
+futurexids open; physicalcoherentrestore/reopen breaks; profile/grants allow
+runtime rewriting identity; bounding/runtime/allocations regress without measured
+tradeoff. Measure position size16=>expected32 and native bounds/runtime; explicit
+16byte persisted history cost added to checkpoint read/write byte accounting.
+Update every exact boundary fixture to SAME configured ceiling with correspondingly
+shorter body/known overhead, NEVERraise limits to green. Before retain, demonstrate
+fresh native controls disabling physical/future/position guards fail actual laws.
+Rollback new5/history position changes together; never rewrite migrations1–4.
+PG7c byte-edge fixture clarification BEFORE edits: checkpoint fixed accounting
+now48bytes, so old37byte ceiling cannot fit EVEN an empty row (one-byte key
+requires49). Preserve37 as an explicit unchanged too-small-floor negative and
+for stale/oversized transfer tests. Exercise exact new positive boundary at53
+with four-byte body and54overflow, not by claiming old37 still stores that row.
+Production limits are unchanged. This new pair of laws is stronger than simply
+raising the old fixture limit. Every original body/CAS/state oracle stays.
+PG7c migration5 populated-v4 follow-up BEFORE new test edits: first209 green
+suite has no checkpoint row before5 (earlier fixture startsv3 then installs4+5).
+It therefore does NOT prove promised backfill. Allocate an additional<=80native
+lines, cumulative new-test budget<=580 (initial500 retained),0extra product/SQL/
+API budget, for ONE populated-v4 collision/rollback/repair/unsigned-state proof.
+This strengthens missing acceptance instead of inferring it from green tests.
+Original migration1–4 checksum/rows remain exact or experiment fails.
+PG7c final native controls and Linux211 evidence support retaining the history
+candidate pending the unchanged full gate and protected delivery; no completion
+claim. Whole PG7 operator drill must independently assert old-primary shutdown
+(the current physical fixture invokes pg_ctl stop through Drop but ignores its
+exit status), actual Projection restart, bounded completed chunks and logical
+rebuild. These remain explicit falsifiers; current physical-copy coherence is
+not failover fencing. Current product source freezes through final gate/CI.

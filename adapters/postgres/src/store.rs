@@ -19,11 +19,11 @@ use sqlx::postgres::PgListener;
 use sqlx::{Error as SqlxError, PgPool, Postgres, QueryBuilder};
 use tokio::task::JoinHandle;
 
-use crate::Limits;
 use crate::error::PostgresError;
 use crate::hex;
 use crate::page::{self, Order, PageRow};
 use crate::position::PgAllPos;
+use crate::{History, Limits};
 
 #[cfg(feature = "import")]
 mod atomic;
@@ -56,6 +56,7 @@ const HINT_TIMEOUT: Duration = Duration::from_millis(250);
 struct Inner {
     pool: PgPool,
     limits: Limits,
+    history: History,
     /// In-process wake registry. The `LISTEN/NOTIFY` listener task drives it:
     /// every `NOTIFY` becomes a `notifiers.wake(id)`, which rouses both the
     /// per-stream and `$all` armed registrations. Reusing this audited registry
@@ -79,13 +80,11 @@ impl Drop for Inner {
 /// PostgreSQL-backed event store.
 ///
 /// Implements [`RawEventStore`](mnesis_store::RawEventStore) and
-/// [`WakeSource`](mnesis_store::wake::WakeSource) (Tasks 4–7). Constructed via
-/// [`connect`](Self::connect) or [`from_pool`](Self::from_pool) in
-/// [`builder`](crate::builder).
+/// [`WakeSource`](mnesis_store::wake::WakeSource). Open with
+/// [`connect`](Self::connect) or [`from_pool`](Self::from_pool).
 ///
-/// Clone is cheap: it is a single `Arc` bump over the shared [`Inner`]
-/// (`PgPool` is itself `Arc`-backed). All clones share one wake registry and
-/// one `LISTEN/NOTIFY` listener task.
+/// Clones share the pool, wake registry and one `LISTEN/NOTIFY` listener task
+/// through an `Arc`.
 #[derive(Clone)]
 pub struct PostgresStore {
     inner: Arc<Inner>,
@@ -96,13 +95,14 @@ impl PostgresStore {
     /// `LISTEN/NOTIFY` listener task, and wrap it all in the shared [`Inner`].
     ///
     /// Called by [`from_pool`](Self::from_pool) *after* the schema is ensured.
-    pub(crate) fn assemble(pool: PgPool, limits: Limits) -> Self {
+    pub(crate) fn assemble(pool: PgPool, limits: Limits, history: History) -> Self {
         let notifiers = StreamNotifiers::new();
         let listener_task = spawn_listener(pool.clone(), Arc::clone(&notifiers));
         Self {
             inner: Arc::new(Inner {
                 pool,
                 limits,
+                history,
                 notifiers,
                 listener_task,
             }),
@@ -113,6 +113,12 @@ impl PostgresStore {
     /// tests) that need the raw pool.
     pub(crate) fn pool(&self) -> &PgPool {
         &self.inner.pool
+    }
+
+    /// Identity to persist with this store's resume positions.
+    #[must_use]
+    pub fn history(&self) -> History {
+        self.inner.history
     }
 
     /// The shared wake registry, driven by the `LISTEN/NOTIFY` listener task.
@@ -301,7 +307,7 @@ async fn insert_one(
     id: &StreamKey,
     number: i64,
     row: &PendingEnvelope,
-) -> Result<PgAllPos, PostgresError> {
+) -> Result<(u64, u64), PostgresError> {
     let returned: Result<(i64, String), sqlx::Error> = sqlx::query_as(
         "INSERT INTO mnesis.events \
          (stream_id, version, event_type, schema_version, payload, metadata) \
@@ -327,7 +333,7 @@ async fn insert_one(
                 stream_id: ErrorId::from_display(id),
                 reason: ErrorId::from_display(&"assigned txid out of range"),
             })?;
-            Ok(PgAllPos::new(txid_u64, seq))
+            Ok((txid_u64, seq))
         }
         Err(error) => Err(PostgresError::Sqlx(error)),
     }
@@ -339,7 +345,7 @@ async fn insert_run(
     id: &StreamKey,
     number: i64,
     envelopes: PendingBatch<'_>,
-) -> Result<PgAllPos, PostgresError> {
+) -> Result<(u64, u64), PostgresError> {
     let mut assigned = insert_one(tx, id, number, envelopes.first()).await?;
     for row in envelopes.iter().skip(1) {
         assigned = insert_one(tx, id, number, row).await?;
@@ -623,7 +629,7 @@ impl RawEventStore for PostgresStore {
 
         // Wake AFTER durable commit (WakeSource contract: wake post-commit).
         self.notify_committed(id.as_bytes()).await;
-        Ok(assigned)
+        Ok(PgAllPos::new(self.history(), assigned.0, assigned.1))
     }
 
     async fn read_stream(
@@ -676,6 +682,10 @@ impl RawEventStore for PostgresStore {
     }
 
     async fn read_all(&self, from: Option<PgAllPos>) -> Result<Self::AllStream, Self::Error> {
+        let history = self.history();
+        if let Some(position) = from {
+            history.check(position.history())?;
+        }
         let start = from;
 
         // Every transaction below this cutoff has already settled. Later
@@ -739,9 +749,10 @@ impl RawEventStore for PostgresStore {
                     return Err(corrupt(row_label, "global_seq is zero"));
                 }
                 let event = row_to_envelope(row.event, row_label)?;
+                let position = PgAllPos::new(history, txid, seq);
                 Ok(Some((
-                    (PgAllPos::new(txid, seq), stream, event),
-                    (pool, Some(PgAllPos::new(txid, seq)), rows, ceiling),
+                    (position, stream, event),
+                    (pool, Some(position), rows, ceiling),
                 )))
             })
             .boxed(),

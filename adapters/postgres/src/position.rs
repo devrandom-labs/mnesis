@@ -1,56 +1,46 @@
-//! `PgAllPos` — postgres's [`AllPosition`](mnesis_store::AllPosition).
-//!
-//! The composite `(txid, seq)` transaction-ordered position. `txid` is the writing
-//! transaction's `xid8` (`pg_current_xact_id()`); `seq` is the row's
-//! `IDENTITY` `global_seq`. Lexicographic `Ord` on `(txid, seq)` is the
-//! Way-2 order: resume strictly after the last delivered position, and the
-//! `pg_snapshot_xmin` watermark guarantees no smaller `(txid, seq)` can become
-//! visible after a larger one is consumed.
-//! Overlapping transactions can finish committing in a different order. This
-//! position defines stable delivery order, not commit-acknowledgement timestamps.
+//! History-scoped, transaction-ordered Postgres resume positions.
 
-/// `PostgreSQL` `$all` resume position: `(txid, seq)`, lexicographic order.
+use crate::History;
+
+/// A resume position within one event history.
 ///
-/// Fields are **private** — the `(u64, u64)` layout is an implementation
-/// detail, not the public contract. A consumer checkpoints a `PgAllPos` and
-/// hands it back to resume; it reconstructs one from its two persisted scalars
-/// via [`new`](Self::new) and reads them via [`txid`](Self::txid) /
-/// [`seq`](Self::seq), but it cannot mutate one in place or depend on the field
-/// layout. That representation-independence is what lets the position evolve
-/// after the 1.0 freeze (the public surface is `new` + two accessors + `Ord`,
-/// not "a struct with two pub u64s").
+/// Persist all three components: [`history`](Self::history), [`txid`](Self::txid)
+/// and [`seq`](Self::seq). Positions from another history are rejected before a
+/// scan. Logical reimport creates a new history; coherent physical recovery
+/// preserves it. Legacy two-number checkpoints require explicit provenance
+/// verification before attaching the migrated store's history identity.
 ///
-/// # Ordering
-///
-/// `derive(Ord)` uses **declaration order**: `txid` first, then `seq`. This
-/// matches `ORDER BY txid, global_seq` in SQL and the row-value comparison
-/// `(txid, global_seq) > ($1, $2)`. A sequence/protocol test asserts
-/// `PgAllPos::new(1, 9) < PgAllPos::new(2, 0)` (lower `txid` wins regardless
-/// of `seq`) to lock the tie-break.
+/// Within one history, ordering is lexicographic `(txid, seq)` and matches
+/// `ORDER BY txid, global_seq`. The xmin barrier prevents skipped late commits;
+/// this is stable delivery order, not commit-acknowledgement timestamps.
+/// Ordering between different histories has no consumer meaning.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PgAllPos {
-    /// The writing transaction id (`xid8`, 64-bit, non-wrapping). Declaration
-    /// order is the `derive(Ord)` primary key — `txid` sorts before `seq`.
+    history: History,
     txid: u64,
-    /// The row's `IDENTITY` `global_seq` (always >= 1).
     seq: u64,
 }
 
 impl PgAllPos {
-    /// Construct from the `(txid, seq)` columns read off a row — or rebuilt
-    /// from a persisted consumer checkpoint.
+    /// Reconstruct a checkpoint from all its unchanged persisted components.
     #[must_use]
-    pub const fn new(txid: u64, seq: u64) -> Self {
-        Self { txid, seq }
+    pub const fn new(history: History, txid: u64, seq: u64) -> Self {
+        Self { history, txid, seq }
     }
 
-    /// The writing transaction id component (serialize this to checkpoint).
+    /// History identity to persist with the numeric components.
+    #[must_use]
+    pub const fn history(self) -> History {
+        self.history
+    }
+
+    /// The writing transaction ID component.
     #[must_use]
     pub const fn txid(self) -> u64 {
         self.txid
     }
 
-    /// The `global_seq` component (serialize this to checkpoint).
+    /// The global sequence component.
     #[must_use]
     pub const fn seq(self) -> u64 {
         self.seq
@@ -63,24 +53,22 @@ impl mnesis_store::AllPosition for PgAllPos {}
 mod tests {
     use super::*;
 
-    /// Sequence/protocol: lexicographic `Ord` — `txid` is the primary sort key.
-    /// `PgAllPos::new(1, 9)` must be less than `PgAllPos::new(2, 0)` regardless
-    /// of `seq`, because this must match `ORDER BY txid, global_seq` in SQL.
+    const HISTORY: History = History::new([1; 16]);
+
     #[test]
     fn ord_is_txid_first_then_seq() {
-        // Lower txid wins regardless of seq.
-        assert!(PgAllPos::new(1, 9) < PgAllPos::new(2, 0));
-        // Equal txid: seq is the tiebreaker.
-        assert!(PgAllPos::new(3, 1) < PgAllPos::new(3, 2));
-        // Equality.
-        assert_eq!(PgAllPos::new(5, 5), PgAllPos::new(5, 5));
+        assert!(PgAllPos::new(HISTORY, 1, 9) < PgAllPos::new(HISTORY, 2, 0));
+        assert!(PgAllPos::new(HISTORY, 3, 1) < PgAllPos::new(HISTORY, 3, 2));
+        assert_eq!(PgAllPos::new(HISTORY, 5, 5), PgAllPos::new(HISTORY, 5, 5));
     }
 
-    /// `new` / `txid` / `seq` round-trip correctly.
     #[test]
     fn accessors_round_trip() {
-        let pos = PgAllPos::new(42, 7);
+        let history = History::new([7; 16]);
+        let pos = PgAllPos::new(history, 42, 7);
+        assert_eq!(pos.history().as_bytes(), &[7; 16]);
         assert_eq!(pos.txid(), 42);
         assert_eq!(pos.seq(), 7);
+        assert_eq!(core::mem::size_of::<PgAllPos>(), 32);
     }
 }

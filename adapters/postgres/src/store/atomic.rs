@@ -29,7 +29,7 @@ async fn insert(
     connection: &mut Transaction<'_, Postgres>,
     write: &PlannedAppend,
     key: Option<i64>,
-) -> Result<PgAllPos, PostgresError> {
+) -> Result<(u64, u64), PostgresError> {
     let number = match key {
         Some(number) => number,
         None => create_key(connection, &write.target).await?,
@@ -124,6 +124,6 @@ impl AtomicAppend for PostgresStore {
             }
         };
         let _ = tokio::time::timeout(super::HINT_TIMEOUT, hints).await;
-        Ok(Some(assigned))
+        Ok(Some(PgAllPos::new(self.history(), assigned.0, assigned.1)))
     }
 }

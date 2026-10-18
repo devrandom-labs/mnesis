@@ -1,0 +1,20 @@
+ Documenting mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+error: public documentation for `PostgresStore` links to private item `crate::builder`
+  --> adapters/postgres/src/store.rs:85:17
+   |
+85 | /// [`builder`](crate::builder).
+   |                 ^^^^^^^^^^^^^^ this item is private
+   |
+   = note: this link will resolve properly if you pass `--document-private-items`
+   = note: `-D rustdoc::private-intra-doc-links` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(rustdoc::private_intra_doc_links)]`
+
+error: public documentation for `PostgresStore` links to private item `Inner`
+  --> adapters/postgres/src/store.rs:87:65
+   |
+87 | /// Clone is cheap: it is a single `Arc` bump over the shared [`Inner`]
+   |                                                                 ^^^^^ this item is private
+   |
+   = note: this link will resolve properly if you pass `--document-private-items`
+
+error: could not document `mnesis-postgres`

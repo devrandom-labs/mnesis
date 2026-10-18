@@ -1,0 +1,22 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+error[E0382]: borrow of moved value: `store`
+   --> adapters/postgres/tests/checkpoint_tests.rs:181:37
+    |
+122 |     let store = PostgresStore::from_pool(runtime.clone()).await.unwrap();
+    |         ----- move occurs because `store` has type `PostgresStore`, which does not implement the `Copy` trait
+...
+162 |     drop(store);
+    |          ----- value moved here
+...
+181 |             position: PgAllPos::new(store.history(), 2, 0),
+    |                                     ^^^^^ value borrowed here after move
+    |
+help: consider cloning the value if the performance cost is acceptable
+    |
+162 |     drop(store.clone());
+    |               ++++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `mnesis-postgres` (test "checkpoint_tests") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --manifest-path /private/tmp/mnesis-postgres-backup/Cargo.toml --no-run --message-format json-render-diagnostics --package mnesis-postgres --all-features --locked` exited with code 101

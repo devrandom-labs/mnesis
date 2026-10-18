@@ -3,7 +3,7 @@
 Status: active (PG7 listing/export/restore; PG8–PG9 remain). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-checkpoints`.
+Planning branch: `docs/postgres-prd`. Current slice: `work/postgres-backup`.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
@@ -355,6 +355,14 @@ an evidenced translation procedure; verify subsequent append, `$all` progress
 and projection restart after restore. Never resume an old checkpoint silently
 against a different history. Document backup consistency, recovery point and
 recovery time as deployment choices, with measured drill results.
+
+The active history slice adds migration5 and a persisted16-byte history identity
+to `PgAllPos` and projection checkpoint rows. Its breaking constructor requires
+all three saved components. Native tests reject copied cluster/database bindings,
+future transaction IDs (including the exact upper bound), and foreign positions
+before pool acquisition; populated-v4 migration rollback/backfill and coherent
+physical recovery are exercised. This slice is not yet merged. Completed bounded
+CBOR interchange, projection restart and the full operator drill remain required.
 
 ### PG8 Secure operation, lifecycle and capacity
 

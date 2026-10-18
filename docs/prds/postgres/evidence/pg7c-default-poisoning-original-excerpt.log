@@ -1,0 +1,26 @@
+Evidence limitation: this is an excerpt copied from the original tool transcript,
+not the complete raw log. The initial /tmp/mnesis-pg7c-features-none.log was
+inadvertently reused by the later feature matrix. The original failing result
+and independent catalog inspection are retained here; no fresh execution claim.
+
+thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (100048124)
+panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+called `Result::unwrap()` on an `Err` value: Schema { reason: "checkpoint columns,
+bounds, logging, primary key or identity reference differ" }
+
+Summary [0.135s] 12/122 tests run: 11 passed, 1 failed, 0 skipped
+FAIL [0.027s] (12/122) mnesis-postgres::all_noskip_tests
+all_noskip_exclusive_resume_after_out_of_order_commits
+110/122 tests were not run due to test failure.
+
+Independent native catalog inspection before fixture repair:
+checkpoints_global_seq_check
+checkpoints_key_fkey
+checkpoints_pkey
+checkpoints_revision_check
+checkpoints_schema_version_check
+checkpoints_txid_check
+Saved checkpoint history equals singleton: f
+
+checkpoints_history_fkey was absent. The fixture now collects outcomes, repairs
+its injected history and constraint changes, then asserts unchanged outcomes.

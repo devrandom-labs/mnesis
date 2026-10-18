@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.24s
+────────────
+ Nextest run ID ee438d68-44e2-4400-81d2-8fdf00de17cd with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   0.915s] (1/1) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+  stdout ───
+
+    running 1 test
+    test foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition ... FAILED
+
+    failures:
+
+    failures:
+        foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.91s
+
+  stderr ───
+
+    thread 'foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition' (100007896) panicked at adapters/postgres/tests/restore_tests.rs:286:5:
+    assertion failed: matches!(restored.read_all(Some(position)).await,
+        Err(PostgresError::HistoryMismatch { expected: actual_expected, actual })
+        if actual_expected == expected && actual == position.history())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.916s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   0.915s] (1/1) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+error: test run failed

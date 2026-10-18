@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.14s
+────────────
+ Nextest run ID f168f91d-44ac-4807-8512-51bf4134e00b with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   1.555s] (1/1) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+  stdout ───
+
+    running 1 test
+    test copied_future_transactions_reject_before_global_history_can_be_used ... FAILED
+
+    failures:
+
+    failures:
+        copied_future_transactions_reject_before_global_history_can_be_used
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.55s
+
+  stderr ───
+
+    thread 'copied_future_transactions_reject_before_global_history_can_be_used' (99998686) panicked at adapters/postgres/tests/restore_tests.rs:242:5:
+    assertion failed: matches!(opened, Err(PostgresError::FutureTransaction))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.556s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   1.555s] (1/1) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+error: test run failed

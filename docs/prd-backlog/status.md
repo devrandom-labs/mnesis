@@ -30,6 +30,7 @@ Protected focused merges:
 - PR383 projection checkpoints: `c482fb6a3762c74d7b10416029de22a642de2b71`.
 - PR384 bounded listing: `88a4575b3a3d0c5db8aaac2b92241c76b19f9a60`.
 - PR385 consistent export sessions: `12fd839c7b08e2eda1a8020bae9f52dd898c1d15`.
+- PR386 release lock synchronization: `87e87d6e00b0d7703a93cf577ec4893a9d49d35e`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -68,8 +69,13 @@ after203 native cases, all40 checks and22 reviewed mutations (9 caught,
 cleanup defects; both original reds are retained, with supported native socket
 checks and pool-close ownership now passing eleven focused laws. Fresh isolation
 and native-disconnect controls reject the original defects. Backup composition
-and restore remain. Release repair is active: isolated fuzz locks are stale on
-the version PR; the decoder performance check also fails and remains unresolved.
+and restore remain. The active history slice rejects unsafe copied transaction
+IDs, scopes positions and checkpoint state, and tests physical recovery and
+populated migration rollback/backfill. It is not yet merged or released.
+Release lock synchronization is protected-merged in PR386. Its live workflow
+created a verified App commit on release PR378; all four original locked AFL
+builds and campaigns pass. The independent decoder performance check still
+fails by10.42%; it has no accepted fix or waiver.
 No publication is claimed. All prerequisite edges stay visible.
 
 PG10 requires a selected consumer and explicit acknowledgement contract before

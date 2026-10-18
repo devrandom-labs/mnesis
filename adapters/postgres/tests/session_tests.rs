@@ -473,14 +473,32 @@ async fn a_native_backend_failure_preserves_its_sqlstate_and_ends_the_cursor() {
         .await
         .unwrap();
     let pid = native_view(&pool).await;
+    let mut lock = pool.begin().await.unwrap();
+    sqlx::query("LOCK TABLE mnesis.events IN ACCESS EXCLUSIVE MODE")
+        .execute(&mut *lock)
+        .await
+        .unwrap();
+    let mut cursor = Box::pin(session.list_streams().await.unwrap());
+    let mut next = Box::pin(cursor.next());
+    assert!(next.as_mut().now_or_never().is_none());
+    let blocked = timeout(Duration::from_secs(3), async {
+        loop {
+            let waiting: bool = sqlx::query_scalar("SELECT EXISTS (SELECT FROM pg_stat_activity WHERE pid = $1 AND wait_event_type = 'Lock')")
+                .bind(pid).fetch_one(&pool).await.unwrap();
+            if waiting { break; }
+            yield_now().await;
+        }
+    }).await;
     let terminated: bool = sqlx::query_scalar("SELECT pg_catalog.pg_terminate_backend($1)")
         .bind(pid)
         .fetch_one(&pool)
         .await
         .unwrap();
+    let pending = timeout(Duration::from_secs(3), next).await;
+    lock.rollback().await.unwrap();
+    blocked.expect("the actual query must be in flight before native termination");
     assert!(terminated);
-    let mut cursor = Box::pin(session.list_streams().await.unwrap());
-    let failure = cursor.next().await.unwrap();
+    let failure = pending.unwrap().unwrap();
     assert!(cursor.next().await.is_none());
     drop(cursor);
     let closed = session.close().await;
