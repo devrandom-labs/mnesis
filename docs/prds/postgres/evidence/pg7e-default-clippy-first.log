@@ -1,0 +1,16 @@
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-recovery/adapters/postgres)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-recovery/adapters/fjall)
+error: unused imports: `Write` and `stderr`
+ --> adapters/postgres/tests/restore_tests.rs:8:21
+  |
+8 | use std::io::{self, Write, stderr};
+  |                     ^^^^^  ^^^^^^
+  |
+  = note: `-D unused-imports` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: could not compile `mnesis-postgres` (test "restore_tests") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

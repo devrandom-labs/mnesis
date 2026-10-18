@@ -1,5 +1,64 @@
 # Current work — 2026-10-18
 
+## Latest delivery continuation — 2026-10-18
+
+PR389 protected squash merged23:09:09Z at49b32374041843a87980fc6f74a945f51f0b9ea3,
+from signedd30129c3,40SUCCESS/one scheduledskip/no reviewthreads. Downloaded actual
+CI native2220skips/workspace1571/fuzz/feature/compiler runs each THREE-reviewed in
+research. Mutants reported No mutants to filter/no artifacts, ZERO runtime catches.
+Thirteen focused protected merges. No release/publication claim.
+
+Physical signed56007a30537d283a9276600ed3b79760aafbff5d is source-equivalent rebase
+of f431999b above ONLY d301 onto parent49b. Native224/22435.764s0skips, current
+Linux224/22485.858s0skips, full unchanged hook1571/1571workspace532.082s/14slow/
+4filtered, cleanfixup, strict default/EXIM+projection/allfeature Clippy allPASS.
+Full results/logs and THREEreviews recorded. Sessions95312/31050/47681DONE0.
+Final docs update and cached unchanged signed amendment before focusedPR; do not
+claim a fresh test execution from cached/source-equivalent work.
+
+Independent /tmp/mnesis-postgres-backups branchtest/postgres-backups basedd301:
+prebudget450newtest/45helperedits,0production/dependencies. Four actual completed
+CBOR laws for explicitbinaryroute, lateduplicate, finalconflict/exactpolicies and
+sessionview across actual overlapping atomicwriter. First strict lint redonly
+shadowbindings repaired; native session90089 currentlyrunning, samecluster55432,
+do not run concurrent local native suite. Operator source frozen. Preserve all
+worktrees/stashes and userrootresearch.md. Whole PG7/8/9 plus release remains.
+
+## Authoritative physical continuation — 2026-10-18 21:07 UTC
+
+Goal ACTIVE. Backup PR389 OPEN at signed d30129c3d24d543bd773ae3bbd29252b5f38aeb6,
+https://github.com/devrandom-labs/mnesis/pull/389. CI running, no merge claim.
+PR388 protected merge651aabf3 recorded below. Release performance remains open.
+
+Primary /tmp/mnesis-postgres-recovery branchtest/postgres-recovery now based
+backupd30129c3. Owned stashfd00ca76deae61cf2550415c57c0ea37dd71c6f4 preserved.
+Append-only record conflicts resolved after checking exact unchanged base
+prefixes, preserving all parent/child additions. Repeated CI records describe
+the same jobs, not additional test executions. User root research.md untouched.
+
+Physical drill: source fsync/on and synchronous_commit/on, native pg_basebackup
+streamedWAL, pg_verifybackup explicitplain with all checks, actual waited stop0
+and status3 BEFORE target boot, exact migrations1–5 checksums/history/saved pair,
+real projection reload4 and repository append/consumer5. Native same-length
+PG_VERSION corruption and missing file each exact native error/status1, repaired
+backupsuccess. Earlier wrong-tar-error green explicitly rejected and raw retained;
+first mistaken expected literal red retained. Fresh no-stop control fails status0
+vs3 before target boot. No production/API/dependency change. Shared private helper
+now serves both logical and physical consumers instead of duplicated algorithm.
+Budget220newRust/15restoreedits plus35duplicate removals/15backupedits; actual
+restore162added/6removed, helper37added, backup5added/39removed, docs67/100.
+
+Combined224/224nativePASS35.764s/0skips, Clippyall/all2.07s; then cfg-only import
+repair for default-feature lint failure. Current strict default,EXIM+projection,
+allfeatures/alltargets allPASS0.22/1.67/0.29s; no test-proof from compilation.
+All runs THREE-reviewed in research with original reds and scope limits.
+Current independentLinux session31050, /tmp/mnesis-pg7e-combined-linux.log;
+only two fresh derivations on existing remote builder. Next normal signed commit
+unchanged full Nix gate; poll exact handle, don't restart on observationtimeout.
+Native84839DONE0/features93081DONE0/default76250DONE101recorded. No other local
+native suite live; backupCI independent. Full current Linux/source gate and
+focusedPR still due; all other PG7/8/9 acceptance/publication still required.
+
 ## Authoritative continuation — 2026-10-18 21:00 UTC
 
 Goal ACTIVE. PR388 normal protected squash merged20:59:59Z at

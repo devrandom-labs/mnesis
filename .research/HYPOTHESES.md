@@ -420,3 +420,33 @@ roundtrip/interchange loses any field, bounded sink overflows accepted workload,
 normal decode accepts incomplete data, or a failed chunk is falsely completed.
 Any production defect needs a separate recorded budget before editing its owner.
 This first pass is not the complete PG7 operator/restart acceptance proof.
+# PG7 physical operator recovery — 2026-10-18
+
+Before sharing the existing logical consumer with physical recovery: allow removal
+of its35-line private duplicate plus up to15 import/module/call edits in the
+backup owner, in addition to the physical slice's220newRust/15restore edits.
+Both actual consumers must retain exact pair4/restart/advance5 assertions. One
+private test helper now has two concrete owners; no new public/product interface,
+dependency or alternative projection implementation. Rollback is these test-only
+edits if either owning recovery law or feature compilation changes behavior.
+
+Before native backup-integrity case: refine new test/helper Rust ceiling180->220
+for supported pg_verifybackup (manifest/checksums/WAL) and an actual same-length
+file corruption/missing-file witness before boot. Existing15-line/document100/
+production0/dependency0 ceilings unchanged. This replaces no parser and introduces
+no custom backup format. Initial six restore laws already passed180.715s.
+
+Threatened acceptance: a best-effort Drop is not proof that the old primary
+stopped; raw checkpoint bytes are not an actual restarted projection consumer.
+Use existing independent18.6clusters, pg_basebackup, pg_ctl and actual Counter
+repository/projector. Verify successful waited stop and native status3 before
+booting the copy. Preserve migration checksums and saved projection pair, reload
+through the real consumer, then append and advance again. Record backup and
+recovery elapsed times as this fixture's measurements, not deployment targets.
+Falsifiers: source still running, checksum/history/state mismatch, restart replay
+duplicates, or later append cannot advance. Explicit native control must reject
+a skipped old-primary stop. No cross-node failover/fencing/power-loss claim.
+Pre-edit budget<=180new test/helper Rust lines,<=15existing test lines changed,
+<=100operator documentation lines;0production/API/dependency/runtime/tool changes.
+Keep current backup commit frozen. Add small shared consumer fixture for the
+logical/physical recovery owners; use it in logical tests after parent delivery.

@@ -7,6 +7,9 @@
 )]
 
 #[cfg(feature = "projection")]
+#[path = "support/consumer.rs"]
+mod consumer;
+#[cfg(feature = "projection")]
 #[path = "support/projection.rs"]
 mod projection;
 
@@ -19,23 +22,19 @@ use std::time::Duration;
 use futures::{FutureExt, StreamExt, TryStreamExt, stream};
 use mnesis::Version;
 use mnesis_fjall::{AllIndex, FjallStore};
-#[cfg(feature = "projection")]
-use mnesis_postgres::PgAllPos;
 use mnesis_postgres::{Limits, PostgresError, PostgresStore};
 use mnesis_store::cbor::{ChunkWriter, SectionError, WriteError, decode_chunk};
 #[cfg(feature = "projection")]
 use mnesis_store::checkpoint::{CheckpointHydrated, CheckpointStore};
 use mnesis_store::export::{ConsistentExporter, ExportError, ExportSession, StreamLister};
 use mnesis_store::import::{Atomicity, EventImporter};
-#[cfg(feature = "projection")]
-use mnesis_store::state::{AfterEventTypes, CodecSnapshotStore};
 use mnesis_store::value::SchemaVersion;
 use mnesis_store::{
     BatchSize, PendingBatch, PendingEnvelope, PersistedEnvelope, RawEventStore, StreamKey,
     pending_envelope,
 };
 #[cfg(feature = "projection")]
-use mnesis_store::{DecodedStreamExt, JsonCodec, Projection, Repository, Store};
+use mnesis_store::{Repository, Store};
 #[cfg(feature = "projection")]
 use mnesis_test_domains::{Counter as AggregateCounter, CounterEvent, TestId};
 use sqlx::PgPool;
@@ -491,40 +490,13 @@ async fn canceling_a_native_drain_cannot_complete_a_chunk() {
 }
 
 #[cfg(feature = "projection")]
-async fn project(store: &PostgresStore) -> (PgAllPos, i64) {
-    let codec = CodecSnapshotStore::new(store, JsonCodec::default());
-    let mut consumer = Projection::load(
-        StreamKey::from_slice(b"restored-counter"),
-        projection::Counter,
-        AfterEventTypes::new(&["Incremented", "Set"]),
-        &codec,
-        NonZeroU32::MIN,
-    )
-    .await
-    .unwrap();
-    let events = store
-        .read_all(consumer.checkpoint())
-        .await
-        .unwrap()
-        .decoded::<CounterEvent, _>(JsonCodec::default());
-    futures::pin_mut!(events);
-    while let Some(item) = events.try_next().await.unwrap() {
-        consumer.advance(item).await.unwrap();
-    }
-    (
-        consumer.checkpoint().unwrap(),
-        consumer.state().unwrap().value,
-    )
-}
-
-#[cfg(feature = "projection")]
 #[tokio::test]
 async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
     let Some((source, pool)) = fixture().await else {
         return;
     };
     projection::events(&source).await;
-    let (old, state) = project(&source).await;
+    let (old, state) = consumer::resume(&source).await;
     assert_eq!(state, 4);
     let directory = tempfile::tempdir().unwrap();
     let count = backup(&source, directory.path()).await;
@@ -540,7 +512,7 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
             .unwrap(),
         CheckpointHydrated::Absent
     );
-    let (rebuilt, rebuilt_state) = project(&destination).await;
+    let (rebuilt, rebuilt_state) = consumer::resume(&destination).await;
     assert_eq!(rebuilt_state, 4);
     assert_eq!(rebuilt.history(), destination.history());
     assert_ne!(rebuilt.history(), old.history());
@@ -555,7 +527,7 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
     let reopened = PostgresStore::from_pool(reopened_pool.clone())
         .await
         .unwrap();
-    assert_eq!(project(&reopened).await, (rebuilt, 4));
+    assert_eq!(consumer::resume(&reopened).await, (rebuilt, 4));
     let store = Store::new(reopened.clone());
     let repository = store.repository::<AggregateCounter>().json().build();
     let mut root = repository.load(TestId::new("first")).await.unwrap();
@@ -563,7 +535,7 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
         .save::<0>(&mut root, &mnesis::events![CounterEvent::Incremented])
         .await
         .unwrap();
-    let (advanced, advanced_state) = project(&reopened).await;
+    let (advanced, advanced_state) = consumer::resume(&reopened).await;
     assert_eq!(advanced_state, 5);
     assert!(advanced > rebuilt);
     assert_eq!(advanced.history(), reopened.history());
