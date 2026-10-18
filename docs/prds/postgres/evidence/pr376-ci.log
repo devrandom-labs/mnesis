@@ -1,0 +1,12 @@
+Nix Flake Check	Flake Check	2026-10-18T07:15:30.6325511Z mnesis-nextest>     Starting 1524 tests across 121 binaries (4 tests skipped)
+Nix Flake Check	Flake Check	2026-10-18T07:17:44.7066684Z mnesis-nextest>      Summary [ 134.074s] 1524 tests run: 1524 passed (4 slow), 4 skipped
+Compile-fail tests	Kernel compile-fail tests	2026-10-18T07:05:40.9897779Z test compile_fail_version_zero ... ok
+Compile-fail tests	Kernel compile-fail tests	2026-10-18T07:05:59.9797829Z test compile_fail_tests ... ok
+Compile-fail tests	Kernel compile-fail tests	2026-10-18T07:05:59.9798160Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 74.42s
+Compile-fail tests	Macro compile-fail tests	2026-10-18T07:06:15.6856180Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
+Compile-fail tests	Store compile-fail tests	2026-10-18T07:06:28.4573935Z test compile_fail ... ok
+Compile-fail tests	Store compile-fail tests	2026-10-18T07:06:28.4574256Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.87s
+mutants-in-diff	cargo-mutants on the PR diff	2026-10-18T07:04:15.9374713Z server started
+mutants-in-diff	cargo-mutants on the PR diff	2026-10-18T07:05:03.3938474Z ok       Unmutated baseline in 32s build + 14s test
+mutants-in-diff	cargo-mutants on the PR diff	2026-10-18T07:07:15.1723768Z 27 mutants tested in 3m: 14 caught, 13 unviable
+mutants-in-diff	cargo-mutants on the PR diff	2026-10-18T07:07:15.2762156Z server stopped

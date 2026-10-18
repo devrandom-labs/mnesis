@@ -20,6 +20,11 @@ pub enum PostgresError {
     #[error("postgres error: {0}")]
     Sqlx(#[source] sqlx::Error),
 
+    /// COMMIT may have succeeded. Reconcile durable state before a new decision;
+    /// this outcome never proves that retrying the same command is safe.
+    #[error("commit outcome unknown; reconcile before retrying: {0}")]
+    CommitUnknown(#[source] sqlx::Error),
+
     /// A persisted row decoded into bytes that fail envelope validation.
     #[error("envelope integrity error in stream '{stream_id}' at version {version}")]
     EnvelopeCorrupt {
@@ -48,6 +53,23 @@ pub enum PostgresError {
     /// Wake registration over `LISTEN/NOTIFY` failed.
     #[error("listen/notify wake setup failed: {0}")]
     Wake(#[source] sqlx::Error),
+}
+
+impl PostgresError {
+    /// Only explicit server rollbacks prove rejection while awaiting COMMIT.
+    /// In particular class 40 includes `40003` (completion unknown).
+    pub(crate) fn commit(source: sqlx::Error) -> Self {
+        if let sqlx::Error::Database(error) = &source {
+            let code = error.code();
+            if code
+                .as_deref()
+                .is_some_and(|value| value.starts_with("23") || matches!(value, "40001" | "40P01"))
+            {
+                return Self::Sqlx(source);
+            }
+        }
+        Self::CommitUnknown(source)
+    }
 }
 
 #[cfg(test)]

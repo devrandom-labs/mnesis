@@ -19,3 +19,10 @@ while EXCLUDE USING hash(key WITH =) accepts it and rejects duplicates. Actual
 hash-colliding distinct keys survive equality recheck. This supported native
 constraint supersedes a handcrafted advisory-lock identity protocol as the
 preferred candidate; full adapter/migration/concurrency fitness still untested.
+
+PG8: a transaction in another database on the same Postgres cluster can pin the
+safe $all watermark. Native22861→22862 probe demonstrates this. Require an actual
+adapter subscription recovery witness after a foreign-DB transaction ends with
+no later writes, and document cluster-level long-transaction limits/diagnostics.
+Never run independent native suites concurrently on one cluster; database-only
+fixture separation does not isolate snapshot xmin. No unsafe shortcut authorized.

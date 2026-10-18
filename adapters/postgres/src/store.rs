@@ -345,6 +345,7 @@ fn narrow_inserts<'a>(
 async fn insert_one(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     id: &StreamKey,
+    expected: Option<Version>,
     row: &PreparedInsert<'_>,
 ) -> Result<PgAllPos, AppendError<PostgresError>> {
     let returned: Result<(i64, i64), sqlx::Error> = sqlx::query_as(
@@ -381,9 +382,9 @@ async fn insert_one(
         // A UNIQUE(stream_id, version) violation means a concurrent writer
         // claimed this version first — a conflict, not a Store error (CLAUDE
         // rule 3: one variant = one failure domain).
-        Err(e) if is_unique_violation(&e) => Err(AppendError::Conflict {
+        Err(e) if is_stream_conflict(&e) => Err(AppendError::Conflict {
             stream_id: ErrorId::from_display(id),
-            expected: Some(row.env.version()),
+            expected,
             actual: None, // a racer committed; exact actual unknown here
         }),
         Err(e) => Err(AppendError::Store(PostgresError::Sqlx(e))),
@@ -471,9 +472,11 @@ fn store_err<E: Into<sqlx::Error>>(e: E) -> AppendError<PostgresError> {
     AppendError::Store(PostgresError::Sqlx(e.into()))
 }
 
-/// Returns `true` if `e` is a unique-constraint violation (SQLSTATE `23505`).
-fn is_unique_violation(e: &sqlx::Error) -> bool {
-    matches!(e, sqlx::Error::Database(db) if db.is_unique_violation())
+/// Only the intended stream/version arbiter proves optimistic contention.
+fn is_stream_conflict(e: &sqlx::Error) -> bool {
+    matches!(e, sqlx::Error::Database(db) if db.is_unique_violation()
+        && db.table() == Some("events")
+        && db.constraint() == Some("events_stream_id_version_key"))
 }
 
 // ---------------------------------------------------------------------------
@@ -485,16 +488,23 @@ impl PostgresStore {
     /// commit. Best-effort — a failed `NOTIFY` must not fail an already-durable
     /// append (the catch-up scan will still pick the event up on the next poll).
     pub(crate) async fn notify_committed(&self, stream: &[u8]) {
+        self.wake_registry().wake(stream);
+        // NOTIFY permits fewer than 8000 bytes. Oversized IDs still use durable
+        // fallback scans; avoid allocating a hint the server cannot accept.
+        if stream.len() >= 4000 {
+            return;
+        }
         // The payload is the hex-encoded raw stream id (a `NOTIFY` payload must
         // be ASCII text, but a stream id is arbitrary bytes). The listener task
         // reverses this via `hex::decode` before calling `wake` — one shared,
         // unit-tested codec on both ends (see `crate::hex`).
         let payload = hex::encode(stream);
-        let _ = sqlx::query("SELECT pg_notify($1, $2)")
+        let hint = sqlx::query("SELECT pg_notify($1, $2)")
             .bind(NOTIFY_CHANNEL)
             .bind(payload)
-            .execute(self.pool())
-            .await;
+            .execute(self.pool());
+        // An acknowledged commit cannot be held behind auxiliary pool/query work.
+        let _ = tokio::time::timeout(Duration::from_millis(250), hint).await;
     }
 }
 
@@ -541,12 +551,14 @@ impl RawEventStore for PostgresStore {
         // overwrites it, so the value after the loop is the LAST row's — the
         // position `append` returns (#330). No `Option`, because
         // `PendingBatch` guarantees the head exists.
-        let mut assigned = insert_one(&mut tx, id, &head).await?;
+        let mut assigned = insert_one(&mut tx, id, expected_version, &head).await?;
         for row in &tail {
-            assigned = insert_one(&mut tx, id, row).await?;
+            assigned = insert_one(&mut tx, id, expected_version, row).await?;
         }
 
-        tx.commit().await.map_err(store_err)?;
+        tx.commit()
+            .await
+            .map_err(|source| AppendError::Store(PostgresError::commit(source)))?;
 
         // Wake AFTER durable commit (WakeSource contract: wake post-commit).
         self.notify_committed(id.as_bytes()).await;

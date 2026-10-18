@@ -9,7 +9,7 @@ this PRD does not satisfy their acceptance gates.
 | PG0 | Real-database reproduction, baseline and contract decisions | feature-complete | — | PG1, PG2, PG3, PG4 |
 | PG1 | Bounded reads and stable positions | active | PG0 | PG5, PG7, PG8 |
 | PG2 | Recovery without notifications | active | PG0 | PG5, PG8 |
-| PG3 | Transaction outcomes and retry safety | candidate | PG0 | PG5, PG6, PG8 |
+| PG3 | Transaction outcomes and retry safety | active | PG0 | PG5, PG6, PG8 |
 | PG4 | Schema, migrations and representation | candidate | PG0 | PG5, PG6, PG7, PG8 |
 | PG5 | Atomic writes and import | blocked | PG1, PG2, PG3, PG4 | PG7, PG9 |
 | PG6 | Aggregate snapshots and projection state | blocked | PG3, PG4 | PG7, PG9 |

@@ -1,0 +1,26 @@
+mnesis-nextest> ------------
+mnesis-nextest>      Summary [ 453.086s] 1535 tests run: 1535 passed (13 slow), 4 skipped
+mnesis-nextest>
+mnesis-nextest>     Finished report saved to /nix/store/fbjaddxi96jf1q2yvsngznldm9i05i08-mnesis-nextest-0.4.0/coverage
+mnesis-nextest> checkPhase completed in 9 minutes 8 seconds
+mnesis-nextest> Running phase: installPhase
+mnesis-nextest> incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+mnesis-nextest> doing a full archive install of target to /nix/store/fbjaddxi96jf1q2yvsngznldm9i05i08-mnesis-nextest-0.4.0/target.tar.zst
+mnesis-nextest> /*stdin*\            : 23.37%   (  4.44 GiB =>   1.04 GiB, /nix/store/fbjaddxi96jf1q2yvsngznldm9i05i08-mnesis-nextest-0.4.0/target.tar.zst)
+mnesis-nextest> Running phase: fixupPhase
+mnesis-nextest> checking for references to /nix/var/nix/builds/nix-41862-3103495570/ in /nix/store/fbjaddxi96jf1q2yvsngznldm9i05i08-mnesis-nextest-0.4.0...
+mnesis-nextest> patching script interpreter paths in /nix/store/fbjaddxi96jf1q2yvsngznldm9i05i08-mnesis-nextest-0.4.0
+✅ checks.aarch64-darwin.mnesis-doc
+✅ checks.aarch64-darwin.mnesis-toml-fmt
+✅ checks.aarch64-darwin.mnesis-wasm
+✅ checks.aarch64-darwin.mnesis-deny
+✅ checks.aarch64-darwin.mnesis-store-nostd
+✅ checks.aarch64-darwin.mnesis-fmt
+✅ checks.aarch64-darwin.mnesis-fuzz-replay
+✅ checks.aarch64-darwin.mnesis-audit
+✅ checks.aarch64-darwin.mnesis-nextest
+✅ checks.aarch64-darwin.mnesis-nostd
+✅ checks.aarch64-darwin.mnesis-clippy
+✅ checks.aarch64-darwin.mnesis-hakari
+warning: The check omitted these incompatible systems: aarch64-linux, x86_64-darwin, x86_64-linux
+Use '--all-systems' to check all.
