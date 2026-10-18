@@ -222,3 +222,24 @@ An explicitly ordered pg_catalog may follow caller schemas. Functions and
 operators follow search-path resolution; OPERATOR(pg_catalog.<) is supported
 qualified syntax. Applicability: SQLx caller pools retain their configured
 search path. Native tests must establish actual adapter impact before a fix.
+# Physical recovery controls, accessed2026-10-18
+
+https://www.postgresql.org/docs/18/app-pgverifybackup.html: native verification
+checks backup_manifest, system identity, expected/missing files, checksums and
+required WAL. Pin the tool version for WAL parsing; do not skip WAL/checksums.
+Verification is additional evidence, not a replacement for an actual test restore.
+
+https://www.postgresql.org/docs/18/app-pg-ctl.html documents waited shutdown,
+fast-mode rollback/disconnect and status3 when the server is not running
+(status4 instead means an inaccessible/missing data directory).
+https://www.postgresql.org/docs/18/app-pgbasebackup.html documents a running
+cluster's physical base backup with streamed WAL. Applicability: pinned18.6
+native fixture tools; assert outcomes, retain fsync-on profile, do not infer
+cross-node fencing or power-loss survival from this local controlled drill.
+
+Pinned PostgreSQL18.6 source for exact native file-integrity oracles:
+https://raw.githubusercontent.com/postgres/postgres/REL_18_6/src/bin/pg_verifybackup/pg_verifybackup.c
+lines979–981 specify manifest-present-but-not-on-disk,1106–1114 checksum mismatch.
+Explicit --format=plain selects the actual pg_basebackup format even when its
+PG_VERSION marker is absent. Native current tests check both exact diagnostics
+and repaired success; exit1 alone previously accepted the wrong tar/WAL error.

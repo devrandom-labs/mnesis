@@ -5,9 +5,21 @@
     reason = "native restore assertions"
 )]
 
+use std::io;
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+use std::io::{Write, stderr};
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Output};
 use std::sync::Arc;
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+use std::time::Instant;
+
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+#[path = "support/consumer.rs"]
+mod consumer;
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+#[path = "support/projection.rs"]
+mod projection;
 
 #[cfg(feature = "projection")]
 use std::num::NonZeroU32;
@@ -24,6 +36,10 @@ use mnesis_store::checkpoint::{CheckpointError, CheckpointMode, CheckpointStore,
 #[cfg(all(feature = "projection", feature = "snapshot"))]
 use mnesis_store::state::{Hydrated, SnapshotStore};
 use mnesis_store::{PendingBatch, RawEventStore, StreamKey, pending_envelope};
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+use mnesis_store::{Repository, Store};
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+use mnesis_test_domains::{Counter as AggregateCounter, CounterEvent, TestId};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use tempfile::TempDir;
@@ -78,11 +94,43 @@ impl Cluster {
             .output()
             .unwrap();
         assert!(copied.status.success(), "{copied:?}");
+        let verified = target.verify();
+        assert!(verified.status.success(), "{verified:?}");
         target
     }
 
     fn data(&self) -> PathBuf {
         self.directory.path().join("data")
+    }
+
+    fn stop(&self) -> io::Result<Output> {
+        Command::new("pg_ctl")
+            .arg("-D")
+            .arg(self.data())
+            .args(["-m", "fast", "-w", "stop"])
+            .output()
+    }
+
+    #[cfg(all(feature = "projection", feature = "snapshot"))]
+    fn halt(&self) {
+        let stopped = self.stop().unwrap();
+        assert!(stopped.status.success(), "{stopped:?}");
+        let status = Command::new("pg_ctl")
+            .arg("-D")
+            .arg(self.data())
+            .arg("status")
+            .output()
+            .unwrap();
+        assert_eq!(status.status.code(), Some(3), "{status:?}");
+    }
+
+    #[cfg(all(feature = "projection", feature = "snapshot"))]
+    fn verify(&self) -> Output {
+        Command::new("pg_verifybackup")
+            .arg("--format=plain")
+            .arg(self.data())
+            .output()
+            .unwrap()
     }
 
     fn url(&self) -> String {
@@ -123,11 +171,7 @@ impl Cluster {
 
 impl Drop for Cluster {
     fn drop(&mut self) {
-        let _stopped = Command::new("pg_ctl")
-            .arg("-D")
-            .arg(self.data())
-            .args(["-m", "fast", "-w", "stop"])
-            .output();
+        let _stopped = self.stop();
     }
 }
 
@@ -401,6 +445,7 @@ async fn physical_backup_preserves_history_state_and_metadata_and_can_advance() 
     drop(store);
     pool.close().await;
     let target = source.copy_physical();
+    source.halt();
     drop(source);
     target.boot();
     let restored_pool = PgPoolOptions::new()
@@ -445,6 +490,117 @@ async fn physical_backup_preserves_history_state_and_metadata_and_can_advance() 
         .await
         .unwrap();
     assert_eq!(next_revision.get(), revision.get().checked_add(1).unwrap());
+}
+
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+#[tokio::test]
+async fn physical_operator_drill_restarts_the_saved_projection_and_advances() {
+    if std::env::var_os("DATABASE_URL").is_none() {
+        return;
+    }
+    let source = Cluster::start();
+    let (raw, pool) = migrated(&source).await;
+    let profile: (String, String) =
+        sqlx::query_as("SELECT current_setting('fsync'), current_setting('synchronous_commit')")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert_eq!(profile, ("on".to_owned(), "on".to_owned()));
+    projection::events(&raw).await;
+    let (saved, state) = consumer::resume(&raw).await;
+    assert_eq!(state, 4);
+    let metadata: Vec<(i64, Vec<u8>)> =
+        sqlx::query_as("SELECT version, checksum FROM mnesis._sqlx_migrations ORDER BY version")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+    assert_eq!(
+        metadata.iter().map(|row| row.0).collect::<Vec<_>>(),
+        [1, 2, 3, 4, 5]
+    );
+    drop(raw);
+    pool.close().await;
+    let started = Instant::now();
+    let target = source.copy_physical();
+    let backup_time = started.elapsed();
+    source.halt();
+    let recovery = Instant::now();
+    target.boot();
+    let target_pool = PgPoolOptions::new()
+        .max_connections(8)
+        .connect(&target.url())
+        .await
+        .unwrap();
+    let restored = PostgresStore::from_pool(target_pool.clone()).await.unwrap();
+    let restored_metadata: Vec<(i64, Vec<u8>)> =
+        sqlx::query_as("SELECT version, checksum FROM mnesis._sqlx_migrations ORDER BY version")
+            .fetch_all(&target_pool)
+            .await
+            .unwrap();
+    assert_eq!(restored_metadata, metadata);
+    assert_eq!(restored.history(), saved.history());
+    assert_eq!(consumer::resume(&restored).await, (saved, 4));
+    let recovery_time = recovery.elapsed();
+    let store = Store::new(restored.clone());
+    let repository = store.repository::<AggregateCounter>().json().build();
+    let mut root = repository.load(TestId::new("first")).await.unwrap();
+    repository
+        .save::<0>(&mut root, &mnesis::events![CounterEvent::Incremented])
+        .await
+        .unwrap();
+    let (advanced, value) = consumer::resume(&restored).await;
+    assert_eq!(value, 5);
+    assert!(advanced > saved);
+    assert_eq!(advanced.history(), saved.history());
+    writeln!(stderr().lock(),
+        "physical recovery fixture: backup={backup_time:?}, stopped-primary-to-reloaded-projection={recovery_time:?}, checkpoint={saved:?}, advanced={advanced:?}"
+    ).unwrap();
+    drop(repository);
+    drop(store);
+    drop(restored);
+    target_pool.close().await;
+}
+
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+#[tokio::test]
+async fn physical_manifest_rejects_corrupt_and_missing_files_before_boot() {
+    if std::env::var_os("DATABASE_URL").is_none() {
+        return;
+    }
+    let source = Cluster::start();
+    let (store, pool) = migrated(&source).await;
+    append(&store).await;
+    drop(store);
+    pool.close().await;
+    let backup = source.copy_physical();
+    let path = backup.data().join("PG_VERSION");
+    let original = std::fs::read(&path).unwrap();
+    let mut damaged = original.clone();
+    *damaged.first_mut().unwrap() ^= 0xff;
+    assert_eq!(damaged.len(), original.len());
+    std::fs::write(&path, &damaged).unwrap();
+    let corrupt = backup.verify();
+    std::fs::remove_file(&path).unwrap();
+    let missing = backup.verify();
+    std::fs::write(&path, &original).unwrap();
+    let repaired = backup.verify();
+    assert_eq!(corrupt.status.code(), Some(1), "{corrupt:?}");
+    assert_eq!(missing.status.code(), Some(1), "{missing:?}");
+    assert_eq!(
+        String::from_utf8_lossy(&corrupt.stderr),
+        "pg_verifybackup: error: checksum mismatch for file \"PG_VERSION\"\n"
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&missing.stderr),
+        "pg_verifybackup: error: \"PG_VERSION\" is present in the manifest but not on disk\n"
+    );
+    assert!(repaired.status.success(), "{repaired:?}");
+    assert_ne!(corrupt.stderr, missing.stderr);
+    writeln!(
+        stderr().lock(),
+        "corrupt backup verifier: {corrupt:?}; missing file verifier: {missing:?}"
+    )
+    .unwrap();
 }
 
 #[cfg(all(feature = "projection", feature = "snapshot"))]

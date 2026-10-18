@@ -1,0 +1,37 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-recovery-control.5Pvmnv/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.77s
+────────────
+ Nextest run ID e1206462-c4b0-483b-bb3b-2ec69305f839 with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [  51.807s] (1/1) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+  stdout ───
+
+    running 1 test
+    test physical_operator_drill_restarts_the_saved_projection_and_advances ... FAILED
+
+    failures:
+
+    failures:
+        physical_operator_drill_restarts_the_saved_projection_and_advances
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 51.80s
+
+  stderr ───
+
+    thread 'physical_operator_drill_restarts_the_saved_projection_and_advances' (101338322) panicked at adapters/postgres/tests/restore_tests.rs:120:9:
+    assertion `left == right` failed: Output { status: ExitStatus(unix_wait_status(0)), stdout: "pg_ctl: server is running (PID: 56085)\n/nix/store/92dhj2zi51bpi7nlfphhhb9g2k6si0ls-postgresql-18.6/bin/postgres \"-D\" \"/tmp/mnesis-restore-yhTUsP/data\" \"-h\" \"\" \"-k\" \"/tmp/mnesis-restore-yhTUsP\" \"-p\" \"55436\"\n", stderr: "" }
+      left: Some(0)
+     right: Some(3)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [  51.854s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [  51.807s] (1/1) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+error: test run failed

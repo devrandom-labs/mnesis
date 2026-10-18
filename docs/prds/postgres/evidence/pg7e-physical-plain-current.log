@@ -1,0 +1,38 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-recovery/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.86s
+────────────
+ Nextest run ID 1b4aee5d-8a40-4bf1-b926-73f655335374 with nextest profile: default
+    Starting 3 tests across 1 binary (4 tests skipped)
+        PASS [   1.192s] (1/3) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+  stdout ───
+
+    running 1 test
+    test physical_backup_preserves_history_state_and_metadata_and_can_advance ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.17s
+
+
+        PASS [   0.933s] (2/3) mnesis-postgres::restore_tests physical_manifest_rejects_corrupt_and_missing_files_before_boot
+  stdout ───
+
+    running 1 test
+    test physical_manifest_rejects_corrupt_and_missing_files_before_boot ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.93s
+
+  stderr ───
+    corrupt backup verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: checksum mismatch for file \"PG_VERSION\"\n" }; missing file verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: \"PG_VERSION\" is present in the manifest but not on disk\n" }
+
+        PASS [   1.126s] (3/3) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+  stdout ───
+
+    running 1 test
+    test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.12s
+
+  stderr ───
+    physical recovery fixture: backup=210.22575ms, stopped-primary-to-reloaded-projection=136.721917ms, checkpoint=PgAllPos { history: History([43, 203, 183, 236, 184, 141, 67, 86, 170, 129, 227, 39, 56, 74, 211, 78]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([43, 203, 183, 236, 184, 141, 67, 86, 170, 129, 227, 39, 56, 74, 211, 78]), txid: 770, seq: 3 }
+
+────────────
+     Summary [   3.254s] 3 tests run: 3 passed, 4 skipped

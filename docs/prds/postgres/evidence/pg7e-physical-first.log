@@ -1,0 +1,68 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-recovery/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-recovery/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-recovery/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-recovery/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.92s
+────────────
+ Nextest run ID fb25d3e9-df28-4ccc-a595-04fb9320baca with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [  14.126s] (1/6) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+  stdout ───
+
+    running 1 test
+    test committed_transactions_above_an_unrelated_xmin_still_open ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 14.10s
+
+
+        PASS [  31.991s] (2/6) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+  stdout ───
+
+    running 1 test
+    test copied_future_transactions_reject_before_global_history_can_be_used ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 31.98s
+
+
+        PASS [  36.326s] (3/6) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+  stdout ───
+
+    running 1 test
+    test copied_native_database_bindings_reject_without_repair ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 36.31s
+
+
+        PASS [  21.935s] (4/6) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+  stdout ───
+
+    running 1 test
+    test foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 21.92s
+
+
+        PASS [  50.195s] (5/6) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+  stdout ───
+
+    running 1 test
+    test physical_backup_preserves_history_state_and_metadata_and_can_advance ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 50.19s
+
+
+        PASS [  26.121s] (6/6) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+  stdout ───
+
+    running 1 test
+    physical recovery fixture: backup=7.462912333s, stopped-primary-to-reloaded-projection=509.218042ms, checkpoint=PgAllPos { history: History([108, 1, 160, 106, 134, 45, 72, 10, 150, 0, 154, 215, 25, 168, 74, 165]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([108, 1, 160, 106, 134, 45, 72, 10, 150, 0, 154, 215, 25, 168, 74, 165]), txid: 770, seq: 3 }
+    test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 26.11s
+
+
+────────────
+     Summary [ 180.715s] 6 tests run: 6 passed, 0 skipped

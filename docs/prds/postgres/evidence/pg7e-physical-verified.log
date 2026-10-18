@@ -1,0 +1,38 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-recovery/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.34s
+────────────
+ Nextest run ID cd3d67a8-fabe-4383-854a-52251ad668eb with nextest profile: default
+    Starting 3 tests across 1 binary (4 tests skipped)
+        PASS [  10.841s] (1/3) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+  stdout ───
+
+    running 1 test
+    test physical_backup_preserves_history_state_and_metadata_and_can_advance ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 10.82s
+
+
+        PASS [   7.726s] (2/3) mnesis-postgres::restore_tests physical_manifest_rejects_corrupt_and_missing_files_before_boot
+  stdout ───
+
+    running 1 test
+    test physical_manifest_rejects_corrupt_and_missing_files_before_boot ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 7.70s
+
+  stderr ───
+    corrupt backup verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: checksum mismatch for file \"PG_VERSION\"\n" }; missing file verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: pg_waldump cannot read tar files\npg_verifybackup: hint: You must use -n/--no-parse-wal when verifying a tar-format backup.\n" }
+
+        PASS [   9.314s] (3/3) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+  stdout ───
+
+    running 1 test
+    test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 9.31s
+
+  stderr ───
+    physical recovery fixture: backup=3.180546625s, stopped-primary-to-reloaded-projection=136.978875ms, checkpoint=PgAllPos { history: History([154, 189, 103, 185, 123, 226, 66, 190, 191, 151, 81, 227, 188, 216, 195, 96]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([154, 189, 103, 185, 123, 226, 66, 190, 191, 151, 81, 227, 188, 216, 195, 96]), txid: 770, seq: 3 }
+
+────────────
+     Summary [  27.886s] 3 tests run: 3 passed, 4 skipped

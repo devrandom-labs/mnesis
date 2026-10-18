@@ -243,3 +243,70 @@ detect unsafe copies; they do not authenticate backups or repair arbitrary
 administrative changes. Do not edit bindings, transaction counters or migration
 metadata to force acceptance. Restore a verified coherent physical backup or
 reimport events into a fresh history instead.
+
+## Operator recovery drill
+
+Choose the deployment's recovery point and recovery time objectives before
+running this procedure. Record PostgreSQL/tool versions, storage, database
+settings, backup start/end, the source cutoff and the time the recovered consumer
+becomes ready. The native test below measures a small local fixture; its timings
+are not production targets. Replication, cross-node failover and storage power
+loss require their own tested profiles.
+
+For a physical drill, use the matching PostgreSQL tools and a compatible adapter
+binary. Keep the source's `fsync` and local commit-flush settings appropriate for
+its durability claim. Create a coherent backup with all required WAL:
+
+```sh
+pg_basebackup --checkpoint=fast --wal-method=stream \
+  --dbname="$SOURCE_DSN" --pgdata="$RESTORE_DATA" || exit 1
+pg_verifybackup --format=plain "$RESTORE_DATA" || exit 1
+```
+
+Verify the manifest, file checksums and required WAL before boot; do not use
+checksum/WAL skip flags. Native verification supplements the actual restore.
+Keep the backup's complete directory and WAL together. Record the source history
+identity, migration versions/checksums and the application's saved projection
+position/state before the handover. A successful copy command alone does not
+prove that the application can recover.
+
+During the controlled handover, stop source writers through their owning
+controller and stop the old primary. Require successful waited shutdown, then
+the exact native status for a stopped server; an inaccessible data directory
+is a different error:
+
+```sh
+pg_ctl -D "$SOURCE_DATA" -m fast -w stop || exit 1
+if pg_ctl -D "$SOURCE_DATA" status; then
+  exit 1
+else
+  test "$?" -eq 3 || exit 1
+fi
+```
+
+Configure the target's paths, ports, authentication and TLS for its isolated
+deployment before starting it. Preserve the physical history and database
+identity; never edit adapter bindings to pass validation. Boot the target with
+`pg_ctl -D "$RESTORE_DATA" -w start`, then open the existing pool through
+`PostgresStore::from_pool`. Verify migration checksums, history and the saved
+projection pair. Reload the actual projection consumer, resume strictly after
+its checkpoint, and exercise a new append and checkpoint advance before routing
+application work to the target. Record the observed restored point and elapsed
+time. A timeout during any write still requires reconciliation.
+
+The executable drill uses independent private clusters, checks old-primary
+shutdown before target startup, and verifies actual repository/projection
+progress after recovery:
+
+```sh
+nix develop --command cargo nextest run -p mnesis-postgres --all-features \
+  --test restore_tests --test-threads=1 --success-output immediate \
+  -E 'test(physical_operator_drill_restarts_the_saved_projection_and_advances)'
+```
+
+Supply the integration `DATABASE_URL`; without it the native tests return early.
+For a logical event restore, install/migrate a fresh target, validate the complete
+chunk inventory, import completed chunks with explicit routing and atomicity,
+and rebuild projection state from the new event history. Old source positions
+cannot be resumed against that history. Logical event chunks do not carry the
+source's snapshot caches, checkpoints or native migration tables.
