@@ -698,3 +698,103 @@ Three post-run case reviews:
    failures are never counted as caught. Only local diff/output paths changed
    when extracting the CI heredoc. No test source, assertion, timeout threshold
    or skip behavior changed. Native Linux CI still must execute the correction.
+PG3 original-source results at `674ed905`: five of six phase tests pass, one
+fails. The unrelated event-type unique constraint becomes `AppendError::Conflict`,
+misclassifying a permanent schema rejection as optimistic contention. The scoped
+Unix forwarder observes and suppresses the real COMMIT tag; an independent
+connection counts all three rows while append returns ordinary `Sqlx(Io(...))`.
+Dropping BEGIN/INSERT acknowledgements leaves zero visible rows; transparent
+forwarding succeeds. Holding a successful COMMIT response permits an application
+timeout while all three rows remain durable. [Output](evidence/original-outcomes.log).
+The retained acknowledgement assertion will require the explicit unknown variant.
+
+PG3 targeted implementation currently passes all nine outcome tests, zero skips,
+0.577 seconds, with formatting and strict targeted Clippy. Added confirmed-success
+versus stalled hint acknowledgement, unrelated identity-sequence collision, and
+deferred server-code mapping. The latter injects `23514`/`40001`/`40P01`/`40003`
+in a deferred trigger to verify commit-phase error classification; it does not
+claim a true SSI/deadlock workload. All durable-state checks use an independent
+control connection. Full merged-base verification remains required.
+
+Delivery integration: PR #376 opened at `674ed905`. Main advanced through the
+non-Postgres audit (#373/#374) and v0.4.0 (#375) after this branch's baseline;
+GitHub reports merge conflicts. Preserve the uncommitted PG3 experiment in a
+named Git stash while incorporating current main into the read/wake PR, then
+reapply PG3 on the reconciled base and rerun its tests. Preserve the upstream
+contracts and release versions. No overwrite of upstream audit work is intended.
+
+PG3 wrapper-test pre-edit refinement on the isolated0.4.0 checkout: reuse the
+existing Counter domain (path-only mnesis-test-domains dev dependency with serde)
+and existing Store JSON feature for a real typed repository execute/reload case.
+No fake store, codec or new registry crate. Budget adds one existing test-domain
+dependency and one existing codec feature edge beyond tempfile, at most+70 test
+lines within the650-line outcome budget. Require identical EOF cause before and
+after COMMIT, preserved CommitUnknown through ExecuteError/StoreError, false
+is_conflict, unchanged in-memory root despite durable data, and explicit reload
+that reconciles that root. Do not resubmit the command to demonstrate recovery.
+
+Integrated PG3 native run:89 cases pass, zero skips,39.512s; fmt/strict targeted
+Clippy pass. [Output](evidence/pg3-native.log). Three-pass review:
+1. Contract: exact EOF cause is retained in definite BEGIN/INSERT failures and
+   CommitUnknown; independent control proves0 versus3 committed rows. Real typed
+   execute preserves uncertainty/is_conflict=false and leaves root unchanged;
+   explicit load restores the one durable event without replaying the command.
+2. Falsifier: original unrelated-unique case failed against674ed905; intended
+   constraint and PK-sequence failures now stay SQLx errors. Actual COMMIT tag is
+   suppressed and all rows remain visible independently; delayed hint response
+   cannot hold confirmed success. Deferred SQLSTATE injection is a mapping test,
+   not a true deadlock/SSI workload. All prior79 raw/wake laws still pass.
+3. Loopholes FOUND: BEGIN-response loss is during BEGIN, not a pool failure before
+   any BEGIN. Add closed-data-pool coverage explicitly. The timeout case keeps a
+   pinned append in scope until function end; put it in a nested scope so the
+   underlying future is actually dropped before the final durable-state query.
+   These strengthen phase/cancellation evidence without weakening expectations.
+
+PG3 strengthened integrated run:90 native cases passed, zero skips,15.498s;
+formatting/strict targeted Clippy pass. [Output](evidence/pg3-final-native.log).
+Three-pass review:
+1. Acceptance: closed pool proves a definite failure before BEGIN; lost BEGIN
+   and INSERT responses preserve exact EOF, with zero durable rows. Lost COMMIT
+   response preserves the same EOF under CommitUnknown, with all3 rows durable.
+   Unrelated constraints never become conflict. Typed execute and reload preserve
+   the unknown outcome and restore the one durable event without a duplicate.
+2. Falsifier: actual server COMMIT tags and independent row counts establish the
+   phase; no arbitrary backend termination substitutes for successful commit.
+   Stalled-hint case must observe the held hint response, so skipping the hint
+   entirely cannot satisfy it. Original false-conflict and payload-guard mutation
+   failures remain recorded. All prior79 cases still pass on0.4.0.
+3. Loopholes: the pinned append now ends its nested scope before the final query,
+   actually dropping its underlying future. The known closed-pool cause differs
+   from transport uncertainty. Deferred-trigger codes remain mapping-only evidence;
+   true deadlock/SSI, atomic import/projection reuse and full gate are still open.
+   No test threshold, error expectation or skip guard was weakened.
+
+The reused pinned1.99.0 dev environment is rooted at
+`/tmp/mnesis-postgres-shell-199`; `nix develop <profile> --command ...` is the
+standard Nix facility and was verified to run rustc1.99.0. It avoids repeated
+flake evaluation for one-off checks without changing repository setup. The
+isolated source still uses the same locked inputs and Cargo facilities.
+
+PG3 full Darwin gate passes all12 checks,1,535 workspace tests/four compiler
+exclusions,453.086s nextest. [Output](evidence/pg3-gate.log). Phase Rust/test/manifest
+and lock diff SHA-256 relative to its frozen read/wake baseline:
+`3f681b11f5b4c68b9986d70adf952e66c998a774bff3ba0de1c40a581bbcbc1c`.
+Three-pass review:
+1. Matrix/contract:11 outcome cases are included (1,524→1,535);90 real native
+   passes are separate from workspace DB-free returns. PG5/PG6 outcome reuse,
+   real deadlock/SSI and delivery remain required before PG3 feature acceptance.
+2. Falsifier: acknowledged-COMMIT suppression, exact EOF, independent row counts,
+   false-conflict failures, scoped cancellation, bounded hints and real repository
+   reload remain operative. The original unrelated-constraint failure is retained.
+3. Loopholes: source diff matches the completed gate; schema/CI work in separate
+   checkouts cannot be credited here. No new gate-local weakness was found after
+   the last two native-case improvements. Keep the original named stash until
+   the focused delivery commit is safely retained on the reconciled base.
+
+PG3 delivery checkout reuses all12 Darwin outputs after applying only the phase
+patch onto reconciled headc5a5ac34. Three post-check reviews: (1) source, tests,
+manifest and lock hash remains exactly3f681b11f5b4c68b9986d70adf952e66c998a774bff3ba0de1c40a581bbcbc1c;
+(2) real90-case phase/regression proof remains unchanged, including failed
+original unique classification and acknowledged-COMMIT suppression; (3) cached
+checks execute no cases and are not additional native or Linux evidence. Both
+append-only research histories were preserved when integrating the phase patch.

@@ -1,0 +1,80 @@
+warning: Git tree '/Users/joel/orca/workspaces/nexus/main' has uncommitted changes
+   Compiling bitflags v2.13.1
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.4
+   Compiling fastrand v2.5.0
+   Compiling sqlx-postgres v0.8.6
+   Compiling tempfile v3.27.0
+   Compiling sqlx-macros-core v0.8.6
+   Compiling workspace-hack v0.1.0 (/Users/joel/orca/workspaces/nexus/main/crates/workspace-hack)
+   Compiling sqlx-macros v0.8.6
+   Compiling mnesis-wake v0.3.1 (/Users/joel/orca/workspaces/nexus/main/crates/wake)
+   Compiling mnesis-store-testing v0.3.1 (/Users/joel/orca/workspaces/nexus/main/crates/store-testing)
+   Compiling sqlx v0.8.6
+   Compiling mnesis-postgres v0.3.1 (/Users/joel/orca/workspaces/nexus/main/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.77s
+────────────
+ Nextest run ID 0c7d2858-bf39-4bc9-b014-931ff8092022 with nextest profile: default
+    Starting 6 tests across 1 binary
+       START [         ] (1/6) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+
+running 1 test
+test caller_timeout_after_server_commit_never_proves_rollback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.04s
+
+        PASS [   0.063s] (1/6) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+       START [         ] (2/6) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+
+running 1 test
+test loss_before_begin_response_cannot_commit_events ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+
+        PASS [   0.026s] (2/6) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+       START [         ] (3/6) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+
+running 1 test
+test loss_during_inserts_rolls_back_the_uncommitted_prefix ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (3/6) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+       START [         ] (4/6) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+
+running 1 test
+durable rows=3; suppressed COMMIT outcome=Err(Store(Sqlx(Io(Custom { kind: UnexpectedEof, error: "expected to read 5 bytes, got 0 bytes at EOF" }))))
+test lost_commit_acknowledgement_still_leaves_the_whole_batch_durable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+
+        PASS [   0.018s] (4/6) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+       START [         ] (5/6) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+
+running 1 test
+test transparent_transport_preserves_confirmed_append ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+
+        PASS [   0.018s] (5/6) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+       START [         ] (6/6) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+
+running 1 test
+
+thread 'unrelated_unique_constraint_is_not_an_optimistic_conflict' (94159521) panicked at adapters/postgres/tests/outcome_tests.rs:236:5:
+wrong classification: Err(Conflict { stream_id: "other-unique", expected: Some(Version(2)), actual: None })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test unrelated_unique_constraint_is_not_an_optimistic_conflict ... FAILED
+
+failures:
+
+failures:
+    unrelated_unique_constraint_is_not_an_optimistic_conflict
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+
+        FAIL [   0.018s] (6/6) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+────────────
+     Summary [   0.163s] 6 tests run: 5 passed, 1 failed, 0 skipped
+        FAIL [   0.018s] (6/6) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+error: test run failed
