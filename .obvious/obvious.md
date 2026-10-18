@@ -9,9 +9,10 @@ mandatory rules — the authoritative map), [CONTRIBUTING.md](../CONTRIBUTING.md
 
 ## Stack
 
-- **Language:** Rust, edition 2024, pinned **stable 1.95.0** via `rust-toolchain.toml`
+- **Language:** Rust, edition 2024, pinned **stable 1.99.0** via `rust-toolchain.toml`
   (single source of truth; also installs `wasm32-unknown-unknown` +
-  `thumbv7em-none-eabihf` targets, clippy, rustfmt). No nightly anywhere.
+  `thumbv7em-none-eabihf` targets, clippy, rustfmt). Deep fuzzing uses a separate
+  pinned nightly in `.github/workflows/fuzz.yml`.
 - **Package manager:** cargo. One root workspace, **22 members**; all dependency versions
   centralized in root `Cargo.toml` `[workspace.dependencies]`; `crates/workspace-hack`
   is cargo-hakari-managed (rerun `cargo hakari generate` after dependency changes).
@@ -59,6 +60,10 @@ See [codebase-map.md](codebase-map.md) (folder-level table).
 ## Local Verification Summary
 
 Generated 2026-09-17 by the onboarding run — `dev_stack_healthy: true`.
+
+Historical results below describe Rust 1.95.0. For the current toolchain update
+and non-Postgres audit, see [todo.md](../todo.md); do not treat this snapshot as
+verification of the current pin.
 
 | Check | Result |
 |---|---|

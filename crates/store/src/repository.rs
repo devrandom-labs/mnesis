@@ -12,7 +12,6 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::future::Future;
 use core::marker::PhantomData;
-use core::num::NonZeroU32;
 
 use mnesis::{Aggregate, AggregateRoot, DomainEvent, EventOf, Events, Version};
 
@@ -75,12 +74,12 @@ use crate::value::{Payload, SchemaVersion};
 /// # Error handling
 ///
 /// Implementations must bridge errors from four sources:
-/// - [`RawEventStore`](crate::RawEventStore) errors (I/O, conflicts)
-/// - [`Encode`](crate::Encode) errors (serialization failures on write)
-/// - [`Decode`](crate::Decode) errors (deserialization failures on read)
+/// - [`RawEventStore`] errors (I/O, conflicts)
+/// - [`Encode`] errors (serialization failures on write)
+/// - [`Decode`] errors (deserialization failures on read)
 /// - [`KernelError`](mnesis::KernelError) (version mismatch during replay)
 ///
-/// [`StoreError`](crate::StoreError) can represent all four via its
+/// [`StoreError`] can represent all four via its
 /// `Adapter`, `Encode`, `Decode`, and `Kernel` variants. Use `StoreError`
 /// as `Self::Error` or define a custom error with `From` impls.
 pub trait Repository<A: Aggregate>: Send + Sync {
@@ -88,8 +87,8 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     type Error: core::error::Error + Send + Sync + 'static;
 
     /// The `$all` position [`save`](Self::save) returns — the adapter's
-    /// [`AllPosition`](crate::store::AllPosition), surfaced up from
-    /// [`RawEventStore::append`](crate::RawEventStore::append) (#330).
+    /// [`AllPosition`], surfaced up from
+    /// [`RawEventStore::append`] (#330).
     ///
     /// This is the read-your-writes token: a projection whose checkpoint has
     /// reached a returned position has necessarily observed the write. On a
@@ -115,7 +114,8 @@ pub trait Repository<A: Aggregate>: Send + Sync {
     /// The `&Events<EventOf<A>, N>` parameter guarantees at least one
     /// event at compile time — there is no empty-input case.
     ///
-    /// On success, calls `commit_persisted` with the last persisted version to
+    /// Checks the whole batch version range before encoding or persistence.
+    /// On success, calls `commit_persisted` with the persisted events to
     /// advance the version and fold the events into in-memory state atomically,
     /// and returns the [`Position`](Self::Position) the last event landed at —
     /// the read-your-writes token (#330). The advanced version is read off
@@ -155,15 +155,6 @@ pub(crate) trait ReplayFrom<A: Aggregate>: Send + Sync {
 // Shared helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/// Convert a `Version` (`NonZeroU64`) to a `NonZeroU32` for the envelope's
-/// `schema_version` field. Returns `None` if the version exceeds `u32::MAX`.
-pub(super) fn version_to_nz32(version: Version) -> Option<NonZeroU32> {
-    let raw = version.as_u64();
-    let narrow = u32::try_from(raw).ok()?;
-    // SAFETY: Version wraps NonZeroU64, so raw >= 1, so narrow >= 1.
-    NonZeroU32::new(narrow)
-}
-
 /// The first [`Version`] an append will assign, given the stream's current
 /// version (`None` = empty stream). Returns `None` on overflow past `u64::MAX`.
 ///
@@ -185,7 +176,7 @@ pub(crate) const fn first_persisted_version(current: Option<Version>) -> Option<
 /// both owning and borrowing codecs.
 ///
 /// The owning-vs-borrowing distinction is inferred from the codec's
-/// [`Decode::Output`](crate::Decode::Output) GAT, not restated at the call
+/// [`Decode::Output`] GAT, not restated at the call
 /// site: an owning codec (`Output<'a> = E`, e.g. serde — one allocation per
 /// decoded event) and a borrowing codec (`Output<'a> = &'a E`, e.g. a
 /// `#[repr(C)]` POD reinterpret — zero allocation) are unified on the load
@@ -228,7 +219,7 @@ pub(crate) const fn first_persisted_version(current: Option<Version>) -> Option<
 ///
 /// ```ignore
 /// // Read path:
-/// let root = es.load_with(id, OrderTransforms::upcast).await?;
+/// let root = es.load_with(id, |_| Ok::<_, core::convert::Infallible>(()), OrderTransforms::upcast).await?;
 ///
 /// // Write path:
 /// es.save_with(&mut root, &events, OrderTransforms::current_version).await?;
@@ -360,7 +351,7 @@ where
         aggregate: &mut AggregateRoot<A>,
         events: &Events<EventOf<A>, N>,
     ) -> Result<Self::Position, Self::Error> {
-        // The no-upcaster save stamps Version::INITIAL as the schema
+        // The no-upcaster save stamps SchemaVersion::INITIAL as the schema
         // version on every event — the schema-version-lookup function
         // is only needed when an upcaster is in play. See `save_with`.
         save_events::<A, S, C, _, M, N>(self, aggregate, events, |_| None).await
@@ -369,7 +360,15 @@ where
 
 impl<S, C, A, M> EventStore<S, C, A, M> {
     /// Load an aggregate, running `upcast` over each persisted event
-    /// before decoding it.
+    /// before decoding it. `verify_original` runs first against the exact
+    /// persisted envelope, including its original schema, payload and metadata.
+    /// An authentication failure prevents both transformation and decoding.
+    ///
+    /// For trusted, unauthenticated input, explicitly pass
+    /// `|_| Ok::<_, core::convert::Infallible>(())`. Metadata retained after a
+    /// transformation describes the original event; its signature does not
+    /// authenticate the transformed bytes. Decoders should deserialize the
+    /// transformed view, with authentication handled by `verify_original`.
     ///
     /// `upcast` is the schema-evolution function — typically the
     /// associated function the `#[mnesis::transforms]` macro emits
@@ -381,12 +380,13 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
     ///
     /// # Errors
     ///
-    /// Returns [`LoadWithError::Store`] for any non-upcast error
-    /// (adapter, codec, kernel) and [`LoadWithError::Upcast`] for any
-    /// error returned by the `upcast` function.
+    /// Returns [`LoadWithError::Store`] for adapter, codec or kernel errors
+    /// and [`LoadWithError::Upcast`] for any
+    /// error returned by the `upcast` function. [`LoadWithError::Verification`]
+    /// preserves the original verifier error separately.
     #[allow(
         clippy::type_complexity,
-        reason = "the four-source LoadWithError return is intrinsic to the contract; an alias would \
+        reason = "the independent LoadWithError source types are intrinsic to the contract; an alias would \
                   hide which domains the upcasting read path can fail from"
     )]
     #[cfg_attr(
@@ -403,9 +403,10 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
             )
         )
     )]
-    pub async fn load_with<F, E>(
+    pub async fn load_with<F, E, V, VE>(
         &self,
         id: A::Id,
+        verify_original: V,
         upcast: F,
     ) -> Result<
         AggregateRoot<A>,
@@ -414,6 +415,7 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
             <C as Encode<EventOf<A>>>::Error,
             <C as Decode<EventOf<A>>>::Error,
             E,
+            VE,
         >,
     >
     where
@@ -423,6 +425,8 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
             Encode<EventOf<A>> + Decode<EventOf<A>, Output<'a>: Borrow<EventOf<A>>> + 'static,
         F: for<'a> Fn(EventMorsel<'a>) -> Result<EventMorsel<'a>, E> + Send + Sync + 'static,
         E: core::error::Error + Send + Sync + 'static,
+        V: Fn(&PersistedEnvelope) -> Result<(), VE> + Send + Sync + 'static,
+        VE: core::error::Error + Send + Sync + 'static,
         EventOf<A>: DomainEvent,
         S::Stream: Send,
         M: Send + Sync + 'static,
@@ -437,28 +441,30 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
             .await
             .map_err(|e| LoadWithError::Store(StoreError::Adapter(e)))?;
 
+        let verify_original = Arc::new(verify_original);
         let upcast = Arc::new(upcast);
         let loaded = raw_stream
             .map_err(|e| LoadWithError::Store(StoreError::Adapter(e)))
             .try_fold(root, move |mut r, env| {
                 let codec = Arc::<C>::clone(&codec);
                 let upcast = Arc::<F>::clone(&upcast);
+                let verify_original = Arc::<V>::clone(&verify_original);
                 async move {
+                    verify_original(&env).map_err(LoadWithError::Verification)?;
                     let version = env.version();
                     let morsel = EventMorsel::borrowed(
                         env.event_type(),
-                        env.schema_version_as_version(),
+                        env.schema_version_value(),
                         env.payload(),
                     );
                     let transformed = upcast(morsel).map_err(LoadWithError::Upcast)?;
-                    // Synthesize a fresh aligned envelope from the transformed
-                    // morsel — the codec's new shape decodes from an envelope,
-                    // not raw bytes, so post-upcast we rebuild the wire row.
-                    let upcast_env = PersistedEnvelope::for_decode(
-                        transformed.event_type(),
-                        transformed.payload(),
-                    )
-                    .map_err(|e| LoadWithError::Store(StoreError::EnvelopeSynthesis(e)))?;
+                    let upcast_env = env
+                        .for_transformed_decode(
+                            transformed.event_type(),
+                            transformed.schema_version(),
+                            transformed.payload(),
+                        )
+                        .map_err(|e| LoadWithError::Store(StoreError::EnvelopeSynthesis(e)))?;
                     let out = <C as Decode<EventOf<A>>>::decode(&codec, &upcast_env)
                         .map_err(|e| LoadWithError::Store(StoreError::Decode(e)))?;
                     r.replay(version, out.borrow())
@@ -479,7 +485,7 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
     /// `#[mnesis::transforms]` macro emits (e.g.
     /// `OrderTransforms::current_version`). For event types it doesn't
     /// know about, it returns `None` and the schema version falls back
-    /// to [`Version::INITIAL`] (the same default as the no-upcaster
+    /// to [`SchemaVersion::INITIAL`] (the same default as the no-upcaster
     /// [`save`](Repository::save)).
     ///
     /// Returns the [`Position`](Repository::Position) the last event landed at,
@@ -502,7 +508,7 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
         A: Aggregate,
         S: RawEventStore + 'static,
         C: Encode<EventOf<A>> + Decode<EventOf<A>> + 'static,
-        F: Fn(&str) -> Option<Version>,
+        F: Fn(&str) -> Option<SchemaVersion>,
         EventOf<A>: DomainEvent,
         M: MetadataProvider<EventOf<A>>,
     {
@@ -511,7 +517,7 @@ impl<S, C, A, M> EventStore<S, C, A, M> {
 }
 
 // Single save path shared between Repository::save (no upcaster, always stamps
-// Version::INITIAL) and EventStore::save_with (uses the user's current_version
+// SchemaVersion::INITIAL) and EventStore::save_with (uses the user's current_version
 // fn). Encode-only — the decode shape is irrelevant on the write path, so this
 // serves owning and borrowing codecs alike.
 #[allow(
@@ -547,10 +553,16 @@ where
     A: Aggregate,
     S: RawEventStore,
     C: Encode<EventOf<A>> + Decode<EventOf<A>>,
-    F: Fn(&str) -> Option<Version>,
+    F: Fn(&str) -> Option<SchemaVersion>,
     M: MetadataProvider<EventOf<A>>,
     EventOf<A>: DomainEvent,
 {
+    aggregate
+        .commit_version(events)
+        .map_err(|error| match error {
+            mnesis::KernelError::VersionOverflow => StoreError::VersionOverflow,
+            cause => StoreError::Kernel(cause),
+        })?;
     let expected_version = aggregate.version();
 
     let mut next_version =
@@ -562,22 +574,21 @@ where
     // closure (which is not `Send`) is dropped before the append `.await` —
     // otherwise the returned future would capture it across the await point and
     // stop being `Send` (clippy `future_not_send`).
-    let (head, tail, last_version) = {
+    let (head, tail) = {
         let encode_at = |event: &EventOf<A>, version: Version| {
             let payload_bytes = <C as Encode<EventOf<A>>>::encode(&facade.codec, event)
                 .map_err(StoreError::Encode)?;
             let payload = Payload::from_bytes(payload_bytes)
                 .map_err(EnvelopeError::from)
                 .map_err(StoreError::from)?;
-            let schema_version = current_version(event.name()).unwrap_or(Version::INITIAL);
-            let schema_nz32 = version_to_nz32(schema_version).ok_or(StoreError::VersionOverflow)?;
+            let schema_version = current_version(event.name()).unwrap_or(SchemaVersion::INITIAL);
 
             let metadata = facade.meta.metadata(version, event, &payload);
 
             let builder = pending_envelope(version)
                 .event(event)
                 .payload(payload.into_bytes())
-                .schema_version(SchemaVersion::new(schema_nz32));
+                .schema_version(schema_version);
             match metadata {
                 Some(m) => builder.metadata(m.into_bytes()).build(),
                 None => builder.build(),
@@ -586,14 +597,12 @@ where
         };
 
         let head = encode_at(events.first(), next_version)?;
-        let mut last_version = next_version;
         let mut tail = Vec::with_capacity(events.rest().len());
         for event in events.rest() {
             next_version = next_version.next().ok_or(StoreError::VersionOverflow)?;
             tail.push(encode_at(event, next_version)?);
-            last_version = next_version;
         }
-        (head, tail, last_version)
+        (head, tail)
     };
 
     let position = facade
@@ -621,7 +630,7 @@ where
     #[cfg(feature = "tracing")]
     tracing::Span::current().record("position", tracing::field::debug(&position));
 
-    aggregate.commit_persisted(last_version, events);
+    aggregate.commit_persisted(events)?;
     Ok(position)
 }
 

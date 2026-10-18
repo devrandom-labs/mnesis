@@ -78,8 +78,14 @@ async fn incept_then_two_sets_round_trips_and_the_chain_links() {
     // Reload a fresh aggregate and assert folded state + version.
     let loaded = repo.load(id).await.unwrap();
     assert_eq!(loaded.version(), Version::new(3));
-    assert_eq!(loaded.state().entries.get("a"), Some(&"1".to_owned()));
-    assert_eq!(loaded.state().entries.get("b"), Some(&"2".to_owned()));
+    assert_eq!(
+        loaded.state().unwrap().entries.get("a"),
+        Some(&"1".to_owned())
+    );
+    assert_eq!(
+        loaded.state().unwrap().entries.get("b"),
+        Some(&"2".to_owned())
+    );
 
     // Read the raw persisted stream and assert every Set points at the digest
     // of the event immediately before it — the hash chain is intact on disk.

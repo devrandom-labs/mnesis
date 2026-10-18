@@ -1,0 +1,29 @@
+BEGIN
+SAVEPOINT
+psql:/tmp/mnesis-representation.sql:5: ERROR:  22003: bigint out of range
+LOCATION:  numeric_int8_opt_error, numeric.c:4543
+ROLLBACK
+SAVEPOINT
+psql:/tmp/mnesis-representation.sql:8: ERROR:  22003: value "18446744073709551615" is out of range for type bigint
+LOCATION:  pg_strtoint64_safe, numutils.c:875
+ROLLBACK
+SAVEPOINT
+psql:/tmp/mnesis-representation.sql:11: ERROR:  22021: invalid byte sequence for encoding "UTF8": 0x00
+LOCATION:  report_invalid_encoding_int, mbutils.c:1853
+ROLLBACK
+SAVEPOINT
+ stream_key_bytes
+------------------
+             5120
+(1 row)
+
+psql:/tmp/mnesis-representation.sql:18: ERROR:  54000: index row size 5144 exceeds btree version 4 maximum 2704 for index "events_stream_id_version_key"
+DETAIL:  Index row references tuple (0,2) in relation "events".
+HINT:  Values larger than 1/3 of a buffer page cannot be indexed.
+Consider a function index of an MD5 hash of the value, or use full text indexing.
+SCHEMA NAME:  public
+TABLE NAME:  events
+CONSTRAINT NAME:  events_stream_id_version_key
+LOCATION:  _bt_check_third_page, nbtutils.c:5126
+ROLLBACK
+ROLLBACK

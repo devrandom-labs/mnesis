@@ -105,6 +105,10 @@ async fn concurrent_sets_conflict_and_leave_one_unbroken_chain() {
     // the chain is single-threaded and unbroken.
     let final_root = repo.load(id).await.unwrap();
     assert_eq!(final_root.version(), Version::new(2), "one commit landed");
-    assert_eq!(final_root.state().entries.len(), 1, "only the winner's set");
-    assert!(final_root.state().last_digest.is_some());
+    assert_eq!(
+        final_root.state().unwrap().entries.len(),
+        1,
+        "only the winner's set"
+    );
+    assert!(final_root.state().unwrap().last_digest.is_some());
 }

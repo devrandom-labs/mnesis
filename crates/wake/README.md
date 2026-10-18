@@ -15,7 +15,7 @@ You rarely construct it directly — an adapter owns a `StreamNotifiers` and exp
 
 ## MSRV & stability
 
-MSRV **1.95**. Part of the **1.0 tier** (tokio stays an implementation detail — see STABILITY.md). See [STABILITY.md](../../STABILITY.md).
+MSRV **1.99**. Part of the **1.0 tier** (tokio stays an implementation detail — see STABILITY.md). See [STABILITY.md](../../STABILITY.md).
 
 ## License
 

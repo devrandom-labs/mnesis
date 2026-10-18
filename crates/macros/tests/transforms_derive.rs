@@ -1,8 +1,8 @@
 #![allow(clippy::unwrap_used, reason = "tests")]
 #![allow(clippy::expect_used, reason = "tests")]
 
-use mnesis::Version;
 use mnesis_store::upcasting::EventMorsel;
+use mnesis_store::{SchemaVersion, TransformError};
 
 #[derive(Debug)]
 struct TestError;
@@ -40,31 +40,32 @@ impl TestTransforms {
 
 #[test]
 fn transforms_multi_step_upcast() {
-    let morsel = EventMorsel::borrowed("OrderCreated", Version::INITIAL, b"data");
+    let morsel = EventMorsel::borrowed("OrderCreated", SchemaVersion::INITIAL, b"data");
     let result = TestTransforms::upcast(morsel).unwrap();
-    assert_eq!(result.schema_version(), Version::new(3).unwrap());
+    assert_eq!(result.schema_version(), SchemaVersion::from_u32(3).unwrap());
     assert_eq!(result.payload(), b"data,v2,v3");
     assert_eq!(result.event_type(), "OrderCreated");
 }
 
 #[test]
 fn transforms_rename() {
-    let morsel = EventMorsel::borrowed("OrderCancelled", Version::INITIAL, b"data");
+    let morsel = EventMorsel::borrowed("OrderCancelled", SchemaVersion::INITIAL, b"data");
     let result = TestTransforms::upcast(morsel).unwrap();
     assert_eq!(result.event_type(), "OrderVoided");
-    assert_eq!(result.schema_version(), Version::new(2).unwrap());
+    assert_eq!(result.schema_version(), SchemaVersion::from_u32(2).unwrap());
 }
 
 #[test]
 fn transforms_passthrough_current_version() {
-    let morsel = EventMorsel::borrowed("OrderCreated", Version::new(3).unwrap(), b"data");
+    let morsel =
+        EventMorsel::borrowed("OrderCreated", SchemaVersion::from_u32(3).unwrap(), b"data");
     let result = TestTransforms::upcast(morsel).unwrap();
     assert!(result.is_borrowed(), "current version should pass through");
 }
 
 #[test]
 fn transforms_unknown_event_passthrough() {
-    let morsel = EventMorsel::borrowed("Unknown", Version::INITIAL, b"data");
+    let morsel = EventMorsel::borrowed("Unknown", SchemaVersion::INITIAL, b"data");
     let result = TestTransforms::upcast(morsel).unwrap();
     assert!(result.is_borrowed());
 }
@@ -73,11 +74,11 @@ fn transforms_unknown_event_passthrough() {
 fn transforms_current_version_lookup() {
     assert_eq!(
         TestTransforms::current_version("OrderCreated"),
-        Some(Version::new(3).unwrap())
+        Some(SchemaVersion::from_u32(3).unwrap())
     );
     assert_eq!(
         TestTransforms::current_version("OrderCancelled"),
-        Some(Version::new(2).unwrap())
+        Some(SchemaVersion::INITIAL)
     );
     assert_eq!(TestTransforms::current_version("Unknown"), None);
 }
@@ -88,7 +89,31 @@ fn transforms_upcast_is_static_fn_pointer() {
     // no `self`, so it can be coerced to a function pointer and passed
     // directly to `EventStore::load_with` (which requires a `'static`
     // closure/fn).
-    let _: for<'a> fn(EventMorsel<'a>) -> Result<EventMorsel<'a>, TestError> =
+    let _: for<'a> fn(EventMorsel<'a>) -> Result<EventMorsel<'a>, TransformError<TestError>> =
         TestTransforms::upcast;
-    let _: fn(&str) -> Option<Version> = TestTransforms::current_version;
+    let _: fn(&str) -> Option<SchemaVersion> = TestTransforms::current_version;
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("step failed")]
+struct StepFailed;
+
+#[mnesis_macros::transforms(aggregate = TestAggregate, error = StepFailed)]
+impl FailingTransforms {
+    #[transform(event = "E", from = 1, to = 2)]
+    fn fail(_: &[u8]) -> Result<Vec<u8>, StepFailed> {
+        Err(StepFailed)
+    }
+}
+
+#[test]
+fn generated_transform_preserves_the_original_error_source() {
+    let result =
+        FailingTransforms::upcast(EventMorsel::borrowed("E", SchemaVersion::INITIAL, b"x"));
+    let error = result.err().expect("the configured transform fails");
+    assert!(matches!(error, TransformError::Transform(StepFailed)));
+    assert_eq!(
+        std::error::Error::source(&error).unwrap().to_string(),
+        "step failed"
+    );
 }

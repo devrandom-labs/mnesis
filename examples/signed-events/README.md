@@ -16,18 +16,28 @@ domains.
 A register is a small key→value store owned by one ed25519 key.
 
 - **Content-addressed id.** `RegisterId = blake3(owner_pubkey)`. The identity is
-  the digest of the key that controls it — you cannot mint a register id without
-  the key. `RegisterId` is a 32-byte `[u8; 32]` newtype and satisfies
+  the digest of the public key. Anyone with that public key can compute the id;
+  signing commands proves possession of the private key. `RegisterId` is a 32-byte `[u8; 32]` newtype and satisfies
   `mnesis::Id` through the blanket impl (`Display` = hex, `AsRef<[u8]>` = the raw
   digest / stream key).
-- **Signed events.** Every event carries an ed25519 signature over a
-  deterministic blake3 preimage:
-  - `Inception` signs `blake3(b"incept" ‖ owner_pubkey)`.
-  - `Set` signs `blake3(b"set" ‖ key ‖ 0x00 ‖ val ‖ prior_digest)`.
+- **Signed events.** Both variants require numeric `signature_version: 2`,
+  independent of the envelope schema and stream version. Signing uses BLAKE3's
+  derive-key mode with the exact context
+  `devrandom-labs/mnesis/examples/signed-events/signing-preimage`:
+  - `Inception` hashes `0x02 ‖ b"incept" ‖ owner_pubkey`.
+  - `Set` hashes `0x02 ‖ b"set" ‖ blake3(key_utf8) ‖ blake3(val_utf8) ‖ prior_digest`.
+  Ed25519 signs the resulting 32-byte digest. Independently hashed variable
+  fields have fixed-width boundaries, including empty, Unicode and embedded
+  NUL strings; there is no separator restriction.
 - **Hash chain.** Each `Set` carries `prior_digest`, the chain digest of the
   event before it, so a stream is tamper-evident. The chain digest is a
   deterministic, **infallible** structured hash of the event's fields
   (`event_digest`), computed identically on the write side and the read side.
+  It uses the separate derive-key context
+  `devrandom-labs/mnesis/examples/signed-events/event-digest`, followed by
+  `0x02`, `b"Inception\0"` or `b"Set\0"`, then owner/signature or
+  key hash/value hash/prior/signature respectively. This binds the protocol
+  version and separates chain digests from signing digests.
 
 ### Where the crypto lives
 
@@ -75,16 +85,11 @@ the re-verifying projector.
 
 ## Strain points found (candidate follow-ups)
 
-1. **Envelope metadata is not on the typed facade — [#344].** `EventStore::save`
-   / `save_with` build the pending envelope with **no** `.metadata()`, so the
-   high-level repository path always persists `metadata = None`. KERI's natural
-   home for a signature/attachment is envelope metadata; a consumer that wants it
-   there must drop to the raw `RawEventStore::append` seam and hand-build a
-   `PendingEnvelope`. **Decision for this example:** the signature lives *inside
-   the event payload*, so the example stays on the blessed typed path — and the
-   gap is documented here and filed, not hidden. #344 is now resolved by the
-   builder-level `MetadataProvider` configured via `RepositoryBuilder::metadata(provider)`,
-   so new code can place signatures in envelope metadata on the typed path.
+1. **Self-contained signatures.** This example stores the signature in the
+   payload. The typed facade also supports envelope metadata through
+   `RepositoryBuilder::metadata(provider)` ([#344]). Metadata preserved during
+   upcasting is original evidence, not authentication of rewritten payloads;
+   authenticate original bytes before transforming them.
 
 2. **`Projector::apply` could not see the stream key — resolved by [#345].**
    `Projector` now carries a defaulted second method,
@@ -106,3 +111,31 @@ the re-verifying projector.
 
 [#344]: https://github.com/devrandom-labs/mnesis/issues/344
 [#345]: https://github.com/devrandom-labs/mnesis/issues/345
+
+## Protocol compatibility and reproducible vectors
+
+Missing, legacy (`1`) and unknown future signing discriminators are rejected
+at JSON decoding; there is no implicit default or legacy-verification fallback.
+Merely adding `signature_version: 2` to an old payload fails signature verification.
+The old NUL-separated signing format permits distinct key/value assignments to
+share a preimage, so its signatures alone cannot establish the intended assignment.
+
+Migration requires an independently trusted source of the intended assignments
+and authorization by the owner holding the private key. Create a fresh version-2
+log in a separate database or namespace, emit a new inception, and sign the
+trusted assignments through the handlers. Preserve the original legacy log for
+audit. Re-signing untrusted legacy fields or continuing the old chain does not
+repair its ambiguous authorization history. This example provides no automatic
+migration utility.
+
+[Retained vectors and provenance](tests/fixtures/README.md) document deterministic
+keys, exact commands and the legacy source revision. `tests/signing_format.rs`
+reproduces the version-2 signatures and digest through actual handlers, verifies
+the projector, tests strict Ed25519 verification after field changes, exercises
+seeded Unicode properties and byte-length boundaries, and reopens real Fjall
+legacy rows to check typed rejection without altering their payloads.
+
+The hashing contexts follow [BLAKE3's derive-key API contract](https://docs.rs/blake3/latest/blake3/struct.Hasher.html#method.new_derive_key).
+The read side uses [Ed25519 strict verification](https://docs.rs/ed25519-dalek/2.2.0/ed25519_dalek/struct.VerifyingKey.html#method.verify_strict).
+Fixed-width field hashes remove encoding-boundary ambiguity; they still rely on
+BLAKE3's cryptographic collision resistance.

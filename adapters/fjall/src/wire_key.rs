@@ -13,8 +13,8 @@ pub enum DecodeError {
 /// Error from encoding a stream id into an event key.
 #[derive(Debug, Error)]
 pub enum EncodeError {
-    #[error("stream ID too long: {len} bytes (max {})", u16::MAX)]
-    IdTooLong { len: usize },
+    #[error("stream ID too long: {len} bytes (max {max})")]
+    IdTooLong { len: usize, max: usize },
 }
 
 /// Size of the event key header: `[u16 BE id_len]`.
@@ -30,12 +30,7 @@ const STREAM_VERSION_SIZE: usize = 8;
 ///
 /// Format: `[u16 BE id_len][id_bytes][u64 BE version]`.
 ///
-/// Bare `+` is sound here (rule 2's provably-bounded carve-out): both call
-/// sites bound `id_len` by `u16::MAX` — `encode_event_key` validates it via
-/// `u16::try_from` first, and `decode_event_key` derives it from a `u16` — so
-/// the sum is at most `2 + 65535 + 8 = 65545`, unrepresentable-overflow only on
-/// a <32-bit target, which this workspace does not support. (The `$all`-key
-/// path uses `checked_add` because its inputs are not so bounded.)
+/// Both callers bound `id_len` by a u16, so the sum fits supported targets.
 const fn event_key_size(id_len: usize) -> usize {
     EVENT_KEY_HEADER_SIZE + id_len + EVENT_KEY_VERSION_SIZE
 }
@@ -48,10 +43,11 @@ const fn event_key_size(id_len: usize) -> usize {
 ///
 /// # Errors
 ///
-/// Returns [`EncodeError::IdTooLong`] if `id_bytes` exceeds `u16::MAX` bytes.
+/// Returns [`EncodeError::IdTooLong`] if the encoded key exceeds the engine limit.
 pub fn encode_event_key(id_bytes: &[u8], version: u64) -> Result<Vec<u8>, EncodeError> {
     let id_len = id_bytes.len();
-    let id_len_u16 = u16::try_from(id_len).map_err(|_| EncodeError::IdTooLong { len: id_len })?;
+    let max = crate::MAX_KEY_LEN - EVENT_KEY_HEADER_SIZE - EVENT_KEY_VERSION_SIZE;
+    let id_len_u16 = checked_id_len(id_len, max)?;
 
     let total = event_key_size(id_len);
     let mut buf = Vec::with_capacity(total);
@@ -59,6 +55,13 @@ pub fn encode_event_key(id_bytes: &[u8], version: u64) -> Result<Vec<u8>, Encode
     buf.extend_from_slice(id_bytes);
     buf.extend_from_slice(&version.to_be_bytes());
     Ok(buf)
+}
+
+fn checked_id_len(len: usize, max: usize) -> Result<u16, EncodeError> {
+    if len > max {
+        return Err(EncodeError::IdTooLong { len, max });
+    }
+    u16::try_from(len).map_err(|_| EncodeError::IdTooLong { len, max })
 }
 
 /// Decode an event key from `[u16 BE id_len][id_bytes][u64 BE version]`.
@@ -121,9 +124,9 @@ const GLOBAL_KEY_VERSION_SIZE: usize = 8;
 ///
 /// # Errors
 ///
-/// Returns [`EncodeError::IdTooLong`] if `id` exceeds `u16::MAX` bytes.
+/// Returns [`EncodeError::IdTooLong`] if the encoded key exceeds the engine limit.
 pub fn encode_global_key(global_seq: u64, id: &[u8], version: u64) -> Result<Vec<u8>, EncodeError> {
-    let id_len = u16::try_from(id.len()).map_err(|_| EncodeError::IdTooLong { len: id.len() })?;
+    let id_len = checked_id_len(id.len(), crate::MAX_STREAM_ID_LEN)?;
     let mut buf = Vec::with_capacity(GLOBAL_KEY_PREFIX_SIZE + id.len() + GLOBAL_KEY_VERSION_SIZE);
     buf.extend_from_slice(&global_seq.to_be_bytes());
     buf.extend_from_slice(&id_len.to_be_bytes());
@@ -201,7 +204,7 @@ pub const fn encode_stream_version(version: u64) -> [u8; STREAM_VERSION_SIZE] {
 /// # Errors
 ///
 /// Returns [`DecodeError::InvalidSize`] if `value` is not exactly [`STREAM_VERSION_SIZE`] bytes.
-pub fn decode_stream_version(value: &[u8]) -> Result<u64, DecodeError> {
+pub const fn decode_stream_version(value: &[u8]) -> Result<u64, DecodeError> {
     if value.len() != STREAM_VERSION_SIZE {
         return Err(DecodeError::InvalidSize {
             expected: STREAM_VERSION_SIZE,
@@ -352,9 +355,7 @@ mod tests {
 
     #[test]
     fn global_key_round_trips_at_max_id_len() {
-        // Acceptance boundary: exactly u16::MAX id bytes must encode and
-        // round-trip (one past it is rejected — see the over-long test).
-        let id = vec![0xABu8; usize::from(u16::MAX)];
+        let id = vec![0xABu8; crate::MAX_STREAM_ID_LEN];
         let key = encode_global_key(9, &id, 3).unwrap();
         let (gs, decoded_id, ver) = decode_global_key(&key).unwrap();
         assert_eq!(gs, 9);
@@ -378,10 +379,10 @@ mod tests {
 
     #[test]
     fn global_key_rejects_over_long_id() {
-        let too_long = vec![0u8; usize::from(u16::MAX) + 1];
+        let too_long = vec![0u8; crate::MAX_STREAM_ID_LEN + 1];
         assert!(matches!(
             encode_global_key(1, &too_long, 1).unwrap_err(),
-            EncodeError::IdTooLong { len } if len == usize::from(u16::MAX) + 1
+            EncodeError::IdTooLong { len, .. } if len == crate::MAX_STREAM_ID_LEN + 1
         ));
     }
 

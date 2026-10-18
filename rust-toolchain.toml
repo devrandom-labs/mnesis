@@ -5,6 +5,6 @@
 # Stable only: the crates carry no `#![feature(...)]` gates and the workspace
 # builds + tests on stable (verified for 1.0 freeze gate, issue #204).
 [toolchain]
-channel = "1.95.0"
-components = ["cargo", "rustc", "rust-std", "rustfmt", "clippy", "llvm-tools-preview"]
+channel = "1.99.0"
+components = ["cargo", "rustc", "rust-std", "rustfmt", "clippy", "llvm-tools-preview", "rust-analyzer"]
 targets = ["wasm32-unknown-unknown", "thumbv7em-none-eabihf"]

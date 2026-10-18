@@ -350,24 +350,17 @@ fn h5_replay_panic_no_partial_mutation() {
         .expect("safe replay should succeed");
 
     // State should be count=1, version=1 after safe replay
-    assert_eq!(agg.state().count, 1);
+    assert_eq!(agg.state().unwrap().count, 1);
     assert_eq!(agg.version(), Some(Version::INITIAL));
 
-    // Panicking replay: version must not advance, and state is left at
-    // initial() — replay moves the state out via mem::replace (no clone), so
-    // a clean initial() placeholder remains; the pre-panic value is gone but
-    // the state is never partially mutated.
+    // Panicking replay consumes state; diagnostic version is not advanced.
     let v2 = Version::new(2).expect("2 is non-zero");
     let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
         let _ = agg.replay(v2, &BombEvent::Explode);
     }));
     assert!(result.is_err(), "replay should have panicked");
 
-    assert_eq!(
-        agg.state().count,
-        0,
-        "state must be left at initial() after panic (no partial mutation)"
-    );
+    assert!(matches!(agg.state(), Err(KernelError::PoisonedAggregate)));
     assert_eq!(
         agg.version(),
         Some(Version::INITIAL),
@@ -376,7 +369,7 @@ fn h5_replay_panic_no_partial_mutation() {
 }
 
 // `h5_apply_events_panic_no_partial_mutation` was relocated in-crate to
-// `crates/mnesis/src/aggregate.rs` (`apply_events_mid_batch_panic_leaves_initial_state`)
+// `crates/mnesis/src/aggregate.rs` (`apply_events_mid_batch_panic_poisoned_root_rejects_reuse`)
 // when `apply_events` became a private primitive — its panic-safety contract
 // (state left at initial(), version untouched) is only reachable in-crate now.
 

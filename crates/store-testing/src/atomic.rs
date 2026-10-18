@@ -5,7 +5,9 @@ use core::future::Future;
 
 use mnesis::Version;
 use mnesis_store::StreamKey;
-use mnesis_store::import::{AtomicAppend, AtomicAppendError, PlannedAppend};
+use mnesis_store::import::{
+    AtomicAppend, AtomicAppendError, InvalidRoute, InvalidRun, PlannedAppend,
+};
 use mnesis_store::wake::WakeSource;
 // NOTE: RawEventStore is NOT imported — `AtomicAppend: RawEventStore` is a
 // supertrait, and nothing here names the trait directly (unused imports deny).
@@ -167,4 +169,122 @@ where
         drain_all(&store, None).await.is_empty(),
         "empty batch must write nothing"
     );
+}
+
+fn planned_run(
+    target: &StreamKey,
+    expected_version: Option<Version>,
+    version: u64,
+    payload: u8,
+) -> PlannedAppend {
+    PlannedAppend {
+        target: target.clone(),
+        expected_version,
+        head: envelope_for(&ConformanceRow::new(version, "E", vec![payload])),
+        tail: Vec::new(),
+    }
+}
+
+/// Malformed runs are input errors even when storage has a conflicting head.
+pub async fn check_atomic_malformed_runs_reject_all<S, C, F, Fut>(factory: &F)
+where
+    S: AtomicAppend + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    for (first, second, expected, actual) in [
+        (2, None, 1, 2),
+        (1, Some(1), 2, 1),
+        (1, Some(3), 2, 3),
+        (2, Some(1), 3, 1),
+    ] {
+        for existing in [false, true] {
+            let (store, _guard) = factory().await;
+            let target = StreamKey::from_slice(b"malformed");
+            if existing {
+                append_rows(&store, &target, &[ConformanceRow::new(1, "E", vec![9])]).await;
+            }
+            let before = drain_all(&store, None).await;
+            let fresh = StreamKey::from_slice(b"fresh");
+            let mut malformed = planned_run(&target, None, first, 2);
+            if let Some(version) = second {
+                malformed
+                    .tail
+                    .push(envelope_for(&ConformanceRow::new(version, "E", vec![3])));
+            }
+            let declared = if first == 2 && second.is_some() {
+                Version::new(1)
+            } else {
+                None
+            };
+            malformed.expected_version = declared;
+            let writes = [planned_run(&fresh, None, 1, 1), malformed];
+            let error = store
+                .atomic_append_many(&writes)
+                .await
+                .expect_err("malformed input must reject before storage checks");
+            assert!(
+                matches!(error, AtomicAppendError::InvalidRun(reason) if reason == InvalidRun::NonSequential {
+                    index: 1, expected: Version::new(expected).unwrap(), actual: Version::new(actual).unwrap()
+                })
+            );
+            assert_eq!(drain_all(&store, None).await, before);
+            assert_eq!(
+                drain_stream(&store, &fresh, Version::INITIAL).await,
+                Vec::<ConformanceRow>::new()
+            );
+        }
+    }
+}
+
+/// Contiguous, overlapping and gapped duplicate targets reject the whole batch.
+pub async fn check_atomic_duplicate_targets_reject_all<S, C, F, Fut>(factory: &F)
+where
+    S: AtomicAppend + WakeSource,
+    C: Send,
+    F: Fn() -> Fut + Send + Sync,
+    Fut: Future<Output = (S, C)> + Send,
+{
+    for second_version in [1, 3, 5] {
+        let (store, _guard) = factory().await;
+        let target = StreamKey::from_slice(&[0xff, 0]);
+        append_rows(&store, &target, &[ConformanceRow::new(1, "E", vec![9])]).await;
+        let before = drain_all(&store, None).await;
+        let fresh = StreamKey::from_slice(b"fresh");
+        let writes = vec![
+            planned_run(&fresh, None, 1, 1),
+            planned_run(&target, Version::new(1), 2, 2),
+            planned_run(&StreamKey::from_slice(b"other"), None, 1, 3),
+            planned_run(&target, Version::new(second_version - 1), second_version, 4),
+        ];
+        let failure = store
+            .atomic_append_many(&writes)
+            .await
+            .expect_err("duplicate targets must reject before any write");
+        assert!(matches!(failure, AtomicAppendError::InvalidRoute(error)
+            if error == InvalidRoute { target: target.clone(), first_index: 1, index: 3 }));
+        assert_eq!(drain_all(&store, None).await, before);
+        assert_eq!(
+            drain_stream(&store, &target, Version::INITIAL).await,
+            vec![ConformanceRow::new(1, "E", vec![9])]
+        );
+        assert_eq!(
+            drain_stream(&store, &fresh, Version::INITIAL).await,
+            Vec::<ConformanceRow>::new()
+        );
+        assert_eq!(
+            drain_stream(&store, &StreamKey::from_slice(b"other"), Version::INITIAL).await,
+            Vec::<ConformanceRow>::new()
+        );
+        let valid = vec![writes[0].clone(), writes[1].clone(), writes[2].clone()];
+        assert!(
+            store
+                .atomic_append_many(&valid)
+                .await
+                .expect("distinct targets must commit")
+                .is_some()
+        );
+        assert_eq!(drain_all(&store, None).await.len(), 4);
+    }
 }

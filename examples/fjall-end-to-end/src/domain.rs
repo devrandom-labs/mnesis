@@ -50,32 +50,76 @@ pub enum AccountEvent {
     Withdrawn(MoneyWithdrawn),
 }
 
+impl AccountEvent {
+    /// The checked balance transition shared by replay and subscription folds.
+    pub fn balance_after(&self, balance: u64) -> Result<u64, AccountError> {
+        match self {
+            Self::Opened(_) => Ok(balance),
+            Self::Deposited(event) => {
+                balance
+                    .checked_add(event.amount)
+                    .ok_or(AccountError::BalanceOverflow {
+                        balance,
+                        amount: event.amount,
+                    })
+            }
+            Self::Withdrawn(event) => {
+                balance
+                    .checked_sub(event.amount)
+                    .ok_or(AccountError::InsufficientFunds {
+                        balance,
+                        amount: event.amount,
+                    })
+            }
+        }
+    }
+}
+
 // ── State ───────────────────────────────────────────────────────────────────
 
 /// `PartialEq`/`Eq` so the example can assert round-trip *aggregate equality*
 /// (rehydrated state `==` original) after a reopen or a backup/restore.
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AccountState {
     pub owner: String,
-    pub balance: u64,
+    /// Invalid historical arithmetic replaces the balance with its typed cause.
+    /// Once invalid, replay cannot repair it and commands return that same error.
+    pub balance: Result<u64, AccountError>,
     pub is_open: bool,
+}
+
+impl AccountState {
+    /// A usable balance, or the first invalid historical arithmetic transition.
+    pub fn balance(&self) -> Result<u64, AccountError> {
+        self.balance.clone()
+    }
 }
 
 impl AggregateState for AccountState {
     type Event = AccountEvent;
 
     fn initial() -> Self {
-        Self::default()
+        Self {
+            owner: String::new(),
+            balance: Ok(0),
+            is_open: false,
+        }
     }
 
     fn apply(mut self, event: &AccountEvent) -> Self {
+        let Ok(balance) = self.balance else {
+            return self;
+        };
+        self.balance = event.balance_after(balance);
+        if self.balance.is_err() {
+            return self;
+        }
         match event {
             AccountEvent::Opened(e) => {
                 self.owner = e.owner.clone();
                 self.is_open = true;
             }
-            AccountEvent::Deposited(e) => self.balance += e.amount,
-            AccountEvent::Withdrawn(e) => self.balance -= e.amount,
+            AccountEvent::Deposited(_) | AccountEvent::Withdrawn(_) => {}
         }
         self
     }
@@ -83,7 +127,7 @@ impl AggregateState for AccountState {
 
 // ── Error ───────────────────────────────────────────────────────────────────
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum AccountError {
     #[error("account already open")]
     AlreadyOpen,
@@ -91,6 +135,8 @@ pub enum AccountError {
     Closed,
     #[error("insufficient funds: have {balance}, need {amount}")]
     InsufficientFunds { balance: u64, amount: u64 },
+    #[error("balance overflow: have {balance}, deposit {amount}")]
+    BalanceOverflow { balance: u64, amount: u64 },
 }
 
 // ── Aggregate marker + commands ─────────────────────────────────────────────
@@ -113,6 +159,7 @@ impl Handle<OpenAccount> for BankAccount {
         state: &AccountState,
         cmd: OpenAccount,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        state.balance()?;
         if state.is_open {
             return Err(AccountError::AlreadyOpen);
         }
@@ -127,9 +174,16 @@ impl Handle<Deposit> for BankAccount {
         state: &AccountState,
         cmd: Deposit,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        let balance = state.balance()?;
         if !state.is_open {
             return Err(AccountError::Closed);
         }
+        balance
+            .checked_add(cmd.amount)
+            .ok_or(AccountError::BalanceOverflow {
+                balance,
+                amount: cmd.amount,
+            })?;
         Ok(Some(events![AccountEvent::Deposited(MoneyDeposited {
             amount: cmd.amount
         })]))
@@ -141,12 +195,13 @@ impl Handle<Withdraw> for BankAccount {
         state: &AccountState,
         cmd: Withdraw,
     ) -> Result<Option<Events<AccountEvent>>, AccountError> {
+        let balance = state.balance()?;
         if !state.is_open {
             return Err(AccountError::Closed);
         }
-        if state.balance < cmd.amount {
+        if balance < cmd.amount {
             return Err(AccountError::InsufficientFunds {
-                balance: state.balance,
+                balance,
                 amount: cmd.amount,
             });
         }

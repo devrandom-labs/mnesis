@@ -78,7 +78,7 @@ fn empty_payload() {
         .build()
         .expect("valid envelope");
 
-    assert!(envelope.payload().is_empty());
+    assert_eq!(envelope.payload(), b"");
     assert_eq!(envelope.payload().len(), 0);
 }
 

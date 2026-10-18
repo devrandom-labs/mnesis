@@ -41,8 +41,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         println!(
             "  {}: balance {} → restored {} ({})",
             original.id,
-            original.state.balance,
-            restored.state.balance,
+            original.state.balance()?,
+            restored.state.balance()?,
             if original == restored {
                 "identical"
             } else {

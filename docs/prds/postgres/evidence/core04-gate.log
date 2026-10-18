@@ -1,0 +1,28 @@
+mnesis-nextest>         SLOW [>300.000s] (---------) mnesis-fjall::property_tests attack_version_conflict_detection
+mnesis-nextest>         PASS [ 305.466s] (1523/1524) mnesis-fjall::property_tests attack_version_conflict_detection
+mnesis-nextest>         SLOW [>360.000s] (---------) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
+mnesis-nextest>         PASS [ 378.585s] (1524/1524) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
+mnesis-nextest> ------------
+mnesis-nextest>      Summary [ 453.504s] 1524 tests run: 1524 passed (12 slow), 4 skipped
+mnesis-nextest>
+mnesis-nextest>     Finished report saved to /nix/store/qbn43rwm1798vj2xnck065bps7z3layw-mnesis-nextest-0.4.0/coverage
+mnesis-nextest> checkPhase completed in 9 minutes 10 seconds
+mnesis-nextest> Running phase: installPhase
+mnesis-nextest> incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+mnesis-nextest> doing a full archive install of target to /nix/store/qbn43rwm1798vj2xnck065bps7z3layw-mnesis-nextest-0.4.0/target.tar.zst
+mnesis-nextest> /*stdin*\            : 23.33%   (  4.43 GiB =>   1.03 GiB, /nix/store/qbn43rwm1798vj2xnck065bps7z3layw-mnesis-nextest-0.4.0/target.tar.zst)
+mnesis-nextest> Running phase: fixupPhase
+mnesis-nextest> checking for references to /nix/var/nix/builds/nix-73695-1186979229/ in /nix/store/qbn43rwm1798vj2xnck065bps7z3layw-mnesis-nextest-0.4.0...
+mnesis-nextest> patching script interpreter paths in /nix/store/qbn43rwm1798vj2xnck065bps7z3layw-mnesis-nextest-0.4.0
+✅ checks.aarch64-darwin.mnesis-store-nostd
+✅ checks.aarch64-darwin.mnesis-fmt
+✅ checks.aarch64-darwin.mnesis-hakari
+✅ checks.aarch64-darwin.mnesis-clippy
+✅ checks.aarch64-darwin.mnesis-doc
+✅ checks.aarch64-darwin.mnesis-fuzz-replay
+✅ checks.aarch64-darwin.mnesis-wasm
+✅ checks.aarch64-darwin.mnesis-nostd
+✅ checks.aarch64-darwin.mnesis-deny
+✅ checks.aarch64-darwin.mnesis-nextest
+warning: The check omitted these incompatible systems: aarch64-linux, x86_64-darwin, x86_64-linux
+Use '--all-systems' to check all.

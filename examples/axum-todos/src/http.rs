@@ -173,7 +173,7 @@ async fn todos_create(
     Ok((
         StatusCode::CREATED,
         [(POSITION_HEADER, position.as_u64().to_string())],
-        Json(todo_view(id, todo.state())),
+        Json(todo_view(id, todo.state().map_err(internal)?)),
     ))
 }
 
@@ -192,7 +192,7 @@ async fn todos_update(
     let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
     // "Does it exist?" is a domain question: an id with no events loads as a
     // fresh root at version None, never an error.
-    if todo.version().is_none() || todo.state().deleted {
+    if todo.version().is_none() || todo.state().map_err(internal)?.deleted {
         return Err(StatusCode::NOT_FOUND);
     }
     // The all-absent PATCH body needs no special case here: `Handle` decides
@@ -213,10 +213,12 @@ async fn todos_update(
         // (`Ignored`) appended nothing, so there is no position to echo.
         Ok(Execution::Executed { position, .. }) => Ok((
             [(POSITION_HEADER, position.as_u64().to_string())],
-            Json(todo_view(id, todo.state())),
+            Json(todo_view(id, todo.state().map_err(internal)?)),
         )
             .into_response()),
-        Ok(Execution::Ignored) => Ok(Json(todo_view(id, todo.state())).into_response()),
+        Ok(Execution::Ignored) => {
+            Ok(Json(todo_view(id, todo.state().map_err(internal)?)).into_response())
+        }
         Err(e) if e.is_conflict() => Err(StatusCode::CONFLICT),
         Err(ExecuteError::Decide(TodoError::NotFound)) => Err(StatusCode::NOT_FOUND),
         Err(error) => Err(internal(error)),
@@ -229,7 +231,7 @@ async fn todos_delete(
 ) -> Result<Response, StatusCode> {
     let repo = state.store.repository::<Todo>().json().build();
     let mut todo = repo.load(TodoId(id)).await.map_err(internal)?;
-    if todo.version().is_none() || todo.state().deleted {
+    if todo.version().is_none() || todo.state().map_err(internal)?.deleted {
         return Err(StatusCode::NOT_FOUND);
     }
     match repo.execute(&mut todo, Delete { id }).await {

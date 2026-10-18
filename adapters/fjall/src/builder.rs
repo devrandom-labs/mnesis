@@ -1,8 +1,10 @@
+use crate::Durability;
 use crate::error::FjallError;
 #[cfg(feature = "projection")]
 use crate::partition::projection_defaults;
 use crate::partition::{AllIndex, KeyspaceConfig, Partitions, point_read_defaults, scan_defaults};
-use crate::store::FjallStore;
+use crate::store::Storage;
+use crate::{BlockingConfig, FjallStore};
 use fjall::KeyspaceCreateOptions;
 use mnesis_wake::StreamNotifiers;
 use std::path::{Path, PathBuf};
@@ -25,6 +27,8 @@ pub struct FjallStoreBuilder<S = (), E = ()> {
     streams_config: S,
     events_config: E,
     all_index: AllIndex,
+    durability: Durability,
+    blocking: BlockingConfig,
 }
 
 impl FjallStoreBuilder {
@@ -35,11 +39,30 @@ impl FjallStoreBuilder {
             streams_config: (),
             events_config: (),
             all_index: AllIndex::default(),
+            durability: Durability::default(),
+            blocking: BlockingConfig::default(),
         }
     }
 }
 
 impl<S, E> FjallStoreBuilder<S, E> {
+    /// Bound queued worker jobs and scan batches. Defaults to 32 waiting jobs,
+    /// 32 cursor/cleanup slots, 64 rows per scan job and a 1 MiB serialized scan
+    /// byte budget. A full cursor pool rejects new scans with a typed error.
+    #[must_use]
+    pub const fn blocking(mut self, config: BlockingConfig) -> Self {
+        self.blocking = config;
+        self
+    }
+    /// Set the persistence required before acknowledging any event or state
+    /// write. Defaults to [`Durability::SyncAll`]. The layout manifest always
+    /// uses `SyncAll`, independently of this policy.
+    #[must_use]
+    pub const fn durability(mut self, durability: Durability) -> Self {
+        self.durability = durability;
+        self
+    }
+
     /// Choose whether the store maintains the `$all` cross-stream index.
     ///
     /// Defaults to [`AllIndex::Denormalized`] (a read-optimized `$all`). Set
@@ -68,6 +91,8 @@ impl<S, E> FjallStoreBuilder<S, E> {
             streams_config: f,
             events_config: self.events_config,
             all_index: self.all_index,
+            durability: self.durability,
+            blocking: self.blocking,
         }
     }
 
@@ -91,6 +116,8 @@ impl<S, E> FjallStoreBuilder<S, E> {
             streams_config: self.streams_config,
             events_config: f,
             all_index: self.all_index,
+            durability: self.durability,
+            blocking: self.blocking,
         }
     }
 }
@@ -100,14 +127,20 @@ impl<S: KeyspaceConfig, E: KeyspaceConfig> FjallStoreBuilder<S, E> {
     ///
     /// On first open the partitions are created with their default
     /// configurations. On reopen, existing partitions are recovered
-    /// automatically by fjall.
+    /// automatically by fjall. A synchronously persisted adapter manifest
+    /// fixes the index mode at creation, including for empty databases.
     ///
     /// # Errors
     ///
     /// Returns [`FjallError::Io`] if the underlying fjall database cannot
     /// be opened or a partition cannot be created.
+    /// Returns [`FjallError::IndexModeMismatch`] for a different index mode,
+    /// [`FjallError::UnmarkedDatabase`] for nonempty legacy databases, or a
+    /// manifest error for malformed or unsupported layouts. Legacy data must
+    /// be exported with its original adapter and imported into a new database.
     pub fn open(self) -> Result<FjallStore, FjallError> {
         let db = fjall::SingleWriterTxDatabase::builder(&self.path).open()?;
+        crate::manifest::validate(&db, self.all_index)?;
 
         let streams_opts = self.streams_config.apply(point_read_defaults());
         let streams = db.keyspace("streams", || streams_opts)?;
@@ -123,31 +156,34 @@ impl<S: KeyspaceConfig, E: KeyspaceConfig> FjallStoreBuilder<S, E> {
         #[cfg(feature = "snapshot")]
         let snapshots = db.keyspace("snapshots", point_read_defaults)?;
 
-        // Projection state lives in its own point-read keyspace, distinct from
-        // `snapshots`, so a projection id and an aggregate-snapshot id with the
-        // same bytes cannot collide. It adds all-levels LZ4 (see
-        // `projection_defaults`): projection state is larger and more compressible
-        // than a snapshot, and the measurement showed it shrinks 10–100× with no
-        // cost on incompressible data.
+        // Checkpoints use separate namespaces for per-stream and global
+        // positions, isolated from aggregate snapshot caches. Both use the
+        // point-read/all-level LZ4 policy configured by projection_defaults.
         #[cfg(feature = "projection")]
-        let projections = db.keyspace("projections", projection_defaults)?;
+        let checkpoint_global = db.keyspace("checkpoints_global", projection_defaults)?;
+        #[cfg(feature = "projection")]
+        let checkpoint_stream = db.keyspace("checkpoints_stream", projection_defaults)?;
 
         let global = db.keyspace("global", point_read_defaults)?;
 
-        Ok(FjallStore {
-            db,
-            partitions: Partitions::new(
-                streams,
-                (events, events_global),
-                global,
-                #[cfg(feature = "snapshot")]
-                snapshots,
-                #[cfg(feature = "projection")]
-                projections,
-            )
-            .with_all_index(self.all_index),
-            notifiers: StreamNotifiers::new(),
-        })
+        FjallStore::new(
+            Storage {
+                db,
+                partitions: Partitions::new(
+                    streams,
+                    (events, events_global),
+                    global,
+                    #[cfg(feature = "snapshot")]
+                    snapshots,
+                    #[cfg(feature = "projection")]
+                    (checkpoint_global, checkpoint_stream),
+                )
+                .with_all_index(self.all_index),
+                notifiers: StreamNotifiers::new(),
+                durability: self.durability,
+            },
+            self.blocking,
+        )
     }
 }
 
@@ -160,7 +196,7 @@ mod tests {
     fn opens_and_closes_cleanly() {
         let dir = tempfile::tempdir().unwrap();
         let store = FjallStore::builder(dir.path().join("db")).open().unwrap();
-        drop(store);
+        futures::executor::block_on(store.close()).unwrap();
     }
 
     #[test]
@@ -176,7 +212,7 @@ mod tests {
             })
             .open()
             .unwrap();
-        drop(store);
+        futures::executor::block_on(store.close()).unwrap();
     }
 
     #[test]
@@ -187,13 +223,13 @@ mod tests {
         // First open — creates partitions.
         {
             let store = FjallStore::builder(&db_path).open().unwrap();
-            drop(store);
+            futures::executor::block_on(store.close()).unwrap();
         }
 
         // Second open — recovers from existing data.
         {
             let store = FjallStore::builder(&db_path).open().unwrap();
-            drop(store);
+            futures::executor::block_on(store.close()).unwrap();
         }
     }
 }

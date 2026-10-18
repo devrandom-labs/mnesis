@@ -1,0 +1,79 @@
+error: duplicate argument
+ --> tests/macro_compile_fail/macro_duplicate_arguments.rs:6:40
+  |
+6 | impl Marker { #[transform(event = "E", event = "F", from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infal...
+  |                                        ^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:12:50
+   |
+12 | impl Marker { #[transform(event = "E", from = 1, from = 1, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infalli...
+   |                                                  ^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:18:58
+   |
+18 | impl Marker { #[transform(event = "E", from = 1, to = 2, to = 2)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallibl...
+   |                                                          ^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:24:72
+   |
+24 | impl Marker { #[transform(event = "E", from = 1, to = 2, rename = "F", rename = "G")] fn step(payload: &[u8]) -> Result<Vec<u8>, std...
+   |                                                                        ^^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:29:30
+   |
+29 | #[transforms(aggregate = (), aggregate = (), error = std::convert::Infallible)]
+   |                              ^^^^^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:35:42
+   |
+35 | #[transforms(aggregate = (), error = (), error = std::convert::Infallible)]
+   |                                          ^^^^^
+
+error: duplicate #[transform] attribute
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:42:59
+   |
+42 | impl Marker { #[transform(event = "E", from = 1, to = 2)] #[transform(event = "E", from = 1, to = 2)] fn step(payload: &[u8]) -> Res...
+   |                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:47:54
+   |
+47 | #[mnesis::aggregate(state = (), error = (), id = (), state = ())]
+   |                                                      ^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:53:54
+   |
+53 | #[mnesis::aggregate(state = (), error = (), id = (), error = ())]
+   |                                                      ^^^^^
+
+error: duplicate argument
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:59:54
+   |
+59 | #[mnesis::aggregate(state = (), error = (), id = (), id = ())]
+   |                                                      ^^
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:46:9
+   |
+46 |     use super::*;
+   |         ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:52:9
+   |
+52 |     use super::*;
+   |         ^^^^^^^^
+
+warning: unused import: `super::*`
+  --> tests/macro_compile_fail/macro_duplicate_arguments.rs:58:9
+   |
+58 |     use super::*;
+   |         ^^^^^^^^

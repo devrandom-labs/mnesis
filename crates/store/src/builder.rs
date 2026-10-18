@@ -81,7 +81,7 @@ pub struct WithSnapshot<SS, T> {
 ///
 /// // With upcasting (drop to the facade after build):
 /// let repo = store.repository::<Order>().codec(MyCodec).build();
-/// let root = repo.load_with(id, OrderTransforms::upcast).await?;
+/// let root = repo.load_with(id, |_| Ok::<_, core::convert::Infallible>(()), OrderTransforms::upcast).await?;
 /// ```
 pub struct RepositoryBuilder<S, C, A, Snap = NoSnapshot, M = ()> {
     store: Store<S>,
@@ -347,7 +347,7 @@ where
     C: Send + Sync + 'static,
     M: Send + Sync + 'static,
 {
-    /// Build a snapshot-aware [`EventStore`] for aggregate `A` using an owning [`Codec`](crate::Codec).
+    /// Build a snapshot-aware [`EventStore`] for aggregate `A` with the configured codec.
     #[must_use]
     pub fn build(self) -> Snapshotting<EventStore<S, C, A, M>, SS, T> {
         let inner = EventStore::new(self.store, self.codec, self.meta);

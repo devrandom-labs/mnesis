@@ -152,7 +152,7 @@ fn new_aggregate_has_none_version() {
 #[test]
 fn new_aggregate_has_initial_state() {
     let agg = AggregateRoot::<Counter>::new(TestId("1".into()));
-    assert_eq!(agg.state().value, 0);
+    assert_eq!(agg.state().unwrap().value, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -175,7 +175,7 @@ fn replay_single_event_advances_version_and_state() {
     agg.replay(Version::INITIAL, &CounterEvent::Incremented)
         .unwrap();
     assert_eq!(agg.version(), Some(Version::INITIAL));
-    assert_eq!(agg.state().value, 1);
+    assert_eq!(agg.state().unwrap().value, 1);
 }
 
 #[test]
@@ -189,7 +189,7 @@ fn replay_multiple_events_sequentially() {
         .unwrap();
 
     assert_eq!(agg.version(), Version::new(3));
-    assert_eq!(agg.state().value, 1);
+    assert_eq!(agg.state().unwrap().value, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -267,7 +267,7 @@ fn replay_does_not_mutate_state_on_version_gap() {
     let _ = agg.replay(Version::new(3).unwrap(), &CounterEvent::Incremented);
 
     assert_eq!(agg.version(), Version::new(1));
-    assert_eq!(agg.state().value, 1);
+    assert_eq!(agg.state().unwrap().value, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -339,11 +339,10 @@ fn commit_persisted_advances_version_and_folds_state() {
 
     // Simulate: handle -> persist -> commit_persisted.
     let decided: Events<_, 1> = events![CounterEvent::Incremented, CounterEvent::IncrementedBy(9)];
-    let new_version = Version::new(2).unwrap();
-    agg.commit_persisted(new_version, &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
     assert_eq!(agg.version(), Version::new(2));
-    assert_eq!(agg.state().value, 10);
+    assert_eq!(agg.state().unwrap().value, 10);
 }
 
 #[test]
@@ -356,16 +355,16 @@ fn commit_persisted_then_replay_continues_from_committed_version() {
 
     // Simulate persistence of two more events (versions 2, 3).
     let decided: Events<_, 1> = events![CounterEvent::Incremented, CounterEvent::Incremented];
-    agg.commit_persisted(Version::new(3).unwrap(), &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
     assert_eq!(agg.version(), Version::new(3));
-    assert_eq!(agg.state().value, 3);
+    assert_eq!(agg.state().unwrap().value, 3);
 
     // Further replay must continue from version 4.
     agg.replay(Version::new(4).unwrap(), &CounterEvent::Decremented)
         .unwrap();
     assert_eq!(agg.version(), Version::new(4));
-    assert_eq!(agg.state().value, 2);
+    assert_eq!(agg.state().unwrap().value, 2);
 }
 
 // ---------------------------------------------------------------------------
@@ -435,7 +434,7 @@ fn restore_creates_root_at_given_state_and_version() {
     let root = AggregateRoot::<Counter>::restore(id.clone(), state, version);
 
     assert_eq!(root.id(), &id);
-    assert_eq!(root.state().value, 42);
+    assert_eq!(root.state().unwrap().value, 42);
     assert_eq!(root.version(), Some(version));
 }
 
@@ -450,7 +449,7 @@ fn restore_then_replay_continues_from_snapshot_version() {
     // Next replay must be version 11
     let result = root.replay(Version::new(11).unwrap(), &CounterEvent::Incremented);
     assert!(result.is_ok());
-    assert_eq!(root.state().value, 43);
+    assert_eq!(root.state().unwrap().value, 43);
     assert_eq!(root.version(), Some(Version::new(11).unwrap()));
 }
 

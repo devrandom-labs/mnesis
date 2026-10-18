@@ -124,13 +124,13 @@ mod tests {
             })
             .unwrap()
             .unwrap();
-        task.commit_persisted(Version::new(1).unwrap(), &decided);
+        task.commit_persisted(&decided).expect("root is usable");
 
         let decided = task.handle(CompleteTask).unwrap().unwrap();
-        task.commit_persisted(Version::new(2).unwrap(), &decided);
+        task.commit_persisted(&decided).expect("root is usable");
 
-        assert_eq!(task.state().title, "Write tests");
-        assert!(task.state().done);
+        assert_eq!(task.state().unwrap().title, "Write tests");
+        assert!(task.state().unwrap().done);
         assert_eq!(task.version(), Version::new(2));
     }
 
@@ -143,7 +143,7 @@ mod tests {
             })
             .unwrap()
             .unwrap();
-        task.commit_persisted(Version::new(1).unwrap(), &decided);
+        task.commit_persisted(&decided).expect("root is usable");
 
         assert!(
             task.handle(CreateTask {
@@ -153,7 +153,7 @@ mod tests {
         );
 
         let decided = task.handle(CompleteTask).unwrap().unwrap();
-        task.commit_persisted(Version::new(2).unwrap(), &decided);
+        task.commit_persisted(&decided).expect("root is usable");
 
         assert!(task.handle(CompleteTask).is_err());
     }
@@ -168,7 +168,7 @@ mod tests {
             }),
         )
         .unwrap();
-        assert_eq!(task.state().title, "Loaded");
+        assert_eq!(task.state().unwrap().title, "Loaded");
         assert_eq!(task.version(), Version::new(1));
     }
 

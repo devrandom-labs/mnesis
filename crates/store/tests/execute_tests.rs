@@ -159,15 +159,15 @@ async fn sequence_execute_chain_advances_version_and_state() {
     let e1 = executed(repo.execute(&mut ctr, Add(3)).await.unwrap());
     assert_eq!(e1.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(3)]);
     assert_eq!(ctr.version(), Version::new(1));
-    assert_eq!(ctr.state().total, 3);
+    assert_eq!(ctr.state().unwrap().total, 3);
 
     let e2 = executed(repo.execute(&mut ctr, Add(4)).await.unwrap());
     assert_eq!(e2.iter().collect::<Vec<_>>(), vec![&CtrEvent::Added(4)]);
     assert_eq!(ctr.version(), Version::new(2));
-    assert_eq!(ctr.state().total, 7);
+    assert_eq!(ctr.state().unwrap().total, 7);
 
     let reloaded = repo.load(CtrId::new(1)).await.unwrap();
-    assert_eq!(reloaded.state().total, 7);
+    assert_eq!(reloaded.state().unwrap().total, 7);
     assert_eq!(reloaded.version(), Version::new(2));
 }
 
@@ -183,12 +183,12 @@ async fn sequence_no_op_command_persists_nothing_and_holds_version() {
     let outcome = repo.execute::<RaiseTo, 0>(&mut ctr, RaiseTo(5)).await;
     assert!(matches!(outcome, Ok(Execution::Ignored)));
     assert_eq!(ctr.version(), Version::new(1));
-    assert_eq!(ctr.state().total, 5);
+    assert_eq!(ctr.state().unwrap().total, 5);
 
     // Nothing reached the store: the stream is still at v1.
     let mut reloaded = repo.load(CtrId::new(10)).await.unwrap();
     assert_eq!(reloaded.version(), Version::new(1));
-    assert_eq!(reloaded.state().total, 5);
+    assert_eq!(reloaded.state().unwrap().total, 5);
 
     // The very next command still lands at v2 — no version was burned.
     let decided = executed(repo.execute(&mut reloaded, RaiseTo(9)).await.unwrap());
@@ -223,7 +223,7 @@ async fn defensive_rejected_command_persists_nothing() {
     assert!(matches!(err, ExecuteError::Decide(CtrError::Zero)));
     assert!(!err.is_conflict());
     assert_eq!(ctr.version(), None);
-    assert_eq!(ctr.state().total, 0);
+    assert_eq!(ctr.state().unwrap().total, 0);
 
     let reloaded = repo.load(CtrId::new(2)).await.unwrap();
     assert_eq!(reloaded.version(), None);
@@ -281,9 +281,9 @@ async fn linearizable_concurrent_execute_one_winner() {
     // Exactly one of the two commands landed — total is either 10 or 20,
     // never both (30) and never neither (0).
     assert!(
-        final_ctr.state().total == 10 || final_ctr.state().total == 20,
+        final_ctr.state().unwrap().total == 10 || final_ctr.state().unwrap().total == 20,
         "expected exactly one command's effect, got {}",
-        final_ctr.state().total
+        final_ctr.state().unwrap().total
     );
 }
 
@@ -304,5 +304,5 @@ async fn equivalence_execute_matches_manual_two_step() {
         decided.iter().collect::<Vec<_>>()
     );
     assert_eq!(f.version(), m.version());
-    assert_eq!(f.state(), m.state());
+    assert_eq!(f.state().unwrap(), m.state().unwrap());
 }

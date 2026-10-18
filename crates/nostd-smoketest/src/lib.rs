@@ -8,7 +8,7 @@
 //! macro source was only grepped for `std::` paths, which is weak.
 //!
 //! This crate closes that gap: it defines a real aggregate using BOTH macros
-//! plus a [`Handle`] impl, entirely in `core` (no allocator — `Events<E, 0>` is
+//! plus a [`mnesis::Handle`] impl, entirely in `core` (no allocator — `Events<E, 0>` is
 //! the single-event `ArrayVec` path). The two flake gates build it for
 //! `thumbv7em-none-eabihf` and `wasm32-unknown-unknown`; if a macro ever emits a
 //! `std::` path, the generated code fails to compile for `thumbv7em` and the

@@ -33,6 +33,7 @@ mod tests {
     use static_assertions::assert_impl_all;
     use std::error::Error as _;
     use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
     use tokio::sync::Barrier;
 
     fn v(n: u64) -> Version {
@@ -148,7 +149,7 @@ mod tests {
     #[test]
     fn empty_report_is_vacuously_all_complete_with_no_unfinished() {
         let report: ImportReport = ImportReport::new(Vec::new());
-        assert!(report.streams().is_empty());
+        assert_eq!(report.streams(), []);
         assert!(report.all_complete());
         assert_eq!(report.unfinished().count(), 0);
     }
@@ -525,7 +526,7 @@ mod tests {
             .import(&[], identity_route, Atomicity::PerStream)
             .await
             .expect("import ok");
-        assert!(report.streams().is_empty());
+        assert_eq!(report.streams(), []);
         assert!(report.all_complete());
     }
 
@@ -805,41 +806,99 @@ mod tests {
             .import(&sections, to_same, Atomicity::WholeChunk)
             .await
             .expect_err("non-injective route must abort");
-        assert!(matches!(err, ImportError::Aborted { .. }));
+        assert!(
+            matches!(err, ImportError::InvalidRoute(error) if error.target == sk("T") && error.first_index == 0 && error.index == 1)
+        );
         // All-or-nothing + no corruption: T is empty, definitely not [1,2,1,2].
         assert_eq!(versions(&store, &sk("T")).await, Vec::<u64>::new());
     }
 
     #[tokio::test]
-    async fn per_stream_non_injective_route_second_rejected_no_corruption() {
-        // PerStream: the first section commits the target; the second (same
-        // target) is picky-rejected — the stream is [1,2], never [1,2,1,2].
+    async fn per_stream_non_injective_route_rejects_before_writes() {
+        // Routing ambiguity is an operation-level error under both policies.
         let store = mnesis_inmemory::InMemoryStore::new();
         let sections = vec![
             section("o1", vec![evt(1), evt(2)]),
             section("o2", vec![evt(1), evt(2)]),
         ];
         let to_same = |_origin: &[u8]| sk("T");
-        let report = store
+        let failure = store
             .import(&sections, to_same, Atomicity::PerStream)
             .await
-            .expect("import ok");
-        assert_eq!(
-            versions(&store, &sk("T")).await,
-            vec![1, 2],
-            "no [1,2,1,2] corruption — second section rejected, not appended"
+            .expect_err("routing must be rejected before the first append");
+        assert!(
+            matches!(failure, ImportError::InvalidRoute(error) if error.target == sk("T") && error.first_index == 0 && error.index == 1)
         );
-        assert_eq!(
-            report.streams()[0].outcome,
-            StreamOutcome::Complete { version: v(2) }
-        );
-        assert_eq!(
-            report.streams()[1].outcome,
-            StreamOutcome::Mismatch {
-                reached: None,
-                got: v(1)
+        assert_eq!(versions(&store, &sk("T")).await, Vec::<u64>::new());
+    }
+
+    #[tokio::test]
+    async fn late_route_collisions_reject_all_sections_under_both_policies() {
+        for policy in [Atomicity::WholeChunk, Atomicity::PerStream] {
+            for version in [1, 2, 4] {
+                let store = mnesis_inmemory::InMemoryStore::new();
+                let sections = [
+                    section("fresh", vec![evt(1)]),
+                    section("o1", vec![evt(1)]),
+                    section("other", vec![evt(1)]),
+                    section("o2", vec![evt(version)]),
+                ];
+                let calls = AtomicUsize::new(0);
+                let failure = store
+                    .import(
+                        &sections,
+                        |origin| {
+                            calls.fetch_add(1, Ordering::AcqRel);
+                            if origin == b"o1" || origin == b"o2" {
+                                sk("target")
+                            } else {
+                                StreamKey::from_slice(origin)
+                            }
+                        },
+                        policy,
+                    )
+                    .await
+                    .expect_err("late duplicate must reject all routes before writes");
+                assert!(
+                    matches!(failure, ImportError::InvalidRoute(error) if error.target == sk("target") && error.first_index == 1 && error.index == 3)
+                );
+                assert_eq!(calls.load(Ordering::Acquire), 4);
+                for key in ["fresh", "other", "target"] {
+                    assert_eq!(versions(&store, &sk(key)).await, Vec::<u64>::new());
+                }
+                let next = pending_envelope(Version::INITIAL)
+                    .event_type("E")
+                    .payload(b"next".as_slice())
+                    .build()
+                    .unwrap();
+                assert_eq!(
+                    store
+                        .append(&sk("target"), None, PendingBatch::of(&next))
+                        .await
+                        .unwrap()
+                        .as_u64(),
+                    1
+                );
             }
-        );
+        }
+    }
+
+    #[tokio::test]
+    async fn repeated_origins_and_empty_or_corrupt_sections_still_require_distinct_routes() {
+        for policy in [Atomicity::WholeChunk, Atomicity::PerStream] {
+            for blocks in [Vec::new(), vec![ImportBlock::Corrupt], vec![evt(2)]] {
+                let store = mnesis_inmemory::InMemoryStore::new();
+                let sections = [section("same", vec![evt(1)]), section("same", blocks)];
+                let failure = store
+                    .import(&sections, StreamKey::from_slice, policy)
+                    .await
+                    .expect_err("even repeated origins cannot merge implicitly");
+                assert!(
+                    matches!(failure, ImportError::InvalidRoute(error) if error.target == sk("same") && error.first_index == 0 && error.index == 1)
+                );
+                assert_eq!(versions(&store, &sk("same")).await, Vec::<u64>::new());
+            }
+        }
     }
 
     // ── #247: the Store handle is the front door — import, no .raw() ─────────

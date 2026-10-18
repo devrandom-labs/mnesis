@@ -1,11 +1,7 @@
-//! Snapshot / projection value codec (features `snapshot`, `projection`).
+//! Aggregate snapshot value codec (feature `snapshot`).
 //!
-//! The blob layout is fjall-private and distinct from the event wire format:
-//! `[u32 LE schema_version][u64 BE position][payload]`. It backs both
-//! `SnapshotStore` impls in [`crate::store`] — the `u64` `position` field is an
-//! aggregate `Version` for `SnapshotStore<Vec<u8>, Version>` and a `GlobalSeq`
-//! for `SnapshotStore<Vec<u8>, GlobalSeq>` (the projection resume position); the
-//! codec sees only the underlying `u64`, so one shape serves both.
+//! The private layout is `[u32 LE schema_version][u64 BE version][payload]`.
+//! Projection checkpoints use a separate revision-bearing record format.
 
 use crate::wire_key::DecodeError;
 
@@ -13,12 +9,19 @@ use crate::wire_key::DecodeError;
 const SNAPSHOT_VALUE_HEADER_SIZE: usize = 12;
 
 /// Encode a snapshot value as `[u32 LE schema_version][u64 BE version][payload]`.
-pub fn encode_snapshot_value(buf: &mut Vec<u8>, schema_version: u32, version: u64, payload: &[u8]) {
+pub fn encode_snapshot_value(
+    buf: &mut Vec<u8>,
+    schema_version: u32,
+    version: u64,
+    payload: &[u8],
+) -> Result<(), crate::FjallError> {
+    let len = crate::limits::state_value_len(payload.len())?;
     buf.clear();
-    buf.reserve(SNAPSHOT_VALUE_HEADER_SIZE + payload.len());
+    buf.reserve(len);
     buf.extend_from_slice(&schema_version.to_le_bytes());
     buf.extend_from_slice(&version.to_be_bytes());
     buf.extend_from_slice(payload);
+    Ok(())
 }
 
 /// Decode a snapshot value from `[u32 LE schema_version][u64 BE version][payload]`.

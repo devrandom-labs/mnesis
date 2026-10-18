@@ -26,7 +26,7 @@ Four macros: `conformance!` (core matrix), `conformance_atomic_append!`, `confor
 
 ## MSRV & stability
 
-MSRV **1.95**. Ships in the **0.x tier** (testing surface iterates faster than the frozen kernel). See [STABILITY.md](../../STABILITY.md).
+MSRV **1.99**. Ships in the **0.x tier** (testing surface iterates faster than the frozen kernel). See [STABILITY.md](../../STABILITY.md).
 
 ## License
 

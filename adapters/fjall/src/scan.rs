@@ -4,6 +4,7 @@
 //! [`PersistedEnvelope`]. NOT exported; no other adapter shares fjall's on-disk
 //! key layout, so this stays inside `mnesis-fjall`.
 
+use aligned_vec::{AVec, ConstAlign};
 use bytes::Bytes;
 use fjall::Slice;
 use mnesis::{ErrorId, Version};
@@ -11,7 +12,6 @@ use mnesis_store::PersistedEnvelope;
 
 use crate::error::{FjallError, reason_label};
 use crate::global_seq::GlobalSeq;
-use crate::subscription_id::OwnedStreamId;
 use crate::wire_key::{
     GLOBAL_KEY_PREFIX_SIZE, decode_event_key, decode_global_key, encode_event_key,
     encode_global_key,
@@ -28,7 +28,7 @@ pub trait ScanStrategy: Send {
     /// `$all`: a `(GlobalSeq, StreamKey, PersistedEnvelope)` tagged with the
     /// key-derived position and origin stream (the envelope carries neither),
     /// matching the attributed `$all` stream contract (#333).
-    type Item: Send;
+    type Item: Send + 'static;
     /// Keyset lower bound (inclusive) for opening at `from`.
     fn lower_key(&self, from: Self::Position) -> Result<Vec<u8>, FjallError>;
     /// Keyset upper bound (inclusive) — the end of this strategy's key range,
@@ -44,7 +44,7 @@ pub trait ScanStrategy: Send {
 
 /// Per-stream scan: keyed by `[id_len][id_bytes][version]`, opens from a [`Version`].
 pub struct StreamScan {
-    pub id: OwnedStreamId,
+    pub id: StreamKey,
     pub label: ErrorId,
 }
 
@@ -74,9 +74,12 @@ fn build_envelope(
         version: Some(raw_version),
     })?;
 
+    // Frame offsets are multiples of 16, but SST blocks can return a Slice
+    // whose base address is unaligned. Own one aligned copy only in that case.
+    let aligned_value = align_frame(bytes_value);
     PersistedEnvelope::try_new(
         version,
-        bytes_value,
+        aligned_value,
         decoded.schema_version,
         decoded.offsets.event_type,
         decoded.offsets.payload,
@@ -87,6 +90,16 @@ fn build_envelope(
         version: raw_version,
         source,
     })
+}
+
+fn align_frame(bytes: Bytes) -> Bytes {
+    if bytes.as_ptr().addr().is_multiple_of(wire::PAYLOAD_ALIGN) {
+        return bytes;
+    }
+    let mut aligned: AVec<u8, ConstAlign<{ wire::PAYLOAD_ALIGN }>> =
+        AVec::with_capacity(wire::PAYLOAD_ALIGN, bytes.len());
+    aligned.extend_from_slice(&bytes);
+    Bytes::from_owner(aligned)
 }
 
 impl ScanStrategy for StreamScan {
@@ -230,11 +243,34 @@ impl<S: ScanStrategy> ScanCursor<S> {
         strategy: S,
         from: S::Position,
     ) -> Result<Self, FjallError> {
-        let lower = strategy.lower_key(from)?;
-        let iter = match strategy.upper_key()? {
+        Self::open_using(strategy, from, |lower, upper_bound| match upper_bound {
             Some(upper) => keyspace.inner().range(lower..=upper),
             None => keyspace.inner().range(lower..),
-        };
+        })
+    }
+
+    /// Open against the caller's database-wide view, including when this
+    /// cursor is opened after newer transactions have committed.
+    pub fn open_snapshot(
+        snapshot: &fjall::Snapshot,
+        keyspace: &fjall::SingleWriterTxKeyspace,
+        strategy: S,
+        from: S::Position,
+    ) -> Result<Self, FjallError> {
+        use fjall::Readable;
+        Self::open_using(strategy, from, |lower, upper_bound| match upper_bound {
+            Some(upper) => snapshot.range(keyspace, lower..=upper),
+            None => snapshot.range(keyspace, lower..),
+        })
+    }
+
+    fn open_using(
+        strategy: S,
+        from: S::Position,
+        range: impl FnOnce(Vec<u8>, Option<Vec<u8>>) -> fjall::Iter,
+    ) -> Result<Self, FjallError> {
+        let lower = strategy.lower_key(from)?;
+        let iter = range(lower, strategy.upper_key()?);
         Ok(Self {
             iter,
             strategy,
@@ -258,7 +294,7 @@ impl<S: ScanStrategy> ScanCursor<S> {
         }
     }
 
-    fn poll_one(&mut self) -> Option<Result<S::Item, FjallError>> {
+    fn next_sized(&mut self) -> Option<(Result<S::Item, FjallError>, usize)> {
         if self.poisoned {
             return None;
         }
@@ -267,15 +303,31 @@ impl<S: ScanStrategy> ScanCursor<S> {
             Ok(kv) => kv,
             Err(e) => {
                 self.poisoned = true;
-                return Some(Err(FjallError::Io(e)));
+                return Some((Err(FjallError::Io(e)), 0));
             }
         };
         // Poison on a decode error, then surface the result as-is.
-        Some(
+        let Some(size) = key.len().checked_add(value.len()) else {
+            self.poisoned = true;
+            return Some((Err(FjallError::ScanLengthOverflow), 0));
+        };
+        Some((
             self.strategy
                 .decode(&key, value)
                 .inspect_err(|_| self.poisoned = true),
-        )
+            size,
+        ))
+    }
+
+    fn poll_one(&mut self) -> Option<Result<S::Item, FjallError>> {
+        self.next_sized().map(|(item, _)| item)
+    }
+}
+
+impl<S: ScanStrategy + 'static> crate::blocking::Cursor for ScanCursor<S> {
+    type Item = S::Item;
+    fn next_row(&mut self) -> Option<(Result<Self::Item, FjallError>, usize)> {
+        self.next_sized()
     }
 }
 
@@ -298,7 +350,7 @@ impl<S: ScanStrategy + Unpin> futures::Stream for ScanCursor<S> {
 #[allow(clippy::panic, reason = "test code")]
 mod tests {
     use super::*;
-    use crate::store::FjallStore;
+    use crate::FjallStore;
     use crate::store::read_test_helpers::{sk, temp_store};
     use futures::StreamExt;
     use mnesis_store::PendingBatch;
@@ -307,6 +359,28 @@ mod tests {
     use mnesis_store::store::RawEventStore;
     use mnesis_store::value::{EventType, Payload, SchemaVersion};
     use mnesis_store::wire;
+
+    #[test]
+    fn frame_alignment_reuses_aligned_owner_and_repairs_unaligned_owner_once() {
+        let mut owner: AVec<u8, ConstAlign<16>> = AVec::with_capacity(16, 64);
+        owner.resize(64, 7);
+        let bytes = Bytes::from_owner(owner);
+        let original = bytes.as_ptr();
+        let reused = align_frame(bytes.clone());
+        assert_eq!(reused.as_ptr(), original);
+        let unaligned = bytes.slice(1..);
+        let repaired = align_frame(unaligned);
+        assert!(repaired.as_ptr().addr().is_multiple_of(16));
+        assert_eq!(repaired.as_ref(), &[7; 63]);
+        let repaired_ptr = repaired.as_ptr();
+        let shared = repaired.clone();
+        let reused_again = align_frame(repaired);
+        assert_eq!(reused_again.as_ptr(), repaired_ptr);
+        drop(bytes);
+        drop(reused);
+        drop(reused_again);
+        assert_eq!(shared.as_ref(), &[7; 63]);
+    }
 
     /// Build a wire-frame event-value row via the real production encoder
     /// (`wire::encode_frame` + the `mnesis_store::value` newtypes), for the
@@ -341,6 +415,79 @@ mod tests {
         }
     }
 
+    #[cfg(all(feature = "export", feature = "import"))]
+    #[tokio::test]
+    async fn shared_snapshot_excludes_later_atomic_rows_and_stream_ids() {
+        use crate::AllIndex;
+        use mnesis_store::import::{AtomicAppend, PlannedAppend};
+
+        for mode in [AllIndex::Denormalized, AllIndex::Disabled] {
+            let directory = tempfile::tempdir().unwrap();
+            let store = FjallStore::builder(directory.path())
+                .all_index(mode)
+                .open()
+                .unwrap();
+            let ids = [sk("a"), sk("b"), StreamKey::from_slice(&[0xff, 0])];
+            let runs = |version: u64, count: usize| {
+                ids.iter()
+                    .take(count)
+                    .map(|id| PlannedAppend {
+                        target: id.clone(),
+                        expected_version: Version::new(version - 1),
+                        head: pending_envelope(Version::new(version).unwrap())
+                            .event_type("E")
+                            .payload(format!("v{version}").into_bytes())
+                            .build()
+                            .unwrap(),
+                        tail: vec![],
+                    })
+                    .collect::<Vec<_>>()
+            };
+            store.atomic_append_many(&runs(1, 2)).await.unwrap();
+            let snapshot = store.storage.db.read_tx();
+            let open = |id: &StreamKey| {
+                ScanCursor::open_snapshot(
+                    &snapshot,
+                    store.storage.partitions.events(),
+                    StreamScan {
+                        id: id.clone(),
+                        label: ErrorId::from_display(id),
+                    },
+                    Version::INITIAL,
+                )
+                .unwrap()
+            };
+            let first = open(&ids[0]).collect::<Vec<_>>().await;
+            store.atomic_append_many(&runs(2, 2)).await.unwrap();
+            append_versions(&store, &ids[2], 1..=1).await;
+            for id in &ids[..2] {
+                let rows = open(id).collect::<Vec<_>>().await;
+                assert_eq!(rows.len(), 1);
+                let event = rows[0].as_ref().unwrap();
+                assert_eq!(event.version(), Version::INITIAL);
+                assert_eq!(event.payload(), b"v1");
+            }
+            assert_eq!(first.len(), 1);
+            assert!(open(&ids[2]).collect::<Vec<_>>().await.is_empty());
+            let listed = store
+                .storage
+                .partitions
+                .stream_ids(&snapshot)
+                .map(|entry| StreamKey::from_bytes(entry.key().unwrap()))
+                .collect::<Vec<_>>();
+            assert_eq!(listed, ids[..2]);
+            drop(snapshot);
+            let fresh = store
+                .read_stream(&ids[1], Version::INITIAL)
+                .await
+                .unwrap()
+                .collect::<Vec<_>>()
+                .await;
+            assert_eq!(fresh.len(), 2);
+            assert_eq!(fresh[1].as_ref().unwrap().payload(), b"v2");
+        }
+    }
+
     #[tokio::test]
     async fn scan_cursor_yields_rows_in_order() {
         let (store, _dir) = temp_store();
@@ -348,9 +495,9 @@ mod tests {
         append_versions(&store, &id, 1..=3).await;
 
         let cursor = ScanCursor::open(
-            store.partitions.events(),
+            store.storage.partitions.events(),
             StreamScan {
-                id: OwnedStreamId::from_id(&id),
+                id: id.clone(),
                 label: ErrorId::from_display(&id),
             },
             Version::INITIAL,
@@ -371,9 +518,9 @@ mod tests {
         append_versions(&store, &id, 1..=5).await;
 
         let cursor = ScanCursor::open(
-            store.partitions.events(),
+            store.storage.partitions.events(),
             StreamScan {
-                id: OwnedStreamId::from_id(&id),
+                id: id.clone(),
                 label: ErrorId::from_display(&id),
             },
             Version::new(3).unwrap(),
@@ -401,7 +548,7 @@ mod tests {
         append_versions(&store, &b, 2..=2).await; // global_seq 4
 
         let cursor = ScanCursor::open(
-            store.partitions.events_global(),
+            store.storage.partitions.events_global(),
             GlobalScan,
             GlobalSeq::INITIAL,
         )
@@ -430,15 +577,9 @@ mod tests {
 
     fn stream_scan(id_bytes: &[u8], label: &str) -> StreamScan {
         StreamScan {
-            id: OwnedStreamId::from_id(&label_id(id_bytes)),
+            id: StreamKey::from_slice(id_bytes),
             label: ErrorId::from_display(&label),
         }
-    }
-
-    /// A [`StreamKey`] over borrowed bytes, used only to feed
-    /// [`OwnedStreamId::from_id`] in tests.
-    fn label_id(bytes: &[u8]) -> StreamKey {
-        StreamKey::from_slice(bytes)
     }
 
     fn row(id: &[u8], version: u64, et: &str, payload: &[u8]) -> (Slice, Slice) {

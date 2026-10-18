@@ -104,9 +104,9 @@ impl Handle<FinishTask> for TaskAggregate {
 pub fn drive(id: u64) -> Option<Version> {
     let mut root = AggregateRoot::<TaskAggregate>::new(TaskId::new(id));
     let decided = root.handle(StartTask).ok().flatten();
-    decided
-        .iter()
-        .for_each(|events| root.commit_persisted(Version::INITIAL, events));
+    if let Some(events) = decided {
+        root.commit_persisted(&events).ok()?;
+    }
     root.version()
 }
 

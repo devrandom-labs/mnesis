@@ -152,7 +152,7 @@ impl Decode<TodoEvent> for JsonCodec {
 /// Upcast functions operate on raw bytes BEFORE the codec deserializes —
 /// so the old Rust type doesn't need to exist.
 fn rename_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, std::convert::Infallible> {
-    if morsel.event_type() != "TaskCreated" || morsel.schema_version().as_u64() >= 2 {
+    if morsel.event_type() != "TaskCreated" || morsel.schema_version().get() >= 2 {
         return Ok(morsel);
     }
     // Rename the event type. The payload JSON uses serde's tagged enum
@@ -161,7 +161,7 @@ fn rename_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, std::conver
     let upgraded = json.replace("TaskCreated", "TodoCreated");
     Ok(EventMorsel::new(
         "TodoCreated",
-        version!(2),
+        mnesis_store::SchemaVersion::from_u32(2).expect("nonzero schema"),
         upgraded.into_bytes(),
     ))
 }
@@ -318,7 +318,8 @@ async fn main() {
     // --- Step 6: Upcast and decode ---
     println!("Step 6: Apply upcast function, then decode with JsonCodec");
     for (event_type, schema_version, payload, version) in &read_events {
-        let schema_ver = Version::new(u64::from(*schema_version)).expect("schema version > 0");
+        let schema_ver =
+            mnesis_store::SchemaVersion::from_u32(*schema_version).expect("schema version > 0");
         let morsel = EventMorsel::borrowed(event_type, schema_ver, payload);
         let upcasted = rename_upcast(morsel).expect("upcast should succeed");
 

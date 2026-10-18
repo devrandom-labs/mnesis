@@ -359,18 +359,18 @@ impl Decode<DeltaEvent> for DeltaOwningCodec {
 /// Plain-function upcaster: bumps "Incremented" from schema v1→v2 (payload unchanged).
 fn incremented_v1_to_v2_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
     match (morsel.event_type(), morsel.schema_version()) {
-        ("Incremented", v) if v == Version::INITIAL => Ok(EventMorsel::new(
+        ("Incremented", v) if v == mnesis_store::SchemaVersion::INITIAL => Ok(EventMorsel::new(
             "Incremented",
-            Version::new(2).unwrap(),
+            mnesis_store::SchemaVersion::from_u32(2).unwrap(),
             morsel.payload().to_vec(),
         )),
         _ => Ok(morsel),
     }
 }
 
-fn incremented_v1_to_v2_current_version(event_type: &str) -> Option<Version> {
+fn incremented_v1_to_v2_current_version(event_type: &str) -> Option<mnesis_store::SchemaVersion> {
     match event_type {
-        "Incremented" => Some(Version::new(2).unwrap()),
+        "Incremented" => Some(mnesis_store::SchemaVersion::from_u32(2).unwrap()),
         _ => None,
     }
 }
@@ -379,25 +379,27 @@ fn incremented_v1_to_v2_current_version(event_type: &str) -> Option<Version> {
 fn incremented_v1_to_v3_upcast(mut morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
     loop {
         morsel = match (morsel.event_type(), morsel.schema_version()) {
-            ("Incremented", v) if v == Version::INITIAL => EventMorsel::new(
+            ("Incremented", v) if v == mnesis_store::SchemaVersion::INITIAL => EventMorsel::new(
                 "Incremented",
-                Version::new(2).unwrap(),
+                mnesis_store::SchemaVersion::from_u32(2).unwrap(),
                 morsel.payload().to_vec(),
             ),
-            ("Incremented", v) if v == Version::new(2).unwrap() => EventMorsel::new(
-                "Incremented",
-                Version::new(3).unwrap(),
-                morsel.payload().to_vec(),
-            ),
+            ("Incremented", v) if v == mnesis_store::SchemaVersion::from_u32(2).unwrap() => {
+                EventMorsel::new(
+                    "Incremented",
+                    mnesis_store::SchemaVersion::from_u32(3).unwrap(),
+                    morsel.payload().to_vec(),
+                )
+            }
             _ => break,
         };
     }
     Ok(morsel)
 }
 
-fn incremented_v1_to_v3_current_version(event_type: &str) -> Option<Version> {
+fn incremented_v1_to_v3_current_version(event_type: &str) -> Option<mnesis_store::SchemaVersion> {
     match event_type {
-        "Incremented" => Some(Version::new(3).unwrap()),
+        "Incremented" => Some(mnesis_store::SchemaVersion::from_u32(3).unwrap()),
         _ => None,
     }
 }
@@ -405,12 +407,12 @@ fn incremented_v1_to_v3_current_version(event_type: &str) -> Option<Version> {
 /// Plain-function upcaster that doubles the i32 delta — actually mutates payload bytes.
 fn delta_doubling_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
     match (morsel.event_type(), morsel.schema_version()) {
-        ("Delta", v) if v == Version::INITIAL => {
+        ("Delta", v) if v == mnesis_store::SchemaVersion::INITIAL => {
             let delta = i32::from_le_bytes(morsel.payload()[0..4].try_into().unwrap());
             let doubled = delta * 2;
             Ok(EventMorsel::new(
                 "Delta",
-                Version::new(2).unwrap(),
+                mnesis_store::SchemaVersion::from_u32(2).unwrap(),
                 doubled.to_le_bytes().to_vec(),
             ))
         }
@@ -418,9 +420,9 @@ fn delta_doubling_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Inf
     }
 }
 
-fn delta_doubling_current_version(event_type: &str) -> Option<Version> {
+fn delta_doubling_current_version(event_type: &str) -> Option<mnesis_store::SchemaVersion> {
     match event_type {
-        "Delta" => Some(Version::new(2).unwrap()),
+        "Delta" => Some(mnesis_store::SchemaVersion::from_u32(2).unwrap()),
         _ => None,
     }
 }
@@ -583,7 +585,7 @@ async fn d2_aggregate_must_be_retryable_after_failed_save() {
 
     // CORRECT: loading must return the persisted state
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, 2);
+    assert_eq!(loaded.state().unwrap().value, 2);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -664,14 +666,14 @@ async fn d3_concurrent_loads_both_succeed() {
         let es = es.clone();
         async move {
             let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-            loaded.state().value
+            loaded.state().unwrap().value
         }
     });
     let handle_b = tokio::spawn({
         let es = es.clone();
         async move {
             let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-            loaded.state().value
+            loaded.state().unwrap().value
         }
     });
 
@@ -708,8 +710,8 @@ async fn d3_cross_stream_concurrent_saves_both_succeed() {
     // Both streams independent — verify isolation
     let loaded_a: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
     let loaded_b: AggregateRoot<Counter> = es.load(TestId::new("counter-2")).await.unwrap();
-    assert_eq!(loaded_a.state().value, 10);
-    assert_eq!(loaded_b.state().value, 20);
+    assert_eq!(loaded_a.state().unwrap().value, 10);
+    assert_eq!(loaded_b.state().unwrap().value, 20);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -732,10 +734,14 @@ async fn d4_single_upcaster_transforms_on_load() {
 
     // load_with applies upcaster (v1→v2) but payload is unchanged
     let loaded: AggregateRoot<Counter> = es
-        .load_with(TestId::new("counter-1"), incremented_v1_to_v2_upcast)
+        .load_with(
+            TestId::new("counter-1"),
+            |_| Ok::<_, Infallible>(()),
+            incremented_v1_to_v2_upcast,
+        )
         .await
         .unwrap();
-    assert_eq!(loaded.state().value, 42);
+    assert_eq!(loaded.state().unwrap().value, 42);
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
 
@@ -755,10 +761,14 @@ async fn d4_chained_upcasters_v1_to_v3() {
     .unwrap();
 
     let loaded: AggregateRoot<Counter> = es
-        .load_with(TestId::new("counter-1"), incremented_v1_to_v3_upcast)
+        .load_with(
+            TestId::new("counter-1"),
+            |_| Ok::<_, Infallible>(()),
+            incremented_v1_to_v3_upcast,
+        )
         .await
         .unwrap();
-    assert_eq!(loaded.state().value, 0); // +1 -1 = 0
+    assert_eq!(loaded.state().unwrap().value, 0); // +1 -1 = 0
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -801,11 +811,15 @@ async fn d4_zero_copy_event_store_with_payload_mutating_upcaster() {
     let store = Store::new(raw_store);
     let es = store.repository().codec(DeltaBorrowingCodec).build();
     let loaded: AggregateRoot<DeltaAggregate> = es
-        .load_with(TestId::new("counter-1"), delta_doubling_upcast)
+        .load_with(
+            TestId::new("counter-1"),
+            |_| Ok::<_, Infallible>(()),
+            delta_doubling_upcast,
+        )
         .await
         .unwrap();
     assert_eq!(
-        loaded.state().total,
+        loaded.state().unwrap().total,
         10,
         "upcaster should double the legacy delta from 5 to 10"
     );
@@ -842,10 +856,14 @@ async fn d4_upcaster_must_not_double_apply_to_new_events() {
 
     // load_with: legacy delta=5 upcasted to 10. State total=10.
     let mut loaded: AggregateRoot<DeltaAggregate> = es
-        .load_with(TestId::new("counter-1"), delta_doubling_upcast)
+        .load_with(
+            TestId::new("counter-1"),
+            |_| Ok::<_, Infallible>(()),
+            delta_doubling_upcast,
+        )
         .await
         .unwrap();
-    assert_eq!(loaded.state().total, 10);
+    assert_eq!(loaded.state().unwrap().total, 10);
 
     // save_with: delta=3 stamped at schema_version=2 per the version fn.
     es.save_with(
@@ -859,14 +877,18 @@ async fn d4_upcaster_must_not_double_apply_to_new_events() {
     // Reload: legacy event upcasted (5→10), new event untouched (3).
     // Total = 10 + 3 = 13.
     let reloaded: AggregateRoot<DeltaAggregate> = es
-        .load_with(TestId::new("counter-1"), delta_doubling_upcast)
+        .load_with(
+            TestId::new("counter-1"),
+            |_| Ok::<_, Infallible>(()),
+            delta_doubling_upcast,
+        )
         .await
         .unwrap();
     assert_eq!(
-        reloaded.state().total,
+        reloaded.state().unwrap().total,
         13,
         "new events must not be double-upcasted — expected 13 (10 + 3), got {}",
-        reloaded.state().total
+        reloaded.state().unwrap().total
     );
 }
 
@@ -914,7 +936,7 @@ async fn d5_version_consistency_through_save_load_cycles() {
             "loaded version mismatch at round {round}"
         );
         assert_eq!(
-            loaded.state().value,
+            loaded.state().unwrap().value,
             i64::try_from(round).unwrap(),
             "state mismatch at round {round}"
         );
@@ -938,7 +960,7 @@ async fn d5_batch_version_tracking() {
 
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
     assert_eq!(loaded.version(), Some(Version::new(4).unwrap()));
-    assert_eq!(loaded.state().value, 99); // +1 +1 =100 -1 = 99
+    assert_eq!(loaded.state().unwrap().value, 99); // +1 +1 =100 -1 = 99
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -952,7 +974,7 @@ async fn d6_full_lifecycle_fresh_save_load_modify_save_load() {
 
     // 1. Fresh aggregate
     let mut agg = AggregateRoot::<Counter>::new(TestId::new("counter-1"));
-    assert_eq!(agg.state().value, 0);
+    assert_eq!(agg.state().unwrap().value, 0);
     assert_eq!(agg.version(), None);
 
     // 2. Save events
@@ -966,7 +988,7 @@ async fn d6_full_lifecycle_fresh_save_load_modify_save_load() {
 
     // 3. Load from store
     let mut loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, 11);
+    assert_eq!(loaded.state().unwrap().value, 11);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 
     // 4. Save more events
@@ -977,7 +999,7 @@ async fn d6_full_lifecycle_fresh_save_load_modify_save_load() {
 
     // 5. Final load — verify complete state
     let final_agg: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(final_agg.state().value, 0);
+    assert_eq!(final_agg.state().unwrap().value, 0);
     assert_eq!(final_agg.version(), Some(Version::new(3).unwrap()));
 }
 
@@ -995,10 +1017,10 @@ async fn d6_ten_round_modify_save_load_cycles() {
 
         // Reload between each round
         agg = es.load(TestId::new("counter-1")).await.unwrap();
-        assert_eq!(agg.state().value, (round + 1) as i64);
+        assert_eq!(agg.state().unwrap().value, (round + 1) as i64);
     }
 
-    assert_eq!(agg.state().value, 10);
+    assert_eq!(agg.state().unwrap().value, 10);
     assert_eq!(agg.version(), Some(Version::new(10).unwrap()));
 }
 
@@ -1024,9 +1046,9 @@ async fn d6_state_determinism_same_events_same_state() {
     let load1: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
     let load2: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
 
-    assert_eq!(load1.state(), load2.state());
+    assert_eq!(load1.state().unwrap(), load2.state().unwrap());
     assert_eq!(load1.version(), load2.version());
-    assert_eq!(load1.state().value, 99); // 100 -1 -1 +1
+    assert_eq!(load1.state().unwrap().value, 99); // 100 -1 -1 +1
 }
 
 #[tokio::test]
@@ -1073,7 +1095,7 @@ async fn d7_load_nonexistent_stream_returns_fresh_aggregate() {
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
 
     assert_eq!(loaded.version(), None);
-    assert_eq!(loaded.state(), &CounterState::default());
+    assert_eq!(loaded.state().unwrap(), &CounterState::default());
 }
 
 #[tokio::test]
@@ -1096,7 +1118,7 @@ async fn d7_repository_preserves_event_ordering() {
 
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
     assert_eq!(
-        loaded.state().value,
+        loaded.state().unwrap().value,
         1,
         "events must be replayed in save order"
     );
@@ -1251,7 +1273,7 @@ proptest! {
 
             let loaded: AggregateRoot<Counter> =
                 es.load(TestId::new("counter-1")).await.unwrap();
-            prop_assert_eq!(loaded.state().value, expected_value);
+            prop_assert_eq!(loaded.state().unwrap().value, expected_value);
             prop_assert_eq!(loaded.version().unwrap().as_u64(), events.len() as u64);
             Ok(())
         })?;
@@ -1277,7 +1299,7 @@ proptest! {
 
             let loaded: AggregateRoot<Counter> =
                 es.load(TestId::new("counter-1")).await.unwrap();
-            prop_assert_eq!(loaded.state().value, expected_value);
+            prop_assert_eq!(loaded.state().unwrap().value, expected_value);
             Ok(())
         })?;
     }
@@ -1300,7 +1322,7 @@ proptest! {
             let load2: AggregateRoot<Counter> =
                 es.load(TestId::new("counter-1")).await.unwrap();
 
-            prop_assert_eq!(load1.state().value, load2.state().value);
+            prop_assert_eq!(load1.state().unwrap().value, load2.state().unwrap().value);
             prop_assert_eq!(load1.version(), load2.version());
             Ok(())
         })?;
@@ -1330,7 +1352,7 @@ async fn d10_large_batch_500_events_save_and_load() {
     es.save(&mut agg, &batch).await.unwrap();
 
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, 500);
+    assert_eq!(loaded.state().unwrap().value, 500);
     assert_eq!(loaded.version(), Some(Version::new(500).unwrap()));
 }
 
@@ -1363,7 +1385,7 @@ async fn d10_max_rehydration_events_boundary() {
 
     // Load 5 events — should succeed (version 5 is not > 5)
     let loaded: AggregateRoot<TinyAggregate> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, 5);
+    assert_eq!(loaded.state().unwrap().value, 5);
     assert_eq!(loaded.version(), Some(Version::new(5).unwrap()));
 }
 
@@ -1435,7 +1457,7 @@ async fn d11_save_and_load_with_typed_id() {
     assert!(result.is_ok(), "save with typed id should be accepted");
 
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, 1);
+    assert_eq!(loaded.state().unwrap().value, 1);
 }
 
 #[tokio::test]
@@ -1459,9 +1481,9 @@ async fn d11_stream_isolation_different_streams_independent() {
     let loaded_a: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
     let loaded_b: AggregateRoot<Counter> = es.load(TestId::new("counter-2")).await.unwrap();
 
-    assert_eq!(loaded_a.state().value, 100);
+    assert_eq!(loaded_a.state().unwrap().value, 100);
     assert_eq!(loaded_a.version(), Some(Version::new(1).unwrap()));
-    assert_eq!(loaded_b.state().value, 201);
+    assert_eq!(loaded_b.state().unwrap().value, 201);
     assert_eq!(loaded_b.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -1491,7 +1513,7 @@ async fn d11_multiple_event_types_in_single_stream() {
     .unwrap();
 
     let loaded: AggregateRoot<Counter> = es.load(TestId::new("counter-1")).await.unwrap();
-    assert_eq!(loaded.state().value, -9); // 50 +1 -1 -1 = -10 +1 = -9
+    assert_eq!(loaded.state().unwrap().value, -9); // 50 +1 -1 -1 = -10 +1 = -9
     assert_eq!(loaded.version(), Some(Version::new(6).unwrap()));
 }
 

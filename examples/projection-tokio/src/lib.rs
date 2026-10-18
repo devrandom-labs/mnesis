@@ -1,35 +1,15 @@
-//! Consumer-owned projection loop over `mnesis_store` primitives.
+//! A consumer-owned Tokio loop over an assembled projection.
 //!
-//! mnesis deliberately ships **no** event-loop runner — that is runtime,
-//! and the runtime is the consumer's. mnesis ships the pure primitives: a
-//! [`Projector`] (how to fold), a [`PersistTrigger`] (when to persist), a
-//! [`Subscription`] (the cursor), a [`SnapshotStore`] (atomic
-//! `(state, position)` commit), and — assembling the last three around the
-//! first — the inert [`Projection`] stepper. This function is one concrete
-//! loop under tokio; the Agency/Bombay actor framework writes its own loop —
-//! a Zenoh-native actor whose mailbox *is* the loop — calling the same
-//! `Projection::advance`. Two loops, no shared loop code, nothing to drift.
-//!
-//! ## What the stepper removed (issue #255)
-//!
-//! Wiring the four primitives by hand used to be an 8-argument, 6-generic
-//! function that made the consumer restate the owning-codec
-//! `for<'a> Decode<…, Output<'a> = E>` bound — enough friction that the old
-//! version needed a `too_many_arguments` allow. Now:
-//!
-//! - The **assembly** is [`Projection::load`] — five named inputs, no codec,
-//!   no `for<'a>`, no lint. It hands back the stepper and the starting state.
-//! - The **codec** is discharged by [`.decoded()`](StepStreamExt) *before* an
-//!   event reaches the stepper, so it never enters the fold-side generics.
-//! - The one remaining codec bound rides the [`OwningCodec`] alias
-//!   (serde's `DeserializeOwned` trick), so even this generic loop never
-//!   spells `for<'a>`.
+//! The projection owns its read model, validates event positions and persists
+//! checkpoints conditionally. The caller assembles it with `Projection::load`
+//! or explicitly starts a schema rebuild with `Projection::rebuild`. This loop
+//! consumes decoded subscription items until shutdown, then flushes the tail.
 
 use std::future::Future;
 
 use futures::StreamExt;
 use mnesis::{Id, Version};
-use mnesis_store::state::SnapshotStore;
+use mnesis_store::checkpoint::CheckpointStore;
 use mnesis_store::store::RawEventStore;
 use mnesis_store::wake::WakeSource;
 use mnesis_store::{
@@ -40,16 +20,15 @@ use mnesis_store::{
 /// Drive an assembled [`Projection`] under tokio until `shutdown` resolves or
 /// the stream ends.
 ///
-/// The caller assembles the projection and its starting state with
-/// [`Projection::load`], then hands both here along with the cursor and codec:
+/// The caller assembles the projection, then supplies the cursor and codec:
 ///
 /// ```ignore
-/// let (proj, state) =
-///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
-/// run_projection(proj, state, Subscription::new(&store), codec, shutdown).await?;
+/// let projection =
+///     Projection::load(id, projector, trigger, &checkpoints, schema).await?;
+/// run_projection(projection, Subscription::new(&store), codec, shutdown).await?;
 /// ```
 ///
-/// 1. Subscribe from the stepper's `checkpoint` (the cursor never returns
+/// 1. Subscribe from the stepper's `observed` position (the cursor never returns
 ///    `None`); drop the catch-up→live phase marker with `.events()` (a
 ///    projection consumes events, it does not branch on the phase) and decode
 ///    each with `.decoded(codec)`.
@@ -60,11 +39,9 @@ use mnesis_store::{
 /// # Errors
 ///
 /// Propagates subscription-register, stream-read/decode, projector-apply, and
-/// snapshot-commit failures via the boxed error; each preserves its `#[source]`
-/// chain in `to_string()`.
+/// checkpoint-commit failures via the boxed error, preserving each source chain.
 pub async fn run_projection<I, P, Trig, SS, S, EC>(
     mut projection: Projection<I, P, Trig, SS>,
-    mut state: P::State,
     subscription: Subscription<S>,
     codec: EC,
     shutdown: impl Future<Output = ()> + Send,
@@ -73,16 +50,18 @@ where
     I: Id,
     P: Projector,
     Trig: PersistTrigger,
-    SS: SnapshotStore<P::State, Version>,
+    SS: CheckpointStore<P::State, Version>,
     S: RawEventStore + WakeSource,
     <S as RawEventStore>::Stream: Unpin,
     EC: OwningCodec<P::Event>,
 {
-    // 1. Subscribe from the checkpoint. The live loop's stream is `!Unpin`, so
+    projection.state()?;
+    // 1. Continue after the already-folded tail, including unpersisted events.
+    //    The live loop's stream is `!Unpin`, so
     //    pin it before polling. `.events()` drops the phase marker; `.decoded()`
     //    reuses the codec and discharges the owning-codec bound here.
     let stream = subscription
-        .subscribe(projection.id(), projection.checkpoint())?
+        .subscribe(projection.id(), projection.observed())?
         .events()
         .decoded(codec);
     tokio::pin!(stream);
@@ -94,12 +73,12 @@ where
             () = &mut shutdown => break,
             next = stream.next() => {
                 let Some(item) = next else { break };
-                state = projection.advance(state, item?).await?;
+                projection.advance(item?).await?;
             }
         }
     }
 
     // 3. Flush the folded-but-unpersisted tail once.
-    projection.flush(&state).await?;
+    projection.flush().await?;
     Ok(())
 }

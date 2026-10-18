@@ -94,7 +94,7 @@ fn replay_single_event_advances_version() {
     agg.replay(v(1), &REvent::Added("a".into())).unwrap();
 
     assert_eq!(agg.version(), Some(v(1)));
-    assert_eq!(agg.state().items, vec!["a"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a"]);
 }
 
 // =============================================================================
@@ -109,7 +109,7 @@ fn replay_sequential_events() {
     agg.replay(v(3), &REvent::Added("c".into())).unwrap();
 
     assert_eq!(agg.version(), Some(v(3)));
-    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c"]);
 }
 
 // =============================================================================
@@ -189,7 +189,7 @@ fn replay_does_not_change_version_on_error() {
         "version must not change on error"
     );
     assert_eq!(
-        agg.state().items,
+        agg.state().unwrap().items,
         vec!["a"],
         "state must not change on error"
     );
@@ -231,7 +231,7 @@ fn replay_enforces_rehydration_limit() {
 
     // State and version are unchanged after the rejected replay
     assert_eq!(agg.version(), Some(v(3)));
-    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c"]);
 }
 
 // =============================================================================
@@ -253,9 +253,9 @@ fn replay_then_commit_persisted_continues_correctly() {
 
     // Repository syncs the root after the durable write: version advances to the
     // last persisted event and state folds the events, atomically.
-    agg.commit_persisted(v(4), &new_events);
+    agg.commit_persisted(&new_events).expect("root is usable");
     assert_eq!(agg.version(), Some(v(4)));
-    assert_eq!(agg.state().items, vec!["a", "b", "c", "d"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c", "d"]);
 }
 
 // =============================================================================
@@ -322,28 +322,25 @@ fn replay_panic_safety_no_partial_mutation() {
 
     assert!(result.is_err(), "apply(Bomb) must panic");
 
-    // Contract: `replay` moves the state out via `mem::replace` (no clone)
-    // and folds it through `apply`. On an apply-panic the version is NOT
-    // advanced (no store desync), and the state is left at `initial()` — a
-    // valid, COMPLETE state, never a partially-mutated one. The pre-panic
-    // "before" item is gone precisely because the old state was moved out
-    // before `apply` panicked; what remains is the clean `initial()`
-    // placeholder, proving no half-applied corruption.
     assert_eq!(
         agg.version(),
         Some(v(1)),
-        "version must not advance after panic"
+        "diagnostic version is not advanced"
     );
-    assert!(
-        agg.state().items.is_empty(),
-        "state must be left at initial() (no partial mutation), got {:?}",
-        agg.state().items
-    );
+    assert!(matches!(agg.state(), Err(KernelError::PoisonedAggregate)));
+    assert!(matches!(
+        agg.replay(v(2), &PanicEvent::Normal("after".into())),
+        Err(KernelError::PoisonedAggregate)
+    ));
 
-    // The aggregate is still structurally usable — replay continues from the
-    // correct next version, rebuilding state from the placeholder.
-    agg.replay(v(2), &PanicEvent::Normal("after".into()))
+    // Recovery replays the complete good history into a fresh root.
+    let mut recovered = AggregateRoot::<PanicAgg>::new(RId::new(42));
+    recovered
+        .replay(v(1), &PanicEvent::Normal("before".into()))
         .unwrap();
-    assert_eq!(agg.version(), Some(v(2)));
-    assert_eq!(agg.state().items, vec!["after"]);
+    recovered
+        .replay(v(2), &PanicEvent::Normal("after".into()))
+        .unwrap();
+    assert_eq!(recovered.version(), Some(v(2)));
+    assert_eq!(recovered.state().unwrap().items, vec!["before", "after"]);
 }

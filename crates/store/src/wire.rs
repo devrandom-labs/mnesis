@@ -4,8 +4,10 @@
 //! header, then event-type bytes, optional metadata bytes, alignment
 //! padding, and finally payload. The padding makes the payload pointer
 //! 16-byte aligned in the resulting [`Bytes`] buffer, which is a
-//! wire-format invariant — every adapter must use [`encode_frame`] to
-//! encode frames, every decoder may rely on the alignment.
+//! encoder guarantee. Every adapter must use [`encode_frame`] to encode frames.
+//! Storage can return those bytes at a different base address: adapters must
+//! check and repair actual payload alignment on reads. [`decode_frame`] validates
+//! layout and offsets; borrowed codecs still validate format and alignment.
 //!
 //! Layout (V2 — the current format every frame is encoded in):
 //!
@@ -40,7 +42,7 @@
 //!   *end* of a frame is structurally undetectable here. Storage layers
 //!   that wrap [`encode_frame`] output (fjall, snapshots) own
 //!   value-integrity guarantees.
-//! - **Decode recomputes the padding** via the same [`align_padding`]
+//! - **Decode recomputes the padding** via the same padding calculation
 //!   formula the encoder used; there is no padding-length field. Any
 //!   future change to the alignment formula is a wire break — both
 //!   sides must change together.

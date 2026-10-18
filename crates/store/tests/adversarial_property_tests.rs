@@ -835,14 +835,17 @@ fn attack_upcaster_correct_final_state() {
     fn three_step_upcast(mut morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
         loop {
             match (morsel.event_type(), morsel.schema_version()) {
-                ("E", v) if v == Version::INITIAL => {
-                    morsel = morsel.with_schema_version(Version::new(2).unwrap());
+                ("E", v) if v == mnesis_store::SchemaVersion::INITIAL => {
+                    morsel = morsel
+                        .with_schema_version(mnesis_store::SchemaVersion::from_u32(2).unwrap());
                 }
-                ("E", v) if v == Version::new(2).unwrap() => {
-                    morsel = morsel.with_schema_version(Version::new(3).unwrap());
+                ("E", v) if v == mnesis_store::SchemaVersion::from_u32(2).unwrap() => {
+                    morsel = morsel
+                        .with_schema_version(mnesis_store::SchemaVersion::from_u32(3).unwrap());
                 }
-                ("E", v) if v == Version::new(3).unwrap() => {
-                    morsel = morsel.with_schema_version(Version::new(4).unwrap());
+                ("E", v) if v == mnesis_store::SchemaVersion::from_u32(3).unwrap() => {
+                    morsel = morsel
+                        .with_schema_version(mnesis_store::SchemaVersion::from_u32(4).unwrap());
                 }
                 _ => break,
             }
@@ -851,11 +854,14 @@ fn attack_upcaster_correct_final_state() {
     }
 
     let payload = vec![42u8; 100];
-    let morsel = EventMorsel::borrowed("E", Version::INITIAL, &payload);
+    let morsel = EventMorsel::borrowed("E", mnesis_store::SchemaVersion::INITIAL, &payload);
     let result = three_step_upcast(morsel).unwrap();
 
     assert_eq!(result.event_type(), "E");
-    assert_eq!(result.schema_version(), Version::new(4).unwrap());
+    assert_eq!(
+        result.schema_version(),
+        mnesis_store::SchemaVersion::from_u32(4).unwrap()
+    );
     assert_eq!(
         result.payload(),
         payload.as_slice(),
@@ -933,12 +939,12 @@ proptest! {
 
             // Verify state matches
             prop_assert_eq!(
-                loaded.state().last_value,
+                loaded.state().unwrap().last_value,
                 *values.last().unwrap(),
                 "last_value mismatch after save/load",
             );
             prop_assert_eq!(
-                loaded.state().events_applied,
+                loaded.state().unwrap().events_applied,
                 u64::try_from(values.len()).unwrap(),
                 "events_applied mismatch",
             );
@@ -966,7 +972,7 @@ proptest! {
             es.save(&mut root, &save_events(&events)).await.unwrap();
             let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
 
-            prop_assert_eq!(&loaded.state().log, &strings, "event log mismatch after roundtrip");
+            prop_assert_eq!(&loaded.state().unwrap().log, &strings, "event log mismatch after roundtrip");
             Ok(())
         })?;
     }
@@ -991,9 +997,9 @@ async fn attack_event_store_load_empty_stream() {
         es.load(TestId("test-1".into())).await.unwrap();
 
     assert_eq!(loaded.version(), None);
-    assert_eq!(loaded.state().events_applied, 0);
-    assert_eq!(loaded.state().last_value, 0);
-    assert!(loaded.state().log.is_empty());
+    assert_eq!(loaded.state().unwrap().events_applied, 0);
+    assert_eq!(loaded.state().unwrap().last_value, 0);
+    assert_eq!(loaded.state().unwrap().log, Vec::<String>::new());
 }
 
 // ============================================================================
@@ -1041,9 +1047,9 @@ async fn attack_event_store_transforms_applied_on_load() {
     // Plain-function upcaster that bumps "Happened" from schema V1 to V2 (payload unchanged).
     fn happened_v1_to_v2_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
         match (morsel.event_type(), morsel.schema_version()) {
-            ("Happened", v) if v == Version::INITIAL => Ok(EventMorsel::new(
+            ("Happened", v) if v == mnesis_store::SchemaVersion::INITIAL => Ok(EventMorsel::new(
                 "Happened",
-                Version::new(2).unwrap(),
+                mnesis_store::SchemaVersion::from_u32(2).unwrap(),
                 morsel.payload().to_vec(),
             )),
             _ => Ok(morsel),
@@ -1077,11 +1083,15 @@ async fn attack_event_store_transforms_applied_on_load() {
     let es = store.repository().codec(JsonCodec).build();
 
     let loaded: mnesis::AggregateRoot<TestAggregate> = es
-        .load_with(TestId("test-1".into()), happened_v1_to_v2_upcast)
+        .load_with(
+            TestId("test-1".into()),
+            |_| Ok::<_, Infallible>(()),
+            happened_v1_to_v2_upcast,
+        )
         .await
         .unwrap();
-    assert_eq!(loaded.state().events_applied, 1);
-    assert_eq!(loaded.state().log, vec!["hello".to_owned()]);
+    assert_eq!(loaded.state().unwrap().events_applied, 1);
+    assert_eq!(loaded.state().unwrap().log, vec!["hello".to_owned()]);
 }
 
 // ============================================================================
@@ -1335,11 +1345,11 @@ proptest! {
                 // Verify by loading again
                 let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
                 prop_assert_eq!(
-                    loaded.state().last_value, expected_last_value,
+                    loaded.state().unwrap().last_value, expected_last_value,
                     "last_value wrong after cycle {}", cycle_idx,
                 );
                 prop_assert_eq!(
-                    loaded.state().events_applied, total_events,
+                    loaded.state().unwrap().events_applied, total_events,
                     "events_applied wrong after cycle {}", cycle_idx,
                 );
                 prop_assert_eq!(
@@ -1559,8 +1569,8 @@ proptest! {
             es.save(&mut root, &save_events(&events)).await.unwrap();
             let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-7".into())).await.unwrap();
 
-            prop_assert_eq!(loaded.state().last_value, expected_last_value);
-            prop_assert_eq!(&loaded.state().log, &expected_log);
+            prop_assert_eq!(loaded.state().unwrap().last_value, expected_last_value);
+            prop_assert_eq!(&loaded.state().unwrap().log, &expected_log);
             Ok(())
         })?;
     }
@@ -1576,12 +1586,12 @@ proptest! {
     #[test]
     fn attack_noop_upcaster_is_identity(
         event_type in "[A-Z][a-z]{0,20}",
-        schema_version in 1..1000u64,
+        schema_version in 1..1000u32,
         payload in prop::collection::vec(any::<u8>(), 0..500),
     ) {
         // The no-op upcaster is just an identity function.
         fn noop_upcast(m: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> { Ok(m) }
-        let ver = Version::new(schema_version).unwrap();
+        let ver = mnesis_store::SchemaVersion::from_u32(schema_version).unwrap();
         let morsel = EventMorsel::borrowed(&event_type, ver, &payload);
         let result = noop_upcast(morsel).unwrap();
 
@@ -1717,15 +1727,15 @@ proptest! {
         fn renaming_upcast(mut morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
             loop {
                 match (morsel.event_type(), morsel.schema_version()) {
-                    ("OldEvent", v) if v == Version::INITIAL => {
+                    ("OldEvent", v) if v == mnesis_store::SchemaVersion::INITIAL => {
                         morsel = morsel
                             .with_event_type(Cow::Borrowed("MiddleEvent"))
-                            .with_schema_version(Version::new(2).unwrap());
+                            .with_schema_version(mnesis_store::SchemaVersion::from_u32(2).unwrap());
                     }
-                    ("MiddleEvent", v) if v == Version::new(2).unwrap() => {
+                    ("MiddleEvent", v) if v == mnesis_store::SchemaVersion::from_u32(2).unwrap() => {
                         morsel = morsel
                             .with_event_type(Cow::Borrowed("NewEvent"))
-                            .with_schema_version(Version::new(3).unwrap());
+                            .with_schema_version(mnesis_store::SchemaVersion::from_u32(3).unwrap());
                     }
                     _ => break,
                 }
@@ -1733,11 +1743,11 @@ proptest! {
             Ok(morsel)
         }
 
-        let morsel = EventMorsel::borrowed("OldEvent", Version::INITIAL, &payload);
+        let morsel = EventMorsel::borrowed("OldEvent", mnesis_store::SchemaVersion::INITIAL, &payload);
         let result = renaming_upcast(morsel).unwrap();
 
         prop_assert_eq!(result.event_type(), "NewEvent", "type rename chain failed");
-        prop_assert_eq!(result.schema_version(), Version::new(3).unwrap());
+        prop_assert_eq!(result.schema_version(), mnesis_store::SchemaVersion::from_u32(3).unwrap());
         prop_assert_eq!(result.payload(), payload.as_slice(), "payload corrupted during type rename");
     }
 }
@@ -1757,10 +1767,10 @@ proptest! {
         fn prefix_upcast(mut morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
             loop {
                 match (morsel.event_type(), morsel.schema_version()) {
-                    ("E", v) if v == Version::INITIAL => {
+                    ("E", v) if v == mnesis_store::SchemaVersion::INITIAL => {
                         let mut new_payload = vec![0xCA, 0xFE];
                         new_payload.extend_from_slice(morsel.payload());
-                        morsel = EventMorsel::new("E", Version::new(2).unwrap(), new_payload);
+                        morsel = EventMorsel::new("E", mnesis_store::SchemaVersion::from_u32(2).unwrap(), new_payload);
                     }
                     _ => break,
                 }
@@ -1768,10 +1778,10 @@ proptest! {
             Ok(morsel)
         }
 
-        let morsel = EventMorsel::borrowed("E", Version::INITIAL, &payload);
+        let morsel = EventMorsel::borrowed("E", mnesis_store::SchemaVersion::INITIAL, &payload);
         let result = prefix_upcast(morsel).unwrap();
 
-        prop_assert_eq!(result.schema_version(), Version::new(2).unwrap());
+        prop_assert_eq!(result.schema_version(), mnesis_store::SchemaVersion::from_u32(2).unwrap());
         prop_assert_eq!(result.payload().len(), payload.len() + 2);
         prop_assert_eq!(&result.payload()[..2], &[0xCA, 0xFE]);
         prop_assert_eq!(&result.payload()[2..], payload.as_slice());
@@ -1823,12 +1833,12 @@ proptest! {
                 u64::try_from(total).unwrap(),
             );
             prop_assert_eq!(
-                final_root.state().events_applied,
+                final_root.state().unwrap().events_applied,
                 u64::try_from(total).unwrap(),
             );
             // Last value should be last of batch3
             prop_assert_eq!(
-                final_root.state().last_value,
+                final_root.state().unwrap().last_value,
                 *batch3.last().unwrap(),
             );
             Ok(())
@@ -1980,8 +1990,8 @@ proptest! {
             es.save(&mut root, &save_events(&[TestEvent::ValueSet(999)])).await.unwrap();
 
             let loaded: mnesis::AggregateRoot<TestAggregate> = es.load(TestId("test-1".into())).await.unwrap();
-            prop_assert_eq!(loaded.state().last_value, 999);
-            prop_assert_eq!(loaded.state().events_applied, u64::try_from(n + 1).unwrap());
+            prop_assert_eq!(loaded.state().unwrap().last_value, 999);
+            prop_assert_eq!(loaded.state().unwrap().events_applied, u64::try_from(n + 1).unwrap());
             Ok(())
         })?;
     }

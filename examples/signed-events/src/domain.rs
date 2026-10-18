@@ -26,14 +26,68 @@ const INCEPT_TAG: &[u8] = b"incept";
 /// Domain-separation tag for the set preimage.
 const SET_TAG: &[u8] = b"set";
 
+/// The signed-event protocol version, independent of stream and envelope schema.
+/// Only version 2 is accepted. Missing, legacy and future discriminators do not
+/// fall back to a different signing preimage.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(try_from = "u8", into = "u8")]
+pub enum SignatureVersion {
+    /// Domain-separated signing with independently hashed variable fields.
+    V2,
+}
+
+impl SignatureVersion {
+    /// The serialized discriminator, also bound into signing and chain digests.
+    #[must_use]
+    pub const fn get(self) -> u8 {
+        match self {
+            Self::V2 => 2,
+        }
+    }
+}
+
+/// An unsupported signed-event protocol version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+#[error("unsupported signature version {actual}; only version 2 is accepted")]
+pub struct SignatureVersionError {
+    /// The discriminator read from input.
+    pub actual: u8,
+}
+
+impl TryFrom<u8> for SignatureVersion {
+    type Error = SignatureVersionError;
+    fn try_from(actual: u8) -> Result<Self, Self::Error> {
+        if actual == Self::V2.get() {
+            Ok(Self::V2)
+        } else {
+            Err(SignatureVersionError { actual })
+        }
+    }
+}
+
+impl From<SignatureVersion> for u8 {
+    fn from(version: SignatureVersion) -> Self {
+        version.get()
+    }
+}
+
+fn signing_hasher(version: SignatureVersion, event_tag: &[u8]) -> blake3::Hasher {
+    let mut hasher = blake3::Hasher::new_derive_key(
+        "devrandom-labs/mnesis/examples/signed-events/signing-preimage",
+    );
+    hasher.update(&[version.get()]);
+    hasher.update(event_tag);
+    hasher
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // RegisterId — content-addressed identity: id = blake3(owner_pubkey)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// The register's identity, the blake3 digest of its owner's public key.
 ///
-/// A 32-byte content address, so a register id can never be minted without the
-/// key that controls it. Implements [`mnesis::Id`] via the blanket impl (it
+/// A 32-byte content address computable from the public key. Signing requires
+/// possession of the corresponding private key. Implements [`mnesis::Id`] via the blanket impl (it
 /// already carries every supertrait: `Clone + Send + Sync + Debug + Hash + Eq +
 /// Display + AsRef<[u8]> + 'static`). `Display` is lowercase hex; `AsRef<[u8]>`
 /// is the raw digest — the stable byte key the store uses.
@@ -87,14 +141,15 @@ impl AsRef<[u8]> for RegisterId {
 /// chain link).
 ///
 /// The signature lives **inside the payload** rather than in envelope metadata:
-/// the typed [`EventStore`](mnesis_store::EventStore) facade does not plumb
-/// metadata through `save` (issue #344), so a consumer that wants to stay on the
-/// blessed typed path embeds the signature in the event. See `README.md`.
+/// this example keeps signed events self-contained. The typed facade also
+/// supports envelope metadata through its metadata provider. See `README.md`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, DomainEvent)]
 pub enum RegisterEvent {
     /// Genesis event. `prior = None`; establishes the owner. Signed over
-    /// `blake3(b"incept" ‖ owner_pubkey)`.
+    /// the version-2 inception preimage.
     Inception {
+        /// Required signing protocol discriminator; legacy payloads are rejected.
+        signature_version: SignatureVersion,
         /// The owner's ed25519 verifying key. `blake3` of this is the register id.
         owner_pubkey: [u8; 32],
         /// ed25519 signature over the inception preimage.
@@ -102,8 +157,10 @@ pub enum RegisterEvent {
         sig: [u8; 64],
     },
     /// A key→value assignment, chained to the prior event. Signed over
-    /// `blake3(b"set" ‖ key ‖ 0x00 ‖ val ‖ prior_digest)`.
+    /// the version-2 set preimage.
     Set {
+        /// Required signing protocol discriminator; legacy payloads are rejected.
+        signature_version: SignatureVersion,
         /// The entry key.
         key: String,
         /// The entry value.
@@ -116,27 +173,31 @@ pub enum RegisterEvent {
     },
 }
 
-/// The inception preimage the owner signs: `blake3(b"incept" ‖ owner_pubkey)`.
+/// The version-2 inception digest, binding the protocol, event kind and owner key.
 #[must_use]
-pub fn inception_preimage(owner_pubkey: &[u8; 32]) -> [u8; 32] {
-    let mut hasher = blake3::Hasher::new();
-    hasher.update(INCEPT_TAG);
+pub fn inception_preimage(version: SignatureVersion, owner_pubkey: &[u8; 32]) -> [u8; 32] {
+    let mut hasher = signing_hasher(version, INCEPT_TAG);
     hasher.update(owner_pubkey);
     *hasher.finalize().as_bytes()
 }
 
-/// The set preimage the owner signs:
-/// `blake3(b"set" ‖ key ‖ 0x00 ‖ val ‖ prior_digest)`.
+/// The version-2 set digest, binding the protocol, event kind, key, value and
+/// prior digest.
 ///
-/// The `0x00` separator plus the fixed-width trailing `prior_digest` make the
-/// encoding unambiguous — no two distinct `(key, val)` pairs share a preimage.
+/// Key/value UTF-8 bytes are hashed independently into fixed-width
+/// fields, so embedded NUL bytes cannot move a boundary between them. This
+/// removes the legacy framing ambiguity; digest collision resistance remains
+/// the cryptographic hash's responsibility.
 #[must_use]
-pub fn set_preimage(key: &str, val: &str, prior_digest: &[u8; 32]) -> [u8; 32] {
-    let mut hasher = blake3::Hasher::new();
-    hasher.update(SET_TAG);
-    hasher.update(key.as_bytes());
-    hasher.update(&[0x00]);
-    hasher.update(val.as_bytes());
+pub fn set_preimage(
+    version: SignatureVersion,
+    key: &str,
+    val: &str,
+    prior_digest: &[u8; 32],
+) -> [u8; 32] {
+    let mut hasher = signing_hasher(version, SET_TAG);
+    hasher.update(blake3::hash(key.as_bytes()).as_bytes());
+    hasher.update(blake3::hash(val.as_bytes()).as_bytes());
     hasher.update(prior_digest);
     *hasher.finalize().as_bytes()
 }
@@ -156,9 +217,21 @@ pub fn set_preimage(key: &str, val: &str, prior_digest: &[u8; 32]) -> [u8; 32] {
 /// without an `unwrap` or a silent-sentinel digest. See `README.md`.
 #[must_use]
 pub fn event_digest(event: &RegisterEvent) -> [u8; 32] {
-    let mut hasher = blake3::Hasher::new();
+    let signature_version = match event {
+        RegisterEvent::Inception {
+            signature_version, ..
+        }
+        | RegisterEvent::Set {
+            signature_version, ..
+        } => signature_version,
+    };
+    let mut hasher =
+        blake3::Hasher::new_derive_key("devrandom-labs/mnesis/examples/signed-events/event-digest");
+    hasher.update(&[signature_version.get()]);
     match event {
-        RegisterEvent::Inception { owner_pubkey, sig } => {
+        RegisterEvent::Inception {
+            owner_pubkey, sig, ..
+        } => {
             hasher.update(b"Inception\0");
             hasher.update(owner_pubkey);
             hasher.update(sig);
@@ -168,6 +241,7 @@ pub fn event_digest(event: &RegisterEvent) -> [u8; 32] {
             val,
             prior_digest,
             sig,
+            ..
         } => {
             hasher.update(b"Set\0");
             hasher.update(blake3::hash(key.as_bytes()).as_bytes());
@@ -285,9 +359,11 @@ impl Handle<Incept> for SignedRegister {
             return Err(RegisterError::AlreadyIncepted);
         }
         let owner_pubkey = cmd.signing_key.verifying_key().to_bytes();
-        let preimage = inception_preimage(&owner_pubkey);
+        let signature_version = SignatureVersion::V2;
+        let preimage = inception_preimage(signature_version, &owner_pubkey);
         let sig = cmd.signing_key.sign(&preimage);
         Ok(Some(events![RegisterEvent::Inception {
+            signature_version,
             owner_pubkey,
             sig: sig.to_bytes(),
         }]))
@@ -302,7 +378,8 @@ impl Handle<SubmitSet> for SignedRegister {
         let owner = state.owner.ok_or(RegisterError::NotIncepted)?;
         let prior_digest = state.last_digest.ok_or(RegisterError::NotIncepted)?;
 
-        let preimage = set_preimage(&cmd.key, &cmd.val, &prior_digest);
+        let signature_version = SignatureVersion::V2;
+        let preimage = set_preimage(signature_version, &cmd.key, &cmd.val, &prior_digest);
         let sig = cmd.signing_key.sign(&preimage);
         // State-dependent crypto: the signature must verify against the *stored*
         // owner. A different signing key produces a signature valid under its
@@ -312,6 +389,7 @@ impl Handle<SubmitSet> for SignedRegister {
             .map_err(|_| RegisterError::Unauthorized)?;
 
         Ok(Some(events![RegisterEvent::Set {
+            signature_version,
             key: cmd.key,
             val: cmd.val,
             prior_digest,
@@ -421,7 +499,11 @@ mod tests {
         let (signing_key, id) = keypair();
         let pubkey = signing_key.verifying_key().to_bytes();
         match incept_event(&signing_key) {
-            RegisterEvent::Inception { owner_pubkey, sig } => {
+            RegisterEvent::Inception {
+                owner_pubkey,
+                sig,
+                signature_version,
+            } => {
                 assert_eq!(owner_pubkey, pubkey, "inception binds the owner key");
                 assert_eq!(
                     RegisterId::from_pubkey(&owner_pubkey),
@@ -430,7 +512,7 @@ mod tests {
                 );
                 let vk = VerifyingKey::from_bytes(&owner_pubkey).expect("valid key");
                 vk.verify_strict(
-                    &inception_preimage(&owner_pubkey),
+                    &inception_preimage(signature_version, &owner_pubkey),
                     &Signature::from_bytes(&sig),
                 )
                 .expect("inception signature must verify");
@@ -491,7 +573,7 @@ mod tests {
             .expect("incept")
             .expect("event");
         let inception = e1.first().clone();
-        root.commit_persisted(Version::INITIAL, &e1);
+        root.commit_persisted(&e1).expect("root is usable");
         let d1 = event_digest(&inception);
 
         let e2 = root
@@ -507,7 +589,7 @@ mod tests {
             matches!(&set1, RegisterEvent::Set { prior_digest, .. } if *prior_digest == d1),
             "set1 must chain to the inception digest"
         );
-        root.commit_persisted(Version::new(2).unwrap(), &e2);
+        root.commit_persisted(&e2).expect("root is usable");
         let d2 = event_digest(&set1);
 
         let e3 = root
@@ -523,11 +605,17 @@ mod tests {
             matches!(&set2, RegisterEvent::Set { prior_digest, .. } if *prior_digest == d2),
             "set2 must chain to set1's digest"
         );
-        root.commit_persisted(Version::new(3).unwrap(), &e3);
+        root.commit_persisted(&e3).expect("root is usable");
 
-        assert_eq!(root.state().entries.get("a"), Some(&"1".to_owned()));
-        assert_eq!(root.state().entries.get("b"), Some(&"2".to_owned()));
-        assert_eq!(root.state().last_digest, Some(event_digest(&set2)));
+        assert_eq!(
+            root.state().unwrap().entries.get("a"),
+            Some(&"1".to_owned())
+        );
+        assert_eq!(
+            root.state().unwrap().entries.get("b"),
+            Some(&"2".to_owned())
+        );
+        assert_eq!(root.state().unwrap().last_digest, Some(event_digest(&set2)));
 
         let mut replayed = SignedRegister::new(id);
         replayed.replay(Version::INITIAL, &inception).expect("v1");
@@ -537,8 +625,14 @@ mod tests {
         replayed
             .replay(Version::new(3).unwrap(), &set2)
             .expect("v3");
-        assert_eq!(replayed.state().entries, root.state().entries);
-        assert_eq!(replayed.state().last_digest, root.state().last_digest);
+        assert_eq!(
+            replayed.state().unwrap().entries,
+            root.state().unwrap().entries
+        );
+        assert_eq!(
+            replayed.state().unwrap().last_digest,
+            root.state().unwrap().last_digest
+        );
     }
 
     #[test]

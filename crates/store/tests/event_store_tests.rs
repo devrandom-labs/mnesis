@@ -130,8 +130,8 @@ async fn save_and_load_roundtrip() {
     es.save(&mut agg, &save_events(&events)).await.unwrap();
 
     let loaded: AggregateRoot<TodoAggregate> = es.load(TodoId("todo-1".into())).await.unwrap();
-    assert_eq!(loaded.state().title, "Buy milk");
-    assert!(loaded.state().done);
+    assert_eq!(loaded.state().unwrap().title, "Buy milk");
+    assert!(loaded.state().unwrap().done);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -141,7 +141,7 @@ async fn load_empty_stream_returns_fresh_aggregate() {
     let es = store.repository().codec(TestCodec).build();
     let loaded: AggregateRoot<TodoAggregate> = es.load(TodoId("todo-1".into())).await.unwrap();
     assert_eq!(loaded.version(), None);
-    assert_eq!(loaded.state(), &TodoState::default());
+    assert_eq!(loaded.state().unwrap(), &TodoState::default());
 }
 
 #[tokio::test]
@@ -169,8 +169,8 @@ async fn load_and_save_infer_aggregate_from_repository_binding() {
 
     // Still no annotation — `loaded`'s type comes from `es`'s bound aggregate.
     let loaded = es.load(TodoId("t".into())).await.unwrap();
-    assert_eq!(loaded.state().title, "Buy milk");
-    assert!(loaded.state().done);
+    assert_eq!(loaded.state().unwrap().title, "Buy milk");
+    assert!(loaded.state().unwrap().done);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -207,8 +207,8 @@ async fn save_then_append_more_events() {
         .unwrap();
 
     let final_agg: AggregateRoot<TodoAggregate> = es.load(TodoId("todo-1".into())).await.unwrap();
-    assert_eq!(final_agg.state().title, "Task");
-    assert!(final_agg.state().done);
+    assert_eq!(final_agg.state().unwrap().title, "Task");
+    assert!(final_agg.state().unwrap().done);
     assert_eq!(final_agg.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -244,18 +244,18 @@ async fn optimistic_concurrency_conflict() {
 /// is unchanged; only the schema version advances.
 fn v1_to_v2_upcast(morsel: EventMorsel<'_>) -> Result<EventMorsel<'_>, Infallible> {
     match (morsel.event_type(), morsel.schema_version()) {
-        ("Created", v) if v == Version::INITIAL => Ok(EventMorsel::new(
+        ("Created", v) if v == mnesis_store::SchemaVersion::INITIAL => Ok(EventMorsel::new(
             "Created",
-            Version::new(2).unwrap(),
+            mnesis_store::SchemaVersion::from_u32(2).unwrap(),
             morsel.payload().to_vec(),
         )),
         _ => Ok(morsel),
     }
 }
 
-fn v1_to_v2_current_version(event_type: &str) -> Option<Version> {
+fn v1_to_v2_current_version(event_type: &str) -> Option<mnesis_store::SchemaVersion> {
     match event_type {
-        "Created" => Some(Version::new(2).unwrap()),
+        "Created" => Some(mnesis_store::SchemaVersion::from_u32(2).unwrap()),
         _ => None,
     }
 }
@@ -280,10 +280,14 @@ async fn load_with_transform_transforms_events() {
     // decoding. Payload format unchanged in this test, so the only
     // observable effect is that the upcast ran successfully.
     let loaded: AggregateRoot<TodoAggregate> = es
-        .load_with(TodoId("todo-1".into()), v1_to_v2_upcast)
+        .load_with(
+            TodoId("todo-1".into()),
+            |_| Ok::<_, Infallible>(()),
+            v1_to_v2_upcast,
+        )
         .await
         .unwrap();
-    assert_eq!(loaded.state().title, "Task");
+    assert_eq!(loaded.state().unwrap().title, "Task");
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
 

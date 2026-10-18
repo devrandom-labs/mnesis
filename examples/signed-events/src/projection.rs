@@ -4,7 +4,7 @@
 //! bytes: [`RegisterProjector`] re-checks every signature and every chain link
 //! before folding an event into the [`RegisterView`]. A forged, tampered, or
 //! misfiled event is rejected with an `Err`, never folded — the exact opposite
-//! of the aggregate's write-side fold ([`AggregateState::apply`]), which trusts
+//! of the aggregate's write-side fold ([`mnesis::AggregateState::apply`]), which trusts
 //! the already-accepted log.
 //!
 //! # Stream attribution (#333/#345)
@@ -14,9 +14,9 @@
 //! the fold attributes each event to its register through the origin
 //! `StreamKey` the store stamps beside every `$all` item (#333).
 //! [`RegisterProjector`] overrides
-//! [`Projector::apply_attributed`](mnesis_store::Projector::apply_attributed)
+//! [`Projector::apply_attributed`]
 //! and decodes the [`RegisterId`] from that key; the keyless
-//! [`Projector::apply`](mnesis_store::Projector::apply) is the error path
+//! [`Projector::apply`] is the error path
 //! ([`ViewError::Unattributed`]). No driver-side routing shim. See
 //! `README.md`.
 
@@ -118,7 +118,11 @@ impl Projector for RegisterProjector {
             RegisterId::from_key_bytes(k.as_bytes()).ok_or(ViewError::BadStreamKey)
         })?;
         match event {
-            RegisterEvent::Inception { owner_pubkey, sig } => {
+            RegisterEvent::Inception {
+                owner_pubkey,
+                sig,
+                signature_version,
+            } => {
                 // Content-addressing check: the stream id must equal blake3 of
                 // the key that signs the genesis event.
                 if RegisterId::from_pubkey(owner_pubkey) != id {
@@ -131,7 +135,7 @@ impl Projector for RegisterProjector {
                     VerifyingKey::from_bytes(owner_pubkey).map_err(|_| ViewError::BadSignature)?;
                 owner
                     .verify_strict(
-                        &inception_preimage(owner_pubkey),
+                        &inception_preimage(*signature_version, owner_pubkey),
                         &Signature::from_bytes(sig),
                     )
                     .map_err(|_| ViewError::BadSignature)?;
@@ -149,6 +153,7 @@ impl Projector for RegisterProjector {
                 val,
                 prior_digest,
                 sig,
+                signature_version,
             } => {
                 let head = *view.chains.get(&id).ok_or(ViewError::NotIncepted)?;
                 // Chain first, so a wrong link is BrokenChain, not BadSignature.
@@ -160,7 +165,7 @@ impl Projector for RegisterProjector {
                 }
                 head.owner
                     .verify_strict(
-                        &set_preimage(key, val, prior_digest),
+                        &set_preimage(*signature_version, key, val, prior_digest),
                         &Signature::from_bytes(sig),
                     )
                     .map_err(|_| ViewError::BadSignature)?;
@@ -192,7 +197,7 @@ mod tests {
         Incept, RegisterEvent, RegisterId, SignedRegister, SubmitSet, event_digest, set_preimage,
     };
     use ed25519_dalek::{Signer, SigningKey};
-    use mnesis::{AggregateRoot, Handle, Version};
+    use mnesis::{AggregateRoot, Handle};
     use mnesis_store::{Projector, StreamKey};
     use rand_core::OsRng;
 
@@ -204,7 +209,7 @@ mod tests {
         let mut root: AggregateRoot<SignedRegister> = SignedRegister::new(id);
 
         let e1 = SignedRegister::handle(
-            root.state(),
+            root.state().unwrap(),
             Incept {
                 signing_key: signing_key.clone(),
             },
@@ -212,10 +217,10 @@ mod tests {
         .unwrap()
         .unwrap();
         let inception = e1.first().clone();
-        root.commit_persisted(Version::INITIAL, &e1);
+        root.commit_persisted(&e1).expect("root is usable");
 
         let e2 = SignedRegister::handle(
-            root.state(),
+            root.state().unwrap(),
             SubmitSet {
                 key: "a".to_owned(),
                 val: "1".to_owned(),
@@ -284,9 +289,10 @@ mod tests {
         // owner over that wrong preimage — isolates the chain check from the
         // signature check.
         let wrong_prior = [0xAB; 32];
-        let preimage = set_preimage("a", "1", &wrong_prior);
+        let preimage = set_preimage(crate::domain::SignatureVersion::V2, "a", "1", &wrong_prior);
         let sig = signing_key.sign(&preimage).to_bytes();
         let bad = RegisterEvent::Set {
+            signature_version: crate::domain::SignatureVersion::V2,
             key: "a".to_owned(),
             val: "1".to_owned(),
             prior_digest: wrong_prior,
@@ -310,9 +316,10 @@ mod tests {
         // An attacker signs a well-chained Set with their own key — the chain
         // link is correct, but the signature does not verify against the owner.
         let attacker = SigningKey::generate(&mut OsRng);
-        let preimage = set_preimage("a", "evil", &head);
+        let preimage = set_preimage(crate::domain::SignatureVersion::V2, "a", "evil", &head);
         let sig = attacker.sign(&preimage).to_bytes();
         let forged = RegisterEvent::Set {
+            signature_version: crate::domain::SignatureVersion::V2,
             key: "a".to_owned(),
             val: "evil".to_owned(),
             prior_digest: head,

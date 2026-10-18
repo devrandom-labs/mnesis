@@ -28,6 +28,7 @@ pub fn cbor_decode_header(data: &[u8]) {
 /// structure is a typed `ChunkError`.
 pub fn cbor_decode_chunk(data: &[u8]) {
     let _ = cbor::decode_chunk(data);
+    let _ = cbor::salvage_chunk(data);
 }
 
 /// The event-type value newtype: UTF-8 validity plus the `u16::MAX` length cap.

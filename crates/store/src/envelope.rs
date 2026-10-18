@@ -1,3 +1,4 @@
+use alloc::borrow::Cow;
 use core::iter::{Chain, Once, once};
 use core::num::NonZeroUsize;
 use core::ops::Range;
@@ -357,7 +358,7 @@ impl WithVersion {
     /// # Errors
     ///
     /// Returns [`EnvelopeError::Value`] if the bytes are invalid UTF-8 or
-    /// exceed [`MAX_EVENT_TYPE_LEN`](crate::value::MAX_EVENT_TYPE_LEN).
+    /// exceed [`MAX_EVENT_TYPE_LEN`].
     pub fn event_type_bytes(self, bytes: Bytes) -> Result<WithEventType, EnvelopeError> {
         let event_type = EventType::from_bytes(bytes)?;
         Ok(WithEventType {
@@ -404,7 +405,7 @@ impl WithPayload {
     ///
     /// Returns [`EnvelopeError::Value`] if the payload exceeds
     /// [`MAX_PAYLOAD_LEN`](crate::value::MAX_PAYLOAD_LEN), or the metadata is
-    /// empty or exceeds [`MAX_METADATA_LEN`](crate::value::MAX_METADATA_LEN).
+    /// empty or exceeds [`MAX_METADATA_LEN`].
     pub fn build(self) -> Result<PendingEnvelope, EnvelopeError> {
         let payload = Payload::from_bytes(self.payload)?;
         let metadata = self.metadata.map(Metadata::from_bytes).transpose()?;
@@ -649,26 +650,64 @@ impl PersistedEnvelope {
         })
     }
 
-    /// The schema version widened to the kernel's [`Version`] for upcaster APIs.
+    /// Build a decoder view of a transformed event, retaining its stream version
+    /// and original metadata. An unchanged event borrows this envelope without
+    /// allocating or rebuilding its frame, even if the caller supplied owned data.
     ///
-    /// Total conversion — [`SchemaVersion`] is structurally nonzero.
-    #[must_use]
-    pub fn schema_version_as_version(&self) -> Version {
-        Version::from(self.schema_version)
+    /// Metadata remains evidence about the original persisted event. Any signature
+    /// in it must be verified against the original envelope before transformation;
+    /// it does not authenticate the transformed type, schema or payload.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ForDecodeError`] for invalid value lengths or frame construction.
+    pub fn for_transformed_decode(
+        &self,
+        event_type: &str,
+        schema: SchemaVersion,
+        payload: &[u8],
+    ) -> Result<Cow<'_, Self>, ForDecodeError> {
+        if event_type == self.event_type()
+            && schema == self.schema_version
+            && payload == self.payload()
+        {
+            return Ok(Cow::Borrowed(self));
+        }
+        let event = if event_type == self.event_type() {
+            self.event_type_value()
+        } else {
+            EventType::from_bytes(Bytes::copy_from_slice(event_type.as_bytes()))?
+        };
+        let data = if payload == self.payload() {
+            self.payload_value()
+        } else {
+            Payload::from_bytes(Bytes::copy_from_slice(payload))?
+        };
+        let metadata = self.metadata_value();
+        let frame = crate::wire::encode_frame(schema, &event, &data, metadata.as_ref())?;
+        Ok(Cow::Owned(Self::try_new(
+            self.version,
+            frame.value,
+            schema,
+            frame.offsets.event_type,
+            frame.offsets.payload,
+            frame.offsets.metadata,
+        )?))
     }
 
-    /// Wrap raw bytes in a synthetic envelope suitable for [`Decode`].
+    /// Wrap raw bytes in a synthetic envelope suitable for [`Decode`](crate::codec::Decode).
     ///
     /// Builds a fresh wire-format frame via [`crate::wire::encode_frame`] so the
     /// payload pointer lands on a 16-byte boundary. Use this when calling a
     /// [`Decode`](crate::codec::Decode) impl outside the cursor's normal frame
-    /// buffer — snapshot decoding, upcaster post-transform decoding, codec
-    /// round-trip tests.
+    /// buffer — snapshot decoding and codec round-trip tests. For transformed
+    /// persisted events use [`Self::for_transformed_decode`].
     ///
     /// Reports `Version::INITIAL` and `schema_version = SchemaVersion::INITIAL`.
-    /// Most codecs ignore those fields; when they don't (or you're bridging an
-    /// upcast back to a decode and need to preserve the original envelope's
-    /// version), construct the envelope manually via [`try_new`](Self::try_new).
+    /// These are synthetic placeholders, not stream history or a persisted
+    /// snapshot schema. Metadata is absent. A snapshot codec must not infer event
+    /// context or authentication from this envelope; the cache wrapper validates
+    /// its own schema separately.
     ///
     /// # Errors
     ///

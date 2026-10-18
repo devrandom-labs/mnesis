@@ -2,4 +2,4 @@
 source: crates/store/src/cbor.rs
 expression: hex_of(&bytes)
 ---
-a3 00 44 6e 78 63 68 01 01 02 43 64 65 76
+a3 00 44 6e 78 63 68 01 02 02 43 64 65 76

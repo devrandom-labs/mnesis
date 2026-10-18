@@ -1,0 +1,961 @@
+warning: Git tree '/Users/joel/orca/workspaces/nexus/main' has uncommitted changes
+building '/nix/store/3x92qf6xvw6qz30f1lhlya7y571jikci-nix-shell-env.drv'...
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+   Compiling parking_lot_core v0.9.12
+   Compiling cfg-if v1.0.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling icu_normalizer_data v2.2.0
+   Compiling icu_properties_data v2.2.0
+   Compiling crossbeam-utils v0.8.22
+   Compiling typenum v1.20.1
+   Compiling pin-project-lite v0.2.17
+   Compiling zmij v1.0.23
+   Compiling zerocopy v0.8.55
+   Compiling generic-array v0.14.7
+   Compiling futures-core v0.3.33
+   Compiling writeable v0.6.3
+   Compiling litemap v0.8.2
+   Compiling subtle v2.6.1
+   Compiling thiserror v2.0.19
+   Compiling serde_json v1.0.151
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling autocfg v1.5.1
+   Compiling itoa v1.0.18
+   Compiling utf8_iter v1.0.4
+   Compiling memchr v2.8.3
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling futures-sink v0.3.33
+   Compiling digest v0.10.7
+   Compiling bytes v1.12.1
+   Compiling futures-channel v0.3.33
+   Compiling num-traits v0.2.19
+   Compiling slab v0.4.12
+   Compiling futures-io v0.3.33
+   Compiling futures-task v0.3.33
+   Compiling once_cell v1.21.4
+   Compiling equivalent v1.0.2
+   Compiling tracing-core v0.1.36
+   Compiling percent-encoding v2.3.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling tinyvec_macros v0.1.1
+   Compiling httparse v1.10.1
+   Compiling log v0.4.33
+   Compiling semver v1.0.28
+   Compiling foldhash v0.1.5
+   Compiling allocator-api2 v0.2.21
+    Checking errno v0.3.14
+   Compiling mio v1.2.2
+   Compiling socket2 v0.6.5
+   Compiling getrandom v0.2.17
+   Compiling signal-hook-registry v1.4.8
+   Compiling cpufeatures v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling sha2 v0.10.9
+   Compiling hashbrown v0.15.5
+   Compiling rustc_version v0.4.1
+   Compiling tinyvec v1.12.0
+   Compiling form_urlencoded v1.2.2
+   Compiling hashbrown v0.17.1
+   Compiling parking v2.2.1
+   Compiling crc-catalog v2.5.0
+   Compiling curve25519-dalek v4.1.3
+   Compiling crc v3.4.0
+   Compiling unicode-normalization v0.1.25
+   Compiling hashlink v0.10.0
+   Compiling hmac v0.12.1
+   Compiling base64 v0.22.1
+   Compiling unicode-properties v0.1.4
+   Compiling indexmap v2.14.0
+   Compiling unicode-bidi v0.3.18
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.13
+   Compiling target-triple v1.0.1
+   Compiling hkdf v0.12.4
+   Compiling event-listener v5.4.1
+   Compiling md-5 v0.10.6
+   Compiling hex v0.4.3
+   Compiling byteorder v1.5.0
+   Compiling stringprep v0.1.5
+   Compiling whoami v1.6.1
+   Compiling home v0.5.12
+   Compiling dotenvy v0.15.7
+   Compiling bitflags v2.13.1
+   Compiling http v1.4.2
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.19
+   Compiling winnow v1.0.4
+   Compiling try-lock v0.2.5
+   Compiling want v0.3.1
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling http-body v1.1.0
+   Compiling atoi v2.0.0
+   Compiling atomic-waker v1.1.2
+   Compiling synstructure v0.13.2
+   Compiling httpdate v1.0.3
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling signature v2.2.0
+   Compiling zeroize v1.9.0
+   Compiling ed25519 v2.2.3
+   Compiling toml v1.1.3+spec-1.1.0
+   Compiling glob v0.3.4
+   Compiling tower-service v0.3.3
+   Compiling regex-syntax v0.8.11
+   Compiling dissimilar v1.0.11
+   Compiling termcolor v1.4.1
+   Compiling ed25519-dalek v2.2.0
+    Checking arrayvec v0.7.8
+   Compiling heck v0.5.0
+    Checking foldhash v0.2.0
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+   Compiling zerocopy-derive v0.8.55
+   Compiling tracing-attributes v0.1.31
+   Compiling equator-macro v0.4.2
+    Checking mnesis v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/mnesis)
+   Compiling regex-automata v0.4.16
+   Compiling futures-util v0.3.33
+   Compiling equator v0.4.2
+   Compiling zerofrom v0.1.8
+    Checking smallvec v1.15.2
+    Checking either v1.16.0
+    Checking trybuild v1.0.118
+   Compiling tracing v0.1.44
+    Checking parking_lot v0.12.5
+   Compiling aligned-vec v0.6.4
+    Checking tokio v1.53.1
+    Checking futures-intrusive v0.5.0
+   Compiling yoke v0.8.3
+    Checking futures-executor v0.3.33
+    Checking futures v0.3.33
+    Checking mnesis-store v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/store)
+    Checking zerovec v0.11.6
+    Checking zerotrie v0.2.4
+    Checking tinystr v0.8.3
+    Checking potential_utf v0.1.5
+    Checking icu_collections v2.2.0
+    Checking icu_locale_core v2.2.0
+    Checking ppv-lite86 v0.2.21
+    Checking rand_chacha v0.3.1
+    Checking icu_provider v2.2.0
+    Checking tokio-stream v0.1.19
+    Checking hyper v1.11.0
+    Checking rand v0.8.7
+    Checking icu_normalizer v2.2.0
+    Checking icu_properties v2.2.0
+    Checking hyper-util v0.1.20
+    Checking idna_adapter v1.2.2
+    Checking idna v1.1.0
+    Checking url v2.5.8
+    Checking sqlx-core v0.8.6
+    Checking sqlx-postgres v0.8.6
+   Compiling sqlx-macros-core v0.8.6
+   Compiling workspace-hack v0.1.0 (/Users/joel/orca/workspaces/nexus/main/crates/workspace-hack)
+   Compiling sqlx-macros v0.8.6
+    Checking mnesis-wake v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/store-testing)
+    Checking sqlx v0.8.6
+    Checking mnesis-postgres v0.4.0 (/Users/joel/orca/workspaces/nexus/main/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.32s
+   Compiling cfg-if v1.0.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling typenum v1.20.1
+   Compiling pin-project-lite v0.2.17
+   Compiling futures-core v0.3.33
+   Compiling scopeguard v1.2.0
+   Compiling writeable v0.6.3
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling litemap v0.8.2
+   Compiling bytes v1.12.1
+   Compiling memchr v2.8.3
+   Compiling zerofrom v0.1.8
+   Compiling subtle v2.6.1
+   Compiling futures-sink v0.3.33
+   Compiling lock_api v0.4.14
+   Compiling utf8_iter v1.0.4
+   Compiling itoa v1.0.18
+   Compiling futures-io v0.3.33
+   Compiling yoke v0.8.3
+   Compiling slab v0.4.12
+   Compiling futures-channel v0.3.33
+   Compiling futures-task v0.3.33
+   Compiling icu_properties_data v2.2.0
+   Compiling icu_normalizer_data v2.2.0
+   Compiling crossbeam-utils v0.8.22
+   Compiling once_cell v1.21.4
+   Compiling equivalent v1.0.2
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling zerocopy v0.8.55
+   Compiling thiserror v2.0.19
+   Compiling zmij v1.0.23
+   Compiling percent-encoding v2.3.2
+   Compiling futures-util v0.3.33
+   Compiling foldhash v0.1.5
+   Compiling tracing-core v0.1.36
+   Compiling allocator-api2 v0.2.21
+   Compiling log v0.4.33
+   Compiling generic-array v0.14.7
+   Compiling tinyvec_macros v0.1.1
+   Compiling form_urlencoded v1.2.2
+   Compiling parking v2.2.1
+   Compiling tinyvec v1.12.0
+   Compiling concurrent-queue v2.5.0
+   Compiling errno v0.3.14
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.2
+   Compiling getrandom v0.2.17
+   Compiling cpufeatures v0.2.17
+   Compiling signal-hook-registry v1.4.8
+   Compiling hashbrown v0.15.5
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_collections v2.2.0
+   Compiling rand_core v0.6.4
+   Compiling tracing v0.1.44
+   Compiling crc-catalog v2.5.0
+   Compiling hashbrown v0.17.1
+   Compiling crc v3.4.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling unicode-normalization v0.1.25
+   Compiling event-listener v5.4.1
+   Compiling crossbeam-queue v0.3.13
+   Compiling digest v0.10.7
+   Compiling num-traits v0.2.19
+   Compiling unicode-bidi v0.3.18
+   Compiling unicode-properties v0.1.4
+   Compiling hashlink v0.10.0
+   Compiling base64 v0.22.1
+   Compiling hex v0.4.3
+   Compiling byteorder v1.5.0
+   Compiling sha2 v0.10.9
+   Compiling hmac v0.12.1
+   Compiling indexmap v2.14.0
+   Compiling md-5 v0.10.6
+   Compiling whoami v1.6.1
+   Compiling stringprep v0.1.5
+   Compiling hkdf v0.12.4
+   Compiling home v0.5.12
+   Compiling dotenvy v0.15.7
+   Compiling icu_provider v2.2.0
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling bitflags v2.13.1
+   Compiling http v1.4.2
+   Compiling try-lock v0.2.5
+   Compiling icu_properties v2.2.0
+   Compiling atoi v2.0.0
+   Compiling winnow v1.0.4
+   Compiling want v0.3.1
+   Compiling equator v0.4.2
+   Compiling httparse v1.10.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling atomic-waker v1.1.2
+   Compiling signature v2.2.0
+   Compiling smallvec v1.15.2
+   Compiling either v1.16.0
+   Compiling zeroize v1.9.0
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling httpdate v1.0.3
+   Compiling ed25519 v2.2.3
+   Compiling aligned-vec v0.6.4
+   Compiling target-triple v1.0.1
+   Compiling parking_lot_core v0.9.12
+   Compiling icu_normalizer v2.2.0
+   Compiling curve25519-dalek v4.1.3
+   Compiling futures-executor v0.3.33
+   Compiling termcolor v1.4.1
+   Compiling dissimilar v1.0.11
+   Compiling glob v0.3.4
+   Compiling regex-syntax v0.8.11
+   Compiling parking_lot v0.12.5
+   Compiling http-body v1.1.0
+   Compiling toml v1.1.3+spec-1.1.0
+   Compiling futures v0.3.33
+   Compiling tower-service v0.3.3
+   Compiling arrayvec v0.7.8
+   Compiling tokio v1.53.1
+   Compiling idna_adapter v1.2.2
+   Compiling futures-intrusive v0.5.0
+   Compiling foldhash v0.2.0
+   Compiling idna v1.1.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling mnesis v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/mnesis)
+   Compiling mnesis-store v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/store)
+   Compiling url v2.5.8
+   Compiling ppv-lite86 v0.2.21
+   Compiling trybuild v1.0.118
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.7
+   Compiling regex-automata v0.4.16
+   Compiling tokio-stream v0.1.19
+   Compiling hyper v1.11.0
+   Compiling sqlx-core v0.8.6
+   Compiling hyper-util v0.1.20
+   Compiling sqlx-postgres v0.8.6
+   Compiling sqlx-macros-core v0.8.6
+   Compiling workspace-hack v0.1.0 (/Users/joel/orca/workspaces/nexus/main/crates/workspace-hack)
+   Compiling sqlx-macros v0.8.6
+   Compiling sqlx v0.8.6
+   Compiling mnesis-wake v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/Users/joel/orca/workspaces/nexus/main/crates/store-testing)
+   Compiling mnesis-postgres v0.4.0 (/Users/joel/orca/workspaces/nexus/main/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.74s
+────────────
+ Nextest run ID a3bbf8b2-e004-414f-89d5-5a274d5756ae with nextest profile: default
+    Starting 79 tests across 6 binaries
+       START [         ] ( 1/79) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+
+running 1 test
+test error::tests::corrupt_row_display_truncates_overlong_stream_id ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.019s] ( 1/79) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+       START [         ] ( 2/79) mnesis-postgres error::tests::satisfies_error_send_sync_static
+
+running 1 test
+test error::tests::satisfies_error_send_sync_static ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.013s] ( 2/79) mnesis-postgres error::tests::satisfies_error_send_sync_static
+       START [         ] ( 3/79) mnesis-postgres hex::tests::decode_accepts_uppercase
+
+running 1 test
+test hex::tests::decode_accepts_uppercase ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.011s] ( 3/79) mnesis-postgres hex::tests::decode_accepts_uppercase
+       START [         ] ( 4/79) mnesis-postgres hex::tests::empty_round_trips
+
+running 1 test
+test hex::tests::empty_round_trips ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.010s] ( 4/79) mnesis-postgres hex::tests::empty_round_trips
+       START [         ] ( 5/79) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+
+running 1 test
+test hex::tests::encodes_known_vector_lowercase ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.008s] ( 5/79) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+       START [         ] ( 6/79) mnesis-postgres hex::tests::non_hex_char_is_rejected
+
+running 1 test
+test hex::tests::non_hex_char_is_rejected ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.007s] ( 6/79) mnesis-postgres hex::tests::non_hex_char_is_rejected
+       START [         ] ( 7/79) mnesis-postgres hex::tests::odd_length_is_rejected
+
+running 1 test
+test hex::tests::odd_length_is_rejected ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.007s] ( 7/79) mnesis-postgres hex::tests::odd_length_is_rejected
+       START [         ] ( 8/79) mnesis-postgres hex::tests::round_trips_all_byte_values
+
+running 1 test
+test hex::tests::round_trips_all_byte_values ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] ( 8/79) mnesis-postgres hex::tests::round_trips_all_byte_values
+       START [         ] ( 9/79) mnesis-postgres position::tests::accessors_round_trip
+
+running 1 test
+test position::tests::accessors_round_trip ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] ( 9/79) mnesis-postgres position::tests::accessors_round_trip
+       START [         ] (10/79) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+
+running 1 test
+test position::tests::ord_is_txid_first_then_seq ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] (10/79) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+       START [         ] (11/79) mnesis-postgres store::tests::existing_stream_two_events_ok
+
+running 1 test
+test store::tests::existing_stream_two_events_ok ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] (11/79) mnesis-postgres store::tests::existing_stream_two_events_ok
+       START [         ] (12/79) mnesis-postgres store::tests::fresh_stream_three_events_ok
+
+running 1 test
+test store::tests::fresh_stream_three_events_ok ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] (12/79) mnesis-postgres store::tests::fresh_stream_three_events_ok
+       START [         ] (13/79) mnesis-postgres store::tests::schema_version_full_u32_range_is_accepted
+
+running 1 test
+test store::tests::schema_version_full_u32_range_is_accepted ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] (13/79) mnesis-postgres store::tests::schema_version_full_u32_range_is_accepted
+       START [         ] (14/79) mnesis-postgres store::tests::schema_version_widens_to_i64
+
+running 1 test
+test store::tests::schema_version_widens_to_i64 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+        PASS [   0.006s] (14/79) mnesis-postgres store::tests::schema_version_widens_to_i64
+       START [         ] (15/79) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+
+running 1 test
+test all_noskip_exclusive_resume_after_out_of_order_commits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (15/79) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+       START [         ] (16/79) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+
+running 1 test
+test all_noskip_out_of_order_commits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+        PASS [   0.017s] (16/79) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+       START [         ] (17/79) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+
+running 1 test
+test conformance_boundary::check_conflict_leaves_store_unchanged ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.018s] (17/79) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+       START [         ] (18/79) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+
+running 1 test
+test conformance_boundary::check_large_payload_round_trips ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.02s
+
+        PASS [   0.030s] (18/79) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+       START [         ] (19/79) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+
+running 1 test
+test conformance_boundary::check_max_length_event_type_round_trips ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (19/79) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+       START [         ] (20/79) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+
+running 1 test
+test conformance_boundary::check_metadata_absent_vs_present_distinct ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (20/79) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+       START [         ] (21/79) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+
+running 1 test
+test conformance_boundary::check_prefix_stream_ids_isolated ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.017s] (21/79) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+       START [         ] (22/79) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+
+running 1 test
+test conformance_boundary::check_version_gap_batch_rejected ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.013s] (22/79) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+       START [         ] (23/79) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+
+running 1 test
+test conformance_boundary::check_wrong_first_version_rejected ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.013s] (23/79) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+       START [         ] (24/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+
+running 1 test
+test conformance_lifecycle::check_reopen_conflict_state_intact ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.019s] (24/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+       START [         ] (25/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+
+running 1 test
+test conformance_lifecycle::check_reopen_preserves_events ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (25/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+       START [         ] (26/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+
+running 1 test
+test conformance_lifecycle::check_reopen_preserves_position_watermark ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (26/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+       START [         ] (27/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+
+running 1 test
+test conformance_lifecycle::check_reopen_subscription_catches_up ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.019s] (27/79) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+       START [         ] (28/79) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+
+running 1 test
+test conformance_linearizability::check_caught_up_boundary_race ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.04s
+
+        PASS [   0.043s] (28/79) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+       START [         ] (29/79) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+
+running 1 test
+test conformance_linearizability::check_concurrent_distinct_streams_all_land ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.02s
+
+        PASS [   0.027s] (29/79) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+       START [         ] (30/79) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+
+running 1 test
+test conformance_linearizability::check_concurrent_same_stream_single_winner ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (30/79) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+       START [         ] (31/79) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+
+running 1 test
+test conformance_linearizability::check_wake_after_idle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.11s
+
+        PASS [   0.122s] (31/79) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+       START [         ] (32/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+
+running 1 test
+test conformance_sequence::check_all_boundary_then_new_append ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (32/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+       START [         ] (33/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+
+running 1 test
+test conformance_sequence::check_all_empty_store_yields_none ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (33/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+       START [         ] (34/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+
+running 1 test
+test conformance_sequence::check_all_from_is_exclusive ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (34/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+       START [         ] (35/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+
+running 1 test
+test conformance_sequence::check_all_global_order_across_streams ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (35/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+       START [         ] (36/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+
+running 1 test
+test conformance_sequence::check_all_items_carry_their_stream_key ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (36/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+       START [         ] (37/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+
+running 1 test
+test conformance_sequence::check_all_metadata_round_trips ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (37/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+       START [         ] (38/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+
+running 1 test
+test conformance_sequence::check_all_multi_resume_cycles ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.017s] (38/79) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+       START [         ] (39/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+
+running 1 test
+test conformance_sequence::check_append_conflict_is_surfaced ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (39/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+       START [         ] (40/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+
+running 1 test
+test conformance_sequence::check_append_retry_after_conflict_succeeds ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (40/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+       START [         ] (41/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+
+running 1 test
+test conformance_sequence::check_append_returns_assigned_all_position ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (41/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+       START [         ] (42/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+
+running 1 test
+test conformance_sequence::check_append_then_read_round_trips ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (42/79) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+       START [         ] (43/79) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+
+running 1 test
+test conformance_sequence::check_empty_read_yields_none ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.013s] (43/79) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+       START [         ] (44/79) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+
+running 1 test
+test conformance_sequence::check_large_stream_completes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.05s
+
+        PASS [   0.055s] (44/79) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+       START [         ] (45/79) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+
+running 1 test
+test conformance_sequence::check_multi_event_append_returns_last_position ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (45/79) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+       START [         ] (46/79) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+
+running 1 test
+test conformance_sequence::check_read_stream_from_is_inclusive ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (46/79) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+       START [         ] (47/79) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+
+running 1 test
+test conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (47/79) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+       START [         ] (48/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+
+running 1 test
+test conformance_sequence::check_subscription_absent_stream_waits_then_delivers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.014s] (48/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+       START [         ] (49/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+
+running 1 test
+test conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.018s] (49/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+       START [         ] (50/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+
+running 1 test
+test conformance_sequence::check_subscription_backlog_then_caught_up_then_live ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (50/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+       START [         ] (51/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+
+running 1 test
+test conformance_sequence::check_subscription_beyond_head_filters_below_bound ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (51/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+       START [         ] (52/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+
+running 1 test
+test conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.08s
+
+        PASS [   0.090s] (52/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+       START [         ] (53/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+
+running 1 test
+test conformance_sequence::check_subscription_resume_strict_after ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (53/79) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+       START [         ] (54/79) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+
+running 1 test
+test conformance_sequence::check_two_subscribers_same_stream_both_receive ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (54/79) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+       START [         ] (55/79) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+
+running 1 test
+test conformance_sequence::check_versions_strictly_monotonic_and_fused ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.01s
+
+        PASS [   0.016s] (55/79) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+       START [         ] (56/79) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+
+running 1 test
+test pg_all_pos_ord_txid_first ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+        PASS [   0.007s] (56/79) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+       START [         ] (57/79) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+
+running 1 test
+test a_pool_with_one_connection_is_rejected_before_it_can_starve_queries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+        PASS [   0.010s] (57/79) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+       START [         ] (58/79) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+
+running 1 test
+test all_rescans_after_a_long_held_snapshot_commits_without_a_hint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.02s
+
+        PASS [   1.028s] (58/79) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+       START [         ] (59/79) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+
+running 1 test
+test clones_share_one_listener_and_last_drop_preserves_the_callers_pool ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s
+
+        PASS [   0.055s] (59/79) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+       START [         ] (60/79) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+
+running 1 test
+test closing_the_callers_pool_completes_with_a_live_subscription ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.01s
+
+        PASS [   0.020s] (60/79) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+       START [         ] (61/79) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+
+running 1 test
+test initial_listener_acquisition_failure_recovers_after_service_returns ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.11s
+
+        PASS [   1.121s] (61/79) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+       START [         ] (62/79) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+
+running 1 test
+test listener_disconnect_and_a_final_unnotified_commit_recover ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.03s
+
+        PASS [   1.037s] (62/79) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+       START [         ] (63/79) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+
+running 1 test
+test listener_subscription_failure_recovers_after_the_acquired_backend_dies ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.02s
+
+        PASS [   1.042s] (63/79) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+       START [         ] (64/79) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+
+running 1 test
+test malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.12s
+
+        PASS [   1.127s] (64/79) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+       START [         ] (65/79) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+
+running 1 test
+test overlong_binary_notification_payload_does_not_reject_a_committed_append ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.01s
+
+        PASS [   1.021s] (65/79) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+       START [         ] (66/79) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+
+running 1 test
+test terminal_receive_error_after_failed_reconnection_is_retried ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.12s
+
+        PASS [   1.124s] (66/79) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+       START [         ] (67/79) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+
+running 1 test
+test wake_between_arm_and_first_poll_is_preserved ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.01s
+
+        PASS [   0.014s] (67/79) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+       START [         ] (68/79) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+
+running 1 test
+test byte_edges_count_binary_keys_utf8_and_optional_metadata ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+        PASS [   0.018s] (68/79) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+       START [         ] (69/79) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+
+running 1 test
+test cancelling_reads_waiting_for_pool_capacity_releases_their_requests ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.06s
+
+        PASS [   0.064s] (69/79) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+       START [         ] (70/79) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+
+running 1 test
+test corruption_on_a_later_page_terminates_without_skipping ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+        PASS [   0.017s] (70/79) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+       START [         ] (71/79) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+
+running 1 test
+test finite_scans_exclude_later_appends_and_release_the_connection_between_pages ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+        PASS [   0.015s] (71/79) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+       START [         ] (72/79) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+
+running 1 test
+4096 rows x 4096 bytes: stream=1088719 bytes/2.688708ms, all=1090052 bytes/1.98075ms; budget=4194304
+test first_event_does_not_retain_the_whole_backlog ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.04s
+
+        PASS [   0.052s] (72/79) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+       START [         ] (73/79) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+
+running 1 test
+1MiB rows: stream=15718465, all=15735472
+test large_rows_obey_the_default_byte_budget ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.09s
+
+        PASS [   0.099s] (73/79) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+       START [         ] (74/79) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+
+running 1 test
+test oversized_legacy_row_stops_without_fetching_its_body_or_skipping ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.07s
+
+        PASS [   0.076s] (74/79) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+       START [         ] (75/79) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+
+running 1 test
+test oversized_tail_rejects_the_entire_append_before_writing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+        PASS [   0.014s] (75/79) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+       START [         ] (76/79) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+
+running 1 test
+test page_edges_preserve_versions_and_exclusive_global_resume ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.37s
+
+        PASS [   0.379s] (76/79) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+       START [         ] (77/79) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+
+running 1 test
+test all_recovers_after_an_unrelated_transaction_releases_the_watermark ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.12s
+
+        PASS [   1.128s] (77/79) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+       START [         ] (78/79) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+
+running 1 test
+test all_recovers_the_final_missing_hint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.01s
+
+        PASS [   1.020s] (78/79) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+       START [         ] (79/79) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+
+running 1 test
+test stream_recovers_the_final_missing_hint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.01s
+
+        PASS [   1.020s] (79/79) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+────────────
+     Summary [  12.568s] 79 tests run: 79 passed, 0 skipped

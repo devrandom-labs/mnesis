@@ -101,16 +101,17 @@ impl<A: Aggregate> AggregateRoot<A> {
     ///
     /// # Errors
     ///
-    /// Returns `A::Error` when the incoming event violates a saga invariant.
+    /// Returns [`crate::DecisionError::Domain`] for a saga rejection or
+    /// [`crate::DecisionError::Kernel`] when the root is unusable.
     pub fn react<E, const N: usize>(
         &self,
         event: &E,
-    ) -> Result<Option<Events<EventOf<A>, N>>, A::Error>
+    ) -> Result<Option<Events<EventOf<A>, N>>, crate::DecisionError<A::Error>>
     where
         E: DomainEvent,
         A: React<E, N>,
     {
-        A::react(self.state(), event)
+        A::react(self.state()?, event).map_err(crate::DecisionError::Domain)
     }
 }
 
@@ -124,6 +125,7 @@ mod saga_dispatch_tests {
     use crate::events::Events;
     use crate::message::Message;
     use crate::version::Version;
+    use alloc::{vec, vec::Vec};
 
     // ── Saga identity ────────────────────────────────────────────────
     #[derive(Debug, Clone, Hash, PartialEq, Eq, Default)]
@@ -293,10 +295,10 @@ mod saga_dispatch_tests {
     #[test]
     fn react_surfaces_saga_error() {
         let root = AggregateRoot::<OrderSaga>::new(OrderId::new(1));
-        assert_eq!(
+        assert!(matches!(
             root.react::<OrderPlaced, 0>(&OrderPlaced { id: 1, total: 0 }),
-            Err(OrderSagaError::EmptyOrder)
-        );
+            Err(crate::DecisionError::Domain(OrderSagaError::EmptyOrder))
+        ));
     }
 
     #[test]

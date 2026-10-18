@@ -4,6 +4,8 @@
 // `alloc` is pulled in only for the test fixture and unit tests.
 #[cfg(any(test, feature = "testing"))]
 extern crate alloc;
+#[cfg(test)]
+extern crate std;
 
 mod aggregate;
 mod error;
@@ -23,7 +25,7 @@ pub mod closing_the_books;
 pub use aggregate::{
     Aggregate, AggregateRoot, AggregateState, DEFAULT_MAX_REHYDRATION_EVENTS, EventOf, Handle,
 };
-pub use error::KernelError;
+pub use error::{DecisionError, KernelError};
 pub use error_id::{DEFAULT_ERROR_ID_CAP, ErrorId};
 pub use event::DomainEvent;
 pub use events::{Events, EventsIntoIter};

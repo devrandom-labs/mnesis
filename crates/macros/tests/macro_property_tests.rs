@@ -104,7 +104,7 @@ proptest! {
         let agg1 = make_agg(&raw_events);
         let agg2 = make_agg(&raw_events);
 
-        prop_assert_eq!(agg1.state(), agg2.state());
+        prop_assert_eq!(agg1.state().unwrap(), agg2.state().unwrap());
         prop_assert_eq!(agg1.version(), agg2.version());
     }
 
@@ -196,6 +196,6 @@ proptest! {
         prop_assert_eq!(agg.id(), &PId::new(7));
         // `Version::new(0)` is `None`, matching a fresh aggregate with no events.
         prop_assert_eq!(agg.version(), Version::new(events.len() as u64));
-        prop_assert_eq!(agg.state().value, expected_value);
+        prop_assert_eq!(agg.state().unwrap().value, expected_value);
     }
 }

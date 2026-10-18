@@ -54,7 +54,7 @@ impl Handle<Deposit> for BankAccount {
 
 **`no_std` down to the persistence layer.** Not just the domain types — the whole core stack builds for bare-metal ARM (`thumbv7em-none-eabihf`) and WASM. The **kernel** is `no_std` and **pure `core`** — no allocator at all: `Events<E, N>` is `ArrayVec`-backed (stack, any `N`), so it never touches the heap (`N = 0`, the default, is simply a single event). **`mnesis-store`** — codecs, envelopes, the catch-up + live-tail subscription loop, backup/restore, snapshots, projections — is `no_std` + `alloc`. And `mnesis-wake-nostd` gives on-device live subscriptions under an [embassy](https://embassy.dev) executor. CI builds every one of these on `thumbv7em` on each push, so a `std` leak fails the gate.
 
-**Zero-copy read path.** One `Decode<E>` trait with an `Output<'a>` GAT covers both owning codecs (serde JSON/bincode/postcard return `E`) and borrowing codecs (rkyv returns `&'a Archived<E>`, bytemuck returns `&'a E`). Event streams are `futures::Stream<Item = Result<PersistedEnvelope, _>>`, so the entire `futures::StreamExt` / `TryStreamExt` combinator surface is free. The on-disk row format aligns every event payload to a 16-byte boundary, so zero-copy decoders (rkyv, flatbuffers, `#[repr(C)]` POD) get sound `&T` references without a copy or a realignment step.
+**Zero-copy read path.** One `Decode<E>` trait with an `Output<'a>` GAT covers both owning codecs (serde JSON/bincode/postcard return `E`) and borrowing codecs (rkyv returns `&'a Archived<E>`, bytemuck returns `&'a E`). Event streams are `futures::Stream<Item = Result<PersistedEnvelope, _>>`, so the entire `futures::StreamExt` / `TryStreamExt` combinator surface is free. The wire format aligns payload offsets to 16 bytes. Fjall checks the actual buffer address, reuses aligned buffers and realigns others. Borrowing codecs still validate the format and their required alignment.
 
 ## Crates
 
@@ -66,19 +66,19 @@ impl Handle<Deposit> for BankAccount {
 | [`mnesis-wake-nostd`](crates/wake-nostd) | On-device wake source for live subscriptions (embassy) | ✅ + `alloc` |
 | [`mnesis-fjall`](adapters/fjall) | Embedded LSM-tree event store adapter (fjall) | `std` |
 
-Projection is provided as primitives (`Projector`, `PersistTrigger`, `Subscription`, `SnapshotStore`); mnesis ships no event-loop runner — the loop is the consumer's. See `examples/projection-tokio`.
+Projection is provided as primitives (`Projector`, `PersistTrigger`, `Subscription`, `CheckpointStore`); mnesis ships no event-loop runner — the loop is the consumer's. See `examples/projection-tokio`.
 
 ## Features
 
 - **`no_std` + `alloc` all the way to persistence** — the kernel, `mnesis-store` (subscriptions, backup/restore, snapshots, projections), and `mnesis-wake-nostd` build for bare-metal ARM (`thumbv7em`) and WASM; CI gates it on every push
 - Schema evolution via `#[mnesis::transforms]` upcasters
 - Optimistic concurrency with version-checked appends
-- Allocation-free errors (`ArrayString`-based, no heap on error paths)
+- Compact bounded diagnostic IDs and typed error sources
 - Aggregate snapshots with `AggregateRoot::restore`
 - Pluggable codecs via cargo features on `mnesis-store`: `serde` + `json`, `bytemuck` (`#[repr(C)]` POD), `rkyv` (archived zero-copy)
-- 16-byte payload alignment as a wire-format invariant — sound zero-copy decode for rkyv, flatbuffers, and `#[repr(C)]` types out of the box
+- Validated 16-byte payload alignment with buffer reuse or realignment as needed
 - Owned `bytes::Bytes` envelopes — event streams are plain `futures::Stream`, so every `futures::StreamExt` / `TryStreamExt` combinator works
-- Verified with proptest, miri, mutation testing, trybuild, and criterion
+- Test tooling includes proptest, Miri, mutation testing, trybuild and Criterion
 
 ## Getting Started
 

@@ -41,7 +41,7 @@ mnesis_store_testing::conformance_snapshot! {
 mnesis_store_testing::conformance_lifecycle! {
     open: open_fresh,
     reopen: |store: FjallStore, dir: TempDir| async move {
-        drop(store);
+        store.close().await.expect("close fjall worker and engine");
         let reopened = FjallStore::builder(dir.path().join("db"))
             .open()
             .expect("reopen fjall store");

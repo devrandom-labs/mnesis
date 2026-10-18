@@ -45,7 +45,7 @@ use std::num::NonZeroU32;
 
 use futures::StreamExt;
 use mnesis::Version;
-use mnesis_fjall::FjallStore;
+use mnesis_fjall::{AllIndex, FjallStore};
 use mnesis_store::PendingEnvelope;
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::pending_envelope;
@@ -272,7 +272,7 @@ proptest! {
 // ============================================================================
 
 /// Evil stream IDs: Unicode, injection, path traversal, null bytes, whitespace.
-/// Empty string is tested separately in attack_empty_string_stream_id_returns_error.
+/// Invalid lengths are covered by the active `audit_repros` boundary tests.
 #[tokio::test]
 async fn attack_evil_stream_ids() {
     let evil_ids: Vec<(&str, &str)> = vec![
@@ -291,50 +291,73 @@ async fn attack_evil_stream_ids() {
         ("\u{FEFF}stream", "BOM prefix"),
     ];
 
-    let (store, _dir) = temp_store();
-
-    for (evil_id, description) in &evil_ids {
-        // Use the evil_id directly as a StreamKey — no StreamId validation anymore.
-        let stream_id = StreamKey::from_slice(evil_id.as_bytes());
-
-        let env = make_envelope(1, "Created", b"test-payload");
-        let result = store.append(&stream_id, None, PendingBatch::of(&env)).await;
-
-        match result {
-            Ok(_position) => {
-                // If append succeeded, reading must return the exact data
-                let read = read_all_payloads(&store, &stream_id).await;
-                assert_eq!(
-                    read.len(),
-                    1,
-                    "wrong event count for stream ID: {} ({})",
-                    evil_id,
-                    description
-                );
-                assert_eq!(
-                    read[0], b"test-payload",
-                    "payload corrupted for stream ID: {} ({})",
-                    evil_id, description
-                );
-            }
-            Err(e) => {
-                // Rejection is also acceptable for truly pathological IDs
-                println!(
-                    "Stream ID '{}' ({}) was rejected: {}",
-                    evil_id, description, e
-                );
-            }
+    for mode in [AllIndex::Denormalized, AllIndex::Disabled] {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("db");
+        let store = FjallStore::builder(&path).all_index(mode).open().unwrap();
+        for (evil_id, description) in &evil_ids {
+            let stream_id = StreamKey::from_slice(evil_id.as_bytes());
+            let env = make_envelope(1, "Created", b"test-payload");
+            store
+                .append(&stream_id, None, PendingBatch::of(&env))
+                .await
+                .unwrap();
+            assert_eq!(
+                read_all_payloads(&store, &stream_id).await,
+                vec![b"test-payload".to_vec()],
+                "{description}: {evil_id:?}"
+            );
         }
+        store.close().await.unwrap();
+        let reopened = FjallStore::builder(&path).all_index(mode).open().unwrap();
+        for (evil_id, description) in &evil_ids {
+            assert_eq!(
+                read_all_payloads(&reopened, &sk(evil_id)).await,
+                vec![b"test-payload".to_vec()],
+                "reopened {description}: {evil_id:?}"
+            );
+        }
+        reopened.close().await.unwrap();
     }
 }
 
 /// Very long stream ID (10,000 characters).
 #[tokio::test]
 async fn attack_very_long_stream_id() {
-    // Version test: from_persisted(0) returns None.
-    let _long_id = "a".repeat(10_000);
-    let result = Version::new(0);
-    assert!(result.is_none(), "Version 0 must not be constructable");
+    let id = StreamKey::from_slice(&vec![b'a'; 10_000]);
+    for mode in [AllIndex::Denormalized, AllIndex::Disabled] {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("db");
+        let store = FjallStore::builder(&path).all_index(mode).open().unwrap();
+        store
+            .append(
+                &id,
+                None,
+                PendingBatch::of(&make_envelope(1, "Long", b"one")),
+            )
+            .await
+            .unwrap();
+        assert_eq!(read_all_payloads(&store, &id).await, vec![b"one".to_vec()]);
+        store.close().await.unwrap();
+        let reopened = FjallStore::builder(&path).all_index(mode).open().unwrap();
+        assert_eq!(
+            read_all_payloads(&reopened, &id).await,
+            vec![b"one".to_vec()]
+        );
+        reopened
+            .append(
+                &id,
+                Some(Version::INITIAL),
+                PendingBatch::of(&make_envelope(2, "Long", b"two")),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            read_all_payloads(&reopened, &id).await,
+            vec![b"one".to_vec(), b"two".to_vec()]
+        );
+        reopened.close().await.unwrap();
+    }
 }
 
 proptest! {
@@ -634,18 +657,6 @@ proptest! {
 // ============================================================================
 // CATEGORY 10: Empty and Degenerate Cases
 // ============================================================================
-
-/// Empty stream ID must return an error, not panic.
-///
-/// Previously this caused a panic deep inside fjall's lsm-tree ("key may not
-/// be empty"). Now `FjallStore` validates at the boundary.
-#[test]
-fn attack_empty_string_stream_id_rejected_by_stream_id_type() {
-    // Version::new(0) returns None — test version boundary instead.
-    // Empty stream IDs can no longer reach the store layer.
-    let result = Version::new(0);
-    assert!(result.is_none(), "from_persisted(0) must return None");
-}
 
 // Schema version round-trip through the full stack for various values.
 proptest! {

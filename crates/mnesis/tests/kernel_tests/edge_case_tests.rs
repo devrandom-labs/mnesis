@@ -109,7 +109,7 @@ impl Aggregate for TAgg {
 fn new_aggregate_without_replay_has_default_state_and_none_version() {
     let agg = AggregateRoot::<TAgg>::new(TId::new(1));
     assert_eq!(agg.version(), None);
-    assert!(agg.state().items.is_empty());
+    assert_eq!(agg.state().unwrap().items, Vec::<String>::new());
 }
 
 // =============================================================================
@@ -159,7 +159,7 @@ fn version_tracks_replay_sequence() {
     agg.replay(v3, &TEvent::Added(Added("c".into()))).unwrap();
     assert_eq!(agg.version(), Some(v3));
 
-    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c"]);
 }
 
 // =============================================================================
@@ -183,11 +183,11 @@ fn advance_version_and_apply_events_after_replay() {
     // Simulate persisting 2 new events, then advancing
     let new_events: Events<_, 1> =
         events![TEvent::Added(Added("d".into())), TEvent::Removed(Removed)];
-    agg.commit_persisted(v5, &new_events);
+    agg.commit_persisted(&new_events).expect("root is usable");
 
     assert_eq!(agg.version(), Some(v5));
     // State: [a, b, c] -> Added(d) -> [a, b, c, d] -> Removed -> [a, b, c]
-    assert_eq!(agg.state().items, vec!["a", "b", "c"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c"]);
 }
 
 // Separate clean test for commit_persisted state correctness
@@ -200,7 +200,7 @@ fn commit_persisted_state_correctness() {
     agg.replay(v1, &TEvent::Added(Added("a".into()))).unwrap();
     agg.replay(v2, &TEvent::Added(Added("b".into()))).unwrap();
     assert_eq!(agg.version(), Some(v2));
-    assert_eq!(agg.state().items, vec!["a", "b"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b"]);
 
     // Simulate: command handler produced 2 events, repository persisted them
     let decided: Events<_, 1> = events![
@@ -208,10 +208,10 @@ fn commit_persisted_state_correctness() {
         TEvent::Added(Added("d".into()))
     ];
     let v4 = Version::new(4).expect("non-zero");
-    agg.commit_persisted(v4, &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
     assert_eq!(agg.version(), Some(v4));
-    assert_eq!(agg.state().items, vec!["a", "b", "c", "d"]);
+    assert_eq!(agg.state().unwrap().items, vec!["a", "b", "c", "d"]);
 }
 
 // =============================================================================
@@ -259,9 +259,9 @@ fn multiple_replays_in_strict_sequence() {
     }
 
     assert_eq!(agg.version(), Version::new(10));
-    assert_eq!(agg.state().items.len(), 10);
-    assert_eq!(agg.state().items[0], "item-1");
-    assert_eq!(agg.state().items[9], "item-10");
+    assert_eq!(agg.state().unwrap().items.len(), 10);
+    assert_eq!(agg.state().unwrap().items[0], "item-1");
+    assert_eq!(agg.state().unwrap().items[9], "item-10");
 }
 
 #[test]
@@ -327,16 +327,16 @@ fn replay_then_advance_and_apply_continues_correctly() {
 
     // Simulate persisting 1 new event at version 3
     let decided: Events<_, 0> = events![TEvent::Added(Added("z".into()))];
-    agg.commit_persisted(v3, &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
     assert_eq!(agg.version(), Some(v3));
-    assert_eq!(agg.state().items, vec!["x", "y", "z"]);
+    assert_eq!(agg.state().unwrap().items, vec!["x", "y", "z"]);
 
     // After advance, replay should still validate from v3's successor (v4)
     let v4 = Version::new(4).expect("non-zero");
     agg.replay(v4, &TEvent::Added(Added("w".into()))).unwrap();
     assert_eq!(agg.version(), Some(v4));
-    assert_eq!(agg.state().items, vec!["x", "y", "z", "w"]);
+    assert_eq!(agg.state().unwrap().items, vec!["x", "y", "z", "w"]);
 }
 
 #[test]
@@ -347,21 +347,20 @@ fn commit_persisted_on_fresh_aggregate() {
     // Simulate: first-ever command produces events, repository persists them
     let decided: Events<_, 0> = events![TEvent::Added(Added("first".into()))];
     let v1 = Version::new(1).expect("non-zero");
-    agg.commit_persisted(v1, &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
     assert_eq!(agg.version(), Some(v1));
-    assert_eq!(agg.state().items, vec!["first"]);
+    assert_eq!(agg.state().unwrap().items, vec!["first"]);
 }
 
 #[test]
 fn apply_events_with_single_event() {
     let mut agg = AggregateRoot::<TAgg>::new(TId::new(1));
     let decided: Events<_, 0> = events![TEvent::Added(Added("only".into()))];
-    let v1 = Version::new(1).expect("non-zero");
 
-    agg.commit_persisted(v1, &decided);
+    agg.commit_persisted(&decided).expect("root is usable");
 
-    assert_eq!(agg.state().items, vec!["only"]);
+    assert_eq!(agg.state().unwrap().items, vec!["only"]);
 }
 
 #[test]

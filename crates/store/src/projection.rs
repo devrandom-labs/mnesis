@@ -1,10 +1,14 @@
 use core::iter;
-use core::num::NonZeroU32;
+use core::num::{NonZeroU32, NonZeroU64};
 
 use mnesis::{DomainEvent, Id, Version};
 
+use crate::checkpoint::{
+    CheckpointError, CheckpointHydrated, CheckpointMode, CheckpointRejection, CheckpointStore,
+    CheckpointWrite,
+};
 use crate::decoded::Decoded;
-use crate::state::{Hydrated, PersistTrigger, SnapshotStore};
+use crate::state::PersistTrigger;
 use crate::store::AllPosition;
 use crate::stream_id::StreamKey;
 
@@ -100,16 +104,14 @@ mod sealed {
 ///   delegates to [`Projector::apply`], so a single-stream projector is
 ///   untouched.
 ///
-/// Sealed on purpose: the pairing of position and event is **structural**.
-/// A caller can never hand [`Projection::advance`] a position that did not
-/// arrive with the event, so a committed checkpoint always describes the
-/// state it is saved with — the same illegal-states-unrepresentable bet as
-/// the atomic [`SnapshotStore::commit`].
+/// Sealed to accept the two decoded item shapes. Sealing does not prove that
+/// an event came from storage: callers can construct decoded items. The
+/// projection validates position ordering before folding each item.
 pub trait Positioned: sealed::Sealed {
     /// The decoded event type carried by the item.
     type Event;
     /// The position type the stepper checkpoints at.
-    type Pos: Copy + Send;
+    type Pos: Copy + Ord + Send;
     /// Split the item into its bookmark, its origin-stream attribution
     /// (`$all` items only), and the decoded box.
     fn into_parts(self) -> (Self::Pos, Option<StreamKey>, Decoded<Self::Event>);
@@ -133,260 +135,314 @@ impl<E, P: AllPosition> Positioned for (P, StreamKey, Decoded<E>) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Projection<I, P, Trig, SS> — inert per-event assembly of the four primitives
-// ═══════════════════════════════════════════════════════════════════════════
-
-/// A per-event projection **stepper** — the ergonomic assembly of the four
-/// projection primitives ([`Projector`], [`PersistTrigger`],
-/// [`SnapshotStore`], and — outside this type — a [`Subscription`]).
+/// An event-driven projection that owns its state and checkpoint metadata.
 ///
-/// It owns **no loop**. mnesis still ships no runner: the host drives the
-/// stepper one event at a time. A tokio `while let` calls [`advance`] in its
-/// body; a Bombay/Agency actor calls it from its message handler. Both shrink
-/// to a single `advance` call and share no loop code, so nothing can drift.
+/// The host owns the event loop. Decode subscription items before passing them
+/// to [`advance`](Self::advance); both per-stream and `$all` items are accepted.
+/// State is moved through the pure projector without cloning. Only a complete
+/// successful fold is installed, and [`flush`](Self::flush) persists that state
+/// together with the position it represents.
 ///
-/// The stepper holds only the *bookkeeping* — the last-persisted `checkpoint`
-/// and the folded-but-unpersisted `pending` position — plus the persist
-/// decision. **State flows through the caller**, not the stepper, because
-/// [`Projector::apply`] consumes state by value: `load` hands back the starting
-/// state, [`advance`] returns the next state, and [`flush`] takes the final
-/// state by reference. This keeps the primitive Clone-free and unopinionated —
-/// it decides *when* to persist and tracks *where* you are, and never owns your
-/// read model.
+/// Positions must increase strictly; gaps are allowed for filtered streams.
+/// Conditional writes prevent a stale worker from overwriting a newer revision.
+/// A failed fold poisons this instance. A failed or canceled checkpoint write
+/// requires reloading because it may have committed. Neither instance can be
+/// reused to fold or flush. Ordinary loads reject schema mismatches; use
+/// [`rebuild`](Self::rebuild) explicitly to replace a different schema.
 ///
-/// The codec is **absent by construction**: decode the raw subscription with
-/// [`StepStreamExt::decoded`](crate::StepStreamExt) /
-/// [`DecodedStreamExt`](crate::DecodedStreamExt) *before* the event reaches
-/// [`advance`], so this type never names a codec and never restates the
-/// owning-codec `for<'a>` bound.
-///
-/// # Assembly (consumer-owned loop)
-///
-/// Per-stream (`Pos` defaults to [`Version`]):
 /// ```ignore
-/// let (mut proj, mut state) =
-///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
+/// let mut projection = Projection::load(id, projector, trigger, &checkpoints, schema).await?;
 /// let stream = subscription
-///     .subscribe(proj.id(), proj.checkpoint())?
+///     .subscribe(projection.id(), projection.checkpoint())?
 ///     .events()
 ///     .decoded(codec);
 /// tokio::pin!(stream);
 /// while let Some(item) = stream.next().await {
-///     state = proj.advance(state, item?).await?;
+///     projection.advance(item?).await?;
 /// }
-/// proj.flush(&state).await?;
+/// projection.flush().await?;
 /// ```
-///
-/// `$all` (`Pos` = the adapter's [`AllPosition`]) is the
-/// **same loop** — the `(position, StreamKey, Decoded)` tuple `.decoded()`
-/// yields feeds [`advance`] whole; only the subscribe call and the snapshot
-/// store's position type differ:
-/// ```ignore
-/// let (mut proj, mut state) =
-///     Projection::load(id, projector, trigger, &snapshots, schema).await?;
-/// let stream = subscription
-///     .subscribe_all(proj.checkpoint())?
-///     .events()
-///     .decoded(codec);
-/// tokio::pin!(stream);
-/// while let Some(item) = stream.next().await {
-///     state = proj.advance(state, item?).await?;
-/// }
-/// proj.flush(&state).await?;
-/// ```
-///
-/// [`advance`]: Projection::advance
-/// [`flush`]: Projection::flush
-pub struct Projection<I, P: Projector, Trig, SS, Pos = Version> {
+pub struct Projection<I, P: Projector, Trig, CS, Pos = Version> {
     id: I,
     projector: P,
     trigger: Trig,
-    snapshot_store: SS,
+    checkpoint_store: CS,
     schema_version: NonZeroU32,
-    /// Last position durably committed together with the state.
+    state: Option<P::State>,
+    /// Last successfully acknowledged checkpoint revision.
+    revision: Option<NonZeroU64>,
+    /// Last successfully acknowledged durable position.
     checkpoint: Option<Pos>,
-    /// Folded-but-not-yet-persisted tail position, flushed on shutdown.
-    pending: Option<Pos>,
-    /// `Some(old_schema)` iff `load` discarded a snapshot under a different
-    /// schema version — the projection is re-folding from scratch. Surfaced via
-    /// [`rebuilding_from`](Projection::rebuilding_from) so a host can distinguish
-    /// a costly schema-bump rebuild from an ordinary fresh start.
+    /// Last successfully folded position, including the unpersisted tail.
+    observed: Option<Pos>,
+    /// Set before starting any write, cleared only after successful acknowledgment.
+    reload_required: bool,
+    /// Schema deliberately discarded when starting this rebuild.
     rebuilt_from: Option<NonZeroU32>,
 }
 
-impl<I, P, Trig, SS, Pos> Projection<I, P, Trig, SS, Pos>
+impl<I, P, Trig, CS, Pos> Projection<I, P, Trig, CS, Pos>
 where
     I: Id,
     P: Projector,
     Trig: PersistTrigger<Pos>,
-    SS: SnapshotStore<P::State, Pos>,
-    Pos: Copy + Send,
+    CS: CheckpointStore<P::State, Pos>,
+    Pos: Copy + Ord + Send,
 {
-    /// Assemble and hydrate the stepper, returning it alongside the starting
-    /// state.
-    ///
-    /// Resolves `(state, checkpoint)` from the snapshot store atomically:
-    /// - [`Hydrated::Found`] → restore its state and position (resume).
-    /// - [`Hydrated::Absent`] → [`Projector::initial`], no checkpoint (fresh).
-    /// - [`Hydrated::Stale`] → `initial()`, no checkpoint, and
-    ///   [`rebuilding_from`](Self::rebuilding_from) reports the discarded schema
-    ///   version — a bump invalidated the saved state, so the projection re-folds
-    ///   the whole stream. The host sees that instead of a silent full replay.
+    /// Restore a matching checkpoint, or start fresh when none exists.
     ///
     /// # Errors
-    ///
-    /// Returns [`SnapshotStore::Error`] if hydration fails.
+    /// Returns the adapter error on read failure. A different schema returns
+    /// [`CheckpointRejection::SchemaMismatch`]; rebuilding must be explicit.
     pub async fn load(
         id: I,
         projector: P,
         trigger: Trig,
-        snapshot_store: SS,
+        checkpoint_store: CS,
         schema_version: NonZeroU32,
-    ) -> Result<(Self, P::State), SS::Error> {
-        let (state, checkpoint, rebuilt_from) = match snapshot_store
-            .hydrate(&id, schema_version)
-            .await?
-        {
-            Hydrated::Found { position, state } => (state, Some(position), None),
-            Hydrated::Absent => (projector.initial(), None, None),
-            Hydrated::Stale { stored_schema } => (projector.initial(), None, Some(stored_schema)),
-        };
-        Ok((
-            Self {
-                id,
-                projector,
-                trigger,
-                snapshot_store,
-                schema_version,
-                checkpoint,
-                pending: None,
-                rebuilt_from,
-            },
-            state,
-        ))
+    ) -> Result<Self, CheckpointError<CS::Error>> {
+        Self::assemble(
+            id,
+            projector,
+            trigger,
+            checkpoint_store,
+            (schema_version, CheckpointMode::Advance),
+        )
+        .await
     }
 
-    /// `Some(old_schema)` when [`load`](Self::load) discarded a snapshot written
-    /// under a different schema version — i.e. this projection is re-folding
-    /// from the beginning because of a schema bump, not because it is new.
-    /// `None` means it resumed from a checkpoint or started genuinely fresh
-    /// (disambiguate those two via [`checkpoint`](Self::checkpoint)). A host on a
-    /// constrained device can use this to warn/defer/throttle the rebuild.
+    /// Start a deliberate rebuild of an existing, different schema.
+    ///
+    /// The old checkpoint remains intact until the first conditional write.
+    /// A concurrent change rejects that write; revisions never reset. Replay
+    /// from the beginning and retain the same instance across unpersisted folds.
+    ///
+    /// # Errors
+    /// Returns an adapter read error, or [`CheckpointRejection::InvalidRebuild`]
+    /// when the checkpoint is absent or already has the requested schema.
+    pub async fn rebuild(
+        id: I,
+        projector: P,
+        trigger: Trig,
+        checkpoint_store: CS,
+        schema_version: NonZeroU32,
+    ) -> Result<Self, CheckpointError<CS::Error>> {
+        Self::assemble(
+            id,
+            projector,
+            trigger,
+            checkpoint_store,
+            (schema_version, CheckpointMode::Rebuild),
+        )
+        .await
+    }
+
+    async fn assemble(
+        id: I,
+        projector: P,
+        trigger: Trig,
+        checkpoint_store: CS,
+        schema: (NonZeroU32, CheckpointMode),
+    ) -> Result<Self, CheckpointError<CS::Error>> {
+        let (schema_version, mode) = schema;
+        let hydrated = checkpoint_store
+            .hydrate_checkpoint(&id, schema_version)
+            .await
+            .map_err(CheckpointError::Store)?;
+        let (state, checkpoint, revision, rebuilt_from) = match (mode, hydrated) {
+            (
+                CheckpointMode::Advance,
+                CheckpointHydrated::Found {
+                    revision,
+                    position,
+                    state,
+                },
+            ) => (state, Some(position), Some(revision), None),
+            (CheckpointMode::Advance, CheckpointHydrated::Absent) => {
+                (projector.initial(), None, None, None)
+            }
+            (CheckpointMode::Advance, CheckpointHydrated::Stale { stored_schema, .. }) => {
+                return Err(CheckpointRejection::SchemaMismatch {
+                    stored: stored_schema,
+                    requested: schema_version,
+                }
+                .into());
+            }
+            (
+                CheckpointMode::Rebuild,
+                CheckpointHydrated::Stale {
+                    revision,
+                    stored_schema,
+                },
+            ) => (
+                projector.initial(),
+                None,
+                Some(revision),
+                Some(stored_schema),
+            ),
+            (
+                CheckpointMode::Rebuild,
+                CheckpointHydrated::Absent | CheckpointHydrated::Found { .. },
+            ) => return Err(CheckpointRejection::InvalidRebuild.into()),
+        };
+        Ok(Self {
+            id,
+            projector,
+            trigger,
+            checkpoint_store,
+            schema_version,
+            state: Some(state),
+            revision,
+            checkpoint,
+            observed: checkpoint,
+            reload_required: false,
+            rebuilt_from,
+        })
+    }
+
+    /// The schema deliberately discarded by this instance's rebuild.
     #[must_use]
     pub const fn rebuilding_from(&self) -> Option<NonZeroU32> {
         self.rebuilt_from
     }
 
-    /// The id this projection is bound to — pass to `subscribe`.
+    /// Id used for checkpoint storage and subscription assembly.
     pub const fn id(&self) -> &I {
         &self.id
     }
 
-    /// The last durably-committed position — pass to `subscribe` (per-stream,
-    /// `Pos = Version`) or `subscribe_all` (`Pos` = the adapter's
-    /// [`AllPosition`]) as the resume point. `None` means
-    /// "from the beginning".
+    /// Last successfully acknowledged durable position.
+    ///
+    /// On a newly loaded instance this is the subscription resume point. After
+    /// a write error or cancellation it remains diagnostic metadata; reload
+    /// before opening a new subscription or continuing the fold.
     pub const fn checkpoint(&self) -> Option<Pos> {
         self.checkpoint
     }
 
-    /// Fold one decoded event, then commit `(state, position)` together if the
-    /// [`PersistTrigger`] fires. Returns the new state.
+    /// Last successfully folded position, including any unpersisted tail.
     ///
-    /// Accepts either item shape a decoded stream yields (see [`Positioned`]):
-    /// a bare [`Decoded<E>`](Decoded) from a per-stream subscription (the
-    /// position is its `version`), or the `(position, StreamKey, Decoded<E>)`
-    /// tuple from an `$all` subscription — fed whole, no unpacking (the stream
-    /// key is forwarded to [`Projector::apply_attributed`]). The item's position
-    /// becomes the candidate checkpoint. On a commit the checkpoint advances
-    /// and the pending tail clears; otherwise the position is remembered as
-    /// `pending` for the next [`flush`](Projection::flush).
+    /// Use this to reopen a cursor while continuing the same healthy instance.
+    /// Reloaded instances instead start from their durable checkpoint.
+    pub const fn observed(&self) -> Option<Pos> {
+        self.observed
+    }
+
+    /// Borrow the owned read model while this instance is usable.
     ///
     /// # Errors
+    /// A failed/panicking fold returns [`ProjectionStateError::Poisoned`]. A
+    /// failed/canceled write returns [`ProjectionStateError::ReloadRequired`].
+    pub fn state(&self) -> Result<&P::State, ProjectionStateError> {
+        if self.reload_required {
+            return Err(ProjectionStateError::ReloadRequired);
+        }
+        self.state.as_ref().ok_or(ProjectionStateError::Poisoned)
+    }
+
+    /// Validate ordering, fold one event, then persist if the trigger fires.
     ///
-    /// - [`ProjectionError::Apply`] if the projector rejects the event. The
-    ///   consumed state is not recoverable (the fold owns it by value), so a
-    ///   failed `advance` ends the projection — reload to resume.
-    /// - [`ProjectionError::Commit`] if the snapshot commit fails.
+    /// # Errors
+    /// Rejects duplicates/regressions before applying or changing state.
+    /// Projector failure poisons this instance; checkpoint failure requires a
+    /// reload. Dropping a pending write future has the same reload requirement.
     pub async fn advance<It>(
         &mut self,
-        state: P::State,
         item: It,
-    ) -> Result<P::State, ProjectionError<P::Error, SS::Error>>
+    ) -> Result<(), ProjectionError<P::Error, CS::Error>>
     where
         It: Positioned<Event = P::Event, Pos = Pos>,
     {
+        self.state()?;
         let (position, key, decoded) = item.into_parts();
+        if self.observed.is_some_and(|previous| position <= previous) {
+            return Err(ProjectionError::NonIncreasingPosition);
+        }
+        let state = self.state.take().ok_or(ProjectionStateError::Poisoned)?;
         let folded = self
             .projector
             .apply_attributed(state, key.as_ref(), &decoded.event)
             .map_err(ProjectionError::Apply)?;
-
+        self.state = Some(folded);
+        self.observed = Some(position);
         if self
             .trigger
             .should_persist(self.checkpoint, position, iter::once(decoded.event.name()))
         {
-            self.commit(position, &folded).await?;
-        } else {
-            self.pending = Some(position);
+            self.flush().await?;
         }
-        Ok(folded)
+        Ok(())
     }
 
-    /// Commit the folded-but-unpersisted tail, if any.
-    ///
-    /// Call once when the host loop ends (shutdown, passivation) so a state
-    /// folded past the last trigger is not lost. A no-op when nothing is
-    /// pending.
+    /// Persist the owned state and its unpersisted observed position together.
+    /// A no-op when a healthy instance has no unpersisted events.
     ///
     /// # Errors
-    ///
-    /// Returns [`ProjectionError::Commit`] if the snapshot commit fails.
-    pub async fn flush(
-        &mut self,
-        state: &P::State,
-    ) -> Result<(), ProjectionError<P::Error, SS::Error>> {
-        match self.pending {
-            Some(position) => self.commit(position, state).await,
-            None => Ok(()),
-        }
-    }
-
-    /// Persist `(state, position)` atomically and advance the checkpoint.
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(
-            name = "mnesis.projection.commit",
-            level = "debug",
-            skip_all,
-            fields(id = %self.id)
-        )
-    )]
-    async fn commit(
-        &mut self,
-        position: Pos,
-        state: &P::State,
-    ) -> Result<(), ProjectionError<P::Error, SS::Error>> {
-        self.snapshot_store
-            .commit(&self.id, self.schema_version, position, state)
+    /// Rejects poisoned or uncertain instances. A checkpoint failure requires
+    /// reloading, even if the adapter rejected the write without committing.
+    #[cfg_attr(feature = "tracing", tracing::instrument(name = "mnesis.projection.commit", level = "debug", skip_all, fields(id = %self.id)))]
+    pub async fn flush(&mut self) -> Result<(), ProjectionError<P::Error, CS::Error>> {
+        self.state()?;
+        let Some(position) = self
+            .observed
+            .filter(|observed| Some(*observed) != self.checkpoint)
+        else {
+            return Ok(());
+        };
+        let state = self.state.as_ref().ok_or(ProjectionStateError::Poisoned)?;
+        let mode = if self.checkpoint.is_none() && self.revision.is_some() {
+            CheckpointMode::Rebuild
+        } else {
+            CheckpointMode::Advance
+        };
+        self.reload_required = true;
+        let revision = self
+            .checkpoint_store
+            .commit_checkpoint(
+                &self.id,
+                CheckpointWrite {
+                    expected: self.revision,
+                    schema_version: self.schema_version,
+                    position,
+                    state,
+                    mode,
+                },
+            )
             .await
             .map_err(ProjectionError::Commit)?;
+        self.revision = Some(revision);
         self.checkpoint = Some(position);
-        self.pending = None;
+        self.reload_required = false;
         Ok(())
     }
 }
 
-/// Failure from [`Projection::advance`] / [`Projection::flush`] — the fold and
-/// the persist are distinct domains and never share a variant (CLAUDE rule 3).
+/// An instance whose state may no longer be used; recovery requires reloading.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+#[non_exhaustive]
+pub enum ProjectionStateError {
+    /// A consuming fold failed or panicked; no complete state remains.
+    #[error("projection fold failed; reload required")]
+    Poisoned,
+    /// A checkpoint write failed or was canceled; its outcome may be uncertain.
+    #[error("projection checkpoint outcome uncertain; reload required")]
+    ReloadRequired,
+}
+
+/// Projection failures keep application, persistence and integrity domains separate.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum ProjectionError<PErr, SErr> {
-    /// The projector rejected the event (overflow, invariant violation, …).
+    /// The projector rejected the event; this instance is now poisoned.
     #[error("projector failed to apply event")]
     Apply(#[source] PErr),
-    /// The snapshot store failed to commit `(state, position)`.
-    #[error("snapshot commit failed")]
-    Commit(#[source] SErr),
+    /// A checkpoint write failed or was rejected; reload this instance.
+    #[error("checkpoint commit failed")]
+    Commit(#[source] CheckpointError<SErr>),
+    /// The instance cannot be reused after fold/write failure or cancellation.
+    #[error(transparent)]
+    State(#[from] ProjectionStateError),
+    /// The input repeated or regressed the last successfully folded position.
+    #[error("projection position did not increase")]
+    NonIncreasingPosition,
 }

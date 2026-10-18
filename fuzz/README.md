@@ -13,7 +13,7 @@ once in `fuzz-common/src/lib.rs` and shared by both engines:
 |--------|----------|---------|
 | `wire_decode_frame` | `wire::decode_frame` | the canonical on-disk event frame |
 | `cbor_decode_header` | `cbor::decode_header` | backup-box chunk header |
-| `cbor_decode_chunk` | `cbor::decode_chunk` | backup-box chunk body (crc-checked blocks) |
+| `cbor_decode_chunk` | `cbor::decode_chunk` | strict backup decoding and explicit prefix salvage |
 | `value_event_type` | `EventType::from_bytes` | UTF-8 + length-cap validator |
 
 ## Layout

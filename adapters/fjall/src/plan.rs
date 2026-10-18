@@ -1,25 +1,10 @@
-//! Pure, IO-free append planner — the single source of truth for fjall's
-//! write path.
+//! Pure append preparation and planning shared by normal and atomic writes.
 //!
-//! Both [`RawEventStore::append`](crate::store) and the
-//! [`AtomicAppend`](mnesis_store::import::AtomicAppend) impl reduce to the same
-//! per-stream work: validate that a run's versions are strictly sequential from
-//! the stream's current version, then encode each event's primary key, `$all`
-//! key, and 16-byte-aligned wire frame while assigning a running
-//! [`GlobalSeq`](crate::GlobalSeq). None of that touches fjall — it is a pure
-//! function of `(current_version, current_global, id, envelopes)`, so it lives
-//! here, unit-tested with no database, exactly as `mnesis-postgres` factors its
-//! `narrow_inserts` out of `append`. The append *contract* (optimistic
-//! concurrency + strict-sequential versions) is validated once in the kernel
-//! [`validate_append_versions`](mnesis_store::store::validate_append_versions)
-//! before this core runs; `plan_run` re-derives each version from a running
-//! counter for the key codec rather than trusting the envelope's own field.
-//!
-//! The two public methods differ only in their *error domain* and in the
-//! single-stream-vs-cross-run validation that wraps this core: `append` maps a
-//! [`PlanError`] into [`AppendError`](mnesis_store::error::AppendError); the
-//! atomic path owns its own cross-run head/projected-head/non-injective-route
-//! check (index-based conflicts) and then calls [`plan_run`] purely to stage.
+//! Frame encoding happens before acquiring the writer transaction. After the
+//! kernel validates the batch against transaction-protected stream heads,
+//! [`plan_prepared_run`] derives sequential keys and global positions. The
+//! transaction stages all rows and counters together. Encoding failures never
+//! open a transaction; conflicts and position overflows never commit one.
 
 use bytes::Bytes;
 use mnesis::ErrorId;
@@ -73,25 +58,56 @@ pub enum PlanError {
     InvalidInput { version: u64, reason: ErrorId<128> },
 }
 
-/// Plan one stream's append run: validate strict-sequential versions from
-/// `current_version`, then encode + stage each event assigning a running
-/// `GlobalSeq` from `current_global`. Pure — no fjall, no `tx`.
-///
-/// `current_version` is the stream's current max (0 = fresh stream); the run's
-/// first event must be version `current_version + 1`. `current_global` is the
-/// store-wide counter; the first staged event is stamped `current_global + 1`.
+/// Frames prepared before acquiring the writer transaction. The private
+/// vector is created only from a nonempty batch and consumed exactly once.
+pub struct PreparedRun {
+    frames: Vec<Bytes>,
+}
+
+/// Encode the immutable event frames without acquiring an engine lock.
+pub fn prepare_run(envelopes: PendingBatch<'_>) -> Result<PreparedRun, PlanError> {
+    let frames = envelopes
+        .iter()
+        .map(|env| {
+            wire::encode_frame(
+                env.schema_version_value(),
+                &env.event_type_value(),
+                &env.payload_value(),
+                env.metadata_value().as_ref(),
+            )
+            .map(|frame| frame.value)
+            .map_err(|error| PlanError::InvalidInput {
+                version: env.version().as_u64(),
+                reason: reason_label(&error),
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(PreparedRun { frames })
+}
+
+#[cfg(test)]
 pub fn plan_run(
     current_version: u64,
     current_global: u64,
     id: &StreamKey,
     envelopes: PendingBatch<'_>,
 ) -> Result<PlannedRun, PlanError> {
+    plan_prepared_run(current_version, current_global, id, prepare_run(envelopes)?)
+}
+
+/// Assign transaction-protected positions and keys to pre-encoded frames.
+pub fn plan_prepared_run(
+    current_version: u64,
+    current_global: u64,
+    id: &StreamKey,
+    prepared: PreparedRun,
+) -> Result<PlannedRun, PlanError> {
     let id_bytes = id.as_ref();
     let mut version = current_version;
     let mut global_seq = current_global;
-    let mut rows = Vec::with_capacity(envelopes.len().get());
+    let mut rows = Vec::with_capacity(prepared.frames.len());
 
-    for env in envelopes {
+    for frame in prepared.frames {
         // `version` is the validated, strictly-sequential successor of
         // `current_version`. The kernel `validate_append_versions` (single-stream
         // path) or `validate_atomic_writes` (atomic path) already proved the
@@ -110,16 +126,6 @@ pub fn plan_run(
                 version,
                 reason: reason_label(&e),
             })?;
-        let frame = wire::encode_frame(
-            env.schema_version_value(),
-            &env.event_type_value(),
-            &env.payload_value(),
-            env.metadata_value().as_ref(),
-        )
-        .map_err(|e| PlanError::InvalidInput {
-            version,
-            reason: reason_label(&e),
-        })?;
         // Defensively-unreachable arm: the id already passed the same u16
         // length gate in `encode_event_key` above — but it stays typed (rule 3),
         // never an unwrap.
@@ -133,7 +139,7 @@ pub fn plan_run(
         rows.push(StagedRow {
             event_key,
             global_key,
-            frame: frame.value,
+            frame,
         });
     }
 

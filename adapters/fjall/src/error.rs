@@ -16,6 +16,64 @@ pub fn reason_label(value: &impl std::fmt::Display) -> ErrorId<128> {
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum FjallError {
+    /// A blocking worker could not be created.
+    #[error("cannot spawn Fjall I/O worker: {0}")]
+    WorkerSpawn(#[source] std::io::Error),
+    /// The export deadline driver could not be initialized.
+    #[cfg(feature = "export")]
+    #[error("cannot initialize Fjall export timer: {0}")]
+    WorkerTimer(#[source] std::io::Error),
+    /// Unique export-view identifiers are exhausted; reopen the store.
+    #[cfg(feature = "export")]
+    #[error("Fjall export session identifier overflow")]
+    ExportSessionIdOverflow,
+    /// The worker stopped accepting jobs.
+    #[error("Fjall worker queue closed: {0}")]
+    WorkerQueueClosed(#[source] tokio::sync::mpsc::error::SendError<()>),
+    /// The worker terminated without returning a result.
+    #[error("Fjall worker response canceled: {0}")]
+    WorkerResponseCanceled(#[source] futures::channel::oneshot::Canceled),
+    /// A storage operation panicked; its write outcome may be uncertain.
+    #[error("Fjall worker operation panicked: {message}")]
+    WorkerPanicked { message: ErrorId<128> },
+    /// Explicit close requires all other store/scan handles to be released.
+    #[error("cannot close Fjall: {count} worker handles observed; release other handles first")]
+    OutstandingHandles { count: usize },
+    /// All configured cursor/cleanup slots are occupied, or the worker closed.
+    #[error("cannot admit Fjall scan: {0}")]
+    ScanCapacity(#[source] tokio::sync::mpsc::error::TrySendError<()>),
+    /// Serialized scan batch length overflowed.
+    #[error("scan byte count overflow")]
+    ScanLengthOverflow,
+    /// A nonempty legacy database has no layout/completeness manifest.
+    #[error("nonempty database has no Mnesis layout manifest; explicit migration is required")]
+    UnmarkedDatabase,
+
+    /// Persisted adapter manifest is malformed.
+    #[error("invalid Mnesis layout manifest")]
+    InvalidManifest,
+
+    /// The database was written using a layout this adapter cannot read.
+    #[error("unsupported Mnesis layout version {version}")]
+    UnsupportedLayout { version: u8 },
+
+    /// Requested index mode differs from the database's persisted configuration.
+    #[error(
+        "index mode mismatch: stored {stored:?}, requested {requested:?}; explicit migration is required"
+    )]
+    IndexModeMismatch {
+        stored: crate::AllIndex,
+        requested: crate::AllIndex,
+    },
+
+    /// Input key is empty or exceeds the limit for its storage layout.
+    #[error("invalid key length: {len} bytes (expected 1..={max})")]
+    InvalidKey { len: usize, max: usize },
+
+    /// State plus its header exceeds the engine's u32 value limit.
+    #[error("state payload too large: {payload} bytes plus {header}-byte header")]
+    StateTooLarge { payload: usize, header: usize },
+
     /// Fjall I/O or internal database error.
     #[error("fjall error: {0}")]
     Io(#[from] fjall::Error),

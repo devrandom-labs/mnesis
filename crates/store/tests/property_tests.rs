@@ -247,18 +247,18 @@ proptest! {
         fn v1_to_v3_upcast(mut morsel: mnesis_store::upcasting::EventMorsel<'_>) -> Result<mnesis_store::upcasting::EventMorsel<'_>, Infallible> {
             loop {
                 morsel = match (morsel.event_type(), morsel.schema_version()) {
-                    ("E", v) if v == Version::INITIAL => mnesis_store::upcasting::EventMorsel::new("E", Version::new(2).unwrap(), morsel.payload().to_vec()),
-                    ("E", v) if v == Version::new(2).unwrap() => mnesis_store::upcasting::EventMorsel::new("E", Version::new(3).unwrap(), morsel.payload().to_vec()),
+                    ("E", v) if v == mnesis_store::SchemaVersion::INITIAL => mnesis_store::upcasting::EventMorsel::new("E", mnesis_store::SchemaVersion::from_u32(2).unwrap(), morsel.payload().to_vec()),
+                    ("E", v) if v == mnesis_store::SchemaVersion::from_u32(2).unwrap() => mnesis_store::upcasting::EventMorsel::new("E", mnesis_store::SchemaVersion::from_u32(3).unwrap(), morsel.payload().to_vec()),
                     _ => break,
                 };
             }
             Ok(morsel)
         }
 
-        let morsel = mnesis_store::EventMorsel::borrowed("E", Version::INITIAL, &payload);
+        let morsel = mnesis_store::EventMorsel::borrowed("E", mnesis_store::SchemaVersion::INITIAL, &payload);
         let result = v1_to_v3_upcast(morsel).unwrap();
 
-        prop_assert_eq!(result.schema_version(), Version::new(3).unwrap(), "final version should be 3");
+        prop_assert_eq!(result.schema_version(), mnesis_store::SchemaVersion::from_u32(3).unwrap(), "final version should be 3");
         prop_assert_eq!(
             result.event_type(), "E",
             "event type should be preserved"

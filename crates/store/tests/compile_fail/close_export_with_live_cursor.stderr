@@ -1,0 +1,13 @@
+error[E0505]: cannot move out of `session` because it is borrowed
+  --> tests/compile_fail/close_export_with_live_cursor.rs:12:5
+   |
+ 9 |     let session = store.open_export_session(Duration::from_secs(60)).await.unwrap();
+   |         ------- binding `session` declared here
+10 |     let id = StreamKey::from_slice(b"a");
+11 |     let mut cursor = session.export_stream(&id, Version::INITIAL).await.unwrap();
+   |                      ------- borrow of `session` occurs here
+12 |     session.close().await.unwrap();
+   |     ^^^^^^^ move out of `session` occurs here
+13 |     let _ = cursor.next().await;
+14 | }
+   | - borrow might be used here, when `cursor` is dropped and runs the destructor for type `InMemoryExportCursor<'_, PersistedEnvelope>`

@@ -523,6 +523,18 @@ macro_rules! conformance_atomic_append {
             );
             $crate::__conformance_case!(atomic, check_atomic_conflict_aborts_all, $factory, $skip);
             $crate::__conformance_case!(atomic, check_atomic_empty_batch_is_noop, $factory, $skip);
+            $crate::__conformance_case!(
+                atomic,
+                check_atomic_duplicate_targets_reject_all,
+                $factory,
+                $skip
+            );
+            $crate::__conformance_case!(
+                atomic,
+                check_atomic_malformed_runs_reject_all,
+                $factory,
+                $skip
+            );
         }
     };
 }

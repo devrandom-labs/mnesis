@@ -75,7 +75,7 @@ async fn load_without_snapshot_does_full_replay() {
 
     // Reload — should replay all 5 events
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 3); // +1 +1 +1 -1 +1 = 3
+    assert_eq!(loaded.state().unwrap().value, 3); // +1 +1 +1 -1 +1 = 3
     assert_eq!(loaded.version(), Some(Version::new(5).unwrap()));
 }
 
@@ -96,7 +96,7 @@ async fn save_triggers_snapshot_and_load_uses_it() {
     // At this point, trigger should have fired (crossed 3-boundary).
     // Reload — should hit snapshot + partial replay (0 additional events).
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 3);
+    assert_eq!(loaded.state().unwrap().value, 3);
     assert_eq!(loaded.version(), Some(Version::new(3).unwrap()));
 }
 
@@ -132,7 +132,7 @@ async fn save_below_threshold_no_snapshot_then_crosses() {
 
     // Reload — should use snapshot at v6
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 6);
+    assert_eq!(loaded.state().unwrap().value, 6);
     assert_eq!(loaded.version(), Some(Version::new(6).unwrap()));
 }
 
@@ -171,7 +171,7 @@ async fn schema_version_mismatch_falls_back_to_full_replay() {
 
     // Load should ignore the v1 snapshot and do full replay
     let loaded: AggregateRoot<Counter> = repo_v2.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 1);
+    assert_eq!(loaded.state().unwrap().value, 1);
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
 
@@ -197,7 +197,7 @@ async fn after_event_types_trigger_snapshots_on_domain_milestone() {
 
     // Reload — snapshot at v3, state=1
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 1);
+    assert_eq!(loaded.state().unwrap().value, 1);
     assert_eq!(loaded.version(), Some(Version::new(3).unwrap()));
 }
 
@@ -244,7 +244,7 @@ async fn lazy_snapshot_on_read_after_full_replay() {
 
     // First load → full replay → lazy snapshot created
     let loaded: AggregateRoot<Counter> = repo_read.load(id.clone()).await.unwrap();
-    assert_eq!(loaded.state().value, 3);
+    assert_eq!(loaded.state().unwrap().value, 3);
 
     // Verify snapshot was created by hydrating directly
     let (snap_version, _) = snap_store
@@ -280,7 +280,7 @@ async fn multiple_save_load_cycles() {
 
     // Cycle 2: reload, save 3 more → snapshot at v6
     let mut agg = repo.load(id.clone()).await.unwrap();
-    assert_eq!(agg.state().value, 3);
+    assert_eq!(agg.state().unwrap().value, 3);
     repo.save(
         &mut agg,
         &save_events(&[
@@ -294,7 +294,7 @@ async fn multiple_save_load_cycles() {
 
     // Cycle 3: reload, verify state
     let agg = repo.load(id).await.unwrap();
-    assert_eq!(agg.state().value, 6);
+    assert_eq!(agg.state().unwrap().value, 6);
     assert_eq!(agg.version(), Some(Version::new(6).unwrap()));
 }
 
@@ -323,7 +323,7 @@ async fn sequence_save_snapshot_save_more_snapshot_again() {
 
     // Reload from snapshot → save 3 more → snapshot at v6
     let mut agg = repo.load(id.clone()).await.unwrap();
-    assert_eq!(agg.state().value, 3);
+    assert_eq!(agg.state().unwrap().value, 3);
     repo.save(
         &mut agg,
         &save_events(&[
@@ -337,7 +337,7 @@ async fn sequence_save_snapshot_save_more_snapshot_again() {
 
     // Final reload — should use v6 snapshot
     let agg = repo.load(id).await.unwrap();
-    assert_eq!(agg.state().value, 2); // 3 - 1 - 1 + 1
+    assert_eq!(agg.state().unwrap().value, 2); // 3 - 1 - 1 + 1
     assert_eq!(agg.version(), Some(Version::new(6).unwrap()));
 }
 
@@ -377,7 +377,7 @@ async fn sequence_batch_crossing_non_multiple_boundary() {
 
     // Snapshot should exist at v8. Reload and verify.
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 8);
+    assert_eq!(loaded.state().unwrap().value, 8);
     assert_eq!(loaded.version(), Some(Version::new(8).unwrap()));
 }
 
@@ -413,7 +413,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
         false,
     );
     let mut agg: AggregateRoot<Counter> = repo_v2.load(id.clone()).await.unwrap();
-    assert_eq!(agg.state().value, 1);
+    assert_eq!(agg.state().unwrap().value, 1);
 
     // Save another event → new snapshot with schema v2
     repo_v2
@@ -423,7 +423,7 @@ async fn sequence_snapshot_invalidation_then_new_snapshot() {
 
     // Reload should hit v2 snapshot
     let loaded: AggregateRoot<Counter> = repo_v2.load(id.clone()).await.unwrap();
-    assert_eq!(loaded.state().value, 2);
+    assert_eq!(loaded.state().unwrap().value, 2);
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 
     // Verify the snapshot has schema v2: hydrating at v2 hits, at v1 misses.
@@ -456,7 +456,7 @@ async fn lifecycle_create_save_snapshot_reload_verify() {
     // Create new aggregate
     let mut agg = repo.load(id.clone()).await.unwrap();
     assert_eq!(agg.version(), None);
-    assert_eq!(agg.state().value, 0);
+    assert_eq!(agg.state().unwrap().value, 0);
 
     // Save 2 events → snapshot
     repo.save(
@@ -468,7 +468,7 @@ async fn lifecycle_create_save_snapshot_reload_verify() {
 
     // Reload → from snapshot, state should match
     let loaded = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 0); // +1 -1
+    assert_eq!(loaded.state().unwrap().value, 0); // +1 -1
     assert_eq!(loaded.version(), Some(Version::new(2).unwrap()));
 }
 
@@ -536,7 +536,7 @@ async fn lifecycle_lazy_snapshot_then_subsequent_load_uses_it() {
     // Second load uses snapshot (we can't directly prove partial replay,
     // but state correctness confirms the snapshot path works)
     let loaded2: AggregateRoot<Counter> = repo_on_read.load(id).await.unwrap();
-    assert_eq!(loaded2.state().value, 5);
+    assert_eq!(loaded2.state().unwrap().value, 5);
     assert_eq!(loaded2.version(), Some(Version::new(5).unwrap()));
 }
 
@@ -603,7 +603,7 @@ async fn defensive_snapshot_codec_error_falls_back_to_full_replay() {
         false,
     );
     let loaded: AggregateRoot<Counter> = repo_bad.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 1);
+    assert_eq!(loaded.state().unwrap().value, 1);
     assert_eq!(loaded.version(), Some(Version::new(1).unwrap()));
 }
 
@@ -666,7 +666,7 @@ async fn defensive_snapshot_store_load_error_falls_back_to_full_replay() {
         false,
     );
     let loaded: AggregateRoot<Counter> = bad_repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 2);
+    assert_eq!(loaded.state().unwrap().value, 2);
 }
 
 #[tokio::test]
@@ -715,11 +715,11 @@ async fn defensive_snapshot_save_failure_does_not_fail_event_save() {
         .save(&mut agg, &save_events(&[CounterEvent::Incremented]))
         .await;
     assert!(result.is_ok());
-    assert_eq!(agg.state().value, 1);
+    assert_eq!(agg.state().unwrap().value, 1);
 
     // Events persist correctly — reload works via full replay
     let loaded: AggregateRoot<Counter> = repo.load(id).await.unwrap();
-    assert_eq!(loaded.state().value, 1);
+    assert_eq!(loaded.state().unwrap().value, 1);
 }
 
 #[tokio::test]
@@ -789,8 +789,8 @@ async fn isolation_concurrent_loads_from_same_snapshot_get_independent_copies() 
     );
 
     // Both should have identical state but be independent instances
-    assert_eq!(load_a.state().value, 3);
-    assert_eq!(load_b.state().value, 3);
+    assert_eq!(load_a.state().unwrap().value, 3);
+    assert_eq!(load_b.state().unwrap().value, 3);
     assert_eq!(load_a.version(), Some(Version::new(3).unwrap()));
     assert_eq!(load_b.version(), Some(Version::new(3).unwrap()));
 }
@@ -842,7 +842,7 @@ async fn load_uses_snapshot_state_when_events_cannot_reproduce_it() {
     );
     let loaded: AggregateRoot<Counter> = repo_b.load(id).await.unwrap();
     assert_eq!(
-        loaded.state().value,
+        loaded.state().unwrap().value,
         3,
         "state must be hydrated from the snapshot, not an empty replay"
     );
@@ -890,4 +890,110 @@ fn save_events<E: mnesis::DomainEvent + Clone>(slice: &[E]) -> mnesis::Events<E,
         events.add(event.clone());
     }
     events
+}
+
+#[tokio::test]
+async fn ceiling_snapshot_hits_preserve_state_and_stale_schema_still_replays() {
+    let near_ceiling = u64::MAX.checked_sub(1).unwrap();
+    for (position, stored_schema, expected_version, expected_value) in [
+        (u64::MAX, SV1, u64::MAX, 123),
+        (near_ceiling, SV1, near_ceiling, 123),
+        (u64::MAX, sv2(), 1, 1),
+    ] {
+        let store = Store::new(RecordingReads {
+            inner: InMemoryStore::new(),
+            reads: std::sync::atomic::AtomicUsize::new(0),
+        });
+        let inner = store.repository::<Counter>().json().build();
+        let id = TestId::new("ceiling");
+        let one = save_events(&[CounterEvent::Incremented]);
+        let mut original = inner.load(id.clone()).await.unwrap();
+        inner.save(&mut original, &one).await.unwrap();
+        // The snapshot contract accepts supplied state/version. The ordinary
+        // row is only a fallback witness; no maximum-length log is invented.
+        let snapshots = InMemorySnapshotStore::<CounterState, Version>::new();
+        snapshots
+            .commit(
+                &id,
+                stored_schema,
+                Version::new(position).unwrap(),
+                &CounterState { value: 123 },
+            )
+            .await
+            .unwrap();
+        let reader = Snapshotting::new(inner, &snapshots, AfterEventTypes::new(&[]), SV1, false);
+        let reads_before = store.raw().reads.load(std::sync::atomic::Ordering::SeqCst);
+        let mut loaded = reader.load(id).await.unwrap();
+        let reads_after = store.raw().reads.load(std::sync::atomic::Ordering::SeqCst);
+        if expected_version == u64::MAX {
+            assert_eq!(
+                reads_after, reads_before,
+                "ceiling hit must not open a read"
+            );
+        } else {
+            assert_eq!(reads_after, reads_before.checked_add(1).unwrap());
+        }
+        assert_eq!(loaded.version(), Version::new(expected_version));
+        assert_eq!(loaded.state().unwrap().value, expected_value);
+        if expected_version == u64::MAX {
+            assert!(matches!(
+                reader.save(&mut loaded, &one).await,
+                Err(mnesis_store::StoreError::VersionOverflow)
+            ));
+            assert_eq!(loaded.state().unwrap().value, 123);
+            assert_eq!(loaded.version(), Version::new(u64::MAX));
+        }
+    }
+}
+
+// Delegate storage behavior to the real adapter. Only opening a read is
+// observed: state assertions alone cannot detect an unnecessary empty read.
+struct RecordingReads {
+    inner: InMemoryStore,
+    reads: std::sync::atomic::AtomicUsize,
+}
+
+impl RecordingReads {
+    fn record_read(&self) {
+        self.reads
+            .try_update(
+                std::sync::atomic::Ordering::SeqCst,
+                std::sync::atomic::Ordering::SeqCst,
+                |count| count.checked_add(1),
+            )
+            .expect("read observation count must fit usize");
+    }
+}
+
+impl mnesis_store::RawEventStore for RecordingReads {
+    type Error = <InMemoryStore as mnesis_store::RawEventStore>::Error;
+    type Stream = <InMemoryStore as mnesis_store::RawEventStore>::Stream;
+    type AllPosition = <InMemoryStore as mnesis_store::RawEventStore>::AllPosition;
+    type AllStream = <InMemoryStore as mnesis_store::RawEventStore>::AllStream;
+
+    async fn append(
+        &self,
+        id: &mnesis_store::StreamKey,
+        expected_version: Option<Version>,
+        envelopes: mnesis_store::PendingBatch<'_>,
+    ) -> Result<Self::AllPosition, mnesis_store::AppendError<Self::Error>> {
+        self.inner.append(id, expected_version, envelopes).await
+    }
+
+    async fn read_stream(
+        &self,
+        id: &mnesis_store::StreamKey,
+        from: Version,
+    ) -> Result<Self::Stream, Self::Error> {
+        self.record_read();
+        self.inner.read_stream(id, from).await
+    }
+
+    async fn read_all(
+        &self,
+        from: Option<Self::AllPosition>,
+    ) -> Result<Self::AllStream, Self::Error> {
+        self.record_read();
+        self.inner.read_all(from).await
+    }
 }

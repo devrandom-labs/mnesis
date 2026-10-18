@@ -99,7 +99,7 @@ async fn main() -> Result<(), BoxError> {
     let loaded = repo.load(alice_id).await?;
     println!("  register {alice_id}");
     println!("  version {:?}", loaded.version());
-    let mut entries: Vec<_> = loaded.state().entries.iter().collect();
+    let mut entries: Vec<_> = loaded.state()?.entries.iter().collect();
     entries.sort();
     for (key, val) in entries {
         println!("    {key} = {val}");

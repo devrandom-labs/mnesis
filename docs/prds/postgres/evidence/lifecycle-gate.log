@@ -6,7 +6,7 @@ mnesis-nextest>         SLOW [>240.000s] (---------) mnesis-fjall::property_test
 mnesis-nextest>         PASS [ 251.246s] (1369/1369) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
 mnesis-nextest> ------------
 mnesis-nextest>      Summary [ 279.821s] 1369 tests run: 1369 passed (10 slow), 4 skipped
-mnesis-nextest> 
+mnesis-nextest>
 mnesis-nextest>     Finished report saved to /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1/coverage
 mnesis-nextest> checkPhase completed in 6 minutes 6 seconds
 mnesis-nextest> Running phase: installPhase

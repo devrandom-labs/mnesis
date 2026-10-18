@@ -1,0 +1,23 @@
+error: duplicate transform for event 'E' at source version 1
+ --> tests/macro_compile_fail/transforms_graph_rejections.rs:7:63
+  |
+7 |  #[transform(event = "E", from = 1, to = 2, rename = "G")] fn other(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok...
+  |                                                               ^^^^^
+
+error: non-contiguous version: to (1) must equal from + 1 (2)
+  --> tests/macro_compile_fail/transforms_graph_rejections.rs:13:55
+   |
+13 | impl Marker { #[transform(event = "E", from = 1, to = 1)] fn step(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(...
+   |                                                       ^
+
+error: transform chain gap: no transform produces 'New@3'; chains must start at schema 1
+  --> tests/macro_compile_fail/transforms_graph_rejections.rs:20:51
+   |
+20 |  #[transform(event = "New", from = 3, to = 4)] fn other(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { Ok(payload.to...
+   |                                                   ^^^^^
+
+error: transform chain gap: 'New@2' stops before its latest declared schema
+  --> tests/macro_compile_fail/transforms_graph_rejections.rs:27:66
+   |
+27 | #[transform(event = "Old", from = 1, to = 2, rename = "New")] fn old(payload: &[u8]) -> Result<Vec<u8>, std::convert::Infallible> { ...
+   |                                                                  ^^^

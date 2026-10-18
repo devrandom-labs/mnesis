@@ -6,6 +6,7 @@
 
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::io::{Write, stderr};
+use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
@@ -15,12 +16,13 @@ use mnesis_postgres::{Limits, PostgresError, PostgresStore};
 use mnesis_store::batch::MAX_BATCH;
 use mnesis_store::{BatchSize, RawEventStore, StreamKey};
 use sqlx::PgPool;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use tokio::time::timeout;
 
 struct Allocator;
 
 static LIVE: AtomicUsize = AtomicUsize::new(0);
+static PEAK: AtomicUsize = AtomicUsize::new(0);
 
 // Every allocation and matching deallocation contributes its exact layout.
 // No other state is published through the counter; relaxed operations suffice.
@@ -29,7 +31,8 @@ unsafe impl GlobalAlloc for Allocator {
         // SAFETY: the allocator receives System's unchanged layout contract.
         let ptr = unsafe { System.alloc(layout) };
         if !ptr.is_null() {
-            LIVE.fetch_add(layout.size(), Ordering::Relaxed);
+            let before = LIVE.fetch_add(layout.size(), Ordering::Relaxed);
+            PEAK.fetch_max(before.saturating_add(layout.size()), Ordering::Relaxed);
         }
         ptr
     }
@@ -371,9 +374,12 @@ async fn large_rows_obey_the_default_byte_budget() {
 
 async fn with_bytes(limit: u32) -> Option<(PostgresStore, PgPool)> {
     let url = std::env::var("DATABASE_URL").ok()?;
+    let options = PgConnectOptions::from_str(&url)
+        .unwrap()
+        .application_name(&format!("mnesis-bytes-{}", std::process::id()));
     let pool = PgPoolOptions::new()
         .max_connections(4)
-        .connect(&url)
+        .connect_with(options)
         .await
         .unwrap();
     let limits = Limits {
@@ -525,7 +531,15 @@ async fn oversized_legacy_row_stops_without_fetching_its_body_or_skipping() {
             expected
         );
     }
+    // Calibrate sensitivity to a body-sized allocation already freed at assertion.
+    let calibration = LIVE.load(Ordering::Relaxed);
+    PEAK.store(calibration, Ordering::Relaxed);
+    let released = vec![42_u8; 2_097_152];
+    std::hint::black_box(&released);
+    drop(released);
+    assert!(PEAK.load(Ordering::Relaxed).saturating_sub(calibration) >= 2_097_152);
     let before = LIVE.load(Ordering::Relaxed);
+    PEAK.store(before, Ordering::Relaxed);
     assert!(matches!(
         stream.next().await,
         Some(Err(PostgresError::RowLimit {
@@ -541,21 +555,25 @@ async fn oversized_legacy_row_stops_without_fetching_its_body_or_skipping() {
         }))
     ));
     let retained = LIVE.load(Ordering::Relaxed).saturating_sub(before);
+    let peak = PEAK.load(Ordering::Relaxed).saturating_sub(before);
+    writeln!(
+        stderr().lock(),
+        "8MiB rejected row: retained={retained}, peak={peak}"
+    )
+    .unwrap();
     assert!(
         retained < 1_048_576,
         "an 8MiB rejected body was retained: {retained}"
     );
+    assert!(
+        peak < 1_048_576,
+        "an 8MiB rejected body was temporarily allocated: {peak}"
+    );
     assert!(stream.next().await.is_none());
     assert!(all.next().await.is_none());
-    let larger = PostgresStore::from_pool_with_limits(
-        pool,
-        Limits {
-            bytes: std::num::NonZeroU32::new(16_777_216).unwrap(),
-            ..Limits::default()
-        },
-    )
-    .await
-    .unwrap();
+    let larger = PostgresStore::from_pool_with_limits(pool, Limits::default())
+        .await
+        .unwrap();
     assert_eq!(
         larger
             .read_stream(&id, Version::INITIAL)
@@ -590,12 +608,16 @@ async fn cancelling_reads_waiting_for_pool_capacity_releases_their_requests() {
     };
     let id = StreamKey::from_bytes("cancel");
     seed(&pool, &id, 3).await;
+    let options = pool.connect_options();
+    let application = options.get_application_name().unwrap();
     timeout(Duration::from_secs(3), async {
         loop {
             let listening: i64 = sqlx::query_scalar(
                 "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() \
-                 AND state = 'idle' AND query LIKE 'LISTEN %mnesis_events%'",
+                 AND application_name = $1 AND state = 'idle' \
+                 AND query LIKE 'LISTEN %mnesis_events%'",
             )
+            .bind(application)
             .fetch_one(&pool)
             .await
             .unwrap();

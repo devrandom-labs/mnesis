@@ -14,6 +14,67 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  compile-fail:
+    name: Compile-fail tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install repository toolchain
+        # rustup reads the exact version, components and targets from the file.
+        run: rustup show active-toolchain
+
+      - name: Kernel compile-fail tests
+        run: cargo test -p mnesis --all-features --locked --test compile_tests
+
+      - name: Macro compile-fail tests
+        run: cargo test -p mnesis-macros --all-features --locked --test compile_fail_tests
+
+      - name: Store compile-fail tests
+        run: cargo test -p mnesis-store --all-features --locked --test compile_fail_tests
+
+  feature-isolation:
+    name: Features (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - mnesis
+          - mnesis-macros
+          - mnesis-store
+          - mnesis-store-testing
+          - mnesis-wake
+          - mnesis-wake-nostd
+          - mnesis-inmemory
+          - mnesis-fjall
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install repository toolchain
+        run: rustup show active-toolchain
+
+      - name: Check isolated libraries and unit harnesses
+        run: python3 scripts/check-features.py "${{ matrix.package }}"
+
+  feature-isolation-gate:
+    name: Feature isolation
+    runs-on: ubuntu-latest
+    needs: feature-isolation
+    if: always()
+    permissions: {}
+    steps:
+      - name: Require every feature matrix member
+        env:
+          RESULT: ${{ needs.feature-isolation.result }}
+        run: test "$RESULT" = success
+
   checks:
     name: Nix Flake Check
     runs-on: ubuntu-latest

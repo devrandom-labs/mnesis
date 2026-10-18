@@ -421,3 +421,220 @@ transaction and seek later transaction IDs, rather than fail signed conversion.
 These choices require exact round-trip, upgrade, rollback, least-privilege and
 plan evidence before selection. Long incompressible stream keys remain a separate
 credible native-index limitation to measure, not solved by event-type conversion.
+
+## Reconciliation with the released 0.4.0 core
+
+PR #376 initially targeted the older 0.3.1 baseline. Main advanced to `6faddb7f`
+through #373/#374 and release #375. Incorporation preserves those changes and
+Rust 1.99.0. One documentation conflict in AtomicAppend is resolved by keeping
+both current distinct-target/run validation and remote commit uncertainty.
+The PRD now follows the current owning projection checkpoint CAS and consistent
+export-session/completed format-2 backup contracts; these remain required PG6/PG7
+work, and standalone subscriber checkpoints remain conditional PG10.
+
+The uncommitted PG3 experiment is preserved in Git stash
+`postgres PG3 outcome experiment before PR376 base integration` on
+`fix/postgres-outcomes`. It passed nine native phase tests on its pre-merge base;
+reapply and verify after this integration. No phase experiment is included in
+this read/wake PR. Incoming `scripts/check-features.py` and the existing NixOS
+Python harness require replacement with maintained Cargo/Nix facilities in PG9;
+preserve their actual coverage and required check names. Cargo-hack's supported
+`--each-feature --no-dev-deps` is a candidate (default, no-default, all and each
+feature); verify locked Nixpkgs fitness before adopting it. No replacement custom
+script or validation framework is authorized.
+
+The integrated 0.4.0 / Rust 1.99.0 source passes formatting, strict targeted
+Clippy and all 79 native adapter tests, zero skips, 12.568 seconds.
+[Output](evidence/core04-native.log). The matched full gate is running in unified
+exec session 48147, `/tmp/mnesis-postgres-core04-flake.log`. Source/core-contract
+Rust diff SHA-256 relative to `origin/main` (`6faddb7f`) at invocation:
+`1bdafa8dde90f40343ba98e283404906edf55dc4f1a0296ca113b4c8ac186153`.
+
+Native representation diagnostics on the integrated legacy schema reproduce four
+concrete limits without retaining mutations (savepoints and final rollback):
+u64::MAX version and xid8 signed output both fail SQLSTATE22003; UTF-8 text NUL
+fails22021; a deterministic incompressible 5,120-byte stream key fails54000 because
+the unique B-tree tuple is5,144 bytes versus2,704 allowed. The earlier 5,000-byte
+hint witness is compressible and cannot certify arbitrary binary-key support.
+[Exact server output](evidence/representation-diagnostics.log). These are storage
+facility diagnostics, not yet adapter-level PG4 regression tests.
+
+PG4 must resolve the key limitation without using a digest as identity. Candidate:
+a native hash index over a stream table's raw byte key for equality lookup (hash
+collisions are rechecked by Postgres), a compact assigned stream number for the
+unique event/version arbiter, and transaction advisory locking of lookup/create.
+Hash collisions may serialize unrelated creations but must never merge identities.
+Compare its ownership, migration, query/insert cost and native collision/concurrency
+proof against alternatives before selecting it. Keep one authoritative raw key;
+do not add a duplicate event key plus surrogate without an enforced relationship.
+Preserve sequence/global positions and adopt legacy data atomically through SQLx
+migrations. The current target permits binary IDs beyond NOTIFY's size ceiling,
+so an arbitrary small key limit cannot silently waive that acceptance criterion.
+
+A better maintained facility emerged before implementing that advisory-lock
+candidate: Postgres17 supports `EXCLUDE USING hash (key WITH =)` as an equality
+constraint. A native temporary-table probe accepts the incompressible5,120-byte
+key, rejects an exact duplicate with23P01, and supports `ON CONFLICT ON CONSTRAINT
+key_probe_key_excl DO NOTHING` without altering data. Crucially, two distinct
+keys with the same actual index hash both insert: collision-44072 and
+collision-102013 share -2078099230. An index query returns the correct one and
+reports one row removed by index recheck, proving identity remains raw-byte
+equality. [Probe and plan](evidence/hash-exclusion-probe.log); only the generated
+large-key error detail is trimmed.
+
+This supersedes a custom advisory-lock stream-creation protocol as the preferred
+PG4 candidate: use native exclusion for raw-key uniqueness and compact numeric
+identity for event/version B-tree lookup, then measure full adapter fitness.
+No new extension or library is needed. The probe is not a completed migration or
+adapter concurrency proof. `DO UPDATE` does not accept exclusion arbiters; select
+or insert with exact-constraint `DO NOTHING` and handle creation races explicitly
+without replaying writes. PostgreSQL17 CREATE TABLE exclusion documentation and
+its index recheck behavior were checked2026-10-18:
+https://www.postgresql.org/docs/17/sql-createtable.html#SQL-CREATETABLE-EXCLUDE .
+The first attempt to call hashvarlena(bytea) directly failed because its SQL
+argument is internal. The retained probe uses `hash_record(ROW(bytea))` solely to
+find candidates and verifies the collision through the actual index recheck;
+production does not depend on either hash value or internal hash function API.
+
+## Three-pass case review after every test run
+
+User direction added2026-10-18: review test cases three times after every run.
+A passing command is insufficient; retain the three separate reviews and any
+findings before using a run as acceptance evidence. New source changes require
+another run and the three reviews again. Do not lower assertions or skip a case
+to clear a failure. Workspace runs without DATABASE_URL are not native database
+proof; their vacuous adapter returns must stay explicit.
+
+Latest completed native run: integrated0.4.0,79 cases, zero skips,12.568s,
+`evidence/core04-native.log`.
+
+1. Contract review: inspect raw read inclusive/exclusive bounds, finite visibility,
+   attribution, row/byte budgets, pool ownership and independent notification
+   progress against PG1/PG2. New small-budget tests cover keys, UTF-8 bytes,
+   metadata, exact acceptance, oversized tails and terminal legacy errors. Full
+   capacity/delivery and PG3+ remain open; passing79 cannot certify them.
+2. Falsifier review: original whole-backlog/large-row regressions and final-hint
+   failures were recorded against old production. Hints are omitted by raw SQL
+   commits, not randomized sleeps; short hint deadlines cannot be satisfied by
+   the one-second fallback. Setup faults use SQLx callbacks/terminated backends;
+   restored service must establish LISTEN again. The existing query plans also
+   verify strict native index seeks at late checkpoints.
+3. Loophole review FOUND gaps to strengthen: the oversized-body assertion counts
+   retained allocation only, so a fetch-then-free implementation could evade it.
+   Track peak allocation during that request as well. The cancellation fixture
+   currently accepts any LISTEN backend when proving pool occupancy; give its
+   own pool a unique application name and select that listener. Neither finding
+   permits weakening the contract; strengthen and rerun after collecting the
+   current integration gate. Do not describe retained-memory evidence alone as
+   a peak/transfer measurement.
+
+Review of the preserved PG3 cases also requires matching the actual EOF source
+on both definite pre-commit failures and CommitUnknown, and proving propagation
+through real StoreError/repository consumers. The deferred-trigger tests are
+code-mapping tests, not real deadlock/SSI tests. These remain explicit follow-ups
+when the stash is reapplied on the reconciled base.
+
+Three-pass review of `hash-exclusion-probe.log` (completed native facility probe):
+1. Contract: this tests equality uniqueness and large-key representation only;
+   it cannot certify migrations, adapter transaction races or least-privilege
+   deployment. All objects are temporary and disappear with the connection.
+2. Falsifier: the same5,120-byte key that fails B-tree insertion succeeds here;
+   its duplicate fails23P01 and exact-constraint DO NOTHING leaves count1. Two
+   different keys sharing an actual hash insert independently and remain separate.
+3. Loopholes: candidate hashes alone would be insufficient, so the retained plan
+   proves two index hits and one equality recheck rejection. No digest substitutes
+   identity. The superuser probe establishes no permission claim, and its single
+   latency sample establishes no capacity claim. Adapter-level races and recovery
+   remain required. No false acceptance claim is retained from this probe.
+
+Test-strengthening pre-edit record after the three-pass review: add peak live
+allocation tracking to the existing native read-test allocator and reset its
+peak around the oversized-body request. Require both peak and retained deltas
+below1MiB for an8MiB rejected body. Give the byte-test pool a per-process unique
+application name and query that exact name before occupying its remaining slots.
+Test-only budget +25/−5 lines, no production/dependency/public API change. Native
+negative control: temporarily remove the payload CASE guard, confirm that the
+same test rejects the fetched-and-discarded oversized body, then restore source.
+Review cases three times after that expected failing run and after the repaired
+run; retain the failure output. Do not change the memory threshold to make it pass.
+
+The integrated0.4.0 full Darwin gate passed all12 configured checks,
+1,524 workspace tests/four compiler exclusions, nextest453.504s.
+[Output](evidence/core04-gate.log). Three-pass review:
+1. Coverage: workspace suite covers the integrated owners, but adapter cases
+   without DATABASE_URL are vacuous; native79 proof stays separate. Compiler
+   exclusions require the protected Compile-fail tests job, not a waiver.
+2. Regression: read/wake original failures remain recorded and native79 passed
+   on this exact core. This supports integration only, not PG3–PG9 completion.
+3. Loopholes: the earlier peak-memory and listener-identity findings remain open.
+   Strengthen those cases next and repeat verification. This gate does not
+   certify the strengthened source that has not yet been written.
+
+Original PR376 head674ed905 passed Linux Nix Flake Check and Postgres Integration
+in [run39103105302](https://github.com/devrandom-labs/mnesis/actions/runs/39103105302).
+Three-pass review: this is old-head coverage only; the workspace summary is1,374
+passes/four compiler exclusions; native VM script completes in52.41s. Its pipeline
+can mask a failing nextest exit and the normal log does not show individual native
+verdicts, so job success alone is insufficient final native acceptance. Preserve
+native local79 evidence; replace the harness with fail-closed standard Nix/Postgres
+commands in PG9, preserve required CI status names and verify exact native counts.
+
+Strengthened read cases:9 native cases passed, zero skips,0.773s; strict targeted
+Clippy/fmt passed (`/tmp/mnesis-read-oracles.log`). Three-pass review:
+1. Acceptance: both retained and peak allocation are bounded for the rejected8MiB
+   body; cancellation waits for the pool's unique application-name listener.
+2. Falsifier: page/resume/finite/order and byte-edge assertions still execute;
+   original failure evidence is unchanged. A payload-guard mutation is next, so
+   instrumentation sensitivity is not yet claimed from this passing run alone.
+3. Loopholes: peak resets after fixture insertion, directly before the two failing
+   read requests; it includes temporary allocations and cannot be satisfied by
+   freeing the body before the assertion. Per-process test isolation and current-
+   thread runtime bound unrelated allocations. Neither threshold nor skip guard
+   was weakened. This remains targeted evidence pending mutation/full checks.
+
+Payload-guard mutation: the real native case fails as required,0 passes/1 expected
+failure,0.120s. [Output](evidence/body-guard-mutant.log). Three-pass review:
+1. Acceptance: both requests still report RowLimit; the failed invariant is actual
+   body memory, not a SQL syntax/setup failure or changed expected error.
+2. Falsifier: only the production payload CASE guard was removed. The driver
+   retains16,747,385 extra bytes and the test rejects the mutation.
+3. Loopholes: this particular driver's retained buffer already trips the older
+   assertion before peak is checked. It does NOT prove peak sensitivity by itself.
+   Add a small freed-allocation calibration to the same measurement fixture, then
+   reset before real requests. Restore the guard exactly; keep both thresholds.
+   Refine this test-only stage budget to+40/−5 lines to include that calibration
+   and explicit metric output. No production change is retained from the mutant.
+
+Restored guard plus strengthened oracles: all79 native cases pass, zero skips,
+12.654s; fmt/strict targeted Clippy pass. [Output](evidence/strong-native.log).
+Actual test-only stage+35/−13 lines; production byte guard restored unchanged.
+The rejected8MiB row adds zero retained bytes and5,904 peak bytes; the fixture
+first observes a2MiB allocation after that allocation has been freed.
+Three-pass review after this run:
+1. Contract: inclusive/exclusive page edges, finite order, attribution, byte-edge
+   writes and terminal read rejection still execute across all79 cases. Both
+   read paths remain below the unchanged1MiB peak/retained error budget.
+2. Falsifier: removing the real payload guard fails the real native case; the
+   freed-buffer calibration would fail if peak updates stopped. Exact listener
+   identity replaces the old any-listener condition. No production fault seam.
+3. Loopholes: default byte budget is reused from Limits rather than duplicated;
+   thresholds, native guard and all order/error checks remain. Filtered counts in
+   mutant runs are not claimed as native passes. The full source-matched gate
+   must be repeated because these assertions changed after the integration gate.
+
+Strengthened source-matched full gate passed in session98721: all12 Darwin
+checks,1,524 workspace passes/four compiler exclusions,470.744s nextest.
+[Output](evidence/strong-gate.log). Source diff relative6faddb7f:
+`3f6f3b4697bbaa5d4788b4eb1304f0449c64764f93f88b899bdc844df405087c`.
+Three-pass review:
+1. Matrix/contract: all configured checks passed; real79-case native proof is
+   separate from DB-free workspace returns. Compiler exclusions still require
+   the protected compiler job. No secure-operation/full-capability claim follows.
+2. Regression: the exact source includes the calibrated peak/own-listener cases;
+   the real payload-guard mutant was killed and then reverted. All original
+   read/wake witnesses and independent native run remain linked above.
+3. Loopholes: full-gate source hash matches the retained Rust; no thresholds,
+   cases or CI requirements were removed. Worktree PG3 changes were isolated and
+   cannot be credited to this gate. Linux checks must rerun on the new PR head.
+   No additional gate-local test weakness was found in this pass; later capacity,
+   fail-closed CI and PG3–PG9 acceptance remain explicitly open.

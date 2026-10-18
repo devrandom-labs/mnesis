@@ -317,8 +317,8 @@ impl Metadata {
 /// The kernel's `Version` is `NonZeroU64` because aggregate streams can
 /// in principle be unboundedly long; `SchemaVersion` is `NonZeroU32`
 /// because the wire format chose that width. Same invariant, different
-/// width — explicit total conversion to `Version` is provided for the
-/// upcaster path.
+/// width. Schema-evolution APIs use this type directly; conversion to `Version`
+/// is a numeric widening, not permission to substitute a stream position.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SchemaVersion(NonZeroU32);
 
@@ -444,7 +444,7 @@ mod payload_tests {
     #[test]
     fn from_bytes_accepts_empty() {
         let p = Payload::from_bytes(Bytes::new()).expect("empty payload is valid");
-        assert!(p.as_slice().is_empty());
+        assert_eq!(p.as_slice(), b"");
     }
 
     #[test]

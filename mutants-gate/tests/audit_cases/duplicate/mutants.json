@@ -1,0 +1,62 @@
+[
+  {
+    "file": "x.rs",
+    "function": {
+      "function_name": "f",
+      "return_type": "-> bool",
+      "span": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 21
+        }
+      }
+    },
+    "replacement": "true",
+    "package": "fixture",
+    "genre": "FnValue",
+    "span": {
+      "start": {
+        "line": 1,
+        "column": 10
+      },
+      "end": {
+        "line": 1,
+        "column": 20
+      }
+    }
+  },
+  {
+    "file": "x.rs",
+    "function": {
+      "function_name": "f",
+      "return_type": "-> bool",
+      "span": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 21
+        }
+      }
+    },
+    "replacement": "false",
+    "package": "fixture",
+    "genre": "FnValue",
+    "span": {
+      "start": {
+        "line": 1,
+        "column": 10
+      },
+      "end": {
+        "line": 1,
+        "column": 20
+      }
+    }
+  }
+]

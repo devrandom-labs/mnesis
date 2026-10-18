@@ -13,3 +13,9 @@ and does not establish arbitrary-key capacity. Record practical accepted limits
 or a native representation that preserves equality without probabilistic identity.
 Do not silently substitute a hash for the durable stream identity. PG9 must
 assess compatible patched event-listener >=5.4.2 rather than ignore the advisory.
+
+Native PG4 probe now rejects a5,120-byte incompressible key in the legacy B-tree,
+while EXCLUDE USING hash(key WITH =) accepts it and rejects duplicates. Actual
+hash-colliding distinct keys survive equality recheck. This supported native
+constraint supersedes a handcrafted advisory-lock identity protocol as the
+preferred candidate; full adapter/migration/concurrency fitness still untested.

@@ -34,8 +34,8 @@ may remain opt-in, following the Fjall adapter's feature arrangement.
 | Live subscriptions | `PgListener` forwards hints to `StreamNotifiers` | Recovery without another notification or write; bounded connection and task use. |
 | Atomic multi-stream writes | Not implemented | `AtomicAppend`, including whole-chunk import through the existing blanket implementation. |
 | Aggregate snapshots | Not implemented | `SnapshotStore<Vec<u8>, Version>` using the existing codec wrapper. |
-| Projection state | Not implemented | `SnapshotStore<Vec<u8>, PgAllPos>` saves state and position together. |
-| Export and stream discovery | Per-stream export inherited; no `StreamLister` | Bounded stream enumeration and verified existing export/import composition. |
+| Projection state | Not implemented | `CheckpointStore<Vec<u8>, PgAllPos>` conditionally saves revision, schema, state and position together. |
+| Export and stream discovery | Per-stream export inherited; no `StreamLister` | Bounded stream enumeration, finite consistent export sessions and verified format-2 backup/import composition. |
 | Schema lifecycle | `CREATE ... IF NOT EXISTS` on open | Versioned, validated migrations; ordinary runtime access without DDL privileges. |
 | Operations | Shared pool; listener aborted on last store drop | Secure connection options, timeouts, readiness, shutdown, diagnostics, recovery instructions, and measured limits. |
 | Delivery | Basic conformance and two out-of-order commit tests | Required real-database CI, complete feature coverage, migration and failure evidence, reviewed merge and verified publication. |
@@ -282,13 +282,16 @@ upgrade. Schema-changing releases include the migration in the published crate.
 ### PG5 Atomic writes and import
 
 Implement existing `AtomicAppend::atomic_append_many` under the `import` feature.
-One database transaction covers all runs. Validate each run against its running
-head, including earlier writes to the same stream. Return the highest assigned
+One database transaction covers all runs. Follow the current owning contract:
+validate distinct raw targets and complete run shapes before storage work;
+duplicate routes and invalid runs are input rejections, never optimistic conflicts.
+Validate each accepted run against its committed head. Return the highest assigned
 `PgAllPos`; empty input returns `None`. Reuse single-stream validation and SQL
 without introducing a second transaction or repository abstraction.
 
 Acceptance: enable the shared atomic conformance suite, plus conflicting final
-run, malformed middle run, repeated target with valid and stale running versions,
+run, malformed middle run, repeated target with valid and stale versions (both
+must reject as invalid routes before writing),
 concurrent overlapping batches, reversed target order/deadlocks, cancellation,
 and uncertain commit. A definite rejection leaves every target unchanged; an
 unknown outcome is still all-or-none in the database. Conflict index and actual
@@ -298,24 +301,34 @@ reports; whole-chunk import must not degrade into separate commits.
 
 ### PG6 Aggregate snapshots and projection state
 
-Implement the two existing byte-state `SnapshotStore` specializations under
-`snapshot` and `projection` features. Reuse `CodecSnapshotStore` for typed state.
+Implement aggregate `SnapshotStore<Vec<u8>, Version>` and projection
+`CheckpointStore<Vec<u8>, PgAllPos>` under `snapshot` and `projection` features.
+Reuse the existing codec wrappers and owning `CheckpointWrite::next_revision` rule.
 Save ID, schema version, state and its exact position in one atomic operation.
 Keep aggregate and projection identities/position forms from colliding.
 `Hydrated::Absent`, `Stale` and `Found` remain distinct; corruption is an error.
 
-Acceptance: shared snapshot conformance for both `Version` and `PgAllPos`, empty
+Acceptance: shared snapshot conformance for `Version` and checkpoint contract
+tests for `PgAllPos`, empty
 state, maximum supported positions and schema versions, overwrite behavior,
 concurrent readers during writes, process restart, schema mismatch/rebuild and
 failed/uncertain commits. Readers observe the old complete pair or new complete
 pair, never a mixed state and position. Exercise real aggregate rehydration and
 the existing projection stepper through these implementations. Preserve the
-owner's single-producer semantics; do not claim this fences competing workers.
+owner's revision comparison, strictly increasing positions, schema replacement
+through explicit rebuild and revision-overflow rejection. Failed or cancelled
+checkpoint writes require reload. Storage revision checks do not replace Labcast's
+controller command/worker fencing.
 
 ### PG7 Export, backup and restore
 
-Implement bounded `StreamLister` under `export`; enumerate each stream once for
-the documented scan visibility boundary. Compose the existing exporter, CBOR
+Implement bounded `StreamLister` and `ConsistentExporter` under `export`;
+enumerate each stream once for the documented scan visibility boundary. A
+finite-lifetime `ExportSession` pins one database view for listing and every
+stream read, including across concurrent atomic multi-stream commits. Expiration
+must release the view without another caller poll; explicit close waits for
+cleanup, and cursors borrow the session. Bound session count and retained resources.
+Compose the existing exporter, completed format-2 CBOR
 format and importer. Preserve versions, event types, schema versions, payloads,
 metadata and caller-selected routing. Import assigns destination global positions;
 source `$all` checkpoints are not portable across a logical restore.
@@ -324,8 +337,9 @@ Acceptance: Postgres export/import round trip and Fjall/Postgres interchange;
 empty database, many streams, binary IDs, schema variants, malformed/truncated
 backup, duplicate target routing and conflict near the end of a chunk. Exercise
 bounded reads and failure reports instead of loading a backup into memory.
-Document that independent live stream exports do not automatically provide one
-cross-stream consistent database snapshot.
+Test session cancellation, idle expiration, close, corruption and incomplete
+backup rejection. Ordinary independent live stream exports keep their independent
+views; consistent backup must use the session contract and completed chunks.
 
 Provide an operator restore drill for events plus saved state and migration
 metadata. Distinguish physical database recovery (which preserves transaction

@@ -1,3 +1,8 @@
+//! Historical key-layout comparison using raw Fjall writes. This fixture does
+//! not measure the current adapter's worker, durability policy or whole API.
+//! Record the host, toolchain and Fjall version with results; prior timing or
+//! size figures do not establish current production performance.
+//!
 //! Decision-gate benchmark for #333 (CLAUDE rule 9 — "measure the fork, don't
 //! assert it"): which layout should the fjall `events_global` (`$all` index)
 //! partition use once each row carries the writing stream's id?
@@ -6,7 +11,7 @@
 //!   value = the frame bytes **unchanged** (the same `Slice` clone already
 //!   shared with the `events` partition in production — an `Arc` bump, no
 //!   extra allocation on append).
-//! - **A1** — key = the existing 16-byte `[u64 BE global_seq][u64 BE version]`,
+//! - **A1** — key = the historical 16-byte `[u64 BE global_seq][u64 BE version]`,
 //!   value = `[u16 BE id_len][id][frame]` (a fresh `Vec` built on every append
 //!   to wrap the id in front of the frame).
 //!

@@ -30,7 +30,7 @@
 //! `CommandRepository::execute` returning `Execution { position, .. }` with
 //! `ExecuteError::is_conflict`,
 //! `Subscription::subscribe_all` with `.events().decoded()`, `Projector`,
-//! fjall's `SnapshotStore<Vec<u8>, GlobalSeq>` via `CodecSnapshotStore`,
+//! fjall's conditional `CheckpointStore<Vec<u8>, GlobalSeq>` via `CodecSnapshotStore`,
 //! and `AggregateFixture` (unit tests).
 
 // Example code relaxes strict lints locally (production crates do NOT) —
