@@ -798,3 +798,33 @@ manifest and lock hash remains exactly3f681b11f5b4c68b9986d70adf952e66c998a774bf
 original unique classification and acknowledged-COMMIT suppression; (3) cached
 checks execute no cases and are not additional native or Linux evidence. Both
 append-only research histories were preserved when integrating the phase patch.
+PR376 head8357c0c2d53edcdc91f6de7795e6ec8ef44b6632:40 checks passed, one
+expected nightly-only job skipped; GitHub merge state CLEAN, no reviews/threads
+blocking. Three post-CI case reviews before protected merge:
+1. Acceptance: protected Linux Nix gate1524 passes/four compiler exclusions;
+   separate compiler jobs execute their compile-fail cases successfully. Feature
+   isolation, native integration, deny, fuzz and CodeQL jobs pass.
+2. Falsifiers: corrected CI mutation path starts/stops a real fresh Postgres,
+   baseline14s tests;27 mutations yield14 caught/13 compiler-unviable, no survivors
+   or timeout. Same source already passed all79 local native laws and the manual
+   SQL payload-guard mutation. CI fix changes no Rust assertions or limits.
+3. Loopholes: the existing NixOS integration output is cached and its tee pipeline
+   can mask a future nextest failure; it is not fresh fail-closed native evidence.
+   PG9 must replace that harness and verify exact native counts. Independent
+   fresh-database mutation CI uses strict shell failure handling. This merge
+   delivers only the bounded-read/recovery slice; PG3–PG9 and publication remain.
+
+Initial read/wake slice delivered by protected squash PR376 on2026-10-18 at
+07:23:40UTC, merge7db7cf83f74d9ae53b45ca9aae6c548572c73e91. CI record:
+[evidence](evidence/pr376-ci.log), workflow run39106192841 and native mutation
+run39106192660. No admin bypass, direct main write or protection change.
+PG3 rebased as4b8f3ba9eee25d52317e17be60180063001ff6b3; its adapter/manifest/lock
+diff hash relative merged main remains3f681b11f5b4c68b9986d70adf952e66c998a774bff3ba0de1c40a581bbcbc1c.
+PG1/PG2 final capacity/recovery acceptance remains open underPG8/PG9. No version
+publication or clean registry-consumer proof is credited to this initial merge.
+
+Post-rebase PG3 gate passes with all12 outputs reused. Three reviews: (1) exact
+adapter/test/manifest/lock hash remains3f681b11f5b4c68b9986d70adf952e66c998a774bff3ba0de1c40a581bbcbc1c;
+(2) unchanged native90-case evidence and original COMMIT/constraint failures still
+apply; (3) cached checks are not a fresh native run, and new Linux PR377 jobs
+remain required. PR376 CI/delivery records are added without changing that code.
