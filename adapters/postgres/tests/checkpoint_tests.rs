@@ -14,7 +14,7 @@ use std::process::Command;
 
 #[cfg(feature = "snapshot")]
 use mnesis::Version;
-use mnesis_postgres::{Limits, PgAllPos, PostgresError, PostgresStore};
+use mnesis_postgres::{History, Limits, PgAllPos, PostgresError, PostgresStore};
 use mnesis_store::StreamKey;
 use mnesis_store::checkpoint::{
     CheckpointError, CheckpointHydrated, CheckpointMode, CheckpointRejection, CheckpointStore,
@@ -46,11 +46,11 @@ async fn acknowledged_checkpoint_pair_survives_client_process_termination() {
     };
     let id = StreamKey::from_slice(b"crashed-checkpoint\0");
     let schema = NonZeroU32::new(u32::MAX).unwrap();
-    let position = PgAllPos::new(u64::MAX, u64::MAX);
     let state = b"saved before client SIGKILL".to_vec();
     match std::env::var(CHILD).as_deref() {
         Ok("write") => {
             let store = PostgresStore::connect(&url).await.unwrap();
+            let position = PgAllPos::new(store.history(), u64::MAX, u64::MAX);
             let revision = store
                 .commit_checkpoint(
                     &id,
@@ -83,6 +83,7 @@ async fn acknowledged_checkpoint_pair_survives_client_process_termination() {
                 .env(CHILD, "write");
             process::kill_after_marker(&mut command, ACK);
             let reopened = PostgresStore::connect(&url).await.unwrap();
+            let position = PgAllPos::new(reopened.history(), u64::MAX, u64::MAX);
             assert_eq!(
                 reopened.hydrate_checkpoint(&id, schema).await.unwrap(),
                 CheckpointHydrated::Found {
@@ -98,10 +99,10 @@ async fn acknowledged_checkpoint_pair_survives_client_process_termination() {
 
 #[tokio::test]
 async fn runtime_checkpoint_writer_needs_no_key_mutation_event_rewrite_or_ddl() {
-    let Some((_store, pool)) = fixture().await else {
+    let Some((admin, pool)) = fixture().await else {
         return;
     };
-    sqlx::raw_sql("DROP ROLE IF EXISTS mnesis_checkpoint_writer; CREATE ROLE mnesis_checkpoint_writer LOGIN; GRANT USAGE ON SCHEMA mnesis TO mnesis_checkpoint_writer; GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_checkpoint_writer; GRANT SELECT, INSERT ON mnesis.keys TO mnesis_checkpoint_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_checkpoint_writer; GRANT SELECT ON mnesis.events TO mnesis_checkpoint_writer; GRANT SELECT, INSERT, UPDATE ON mnesis.checkpoints TO mnesis_checkpoint_writer")
+    sqlx::raw_sql("DROP ROLE IF EXISTS mnesis_checkpoint_writer; CREATE ROLE mnesis_checkpoint_writer LOGIN; GRANT USAGE ON SCHEMA mnesis TO mnesis_checkpoint_writer; GRANT SELECT ON mnesis._sqlx_migrations, mnesis.history TO mnesis_checkpoint_writer; GRANT SELECT, INSERT ON mnesis.keys TO mnesis_checkpoint_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_checkpoint_writer; GRANT SELECT ON mnesis.events TO mnesis_checkpoint_writer; GRANT SELECT, INSERT, UPDATE ON mnesis.checkpoints TO mnesis_checkpoint_writer")
         .execute(&pool).await.unwrap();
     let runtime = sqlx::postgres::PgPoolOptions::new()
         .max_connections(4)
@@ -121,36 +122,23 @@ async fn runtime_checkpoint_writer_needs_no_key_mutation_event_rewrite_or_ddl() 
     let store = PostgresStore::from_pool(runtime.clone()).await.unwrap();
     let id = StreamKey::from_slice(b"restricted-checkpoint");
     let first = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &vec![1]))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 1, 1), &vec![1]),
+        )
         .await;
     let second = store
         .commit_checkpoint(
             &id,
-            advance(Some(NonZeroU64::MIN), PgAllPos::new(2, 0), &vec![2]),
+            advance(
+                Some(NonZeroU64::MIN),
+                PgAllPos::new(store.history(), 2, 0),
+                &vec![2],
+            ),
         )
         .await;
     let saved = store.hydrate_checkpoint(&id, NonZeroU32::MIN).await;
-    let mut codes = Vec::new();
-    for statement in [
-        "UPDATE mnesis.keys SET value = 'changed'::bytea",
-        "UPDATE mnesis.events SET payload = 'changed'::bytea",
-        "DELETE FROM mnesis.events",
-        "DELETE FROM mnesis.checkpoints",
-        "CREATE TABLE mnesis.forbidden (number int)",
-    ] {
-        codes.push(
-            sqlx::raw_sql(statement)
-                .execute(&runtime)
-                .await
-                .err()
-                .and_then(|error| {
-                    error
-                        .as_database_error()
-                        .and_then(sqlx::error::DatabaseError::code)
-                        .map(Cow::into_owned)
-                }),
-        );
-    }
+    let codes = denied(&runtime).await;
     drop(store);
     runtime.close().await;
     sqlx::raw_sql("DROP OWNED BY mnesis_checkpoint_writer; DROP ROLE mnesis_checkpoint_writer")
@@ -170,11 +158,38 @@ async fn runtime_checkpoint_writer_needs_no_key_mutation_event_rewrite_or_ddl() 
         saved.unwrap(),
         CheckpointHydrated::Found {
             revision: NonZeroU64::new(2).unwrap(),
-            position: PgAllPos::new(2, 0),
+            position: PgAllPos::new(admin.history(), 2, 0),
             state: vec![2],
         }
     );
-    assert_eq!(codes, vec![Some("42501".to_owned()); 5]);
+    assert_eq!(codes, vec![Some("42501".to_owned()); 7]);
+}
+
+async fn denied(runtime: &PgPool) -> Vec<Option<String>> {
+    let mut codes = Vec::new();
+    for statement in [
+        "UPDATE mnesis.keys SET value = 'changed'::bytea",
+        "UPDATE mnesis.events SET payload = 'changed'::bytea",
+        "DELETE FROM mnesis.events",
+        "DELETE FROM mnesis.checkpoints",
+        "CREATE TABLE mnesis.forbidden (number int)",
+        "UPDATE mnesis.history SET value = value",
+        "DELETE FROM mnesis.history",
+    ] {
+        codes.push(
+            sqlx::raw_sql(statement)
+                .execute(runtime)
+                .await
+                .err()
+                .and_then(|error| {
+                    error
+                        .as_database_error()
+                        .and_then(sqlx::error::DatabaseError::code)
+                        .map(Cow::into_owned)
+                }),
+        );
+    }
+    codes
 }
 
 const fn advance(
@@ -224,7 +239,11 @@ async fn missing_revision_and_invalid_rebuild_do_not_create_or_replace_state() {
         store
             .commit_checkpoint(
                 &id,
-                advance(Some(NonZeroU64::MIN), PgAllPos::new(0, 0), &original),
+                advance(
+                    Some(NonZeroU64::MIN),
+                    PgAllPos::new(store.history(), 0, 0),
+                    &original,
+                ),
             )
             .await,
         &CheckpointRejection::Conflict {
@@ -235,7 +254,7 @@ async fn missing_revision_and_invalid_rebuild_do_not_create_or_replace_state() {
     let rebuild = |expected| CheckpointWrite {
         expected,
         schema_version: NonZeroU32::MIN,
-        position: PgAllPos::new(0, 0),
+        position: PgAllPos::new(store.history(), 0, 0),
         state: &original,
         mode: CheckpointMode::Rebuild,
     };
@@ -258,7 +277,10 @@ async fn missing_revision_and_invalid_rebuild_do_not_create_or_replace_state() {
         0
     );
     let revision = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &original))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 1, 1), &original),
+        )
         .await
         .unwrap();
     rejected(
@@ -272,7 +294,7 @@ async fn missing_revision_and_invalid_rebuild_do_not_create_or_replace_state() {
             .unwrap(),
         CheckpointHydrated::Found {
             revision,
-            position: PgAllPos::new(1, 1),
+            position: PgAllPos::new(store.history(), 1, 1),
             state: original,
         }
     );
@@ -289,7 +311,7 @@ async fn aggregate_cache_and_checkpoint_with_identical_ids_remain_independent() 
         .commit(&id, NonZeroU32::MIN, Version::INITIAL, &vec![1])
         .await
         .unwrap();
-    let first = PgAllPos::new(9, 1);
+    let first = PgAllPos::new(store.history(), 9, 1);
     let revision = store
         .commit_checkpoint(&id, advance(None, first, &vec![2]))
         .await
@@ -310,7 +332,14 @@ async fn aggregate_cache_and_checkpoint_with_identical_ids_remain_independent() 
         }
     );
     let next = store
-        .commit_checkpoint(&id, advance(Some(revision), PgAllPos::new(9, 2), &vec![4]))
+        .commit_checkpoint(
+            &id,
+            advance(
+                Some(revision),
+                PgAllPos::new(store.history(), 9, 2),
+                &vec![4],
+            ),
+        )
         .await
         .unwrap();
     assert_eq!(next.get(), 2);
@@ -323,11 +352,11 @@ async fn aggregate_cache_and_checkpoint_with_identical_ids_remain_independent() 
     );
 }
 
-async fn bounded(pool: PgPool) -> PostgresStore {
+async fn bounded(pool: PgPool, bytes: u32) -> PostgresStore {
     PostgresStore::from_pool_with_limits(
         pool,
         Limits {
-            bytes: NonZeroU32::new(37).unwrap(),
+            bytes: NonZeroU32::new(bytes).unwrap(),
             ..Limits::default()
         },
     )
@@ -342,20 +371,27 @@ async fn byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage()
     };
     let id = StreamKey::from_slice(b"k");
     let revision = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &b"old".to_vec()))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 1, 1), &b"old".to_vec()),
+        )
         .await
         .unwrap();
-    let limited = bounded(pool.clone()).await;
+    let limited = bounded(pool.clone(), 53).await;
     assert!(matches!(
         limited
             .commit_checkpoint(
                 &id,
-                advance(Some(revision), PgAllPos::new(2, 0), &b"above".to_vec())
+                advance(
+                    Some(revision),
+                    PgAllPos::new(store.history(), 2, 0),
+                    &b"above".to_vec()
+                )
             )
             .await,
         Err(CheckpointError::Store(PostgresError::RowLimit {
-            actual: 38,
-            limit: 37
+            actual: 54,
+            limit: 53
         }))
     ));
     assert_eq!(
@@ -365,14 +401,18 @@ async fn byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage()
             .unwrap(),
         CheckpointHydrated::Found {
             revision,
-            position: PgAllPos::new(1, 1),
+            position: PgAllPos::new(store.history(), 1, 1),
             state: b"old".to_vec(),
         }
     );
     let next = limited
         .commit_checkpoint(
             &id,
-            advance(Some(revision), PgAllPos::new(2, 0), &b"edge".to_vec()),
+            advance(
+                Some(revision),
+                PgAllPos::new(store.history(), 2, 0),
+                &b"edge".to_vec(),
+            ),
         )
         .await
         .unwrap();
@@ -384,7 +424,7 @@ async fn byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage()
             .unwrap(),
         CheckpointHydrated::Found {
             revision: next,
-            position: PgAllPos::new(2, 0),
+            position: PgAllPos::new(store.history(), 2, 0),
             state: b"edge".to_vec(),
         }
     );
@@ -393,12 +433,16 @@ async fn byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage()
         limited
             .commit_checkpoint(
                 &id,
-                advance(Some(next), PgAllPos::new(3, 0), &b"above".to_vec())
+                advance(
+                    Some(next),
+                    PgAllPos::new(store.history(), 3, 0),
+                    &b"above".to_vec()
+                )
             )
             .await,
         Err(CheckpointError::Store(PostgresError::RowLimit {
-            actual: 38,
-            limit: 37
+            actual: 54,
+            limit: 53
         }))
     ));
 }
@@ -410,10 +454,17 @@ async fn stale_and_oversized_reads_omit_the_megabyte_checkpoint_body() {
     };
     let id = StreamKey::from_slice(b"k");
     let revision = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &vec![7; 1_048_576]))
+        .commit_checkpoint(
+            &id,
+            advance(
+                None,
+                PgAllPos::new(store.history(), 1, 1),
+                &vec![7; 1_048_576],
+            ),
+        )
         .await
         .unwrap();
-    let limited = bounded(pool).await;
+    let limited = bounded(pool, 37).await;
     limited
         .hydrate_checkpoint(&StreamKey::from_slice(b"missing"), NonZeroU32::MIN)
         .await
@@ -446,7 +497,7 @@ async fn stale_and_oversized_reads_omit_the_megabyte_checkpoint_body() {
     assert!(matches!(
         oversized,
         Err(PostgresError::RowLimit {
-            actual: 1_048_609,
+            actual: 1_048_625,
             limit: 37
         })
     ));
@@ -454,6 +505,99 @@ async fn stale_and_oversized_reads_omit_the_megabyte_checkpoint_body() {
         matching < 262_144,
         "oversized checkpoint allocated {matching} bytes"
     );
+}
+
+#[tokio::test]
+async fn foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair() {
+    let Some((store, pool)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_slice(b"foreign-checkpoint");
+    let position = PgAllPos::new(store.history(), 1, 1);
+    let revision = store
+        .commit_checkpoint(&id, advance(None, position, &vec![7; 1_048_576]))
+        .await
+        .unwrap();
+    store
+        .hydrate_checkpoint(&StreamKey::from_slice(b"missing"), NonZeroU32::MIN)
+        .await
+        .unwrap();
+    let foreign = History::new([0; 16]);
+    assert_ne!(foreign, store.history());
+    sqlx::query("ALTER TABLE mnesis.checkpoints DROP CONSTRAINT checkpoints_history_fkey")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("UPDATE mnesis.checkpoints SET history = $1")
+        .bind(foreign.as_bytes())
+        .execute(&pool)
+        .await
+        .unwrap();
+    let before: (String, i64, String, String, Vec<u8>, Vec<u8>) = sqlx::query_as(
+        "SELECT revision::text, schema_version, txid::text, global_seq::text, state, history FROM mnesis.checkpoints",
+    ).fetch_one(&pool).await.unwrap();
+    let allocations = memory::TOTAL.load(Ordering::Relaxed);
+    let reads = [
+        store.hydrate_checkpoint(&id, NonZeroU32::MIN).await,
+        store
+            .hydrate_checkpoint(&id, NonZeroU32::new(2).unwrap())
+            .await,
+    ];
+    let allocated = memory::TOTAL
+        .load(Ordering::Relaxed)
+        .checked_sub(allocations)
+        .unwrap();
+    let write = store
+        .commit_checkpoint(
+            &id,
+            advance(
+                Some(revision),
+                PgAllPos::new(store.history(), 2, 0),
+                &vec![9],
+            ),
+        )
+        .await;
+    let after: (String, i64, String, String, Vec<u8>, Vec<u8>) = sqlx::query_as(
+        "SELECT revision::text, schema_version, txid::text, global_seq::text, state, history FROM mnesis.checkpoints",
+    ).fetch_one(&pool).await.unwrap();
+    sqlx::raw_sql("UPDATE mnesis.checkpoints SET history = (SELECT value FROM mnesis.history); ALTER TABLE mnesis.checkpoints ADD CONSTRAINT checkpoints_history_fkey FOREIGN KEY (history) REFERENCES mnesis.history (value)")
+        .execute(&pool).await.unwrap();
+    for read in reads {
+        assert!(
+            matches!(read, Err(PostgresError::HistoryMismatch { expected, actual })
+            if expected == store.history() && actual == foreign)
+        );
+    }
+    assert!(matches!(write,
+        Err(CheckpointError::Store(PostgresError::HistoryMismatch { expected, actual }))
+        if expected == store.history() && actual == foreign));
+    assert!(
+        allocated < 262_144,
+        "foreign checkpoint allocated {allocated} bytes"
+    );
+    assert_eq!(after, before);
+}
+
+#[tokio::test]
+async fn original_too_small_ceiling_rejects_even_empty_scoped_state_before_storage() {
+    let Some((_store, pool)) = fixture().await else {
+        return;
+    };
+    let limited = bounded(pool.clone(), 37).await;
+    let position = PgAllPos::new(limited.history(), 1, 1);
+    pool.close().await;
+    assert!(matches!(
+        limited
+            .commit_checkpoint(
+                &StreamKey::from_slice(b"k"),
+                advance(None, position, &Vec::new())
+            )
+            .await,
+        Err(CheckpointError::Store(PostgresError::RowLimit {
+            actual: 49,
+            limit: 37
+        }))
+    ));
 }
 
 #[tokio::test]
@@ -465,11 +609,14 @@ async fn stale_schema_and_position_rejections_preserve_the_complete_pair() {
     let initial = vec![1];
     let latest = vec![2];
     let first = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(0, 0), &initial))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 0, 0), &initial),
+        )
         .await
         .unwrap();
     assert_eq!(first, NonZeroU64::MIN);
-    let position = PgAllPos::new(1, 9);
+    let position = PgAllPos::new(store.history(), 1, 9);
     let second = store
         .commit_checkpoint(&id, advance(Some(first), position, &latest))
         .await
@@ -478,7 +625,10 @@ async fn stale_schema_and_position_rejections_preserve_the_complete_pair() {
     for expected in [None, Some(first)] {
         rejected(
             store
-                .commit_checkpoint(&id, advance(expected, PgAllPos::new(2, 0), &initial))
+                .commit_checkpoint(
+                    &id,
+                    advance(expected, PgAllPos::new(store.history(), 2, 0), &initial),
+                )
                 .await,
             &CheckpointRejection::Conflict {
                 expected,
@@ -486,7 +636,11 @@ async fn stale_schema_and_position_rejections_preserve_the_complete_pair() {
             },
         );
     }
-    for previous in [position, PgAllPos::new(1, 8), PgAllPos::new(0, u64::MAX)] {
+    for previous in [
+        position,
+        PgAllPos::new(store.history(), 1, 8),
+        PgAllPos::new(store.history(), 0, u64::MAX),
+    ] {
         rejected(
             store
                 .commit_checkpoint(&id, advance(Some(second), previous, &initial))
@@ -515,7 +669,10 @@ async fn explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacemen
     let id = StreamKey::from_slice(b"rebuild");
     let initial = vec![1];
     let first = store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(9, 9), &initial))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 9, 9), &initial),
+        )
         .await
         .unwrap();
     let schema = NonZeroU32::new(2).unwrap();
@@ -530,7 +687,7 @@ async fn explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacemen
     let proposal = |mode| CheckpointWrite {
         expected: Some(first),
         schema_version: schema,
-        position: PgAllPos::new(0, 0),
+        position: PgAllPos::new(store.history(), 0, 0),
         state: &state,
         mode,
     };
@@ -561,7 +718,7 @@ async fn explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacemen
         store.hydrate_checkpoint(&id, schema).await.unwrap(),
         CheckpointHydrated::Found {
             revision: next,
-            position: PgAllPos::new(0, 0),
+            position: PgAllPos::new(store.history(), 0, 0),
             state,
         }
     );
@@ -574,7 +731,7 @@ async fn reopen_preserves_unsigned_extremes_empty_state_and_revision_overflow() 
     };
     let id = StreamKey::from_slice(b"maximum\0");
     let schema = NonZeroU32::new(u32::MAX).unwrap();
-    let position = PgAllPos::new(u64::MAX, u64::MAX);
+    let position = PgAllPos::new(store.history(), u64::MAX, u64::MAX);
     let state = Vec::new();
     let revision = store
         .commit_checkpoint(
@@ -613,7 +770,7 @@ async fn reopen_preserves_unsigned_extremes_empty_state_and_revision_overflow() 
                 CheckpointWrite {
                     expected: Some(maximum),
                     schema_version: NonZeroU32::MIN,
-                    position: PgAllPos::new(0, 0),
+                    position: PgAllPos::new(reopened.history(), 0, 0),
                     state: &replacement,
                     mode: CheckpointMode::Rebuild,
                 },
@@ -639,7 +796,10 @@ async fn corrupt_metadata_is_not_stale_and_cannot_be_replaced() {
     let id = StreamKey::from_slice(b"corrupt-revision");
     let state = vec![7];
     store
-        .commit_checkpoint(&id, advance(None, PgAllPos::new(1, 1), &state))
+        .commit_checkpoint(
+            &id,
+            advance(None, PgAllPos::new(store.history(), 1, 1), &state),
+        )
         .await
         .unwrap();
     for (mutation, repair) in [
@@ -689,7 +849,7 @@ async fn corrupt_metadata_is_not_stale_and_cannot_be_replaced() {
             .unwrap(),
         CheckpointHydrated::Found {
             revision: NonZeroU64::MIN,
-            position: PgAllPos::new(1, 1),
+            position: PgAllPos::new(store.history(), 1, 1),
             state
         }
     );
@@ -711,7 +871,10 @@ async fn corrupt_checkpoint(
         .hydrate_checkpoint(id, NonZeroU32::new(2).unwrap())
         .await;
     let write = store
-        .commit_checkpoint(id, advance(None, PgAllPos::new(2, 0), &vec![9]))
+        .commit_checkpoint(
+            id,
+            advance(None, PgAllPos::new(store.history(), 2, 0), &vec![9]),
+        )
         .await;
     let reopened = PostgresStore::from_pool(pool.clone()).await;
     let unchanged: (String, i64, String, String, Vec<u8>) = sqlx::query_as(
@@ -736,7 +899,7 @@ async fn suppressed_creation_and_update_fail_without_fabricating_a_revision_conf
     let existing = StreamKey::from_slice(b"existing-checkpoint");
     let missing = StreamKey::from_slice(b"missing-checkpoint");
     let original = vec![1];
-    let position = PgAllPos::new(1, 1);
+    let position = PgAllPos::new(store.history(), 1, 1);
     let revision = store
         .commit_checkpoint(&existing, advance(None, position, &original))
         .await
@@ -759,7 +922,10 @@ async fn suppressed_creation_and_update_fail_without_fabricating_a_revision_conf
         sqlx::raw_sql(statement).execute(&pool).await.unwrap();
         outcomes.push(
             store
-                .commit_checkpoint(id, advance(expected, PgAllPos::new(2, 0), &vec![2]))
+                .commit_checkpoint(
+                    id,
+                    advance(expected, PgAllPos::new(store.history(), 2, 0), &vec![2]),
+                )
                 .await,
         );
         sqlx::raw_sql("DROP TRIGGER checkpoint_skip ON mnesis.checkpoints")
@@ -834,7 +1000,10 @@ async fn overlapping_creators_and_advancers_have_one_complete_winner() {
         panic!("reopen must retain the complete winning record");
     };
     assert_eq!(revision, next);
-    assert!(position == PgAllPos::new(3, 0) || position == PgAllPos::new(4, 0));
+    assert!(
+        position == PgAllPos::new(reopened.history(), 3, 0)
+            || position == PgAllPos::new(reopened.history(), 4, 0)
+    );
     assert_eq!(state, position.txid().to_be_bytes());
 }
 
@@ -860,7 +1029,7 @@ async fn race(
         let target = id.clone();
         writers.spawn(async move {
             let state = value.to_be_bytes().to_vec();
-            let position = PgAllPos::new(value, 0);
+            let position = PgAllPos::new(client.history(), value, 0);
             (
                 client
                     .commit_checkpoint(&target, advance(expected, position, &state))

@@ -34,9 +34,9 @@ async fn opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_ke
         .execute(&pool)
         .await
         .unwrap();
-    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 1, 1, 1, 1, 'parent'::bytea)")
+    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state, history) VALUES ($1, 1, 1, 1, 1, 'parent'::bytea, (SELECT value FROM mnesis.history))")
         .bind(number).execute(&pool).await.unwrap();
-    sqlx::query("INSERT INTO mnesis.checkpoint_child (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 2, 1, 2, 2, 'child'::bytea)")
+    sqlx::query("INSERT INTO mnesis.checkpoint_child (key, revision, schema_version, txid, global_seq, state, history) VALUES ($1, 2, 1, 2, 2, 'child'::bytea, (SELECT value FROM mnesis.history))")
         .bind(number).execute(&pool).await.unwrap();
     let states: Vec<Vec<u8>> =
         sqlx::query_scalar("SELECT state FROM mnesis.checkpoints WHERE key = $1 ORDER BY revision")
@@ -217,7 +217,11 @@ async fn legacy_adoption_preserves_payload_metadata_and_checkpoint() {
     assert_eq!(rows.len(), 1);
     assert_eq!(
         rows[0].0,
-        PgAllPos::new(stored.1.parse().unwrap(), u64::try_from(stored.0).unwrap())
+        PgAllPos::new(
+            store.history(),
+            stored.1.parse().unwrap(),
+            u64::try_from(stored.0).unwrap()
+        )
     );
     assert_eq!(rows[0].2.payload(), b"data");
     assert!(
@@ -485,7 +489,7 @@ async fn runtime_role_reads_and_appends_without_schema_creation_rights() {
     sqlx::raw_sql(
         "DROP ROLE IF EXISTS mnesis_pg4_runtime; CREATE ROLE mnesis_pg4_runtime LOGIN; \
         GRANT USAGE ON SCHEMA mnesis TO mnesis_pg4_runtime; \
-        GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_pg4_runtime; \
+        GRANT SELECT ON mnesis._sqlx_migrations, mnesis.history TO mnesis_pg4_runtime; \
         GRANT SELECT, INSERT ON mnesis.keys TO mnesis_pg4_runtime; \
         GRANT USAGE ON SEQUENCE mnesis.keys_number_seq TO mnesis_pg4_runtime; \
         GRANT SELECT, INSERT ON mnesis.events TO mnesis_pg4_runtime; \

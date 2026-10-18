@@ -430,7 +430,7 @@ async fn checkpoint_hydration_keeps_the_captured_revision_position_and_state_tog
         return;
     };
     let id = StreamKey::from_slice(b"checkpoint-pair");
-    let original = PgAllPos::new(1, 9);
+    let original = PgAllPos::new(store.history(), 1, 9);
     let revision = store
         .commit_checkpoint(
             &id,
@@ -451,7 +451,7 @@ async fn checkpoint_hydration_keeps_the_captured_revision_position_and_state_tog
     pending.spawn(async move { client.hydrate_checkpoint(&target, NonZeroU32::MIN).await });
     proxy.observed(Observation::State).await;
     let independent = PostgresStore::from_pool(control).await.unwrap();
-    let next = PgAllPos::new(2, 0);
+    let next = PgAllPos::new(store.history(), 2, 0);
     let replacement = b"checkpoint-new".to_vec();
     let updated = independent
         .commit_checkpoint(
@@ -495,9 +495,10 @@ async fn codec_checkpoint_commit_retains_unknown_outcome_after_native_commit() {
     let Some((mut proxy, raw, control)) = fixture().await else {
         return;
     };
+    let history = raw.history();
     let store = CodecSnapshotStore::new(raw, JsonCodec::default());
     let id = StreamKey::from_slice(b"checkpoint-unknown");
-    let position = PgAllPos::new(u64::MAX, u64::MAX);
+    let position = PgAllPos::new(history, u64::MAX, u64::MAX);
     let state = mnesis_test_domains::CounterState { value: 7 };
     proxy.fault.send_replace(Fault::DropCommit);
     let result = store
@@ -556,7 +557,7 @@ async fn caller_timeout_after_checkpoint_commit_preserves_every_saved_field() {
         return;
     };
     let id = StreamKey::from_slice(b"checkpoint-cancel");
-    let position = PgAllPos::new(7, 9);
+    let position = PgAllPos::new(store.history(), 7, 9);
     let state = b"committed".to_vec();
     let schema = NonZeroU32::new(u32::MAX).unwrap();
     let write = CheckpointWrite {
@@ -1564,7 +1565,7 @@ async fn final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_hea
 
 #[cfg(feature = "import")]
 async fn restricted_writer(control: &PgPool) -> (PostgresStore, PgPool) {
-    sqlx::raw_sql("DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mnesis_atomic_writer') THEN CREATE ROLE mnesis_atomic_writer; END IF; END $$; GRANT USAGE ON SCHEMA mnesis TO mnesis_atomic_writer; GRANT SELECT ON mnesis._sqlx_migrations TO mnesis_atomic_writer; GRANT SELECT, INSERT ON mnesis.keys, mnesis.events TO mnesis_atomic_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq, mnesis.events_global_seq_seq TO mnesis_atomic_writer")
+    sqlx::raw_sql("DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mnesis_atomic_writer') THEN CREATE ROLE mnesis_atomic_writer; END IF; END $$; GRANT USAGE ON SCHEMA mnesis TO mnesis_atomic_writer; GRANT SELECT ON mnesis._sqlx_migrations, mnesis.history TO mnesis_atomic_writer; GRANT SELECT, INSERT ON mnesis.keys, mnesis.events TO mnesis_atomic_writer; GRANT USAGE ON SEQUENCE mnesis.keys_number_seq, mnesis.events_global_seq_seq TO mnesis_atomic_writer")
         .execute(control).await.unwrap();
     let pool = PgPoolOptions::new()
         .max_connections(4)

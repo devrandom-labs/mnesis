@@ -180,3 +180,36 @@ FindBenchmarkCallGraph uses repository(...provider:GITHUB).benchmarkResultById
 callGraphPresignedUrl, public readonly https://gql.codspeed.io. Actual v3 node/
 edge self times reconcile501.6667=>560ns exactly. Full large-payload traces kept
 as evidence; no credentials/expiring download URLs retained in project.
+2026-10-18 actual native history capability: PG17.10 pg_catalog.pg_control_system
+returns system_identifier, and pg_database current-database OID is readable by a
+new NOLOGIN role with NO additional grants. Actual BEGIN/CREATE ROLE/SET LOCAL/
+query/ROLLBACK succeeds; no role retained. PostgreSQL18 primary docs
+https://www.postgresql.org/docs/18/functions-info.html#FUNCTIONS-PG-CONTROL
+identify system_identifier as server-wide unique cluster identifier. This is a
+candidate native context source, not yet a chosen PgAllPos/API/migration contract.
+Do not assume all control-data functions are privileged or add unnecessary UUID/
+random/runtime dependencies. Need actual18.6 role/physical/logical/reopen evidence,
+compatibility and size/complexity decision before retaining history-context API.
+2026-10-18 PG9 decoder performance primary evidence:
+Rust Reference https://doc.rust-lang.org/reference/attributes/codegen.html#the-inline-attribute
+states inline is a compiler hint, may be ignored, and poor choices can slow code.
+No always hint or blanket attribution justified. Actual pinned Rust1.99.0,
+codspeed-criterion-compat5.0.1 benchmark owner unchanged. CodSpeed primary client
+FindBenchmarkCallGraph retrieves all3payload profiles: all base/head35ns total
+instruction contribution and501.6667/560ns total from one extra L1/LL cache-miss
+pair. Source cost, binary size, native runtime and x86 CI evidence required.
+2026-10-18 selected history facilities: PostgreSQL18 UUID functions official
+https://www.postgresql.org/docs/18/functions-uuid.html documents built-in v4
+random generator; pg_control_system/pg_database native17+18 no-grant proofs in
+PG7c evidence. SQLx0.9 locked src/types/bytes.rs explicitly implements Decode
+and Encode<Postgres> for [u8;N], retaining binary wrong-length decode cause;
+no custom UUID parser or crate needed. STABILITY.md0.x tier permits breaking
+0.(x+1) documented releases. No shared-kernel type/API change selected.
+2026-10-18 PG7c Linux fixture followup primary source:
+https://www.postgresql.org/docs/18/functions-admin.html#FUNCTIONS-ADMIN-SIGNAL
+pg_terminate_backend default timeout0 true proves signal sent, not completed
+termination or delivery of a server SQLSTATE to a client whose next write races
+socket close. Actual Linux red retains SQLx0.9 Io(BrokenPipe32). Reuse native
+pg_stat_activity Lock observation to establish query in flight before termination;
+then require exact original57P01 rather than broaden error acceptance. No adapter
+cause mapping or runtime change. Keep raw175/1/35UNRUN Linux evidence.

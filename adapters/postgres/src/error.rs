@@ -1,6 +1,8 @@
 use mnesis::ErrorId;
 use mnesis_store::envelope::EnvelopeError;
 
+use crate::History;
+
 /// Errors produced by the postgres event store adapter.
 ///
 /// Distinct failure domains (CLAUDE rule 3); diagnostic fields use
@@ -15,6 +17,24 @@ pub enum PostgresError {
     /// Runtime opening never repairs or changes an incompatible schema.
     #[error("incompatible postgres schema: {reason}")]
     Schema { reason: ErrorId<128> },
+
+    /// A cursor or projection position belongs to another event history.
+    #[error(
+        "position history {actual:?} differs from database history {expected:?}; rebuild the consumer"
+    )]
+    HistoryMismatch { expected: History, actual: History },
+
+    /// Copied physical metadata cannot identify this cluster/database.
+    #[error(
+        "database history metadata is incompatible with this Postgres database; use logical event reimport"
+    )]
+    DatabaseHistory,
+
+    /// Stored xid8 values cannot belong to this cluster's visible history.
+    #[error(
+        "stored events contain future transaction IDs; use logical event reimport and rebuild projections"
+    )]
+    FutureTransaction,
 
     /// A row exceeds the configured read/write byte ceiling. No row is skipped.
     #[error("row requires {actual} bytes, exceeding configured limit {limit}")]

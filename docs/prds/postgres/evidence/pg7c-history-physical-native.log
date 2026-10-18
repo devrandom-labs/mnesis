@@ -1,0 +1,12 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.02s
+────────────
+ Nextest run ID b1a9c1e9-7ebf-4bf0-a8a4-d6305996c0e1 with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.958s] (1/5) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+        PASS [   1.509s] (2/5) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+        PASS [   1.377s] (3/5) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+        PASS [   0.709s] (4/5) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+        PASS [   1.350s] (5/5) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+────────────
+     Summary [   5.904s] 5 tests run: 5 passed, 0 skipped

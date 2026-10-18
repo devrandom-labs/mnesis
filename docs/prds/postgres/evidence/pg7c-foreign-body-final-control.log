@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.11s
+────────────
+ Nextest run ID f72e865b-9fbe-4c95-bc57-17481b11cee5 with nextest profile: default
+    Starting 1 test across 1 binary (13 tests skipped)
+        FAIL [   0.126s] (1/1) mnesis-postgres::checkpoint_tests foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+  stdout ───
+
+    running 1 test
+    test foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair ... FAILED
+
+    failures:
+
+    failures:
+        foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.10s
+
+  stderr ───
+
+    thread 'foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair' (100104723) panicked at adapters/postgres/tests/checkpoint_tests.rs:574:5:
+    foreign checkpoint allocated 6289652 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.131s] 1 test run: 0 passed, 1 failed, 13 skipped
+        FAIL [   0.126s] (1/1) mnesis-postgres::checkpoint_tests foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+error: test run failed

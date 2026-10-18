@@ -1,0 +1,270 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.189
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling cfg-if v1.0.4
+   Compiling crossbeam-utils v0.8.22
+   Compiling parking_lot_core v0.9.12
+   Compiling version_check v0.9.5
+   Compiling icu_normalizer_data v2.2.0
+   Compiling getrandom v0.4.3
+   Compiling icu_properties_data v2.2.0
+   Compiling zmij v1.0.23
+   Compiling stable_deref_trait v1.2.1
+   Compiling autocfg v1.5.1
+   Compiling zerocopy v0.8.55
+   Compiling generic-array v0.14.7
+   Compiling num-traits v0.2.19
+   Compiling serde_json v1.0.151
+   Compiling once_cell v1.21.4
+   Compiling semver v1.0.28
+   Compiling scopeguard v1.2.0
+   Compiling memchr v2.8.3
+   Compiling pin-project-lite v0.2.17
+   Compiling rustc_version v0.4.1
+   Compiling lock_api v0.4.14
+   Compiling futures-core v0.3.33
+   Compiling rand_core v0.10.1
+   Compiling itoa v1.0.18
+   Compiling writeable v0.6.3
+   Compiling errno v0.3.14
+   Compiling litemap v0.8.2
+   Compiling thiserror v2.0.19
+   Compiling httparse v1.10.1
+   Compiling bytes v1.12.1
+   Compiling typenum v1.20.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling utf8_iter v1.0.4
+   Compiling bitflags v2.13.1
+   Compiling futures-sink v0.3.33
+   Compiling futures-channel v0.3.33
+   Compiling curve25519-dalek v4.1.3
+   Compiling target-triple v1.0.1
+   Compiling signal-hook-registry v1.4.8
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.2
+   Compiling slab v0.4.12
+   Compiling equivalent v1.0.2
+   Compiling futures-io v0.3.33
+   Compiling crossbeam-epoch v0.9.20
+   Compiling futures-task v0.3.33
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling log v0.4.33
+   Compiling allocator-api2 v0.2.21
+   Compiling rustix v1.1.4
+   Compiling regex-syntax v0.8.11
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.19
+   Compiling foldhash v0.2.0
+   Compiling hashbrown v0.16.1
+   Compiling http v1.4.2
+   Compiling tracing-core v0.1.36
+   Compiling cpufeatures v0.2.17
+   Compiling synstructure v0.13.2
+   Compiling winnow v1.0.4
+   Compiling percent-encoding v2.3.2
+   Compiling try-lock v0.2.5
+   Compiling want v0.3.1
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling form_urlencoded v1.2.2
+   Compiling http-body v1.1.0
+   Compiling sha2 v0.10.9
+   Compiling concurrent-queue v2.5.0
+   Compiling serde_spanned v1.1.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling getrandom v0.2.17
+   Compiling fastrand v2.5.0
+   Compiling httpdate v1.0.3
+   Compiling crc-catalog v2.5.0
+   Compiling atomic-waker v1.1.2
+   Compiling glob v0.3.4
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling subtle v2.6.1
+   Compiling getrandom v0.3.4
+   Compiling hashbrown v0.17.1
+   Compiling parking v2.2.1
+   Compiling signature v2.2.0
+   Compiling zeroize v1.9.0
+   Compiling event-listener v5.4.1
+   Compiling ed25519 v2.2.3
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling zerocopy-derive v0.8.55
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+   Compiling tracing-attributes v0.1.31
+   Compiling equator-macro v0.4.2
+   Compiling futures-util v0.3.33
+   Compiling equator v0.4.2
+   Compiling zerofrom v0.1.8
+   Compiling smallvec v1.15.2
+   Compiling either v1.16.0
+   Compiling indexmap v2.14.0
+   Compiling tempfile v3.27.0
+   Compiling tracing v0.1.44
+   Compiling parking_lot v0.12.5
+   Compiling toml v1.1.3+spec-1.1.0
+   Compiling tokio v1.53.1
+   Compiling yoke v0.8.3
+   Compiling futures-intrusive v0.5.0
+   Compiling crc v3.4.0
+   Compiling rand_core v0.6.4
+   Compiling hashlink v0.11.1
+   Compiling regex-automata v0.4.16
+   Compiling crossbeam-queue v0.3.13
+   Compiling tower-service v0.3.3
+   Compiling base64 v0.22.1
+   Compiling termcolor v1.4.1
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling dissimilar v1.0.11
+   Compiling futures-executor v0.3.33
+   Compiling trybuild v1.0.118
+   Compiling futures v0.3.33
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling aligned-vec v0.6.4
+   Compiling icu_normalizer v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling crc32c v0.6.8
+   Compiling cfg_aliases v0.2.2
+   Compiling shlex v2.0.1
+   Compiling idna_adapter v1.2.2
+   Compiling crossbeam-deque v0.8.7
+   Compiling idna v1.1.0
+   Compiling find-msvc-tools v0.1.9
+   Compiling tokio-stream v0.1.19
+   Compiling hyper v1.11.0
+   Compiling url v2.5.8
+   Compiling cc v1.3.0
+   Compiling sqlx-core v0.9.0
+   Compiling hyper-util v0.1.20
+   Compiling nix v0.31.3
+   Compiling rand_core v0.9.5
+   Compiling minicbor-derive v0.19.5
+   Compiling ptr_meta_derive v0.3.1
+   Compiling anyhow v1.0.104
+   Compiling rayon-core v1.13.0
+   Compiling arrayvec v0.7.8
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-release-performance/crates/mnesis)
+   Compiling ptr_meta v0.3.1
+   Compiling codspeed v5.0.1
+   Compiling half v2.7.1
+   Compiling approx v0.5.1
+   Compiling clap_lex v1.1.0
+   Compiling compare v0.0.6
+   Compiling byteorder-lite v0.1.0
+   Compiling anstyle v1.0.14
+   Compiling xxhash-rust v0.8.18
+   Compiling plotters-backend v0.3.7
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-release-performance/crates/workspace-hack)
+   Compiling ciborium-io v0.2.2
+   Compiling twox-hash v2.1.3
+   Compiling minicbor v2.2.3
+   Compiling ciborium-ll v0.2.2
+   Compiling sfa v1.0.0
+   Compiling lz4_flex v0.13.1
+   Compiling plotters-svg v0.3.7
+   Compiling clap_builder v4.6.2
+   Compiling interval-heap v0.0.5
+   Compiling statrs v0.18.0
+   Compiling rancor v0.1.2
+   Compiling ppv-lite86 v0.2.21
+   Compiling itertools v0.10.5
+   Compiling bytecheck_derive v0.8.2
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-release-performance/crates/store)
+   Compiling enum_dispatch v0.3.13
+   Compiling crossbeam-skiplist v0.1.3
+   Compiling quick_cache v0.6.24
+   Compiling wait-timeout v0.2.1
+   Compiling spin v0.9.9
+   Compiling rustc-hash v2.1.3
+   Compiling cast v0.3.0
+   Compiling quick-error v1.2.3
+   Compiling byteview v0.10.1
+   Compiling bit-vec v0.8.0
+   Compiling varint-rs v2.2.1
+   Compiling fnv v1.0.7
+   Compiling same-file v1.0.6
+   Compiling self_cell v1.3.0
+   Compiling simdutf8 v0.1.5
+   Compiling hashbrown v0.14.5
+   Compiling colored v3.1.1
+   Compiling walkdir v2.5.0
+   Compiling lsm-tree v3.1.8
+   Compiling rusty-fork v0.3.1
+   Compiling bit-set v0.8.0
+   Compiling bytecheck v0.8.2
+   Compiling criterion-plot v0.5.0
+   Compiling dashmap v6.2.1
+   Compiling flume v0.12.0
+   Compiling clap v4.6.4
+   Compiling rand_chacha v0.9.0
+   Compiling rayon v1.12.0
+   Compiling plotters v0.3.7
+   Compiling ciborium v0.2.2
+   Compiling rand v0.9.5
+   Compiling rand_xorshift v0.4.0
+   Compiling regex v1.13.1
+   Compiling tinytemplate v1.2.1
+   Compiling munge_macro v0.4.7
+   Compiling is-terminal v0.4.17
+   Compiling unarray v0.1.4
+   Compiling anes v0.1.6
+   Compiling codspeed-criterion-compat v5.0.1
+   Compiling oorandom v11.1.5
+   Compiling munge v0.4.7
+   Compiling proptest v1.11.0
+   Compiling rend v0.5.4
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-release-performance/crates/wake)
+   Compiling rkyv_derive v0.8.17
+   Compiling bytemuck_derive v1.11.0
+   Compiling console v0.16.4
+   Compiling similar v2.7.0
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-release-performance/crates/store-testing)
+   Compiling insta v1.48.0
+   Compiling fjall v3.1.8
+   Compiling codspeed-criterion-compat-walltime v5.0.1
+   Compiling bytemuck v1.25.2
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-release-performance/adapters/fjall)
+   Compiling proptest-state-machine v0.8.0
+   Compiling rkyv v0.8.17
+    Finished `bench` profile [optimized] target(s) in 18.01s
+     Running benches/fjall_benchmarks.rs (/tmp/mnesis-release-performance-target/release/deps/fjall_benchmarks-138285fb91733059)
+Benchmarking encoding/decode_frame/small_64B
+Benchmarking encoding/decode_frame/small_64B: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/small_64B: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/small_64B: Analyzing
+encoding/decode_frame/small_64B
+                        time:   [2.5897 ns 2.5984 ns 2.6082 ns]
+Found 4 outliers among 30 measurements (13.33%)
+  1 (3.33%) low mild
+  3 (10.00%) high severe
+Benchmarking encoding/decode_frame/medium_1KB
+Benchmarking encoding/decode_frame/medium_1KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/medium_1KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/medium_1KB: Analyzing
+encoding/decode_frame/medium_1KB
+                        time:   [2.6587 ns 2.7166 ns 2.7653 ns]
+Found 5 outliers among 30 measurements (16.67%)
+  2 (6.67%) high mild
+  3 (10.00%) high severe
+Benchmarking encoding/decode_frame/large_64KB
+Benchmarking encoding/decode_frame/large_64KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/large_64KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/large_64KB: Analyzing
+encoding/decode_frame/large_64KB
+                        time:   [2.5626 ns 2.5769 ns 2.5924 ns]
+

@@ -1,0 +1,36 @@
+   Compiling mnesis v0.4.0 (/tmp/mnesis-pg7c-guards/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/tmp/mnesis-pg7c-guards/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/tmp/mnesis-pg7c-guards/crates/store)
+   Compiling mnesis-wake v0.4.0 (/tmp/mnesis-pg7c-guards/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/tmp/mnesis-pg7c-guards/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/tmp/mnesis-pg7c-guards/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.27s
+────────────
+ Nextest run ID 21f6c9af-34e4-4228-ba06-d31646ade39d with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   1.632s] (1/1) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+  stdout ───
+
+    running 1 test
+    test copied_future_transactions_reject_before_global_history_can_be_used ... FAILED
+
+    failures:
+
+    failures:
+        copied_future_transactions_reject_before_global_history_can_be_used
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.62s
+
+  stderr ───
+
+    thread 'copied_future_transactions_reject_before_global_history_can_be_used' (99993580) panicked at adapters/postgres/tests/restore_tests.rs:257:5:
+    assertion failed: matches!(PostgresStore::from_pool(pool.clone()).await,
+        Err(PostgresError::FutureTransaction))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.634s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   1.632s] (1/1) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+error: test run failed

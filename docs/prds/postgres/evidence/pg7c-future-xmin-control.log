@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.94s
+────────────
+ Nextest run ID 6efb0dd7-691f-4056-ad0d-e5f8cd1e0807 with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   0.783s] (1/1) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+  stdout ───
+
+    running 1 test
+    test committed_transactions_above_an_unrelated_xmin_still_open ... FAILED
+
+    failures:
+
+    failures:
+        committed_transactions_above_an_unrelated_xmin_still_open
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.77s
+
+  stderr ───
+
+    thread 'committed_transactions_above_an_unrelated_xmin_still_open' (99996198) panicked at adapters/postgres/tests/restore_tests.rs:359:27:
+    called `Result::unwrap()` on an `Err` value: FutureTransaction
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.784s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   0.783s] (1/1) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+error: test run failed

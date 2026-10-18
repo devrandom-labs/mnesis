@@ -1,0 +1,15 @@
+      proname      | proacl | current_role_can_execute 
+-------------------+--------+--------------------------
+ pg_control_system |        | t
+(1 row)
+
+ pg_control_version | catalog_version_no |  system_identifier  | pg_control_last_modified 
+--------------------+--------------------+---------------------+--------------------------
+               1700 |          202406281 | 7697868455147003551 | 2026-10-18 13:07:09-04
+(1 row)
+
+  oid   |   datname   
+--------+-------------
+ 156713 | mnesis_pg7b
+(1 row)
+

@@ -75,7 +75,7 @@ async fn unsigned_global_sequence_still_includes_later_transactions() {
         .unwrap();
     assert!(first.txid() < second.txid());
     let resumed: Vec<_> = store
-        .read_all(Some(PgAllPos::new(first.txid(), u64::MAX)))
+        .read_all(Some(PgAllPos::new(store.history(), first.txid(), u64::MAX)))
         .await
         .unwrap()
         .try_collect()
@@ -90,7 +90,7 @@ async fn unsigned_global_sequence_still_includes_later_transactions() {
     assert_eq!(resumed[0].1, after);
     assert!(
         store
-            .read_all(Some(PgAllPos::new(u64::MAX, u64::MAX)))
+            .read_all(Some(PgAllPos::new(store.history(), u64::MAX, u64::MAX)))
             .await
             .unwrap()
             .next()

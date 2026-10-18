@@ -57,7 +57,7 @@ impl PostgresStore {
         if capacity < 2 {
             return Err(PostgresError::PoolCapacity { actual: capacity });
         }
-        schema::validate_pool(&pool).await?;
-        Ok(Self::assemble(pool, limits))
+        let history = schema::validate_pool(&pool).await?;
+        Ok(Self::assemble(pool, limits, history))
     }
 }

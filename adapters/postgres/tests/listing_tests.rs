@@ -136,7 +136,7 @@ async fn empty_and_saved_state_keys_do_not_create_event_streams() {
     let checkpoint = support::key(&pool, b"checkpoint-only").await;
     sqlx::query("INSERT INTO mnesis.snapshots (key, schema_version, version, state) VALUES ($1, 1, 1, 'cache'::bytea)")
         .bind(cache).execute(&pool).await.unwrap();
-    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 1, 1, 0, 0, 'checkpoint'::bytea)")
+    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state, history) VALUES ($1, 1, 1, 0, 0, 'checkpoint'::bytea, (SELECT value FROM mnesis.history))")
         .bind(checkpoint).execute(&pool).await.unwrap();
     assert_eq!(ids(&store).await, Vec::<Vec<u8>>::new());
     let id = StreamKey::from_slice(b"events");

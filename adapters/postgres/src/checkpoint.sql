@@ -1,15 +1,15 @@
 WITH relation AS (SELECT pg_catalog.to_regclass('mnesis.checkpoints') AS id),
 expected(position, name, kind) AS (
     VALUES (1, 'key', 'int8'), (2, 'revision', 'numeric'), (3, 'schema_version', 'int8'),
-           (4, 'txid', 'numeric'), (5, 'global_seq', 'numeric'), (6, 'state', 'bytea')
+           (4, 'txid', 'numeric'), (5, 'global_seq', 'numeric'), (6, 'state', 'bytea'), (7, 'history', 'bytea')
 )
 SELECT
     (SELECT count(*) FROM pg_catalog.pg_attribute, relation
-     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 6
+     WHERE attrelid = id AND attnum > 0 AND NOT attisdropped) = 7
     AND (SELECT count(*) FROM expected JOIN pg_catalog.pg_attribute a
          ON a.attnum = expected.position AND a.attname = expected.name
          AND a.atttypid = pg_catalog.to_regtype('pg_catalog.' || expected.kind)
-         AND a.attnotnull AND a.attidentity = '' AND a.attgenerated = '', relation WHERE a.attrelid = id) = 6
+         AND a.attnotnull AND a.attidentity = '' AND a.attgenerated = '', relation WHERE a.attrelid = id) = 7
     AND EXISTS (SELECT FROM pg_catalog.pg_class, relation
                 WHERE oid = id AND relkind = 'r' AND NOT relrowsecurity AND relpersistence = 'p')
     AND NOT EXISTS (SELECT FROM pg_catalog.pg_inherits, relation
@@ -36,3 +36,8 @@ SELECT
          ) AS checks(name, definition)
          WHERE c.conrelid = id AND c.conname = checks.name AND c.contype = 'c'
          AND c.convalidated AND pg_catalog.pg_get_constraintdef(c.oid) = checks.definition) = 4
+    AND EXISTS (SELECT FROM pg_catalog.pg_constraint, relation
+                WHERE conrelid = id AND conname = 'checkpoints_history_fkey' AND contype = 'f'
+                AND conkey = ARRAY[7]::smallint[] AND confkey = ARRAY[1]::smallint[]
+                AND confrelid = pg_catalog.to_regclass('mnesis.history')
+                AND convalidated AND NOT condeferrable AND confupdtype = 'a' AND confdeltype = 'a')

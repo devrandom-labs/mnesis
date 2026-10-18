@@ -9,10 +9,14 @@
 use futures::TryStreamExt;
 use mnesis::Version;
 use mnesis_postgres::{PgAllPos, PostgresError, PostgresStore};
+#[cfg(feature = "projection")]
+use mnesis_store::checkpoint::{CheckpointHydrated, CheckpointStore};
 use mnesis_store::envelope::pending_envelope;
 use mnesis_store::{PendingBatch, RawEventStore, StreamKey};
 use sqlx::PgPool;
 use sqlx::migrate::{MigrateError, Migrator};
+#[cfg(feature = "projection")]
+use std::num::{NonZeroU32, NonZeroU64};
 
 async fn previous(version: i64) -> Option<PgPool> {
     let url = std::env::var("DATABASE_URL").ok()?;
@@ -41,6 +45,91 @@ async fn previous(version: i64) -> Option<PgPool> {
     Some(pool)
 }
 
+#[cfg(feature = "projection")]
+#[tokio::test]
+async fn populated_version_four_history_upgrade_preserves_state_and_rolls_back_collision() {
+    let Some(pool) = previous(4).await else {
+        return;
+    };
+    let id = StreamKey::from_slice(b"legacy-history");
+    let key: i64 =
+        sqlx::query_scalar("INSERT INTO mnesis.keys (value) VALUES ($1) RETURNING number")
+            .bind(id.as_bytes())
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    sqlx::query("INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state) VALUES ($1, 18446744073709551615, 4294967295, 18446744073709551615, 18446744073709551615, $2)")
+        .bind(key).bind([0_u8, 255, 1].as_slice()).execute(&pool).await.unwrap();
+    let before: Vec<(i64, Vec<u8>)> =
+        sqlx::query_as("SELECT version, checksum FROM mnesis._sqlx_migrations ORDER BY version")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+    sqlx::raw_sql("CREATE TABLE mnesis.history (foreign_value text); INSERT INTO mnesis.history VALUES ('keep')").execute(&pool).await.unwrap();
+    let failed = PostgresStore::migrate(&pool).await;
+    let after: Vec<(i64, Vec<u8>)> =
+        sqlx::query_as("SELECT version, checksum FROM mnesis._sqlx_migrations ORDER BY version")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+    let columns: i64 = sqlx::query_scalar("SELECT count(*) FROM pg_catalog.pg_attribute WHERE attrelid = 'mnesis.checkpoints'::regclass AND attname = 'history'")
+        .fetch_one(&pool).await.unwrap();
+    let untouched: Vec<u8> = sqlx::query_scalar("SELECT state FROM mnesis.checkpoints")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    assert!(
+        matches!(failed, Err(PostgresError::Migration(MigrateError::ExecuteMigration(ref source, 5)))
+        if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("42P07"))
+    );
+    assert_eq!(after, before);
+    assert_eq!(columns, 0);
+    assert_eq!(untouched, [0, 255, 1]);
+    sqlx::query("ALTER TABLE mnesis.history RENAME TO saved_history")
+        .execute(&pool)
+        .await
+        .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
+    let old_checksums: Vec<(i64, Vec<u8>)> = sqlx::query_as(
+        "SELECT version, checksum FROM mnesis._sqlx_migrations WHERE version <= 4 ORDER BY version",
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+    assert_eq!(old_checksums, before);
+    assert_eq!(
+        sqlx::query_scalar::<_, String>("SELECT foreign_value FROM mnesis.saved_history")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        "keep"
+    );
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let expected = CheckpointHydrated::Found {
+        revision: NonZeroU64::new(u64::MAX).unwrap(),
+        position: PgAllPos::new(store.history(), u64::MAX, u64::MAX),
+        state: vec![0, 255, 1],
+    };
+    assert_eq!(
+        store
+            .hydrate_checkpoint(&id, NonZeroU32::new(u32::MAX).unwrap())
+            .await
+            .unwrap(),
+        expected
+    );
+    let history = store.history();
+    drop(store);
+    let reopened = PostgresStore::from_pool(pool).await.unwrap();
+    assert_eq!(reopened.history(), history);
+    assert_eq!(
+        reopened
+            .hydrate_checkpoint(&id, NonZeroU32::new(u32::MAX).unwrap())
+            .await
+            .unwrap(),
+        expected
+    );
+}
+
 #[tokio::test]
 async fn checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data() {
     let Some(pool) = previous(3).await else {
@@ -55,7 +144,7 @@ async fn checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data()
             .unwrap();
     let event: (i64, String) = sqlx::query_as("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Old', 1, 'old'::bytea) RETURNING global_seq, txid::text")
         .bind(key).fetch_one(&pool).await.unwrap();
-    let old = PgAllPos::new(event.1.parse().unwrap(), u64::try_from(event.0).unwrap());
+    let legacy = (event.1.parse().unwrap(), u64::try_from(event.0).unwrap());
     sqlx::query("INSERT INTO mnesis.snapshots (key, schema_version, version, state) VALUES ($1, 4294967295, 18446744073709551615, $2)")
         .bind(key).bind(b"saved\0cache".as_slice()).execute(&pool).await.unwrap();
     let before: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
@@ -121,11 +210,12 @@ async fn checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data()
             .unwrap(),
         "keep"
     );
-    checkpoint_upgrade_history(pool, &id, old).await;
+    checkpoint_upgrade_history(pool, &id, legacy).await;
 }
 
-async fn checkpoint_upgrade_history(pool: PgPool, id: &StreamKey, old: PgAllPos) {
+async fn checkpoint_upgrade_history(pool: PgPool, id: &StreamKey, legacy: (u64, u64)) {
     let store = PostgresStore::from_pool(pool).await.unwrap();
+    let old = PgAllPos::new(store.history(), legacy.0, legacy.1);
     let restored: Vec<_> = store
         .read_all(None)
         .await
@@ -174,7 +264,7 @@ async fn snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collis
             .unwrap();
     let original: (i64, String) = sqlx::query_as("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Old', 1, 'old'::bytea) RETURNING global_seq, txid::text")
         .bind(number).fetch_one(&pool).await.unwrap();
-    let old = PgAllPos::new(
+    let legacy = (
         original.1.parse().unwrap(),
         u64::try_from(original.0).unwrap(),
     );
@@ -202,6 +292,7 @@ async fn snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collis
     assert_eq!(applied, [1, 2]);
     assert_eq!(foreign, ["keep".to_owned()]);
     let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let old = PgAllPos::new(store.history(), legacy.0, legacy.1);
     let restored: Vec<_> = store
         .read_all(None)
         .await
@@ -265,7 +356,11 @@ async fn populated_version_one_preserves_position_and_next_identity() {
         .await
         .unwrap();
     assert_eq!(existing.len(), 1);
-    let position = PgAllPos::new(before.1.parse().unwrap(), u64::try_from(before.0).unwrap());
+    let position = PgAllPos::new(
+        store.history(),
+        before.1.parse().unwrap(),
+        u64::try_from(before.0).unwrap(),
+    );
     assert_eq!(existing[0].0, position);
     assert_eq!(existing[0].1, StreamKey::from_bytes("upgrade"));
     assert_eq!(existing[0].2.event_type(), "Old");
@@ -351,7 +446,11 @@ async fn rejected_version_two_rolls_back_and_preserves_repairable_version_one() 
     assert_eq!(repaired.len(), 1);
     assert_eq!(
         repaired[0].0,
-        PgAllPos::new(before.1.parse().unwrap(), u64::try_from(before.0).unwrap())
+        PgAllPos::new(
+            store.history(),
+            before.1.parse().unwrap(),
+            u64::try_from(before.0).unwrap()
+        )
     );
     assert_eq!(repaired[0].2.version(), Version::INITIAL);
     assert_eq!(repaired[0].2.payload(), b"old");

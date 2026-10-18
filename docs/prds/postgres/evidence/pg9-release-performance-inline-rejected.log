@@ -1,0 +1,33 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-release-performance/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-release-performance/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-release-performance/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-release-performance/adapters/fjall)
+    Finished `bench` profile [optimized] target(s) in 2.79s
+     Running benches/fjall_benchmarks.rs (/tmp/mnesis-release-performance-target/release/deps/fjall_benchmarks-138285fb91733059)
+Benchmarking encoding/decode_frame/small_64B
+Benchmarking encoding/decode_frame/small_64B: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/small_64B: Collecting 30 samples in estimated 3.0000 s (883M iterations)
+Benchmarking encoding/decode_frame/small_64B: Analyzing
+encoding/decode_frame/small_64B
+                        time:   [3.5537 ns 3.5836 ns 3.6029 ns]
+                        change: [+32.035% +34.121% +36.274%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Benchmarking encoding/decode_frame/medium_1KB
+Benchmarking encoding/decode_frame/medium_1KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/medium_1KB: Collecting 30 samples in estimated 3.0000 s (844M iterations)
+Benchmarking encoding/decode_frame/medium_1KB: Analyzing
+encoding/decode_frame/medium_1KB
+                        time:   [3.4073 ns 3.4459 ns 3.4891 ns]
+                        change: [+27.498% +29.645% +31.569%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 4 outliers among 30 measurements (13.33%)
+  4 (13.33%) high mild
+Benchmarking encoding/decode_frame/large_64KB
+Benchmarking encoding/decode_frame/large_64KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/large_64KB: Collecting 30 samples in estimated 3.0000 s (871M iterations)
+Benchmarking encoding/decode_frame/large_64KB: Analyzing
+encoding/decode_frame/large_64KB
+                        time:   [3.4080 ns 3.4634 ns 3.5063 ns]
+                        change: [+25.845% +27.743% +29.417%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+

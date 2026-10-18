@@ -5,6 +5,7 @@ use sqlx::migrate::Migrator;
 use sqlx::{Connection, PgConnection, PgPool};
 
 use crate::error::PostgresError;
+use crate::{History, history};
 
 static MIGRATIONS: LazyLock<Migrator> = LazyLock::new(|| {
     let mut migrator = sqlx::migrate!("./migrations");
@@ -25,25 +26,26 @@ pub async fn migrate(pool: &PgPool) -> Result<(), PostgresError> {
         .run_direct(None, &mut *connection, false)
         .await
         .map_err(PostgresError::Migration)?;
-    validate(&mut connection).await
+    validate(&mut connection).await.map(|_| ())
 }
 
-pub async fn validate_pool(pool: &PgPool) -> Result<(), PostgresError> {
+pub async fn validate_pool(pool: &PgPool) -> Result<History, PostgresError> {
     let mut connection = pool.acquire().await.map_err(PostgresError::Sqlx)?;
     connection.close_on_drop();
     validate(&mut connection).await
 }
 
-async fn validate(connection: &mut PgConnection) -> Result<(), PostgresError> {
+async fn validate(connection: &mut PgConnection) -> Result<History, PostgresError> {
     let mut view = connection
         .begin_with("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")
         .await
         .map_err(PostgresError::Sqlx)?;
-    validate_current(&mut view).await?;
-    view.rollback().await.map_err(PostgresError::Sqlx)
+    let history = validate_current(&mut view).await?;
+    view.rollback().await.map_err(PostgresError::Sqlx)?;
+    Ok(history)
 }
 
-async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresError> {
+async fn validate_current(connection: &mut PgConnection) -> Result<History, PostgresError> {
     let ready: bool =
         sqlx::query_scalar("SELECT pg_catalog.to_regclass('mnesis._sqlx_migrations') IS NOT NULL")
             .fetch_one(&mut *connection)
@@ -83,7 +85,7 @@ async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresE
         ));
     }
     let checkpoints: bool = sqlx::query_scalar(include_str!("checkpoint.sql"))
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await
         .map_err(PostgresError::Sqlx)?;
     if !checkpoints {
@@ -91,7 +93,7 @@ async fn validate_current(connection: &mut PgConnection) -> Result<(), PostgresE
             "checkpoint columns, bounds, logging, primary key or identity reference differ",
         ));
     }
-    Ok(())
+    history::load(connection).await
 }
 
 async fn validate_shape(connection: &mut PgConnection, table: &str) -> Result<(), PostgresError> {

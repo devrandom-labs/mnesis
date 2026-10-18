@@ -1,0 +1,27 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-backup/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-backup/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backup/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-backup/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backup/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backup/crates/store-testing)
+error[E0277]: can't compare `mnesis_store::bytes::Bytes` with `[u8; 8]`
+   --> adapters/postgres/tests/restore_tests.rs:138:5
+    |
+138 |     assert_eq!(stream[0].payload_bytes(), b"original");
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no implementation for `mnesis_store::bytes::Bytes == [u8; 8]`
+    |
+    = help: the trait `PartialEq<[u8; 8]>` is not implemented for `mnesis_store::bytes::Bytes`
+    = help: `mnesis_store::bytes::Bytes` implements trait `PartialEq<Rhs>`:
+              PartialEq<&T>
+              PartialEq<BytesMut>
+              PartialEq<Vec<u8>>
+              PartialEq<[u8]>
+              PartialEq<std::string::String>
+              PartialEq<str>
+              PartialEq
+    = note: required for `mnesis_store::bytes::Bytes` to implement `PartialEq<&[u8; 8]>`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `mnesis-postgres` (test "restore_tests") due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --manifest-path /private/tmp/mnesis-postgres-backup/Cargo.toml --no-run --message-format json-render-diagnostics --package mnesis-postgres --test restore_tests --all-features --locked` exited with code 101

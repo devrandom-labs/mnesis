@@ -1,0 +1,30 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7c-guards/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.11s
+────────────
+ Nextest run ID 4cdc836c-2f8c-4322-8533-6fb6f955997e with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   1.535s] (1/1) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+  stdout ───
+
+    running 1 test
+    test copied_native_database_bindings_reject_without_repair ... FAILED
+
+    failures:
+
+    failures:
+        copied_native_database_bindings_reject_without_repair
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.52s
+
+  stderr ───
+
+    thread 'copied_native_database_bindings_reject_without_repair' (100019396) panicked at adapters/postgres/tests/restore_tests.rs:329:5:
+    assertion failed: matches!(PostgresStore::from_pool(pool.clone()).await,
+        Err(PostgresError::DatabaseHistory))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.539s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   1.535s] (1/1) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+error: test run failed

@@ -4003,3 +4003,682 @@ Raw callgraphs retained without expiring signed download URLs. Initial read-only
 GraphQL query rejected wrong enum GitHub; native schema response says GITHUB,
 corrected query succeeds. Initial jq on gzip bytes rejected; proper gzip decode
 used. Neither inspection rejection is a native test or performance proof.
+PG7c initial fresh-cluster fixture REJECTED at compilation: Bytes cannot compare
+with &[u8;8] (E0277). THREE reviews:1restore coherence invariant not exercised;
+2fixture assertion type mistake, NOT evidence of copied-xid defect;3zero runtime/
+Postgres startup/test count, no caught-defect credit. Correct only slice coercion
+and rerun same test; no original source/expected history assertions changed.
+PG7c first actual independent-cluster native run FAIL1/1,1.900s. THREE reviews:
+1real migrated source append plus native full-schema pg_dump/psql restore;
+2actual from_pool rejects Schema(events columns/defaults/constraints/index), so
+this is NOT the claimed xid-watermark fault;3real PG18.6 source/target clusters,
+0skips, no history/read assertions reached. Current schema validator hardcodes
+stream_id attnum9 after migration dropped an earlier column; pg_dump recreates
+only live columns and can renumber them. That cause is a source-backed hypothesis
+pending catalog comparison, not accepted explanation. Fail-closed behavior
+retained. Next use independently migrated exact target schema and native DATA-
+ONLY dump excluding already-installed migration row data. This preserves actual
+schema/validation and isolates copied xid data, rather than bypassing auditor
+or weakening expected stream/global coherence. Both distinct paths remain in
+required logical-restore contract decisions; no raw-schema support claimed.
+PG7c isolated DATA-ONLY logical restore produces actual original defect:
+FAIL1/1,1.557s, actual global.len()0 versus expected1 after PostgresStore opened
+successfully. THREE reviews:1real source/target independent PG18.6 clusters,
+source migration+128 actual allocated transaction IDs, actual adapter append,
+native pg_dump data-only +psql into separately migrated target;2actual adapter
+stream read yields exactly1 original payload, stored source txid strictly exceeds
+actual fresh target counter, then actual read_all(None) omits it;3no auditor
+bypass (target schema installed and validated by same migrator),0filtered/skips,
+no original product changes, all earlier exact payload/counter assertions reached,
+server cleanup before final failing assertion. This is real xid-history mismatch,
+not the earlier full-schema rejection or compile fixture failure. Both prior
+rejected/other-path results retained. No supported logical restore policy or
+history/checkpoint context API chosen yet. Need native evidenced completed-CBOR
+reimport/rebuild and foreign checkpoint rejection, plus operator drill; current
+probe remains RED and uncommitted until contract/implementation resolves it.
+
+Release repairPR386 CI owner jobs inspected: two real native203/203 PASS
+32.902/35.986s,0skips. EACH reviewed THREE ways:1whole adapter contract current
+12fd production;2all actual session/listing/import/checkpoint/snapshot and prior
+fault laws;3fresh native job, installed duplicate summary replay not another run.
+Each of ten native feature smokes reviewed THREE ways: exact requested capability;
+real native conformance/consumer assertions;1 actual each,14/15/2/7/10filtered not
+passes, --no-tests=fail and pipefail retained. Two compiler jobs2/1/1 functions
+PASS71.37/2.61/7.67s and109.80/3.95/12.83s. EACH function run reviewed THREE
+ways: intended diagnostic owner; actual rejected compiler fixtures;0skips,
+no stderr rewrite or native/runtime overclaim. Full Nix jobs still pending.
+
+Release repair mutation39151448951 actual log 'No source changes in this PR —
+nothing to mutate', API0artifacts. THREE reviews:1workflow-only production diff;
+2native diff selector truly selects0Rustmutations;3green is gate/selection only,
+0baseline/runtime/caught/survivor credit, no nonexistent artifact inferred.
+Fuzz39151449004 four LibFuzzer61s runs wire6613345/header1763132/chunk1264851/
+value5603167 PASS. EACH reviewed THREE ways: unchanged production decoder owner;
+actual mutations execute without crash; finite campaign, no adapterDB proof.
+Four AFL60s runs PASS with0crashes/timeouts:wire37.25%/header47.61%/chunk43.52%/
+value8.31% bitmap coverage. EACH reviewed THREE ways: same target and locked
+build; actual native fuzz runs to original time limit; bitmap not line coverage,
+known independent crash-exit propagation gap still PG9. No altered workload,
+compiler diagnostics, test exclusions, timeout, threshold or gate.
+Native17.10 history-capability inspection: pg_control_system().system_identifier
+and current pg_database.oid readable by freshly created unprivileged NOLOGIN role
+with no added grants. Original speculation that this necessarily needs monitoring
+or superuser grants is disproved. Actual transaction rolls role creation back.
+THREE reviews:1minimum runtime-read capability;2actual SET LOCAL ROLE invokes
+native builtin, not admin-only privilege inquiry;3PG17.10 proof only,18.6 and
+physical/logical context semantics not inferred. No API/migration or extra grant
+retained. System/DB identity is a candidate needing bounded representation and
+checkpoint/history compatibility decision, not an automatically selected design.
+Release repair full CI final exact49c1b1c6c0b18e1775071d8249cd4927af2ce541:
+40SUCCESS1scheduledSKIP,CLEAN/MERGEABLE,0reviews/threads. Two full workspace runs
+1563 PASS115.763/110.972s,4compiler-function exclusions separately verified above.
+EACH reviewed THREE ways: entire default workspace owner; actual unchanged
+property/resilience assertions; DB-free returns not native and4excluded functions
+not passes. Remaining two full-gate native203 PASS34.909/30.928s,0skips EACH
+reviewed THREE ways: all current capability contracts; actual session/ordering/
+state/uncertainty/wake regressions; fresh actual execution, no installed replay
+credit. Each remaining ten feature smokes reviewed THREE ways: owning capability;
+actual native law;1selected14/15/2/7/10filtered not passes. Each six replay runs
+2/1/1 per gate reviewed THREE ways: decoder owner; actual corpus assertions;
+finite replay,0filtered, not additional deep fuzz/native credit. Each feature-unit
+matrix run in retained summary reviewed THREE ways: actual isolated capability;
+original owner assertions/compilation obligation;0-test harnesses compilation-only,
+not native or fabricated runtime successes. No new generated mutation candidates
+or artifact;0Rustdiff proven by actual selector/API. No gate/expectation weakened.
+Normal protected exact-head merge authorized; live workflow still needs proof.
+
+PG7c fixture refactor (native dump/restore moves to Cluster::copy_into, under
+220line test budget) preserves original data-only scenario and every oracle.
+Actual fresh native FAIL1/1,2.106s on global0vs1 again. THREE reviews:1same actual
+adapter/history invariant;2same exact-payload and source-counter preconditions
+passed before final expected1actual0;3only fixture extraction/formatting, no
+product/auditor/assertion/timeout relaxation,0filtered/skips. Red remains pending
+supported restore/history contract decision, not a passing readiness claim.
+
+Release workflow repair DELIVERY: PR386 normal protected squash at exact signed
+head49c1b1c6c0b18e1775071d8249cd4927af2ce541,40success/1scheduledskip,
+CLEAN/MERGEABLE0reviewthreads. Merge87e87d6e00b0d7703a93cf577ec4893a9d49d35e
+2026-10-18T18:09:28Z; actual normal CLI issued successfully, remote branch absent,
+clean worktree retains signed reviewed head. Explicit Release MAIN dispatch
+39152877808 at18:09:40Z uses actual merged87e87d6e and contains separate PR
+checkout/synchronization. Root main remains0.4.0 (already released2026-10-03),
+releasePR378 remainsOPEN9aab7b8 at dispatch; no unmerged PR publication. Live
+App-lock commit/AFL proof still pending, independent CodSpeed failure still OPEN.
+PG7c current native characterization with context capability assertions FAIL1/1
+1.699s on SAME actual global0vs1. THREE reviews:1actual adapter and unchanged
+restore/payload/counter invariant;2before final red, separate fresh18.6 clusters
+have DISTINCT native system_identifiers but SAME postgres databaseOID, both
+readable under newly created NOLOGIN role without grants;3both role transactions
+rolled back before actual scan,0skips/filtered,189test lines<=220 budget,
+0product changes. This disproves blanket privilege worries for18.6 too and
+shows databaseOID alone cannot distinguish these histories. No UUID dependency,
+public history/position API or migration chosen yet. Initial patch context
+mismatch changed no file; corrected exact source patch then native run above.
+
+Release live workflow39152877808 SUCCESS, ROOTmain87e87d6e,18:09:40–18:11:46Z.
+Actual GitHubApp verified(valid) commitdaefe06097f7310ef21a596ca8ee1bb7a5049994,
+authordevrandom-release-plz[bot],parent9556f2c985d22fca12ef50424ea411e307ea2b39,
+headline chore(release): synchronize fuzz workspace locks. EXACTLY two changed
+files fuzz/Cargo.lock and fuzz-afl/Cargo.lock,4local version edits0.4.0=>0.4.1,
+no unrelated registry pins/source/workloads changed. THREE reviews:1required
+locked fuzz graphs track release versions;2real dispatched workflow/App API
+conditional commit succeeds and triggers required checks;3actual API verified
+signature and precise parent/file diff, not just resolver/no-op control.
+Root publisher logs explicitly skip ALLnine already-published0.4.0 crates; no
+0.4.1/incomplete adapter publication. THREE reviews:1separate-checkout publication
+boundary;2actual root version/tag skip logs, not branch-ref inference;3release378
+remainsOPEN with newhead,0new publication credit. Fuzzrun39153035060 actual four
+AFL jobs executing; no repaired fuzz-runtime credit until their real completions.
+CodSpeed on refreshedhead fails independently again; no gate waiver or change.
+PG9 user-directed release repair continues while focused workflowPR386 head
+49c1b1c6c0b18e1775071d8249cd4927af2ce541 runs protectedCI. No workflow delivery or
+successful release check yet claimed. Actual CodSpeed traces for ALL3payloads
+reconcile exact reported regression: base/head instruction35ns unchanged;
+L1/LLmiss22.2222/444.4444=>25/500ns. Exactly58.3333ns difference from simulated
+cache behavior, not added instructions, no syscall/allocator cost. THREE reviews
+EACH comparison:1same real production decoder and unchanged input;2actual profile
+self totals reproduce501.6667=>560ns and decode_frame self accounts for delta;
+3profile source IDs from failed8836/base88a, not runtime hardware causation,
+not a post-fix result. Live refreshed release9aab repeats identical3regressions.
+Pre-edit supported inline-hint hypothesis/budget/falsifier recorded before edit;
+actual unchanged native benchmark baseline now compiling. No product edit yet,
+no metric/threshold/workload/source-policy change. Native ARM alone insufficient
+for x86 release proof. Review after docs-only amended hook: full12checks cached,
+0fresh runtime; unchanged complete gate, no source assertion/lint relaxation.
+
+PG9 native unchanged benchmark first run PASS3actual decode workloads, pinned
+native environment in evidence, releaseprofile,30samples each,1s warmup+3s
+measurement, 64/1024/65536byte payloads. THREE reviews:1actual production decoder
+through original owning Fjall benchmark;2no surrogate function/setup in timing,
+original bytes/data unchanged;3warm native ARM timing NOT cold x86 simulation,
+all three selected, other benchmark groups excluded from this experiment rather
+than counted successes. Raw confidence intervals/outliers retained. Repeat same
+command twice to measure noise before single-line experiment; no attribute yet.
+Native unchanged benchmark second run PASS3actual workloads. THREE reviews:
+1same owning decoder and payloads;2actual original binary/command unchanged,
+30samples each/no data changes;3confidence intervals and outliers retained,
+noise claims use repeated native samples, never simulation equivalence. No
+post-change improvement claimed; second run still before any product edit.
+Native unchanged benchmark third run PASS3actual workloads. THREE reviews:
+1same production owner/input sizes;2actual original compiled binary, no source
+change yet;3all30samples per case and full CIs/outliers retained, native noise
+baseline only. Three original-run logs now recorded before the one-line hint.
+
+PG9 native single #[inline] candidate REJECTED: all three workloads regress
+significantly, e.g. large payload3.4080–3.5063ns versus baseline2.6427–2.7147ns,
+Criterion+25.845%..+29.417%. THREE reviews:1same production decoder and original
+three inputs/30samples;2actual one-line source hypothesis produces worse native
+runtime, falsifier met;3no changed benchmark/threshold/deadline/feature graph,
+full raw CIs and outliers preserved. Do not keep to chase a possibly greener
+CodSpeed result. No semantic test suite claimed. Revert ONLY new attribute and
+run saved original compiled binary as A/B/A control; no need three redundant
+candidate campaigns after this clear falsifier.
+Native A/B/A original-binary control PASS3 actual workloads; large2.5579–2.5837ns,
+restoring the original baseline after candidate3.4080–3.5063ns. THREE reviews:
+1actual same decoder/input owner;2saved pre-edit original executable, source
+attribute reverted and git diff confirms zero production changes;3same pinned
+shell/hardware/options, full CIs/outliers retained, not x86 simulation evidence.
+Binary file sizes original6704128/candidate6704640 (+512bytes, includes all file
+sections, not a claimed text-only size). Both runtime and file size reject hint.
+No retained product/workload change; failed experiment remains documented.
+Release0.4.1 actual owning benchmark PASS3workloads on same pinned M4Pro/Rust
+with unchanged workload/options: CIs small2.6005–2.6195ns,medium2.5884–2.6213ns,
+large2.5975–2.6178ns. THREE reviews:1actual original release8836 source and local
+0.4.1 Cargo graph, locked build;2actual production source/benchmark diff versus
+12fd for kernel/store/Fjall is EMPTY, all three inputs execute;3native warm ARM
+is not x86 cold-cache simulation and cannot waive that gate. Criterion's printed
+-21..26% 'improvement' compares its SAVED FAILED INLINE CANDIDATE baseline from
+the shared target, not original0.4.0. Do NOT attribute that comparison to version
+bump. Original/reversion run logs give correct direct comparison; no retained
+product or benchmark change and release performance failure stays OPEN.
+
+Release lock failure VERIFIED FIXED on real release headdaefe06097f7310ef21a596ca8ee1bb7a5049994:
+actual deep-fuzz39153035060 SUCCESS including required fuzz-gate and four original
+`cargo afl build --release --locked` builds followed by actual60s AFL campaigns.
+Wire/header/chunk/value all PASS0crashes/timeouts, bitmap37.25/47.61/43.52/8.31%.
+EACH reviewed THREE ways:1same required production target/workload/locked graph;
+2original pre-fuzz stale-lock failure removed and actual native fuzzing executes;
+3finite campaign, bitmap not line coverage, no dropped --locked, deadline or
+crash-gate claim (separate known propagation gap remainsPG9). Four LibFuzzer61s
+campaigns PASS wire6533505/header1917920/chunk1476989/value9883659 inputs. EACH
+reviewed THREE ways: decoder owner; actual original fuzz assertions with no crash;
+finite campaign not native Postgres or exhaustive proof. All exact log summaries
+retained. This confirms the workflow fix rather than only a passing resolver.
+
+Independent CodSpeed check117751101287 still FAIL-10.42% on repaired headdaefe,
+three same decode workloads. THREE reviews:1unchanged required workload/threshold;
+2actual external failed check with same reported501.7=>560ns, not dismissed by
+successful AFL;3old downloaded8836 traces explain old same-cost profile, not
+falsely claimed new-head traces; native ARM cannot waive x86 cold simulation.
+No acceptable retained performance repair/waiver yet. PR378 remainsOPEN and no
+new adapter publication is claimed. Persistent PG0–PG9 goal remainsACTIVE.
+
+Research consolidation: backup branch rebased from12fd to actual merged87e87d6e,
+all append conflicts resolved by retaining main plus exact new experiment blocks.
+Performance-only rejected experiment/three original traces/native results merged
+into this record/evidence; original performance worktree kept unchanged. New
+restore test remains189lines and RED,0production changes. No new checks credited
+for mechanical rebase/record consolidation. Named stash retained in progress.
+
+PG7c contract selection: raw copied xid8 histories must reject before runtime use;
+logical restore is completed-CBOR reimport with new positions/history and projection
+rebuild. The original desired coherence row1 actual0 remains in immutable red logs.
+The retained regression now requires exact typed startup rejection for SAME unsafe
+copied data, not expected0 or ignored data. New history metadata is deliberately
+excluded from the data-copy probe to isolate the future-xid guard; copied metadata
+has its own native rejection law. SQLx0.9 supports fixed16byte arrays natively;
+no UUID dependency/hand parser. History is persisted generation+native database
+binding. Scope changes are an explicit documented0.x breaking minor under actual
+STABILITY.md, not an unscoped compatibility fallback. All legacy numeric fields
+and state/revisions stay unchanged on explicit migration, scoped under newhistory.
+PG7c first all-feature library cargo check PASS5.22s. THREE reviews:1new typed
+scope/checkpoint SQL library compiles;2selected Rust/SQLx array capabilities used;
+3compilation-only0runtime/native proof, no complete-gate claim. Original schema
+and copied-xid native regressions not yet rerun on new implementation.
+PG7c first new-history native PASS1/1,1.730s. THREE reviews:1same actual unsafe
+copied futurexid dataset from original global0vs1, now exact FutureTransaction
+startup rejection;2original payload/sourcecounter/native context preconditions
+still pass, no zero-row-success assertion or ignore;3real independent18.6
+clusters/migrator5/native tools and SQLx SUT,0skips, no whole-suite/physical recovery
+or foreign cursor claim. Need separate guards/counterfactuals and regressions.
+PG7c native four laws PASS4/4,4.511s,0skips. EACH reviewed THREE ways:
+- settled-above-xmin: stable order/open contract; actual spawn+Barrier commits B
+  while native A holds older xid, second store opens before rollback; exact same
+  history/one row/assigned position after release, not a relaxed xmin check.
+- futurecopy: original dataset still rejects FutureTransaction; actual migrate5/
+  native data-only copy and sourcecounter/payload assertions;0missing/skipped laws.
+- physicalbinding: actual other-cluster systemid and other-database OID each
+  reject DatabaseHistory; stored generation stays exact original bytes; no repair,
+  no extra privileges inferred, no physical restore credit yet.
+- foreignscope: real same-database schema recreation gives NEW generation;
+  read_all and checkpoint write reject exact old/new HistoryMismatch AFTER pool
+  closure; proves validation precedes acquisition, not a generic connection error.
+Native fixture now uses fsync default (removed -F); setup initdb --no-sync is not
+hardware power-loss evidence. No complete capacity/lifecycle/backup claim.
+PG7c all-test discovery rejected at compilation E0382: one runtime-role assertion
+asked a dropped store for its scope. THREE reviews:1actual native grant law not
+executed;2fixture constructor adaptation error, not history-fault evidence;
+3zero runtime, no flaky retry/skip credited. Use retained administrative fixture's
+history for the expected record, preserving store drop and role cleanup ordering.
+PG7c native five laws PASS5/5,5.904s,0skips. EACH reviewed THREE ways:
+1same four actual scope/binding/future/held-xmin contracts plus physical recovery;
+2original four exact typed/assigned-position assertions repeat, and REAL
+pg_basebackup--wal-method=stream copies fsync-on database after application pools
+close, original primary stops before clone boots, startup validates migrated
+metadata, cache+checkpoint exact states/revision/position survive, new append/
+exclusive global resume/CAS advance succeed;
+3fresh independent18.6 processes/no installed-log replay,1.350s physical law,
+not a power-loss/cross-node failover or real projection-stepper restart claim.
+Those broader recovery requirements remain pending.
+Strict all-target Clippy rejects one private-module redundant pub(crate) on
+history::load. THREE reviews: original lint law unchanged; visibility spelling
+only (module stays private, only History reexported); compilation-only0runtime,
+no suppression or changed lint policy. Correct to pub within private module.
+Second strict Clippy run rejects physical drill88/80lines; THREE reviews:
+original function-length contract; actual diagnostic only, no runtime result;
+no suppression/limit change. Reuse a private checkpoint fixture constructor for
+its two identical Advance/schema fields, preserving every input and assertion.
+Next strict Clippy rejects const-eligible fixture constructor and original runtime
+role law expanded81/80lines. THREE reviews:1same const/function bounds;2static
+source diagnostics,0runtime;3no lint relaxation. Make fixture constructor const;
+extract existing actual SQL permission probes and ADD two exact42501 history
+UPDATE/DELETE probes. All five original permission/state/role cleanup assertions
+stay; the first209 native campaign already compiled still tests the original five
+probes, and later targeted/final runs must execute seven. No new grant permits
+identity mutation. Snapshot role gains SELECTevents for the new bounded startup
+check; no event write/delete right added. Full runtime evidence still pending.
+PG7c first complete native209/209 PASS44.268s,0skips (17.10 main fixture plus
+independent18.6 restore clusters). THREE reviews:1entire adapter default/optional
+contracts including original bounded reads/final hints/atomicity/outcome/state/
+listing/session/upgrade laws;2actual new physical/history/future safeguards and
+exact37-byte floor/53-byte edge/54-byte overflow and megabyte omission execute;
+3no native early-return/filtered/cache credit. This compiled cohort has the
+original five role-denial probes, not subsequently added two history denials.
+One import test takes12.387s versus0.051s in recorded PG7b203/24.551s baseline.
+The new5restore laws add5.9s, but elapsed total is not a throughput benchmark.
+Cause of that import outlier UNPROVEN; retain/investigate, no timeout/workload
+relaxation or performance-parity claim. Prior cold fixture variability alone does
+not establish its cause. Final targeted/repeated native evidence still required.
+Fourth strict all-target Clippy PASS5.96s. THREE reviews: original lint rules;
+actual current library/all test targets compile warning-free;0runtime credit,
+no default/isolated-feature or complete Nix-gate claim.
+PG7c populated-v4 upgrade first run REJECTED fixture setup: native42804 state
+integer[] rather than bytea from untyped [0,255,1] bind. THREE reviews:1backfill/
+collision law NOT reached;2actual SQLx generic bind defaults integer element,
+not product migration failure;3native2old tests pass/1fixturefails/3UNRUN,0skips,
+no backfill credit. Correct only element type to u8 and retain all state bytes.
+Import outlier repeat1 nativePASS1/1 11.835s,14filtered. THREE reviews:1same actual
+import error/partial-state contract;2original23514 and exact WholeChunk/PerStream
+state assertions pass but latency regression REPRODUCES;3not noise-dismissed or
+weakened deadline, baseline0.051s remains. Investigate native query plan/activity
+before keeping performance claim. No fixture delay removed to hide result.
+PG7c corrected populated-v4 upgrade cohort PASS6/6,24.667s,0skips. THREE reviews:
+1migration5 data adoption/rollback/backfill/reopen plus all prior upgrade laws;
+2new actual4schema row has MAXrevision/schema/txid/seq and binary0/255/1 state,
+foreign history table collision yields exact42P07/step5 without added column or
+changed checksums/state, repair preserves all1–4checksums/foreign data and exact
+scoped saved state across reopen;3actual17.10 native, no copying new metadata onto
+unknown old cursor, external2scalar adoption remains explicit operator choice.
+First old upgrade law takes24.424s; retain as observed timing outlier.
+Import repeated cohort PASS1/1 6.531s (14filtered), then paired observer cohort
+PASS1/1 0.060s (14filtered). EACH reviewed THREE ways: same original import
+failure/partial commit contract; actual23514 and exact per-policy stored rows;
+no source/deadline/expected-value changes, unselected14not passes. A psql observer
+initially rejected empty query buffer; corrected watch missed fast episode, so
+it is NOT wait-event evidence. Three actual schema query plans run under1ms
+execution (history0.559,checkpoint0.406,snapshot0.281), not proof against all
+client overhead. SQLx actual locked source constructs default options using
+whoami/getpwuid_r BEFORE explicit URL username; possible host lookup cost, NOT
+proved causal. Native Mac sample of another slow12.260s upgrade invocation
+captures _dyld_start and loader debugger-notification Mach waits before Rust;
+this narrows part of observed interval but sampling can perturb loader timing.
+Do not attribute all latency to lookup or dismiss it as noise. Raw source/stack/
+plan evidence retained; libtest body timing diagnostic pending. No gate replacement.
+Diagnostic libtest runs SAME real import law PASS1/1 6.15s,14filtered. THREE
+reviews: same23514/partial-state assertions; actual in-process harness timing
+still slow; not substituted for nextest/Nix gate and disproves a loader-only
+explanation. Need per-stage/late stack evidence. Host-user lookup hypothesis
+remains unproved. Previous12.260s sampled upgrade PASS1/1 5filtered reviewed3ways:
+original upgrade/checksum/history invariant; actual old law unchanged;
+initial3s sample saw loader only, cannot attribute all12s or dismiss body cost.
+Explicit PGUSER=joel control runs same actual import law, same DATABASE_URL
+including user=joel, with no product/workload/deadline change. Actual1/1PASS,
+14filtered (timing retained). THREE reviews: original error/partial-state contract;
+unchanged actual database identity and SQLx graph; environment default lookup
+only is candidate causal variable, not a weaker DB/user or passing threshold.
+Need reverse/stack evidence before assigning root cause or changing setup.
+
+PG7c timing diagnostic closeout: explicit PGUSER=joel libtest PASS1/1 in0.05s;
+reverse unset-PGUSER libtest PASS1/1 in0.04s, each14filtered. THREE reviews EACH:
+(1) unchanged actual import23514 and exact policy-dependent committed rows;
+(2) neither fault workload, credentials, assertions nor source changed;
+(3) reverse did NOT reproduce slowdown, so PGUSER causality remains unproved.
+Late sampler found no still-running test and produced no stack: zero stack credit.
+Retain timing outliers without a performance-parity claim; do not alter project
+configuration or spend another diagnostic loop without a slow native witness.
+
+PG7c followup BEFORE edit: the future-XID guard's exact equality boundary is
+not yet falsified. Add <=40 native-test lines (cumulative native additions <=620,
+previous580 plus40), no additional product/API/dependency budget. Set an existing
+copied event to the next native transaction ID in one admin statement, assert it
+equals the new snapshot xmax, then require exact FutureTransaction. A >= to >
+counterfactual must fail. Keep the original128-ahead source/copy/payload oracle.
+Rollback: remove only this boundary fixture, never weaken the guard or old tests.
+Current strict Clippy PASS6.94s before equality helper edit. THREE reviews:
+(1) all existing deny levels and80-line rule retained; (2) populated-v4 upgrade
+and seven denial probes compile in all-target/all-feature scope; (3) zero runtime
+credit and no current complete-gate claim. Boundary helper still needs fresh check.
+PG7c equality-boundary cohort PASS5/5 native5.696s,0skips. THREE reviews:
+(1) original payload/counter, physical recovery, mismatched positions and valid
+held-xmin/open contracts remain; (2) copied far-future row AND exactly-xmax row
+both reject FutureTransaction, with actual equality asserted before open;
+(3) independent18.6 clusters, fsync-on physical recovery, no filtered/skipped
+case credited and no timeout/expected result weakened. Manual falsifiers pending.
+PG7c fresh equality counterfactual (separate source worktree, package-clean owned
+target) native FAIL1/1 in1.634s,4unselected. THREE reviews: (1) exactly-xmax
+transaction must reject; (2) >= changed only to >, original far-future/payload
+assertions pass and exact boundary assertion fails at restore_tests:257;
+(3) runtime failure, not build failure, timeout, skipped case or fixture poisoning.
+The production guard remains >=. This is a meaningful caught boundary defect.
+PG7c fresh xmin counterfactual native FAIL1/1 in0.784s,4unselected. THREE reviews:
+(1) newer committed rows behind an unrelated older writer remain valid on open;
+(2) replacing only the future guard's xmax with xmin rejects that valid history
+with exact FutureTransaction, after real Barrier/spawn overlap; (3) native
+assertion failure at restore_tests:359, no timeout/build rejection credit.
+Current strict Clippy PASS9.10s. THREE reviews: (1) unchanged deny policy;
+(2) all targets/all features including equality helper compile warning-free;
+(3) compilation only, no extra runtime or feature-isolation credit.
+PG7c fresh disabled-future counterfactual native FAIL1/1 in1.556s,4unselected.
+THREE reviews: (1) independently copied committed events must not open under a
+lower transaction counter; (2) bypassing only future rejection accepts the unsafe
+copy and fails exact FutureTransaction after the unchanged payload/source-counter
+oracles; (3) actual runtime assertion at restore_tests:242, no build/skip credit.
+Production remains unchanged. Each control uses isolated private clusters, so
+concurrent main-cluster full-suite verification cannot move their counters.
+PG7c fresh disabled-namespace counterfactual native FAIL1/1 in0.916s,4unselected.
+THREE reviews: (1) old positions after same-database schema recreation must return
+exact identities before pool acquisition; (2) bypassing History::check fails the
+read_all exact mismatch assertion with the caller pool already closed;
+(3) current schema generation really differs, source control compiled freshly,
+no guessed mismatch, skip/build-error credit or changed workload. The production
+method still checks both global resumes and checkpoint writes.
+PG7c current full native PASS210/210 in37.703s,0skips. THREE reviews:
+(1) original203 event/notification/outcome/atomic/cache/checkpoint/listing/session
+laws plus five restore laws, the original37-byte floor and populated-v4 upgrade;
+(2) seven exact42501 restricted-role probes now execute, physical backup retains
+scope/state and future equality is checked with real counters; (3) actual17.10
+and independent18.6 clusters, no filter/skip/cached execution or whole-release
+claim. Timing alone is not capacity or CodSpeed evidence.
+PG7c system-binding counterfactual native FAIL1/1 in1.411s,4unselected. THREE
+reviews: (1) foreign actual cluster identity must reject; (2) replacing only its
+comparison with self-equality accepts it, failing exact DatabaseHistory at318;
+(3) SQL source recompiled after package clean, runtime assertion not compile
+failure, database binding guard and all other checks remain active.
+
+PG7c fresh audit BEFORE edit: no law mutates a checkpoint's saved history after
+open. Input mismatch is covered but does not prove metadata rejection before
+stale handling/body transfer. Add <=70 new native lines, cumulative <=690
+(previous620 plus70), zero product/SQL/dependency budget. Use admin fault injection
+only to remove the FK and change16bytes on a real megabyte checkpoint, then
+require exact HistoryMismatch for matching/stale reads and conditional writes,
+unchanged complete pair, and the existing262144-byte allocation threshold.
+A fresh SQL control omitting only the body history predicate must fail that bound.
+This closes a read corruption/transfer gap; do not weaken original tests or limits.
+PG7c database-binding counterfactual native FAIL1/1 in1.539s,4unselected. THREE
+reviews: (1) another database OID must reject even on the same native cluster;
+(2) bypassing only database-ID comparison leaves foreign-cluster rejection
+working, then fails the second exact DatabaseHistory assertion at329;
+(3) native runtime failure after fresh compile, no unviable/build/skip credit.
+PG7c saved-history corruption law native PASS1/1 in4.580s,13unselected. THREE
+reviews: (1) exact HistoryMismatch precedes stale-schema handling and conditional
+replacement; (2) actual one-megabyte saved state, FK removed by admin only,
+16-byte history mutated, both matching/stale schema reads and a CAS write reject,
+complete revision/schema/position/state/history tuple stays unchanged;
+(3) two read allocations remain below original262144 ceiling; no input limit,
+workload or assertion weakened, unselected13not credited. Timing is not a benchmark.
+PG7c fresh foreign-body SQL control native FAIL1/1 in0.057s,13unselected. THREE
+reviews: (1) foreign metadata must not transfer its state body even when its
+schema matches; (2) only c.history=$4 becomes $4::bytea=$4::bytea, retaining the
+four native bind parameters and all other guards, exact HistoryMismatch still
+passes but allocation is6289652 > original262144 at checkpoint_tests:549;
+(3) actual runtime body-transfer witness, not parameter-count/protocol rejection,
+no workload/limit/oracle change and no filtered-case credit. Restore the isolated
+control copy; production predicate never changed.
+PG7c default feature run REJECTED:11pass/1fail/110UNRUN in0.135s. THREE reviews:
+(1) unchanged default no-skip law requires a valid installed schema;
+(2) independent native catalog confirms checkpoints_history_fkey ABSENT and saved
+history unequal to its singleton, left by the targeted admin corruption fixture;
+(3) real fixture poisoning, not product acceptance failure or feature pass.
+Fix fixture to collect actual read/write/unchanged-row outcomes, repair only its
+injected history/FK changes, then assert all original outcomes/allocation bounds.
+This preserves negative oracles and cleans even an assertion-failing control.
+Do not waive validation, reset migration checksums, skip the old law or credit110
+unrun cases. Initial6289652-byte control remains real, but rerun final fixture.
+PG7c repaired fixture native PASS1/1 in25.357s,13unselected. THREE reviews:
+(1) exact foreign metadata read/write and allocation oracles remain;
+(2) independent catalog after run reports one restored history FK and all saved
+history values equal to singleton; (3) source inspection finds the control copy
+had already been restored to production predicate, so THIS is a positive run,
+NOT a failed-to-kill mutant or final counterfactual evidence. Do not infer a
+control from its log filename. Slow elapsed time retained without causal claim.
+Rerun the deliberate predicate replacement explicitly, with fresh package build.
+PG7c FINAL fixture SQL counterfactual native FAIL1/1 in0.131s,13unselected.
+THREE reviews: (1) foreign saved metadata must reject without transferring body;
+(2) inspected source explicitly replaces only c.history=$4 with bind-preserving
+self-equality, exact mismatch oracles pass and actual allocation6289652 exceeds
+original262144 at574; (3) fresh package build, runtime failure, independent
+catalog afterward reports FK count1 and valid history=t EVEN AFTER assertion
+failure. This final fixture no longer poisons subsequent tests. Production stays
+unchanged; its earlier25.357s positive run is separately labeled above.
+Evidence preservation correction: matrix reused the original failed default
+/tmp log filename. Retained tool-transcript excerpt and independent catalog
+output in evidence/pg7c-default-poisoning-original-excerpt.log are explicitly
+labeled incomplete; do NOT claim the original full raw log survives. The native
+failure/11pass/110unrun and catalog cause remain recorded. Future attempts use
+unique names. No failed result is relabeled passing or removed from this record.
+PG7c isolated default matrix cohort PASS122/122 in20.334s,0skips. THREE reviews:
+(1) default append/read/subscription/outcome/migration/history contracts;
+(2) both future counter boundaries, valid held-xmin open, physical binding and
+foreign global resume run against native17.10/private18.6; original no-skip law
+now passes after fixture repair; (3) no projection/snapshot/export/import runtime
+credit, no DB-free early return/filtered-case or capacity claim. Optional API
+absence still needs the separate downstream feature checks required by PG9.
+Linux selected-feature smokes EACH reviewed THREE ways: all-feature archived
+atomic1/1 PASS2.101s (14unselected), snapshot1/1 PASS2.157s (15unselected), real
+projection1/1 PASS2.753s (2unselected), listing1/1 PASS2.073s (7unselected), session
+close/drop1/1 PASS2.263s (10unselected). Pass1: correct optional capability laws;
+Pass2: native18.6 actual database and owned archived source with new migration5,
+fixed corruption-fixture cleanup; Pass3: these are filtered smoke executions,
+NOT five feature-isolated builds and unselected cases get zero credit. Full211
+native run is separate and still pending; no replay/publication claim.
+Four existing fuzz replay assertions (2/1/1 cases) pass under full Nix gate.
+THREE reviews EACH: original wire/CBOR/value corpus laws; actual stored seeds
+replayed, not a new fuzz campaign; no AFL/deep-fuzz/native-DB or coverage credit.
+Slow pre-cleanup full-gate Fjall key law eventually PASS93.098s (14store opens);
+readonly host sampling was denied by process permissions, no stack evidence and
+no escalation. Unchanged Fjall workload and all assertions retained. Do not
+attribute timings to Postgres or claim a measured root cause/performance parity.
+PG7c Linux full native REJECTED175pass/1fail/35UNRUN,51.934s,0skips. THREE reviews:
+(1) SQLSTATE preservation must retain the cause actually delivered by SQLx;
+(2) unchanged session law kills an IDLE backend then sends its FIRST query,
+Linux reports original typed Sqlx::Io(BrokenPipe32), not Database57P01;
+(3) no adapter error erasure was shown and accepting any error/waiving57P01 is
+not justified. Keep exact raw Linux red, not a green retry. Make the intended
+server-SQLSTATE witness deterministic: existing native lock observation must
+prove query in flight BEFORE termination, then still demand exact57P01 and fused
+cursor. Keep idle-death typed-I/O uncertainty as PG8 lifecycle evidence, not a
+claim of server SQLSTATE availability when client writes a closed socket.
+Pre-edit budget <=50 changed native fixture lines,0production/API/SQL budget,
+reuse existing pg_stat_activity native Lock/3s poll pattern and same60s lifetime.
+No deadline/limit/lint relaxed. Rollback only this fault-order fixture change.
+Verification resource decision: cancel the obsolete pre-cleanup full Nix gate
+(PID26280 verified nix flake check) and run the COMPLETE unchanged gate on current
+fixed fixtures. Its1567 selected workspace tests had1557 completed with ten slow
+Fjall property/state tests still running; no failure was waived and no whole-gate
+pass is credited. Three reviews: (1) original workspace laws/workloads/lints
+unchanged; (2) source snapshot lacks two subsequent fixture repairs so completion
+would not validate the current tree; (3) explicitly canceled partial run,4compiler
+cases unselected and DB-free Postgres checks are not native evidence. Keep raw
+log; no timeout/sample-count/durability adjustment. Current whole gate starts
+separately and normal signed-commit hook remains mandatory.
+PG7c isolated export cohort PASS140/140 in246.059s,0skips. THREE reviews:
+(1) default laws plus bounded listing/session capture, resources and cleanup;
+(2) actual far-future/equality/native binding/foreign resume and original eleven
+session laws execute; (3) this binary predates the deterministic in-flight57P01
+fixture followup, so its idle-kill pass does NOT resolve the Linux red. Long
+private-cluster timings19–58s retained without performance-parity claim.
+PG7c isolated import cohort PASS148/148 in41.699s,0skips. THREE reviews:
+(1) default plus actual atomic/whole-chunk/per-stream import contracts;
+(2) native ambiguous commit, exact transaction ordering, validation-before-write,
+real races and raw-restore guard laws all run; (3) export/snapshot/projection are
+absent here, so no credit for their runtime laws or API-absence compilation.
+Current full-gate corpus replays EACH again reviewed THREE ways (2/1/1 cases):
+unchanged wire/CBOR/value seed contracts; actual existing seeds, no new fuzzing;
+no native database/AFL/campaign or mutation credit. Old interrupted gate receives
+zero whole-run pass credit; current normal gate is independently in progress.
+PG7c isolated projection cohort PASS143/143 in24.137s,0skips. THREE reviews:
+(1) default plus conditional-state/CAS/scalar/consumer/uncertainty laws;
+(2) new corrupted saved history rejects matching/stale reads and CAS without
+megabyte transfer, repaired FK/pair survives; populated-v4 collision/backfill,
+foreign input pre-acquire and seven42501 role probes execute;
+(3) no export/import/cache or actual physical-Projection restart credit, no skips,
+limits/assertions unchanged. Complete delivery and capacity evidence pending.
+PG7c isolated snapshot cohort PASS143/143 in23.670s,0skips. THREE reviews:
+(1) default plus unconditional cache/codec/repository/scalar/uncertainty laws;
+(2) history-bound startup under restricted cache LOGIN succeeds with SELECTonly
+history/events and retained mutation/DDL prohibitions; original stale/oversized
+body and migration/cache/event isolation assertions execute; (3) no projection,
+export/import or physical checkpoint-restart credit; all original limits stay.
+PG7c CURRENT Linux native PASS211/211 in51.024s,0skips, artifact
+/nix/store/045sg6v2lhkvj0bd94pbyfxh9fynmic4-mnesis-postgres-integration.
+THREE reviews: (1) full default and all four optional adapter contracts;
+(2) current corrupted-history/FK cleanup, real physical recovery, populated-v4
+rollback/backfill, and IN-FLIGHT native57P01/fused-cursor/failedclose all execute;
+(3) real PostgreSQL18.6 on aarch64-linux, no retries/filtered/DB-free cases credited
+as full suite; original Linux175/1/35UNRUN red retained independently. No workload,
+SQLSTATE assertion, durability, deadline or limit relaxed. This is a focused
+slice pass, not PG7/8/9 delivery or publication.
+CURRENT Linux smokes EACH also THREE-reviewed: atomic1/1.445s(14unselected),
+cache1/.394s(15), projection1/.371s(2), listing1/.197s(7), session1/.381s(10).
+Pass1 original capability law; Pass2 actual current archived native source;
+Pass3 filtered smokes not isolated builds, no skipped-case credit.
+PG7c isolated export+import cohort PASS167/167 in32.612s,0skips. THREE reviews:
+(1) default plus consistent export/listing, atomic/import and facade composition;
+(2) corrected IN-FLIGHT57P01 law and fresh history/future/binding laws execute
+alongside whole-chunk/per-stream validation and outcomes; (3) no projection/cache
+or physical checkpoint-restart credit, original assertion/limit policy retained.
+PG7c isolated export+projection PASS161/161 in27.712s,0skips. THREE reviews:
+(1) default plus listing/session and conditional-state capability laws;
+(2) foreign saved history, scoped CAS, populated-v4 upgrade and corrected native
+in-flight57P01 all execute together; (3) no atomic import/cache/physical pair
+restart credit, no skipped cases or source/limit/expected-value relaxation.
+PG7c isolated export+snapshot PASS161/161 in42.642s,0skips. THREE reviews:
+(1) default plus consistent export/listing and unconditional cache laws;
+(2) new history startup under restricted cache LOGIN, original cache/body bounds,
+session in-flight57P01 and foreign global resumes execute together;
+(3) no projection/import/physical checkpoint restart credit, no skipped cases or
+source/limit/expected-value relaxation. Current full Clippy is warning-free:
+allworkspace/allfeatures/alltargets49.95s under unchanged deny policy; three
+reviews are original strict contracts, actual current fixtures compile, zero
+runtime/whole-gate credit. Full workspace test phase still running separately.
+PG7c exact minimization count at frozen product source: Rust186added/84removed
+(including position docs/unit changes), SQL51added/3removed, within original
+300/100 and110SQL budgets. New restore file483lines + populated-v4 test~84 +
+foreign-metadata test71 + floor22 ~=660, plus a few permission/import lines stays
+within690new-native budget. Existing constructor callsite edits47 (source diff),
+plus grants/raw SQL fixtures and the separately budgeted22-line session fix;
+no lint/limit/kernel/dependency/runtime/framework/tool changes.
+Next PG7 composition source inspection (NOT implementation/pass): LOCKEDminicbor
+2.2.3 Write for &mut[u8] supports a fixed-capacity sink directly; no custom sink,
+new dependency or minicbor public reexport needed to bound encoded chunk bytes.
+Existing ChunkWriter/finish + decode_chunk still materializes ONE completed chunk.
+Use small bounded chunks/lazy session enumeration in the next native experiment;
+never call fs::read on an arbitrary whole backup and claim bounded resources.
+PG7c isolated import+projection PASS169/169 in188.271s,0skips. THREE reviews:
+(1) default/atomic/import plus conditional checkpoint and consumer laws;
+(2) scoped CAS/unsigned bounds/metadata corruption/no-body transfer, exact import
+outcomes/partial state, populated-v4 and restore guard laws execute together;
+(3) no export/cache/physical checkpoint restart credit, no skipped cases or
+weakened deadlines/limits. Long19–37s private restore and20.619s old upgrade
+latencies remain observations, not performance parity or a demonstrated cause.
+PG9 future tooling inspection only: the existing Nix shell does NOT provide
+cargo-hack (help exits with no such command); do not imperatively install it or
+claim an existing tool. Inspect locked nixpkgs package/upstream before selection.
+Python remains in scripts/check-features.py and fuzz.yml AFL-version extraction;
+remove via supported ecosystem facilities in a separate focused slice. No current
+product/gate source change. Fixed-slice full gate and matrix continue.
+PG7c isolated import+snapshot PASS169/169 in141.587s,0skips. THREE reviews:
+(1) default/atomic/import plus unconditional cache/repository laws;
+(2) binary/unsigned/migration/cache-event isolation and import error/partial-state
+contracts execute under the same history-bound startup; (3) no projection/export
+or physical checkpoint restart credit, no unselected-case/deadline/limit waiver.
+Large host timing variation is retained without a performance-parity conclusion.
+PG7c isolated projection+snapshot PASS166/166 in37.941s,0skips. THREE reviews:
+(1) default plus independent cache/checkpoint persistence and actual consumers;
+(2) new metadata mismatch/no-body transfer, scoped CAS/v4backfill, original cache
+contracts, and physical backup retaining event/cache/checkpoint pairs all execute;
+(3) physical pair/append/resume/CAS are not an actual restarted Projection stepper
+or failover/power-loss proof; no import/export credit, no skips or relaxed oracles.
+PG7c current normal Nix gate EXIT0. Workspace1567/1567PASS624.962s,14slow,
+4compiler cases deliberately unselected. THREE reviews: (1) unchanged full
+workspace laws,256-case Fjall random-version workload and all other properties;
+(2) last properties429.759/527.870s pass with original samples/assertions, no
+sampling/timeout/durability relaxation; (3) Postgres cases under this Darwin gate
+are DB-free and receive ZERO native credit; compiler4not run here, not passes.
+Native Linux211 remains separate. Static Clippy/fmt/docs-excluding-postgres/
+no_std/wasm/hakari/deny and corpus gates pass. Nix fixup emits a Bash pipeline
+SIGSEGV in audit-tmpdir.sh AFTER completed Rust tests but Nix exits0; retain raw
+diagnostic and triage in PG9, no suppression and no claim of a clean packaging
+audit from this message. Actual Linux native artifact fixup succeeds separately.
+
+Dedicated public Postgres rustdoc REJECTED two PRIVATE links (builder/Inner).
+THREE reviews: (1) warning-free public API docs; (2) actual -D warnings check,
+no --document-private-items or allow; (3) existing source-doc links, not missing
+History API or runtime failure. Fix only public prose to link public constructors
+and describe shared ownership. <=8doc lines, within existing Rust budget; no
+new tests or runtime changes. Fresh normal hook gate required after this fix.
+PG7c isolated export+import+projection PASS188/188 in34.539s,0skips. THREE
+reviews: (1) default plus atomic/import, sessions and actual projection consumers;
+(2) exact scoped positions and checkpoint pairs survive import/read/consumer
+composition, metadata faults and in-flight57P01 remain covered; (3) no cache or
+physical checkpoint restart credit, no skips or changed workloads/assertions.
+PG7c isolated export+import+snapshot PASS188/188 in35.997s,0skips. THREE reviews:
+(1) default/atomic/import/session/cache/repository contracts; (2) independent
+cache/event state and byte/routing/position laws execute with new history startup;
+(3) no projection or physical checkpoint restart credit, no skips or relaxed bounds.
+PG7c isolated export+projection+snapshot PASS184/184 in28.930s,0skips. THREE
+reviews: (1) default/session/raw checkpoint/cache contracts; (2) physical-copy
+coherence retains event/cache/checkpoint records, scope and subsequent progress;
+(3) no atomic/import-gated actual Projection consumer or operator fencing/restart
+credit, no skips or relaxed bounds. Fourteen native combinations now complete.
+PG7c isolated import+projection+snapshot PASS192/192 in28.550s,0skips. THREE
+reviews: (1) default/atomic/import plus cache, checkpoints and real consumers;
+(2) native metadata no-body faults, physical-copy event/state/pair progress,
+unsigned preservation and v4upgrade execute together; (3) no export-session
+capability credit, no operator fencing/restarted Projection or publication claim.
+PG7c isolated all4 PASS211/211 in32.791s,0skips. THREE reviews: (1) complete
+current adapter native capability cohort; (2) all new history/future/binding/
+metadata/physical-copy/v4upgrade laws and original203 contract laws execute;
+(3) no skipped/filtered/DB-free case credit, no source/limit/deadline/expected-value
+relaxation. ALL16native feature combinations PASS,2652 executed cases total,
+0skips; these are repeated laws under configurations, not2652unique laws.
+Only subsequent public-doc prose changes, no implementation changes; final
+protected CI must execute exact signed head. Preserve each raw per-feature log.
+Dedicated public adapter rustdoc now PASS2.36s with -Dwarnings. THREE reviews:
+(1) public History/position/store docs and constructor links; (2) original two
+private links fixed with prose/public links, modules/Inner remain private;
+(3) compilation only, no doctest/runtime credit and no warning suppression.
+Old16suite+firstLinux head behavior unchanged by four added/six removed DOC lines.
+Final normal signed commit hook must run unchanged full gate on final source.
+PG7c first SIGNED commit attempt REJECTED by unchanged normal hook: noStd build
+syn fails native OS28 No space left on device. THREE reviews: (1) full gate still
+required after doc-only fix; (2) disk exhaustion occurs before target product
+code, no Rust contract/lint failure is proved; (3) no commit created, other checks
+canceled and cached fuzz/deny are not fresh runtime passes. Preserve raw hook log.
+Recovery uses supported `cargo clean -p mnesis-postgres` with explicit owned
+manifest/shared target after ALL16native suites complete. Removes generated
+package artifacts268342files/36.2GiB; free space now32GiB. No source/Git/database/
+evidence/other-package deletion, no raw rm/cache purge or hook bypass. Another
+Nix process is independently building Labcast; verified its cwd, left it alone.
+Retry SAME signed commit and unchanged full gate; no parallelism/test/workload/
+limit/lint configuration change.

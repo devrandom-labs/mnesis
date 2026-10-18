@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.30s
+────────────
+ Nextest run ID 2389e0e9-6fba-4ed1-94a2-c642d86c740d with nextest profile: default
+    Starting 1 test across 1 binary
+        PASS [   1.730s] (1/1) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+────────────
+     Summary [   1.731s] 1 test run: 1 passed, 0 skipped

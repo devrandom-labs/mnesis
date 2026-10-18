@@ -32,6 +32,9 @@ migration checksums and the installed shape without changing the schema. They
 reject an absent, incompatible or newer schema. Runtime roles need `USAGE` on
 `mnesis`, `SELECT` on `mnesis._sqlx_migrations`, `SELECT, INSERT` on `mnesis.events`
 and `USAGE` on `mnesis.events_global_seq_seq`; they need no schema creation rights.
+All runtime opens also require `SELECT` on `mnesis.history` and `mnesis.events`,
+including roles that only write cached state. No runtime role needs to update
+or delete history metadata.
 
 Migrations live in the published crate and use SQLx transactions and locks.
 Adoption of a verified legacy `public.events` table preserves its rows, positions
@@ -52,7 +55,7 @@ to preserve the full nonzero `u64` range; event types use UTF8 bytes, including
 NUL. Global identity remains positive `BIGINT`, a database capacity limit;
 a caller's valid larger resume sequence still permits later transactions.
 
-Version1 and legacy upgrades preserve existing `(txid, seq)` positions and the
+Version1 and legacy upgrades preserve existing numeric `(txid, seq)` components and the
 next sequence. The second migration removes the redundant stream index and
 retains the unique stream/version and global watermark indexes. Invalid stored
 scalar values abort the upgrade transaction; repair the reported data under
@@ -128,7 +131,7 @@ checkpoints remain independent even when they use the same raw ID.
 
 Reads return absent, stale, or one complete saved record; invalid metadata is an
 error even for a stale schema. The byte ceiling counts ID, state, and 32 scalar
-bytes. Stale and over-limit reads omit the body; oversized writes reject before
+bytes, plus 16 history bytes (48 fixed bytes in total). Stale and over-limit reads omit the body; oversized writes reject before
 opening a transaction. Empty state and full unsigned positions are supported.
 
 Failed or canceled checkpoint persistence requires projection reload. A lost
@@ -186,3 +189,35 @@ execution or change write settings, and it does not establish a recovery bound
 for network failures hidden from the server's kernel. Lifecycle and recovery
 profiles remain tracked in the completion PRD. Any export error means the backup
 is incomplete; normal import still requires completed format-2 chunks.
+
+## History and recovery
+
+`PgAllPos` contains a `History` identity and the transaction and sequence
+components. Persist all three unchanged; reconstruct with
+`PgAllPos::new(History::new(saved_bytes), saved_txid, saved_seq)`. Ordering and
+exclusive resume apply within one history. Global reads and checkpoint writes
+reject another history with `HistoryMismatch` before acquiring a connection.
+
+Migration5 creates a 16-byte history identity, binds it to the native cluster
+and database, and attaches it to existing checkpoint rows in the same migration
+transaction. Migrations1–4 and their checksums remain unchanged. This is a
+breaking adapter change for the next 0.x minor release: old binaries and the
+two-argument constructor are incompatible. Stop old writers and save a verified
+backup before upgrading. External two-number checkpoints have no saved identity;
+verify their provenance before explicitly attaching the migrated store's identity.
+Never attach a new identity merely to bypass a mismatch.
+
+A coherent physical backup preserves the history, database identity, transaction
+counter, events and checkpoint pairs. Native restore tests stop the source before
+booting its copy, then verify state, exclusive resume and subsequent writes.
+This does not establish cross-node failover or hardware power-loss guarantees.
+
+Logical event reimport into a newly migrated database creates a new history and
+assigns new positions. Rebuild projection state from those events. Copying native
+`txid` values or old checkpoint pairs is unsupported: open rejects foreign
+cluster/database bindings (`DatabaseHistory`) and event transaction IDs at or
+above the native snapshot's upper bound (`FutureTransaction`). These checks
+detect unsafe copies; they do not authenticate backups or repair arbitrary
+administrative changes. Do not edit bindings, transaction counters or migration
+metadata to force acceptance. Restore a verified coherent physical backup or
+reimport events into a fresh history instead.

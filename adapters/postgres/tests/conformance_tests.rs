@@ -8,7 +8,7 @@
 #![allow(clippy::expect_used, reason = "tests")]
 #![allow(clippy::missing_panics_doc, reason = "tests")]
 
-use mnesis_postgres::PostgresStore;
+use mnesis_postgres::{History, PgAllPos, PostgresStore};
 
 fn have_db() -> bool {
     std::env::var("DATABASE_URL").is_ok()
@@ -69,8 +69,8 @@ mnesis_store_testing::conformance_lifecycle! {
 /// Mirrors the lock test in `position.rs` but exercises the public API.
 #[test]
 fn pg_all_pos_ord_txid_first() {
-    use mnesis_postgres::PgAllPos;
-    assert!(PgAllPos::new(1, 9) < PgAllPos::new(2, 0));
-    assert!(PgAllPos::new(3, 1) < PgAllPos::new(3, 2));
-    assert_eq!(PgAllPos::new(5, 5), PgAllPos::new(5, 5));
+    let history = History::new([1; 16]);
+    assert!(PgAllPos::new(history, 1, 9) < PgAllPos::new(history, 2, 0));
+    assert!(PgAllPos::new(history, 3, 1) < PgAllPos::new(history, 3, 2));
+    assert_eq!(PgAllPos::new(history, 5, 5), PgAllPos::new(history, 5, 5));
 }

@@ -8,6 +8,8 @@ use mnesis_store::checkpoint::{
 };
 use sqlx::PgConnection;
 
+use crate::History;
+
 use super::{
     PgAllPos, PostgresError, PostgresStore, corrupt, corrupt_value, create_key, read_key,
     validate_bytes,
@@ -19,10 +21,16 @@ struct Metadata {
     schema_version: i64,
     txid: String,
     global_seq: String,
+    history: [u8; 16],
 }
 
 impl Metadata {
-    fn validate(&self, id: &impl Id) -> Result<(NonZeroU64, NonZeroU32, PgAllPos), PostgresError> {
+    fn validate(
+        &self,
+        id: &impl Id,
+        history: History,
+    ) -> Result<(NonZeroU64, NonZeroU32, PgAllPos), PostgresError> {
+        history.check(History::new(self.history))?;
         let label = ErrorId::from_display(id);
         let number = |value: &str| {
             value
@@ -35,7 +43,7 @@ impl Metadata {
             u32::try_from(self.schema_version).map_err(|source| corrupt_value(label, &source))?,
         )
         .ok_or_else(|| corrupt(label, "zero checkpoint schema"))?;
-        let position = PgAllPos::new(number(&self.txid)?, number(&self.global_seq)?);
+        let position = PgAllPos::new(history, number(&self.txid)?, number(&self.global_seq)?);
         Ok((revision, schema, position))
     }
 }
@@ -54,8 +62,9 @@ impl Row {
         id: &impl Id,
         schema: NonZeroU32,
         limit: i64,
+        history: History,
     ) -> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError> {
-        let (revision, stored_schema, position) = self.metadata.validate(id)?;
+        let (revision, stored_schema, position) = self.metadata.validate(id, history)?;
         if stored_schema != schema {
             return Ok(CheckpointHydrated::Stale {
                 revision,
@@ -86,16 +95,17 @@ async fn lock(
     connection: &mut PgConnection,
     key: i64,
     id: &impl Id,
+    history: History,
 ) -> Result<Option<(NonZeroU64, NonZeroU32, PgAllPos)>, PostgresError> {
     sqlx::query_as::<_, Metadata>(
-        "SELECT revision::text AS revision, schema_version, txid::text AS txid, global_seq::text AS global_seq \
+        "SELECT revision::text AS revision, schema_version, txid::text AS txid, global_seq::text AS global_seq, history \
          FROM mnesis.checkpoints WHERE key = $1 FOR UPDATE",
     )
     .bind(key)
     .fetch_optional(connection)
     .await
     .map_err(PostgresError::Sqlx)?
-    .map(|value| value.validate(id))
+    .map(|value| value.validate(id, history))
     .transpose()
 }
 
@@ -113,18 +123,18 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
     ) -> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError> {
         let limit = i64::from(self.inner.limits.bytes.get());
         let row = sqlx::query_as::<_, Row>(
-            "SELECT c.revision::text AS revision, c.schema_version, c.txid::text AS txid, c.global_seq::text AS global_seq, \
-             octet_length(k.value)::bigint + octet_length(c.state)::bigint + 32 AS size, \
-             CASE WHEN c.schema_version = $2 AND \
-                 octet_length(k.value)::bigint + octet_length(c.state)::bigint + 32 <= $3 \
+            "SELECT c.revision::text AS revision, c.schema_version, c.txid::text AS txid, c.global_seq::text AS global_seq, c.history, \
+             octet_length(k.value)::bigint + octet_length(c.state)::bigint + 48 AS size, \
+             CASE WHEN c.schema_version = $2 AND c.history = $4 AND \
+                 octet_length(k.value)::bigint + octet_length(c.state)::bigint + 48 <= $3 \
                  THEN c.state END AS state \
              FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key WHERE k.value = $1",
         )
-        .bind(id.as_ref()).bind(i64::from(schema_version.get())).bind(limit)
+        .bind(id.as_ref()).bind(i64::from(schema_version.get())).bind(limit).bind(self.history().as_bytes())
         .fetch_optional(self.pool()).await.map_err(PostgresError::Sqlx)?;
         row.map_or_else(
             || Ok(CheckpointHydrated::Absent),
-            |value| value.hydrate(id, schema_version, limit),
+            |value| value.hydrate(id, schema_version, limit, self.history()),
         )
     }
 
@@ -133,8 +143,14 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
         id: &impl Id,
         write: CheckpointWrite<'_, Vec<u8>, PgAllPos>,
     ) -> Result<NonZeroU64, CheckpointError<PostgresError>> {
-        validate_bytes(&[id.as_ref().len(), write.state.len()], self.inner.limits)
+        self.history()
+            .check(write.position.history())
             .map_err(CheckpointError::Store)?;
+        validate_bytes(
+            &[id.as_ref().len(), write.state.len(), 16],
+            self.inner.limits,
+        )
+        .map_err(CheckpointError::Store)?;
         let mut tx = self.pool().begin().await.map_err(storage)?;
         let key = match read_key(&mut tx, id)
             .await
@@ -145,7 +161,7 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
                 .await
                 .map_err(CheckpointError::Store)?,
         };
-        let current = lock(&mut tx, key, id)
+        let current = lock(&mut tx, key, id, self.history())
             .await
             .map_err(CheckpointError::Store)?;
         let revision = write.next_revision(current)?;
@@ -153,11 +169,11 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
             Some(_) => {
                 "UPDATE mnesis.checkpoints SET revision = $2::text::numeric, \
                 schema_version = $3, txid = $4::text::numeric, global_seq = $5::text::numeric, \
-                state = $6 WHERE key = $1 RETURNING key"
+                state = $6, history = $7 WHERE key = $1 RETURNING key"
             }
             None => {
-                "INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state) \
-                VALUES ($1, $2::text::numeric, $3, $4::text::numeric, $5::text::numeric, $6) \
+                "INSERT INTO mnesis.checkpoints (key, revision, schema_version, txid, global_seq, state, history) \
+                VALUES ($1, $2::text::numeric, $3, $4::text::numeric, $5::text::numeric, $6, $7) \
                 ON CONFLICT (key) DO NOTHING RETURNING key"
             }
         };
@@ -168,6 +184,7 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
             .bind(write.position.txid().to_string())
             .bind(write.position.seq().to_string())
             .bind(write.state)
+            .bind(write.position.history().as_bytes())
             .fetch_optional(&mut *tx)
             .await
             .map_err(storage)?;
@@ -175,7 +192,7 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
             // A lost creation observes the winner. Suppression with no winner
             // must never acknowledge a write, even when revision policy permits it.
             write.next_revision(
-                lock(&mut tx, key, id)
+                lock(&mut tx, key, id, self.history())
                     .await
                     .map_err(CheckpointError::Store)?,
             )?;

@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.47s
+────────────
+ Nextest run ID 1b81f931-5f62-4b81-ba6e-34d6e3b244e8 with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [   1.699s] (1/1) mnesis-postgres::restore_tests raw_logical_restore_keeps_stream_and_global_history_coherent
+  stdout ───
+
+    running 1 test
+    test raw_logical_restore_keeps_stream_and_global_history_coherent ... FAILED
+
+    failures:
+
+    failures:
+        raw_logical_restore_keeps_stream_and_global_history_coherent
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+
+  stderr ───
+
+    thread 'raw_logical_restore_keeps_stream_and_global_history_coherent' (99672237) panicked at adapters/postgres/tests/restore_tests.rs:184:5:
+    assertion `left == right` failed: logical restore must not hide copied events
+      left: 0
+     right: 1
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.703s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [   1.699s] (1/1) mnesis-postgres::restore_tests raw_logical_restore_keeps_stream_and_global_history_coherent
+error: test run failed

@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backup/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+────────────
+ Nextest run ID fc8dc52e-a845-4d38-ba3a-9151c2c10097 with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [   1.900s] (1/1) mnesis-postgres::restore_tests raw_logical_restore_keeps_stream_and_global_history_coherent
+  stdout ───
+
+    running 1 test
+    test raw_logical_restore_keeps_stream_and_global_history_coherent ... FAILED
+
+    failures:
+
+    failures:
+        raw_logical_restore_keeps_stream_and_global_history_coherent
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.89s
+
+  stderr ───
+
+    thread 'raw_logical_restore_keeps_stream_and_global_history_coherent' (99403617) panicked at adapters/postgres/tests/restore_tests.rs:118:76:
+    called `Result::unwrap()` on an `Err` value: Schema { reason: "events columns, defaults, constraints or watermark index differ from the required schema" }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.903s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [   1.900s] (1/1) mnesis-postgres::restore_tests raw_logical_restore_keeps_stream_and_global_history_coherent
+error: test run failed

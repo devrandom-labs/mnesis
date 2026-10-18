@@ -1,0 +1,14 @@
+BEGIN
+CREATE ROLE
+SET
+       current_user       |  system_identifier  
+--------------------------+---------------------
+ mnesis_history_probe_386 | 7697868455147003551
+(1 row)
+
+  oid   
+--------
+ 156713
+(1 row)
+
+ROLLBACK
