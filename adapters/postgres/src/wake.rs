@@ -1,39 +1,44 @@
-//! `WakeSource` for [`PostgresStore`] via `LISTEN/NOTIFY` → [`StreamNotifiers`].
-//!
-//! The generic subscription loop in `mnesis_store::subscription` parks on a
-//! [`WakeRegistration`] until new events may exist. Postgres drives that loop by
-//! reusing the audited in-process [`StreamNotifiers`] registry as the wake
-//! machinery: a single background `PgListener` task (spawned in
-//! [`crate::store`]) turns each `LISTEN/NOTIFY` message into a
-//! `notifiers.wake(id)`, and the trait methods here delegate straight to that
-//! registry. So `LISTEN/NOTIFY` is a thin transport whose only job is to *hint*
-//! "scan sooner"; correctness rests on the registry's arm-before-confirm-rescan
-//! discipline, not on `NOTIFY` delivery (see the listener task's correctness
-//! note). `Registration` and `Error` are therefore the registry's own
-//! [`WakeReg`] / [`NotifyError`] — no postgres-specific wake types are needed.
+//! Notifications accelerate scans; an independent deadline guarantees rescans.
 
-use mnesis_store::wake::WakeSource;
+use std::future::Future;
+use std::time::Duration;
+
+use mnesis_store::wake::{WakeRegistration, WakeSource};
 use mnesis_wake::{NotifyError, WakeReg};
 
 use crate::store::PostgresStore;
 
-/// Delegates wake-routing to the store's [`StreamNotifiers`], which the shared
-/// `PgListener` task drives from `LISTEN/NOTIFY`. Mirrors the trait mechanics of
-/// `mnesis-fjall`'s `impl WakeSource` (delegate to an `Arc<StreamNotifiers>`),
-/// the difference being the wake *source*: fjall's `append` calls `wake`
-/// in-process, whereas postgres routes it through `NOTIFY` so a writer in
-/// *another* process (or connection) still rouses this process's subscribers.
+const RESCAN_INTERVAL: Duration = Duration::from_secs(1);
+
+/// A routed wake registration with an independent rescan deadline.
+pub struct Registration {
+    inner: WakeReg,
+}
+
+impl WakeRegistration for Registration {
+    fn arm(&self) -> impl Future<Output = ()> + Send + 'static {
+        // Capture the generation before the confirming scan, not at first poll.
+        let wake = self.inner.arm();
+        async move {
+            tokio::select! {
+                () = wake => {},
+                () = tokio::time::sleep(RESCAN_INTERVAL) => {},
+            }
+        }
+    }
+}
+
 impl WakeSource for PostgresStore {
-    type Registration = WakeReg;
+    type Registration = Registration;
     type Error = NotifyError;
 
     fn register(&self, stream: Option<&[u8]>) -> Result<Self::Registration, Self::Error> {
-        self.wake_registry().register(stream)
+        self.wake_registry()
+            .register(stream)
+            .map(|inner| Registration { inner })
     }
 
     fn wake(&self, stream: &[u8]) {
-        // `StreamNotifiers::wake` bumps BOTH the per-stream and the `$all` wake
-        // paths, so one call rouses per-stream and `$all` registrations alike.
         self.wake_registry().wake(stream);
     }
 }
