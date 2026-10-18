@@ -1,11 +1,13 @@
 //! `PgAllPos` — postgres's [`AllPosition`](mnesis_store::AllPosition).
 //!
-//! The composite `(txid, seq)` commit-ordered position. `txid` is the writing
+//! The composite `(txid, seq)` transaction-ordered position. `txid` is the writing
 //! transaction's `xid8` (`pg_current_xact_id()`); `seq` is the row's
 //! `IDENTITY` `global_seq`. Lexicographic `Ord` on `(txid, seq)` is the
 //! Way-2 order: resume strictly after the last delivered position, and the
 //! `pg_snapshot_xmin` watermark guarantees no smaller `(txid, seq)` can become
 //! visible after a larger one is consumed.
+//! Overlapping transactions can finish committing in a different order. This
+//! position defines stable delivery order, not commit-acknowledgement timestamps.
 
 /// `PostgreSQL` `$all` resume position: `(txid, seq)`, lexicographic order.
 ///

@@ -378,7 +378,10 @@ where
 ///   storage work; duplicates return [`AtomicAppendError::InvalidRoute`] with
 ///   first and duplicate indices, regardless of versions or existing heads.
 ///   Input rejection is not a retryable OCC conflict. Runs are never merged.
-/// - On any failure, **no** write is applied.
+/// - A conflict or definite rejection applies **no** writes. An adapter error
+///   can instead report an unknown commit outcome after a lost acknowledgement.
+///   All-or-none database atomicity still holds; callers must preserve the
+///   adapter's outcome evidence and must not infer rollback from a timeout.
 ///
 /// # Return value
 ///

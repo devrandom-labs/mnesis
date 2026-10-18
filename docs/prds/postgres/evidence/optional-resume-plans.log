@@ -1,0 +1,44 @@
+SET
+PREPARE
+                                                                    QUERY PLAN
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1860.45..1861.60 rows=460 width=139) (actual time=4.336..4.352 rows=256 loops=1)
+   Buffers: shared hit=868
+   ->  Sort  (cost=1860.45..1871.94 rows=4597 width=139) (actual time=4.335..4.341 rows=256 loops=1)
+         Sort Key: (((txid)::text)::bigint), global_seq
+         Sort Method: top-N heapsort  Memory: 59kB
+         Buffers: shared hit=868
+         ->  Bitmap Heap Scan on events  (cost=349.98..1580.80 rows=4597 width=139) (actual time=3.975..4.119 rows=960 loops=1)
+               Recheck Cond: ((txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+               Filter: (($1 IS NULL) OR (ROW(txid, global_seq) > ROW(($1)::xid8, $2)))
+               Rows Removed by Filter: 40000
+               Heap Blocks: exact=707
+               Buffers: shared hit=865
+               ->  Bitmap Index Scan on events_watermark_idx  (cost=0.00..348.83 rows=13653 width=0) (actual time=0.799..0.800 rows=40960 loops=1)
+                     Index Cond: ((txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+                     Buffers: shared hit=158
+ Planning:
+   Buffers: shared hit=43
+ Planning Time: 0.090 ms
+ Execution Time: 4.378 ms
+(19 rows)
+
+PREPARE
+                                                                          QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1318.64..1319.78 rows=455 width=139) (actual time=0.311..0.325 rows=256 loops=1)
+   Buffers: shared hit=23
+   ->  Sort  (cost=1318.64..1330.02 rows=4551 width=139) (actual time=0.311..0.315 rows=256 loops=1)
+         Sort Key: (((txid)::text)::bigint), global_seq
+         Sort Method: top-N heapsort  Memory: 59kB
+         Buffers: shared hit=23
+         ->  Bitmap Heap Scan on events  (cost=130.33..1042.13 rows=4551 width=139) (actual time=0.032..0.124 rows=960 loops=1)
+               Recheck Cond: ((ROW(txid, global_seq) > ROW(($1)::xid8, $2)) AND (txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+               Heap Blocks: exact=18
+               Buffers: shared hit=23
+               ->  Bitmap Index Scan on events_watermark_idx  (cost=0.00..129.19 rows=4551 width=0) (actual time=0.027..0.027 rows=960 loops=1)
+                     Index Cond: ((ROW(txid, global_seq) > ROW(($1)::xid8, $2)) AND (txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+                     Buffers: shared hit=5
+ Planning Time: 0.080 ms
+ Execution Time: 0.345 ms
+(15 rows)

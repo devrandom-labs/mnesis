@@ -1,0 +1,106 @@
+The files belonging to this database system will be owned by user "joel".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/mnesis-mutants.NqNCoU/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... America/New_York
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /tmp/mnesis-mutants.NqNCoU/data -l logfile start
+
+waiting for server to start.... done
+server started
+Found 27 mutants to test
+ok       Unmutated baseline in 11s build + 12s test
+ INFO Auto-set test timeout to 65s
+27 mutants tested in 2m: 14 caught, 13 unviable
+waiting for server to shut down.... done
+server stopped
+Success	baseline
+Unviable	adapters/postgres/src/builder.rs:35:9: replace PostgresStore::from_pool -> Result<Self, PostgresError> with Ok(Default::default())
+Unviable	adapters/postgres/src/builder.rs:47:9: replace PostgresStore::from_pool_with_limits -> Result<Self, PostgresError> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/builder.rs:48:21: replace < with == in PostgresStore::from_pool_with_limits
+CaughtMutant	adapters/postgres/src/builder.rs:48:21: replace < with > in PostgresStore::from_pool_with_limits
+CaughtMutant	adapters/postgres/src/builder.rs:48:21: replace < with <= in PostgresStore::from_pool_with_limits
+CaughtMutant	adapters/postgres/src/page.rs:22:5: replace finish with ()
+Unviable	adapters/postgres/src/page.rs:62:9: replace <impl FromRow<'row, PgRow> for PageRow<T>>::from_row -> Result<Self, sqlx::Error> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/page.rs:64:19: replace > with == in <impl FromRow<'row, PgRow> for PageRow<T>>::from_row
+CaughtMutant	adapters/postgres/src/page.rs:64:19: replace > with < in <impl FromRow<'row, PgRow> for PageRow<T>>::from_row
+CaughtMutant	adapters/postgres/src/page.rs:64:19: replace > with >= in <impl FromRow<'row, PgRow> for PageRow<T>>::from_row
+Unviable	adapters/postgres/src/page.rs:74:9: replace PageRow<T>::into_value -> Result<T, PostgresError> with Ok(Default::default())
+Unviable	adapters/postgres/src/store.rs:84:9: replace PostgresStore::assemble -> Self with Default::default()
+Unviable	adapters/postgres/src/store.rs:118:5: replace spawn_listener -> JoinHandle<()> with JoinHandle::new()
+Unviable	adapters/postgres/src/store.rs:118:5: replace spawn_listener -> JoinHandle<()> with JoinHandle::from_iter([()])
+Unviable	adapters/postgres/src/store.rs:118:5: replace spawn_listener -> JoinHandle<()> with JoinHandle::new(())
+Unviable	adapters/postgres/src/store.rs:118:5: replace spawn_listener -> JoinHandle<()> with JoinHandle::from(())
+CaughtMutant	adapters/postgres/src/store.rs:135:5: replace listen -> Result<(), SqlxError> with Ok(())
+CaughtMutant	adapters/postgres/src/store.rs:424:5: replace validate_sizes -> Result<(), PostgresError> with Ok(())
+CaughtMutant	adapters/postgres/src/store.rs:440:19: replace > with == in validate_sizes
+CaughtMutant	adapters/postgres/src/store.rs:440:19: replace > with < in validate_sizes
+CaughtMutant	adapters/postgres/src/store.rs:440:19: replace > with >= in validate_sizes
+Unviable	adapters/postgres/src/store.rs:522:9: replace <impl RawEventStore for PostgresStore>::append -> Result<Self::AllPosition, AppendError<Self::Error>> with Ok(Default::default())
+Unviable	adapters/postgres/src/store.rs:561:9: replace <impl RawEventStore for PostgresStore>::read_stream -> Result<Self::Stream, Self::Error> with Ok(Default::default())
+Unviable	adapters/postgres/src/store.rs:619:9: replace <impl RawEventStore for PostgresStore>::read_all -> Result<Self::AllStream, Self::Error> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/store.rs:675:24: replace == with != in <impl RawEventStore for PostgresStore>::read_all
+Unviable	adapters/postgres/src/wake.rs:36:9: replace <impl WakeSource for PostgresStore>::register -> Result<Self::Registration, Self::Error> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/wake.rs:42:9: replace <impl WakeSource for PostgresStore>::wake with ()
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21_001.log:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (94754578) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:10:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21_001.log:     Summary [   0.100s] 15/79 tests run: 14 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19.log:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94760721) panicked at adapters/postgres/tests/read_tests.rs:422:10:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19.log:     Summary [   8.673s] 68/79 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19_002.log:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94775858) panicked at adapters/postgres/tests/read_tests.rs:415:10:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19_002.log:     Summary [   8.732s] 68/79 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_47_col_9.log:error[E0277]: the trait bound `PostgresStore: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21.log:    thread 'a_pool_with_one_connection_is_rejected_before_it_can_starve_queries' (94752954) panicked at adapters/postgres/tests/lifecycle_tests.rs:232:5:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21.log:     Summary [   1.041s] 57/79 tests run: 56 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19_002.log:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94764723) panicked at adapters/postgres/tests/read_tests.rs:422:10:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19_002.log:     Summary [   8.700s] 68/79 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_74_col_9.log:error[E0277]: the trait bound `T: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5_002.log:error[E0624]: associated function `new` is private
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5_002.log:error[E0308]: mismatched types
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_62_col_9.log:error[E0277]: the trait bound `PageRow<T>: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21_002.log:    thread 'initial_listener_acquisition_failure_recovers_after_service_returns' (94756569) panicked at adapters/postgres/tests/lifecycle_tests.rs:132:65:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_48_col_21_002.log:     Summary [   2.169s] 61/79 tests run: 60 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__builder.rs_line_35_col_9.log:error[E0277]: the trait bound `PostgresStore: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_22_col_5.log:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (94758194) panicked at adapters/postgres/tests/all_noskip_tests.rs:95:36:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_22_col_5.log:     Summary [   0.104s] 15/79 tests run: 14 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19_001.log:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (94762347) panicked at adapters/postgres/tests/all_noskip_tests.rs:95:36:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__page.rs_line_64_col_19_001.log:     Summary [   0.107s] 15/79 tests run: 14 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19.log:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94771958) panicked at adapters/postgres/tests/read_tests.rs:415:10:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19.log:     Summary [   8.672s] 68/79 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_424_col_5.log:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94769590) panicked at adapters/postgres/tests/read_tests.rs:430:5:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_424_col_5.log:     Summary [   8.722s] 68/79 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5_001.log:error[E0599]: no associated function or constant named `from_iter` found for struct `tokio::task::JoinHandle<T>` in the current scope
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_135_col_5.log:    thread 'clones_share_one_listener_and_last_drop_preserves_the_callers_pool' (94767005) panicked at adapters/postgres/tests/lifecycle_tests.rs:68:6:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_135_col_5.log:     Summary [   7.061s] 59/79 tests run: 58 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_675_col_24.log:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (94777626) panicked at adapters/postgres/tests/all_noskip_tests.rs:95:36:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_675_col_24.log:     Summary [   0.105s] 15/79 tests run: 14 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_619_col_9.log:error[E0277]: the trait bound `dyn Stream<Item = Result<(PgAllPos, StreamKey, _), _>> + Send: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_619_col_9.log:error[E0277]: the trait bound `dyn Stream<Item = Result<(PgAllPos, StreamKey, _), _>> + Send: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__wake.rs_line_36_col_9.log:error[E0277]: the trait bound `Registration: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5.log:error[E0624]: associated function `new` is private
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5.log:error[E0061]: this function takes 1 argument but 0 arguments were supplied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19_001.log:    thread 'conformance_boundary::check_conflict_leaves_store_unchanged' (94773606) panicked at crates/store-testing/src/row.rs:130:29:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_440_col_19_001.log:     Summary [   0.137s] 17/79 tests run: 16 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_118_col_5_003.log:error[E0308]: mismatched types
+/tmp/mnesis-fresh-mutation/mutants.out/log/baseline.log:     Summary [  12.532s] 79 tests run: 79 passed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_522_col_9.log:error[E0277]: the trait bound `PgAllPos: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_522_col_9.log:error[E0277]: the trait bound `position::PgAllPos: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__wake.rs_line_42_col_9.log:    thread 'wake_between_arm_and_first_poll_is_preserved' (94780024) panicked at adapters/postgres/tests/lifecycle_tests.rs:392:14:
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__wake.rs_line_42_col_9.log:     Summary [   8.715s] 67/79 tests run: 66 passed, 1 failed, 0 skipped
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_84_col_9.log:error[E0277]: the trait bound `PostgresStore: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_561_col_9.log:error[E0277]: the trait bound `dyn Stream<Item = Result<PersistedEnvelope, _>> + Send: Default` is not satisfied
+/tmp/mnesis-fresh-mutation/mutants.out/log/adapters__postgres__src__store.rs_line_561_col_9.log:error[E0277]: the trait bound `dyn Stream<Item = Result<PersistedEnvelope, _>> + Send: Default` is not satisfied

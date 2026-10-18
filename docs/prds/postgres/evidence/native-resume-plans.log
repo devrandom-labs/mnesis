@@ -1,0 +1,25 @@
+SET
+PREPARE
+                                                                    QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.30..150.60 rows=455 width=147) (actual time=0.011..0.055 rows=256 loops=1)
+   Buffers: shared hit=9
+   ->  Index Scan using events_watermark_idx on events  (cost=0.30..1503.59 rows=4551 width=147) (actual time=0.010..0.045 rows=256 loops=1)
+         Index Cond: ((ROW(txid, global_seq) > ROW(($1)::xid8, $2)) AND (txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+         Buffers: shared hit=9
+ Planning:
+   Buffers: shared hit=43
+ Planning Time: 0.068 ms
+ Execution Time: 0.073 ms
+(9 rows)
+
+                                                                    QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.30..150.60 rows=455 width=147) (actual time=0.006..0.044 rows=256 loops=1)
+   Buffers: shared hit=7
+   ->  Index Scan using events_watermark_idx on events  (cost=0.30..1503.59 rows=4551 width=147) (actual time=0.006..0.035 rows=256 loops=1)
+         Index Cond: ((ROW(txid, global_seq) > ROW(($1)::xid8, $2)) AND (txid < ($3)::xid8) AND (txid < pg_snapshot_xmin(pg_current_snapshot())))
+         Buffers: shared hit=7
+ Planning Time: 0.003 ms
+ Execution Time: 0.054 ms
+(7 rows)

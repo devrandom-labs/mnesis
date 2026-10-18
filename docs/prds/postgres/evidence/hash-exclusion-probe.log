@@ -1,0 +1,56 @@
+CREATE TABLE
+INSERT 0 1
+ number | octet_length
+--------+--------------
+      1 |         5120
+(1 row)
+
+psql:/tmp/mnesis-hash-exclusion.sql:9: ERROR:  23P01: conflicting key value violates exclusion constraint "key_probe_key_excl"
+[generated large-key error detail omitted]
+SCHEMA NAME:  pg_temp_64
+TABLE NAME:  key_probe
+CONSTRAINT NAME:  key_probe_key_excl
+LOCATION:  check_exclusion_or_unique_constraint, execIndexing.c:888
+ after_duplicate
+-----------------
+               1
+(1 row)
+
+ number
+--------
+(0 rows)
+
+INSERT 0 0
+ after_conflict_do_nothing
+---------------------------
+                         1
+(1 row)
+
+SELECT 200000
+ first_key | second_key | shared_hash
+-----------+------------+-------------
+     44072 |     102013 | -2078099230
+(1 row)
+
+INSERT 0 2
+ after_distinct_hash_collision
+-------------------------------
+                             3
+(1 row)
+
+SET
+                                               QUERY PLAN
+---------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on key_probe  (cost=4.05..13.53 rows=6 width=8) (actual rows=1 loops=1)
+   Recheck Cond: (key = convert_to('collision-44072'::text, 'UTF8'::name))
+   Rows Removed by Index Recheck: 1
+   Heap Blocks: exact=1
+   Buffers: local hit=2
+   ->  Bitmap Index Scan on key_probe_key_excl  (cost=0.00..4.05 rows=6 width=0) (actual rows=2 loops=1)
+         Index Cond: (key = convert_to('collision-44072'::text, 'UTF8'::name))
+         Buffers: local hit=1
+ Planning:
+   Buffers: shared hit=5
+ Planning Time: 0.040 ms
+ Execution Time: 0.017 ms
+(12 rows)

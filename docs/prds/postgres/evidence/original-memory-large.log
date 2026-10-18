@@ -1,0 +1,34 @@
+
+running 1 test
+40960 rows x 4096 bytes: stream=179236800 bytes/234.139417ms, all=179691520 bytes/299.861417ms; budget=4194304
+
+thread 'first_event_does_not_retain_the_whole_backlog' (93521866) panicked at adapters/postgres/tests/read_tests.rs:108:5:
+first-event retained memory exceeds four default pages: stream=179236800, all=179691520, budget=4194304
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test first_event_does_not_retain_the_whole_backlog ... FAILED
+
+failures:
+
+failures:
+    first_event_does_not_retain_the_whole_backlog
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s
+
+        1.25 real         0.73 user         0.10 sys
+           419790848  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               26254  page reclaims
+                  10  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  27  messages sent
+               70045  messages received
+                   0  signals received
+                   0  voluntary context switches
+                 184  involuntary context switches
+          9539851002  instructions retired
+          3177861904  cycles elapsed
+           289522408  peak memory footprint

@@ -1,0 +1,29 @@
+warning: Git tree '/Users/joel/orca/workspaces/nexus/main' has uncommitted changes
+   Compiling mnesis-postgres v0.3.1 (/Users/joel/orca/workspaces/nexus/main/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.86s
+────────────
+ Nextest run ID 96892f41-f186-45a1-b8ad-2f4f322f322a with nextest profile: default
+    Starting 1 test across 6 binaries (74 tests skipped)
+       START [         ] (1/1) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+
+running 1 test
+1MiB rows: stream=26203952, all=24125055
+
+thread 'large_rows_obey_the_default_byte_budget' (94012116) panicked at adapters/postgres/tests/read_tests.rs:333:5:
+row-count limit permits excessive resident bytes: stream=26203952, all=24125055
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test large_rows_obey_the_default_byte_budget ... FAILED
+
+failures:
+
+failures:
+    large_rows_obey_the_default_byte_budget
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.12s
+
+        FAIL [   0.136s] (1/1) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+  Cancelling due to test failure:
+────────────
+     Summary [   0.136s] 1 test run: 0 passed, 1 failed, 74 skipped
+        FAIL [   0.136s] (1/1) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+error: test run failed

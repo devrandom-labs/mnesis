@@ -1,6 +1,11 @@
 # mnesis-postgres
 
-PostgreSQL-backed event-store adapter for [Mnesis](https://github.com/devrandom-labs/mnesis) — the server-side store, built on `sqlx`. Implements `RawEventStore`, `WakeSource` (over `LISTEN`/`NOTIFY`), and the snapshot/projection seams. A reader-side `xid8` watermark keeps the `$all` stream gap-free under concurrent writers.
+PostgreSQL-backed event-store adapter for [Mnesis](https://github.com/devrandom-labs/mnesis) — the server-side store, built on `sqlx`. Implements `RawEventStore` and `WakeSource` (over `LISTEN`/`NOTIFY`). A reader-side `xid8` watermark keeps the `$all` stream gap-free under concurrent writers.
+
+The [Postgres completion PRD](../../docs/prds/postgres.md) defines the remaining
+production requirements, including bounded reads, notification recovery, commit
+uncertainty, atomic import, snapshots, projection state, migrations and operations.
+See the [status index](../../docs/prd-backlog/status.md) for dependencies and delivery.
 
 ## Quickstart
 

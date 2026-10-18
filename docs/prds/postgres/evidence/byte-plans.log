@@ -1,0 +1,62 @@
+TRUNCATE TABLE
+INSERT 0 40960
+ANALYZE
+SET
+PREPARE
+                                                                           QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1159.83..1160.21 rows=153 width=184) (actual rows=256 loops=1)
+   Sort Key: events.txid, events.global_seq
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=775
+   ->  Nested Loop  (cost=0.97..1154.28 rows=153 width=184) (actual rows=256 loops=1)
+         Buffers: shared hit=775
+         ->  Subquery Scan on ranked  (cost=0.68..180.17 rows=153 width=16) (actual rows=256 loops=1)
+               Filter: ((ranked.total_bytes <= ($5)::numeric) OR (ranked.ordinal = 1))
+               Buffers: shared hit=7
+               ->  WindowAgg  (cost=0.68..172.21 rows=455 width=72) (actual rows=256 loops=1)
+                     Buffers: shared hit=7
+                     ->  Subquery Scan on candidates  (cost=0.30..163.11 rows=455 width=24) (actual rows=256 loops=1)
+                           Buffers: shared hit=7
+                           ->  Limit  (cost=0.30..158.56 rows=455 width=32) (actual rows=256 loops=1)
+                                 Buffers: shared hit=7
+                                 ->  Index Scan using events_watermark_idx on events events_1  (cost=0.30..1583.22 rows=4551 width=32) (actual rows=256 loops=1)
+                                       Index Cond: ((txid < ($1)::xid8) AND (ROW(txid, global_seq) > ROW(($2)::xid8, $3)))
+                                       Buffers: shared hit=7
+         ->  Index Scan using events_pkey on events  (cost=0.29..6.35 rows=1 width=136) (actual rows=1 loops=256)
+               Index Cond: (global_seq = ranked.global_seq)
+               Buffers: shared hit=768
+ Planning:
+   Buffers: shared hit=45
+ Planning Time: 0.163 ms
+ Execution Time: 0.272 ms
+(25 rows)
+
+                                                                           QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1159.83..1160.21 rows=153 width=184) (actual rows=256 loops=1)
+   Sort Key: events.txid, events.global_seq
+   Sort Method: quicksort  Memory: 63kB
+   Buffers: shared hit=777
+   ->  Nested Loop  (cost=0.97..1154.28 rows=153 width=184) (actual rows=256 loops=1)
+         Buffers: shared hit=777
+         ->  Subquery Scan on ranked  (cost=0.68..180.17 rows=153 width=16) (actual rows=256 loops=1)
+               Filter: ((ranked.total_bytes <= ($5)::numeric) OR (ranked.ordinal = 1))
+               Buffers: shared hit=9
+               ->  WindowAgg  (cost=0.68..172.21 rows=455 width=72) (actual rows=256 loops=1)
+                     Buffers: shared hit=9
+                     ->  Subquery Scan on candidates  (cost=0.30..163.11 rows=455 width=24) (actual rows=256 loops=1)
+                           Buffers: shared hit=9
+                           ->  Limit  (cost=0.30..158.56 rows=455 width=32) (actual rows=256 loops=1)
+                                 Buffers: shared hit=9
+                                 ->  Index Scan using events_watermark_idx on events events_1  (cost=0.30..1583.22 rows=4551 width=32) (actual rows=256 loops=1)
+                                       Index Cond: ((txid < ($1)::xid8) AND (ROW(txid, global_seq) > ROW(($2)::xid8, $3)))
+                                       Buffers: shared hit=9
+         ->  Index Scan using events_pkey on events  (cost=0.29..6.35 rows=1 width=136) (actual rows=1 loops=256)
+               Index Cond: (global_seq = ranked.global_seq)
+               Buffers: shared hit=768
+ Planning Time: 0.005 ms
+ Execution Time: 0.279 ms
+(23 rows)
+
+DEALLOCATE

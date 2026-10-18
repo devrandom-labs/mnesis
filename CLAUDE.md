@@ -197,7 +197,12 @@ Every database interaction in store adapters MUST be atomic:
 - **Read-then-write**: single transaction spanning both
 - **Projection checkpoints**: conditional checkpoint writes are separate from event append. Revision, schema, position and state share one transaction; failed or canceled writes require reload. Aggregate snapshots remain best-effort caches. No combined event/checkpoint transaction is promised by the current interfaces.
 
-If a public method does 2+ database calls without a shared transaction, it is a bug.
+Mutable multi-call reads and all read-then-write operations require a shared
+transaction. An append-only event scan may instead freeze an immutable committed
+head or safe transaction cutoff and keyset-page that same history. This exception
+requires proof that no row can appear below the captured boundary later; it does
+not permit independent mutable reads or a moving scan boundary. Holding a long
+read transaction is not required for this structurally repeatable history.
 
 Mnesis-specific addenda to the shared rules:
 

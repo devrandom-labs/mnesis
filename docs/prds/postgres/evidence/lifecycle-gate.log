@@ -1,0 +1,30 @@
+mnesis-nextest>         PASS [ 165.968s] (1367/1369) mnesis-fjall::resilience_tests attack_deterministic_simulation
+mnesis-nextest>         SLOW [>180.000s] (---------) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
+mnesis-nextest>         SLOW [>180.000s] (---------) mnesis-fjall::property_tests attack_version_conflict_detection
+mnesis-nextest>         PASS [ 203.214s] (1368/1369) mnesis-fjall::property_tests attack_version_conflict_detection
+mnesis-nextest>         SLOW [>240.000s] (---------) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
+mnesis-nextest>         PASS [ 251.246s] (1369/1369) mnesis-fjall::property_tests attack_random_versions_rejected_unless_sequential
+mnesis-nextest> ------------
+mnesis-nextest>      Summary [ 279.821s] 1369 tests run: 1369 passed (10 slow), 4 skipped
+mnesis-nextest>
+mnesis-nextest>     Finished report saved to /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1/coverage
+mnesis-nextest> checkPhase completed in 6 minutes 6 seconds
+mnesis-nextest> Running phase: installPhase
+mnesis-nextest> incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+mnesis-nextest> doing a full archive install of target to /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1/target.tar.zst
+mnesis-nextest> /*stdin*\            : 25.19%   (  2.28 GiB =>    589 MiB, /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1/target.tar.zst)
+mnesis-nextest> Running phase: fixupPhase
+mnesis-nextest> checking for references to /nix/var/nix/builds/nix-13226-2635924483/ in /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1...
+mnesis-nextest> patching script interpreter paths in /nix/store/zxm5bp4nqrlblyb429vahil5wlrznd07-mnesis-nextest-0.3.1
+✅ checks.aarch64-darwin.mnesis-fmt
+✅ checks.aarch64-darwin.mnesis-doc
+✅ checks.aarch64-darwin.mnesis-store-nostd
+✅ checks.aarch64-darwin.mnesis-nextest
+✅ checks.aarch64-darwin.mnesis-hakari
+✅ checks.aarch64-darwin.mnesis-clippy
+✅ checks.aarch64-darwin.mnesis-deny
+✅ checks.aarch64-darwin.mnesis-nostd
+✅ checks.aarch64-darwin.mnesis-wasm
+✅ checks.aarch64-darwin.mnesis-fuzz-replay
+warning: The check omitted these incompatible systems: aarch64-linux, x86_64-darwin, x86_64-linux
+Use '--all-systems' to check all.

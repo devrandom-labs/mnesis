@@ -1,6 +1,7 @@
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 
+use crate::Limits;
 use crate::error::PostgresError;
 use crate::schema::ensure_schema;
 use crate::store::PostgresStore;
@@ -23,13 +24,31 @@ impl PostgresStore {
     /// Build from an existing pool and ensure the schema exists.
     ///
     /// Prefer this when the caller already holds a `PgPool` (e.g. a shared
-    /// pool across multiple stores in an application).
+    /// pool across multiple stores in an application). The pool must accommodate
+    /// the dedicated listener alongside data queries.
     ///
     /// # Errors
     ///
-    /// Returns [`PostgresError::Sqlx`] if the schema DDL fails.
+    /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
+    /// [`PostgresError::Sqlx`] if the schema DDL fails.
     pub async fn from_pool(pool: PgPool) -> Result<Self, PostgresError> {
+        Self::from_pool_with_limits(pool, Limits::default()).await
+    }
+
+    /// Build from a shared pool with explicit read/write resource limits.
+    ///
+    /// # Errors
+    /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
+    /// [`PostgresError::Sqlx`] if schema creation fails.
+    pub async fn from_pool_with_limits(
+        pool: PgPool,
+        limits: Limits,
+    ) -> Result<Self, PostgresError> {
+        let capacity = pool.options().get_max_connections();
+        if capacity < 2 {
+            return Err(PostgresError::PoolCapacity { actual: capacity });
+        }
         ensure_schema(&pool).await?;
-        Ok(Self::assemble(pool))
+        Ok(Self::assemble(pool, limits))
     }
 }

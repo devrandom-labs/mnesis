@@ -1,0 +1,50 @@
+
+running 1 test
+4096 rows x 4096 bytes: stream=1086920 bytes/1.555625ms, all=1088997 bytes/2.31075ms; budget=4194304
+test first_event_does_not_retain_the_whole_backlog ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.04s
+
+        0.04 real         0.00 user         0.00 sys
+            11288576  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                 885  page reclaims
+                  10  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  36  messages sent
+                 316  messages received
+                   0  signals received
+                   0  voluntary context switches
+                  47  involuntary context switches
+            78391587  instructions retired
+            29532234  cycles elapsed
+             3457408  peak memory footprint
+
+running 1 test
+40960 rows x 4096 bytes: stream=1086920 bytes/1.423792ms, all=1088997 bytes/8.491917ms; budget=4194304
+test first_event_does_not_retain_the_whole_backlog ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.48s
+
+        0.48 real         0.00 user         0.00 sys
+            11354112  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                 890  page reclaims
+                  10  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  36  messages sent
+                 299  messages received
+                   0  signals received
+                   0  voluntary context switches
+                  46  involuntary context switches
+            77854695  instructions retired
+            31205625  cycles elapsed
+             3539352  peak memory footprint

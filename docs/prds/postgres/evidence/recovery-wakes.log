@@ -1,0 +1,32 @@
+warning: ignoring --test-threads because --no-capture is specified
+   Compiling mnesis-postgres v0.3.1 (/Users/joel/orca/workspaces/nexus/main/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+────────────
+ Nextest run ID c8bf5363-10a4-46c0-9d94-26ed07c44dcb with nextest profile: default
+    Starting 3 tests across 1 binary
+       START [         ] (1/3) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+
+running 1 test
+test all_recovers_after_an_unrelated_transaction_releases_the_watermark ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.13s
+
+        PASS [   1.145s] (1/3) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+       START [         ] (2/3) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+
+running 1 test
+test all_recovers_the_final_missing_hint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.01s
+
+        PASS [   1.030s] (2/3) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+       START [         ] (3/3) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+
+running 1 test
+test stream_recovers_the_final_missing_hint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.01s
+
+        PASS [   1.022s] (3/3) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+────────────
+     Summary [   3.197s] 3 tests run: 3 passed, 0 skipped
