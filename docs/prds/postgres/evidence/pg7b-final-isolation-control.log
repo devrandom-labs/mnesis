@@ -1,0 +1,32 @@
+     Removed 795 files, 123.3MiB total
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7b-final-isolation.qxqkA0/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.40s
+────────────
+ Nextest run ID c41b63f2-42ca-4b61-ae16-ca2c7c0e508d with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   0.056s] (1/1) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+  stdout ───
+
+    running 1 test
+    test one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read ... FAILED
+
+    failures:
+
+    failures:
+        one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read' (98832354) panicked at adapters/postgres/tests/session_tests.rs:167:9:
+    assertion `left == right` failed
+      left: 2
+     right: 1
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.057s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   0.056s] (1/1) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+error: test run failed

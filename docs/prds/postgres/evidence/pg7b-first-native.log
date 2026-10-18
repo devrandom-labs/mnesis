@@ -1,0 +1,32 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.68s
+────────────
+ Nextest run ID 2928c955-d79f-41f8-a764-158562930e1c with nextest profile: default
+    Starting 5 tests across 1 binary
+        FAIL [   3.046s] (1/5) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+  stdout ───
+
+    running 1 test
+    test canceling_open_after_native_view_creation_releases_the_unreceived_session ... FAILED
+
+    failures:
+
+    failures:
+        canceling_open_after_native_view_creation_releases_the_unreceived_session
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 3.03s
+
+  stderr ───
+
+    thread 'canceling_open_after_native_view_creation_releases_the_unreceived_session' (98773121) panicked at adapters/postgres/tests/session_tests.rs:56:6:
+    called `Result::unwrap()` on an `Err` value: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   3.051s] 1/5 tests run: 0 passed, 1 failed, 0 skipped
+        FAIL [   3.046s] (1/5) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+warning: 4/5 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed

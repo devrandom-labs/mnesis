@@ -157,3 +157,32 @@ transaction visibility record, whose size depends on active transactions.
 
 Listing and ordinary per-stream exports capture independent views. Their
 composition does not guarantee a consistent multi-stream backup.
+
+## Consistent export sessions
+
+With `export`, use `ConsistentExporter::open_export_session` for a single view
+covering listing and every stream read. The read-only repeatable-read transaction
+is established before open returns. A later atomic multi-stream commit is wholly
+absent, including streams read for the first time after that commit.
+
+Each session holds one connection from the caller's pool and one task on the
+existing Tokio runtime. The shared listener also holds a connection, so session
+admission shares the pool's capacity and acquisition timeout with other work.
+No connection is created outside that pool. One queued request and one active
+request bound internal work; each cursor retains at most its configured row/byte
+page. Callers own the number of cursors and their yielded envelopes.
+
+A session pins native MVCC history and can delay vacuum reclamation. Choose a
+short, sufficient nonzero lifetime. Expiration and Drop release the view without
+another caller poll, including idle or blocked reads; closing the caller's pool
+also stops session ownership. Explicit `close` waits for rollback and connection
+cleanup, and requires dropping borrowed cursors first. An expired cursor returns
+`ExportError::Expired` and ends; owned envelopes already yielded remain valid.
+
+The transaction uses a local one-second `client_connection_check_interval`,
+preserving a caller's shorter nonzero interval. This lets supported PostgreSQL
+servers detect socket closure during blocked SQL. It does not shorten query
+execution or change write settings, and it does not establish a recovery bound
+for network failures hidden from the server's kernel. Lifecycle and recovery
+profiles remain tracked in the completion PRD. Any export error means the backup
+is incomplete; normal import still requires completed format-2 chunks.

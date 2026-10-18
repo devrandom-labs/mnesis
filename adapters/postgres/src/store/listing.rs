@@ -6,20 +6,20 @@ use futures::StreamExt;
 use futures::stream::{BoxStream, try_unfold};
 use mnesis_store::StreamKey;
 use mnesis_store::export::StreamLister;
-use sqlx::PgPool;
+use sqlx::{Executor, Postgres};
 
 use super::PostgresStore;
 use crate::page::PageRow;
 use crate::{Limits, PostgresError};
 
 #[derive(sqlx::FromRow)]
-struct Key {
-    number: i64,
-    value: Vec<u8>,
+pub(super) struct Key {
+    pub(super) number: i64,
+    pub(super) value: Vec<u8>,
 }
 
-async fn page(
-    pool: &PgPool,
+pub(super) async fn page<'e>(
+    executor: impl Executor<'e, Database = Postgres>,
     after: Option<i64>,
     snapshot: &str,
     limits: Limits,
@@ -44,7 +44,7 @@ async fn page(
     .bind(snapshot)
     .bind(limits.rows.get().to_string())
     .bind(i64::from(limits.bytes.get()))
-    .fetch_all(pool)
+    .fetch_all(executor)
     .await
     .map(VecDeque::from)
     .map_err(PostgresError::Sqlx)

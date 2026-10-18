@@ -1,0 +1,42 @@
+Postgres Integration	Postgres integration	2026-10-18T16:33:24.1687617Z mnesis-postgres-integration>      Summary [   0.075s] 1 test run: 1 passed, 14 skipped
+Postgres Integration	Postgres integration	2026-10-18T16:33:26.1639862Z mnesis-postgres-integration>      Summary [   0.062s] 1 test run: 1 passed, 15 skipped
+Postgres Integration	Postgres integration	2026-10-18T16:33:28.1952865Z mnesis-postgres-integration>      Summary [   0.078s] 1 test run: 1 passed, 2 skipped
+Postgres Integration	Postgres integration	2026-10-18T16:33:30.2183233Z mnesis-postgres-integration>      Summary [   0.095s] 1 test run: 1 passed, 7 skipped
+Postgres Integration	Postgres integration	2026-10-18T16:34:00.5147758Z mnesis-postgres-integration>      Summary [  28.320s] 192 tests run: 192 passed, 0 skipped
+Postgres Integration	Postgres integration	2026-10-18T16:34:01.1884391Z      Summary [  28.320s] 192 tests run: 192 passed, 0 skipped
+Features (mnesis-wake)	Check isolated libraries and unit harnesses	2026-10-18T16:28:45.8139869Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+Features (mnesis-wake)	Check isolated libraries and unit harnesses	2026-10-18T16:28:46.1119884Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+Features (mnesis-wake)	Check isolated libraries and unit harnesses	2026-10-18T16:28:46.4084469Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+Nix Flake Check	Flake Check	2026-10-18T16:30:27.7562458Z mnesis-fuzz-replay> test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T16:30:28.7582766Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T16:30:29.7608769Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T16:41:06.7996908Z mnesis-nextest>      Summary [ 120.776s] 1563 tests run: 1563 passed (4 slow), 4 skipped
+Nix Flake Check	Flake Check	2026-10-18T16:43:01.8355102Z mnesis-postgres-integration>      Summary [   0.078s] 1 test run: 1 passed, 14 skipped
+Nix Flake Check	Flake Check	2026-10-18T16:43:03.8503604Z mnesis-postgres-integration>      Summary [   0.067s] 1 test run: 1 passed, 15 skipped
+Nix Flake Check	Flake Check	2026-10-18T16:43:05.8961448Z mnesis-postgres-integration>      Summary [   0.075s] 1 test run: 1 passed, 2 skipped
+Nix Flake Check	Flake Check	2026-10-18T16:43:07.9220478Z mnesis-postgres-integration>      Summary [   0.095s] 1 test run: 1 passed, 7 skipped
+Nix Flake Check	Flake Check	2026-10-18T16:43:38.3550777Z mnesis-postgres-integration>      Summary [  28.447s] 192 tests run: 192 passed, 0 skipped
+Compile-fail tests	Kernel compile-fail tests	2026-10-18T16:29:19.2463401Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 67.16s
+Compile-fail tests	Macro compile-fail tests	2026-10-18T16:29:32.5786481Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.45s
+Compile-fail tests	Store compile-fail tests	2026-10-18T16:29:44.8047211Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.26s
+Features (mnesis-wake-nostd)	Check isolated libraries and unit harnesses	2026-10-18T16:28:13.4468966Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-wake-nostd)	Check isolated libraries and unit harnesses	2026-10-18T16:28:13.5630303Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-wake-nostd)	Check isolated libraries and unit harnesses	2026-10-18T16:28:13.6762649Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-store)	Check isolated libraries and unit harnesses	2026-10-18T16:28:51.9884455Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.94s
+Features (mnesis-store)	Check isolated libraries and unit harnesses	2026-10-18T16:28:55.0834584Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.95s
+Features (mnesis-store)	Check isolated libraries and unit harnesses	2026-10-18T16:29:02.1008080Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.12s
+Features (mnesis)	Check isolated libraries and unit harnesses	2026-10-18T16:28:45.5901572Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis)	Check isolated libraries and unit harnesses	2026-10-18T16:28:45.7566814Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis)	Check isolated libraries and unit harnesses	2026-10-18T16:28:46.2844420Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-fjall)	Check isolated libraries and unit harnesses	2026-10-18T16:29:02.2728263Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.90s
+Features (mnesis-fjall)	Check isolated libraries and unit harnesses	2026-10-18T16:29:07.9719189Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.54s
+Features (mnesis-fjall)	Check isolated libraries and unit harnesses	2026-10-18T16:29:11.2691714Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.15s
+Features (mnesis-macros)	Check isolated libraries and unit harnesses	2026-10-18T16:28:19.4186384Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-macros)	Check isolated libraries and unit harnesses	2026-10-18T16:28:19.5449900Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-macros)	Check isolated libraries and unit harnesses	2026-10-18T16:28:19.6691929Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-store-testing)	Check isolated libraries and unit harnesses	2026-10-18T16:28:44.8003180Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-store-testing)	Check isolated libraries and unit harnesses	2026-10-18T16:28:44.9391564Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-store-testing)	Check isolated libraries and unit harnesses	2026-10-18T16:28:45.0797684Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Features (mnesis-inmemory)	Check isolated libraries and unit harnesses	2026-10-18T16:28:42.2536063Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+Features (mnesis-inmemory)	Check isolated libraries and unit harnesses	2026-10-18T16:28:42.3967589Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+Features (mnesis-inmemory)	Check isolated libraries and unit harnesses	2026-10-18T16:28:44.1424002Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

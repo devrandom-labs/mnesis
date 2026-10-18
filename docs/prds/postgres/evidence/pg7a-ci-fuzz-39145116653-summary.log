@@ -1,0 +1,8 @@
+deep-fuzz-afl (wire_decode_frame)	Fuzz wire_decode_frame (AFL++/CMPLOG)	2026-10-18T16:30:41.8898665Z ^[[1;94m[*] ^[[0mStatistics: 0 new corpus items found, 37.25% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz (cbor_decode_chunk)	Fuzz cbor_decode_chunk	2026-10-18T16:30:22.5836155Z Done 1245257 runs in 61 second(s)
+deep-fuzz-afl (cbor_decode_chunk)	Fuzz cbor_decode_chunk (AFL++/CMPLOG)	2026-10-18T16:31:46.8081731Z ^[[1;94m[*] ^[[0mStatistics: 12 new corpus items found, 43.39% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 1 sec^[[0m
+deep-fuzz-afl (cbor_decode_header)	Fuzz cbor_decode_header (AFL++/CMPLOG)	2026-10-18T16:32:01.3823836Z ^[[1;94m[*] ^[[0mStatistics: 1 new corpus items found, 47.61% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz (value_event_type)	Fuzz value_event_type	2026-10-18T16:31:27.5834595Z Done 5831023 runs in 61 second(s)
+deep-fuzz-afl (value_event_type)	Fuzz value_event_type (AFL++/CMPLOG)	2026-10-18T16:31:52.7829562Z ^[[1;94m[*] ^[[0mStatistics: 0 new corpus items found, 8.31% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec^[[0m
+deep-fuzz (wire_decode_frame)	Fuzz wire_decode_frame	2026-10-18T16:31:41.7357320Z Done 6580783 runs in 61 second(s)
+deep-fuzz (cbor_decode_header)	Fuzz cbor_decode_header	2026-10-18T16:32:01.6742197Z Done 2955147 runs in 61 second(s)

@@ -68,6 +68,21 @@ pub enum PostgresError {
     /// Wake registration over `LISTEN/NOTIFY` failed.
     #[error("listen/notify wake setup failed: {0}")]
     Wake(#[source] sqlx::Error),
+
+    /// A consistent export request could not be admitted to its closed view.
+    #[cfg(feature = "export")]
+    #[error("export request unavailable: {0}")]
+    ExportRequest(#[source] tokio::sync::mpsc::error::SendError<()>),
+
+    /// The view stopped before returning the requested page or startup result.
+    #[cfg(feature = "export")]
+    #[error("export reply unavailable: {0}")]
+    ExportReply(#[source] tokio::sync::oneshot::error::RecvError),
+
+    /// The export owner stopped unexpectedly; retain its task failure.
+    #[cfg(feature = "export")]
+    #[error("export task failed: {0}")]
+    ExportTask(#[source] tokio::task::JoinError),
 }
 
 impl PostgresError {

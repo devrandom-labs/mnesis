@@ -1,0 +1,30 @@
+     Removed 795 files, 123.2MiB total
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7b-disconnect-disabled.LqroYB/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.00s
+────────────
+ Nextest run ID d663f243-0223-4e46-822d-98bcc823d71c with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   5.061s] (1/1) mnesis-postgres::session_tests dropping_a_long_lived_session_releases_its_blocked_query
+  stdout ───
+
+    running 1 test
+    test dropping_a_long_lived_session_releases_its_blocked_query ... FAILED
+
+    failures:
+
+    failures:
+        dropping_a_long_lived_session_releases_its_blocked_query
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 5.05s
+
+  stderr ───
+
+    thread 'dropping_a_long_lived_session_releases_its_blocked_query' (98822091) panicked at adapters/postgres/tests/session_tests.rs:404:13:
+    Drop must release native blocked SQL before the60s lifetime: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   5.062s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   5.061s] (1/1) mnesis-postgres::session_tests dropping_a_long_lived_session_releases_its_blocked_query
+error: test run failed

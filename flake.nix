@@ -457,6 +457,11 @@
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   -E 'binary(listing_tests) & test(binary_ids_list_once_across_pages_and_reopen)' \
                   2>&1 | tee -a postgres-feature.log
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  -E 'binary(session_tests) & test(explicit_close_and_drop_release_native_views_and_allow_reopen)' \
+                  2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \

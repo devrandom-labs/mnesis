@@ -1,0 +1,55 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-views/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+────────────
+ Nextest run ID 3d416f36-ec1b-4a1a-ac75-7edcbd537d48 with nextest profile: default
+    Starting 7 tests across 1 binary
+        PASS [   0.069s] (1/7) mnesis-postgres::session_tests canceling_open_after_native_view_creation_releases_the_unreceived_session
+        FAIL [   3.039s] (2/7) mnesis-postgres::session_tests closing_the_callers_pool_releases_an_idle_session_before_its_lifetime
+  stdout ───
+
+    running 1 test
+    test closing_the_callers_pool_releases_an_idle_session_before_its_lifetime ... FAILED
+
+    failures:
+
+    failures:
+        closing_the_callers_pool_releases_an_idle_session_before_its_lifetime
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 3.03s
+
+  stderr ───
+
+    thread 'closing_the_callers_pool_releases_an_idle_session_before_its_lifetime' (98782441) panicked at adapters/postgres/tests/session_tests.rs:358:12:
+    caller-owned pool closure must stop idle session ownership: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   5.084s] (3/7) mnesis-postgres::session_tests expiry_releases_a_native_view_while_an_abandoned_read_is_blocked
+  stdout ───
+
+    running 1 test
+    test expiry_releases_a_native_view_while_an_abandoned_read_is_blocked ... FAILED
+
+    failures:
+
+    failures:
+        expiry_releases_a_native_view_while_an_abandoned_read_is_blocked
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 5.05s
+
+  stderr ───
+
+    thread 'expiry_releases_a_native_view_while_an_abandoned_read_is_blocked' (98782548) panicked at adapters/postgres/tests/session_tests.rs:334:13:
+    expiry must release a view while SQL is blocked, without caller polls: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        PASS [   0.071s] (4/7) mnesis-postgres::session_tests explicit_close_and_drop_release_native_views_and_allow_reopen
+        PASS [   1.040s] (5/7) mnesis-postgres::session_tests idle_expiration_releases_a_view_with_buffered_and_unpolled_cursors
+        PASS [   0.051s] (6/7) mnesis-postgres::session_tests invalid_lifetimes_reject_before_a_closed_pool_is_touched
+        PASS [   0.044s] (7/7) mnesis-postgres::session_tests one_view_includes_no_part_of_a_later_atomic_commit_even_before_its_first_read
+────────────
+     Summary [   9.402s] 7 tests run: 5 passed, 2 failed, 0 skipped
+        FAIL [   3.039s] (2/7) mnesis-postgres::session_tests closing_the_callers_pool_releases_an_idle_session_before_its_lifetime
+        FAIL [   5.084s] (3/7) mnesis-postgres::session_tests expiry_releases_a_native_view_while_an_abandoned_read_is_blocked
+error: test run failed
