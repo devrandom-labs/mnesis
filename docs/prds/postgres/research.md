@@ -1491,3 +1491,23 @@ e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1; head a0f422178ab45f086512f58205445837d
 had40 green/1 scheduled skip, native104 zero skips,1549 workspace and21 mutation
 candidates17caught/4unviable,zero misses/timeouts. See CI39112792409 and39112792431.
 No publication or full-adapter acceptance claim follows these focused deliveries.
+
+Post-PR cross-capability review found a PG4b test loophole: DropInsert could now
+intercept new catalog insertion before an event existed. Key setup is committed
+before enabling that fault, so the next native INSERT necessarily stages an event
+inside the append transaction. Tightened selected case passes1/1,11 filtered,
+zero runtime skips credited,0.057s. Three reviews: (1) transaction source error
+and zero committed event assertion remain; (2) actual event statement now reaches
+CommandComplete before response loss, restoring the intended prefix rollback
+falsifier; (3) preseeded key does not bypass event writes and filtered cases are
+not counted. Earlier113-run evidence remains valid for its actual weaker fault
+point; it is not proof of event-prefix transport loss. Rerun full113 and commit
+this stronger oracle before PR380 merge. No production policy changed.
+
+PR380 stronger-event-prefix full native run:113/113 pass,zero skips/no filter,
+13.573s. Three post-run reviews: (1) all representation/migration/read/wake/outcome
+laws remain; (2) DropInsert now necessarily acknowledges an event statement before
+loss because its key already exists and no other INSERT precedes events; (3) no
+production behavior/filter/deadline changed, selected1-run not double-counted,
+all original failures retained. Normal signed hook and fresh protected CI must
+pass this stronger head before merge.

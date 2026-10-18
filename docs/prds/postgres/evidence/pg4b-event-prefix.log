@@ -1,0 +1,13 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-representation/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-representation/crates/workspace-hack)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-representation/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-representation/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.25s
+────────────
+ Nextest run ID 97820462-8213-40d5-8471-f17808716f81 with nextest profile: default
+    Starting 1 test across 1 binary (11 tests skipped)
+        PASS [   0.057s] (1/1) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+────────────
+     Summary [   0.057s] 1 test run: 1 passed, 11 skipped

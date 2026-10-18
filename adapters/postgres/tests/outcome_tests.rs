@@ -258,14 +258,13 @@ async fn loss_during_inserts_rolls_back_the_uncommitted_prefix() {
     let Some((mut proxy, store, control)) = fixture().await else {
         return;
     };
+    let id = StreamKey::from_bytes("during-insert");
+    // The suppressed INSERT must be an event, after key setup has committed.
+    support::key(&control, id.as_bytes()).await;
     proxy.fault.send_replace(Fault::DropInsert);
     let rows = events();
     let result = store
-        .append(
-            &StreamKey::from_bytes("during-insert"),
-            None,
-            PendingBatch::new(&rows).unwrap(),
-        )
+        .append(&id, None, PendingBatch::new(&rows).unwrap())
         .await;
     proxy.observed(Observation::Inserted).await;
     assert!(matches!(

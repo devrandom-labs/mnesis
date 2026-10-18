@@ -125,3 +125,9 @@ Thirdreview: tighten exact process/query advisory wait, unexplained8.170s case t
 recordedPG8. Need forced order/race, COMMIT loss, import and actualSSI/deadlock.
 Do not extract PG5 relativeHEADa0: baseline includesPG4b; align safely after PG4b
 commits/rebases, preserving every record. No PG5 full feature CI/delivery proof yet.
+
+PG4b PR380 https://github.com/devrandom-labs/mnesis/pull/380 head a32cd743665d735e400072a244ba98c9de840a4f
+opened against main e1ee1dc2. Stronger event-prefix transport test found during PG5
+cross-capability review: preseed key before DropInsert so fault is after EVENT
+INSERT, not key catalog INSERT. Selected1+full113 native pass,zero skips; changes
+pending next signed commit/hook and CI. Do not merge old head without correction.
