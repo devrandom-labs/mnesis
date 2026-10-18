@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-schema/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+────────────
+ Nextest run ID e4fb2b07-8de7-450b-bf67-d804666b6ba2 with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   3.047s] (1/1) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+  stdout ───
+
+    running 1 test
+    test cancelling_a_blocked_migration_releases_its_session_and_transaction ... FAILED
+
+    failures:
+
+    failures:
+        cancelling_a_blocked_migration_releases_its_session_and_transaction
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 3.03s
+
+  stderr ───
+
+    thread 'cancelling_a_blocked_migration_releases_its_session_and_transaction' (94818383) panicked at adapters/postgres/tests/migration_tests.rs:253:14:
+    scoped migration sessions must release all reentrant locks: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   3.047s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   3.047s] (1/1) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+error: test run failed

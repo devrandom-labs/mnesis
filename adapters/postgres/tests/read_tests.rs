@@ -57,8 +57,9 @@ async fn first_event_does_not_retain_the_whole_backlog() {
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();
@@ -66,7 +67,7 @@ async fn first_event_does_not_retain_the_whole_backlog() {
     let rows =
         std::env::var("MNESIS_TEST_ROWS").map_or(4096, |value| value.parse::<i64>().unwrap());
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          SELECT $1, n, 'Memory', 1, decode(repeat('42', 4096), 'hex') \
          FROM generate_series(1, $2) AS n",
     )
@@ -118,12 +119,12 @@ async fn first_event_does_not_retain_the_whole_backlog() {
 }
 
 async fn seed(pool: &PgPool, id: &StreamKey, count: usize) {
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(pool)
         .await
         .unwrap();
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          SELECT $1, n, 'Page', 1, 'payload'::bytea FROM generate_series(1, $2) AS n",
     )
     .bind(id.as_bytes())
@@ -143,6 +144,7 @@ async fn page_edges_preserve_versions_and_exclusive_global_resume() {
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let id = StreamKey::from_bytes("pages");
     for size in [1, 2, BatchSize::DEFAULT.get(), MAX_BATCH] {
         let batch = BatchSize::new(size).unwrap();
@@ -223,6 +225,7 @@ async fn finite_scans_exclude_later_appends_and_release_the_connection_between_p
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool_with_limits(
         pool.clone(),
         Limits {
@@ -247,7 +250,7 @@ async fn finite_scans_exclude_later_appends_and_release_the_connection_between_p
     timeout(
         Duration::from_secs(1),
         sqlx::query(
-            "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+            "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 4, 'Later', 1, 'later'::bytea)",
         )
         .bind(id.as_bytes())
@@ -282,6 +285,7 @@ async fn corruption_on_a_later_page_terminates_without_skipping() {
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool_with_limits(
         pool.clone(),
         Limits {
@@ -293,7 +297,7 @@ async fn corruption_on_a_later_page_terminates_without_skipping() {
     .unwrap();
     let id = StreamKey::from_bytes("corrupt-page");
     seed(&pool, &id, 4).await;
-    sqlx::query("UPDATE events SET schema_version = 0 WHERE version = 3")
+    sqlx::query("UPDATE mnesis.events SET schema_version = 0 WHERE version = 3")
         .execute(&pool)
         .await
         .unwrap();
@@ -331,14 +335,15 @@ async fn large_rows_obey_the_default_byte_budget() {
         .connect(&url)
         .await
         .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
     let id = StreamKey::from_bytes("byte-memory");
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          SELECT $1, n, 'Large', 1, decode(repeat('42', 1048576), 'hex') \
          FROM generate_series(1, 24) AS n",
     )
@@ -398,7 +403,7 @@ async fn byte_edges_count_binary_keys_utf8_and_optional_metadata() {
     let Some((store, pool)) = with_bytes(100).await else {
         return;
     };
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();
@@ -471,7 +476,7 @@ async fn oversized_tail_rejects_the_entire_append_before_writing() {
         return;
     };
     let id = StreamKey::from_bytes("byte-write");
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();
@@ -496,7 +501,7 @@ async fn oversized_tail_rejects_the_entire_append_before_writing() {
             limit: 70
         }))
     ));
-    let count: i64 = sqlx::query_scalar("SELECT count(*) FROM events")
+    let count: i64 = sqlx::query_scalar("SELECT count(*) FROM mnesis.events")
         .fetch_one(&pool)
         .await
         .unwrap();
@@ -514,7 +519,7 @@ async fn oversized_legacy_row_stops_without_fetching_its_body_or_skipping() {
     let id = StreamKey::from_bytes("limit");
     seed(&pool, &id, 4).await;
     sqlx::query(
-        "UPDATE events SET payload = decode(repeat('42', 8388608), 'hex') WHERE version = 3",
+        "UPDATE mnesis.events SET payload = decode(repeat('42', 8388608), 'hex') WHERE version = 3",
     )
     .execute(&pool)
     .await

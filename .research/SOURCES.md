@@ -25,3 +25,59 @@ used the canonical source at
   StackSlot call was found in these paths. This limits applicability but does not
   replace the PG9 dependency remediation: evaluate the compatible patched update
   with no_std/platform gates rather than add an ignore. Current lock is 5.4.1.
+
+## PG4 SQLx migrations (2026-10-18)
+
+SQLx0.8.6, locked registry source, MIT OR Apache-2.0:
+https://docs.rs/sqlx/0.8.6/sqlx/migrate/struct.Migrator.html
+and sqlx-core-0.8.6/src/migrate/{migrator,migration}.rs plus
+sqlx-postgres-0.8.6/src/migrate.rs. Native migrator supplies checksums,
+per-migration transaction+metadata and PostgreSQL session advisory locks.
+Errors before final unlock leave the lock held: scoped close_on_drop connections
+are required. Bootstrap holds a reentrant acquisition through completion, so
+schema creation is serialized before SQLx creates its metadata. No transaction
+outlives the migrator unlock. Migration version/checksum authority is the embedded
+Migrator::iter(), not a second manually maintained version constant.
+
+Send experiment: SQLx0.8.6 Migrator::run on an already acquired connection fails
+Acquire lifetime generalization when used by tokio::spawn/conformance. Its own
+source labels run_direct as the workaround for that exact error. Use it only in
+the private schema owner, pinned by0.8.6; no migration logic is reimplemented.
+RawSql::execute also triggers Executor generalization here; the supported
+Executor::execute(&str) returns its Send boxed future directly and compiles.
+Strict all-target Clippy, including actual tokio::spawn overlap, now passes.
+
+Feature cost: enabling SQLx migrate adds14 lockfile-only optional packages
+(MySQL/SQLite drivers and their dependencies) under Cargo resolution. None is
+in the adapter's normal/build tree; retained tree is /tmp/mnesis-pg4a-tree.log.
+Targeted cargo-deny advisories passes with no added ignore. Full audit/license
+and publication checks remain required. This feature avoids a custom migration
+engine and uses the current Rust/SQLx/Tokio owners; no framework/runtime/tool.
+
+Native hash-index equality and exclusion semantics:
+https://www.postgresql.org/docs/17/indexes-types.html and
+https://www.postgresql.org/docs/17/sql-createtable.html. Hash stores a code but
+rechecks actual equality; exclusion can reject equal keys without treating a
+hash collision as identity. Existing native5,120-byte/colliding-key probes are
+candidate evidence only; adapter concurrency/migration/query-plan acceptance
+still required for the later representation slice.
+
+SQLx0.9 correction (2026-10-18): primary release75bc048 and Cargo manifest:
+https://github.com/transact-rs/sqlx/releases/tag/v0.9.0
+https://github.com/transact-rs/sqlx/blob/v0.9.0/Cargo.toml
+Rust1.94 minimum (our1.99 supported), MIT OR Apache-2.0. The MySQL driver disables
+RSA by default; using migrate without mysql-rsa removes the vulnerable rsa family
+from the lock. Source migration0.9 adds create_schema/dangerous_set_table_name;
+we use fixed owned identifiers before installation, never rename live metadata.
+It still provides run_direct as its own workaround for generic Acquire Send
+failure. QueryBuilder removes its argument lifetime. The supported AssertSqlSafe
+marks the existing test-only DDL built exclusively from four literal SQLSTATEs.
+Actual normal/build tree and full advisory/license verification are required.
+
+https://github.com/transact-rs/sqlx/issues/3196 and
+https://github.com/rust-lang/cargo/issues/13078 document weak optional features
+resolving unused driver families in lockfiles. No new security ignore was added.
+The0.8 migration-feature alternative fails our actual CargoAudit gate on RSA.
+The0.9 source options/mod.rs uses whoami2 then anonymous fallback; parser/parse.rs
+explicitly supports and tests the user URL query parameter. Supply the intended
+role in native test and CI URLs. Preserve library-owned connection semantics.

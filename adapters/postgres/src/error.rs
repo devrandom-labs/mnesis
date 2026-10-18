@@ -8,6 +8,14 @@ use mnesis_store::envelope::EnvelopeError;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum PostgresError {
+    /// Explicit migration failed; inspect the source before repairing or retrying.
+    #[error("postgres migration failed: {0}")]
+    Migration(#[source] sqlx::migrate::MigrateError),
+
+    /// Runtime opening never repairs or changes an incompatible schema.
+    #[error("incompatible postgres schema: {reason}")]
+    Schema { reason: ErrorId<128> },
+
     /// A row exceeds the configured read/write byte ceiling. No row is skipped.
     #[error("row requires {actual} bytes, exceeding configured limit {limit}")]
     RowLimit { actual: i64, limit: i64 },

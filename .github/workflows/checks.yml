@@ -113,7 +113,7 @@ jobs:
         run: nix flake check -L
 
   postgres-integration:
-    name: Postgres Integration (nixosTest)
+    name: Postgres Integration
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -144,5 +144,7 @@ jobs:
           purge-created: 0
           purge-primary-key: never
 
-      - name: Postgres nixosTest
-        run: nix build .#postgres-integration -L
+      - name: Postgres integration
+        run: |
+          nix build .#postgres-integration -L --out-link result-postgres
+          cat result-postgres/run.log

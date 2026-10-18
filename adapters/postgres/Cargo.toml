@@ -18,7 +18,7 @@ futures = { workspace = true, features = ["std", "async-await", "executor"] }
 mnesis = { version = "0.4.0", path = "../../crates/mnesis" }
 mnesis-store = { version = "0.4.0", path = "../../crates/store", features = ["subscription"] }
 mnesis-wake = { version = "0.4.0", path = "../../crates/wake" }
-sqlx = { workspace = true }
+sqlx = { workspace = true, features = ["migrate"] }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["rt", "sync"] }
 workspace-hack = { version = "0.1", path = "../../crates/workspace-hack" }

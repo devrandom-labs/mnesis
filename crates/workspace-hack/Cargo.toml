@@ -17,10 +17,11 @@ bytes = { version = "1" }
 concurrent-queue = { version = "2", default-features = false, features = ["std"] }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
-digest = { version = "0.10", features = ["mac", "std"] }
+digest = { version = "0.10", features = ["std"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 either = { version = "1", features = ["serde", "use_std"] }
 event-listener = { version = "5" }
+foldhash = { version = "0.2" }
 form_urlencoded = { version = "1" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", features = ["sink"] }
@@ -28,7 +29,8 @@ futures-io = { version = "0.3" }
 futures-sink = { version = "0.3", default-features = false, features = ["std"] }
 futures-task = { version = "0.3", default-features = false, features = ["std"] }
 futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
-getrandom = { version = "0.2", default-features = false, features = ["std"] }
+getrandom = { version = "0.4", default-features = false, features = ["std", "sys_rng"] }
+hashbrown = { version = "0.16" }
 hyper = { version = "1", features = ["client", "http1", "server"] }
 hyper-util = { version = "0.1", features = ["client-legacy", "http1", "server", "service"] }
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -36,8 +38,7 @@ log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 num-traits = { version = "0.2" }
 once_cell = { version = "1" }
-ppv-lite86 = { version = "0.2", default-features = false, features = ["simd", "std"] }
-rand_core = { version = "0.6", default-features = false, features = ["std"] }
+rand_core = { version = "0.6", default-features = false, features = ["getrandom"] }
 regex-automata = { version = "0.4", default-features = false, features = ["dfa-build", "meta", "std"] }
 regex-syntax = { version = "0.8" }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
@@ -46,13 +47,13 @@ serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
 slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_new", "serde"] }
-sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
-sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
+sqlx-core = { version = "0.9", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
+typenum = { version = "1", default-features = false, features = ["const-generics"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
 
 [build-dependencies]
@@ -61,10 +62,11 @@ bytes = { version = "1" }
 concurrent-queue = { version = "2", default-features = false, features = ["std"] }
 crossbeam-utils = { version = "0.8" }
 crypto-common = { version = "0.1", default-features = false, features = ["std"] }
-digest = { version = "0.10", features = ["mac", "std"] }
+digest = { version = "0.10", features = ["std"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 either = { version = "1", features = ["serde", "use_std"] }
 event-listener = { version = "5" }
+foldhash = { version = "0.2" }
 form_urlencoded = { version = "1" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", features = ["sink"] }
@@ -72,7 +74,8 @@ futures-io = { version = "0.3" }
 futures-sink = { version = "0.3", default-features = false, features = ["std"] }
 futures-task = { version = "0.3", default-features = false, features = ["std"] }
 futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
-getrandom = { version = "0.2", default-features = false, features = ["std"] }
+getrandom = { version = "0.4", default-features = false, features = ["std", "sys_rng"] }
+hashbrown = { version = "0.16" }
 hyper = { version = "1", features = ["client", "http1", "server"] }
 hyper-util = { version = "0.1", features = ["client-legacy", "http1", "server", "service"] }
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -80,9 +83,8 @@ log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 num-traits = { version = "0.2" }
 once_cell = { version = "1" }
-ppv-lite86 = { version = "0.2", default-features = false, features = ["simd", "std"] }
 proc-macro2 = { version = "1", features = ["span-locations"] }
-rand_core = { version = "0.6", default-features = false, features = ["std"] }
+rand_core = { version = "0.6", default-features = false, features = ["getrandom"] }
 regex-automata = { version = "0.4", default-features = false, features = ["dfa-build", "meta", "std"] }
 regex-syntax = { version = "0.8" }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
@@ -91,14 +93,14 @@ serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
 slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_new", "serde"] }
-sqlx-core = { version = "0.8", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
-sqlx-postgres = { version = "0.8", default-features = false, features = ["migrate", "offline"] }
+sqlx-core = { version = "0.9", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
+typenum = { version = "1", default-features = false, features = ["const-generics"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]

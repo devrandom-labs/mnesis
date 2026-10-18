@@ -1,0 +1,140 @@
+warning: Git tree '/private/tmp/mnesis-postgres-migrations' has uncommitted changes
+this derivation will be built:
+  /nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv
+building '/nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv' on 'ssh-ng://builder@linux-builder'...
+copying 0 paths...
+warning: unable to download 'https://cache.nixos.org/nix-cache-info': Problem with the SSL CA cert (path? access rights?) (77) error adding trust anchors from file:
+building '/nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv'...
+mnesis-postgres-integration-failure-proof> Running phase: unpackPhase
+mnesis-postgres-integration-failure-proof> unpacking source archive /nix/store/n2x7j8xc821r1rppf3g3rf9xr22nmgnc-source
+mnesis-postgres-integration-failure-proof> source root is source
+mnesis-postgres-integration-failure-proof> Running phase: patchPhase
+mnesis-postgres-integration-failure-proof> Running phase: updateAutotoolsGnuConfigScriptsPhase
+mnesis-postgres-integration-failure-proof> Running phase: configurePhase
+mnesis-postgres-integration-failure-proof> no configure script, doing nothing
+mnesis-postgres-integration-failure-proof> Running phase: checkPhase
+mnesis-postgres-integration-failure-proof> initializing postgresql
+mnesis-postgres-integration-failure-proof> The files belonging to this database system will be owned by user "nixbld".
+mnesis-postgres-integration-failure-proof> This user must also own the server process.
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> The database cluster will be initialized with locale "C".
+mnesis-postgres-integration-failure-proof> The default text search configuration will be set to "english".
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> Data page checksums are enabled.
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> creating directory /build/postgresql ... ok
+mnesis-postgres-integration-failure-proof> creating subdirectories ... ok
+mnesis-postgres-integration-failure-proof> selecting dynamic shared memory implementation ... posix
+mnesis-postgres-integration-failure-proof> selecting default "max_connections" ... 100
+mnesis-postgres-integration-failure-proof> selecting default "shared_buffers" ... 128MB
+mnesis-postgres-integration-failure-proof> selecting default time zone ... UTC
+mnesis-postgres-integration-failure-proof> creating configuration files ... ok
+mnesis-postgres-integration-failure-proof> running bootstrap script ... ok
+mnesis-postgres-integration-failure-proof> performing post-bootstrap initialization ... ok
+mnesis-postgres-integration-failure-proof> syncing data to disk ... ok
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> initdb: warning: enabling "trust" authentication for local connections
+mnesis-postgres-integration-failure-proof> initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> Success. You can now start the database server using:
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     pg_ctl -D /build/postgresql -l logfile start
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof> starting postgresql
+mnesis-postgres-integration-failure-proof> waiting for server to start....2026-10-18 08:44:19.427 UTC [85] LOG:  starting PostgreSQL 18.6 on aarch64-unknown-linux-gnu, compiled by clang version 21.1.8, 64-bit
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:19.427 UTC [85] LOG:  listening on Unix socket "/build/run/postgresql/.s.PGSQL.5432"
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:19.430 UTC [91] LOG:  database system was shut down at 2026-10-18 08:44:19 UTC
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:19.432 UTC [85] LOG:  database system is ready to accept connections
+mnesis-postgres-integration-failure-proof>  done
+mnesis-postgres-integration-failure-proof> server started
+mnesis-postgres-integration-failure-proof> setting up postgresql
+mnesis-postgres-integration-failure-proof> CREATE ROLE
+mnesis-postgres-integration-failure-proof> CREATE DATABASE
+mnesis-postgres-integration-failure-proof>   Extracting 8 binaries and 1 build script output directory to /build/nextest-archive-FhknGr
+mnesis-postgres-integration-failure-proof>    Extracted 11 files to /build/nextest-archive-FhknGr in 0.38s
+mnesis-postgres-integration-failure-proof> ────────────
+mnesis-postgres-integration-failure-proof>  Nextest run ID 828c0891-f2c8-4019-b1a8-4de14014dbed with nextest profile: default
+mnesis-postgres-integration-failure-proof>     Starting 104 tests across 8 binaries
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  1/104) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  2/104) mnesis-postgres error::tests::satisfies_error_send_sync_static
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  3/104) mnesis-postgres hex::tests::decode_accepts_uppercase
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  4/104) mnesis-postgres hex::tests::empty_round_trips
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  5/104) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  6/104) mnesis-postgres hex::tests::non_hex_char_is_rejected
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  7/104) mnesis-postgres hex::tests::odd_length_is_rejected
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  8/104) mnesis-postgres hex::tests::round_trips_all_byte_values
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] (  9/104) mnesis-postgres position::tests::accessors_round_trip
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] ( 10/104) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] ( 11/104) mnesis-postgres store::tests::existing_stream_two_events_ok
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] ( 12/104) mnesis-postgres store::tests::fresh_stream_three_events_ok
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] ( 13/104) mnesis-postgres store::tests::schema_version_full_u32_range_is_accepted
+mnesis-postgres-integration-failure-proof>         PASS [   0.001s] ( 14/104) mnesis-postgres store::tests::schema_version_widens_to_i64
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:19.972 UTC [148] FATAL:  role "mnesis_intentionally_missing" does not exist
+mnesis-postgres-integration-failure-proof>         FAIL [   0.003s] ( 15/104) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+mnesis-postgres-integration-failure-proof>   stdout ───
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     running 1 test
+mnesis-postgres-integration-failure-proof>     test all_noskip_exclusive_resume_after_out_of_order_commits ... FAILED
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     failures:
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     failures:
+mnesis-postgres-integration-failure-proof>         all_noskip_exclusive_resume_after_out_of_order_commits
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>   stderr ───
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>     thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (147) panicked at adapters/postgres/tests/all_noskip_tests.rs:70:10:
+mnesis-postgres-integration-failure-proof>     connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"mnesis_intentionally_missing\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(804), routine: Some("InitializeSessionUserId") })
+mnesis-postgres-integration-failure-proof>     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+mnesis-postgres-integration-failure-proof>
+mnesis-postgres-integration-failure-proof>   Cancelling due to test failure:
+mnesis-postgres-integration-failure-proof> ────────────
+mnesis-postgres-integration-failure-proof>      Summary [   0.021s] 15/104 tests run: 14 passed, 1 failed, 0 skipped
+mnesis-postgres-integration-failure-proof>         FAIL [   0.003s] ( 15/104) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+mnesis-postgres-integration-failure-proof> warning: 89/104 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+mnesis-postgres-integration-failure-proof> error: test run failed
+mnesis-postgres-integration-failure-proof> stopping postgresql
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:19.995 UTC [85] LOG:  received fast shutdown request
+mnesis-postgres-integration-failure-proof> waiting for server to shut down....2026-10-18 08:44:20.126 UTC [85] LOG:  aborting any active transactions
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:20.128 UTC [85] LOG:  background worker "logical replication launcher" (PID 94) exited with exit code 1
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:20.128 UTC [89] LOG:  shutting down
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:20.129 UTC [89] LOG:  checkpoint starting: shutdown immediate
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:20.151 UTC [89] LOG:  checkpoint complete: wrote 952 buffers (5.8%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.012 s, total=0.023 s; sync files=310, longest=0.004 s, average=0.001 s; distance=4374 kB, estimate=4374 kB; lsn=0/1BAB5F8, redo lsn=0/1BAB5F8
+mnesis-postgres-integration-failure-proof> 2026-10-18 08:44:20.156 UTC [85] LOG:  database system is shut down
+mnesis-postgres-integration-failure-proof>  done
+mnesis-postgres-integration-failure-proof> server stopped
+error: build of '/nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv' on 'ssh-ng://builder@linux-builder' failed: Cannot build '/nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv'.
+       Reason: builder failed with exit code 100.
+       Output paths:
+         /nix/store/dh1mvmc9kxb3xvz47ix423j3mml7p7k1-mnesis-postgres-integration-failure-proof
+       Last 25 log lines:
+       >
+       >     test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+       >
+       >   stderr ───
+       >
+       >     thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (147) panicked at adapters/postgres/tests/all_noskip_tests.rs:70:10:
+       >     connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"mnesis_intentionally_missing\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(804), routine: Some("InitializeSessionUserId") })
+       >     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+       >
+       >   Cancelling due to test failure:
+       > ────────────
+       >      Summary [   0.021s] 15/104 tests run: 14 passed, 1 failed, 0 skipped
+       >         FAIL [   0.003s] ( 15/104) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+       > warning: 89/104 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+       > error: test run failed
+       > stopping postgresql
+       > 2026-10-18 08:44:19.995 UTC [85] LOG:  received fast shutdown request
+       > waiting for server to shut down....2026-10-18 08:44:20.126 UTC [85] LOG:  aborting any active transactions
+       > 2026-10-18 08:44:20.128 UTC [85] LOG:  background worker "logical replication launcher" (PID 94) exited with exit code 1
+       > 2026-10-18 08:44:20.128 UTC [89] LOG:  shutting down
+       > 2026-10-18 08:44:20.129 UTC [89] LOG:  checkpoint starting: shutdown immediate
+       > 2026-10-18 08:44:20.151 UTC [89] LOG:  checkpoint complete: wrote 952 buffers (5.8%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.012 s, total=0.023 s; sync files=310, longest=0.004 s, average=0.001 s; distance=4374 kB, estimate=4374 kB; lsn=0/1BAB5F8, redo lsn=0/1BAB5F8
+       > 2026-10-18 08:44:20.156 UTC [85] LOG:  database system is shut down
+       >  done
+       > server stopped
+       For full logs, run:
+         nix-store -l /nix/store/im3apip157vcb4imh0fpvw16hkxr3xp4-mnesis-postgres-integration-failure-proof.drv
+❓  (cancelled)

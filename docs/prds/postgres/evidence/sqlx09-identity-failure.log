@@ -1,0 +1,1802 @@
+   Compiling typenum v1.20.1
+   Compiling rand_core v0.10.1
+   Compiling hashbrown v0.16.1
+   Compiling base64 v0.22.1
+   Compiling cmov v0.5.4
+   Compiling getrandom v0.2.17
+   Compiling cpufeatures v0.3.0
+   Compiling whoami v2.1.3
+   Compiling getrandom v0.4.3
+   Compiling chacha20 v0.10.2
+   Compiling rand_core v0.6.4
+   Compiling ctutils v0.4.3
+   Compiling tempfile v3.27.0
+   Compiling rand v0.10.3
+   Compiling hashlink v0.11.1
+   Compiling generic-array v0.14.7
+   Compiling hybrid-array v0.4.15
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling curve25519-dalek v4.1.3
+   Compiling sqlx-core v0.9.0
+   Compiling digest v0.11.3
+   Compiling hmac v0.13.0
+   Compiling sha2 v0.11.1
+   Compiling md-5 v0.11.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling hkdf v0.13.0
+   Compiling sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-migrations/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-migrations/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-migrations/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-migrations/crates/store-testing)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+   Compiling sqlx v0.9.0
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-migrations/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.48s
+────────────
+ Nextest run ID a382478a-875c-47d2-9d69-bc6cbdd881af with nextest profile: default
+    Starting 102 tests across 8 binaries
+        PASS [   0.019s] (  1/102) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+        PASS [   0.007s] (  2/102) mnesis-postgres error::tests::satisfies_error_send_sync_static
+        PASS [   0.007s] (  3/102) mnesis-postgres hex::tests::decode_accepts_uppercase
+        PASS [   0.007s] (  4/102) mnesis-postgres hex::tests::empty_round_trips
+        PASS [   0.007s] (  5/102) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+        PASS [   0.007s] (  6/102) mnesis-postgres hex::tests::non_hex_char_is_rejected
+        PASS [   0.007s] (  7/102) mnesis-postgres hex::tests::odd_length_is_rejected
+        PASS [   0.007s] (  8/102) mnesis-postgres hex::tests::round_trips_all_byte_values
+        PASS [   0.007s] (  9/102) mnesis-postgres position::tests::accessors_round_trip
+        PASS [   0.007s] ( 10/102) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+        PASS [   0.007s] ( 11/102) mnesis-postgres store::tests::existing_stream_two_events_ok
+        PASS [   0.007s] ( 12/102) mnesis-postgres store::tests::fresh_stream_three_events_ok
+        PASS [   0.007s] ( 13/102) mnesis-postgres store::tests::schema_version_full_u32_range_is_accepted
+        PASS [   0.007s] ( 14/102) mnesis-postgres store::tests::schema_version_widens_to_i64
+        FAIL [   0.010s] ( 15/102) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+  stdout ───
+
+    running 1 test
+    test all_noskip_exclusive_resume_after_out_of_order_commits ... FAILED
+
+    failures:
+
+    failures:
+        all_noskip_exclusive_resume_after_out_of_order_commits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (94860181) panicked at adapters/postgres/tests/all_noskip_tests.rs:70:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 16/102) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+  stdout ───
+
+    running 1 test
+    test all_noskip_out_of_order_commits ... FAILED
+
+    failures:
+
+    failures:
+        all_noskip_out_of_order_commits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'all_noskip_out_of_order_commits' (94860187) panicked at adapters/postgres/tests/all_noskip_tests.rs:70:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 17/102) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_conflict_leaves_store_unchanged ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_conflict_leaves_store_unchanged
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_conflict_leaves_store_unchanged' (94860194) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 18/102) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_large_payload_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_large_payload_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_large_payload_round_trips' (94860200) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 19/102) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_max_length_event_type_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_max_length_event_type_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_max_length_event_type_round_trips' (94860207) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 20/102) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_metadata_absent_vs_present_distinct ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_metadata_absent_vs_present_distinct
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_metadata_absent_vs_present_distinct' (94860213) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 21/102) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_prefix_stream_ids_isolated ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_prefix_stream_ids_isolated
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_prefix_stream_ids_isolated' (94860218) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 22/102) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_version_gap_batch_rejected ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_version_gap_batch_rejected
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_version_gap_batch_rejected' (94860226) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 23/102) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+  stdout ───
+
+    running 1 test
+    test conformance_boundary::check_wrong_first_version_rejected ... FAILED
+
+    failures:
+
+    failures:
+        conformance_boundary::check_wrong_first_version_rejected
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_boundary::check_wrong_first_version_rejected' (94860232) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 24/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+  stdout ───
+
+    running 1 test
+    test conformance_lifecycle::check_reopen_conflict_state_intact ... FAILED
+
+    failures:
+
+    failures:
+        conformance_lifecycle::check_reopen_conflict_state_intact
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_lifecycle::check_reopen_conflict_state_intact' (94860236) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 25/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+  stdout ───
+
+    running 1 test
+    test conformance_lifecycle::check_reopen_preserves_events ... FAILED
+
+    failures:
+
+    failures:
+        conformance_lifecycle::check_reopen_preserves_events
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_lifecycle::check_reopen_preserves_events' (94860240) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 26/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+  stdout ───
+
+    running 1 test
+    test conformance_lifecycle::check_reopen_preserves_position_watermark ... FAILED
+
+    failures:
+
+    failures:
+        conformance_lifecycle::check_reopen_preserves_position_watermark
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_lifecycle::check_reopen_preserves_position_watermark' (94860244) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 27/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+  stdout ───
+
+    running 1 test
+    test conformance_lifecycle::check_reopen_subscription_catches_up ... FAILED
+
+    failures:
+
+    failures:
+        conformance_lifecycle::check_reopen_subscription_catches_up
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_lifecycle::check_reopen_subscription_catches_up' (94860248) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 28/102) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+  stdout ───
+
+    running 1 test
+    test conformance_linearizability::check_caught_up_boundary_race ... FAILED
+
+    failures:
+
+    failures:
+        conformance_linearizability::check_caught_up_boundary_race
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_linearizability::check_caught_up_boundary_race' (94860252) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 29/102) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+  stdout ───
+
+    running 1 test
+    test conformance_linearizability::check_concurrent_distinct_streams_all_land ... FAILED
+
+    failures:
+
+    failures:
+        conformance_linearizability::check_concurrent_distinct_streams_all_land
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_linearizability::check_concurrent_distinct_streams_all_land' (94860263) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 30/102) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+  stdout ───
+
+    running 1 test
+    test conformance_linearizability::check_concurrent_same_stream_single_winner ... FAILED
+
+    failures:
+
+    failures:
+        conformance_linearizability::check_concurrent_same_stream_single_winner
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_linearizability::check_concurrent_same_stream_single_winner' (94860272) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 31/102) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+  stdout ───
+
+    running 1 test
+    test conformance_linearizability::check_wake_after_idle ... FAILED
+
+    failures:
+
+    failures:
+        conformance_linearizability::check_wake_after_idle
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_linearizability::check_wake_after_idle' (94860280) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.007s] ( 32/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_boundary_then_new_append ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_boundary_then_new_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_boundary_then_new_append' (94860288) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 33/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_empty_store_yields_none ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_empty_store_yields_none
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_empty_store_yields_none' (94860292) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.008s] ( 34/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_from_is_exclusive ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_from_is_exclusive
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_from_is_exclusive' (94860296) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 35/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_global_order_across_streams ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_global_order_across_streams
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_global_order_across_streams' (94860300) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 36/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_items_carry_their_stream_key ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_items_carry_their_stream_key
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_items_carry_their_stream_key' (94860304) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 37/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_metadata_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_metadata_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_metadata_round_trips' (94860317) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 38/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_all_multi_resume_cycles ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_all_multi_resume_cycles
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_all_multi_resume_cycles' (94860326) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 39/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_append_conflict_is_surfaced ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_append_conflict_is_surfaced
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_append_conflict_is_surfaced' (94860330) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 40/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_append_retry_after_conflict_succeeds ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_append_retry_after_conflict_succeeds
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_append_retry_after_conflict_succeeds' (94860334) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 41/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_append_returns_assigned_all_position ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_append_returns_assigned_all_position
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_append_returns_assigned_all_position' (94860338) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 42/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_append_then_read_round_trips ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_append_then_read_round_trips
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_append_then_read_round_trips' (94860342) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 43/102) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_empty_read_yields_none ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_empty_read_yields_none
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_empty_read_yields_none' (94860351) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 44/102) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_large_stream_completes ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_large_stream_completes
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_large_stream_completes' (94860363) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 45/102) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_multi_event_append_returns_last_position ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_multi_event_append_returns_last_position
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_multi_event_append_returns_last_position' (94860371) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 46/102) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_read_stream_from_is_inclusive ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_read_stream_from_is_inclusive
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_read_stream_from_is_inclusive' (94860375) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 47/102) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist' (94860379) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 48/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_absent_stream_waits_then_delivers ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_absent_stream_waits_then_delivers' (94860383) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 49/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live' (94860387) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 50/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_backlog_then_caught_up_then_live ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_backlog_then_caught_up_then_live' (94860391) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 51/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_beyond_head_filters_below_bound ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_beyond_head_filters_below_bound
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_beyond_head_filters_below_bound' (94860395) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 52/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam' (94860399) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 53/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_subscription_resume_strict_after ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_subscription_resume_strict_after
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_subscription_resume_strict_after' (94860403) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 54/102) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_two_subscribers_same_stream_both_receive ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_two_subscribers_same_stream_both_receive
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_two_subscribers_same_stream_both_receive' (94860407) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 55/102) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+  stdout ───
+
+    running 1 test
+    test conformance_sequence::check_versions_strictly_monotonic_and_fused ... FAILED
+
+    failures:
+
+    failures:
+        conformance_sequence::check_versions_strictly_monotonic_and_fused
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'conformance_sequence::check_versions_strictly_monotonic_and_fused' (94860411) panicked at adapters/postgres/tests/conformance_tests.rs:23:10:
+    connect pool: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        PASS [   0.008s] ( 56/102) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+        FAIL [   0.010s] ( 57/102) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+  stdout ───
+
+    running 1 test
+    test a_pool_with_one_connection_is_rejected_before_it_can_starve_queries ... FAILED
+
+    failures:
+
+    failures:
+        a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'a_pool_with_one_connection_is_rejected_before_it_can_starve_queries' (94860418) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 58/102) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+  stdout ───
+
+    running 1 test
+    test all_rescans_after_a_long_held_snapshot_commits_without_a_hint ... FAILED
+
+    failures:
+
+    failures:
+        all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'all_rescans_after_a_long_held_snapshot_commits_without_a_hint' (94860422) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 59/102) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+  stdout ───
+
+    running 1 test
+    test clones_share_one_listener_and_last_drop_preserves_the_callers_pool ... FAILED
+
+    failures:
+
+    failures:
+        clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'clones_share_one_listener_and_last_drop_preserves_the_callers_pool' (94860426) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 60/102) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+  stdout ───
+
+    running 1 test
+    test closing_the_callers_pool_completes_with_a_live_subscription ... FAILED
+
+    failures:
+
+    failures:
+        closing_the_callers_pool_completes_with_a_live_subscription
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'closing_the_callers_pool_completes_with_a_live_subscription' (94860433) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 61/102) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+  stdout ───
+
+    running 1 test
+    test initial_listener_acquisition_failure_recovers_after_service_returns ... FAILED
+
+    failures:
+
+    failures:
+        initial_listener_acquisition_failure_recovers_after_service_returns
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'initial_listener_acquisition_failure_recovers_after_service_returns' (94860443) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 62/102) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+  stdout ───
+
+    running 1 test
+    test listener_disconnect_and_a_final_unnotified_commit_recover ... FAILED
+
+    failures:
+
+    failures:
+        listener_disconnect_and_a_final_unnotified_commit_recover
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'listener_disconnect_and_a_final_unnotified_commit_recover' (94860449) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 63/102) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+  stdout ───
+
+    running 1 test
+    test listener_subscription_failure_recovers_after_the_acquired_backend_dies ... FAILED
+
+    failures:
+
+    failures:
+        listener_subscription_failure_recovers_after_the_acquired_backend_dies
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'listener_subscription_failure_recovers_after_the_acquired_backend_dies' (94860453) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 64/102) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+  stdout ───
+
+    running 1 test
+    test malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers ... FAILED
+
+    failures:
+
+    failures:
+        malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers' (94860457) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 65/102) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+  stdout ───
+
+    running 1 test
+    test overlong_binary_notification_payload_does_not_reject_a_committed_append ... FAILED
+
+    failures:
+
+    failures:
+        overlong_binary_notification_payload_does_not_reject_a_committed_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'overlong_binary_notification_payload_does_not_reject_a_committed_append' (94860461) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 66/102) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+  stdout ───
+
+    running 1 test
+    test terminal_receive_error_after_failed_reconnection_is_retried ... FAILED
+
+    failures:
+
+    failures:
+        terminal_receive_error_after_failed_reconnection_is_retried
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'terminal_receive_error_after_failed_reconnection_is_retried' (94860465) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 67/102) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+  stdout ───
+
+    running 1 test
+    test wake_between_arm_and_first_poll_is_preserved ... FAILED
+
+    failures:
+
+    failures:
+        wake_between_arm_and_first_poll_is_preserved
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'wake_between_arm_and_first_poll_is_preserved' (94860469) panicked at adapters/postgres/tests/lifecycle_tests.rs:34:14:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.011s] ( 68/102) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+  stdout ───
+
+    running 1 test
+    test adoption_preserves_empty_metadata_as_corruption_and_null_as_absence ... FAILED
+
+    failures:
+
+    failures:
+        adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'adoption_preserves_empty_metadata_as_corruption_and_null_as_absence' (94860473) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 69/102) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+  stdout ───
+
+    running 1 test
+    test caller_search_path_cannot_redirect_event_storage ... FAILED
+
+    failures:
+
+    failures:
+        caller_search_path_cannot_redirect_event_storage
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'caller_search_path_cannot_redirect_event_storage' (94860477) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 70/102) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+  stdout ───
+
+    running 1 test
+    test cancelling_a_blocked_migration_releases_its_session_and_transaction ... FAILED
+
+    failures:
+
+    failures:
+        cancelling_a_blocked_migration_releases_its_session_and_transaction
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'cancelling_a_blocked_migration_releases_its_session_and_transaction' (94860481) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 71/102) mnesis-postgres::migration_tests checksum_and_newer_schema_are_rejected_without_repair
+  stdout ───
+
+    running 1 test
+    test checksum_and_newer_schema_are_rejected_without_repair ... FAILED
+
+    failures:
+
+    failures:
+        checksum_and_newer_schema_are_rejected_without_repair
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'checksum_and_newer_schema_are_rejected_without_repair' (94860485) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.009s] ( 72/102) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+  stdout ───
+
+    running 1 test
+    test concurrent_migrations_apply_one_record_and_release_locks ... FAILED
+
+    failures:
+
+    failures:
+        concurrent_migrations_apply_one_record_and_release_locks
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'concurrent_migrations_apply_one_record_and_release_locks' (94860489) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 73/102) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+  stdout ───
+
+    running 1 test
+    test failed_legacy_move_rolls_back_and_can_be_repaired ... FAILED
+
+    failures:
+
+    failures:
+        failed_legacy_move_rolls_back_and_can_be_repaired
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'failed_legacy_move_rolls_back_and_can_be_repaired' (94860493) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 74/102) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+  stdout ───
+
+    running 1 test
+    test fresh_install_is_explicit_and_repeated_migration_preserves_data ... FAILED
+
+    failures:
+
+    failures:
+        fresh_install_is_explicit_and_repeated_migration_preserves_data
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'fresh_install_is_explicit_and_repeated_migration_preserves_data' (94860500) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 75/102) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+  stdout ───
+
+    running 1 test
+    test legacy_adoption_preserves_payload_metadata_and_checkpoint ... FAILED
+
+    failures:
+
+    failures:
+        legacy_adoption_preserves_payload_metadata_and_checkpoint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'legacy_adoption_preserves_payload_metadata_and_checkpoint' (94860536) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 76/102) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+  stdout ───
+
+    running 1 test
+    test opening_a_prepared_database_does_not_require_writes ... FAILED
+
+    failures:
+
+    failures:
+        opening_a_prepared_database_does_not_require_writes
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'opening_a_prepared_database_does_not_require_writes' (94860542) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 77/102) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+  stdout ───
+
+    running 1 test
+    test opening_rejects_a_missing_optimistic_constraint ... FAILED
+
+    failures:
+
+    failures:
+        opening_rejects_a_missing_optimistic_constraint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'opening_rejects_a_missing_optimistic_constraint' (94860546) panicked at adapters/postgres/tests/migration_tests.rs:21:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 78/102) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+  stdout ───
+
+    running 1 test
+    test opening_rejects_a_wrong_optimistic_constraint_with_the_right_name ... FAILED
+
+    failures:
+
+    failures:
+        opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'opening_rejects_a_wrong_optimistic_constraint_with_the_right_name' (94860550) panicked at adapters/postgres/tests/migration_tests.rs:21:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 79/102) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+  stdout ───
+
+    running 1 test
+    test runtime_role_reads_and_appends_without_schema_creation_rights ... FAILED
+
+    failures:
+
+    failures:
+        runtime_role_reads_and_appends_without_schema_creation_rights
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'runtime_role_reads_and_appends_without_schema_creation_rights' (94860554) panicked at adapters/postgres/tests/migration_tests.rs:61:44:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.011s] ( 80/102) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+  stdout ───
+
+    running 1 test
+    test caller_timeout_after_server_commit_never_proves_rollback ... FAILED
+
+    failures:
+
+    failures:
+        caller_timeout_after_server_commit_never_proves_rollback
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'caller_timeout_after_server_commit_never_proves_rollback' (94860558) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.011s] ( 81/102) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+  stdout ───
+
+    running 1 test
+    test closed_data_pool_fails_before_begin_with_no_committed_rows ... FAILED
+
+    failures:
+
+    failures:
+        closed_data_pool_fails_before_begin_with_no_committed_rows
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'closed_data_pool_fails_before_begin_with_no_committed_rows' (94860563) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 82/102) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+  stdout ───
+
+    running 1 test
+    test identity_sequence_collision_is_not_an_optimistic_conflict ... FAILED
+
+    failures:
+
+    failures:
+        identity_sequence_collision_is_not_an_optimistic_conflict
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'identity_sequence_collision_is_not_an_optimistic_conflict' (94860567) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 83/102) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+  stdout ───
+
+    running 1 test
+    test loss_before_begin_response_cannot_commit_events ... FAILED
+
+    failures:
+
+    failures:
+        loss_before_begin_response_cannot_commit_events
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'loss_before_begin_response_cannot_commit_events' (94860571) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 84/102) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+  stdout ───
+
+    running 1 test
+    test loss_during_inserts_rolls_back_the_uncommitted_prefix ... FAILED
+
+    failures:
+
+    failures:
+        loss_during_inserts_rolls_back_the_uncommitted_prefix
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'loss_during_inserts_rolls_back_the_uncommitted_prefix' (94860575) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 85/102) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+  stdout ───
+
+    running 1 test
+    test lost_commit_acknowledgement_still_leaves_the_whole_batch_durable ... FAILED
+
+    failures:
+
+    failures:
+        lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'lost_commit_acknowledgement_still_leaves_the_whole_batch_durable' (94860580) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 86/102) mnesis-postgres::outcome_tests server_rejections_at_commit_preserve_the_code_and_outcome
+  stdout ───
+
+    running 1 test
+    test server_rejections_at_commit_preserve_the_code_and_outcome ... FAILED
+
+    failures:
+
+    failures:
+        server_rejections_at_commit_preserve_the_code_and_outcome
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'server_rejections_at_commit_preserve_the_code_and_outcome' (94860587) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 87/102) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+  stdout ───
+
+    running 1 test
+    test stalled_hint_acknowledgement_cannot_hold_confirmed_success ... FAILED
+
+    failures:
+
+    failures:
+        stalled_hint_acknowledgement_cannot_hold_confirmed_success
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'stalled_hint_acknowledgement_cannot_hold_confirmed_success' (94860591) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 88/102) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+  stdout ───
+
+    running 1 test
+    test transparent_transport_preserves_confirmed_append ... FAILED
+
+    failures:
+
+    failures:
+        transparent_transport_preserves_confirmed_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'transparent_transport_preserves_confirmed_append' (94860598) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 89/102) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+  stdout ───
+
+    running 1 test
+    test uncertain_commit_survives_repository_execution_and_requires_reload ... FAILED
+
+    failures:
+
+    failures:
+        uncertain_commit_survives_repository_execution_and_requires_reload
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'uncertain_commit_survives_repository_execution_and_requires_reload' (94860604) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 90/102) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+  stdout ───
+
+    running 1 test
+    test unrelated_unique_constraint_is_not_an_optimistic_conflict ... FAILED
+
+    failures:
+
+    failures:
+        unrelated_unique_constraint_is_not_an_optimistic_conflict
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'unrelated_unique_constraint_is_not_an_optimistic_conflict' (94860611) panicked at adapters/postgres/tests/outcome_tests.rs:178:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.012s] ( 91/102) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+  stdout ───
+
+    running 1 test
+    test byte_edges_count_binary_keys_utf8_and_optional_metadata ... FAILED
+
+    failures:
+
+    failures:
+        byte_edges_count_binary_keys_utf8_and_optional_metadata
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (94860616) panicked at adapters/postgres/tests/read_tests.rs:389:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.011s] ( 92/102) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+  stdout ───
+
+    running 1 test
+    test cancelling_reads_waiting_for_pool_capacity_releases_their_requests ... FAILED
+
+    failures:
+
+    failures:
+        cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'cancelling_reads_waiting_for_pool_capacity_releases_their_requests' (94860620) panicked at adapters/postgres/tests/read_tests.rs:389:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 93/102) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+  stdout ───
+
+    running 1 test
+    test corruption_on_a_later_page_terminates_without_skipping ... FAILED
+
+    failures:
+
+    failures:
+        corruption_on_a_later_page_terminates_without_skipping
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'corruption_on_a_later_page_terminates_without_skipping' (94860624) panicked at adapters/postgres/tests/read_tests.rs:287:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 94/102) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+  stdout ───
+
+    running 1 test
+    test finite_scans_exclude_later_appends_and_release_the_connection_between_pages ... FAILED
+
+    failures:
+
+    failures:
+        finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'finite_scans_exclude_later_appends_and_release_the_connection_between_pages' (94860636) panicked at adapters/postgres/tests/read_tests.rs:227:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 95/102) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+  stdout ───
+
+    running 1 test
+    test first_event_does_not_retain_the_whole_backlog ... FAILED
+
+    failures:
+
+    failures:
+        first_event_does_not_retain_the_whole_backlog
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'first_event_does_not_retain_the_whole_backlog' (94860644) panicked at adapters/postgres/tests/read_tests.rs:59:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 96/102) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+  stdout ───
+
+    running 1 test
+    test large_rows_obey_the_default_byte_budget ... FAILED
+
+    failures:
+
+    failures:
+        large_rows_obey_the_default_byte_budget
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'large_rows_obey_the_default_byte_budget' (94860650) panicked at adapters/postgres/tests/read_tests.rs:337:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 97/102) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+  stdout ───
+
+    running 1 test
+    test oversized_legacy_row_stops_without_fetching_its_body_or_skipping ... FAILED
+
+    failures:
+
+    failures:
+        oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'oversized_legacy_row_stops_without_fetching_its_body_or_skipping' (94860657) panicked at adapters/postgres/tests/read_tests.rs:389:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 98/102) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+  stdout ───
+
+    running 1 test
+    test oversized_tail_rejects_the_entire_append_before_writing ... FAILED
+
+    failures:
+
+    failures:
+        oversized_tail_rejects_the_entire_append_before_writing
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'oversized_tail_rejects_the_entire_append_before_writing' (94860670) panicked at adapters/postgres/tests/read_tests.rs:389:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] ( 99/102) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+  stdout ───
+
+    running 1 test
+    test page_edges_preserve_versions_and_exclusive_global_resume ... FAILED
+
+    failures:
+
+    failures:
+        page_edges_preserve_versions_and_exclusive_global_resume
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'page_edges_preserve_versions_and_exclusive_global_resume' (94860678) panicked at adapters/postgres/tests/read_tests.rs:146:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.011s] (100/102) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+  stdout ───
+
+    running 1 test
+    test all_recovers_after_an_unrelated_transaction_releases_the_watermark ... FAILED
+
+    failures:
+
+    failures:
+        all_recovers_after_an_unrelated_transaction_releases_the_watermark
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'all_recovers_after_an_unrelated_transaction_releases_the_watermark' (94860686) panicked at adapters/postgres/tests/subscription_tests.rs:26:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] (101/102) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+  stdout ───
+
+    running 1 test
+    test all_recovers_the_final_missing_hint ... FAILED
+
+    failures:
+
+    failures:
+        all_recovers_the_final_missing_hint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'all_recovers_the_final_missing_hint' (94860693) panicked at adapters/postgres/tests/subscription_tests.rs:26:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.010s] (102/102) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+  stdout ───
+
+    running 1 test
+    test stream_recovers_the_final_missing_hint ... FAILED
+
+    failures:
+
+    failures:
+        stream_recovers_the_final_missing_hint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+  stderr ───
+
+    thread 'stream_recovers_the_final_missing_hint' (94860701) panicked at adapters/postgres/tests/subscription_tests.rs:26:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Fatal, code: "28000", message: "role \"anonymous\" does not exist", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("miscinit.c"), line: Some(799), routine: Some("InitializeSessionUserId") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.950s] 102 tests run: 15 passed, 87 failed, 0 skipped
+        FAIL [   0.010s] ( 15/102) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+        FAIL [   0.008s] ( 16/102) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+        FAIL [   0.010s] ( 17/102) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+        FAIL [   0.008s] ( 18/102) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+        FAIL [   0.009s] ( 19/102) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+        FAIL [   0.008s] ( 20/102) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+        FAIL [   0.009s] ( 21/102) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+        FAIL [   0.009s] ( 22/102) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+        FAIL [   0.008s] ( 23/102) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+        FAIL [   0.008s] ( 24/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+        FAIL [   0.009s] ( 25/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+        FAIL [   0.009s] ( 26/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+        FAIL [   0.009s] ( 27/102) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+        FAIL [   0.009s] ( 28/102) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+        FAIL [   0.009s] ( 29/102) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+        FAIL [   0.008s] ( 30/102) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+        FAIL [   0.008s] ( 31/102) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+        FAIL [   0.007s] ( 32/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+        FAIL [   0.008s] ( 33/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+        FAIL [   0.008s] ( 34/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+        FAIL [   0.010s] ( 35/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+        FAIL [   0.009s] ( 36/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+        FAIL [   0.009s] ( 37/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+        FAIL [   0.010s] ( 38/102) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+        FAIL [   0.010s] ( 39/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+        FAIL [   0.009s] ( 40/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+        FAIL [   0.009s] ( 41/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+        FAIL [   0.009s] ( 42/102) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+        FAIL [   0.009s] ( 43/102) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+        FAIL [   0.009s] ( 44/102) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+        FAIL [   0.009s] ( 45/102) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+        FAIL [   0.009s] ( 46/102) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+        FAIL [   0.009s] ( 47/102) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+        FAIL [   0.009s] ( 48/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+        FAIL [   0.009s] ( 49/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+        FAIL [   0.010s] ( 50/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+        FAIL [   0.010s] ( 51/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+        FAIL [   0.009s] ( 52/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+        FAIL [   0.009s] ( 53/102) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+        FAIL [   0.010s] ( 54/102) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+        FAIL [   0.009s] ( 55/102) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+        FAIL [   0.010s] ( 57/102) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+        FAIL [   0.009s] ( 58/102) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+        FAIL [   0.009s] ( 59/102) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+        FAIL [   0.009s] ( 60/102) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+        FAIL [   0.009s] ( 61/102) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+        FAIL [   0.009s] ( 62/102) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+        FAIL [   0.009s] ( 63/102) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+        FAIL [   0.010s] ( 64/102) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+        FAIL [   0.010s] ( 65/102) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+        FAIL [   0.010s] ( 66/102) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+        FAIL [   0.009s] ( 67/102) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+        FAIL [   0.011s] ( 68/102) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+        FAIL [   0.010s] ( 69/102) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+        FAIL [   0.010s] ( 70/102) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+        FAIL [   0.010s] ( 71/102) mnesis-postgres::migration_tests checksum_and_newer_schema_are_rejected_without_repair
+        FAIL [   0.009s] ( 72/102) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+        FAIL [   0.010s] ( 73/102) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+        FAIL [   0.010s] ( 74/102) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+        FAIL [   0.010s] ( 75/102) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+        FAIL [   0.010s] ( 76/102) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+        FAIL [   0.010s] ( 77/102) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+        FAIL [   0.010s] ( 78/102) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+        FAIL [   0.010s] ( 79/102) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+        FAIL [   0.011s] ( 80/102) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+        FAIL [   0.011s] ( 81/102) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+        FAIL [   0.010s] ( 82/102) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+        FAIL [   0.010s] ( 83/102) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+        FAIL [   0.010s] ( 84/102) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+        FAIL [   0.010s] ( 85/102) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+        FAIL [   0.010s] ( 86/102) mnesis-postgres::outcome_tests server_rejections_at_commit_preserve_the_code_and_outcome
+        FAIL [   0.010s] ( 87/102) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+        FAIL [   0.010s] ( 88/102) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+        FAIL [   0.010s] ( 89/102) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+        FAIL [   0.010s] ( 90/102) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+        FAIL [   0.012s] ( 91/102) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+        FAIL [   0.011s] ( 92/102) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+        FAIL [   0.010s] ( 93/102) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+        FAIL [   0.010s] ( 94/102) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+        FAIL [   0.010s] ( 95/102) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+        FAIL [   0.010s] ( 96/102) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+        FAIL [   0.010s] ( 97/102) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+        FAIL [   0.010s] ( 98/102) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+        FAIL [   0.010s] ( 99/102) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+        FAIL [   0.011s] (100/102) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+        FAIL [   0.010s] (101/102) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+        FAIL [   0.010s] (102/102) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+error: test run failed

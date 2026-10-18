@@ -1,0 +1,20 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-migrations/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.19s
+────────────
+ Nextest run ID c41dd66e-695a-4fe4-a3ad-4631193e3469 with nextest profile: default
+    Starting 13 tests across 1 binary
+        PASS [  23.896s] ( 1/13) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+        PASS [   0.035s] ( 2/13) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+        PASS [   0.028s] ( 3/13) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+        PASS [   0.024s] ( 4/13) mnesis-postgres::migration_tests checksum_and_newer_schema_are_rejected_without_repair
+        PASS [   0.023s] ( 5/13) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+        PASS [   0.040s] ( 6/13) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+        PASS [   0.023s] ( 7/13) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+        PASS [   0.026s] ( 8/13) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+        PASS [   0.025s] ( 9/13) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+        PASS [   0.017s] (10/13) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+        PASS [   0.019s] (11/13) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+        PASS [   0.026s] (12/13) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+        PASS [   0.022s] (13/13) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+────────────
+     Summary [  24.207s] 13 tests run: 13 passed, 0 skipped

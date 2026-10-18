@@ -3,16 +3,25 @@ use sqlx::postgres::PgPoolOptions;
 
 use crate::Limits;
 use crate::error::PostgresError;
-use crate::schema::ensure_schema;
+use crate::schema;
 use crate::store::PostgresStore;
 
 impl PostgresStore {
-    /// Connect to `url`, create a connection pool, and ensure the schema exists.
+    /// Install or upgrade the owned schema using an administrative pool.
+    /// Stop old writers before adopting an unversioned database. Runtime open
+    /// validates the installed schema without requiring DDL permissions.
+    ///
+    /// # Errors
+    /// Returns typed migration, database or schema errors without resetting data.
+    pub async fn migrate(pool: &PgPool) -> Result<(), PostgresError> {
+        schema::migrate(pool).await
+    }
+
+    /// Connect to `url` and validate the explicitly migrated schema.
     ///
     /// # Errors
     ///
-    /// Returns [`PostgresError::Sqlx`] on connection failure or schema DDL
-    /// failure.
+    /// Returns connection, capacity or schema-validation errors.
     pub async fn connect(url: &str) -> Result<Self, PostgresError> {
         let pool = PgPoolOptions::new()
             .connect(url)
@@ -21,7 +30,7 @@ impl PostgresStore {
         Self::from_pool(pool).await
     }
 
-    /// Build from an existing pool and ensure the schema exists.
+    /// Build from an existing pool without changing the schema.
     ///
     /// Prefer this when the caller already holds a `PgPool` (e.g. a shared
     /// pool across multiple stores in an application). The pool must accommodate
@@ -30,7 +39,7 @@ impl PostgresStore {
     /// # Errors
     ///
     /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
-    /// [`PostgresError::Sqlx`] if the schema DDL fails.
+    /// a database or schema-validation error if the installed schema is unusable.
     pub async fn from_pool(pool: PgPool) -> Result<Self, PostgresError> {
         Self::from_pool_with_limits(pool, Limits::default()).await
     }
@@ -39,7 +48,7 @@ impl PostgresStore {
     ///
     /// # Errors
     /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
-    /// [`PostgresError::Sqlx`] if schema creation fails.
+    /// a database or schema-validation error if the installed schema is unusable.
     pub async fn from_pool_with_limits(
         pool: PgPool,
         limits: Limits,
@@ -48,7 +57,7 @@ impl PostgresStore {
         if capacity < 2 {
             return Err(PostgresError::PoolCapacity { actual: capacity });
         }
-        ensure_schema(&pool).await?;
+        schema::validate_pool(&pool).await?;
         Ok(Self::assemble(pool, limits))
     }
 }

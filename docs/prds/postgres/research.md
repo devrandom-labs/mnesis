@@ -929,3 +929,374 @@ head scenarios; native91 is separate from DB-free returns; (2) original bad
 metadata and false-classifier failures are preserved and the fresh sweep has no
 viable survivor; (3) source hash is unchanged, no thresholds or exclusions were
 altered, and protected Linux jobs must re-run on the corrected PR377 head.
+## PG4 representation and startup experiment (pre-edit)
+
+Threats already reproduced in native facility probes: signed versions/positions,
+text NUL, long incompressible keys and write-required open. First add six adapter
+regressions against the still-unmigrated0.4.0 production shape: inclusive read
+fromu64::MAX; global resume with a high sequence but a later real transaction;
+UTF-8 NUL event type; incompressible5,120-byte key; sequential append crossing
+signed bigint maximum; and read-only open of a prepared schema. The last fixture
+will move preparation to explicit migration when that API exists; runtime open
+must remain read-only. Use a separate mnesis_pg4 database on the same real pinned
+Postgres17.10 server; do not mutate the active PG3 test database.
+
+Characterization budget:+220 native test lines, production+0. After failures and
+three case reviews, implementation budget at most+700/−200/net+500 production
+Rust lines and+350 SQL lines over current owners: schema/migrations, builder,
+error, row conversion/query/insert and a small private stream-key lookup. Reuse
+SQLx Migrator and native constraints; no migration engine, identity protocol,
+framework, runtime or tool. Normalize event stream identity if the native hash
+exclusion probe survives adapter concurrency/migration tests; no hash substitutes
+raw identity. Track actual production/test/SQL/public surface costs per retained
+sub-experiment. Later PG4 acceptance adds migration/version/checksum/structural,
+concurrent/failed-upgrade, role and full unsigned boundary cases.
+
+PG4 native characterization: all6 targeted cases fail against the unchanged
+representation/startup code,0 passes/6 failures/zero runtime skips,1.319s.
+[Output](evidence/pg4-original.log). Three-pass review:
+1. Contract: failures are the intended54000 long-key limit,25006 DDL-on-read-only
+   open, signed-version rejection, signed resume-sequence rejection,22021 text
+   NUL, and unsigned inclusive-bound rejection. No setup/connection failure
+   substitutes for the product defect. Test delta203 lines, production+0.
+2. Falsifier: high-sequence resume includes a later real transaction, preventing
+   a fake always-empty result from passing. The version test seeds the largest
+   representable old head rather than materializing billions of prior rows;
+   it tests the documented head/next contract, not a complete historical replay.
+   Long keys use deterministic incompressible bytes, not the earlier compressible
+   hint witness. The NUL envelope is accepted by the owning value constructor.
+3. Loopholes: the existing-ready-schema fixture is legacy preparation; when the
+   explicit migration API exists, prepare through it before testing read-only
+   runtime open. Keep the no-DDL assertion unchanged and add separate legacy
+   adoption/rejection cases. These six failures do not cover migration metadata,
+   least privileges, concurrent upgrades or full unsigned checkpoint persistence;
+   those remain required.90 filtered cases are not credited as passes here.
+
+PG4a smaller migration slice before representation changes: explicit SQLx migrate
+and read-only validating open, owned mnesis schema, fully qualified runtime SQL,
+verified legacy adoption and published SQL source inclusion. Keep current legacy
+column representation in migration1; migration2 will own the unsigned/binary-key
+changes after this independently reviewable slice. Budget+260/-50 Rust,+140 SQL,
++250 tests, one existing SQLx feature, no registry dependency or migration engine.
+First characterize missing/wrong optimistic constraint acceptance; runtime open
+must reject either, without silently repairing or writing. The existing six
+representation failures remain open until their respective changes land.
+
+Both missing/wrong constraint witnesses fail against original startup (0/2,
+zero skips,0.032s). Three post-run reviews: (1) both reach successful runtime
+open despite missing or wrongly targeted uniqueness; (2) assertions fail for
+those exact accepted corrupt schemas, not connection/setup errors; (3) each
+fixture restores the original constraint before asserting, so later failures
+cannot be artifacts of prior DDL. Initial generic is_err will become the exact
+schema error once that public error alternative exists. Existing tests remain.
+
+Initial PG4a selected native run:3 pass,5 intentionally filtered representation
+cases (those remain open),0.095s. Three reviews: (1) prepared read-only open now
+passes, missing/wrong constraints fail with the exact Schema alternative; (2)
+the two new assertions failed against original startup and both restore their
+DDL before checking; (3) this selected run does not establish fresh install,
+concurrent/failed migration, checksum or role safety. Those tests must be added
+before retention; no filtered unsigned/key/NUL defect is marked fixed.
+Dependency review found SQLx's migrate feature expands lockfile-only optional
+MySQL/SQLite resolution (+14 packages), despite neither being present in the
+actual normal/build tree. Investigate advisories/license gates; no new advisory
+ignore or handwritten migration implementation is justified by this discovery.
+
+PG4a acceptance expansion pre-edit: raise the native-case budget from250 to360
+lines to cover distinct fresh/repeat, populated legacy, concurrent migration,
+transactional failure/retry, checksum/newer metadata, namespace collision and
+least-privilege obligations. These exercise separate observable failures; no
+framework/helper binary is introduced. Reuse one dedicated native test database
+and existing serial test discipline. Immutable legacy SQL fixture is extracted
+from released6faddb7f, not regenerated from the new implementation.
+
+PG4a first integrated run:89 pass/11 fail,5 unsigned/key/NUL representation
+cases deliberately filtered,12.367s. Three post-run reviews:
+1. Acceptance: fresh/repeated, concurrent, failed/repairable migration, checksum/
+   newer metadata, schema collision and no-CREATE runtime role cases pass. The
+   legacy positive fixture fails on empty metadata (invalid by the owning value
+   contract); two outcome fixtures fail on still-unqualified index/sequence SQL.
+2. Falsifiers: missing/wrong constraints reject specifically; injected42P07 rolls
+   back the legacy move and leaves zero migration records. The remaining8 read
+   failures are fallout from the failed index cleanup, not new page regressions.
+3. Loopholes FOUND: qualify all index/sequence fixture cleanup as well as table
+   queries. Use valid nonempty metadata for the positive legacy read, and KEEP
+   the empty-byte witness separately: adoption must preserve it, reads must
+   reject it, and NULL must remain distinct. No assertion is removed or softened.
+   Rustfmt expanded the nine migration cases to446 lines, beyond360; revise the
+   test budget to500 for these explicit obligations plus the separate corruption
+   case. Production Rust remains below260 and SQL below140; no test framework.
+
+PG4a corrected integrated native run:101 pass/zero failures,5 explicitly open
+representation cases filtered,12.856s; strict all-target Clippy passes. Three
+post-run reviews:
+1. Acceptance: all90 existing raw/wake/outcome cases still pass, plus ten migration
+   laws and read-only prepared startup. Legacy positions, next sequence, schema
+   version maximum, payload and nonempty metadata survive; empty metadata remains
+   exact corruption and NULL remains absence without skipping the corrupt row.
+2. Falsifiers: original missing/wrong constraint cases rejected; failed legacy
+   ALTER retains old data and zero migration records, explicit repair succeeds;
+   runtime role provably lacks CREATE and still appends/reads. Fixture index/
+   sequence cleanup is fully qualified and no longer contaminates later cases.
+3. Loophole FOUND: spawn+Barrier starts overlapping migration calls, but does not
+   prove both requests reached native lock contention. Strengthen that witness
+   by holding SQLx's own lock, observing both native ungranted locks, then releasing
+   it. Cancellation while migration DDL is blocked is also not yet tested; add
+   it now instead of inferring it from error cleanup. No representation/fullPG4
+   claim follows from the five filtered cases. Test budget484 lines currently;
+   pre-edit increment+120 lines (total620) for these concrete contention/cancel
+   witnesses. Keep the production budget unchanged.
+
+PG4a stronger contention run:101 pass/1 fail,5 open representation cases filtered,
+15.970s. Three reviews: (1) both migrations are now observed waiting on SQLx's
+native advisory lock before release; one metadata record and zero leaked locks
+follow; (2) cancellation's exact ALTER-phase witness times out, so no cancellation
+acceptance is credited; (3) the fixture's ACCESS EXCLUSIVE table lock also blocks
+preflight relation lookup, before ALTER. Replace it with ACCESS SHARE, which
+allows preflight reads but still conflicts with ALTER's ACCESS EXCLUSIVE. Keep
+both the actual ALTER query witness and unchanged3s deadline. This corrects the
+fault phase; it does not weaken the assertion or substitute arbitrary termination.
+
+Selected contention/cancellation rerun:2 pass,9 filtered migration cases,0.058s.
+Three post-run reviews: (1) exact native ALTER query is now waiting, abort reports
+cancelled, old positions and zero migration records survive, retry installs one
+record; both concurrent calls also reach native lock contention; (2) ACCESS SHARE
+correctly targets ALTER rather than preflight and retains the strict phase oracle;
+(3) NEW loophole: retry alone could reuse the same session's leaked reentrant
+lock. Assert zero native advisory locks before retry as well, sharing the exact
+existing zero-lock oracle with the concurrency case. Then falsify that assertion
+by removing close_on_drop temporarily. Keep source restoration and raw failure.
+
+Controlled native close_on_drop removal is killed: cancellation reaches the
+actual ALTER phase, then fails the exact zero-advisory-lock assertion in3.047s.
+Source restored byte-for-byte from its pre-mutation snapshot. Three post-run
+reviews: (1) the intended leak, not setup or transport failure, causes rejection;
+(2) no reentrant successful retry can mask it because the assertion precedes
+retry; (3) the mutation is not retained, test deadline/phase/error expectations
+are unchanged, and10 filtered tests are not credited. This manual mutation is
+independent from the earlier cargo-mutants diff sweeps.
+
+Split the migration delivery from the still-unimplemented representation work:
+move the existing read-only startup case unchanged into migration_tests.rs.
+The five unsigned/NUL/long-key witnesses remain in the PG4 research checkout
+for the next representation slice and retain their original failures/evidence.
+They cannot be included in or credited to PG4a's delivery suite. PG4 remains
+active until that slice passes and all migration criteria are delivered.
+
+PG4a restored-source native run:102/102 pass,13.039s. Nextest reports zero case
+skips but ONE binary is explicitly excluded: the five still-open representation
+witnesses. This is migration-slice evidence only, not full adapter acceptance.
+Three post-run reviews:
+1. Acceptance: all90 previous cases plus12 migration/startup laws pass, including
+   actual native contention, exact DDL cancellation, zero locks before retry,
+   metadata/data rollback, populated upgrade, least privileges and read-only open.
+2. Falsifiers: the lock cleanup mutant fails before retry, restored source matches
+   its saved bytes, and original wrong/missing constraint witnesses remain red
+   against released startup. Existing ordering/byte/hint/outcome assertions remain.
+3. Loopholes: no case assertion or deadline was lowered. Five unsigned/NUL/key
+   tests are not delivered by PG4a and remain required in PG4b. The focused
+   delivery checkout must run without any test filter; the final production
+   adapter must pass all those later witnesses too. Actual migration tests597
+   lines <=620 revised budget; production+125/-54, SQL migration25+validation40
+   lines, one public migrate method and two error alternatives, no new framework.
+
+Focused PG4a delivery checkout: all102 native cases pass with NO filter and zero
+skips,13.226s. Three reviews: (1) all previous laws and12 migration/startup cases
+are present; (2) exact lock/ALTER/cleanup oracles and original failure witnesses
+are unchanged; (3) this checkout contains only migration implementation, so the
+five required later representation cases remain in the research checkout and
+are not credited to this count. No completePG4 claim follows.
+
+Full Darwin gate FAILED on RUSTSEC-2023-0071: SQLx0.8.6's migrate facade feature
+resolves unused MySQL/SQLite drivers, including rsa0.9.10. cargo-deny's actual
+dependency tree check passed, but CargoAudit grades the lockfile and rejects it.
+No ignore or changed gate is allowed. Native proof does not override this failure.
+Source/test/manifest/lock/Nix diff hash at failed gate:
+bb9afcd4a0d5df7ef2fc4d1bdf84ffd3d49e9fc21395d2f589749e11e83da64d.
+
+Dependency correction pre-edit: evaluate maintained SQLx0.9.0 (Rust1.94 minimum,
+compatible with pinned1.99, MIT OR Apache-2.0). Its MySQL RSA support is separately
+opt-in and disabled by default. Preserve existing SQLx/Tokio/driver ownership;
+no replacement runtime/framework or handwritten migration source/registry.
+Upstream SQLx#3196 and Cargo#13078 explain optional-driver lockfile resolution.
+Compare native laws, audit/license gates, dependency tree/lock costs and startup
+behavior before retention. Budget: one workspace SQLx version update, generated
+workspace-hack manifest/lock changes, at most+80/-80 adapter compatibility lines,
+no new public API or dependency crate family. Keep all assertions and gates.
+A manual embedded MigrationSource on sqlx-core0.8 would duplicate migration
+version/description authority and add custom registry work; prefer supported
+current facade capability if compatibility and cost checks pass.
+
+SQLx0.9 first native run:15 unit cases pass/87 native setup failures,zero skips,
+0.950s. Three post-run reviews: (1) no native migration law passed here; all87
+fail before storage on role anonymous, SQLSTATE28000; (2) SQLx0.9 changed OS-user
+lookup via whoami2, and its supported fallback is anonymous when lookup fails in
+this Darwin Nix environment; (3) supply the intended role explicitly in local
+URLs and both CI owners instead of creating anonymous or weakening assertions.
+The upstream parser supports the user query parameter and tests it directly.
+Use fixed initdb role mnesis in fresh mutation clusters; the VM already creates
+root, so its URL names root. Production connection policy remains SQLx-owned.
+
+SQLx0.9 also provides schema creation and a schema-qualified migration table
+under its native migration lock. Reuse those methods and remove our CREATE
+SCHEMA/SET search_path statements. Preflight legacy validation still holds a
+SQLx reentrant lock until scoped connection close; actual contention/cancellation
+witnesses remain mandatory. Generic run still fails Send/Acquire compilation;
+retain upstream run_direct(None, connection, false), now its0.9 signature. Dynamic
+DDL in the existing SQLSTATE test uses AssertSqlSafe solely around formatting of
+its four compile-time literal codes; no user input or production SQL is exempted.
+
+SQLx0.9 with explicit intended username:102 native passes,zero skips/no filter,
+13.940s. Three post-run reviews:
+1. Acceptance: fresh/legacy/repeat/concurrent/cancel/failed upgrades, least rights,
+   read-only runtime and all prior raw/wake/commit-uncertainty laws pass. The
+   existing0.8 candidate migration checksum is accepted before clean fixtures;
+   native0.9 schema creation uses the owned migration table without search_path
+   mutation. No unsafe-retry or row-bound assertions changed.
+2. Falsifiers: both requests still reach native advisory contention; cancelled
+   actual ALTER leaves zero migration records and zero locks before retry.
+   COMMIT suppression preserves exact EOF and independent durable counts.
+3. Loopholes: username is explicitly the existing authorized role, not an
+   anonymous superuser created to hide failed identity selection. Host-user
+   inference is no production guarantee. Five representation witnesses remain
+   outside this focused slice. Full matched Nix gates and dependency/performance
+   comparisons still required; the earlier running gate precedes import ordering
+   and CI-role configuration corrections and cannot certify their final bytes.
+
+SQLx0.9 capacity spot check:40,960x4,096-byte events, one case passed/8 filtered,
+7.364s. Retained stream1,089,173B/global1,090,271B versus unchanged4,194,304B
+ceiling; first-event timings2.325/2.829ms are single samples under competing Nix
+build load, not a throughput/noise-floor result. Three reviews: (1) workload and
+byte ceiling equal original10x-backlog witness; (2) actual SUT first stream/global
+rows and correct origin/version are asserted, not just allocator output; (3)
+no smaller workload, threshold increase or untested throughput claim. Native
+schema/driver change preserves bounded retention; full capacity remainsPG8.
+
+Native CI correction pre-edit: replace the existing Python NixOS testScript with
+locked nixpkgs' postgresqlTestHook + stdenv.mkDerivation and existing nextest
+archive. Source: pkgs/by-name/po/postgresqlTestHook/{package.nix,test.nix,
+postgresql-test-hook.sh} at locked nixpkgs. The hook owns initdb, Unix-only service,
+pre/post/failure cleanup and test identity. It is Linux-supported (badPlatforms
+Darwin), matching the existing package's Linux scope. Budget+50/-70 Nix/CI lines,
+no Rust test assertion or new framework/runtime/tool. Standard stdenv unpack
+provides writable sources; preserve the same archive/remap/serial cases, strict
+pipefail and durable run.log. CI prints the artifact log even on a cache hit.
+Hook setup role uses SUPERUSER only for existing administrative fixtures (as the
+previous root fixture did); the runtime least-privilege case remains distinct.
+This removes the edited owner’s project Python instead of retaining it. Feature
+script Python remains a separate requiredPG9 removal through supported cargo-hack.
+
+SQLx0.9 initial Darwin gate completed all12 checks,1547 workspace passes/four
+compiler exclusions,503.047s. Three reviews: (1) existing102 native cases are
+separately proved, DB-free returns are not new native evidence; (2) RSA is gone
+and audit/deny pass without a new ignore; (3) this source precedes import ordering,
+CI role/hook changes and the forced-collision correction, so it is not the final
+matched delivery gate. Retain only as dependency-candidate evidence.
+
+Next migration-artifact audit: legacy shape verification currently occurs only
+in Rust before SQLx runs migration1, so direct execution of the shipped SQL can
+omit that obligation. Characterize that bypass with an incompatible legacy
+constraint, then put the immutable legacy shape check inside migration1's SQLx
+transaction and remove the Rust preflight/reentrant bootstrap lock. SQLx0.9
+already serializes native schema/metadata creation. Current runtime shape and
+legacy-version shape are distinct authorities once representation migration2
+lands; no stored validation function, second migration engine or extra public
+adoption API is justified. Budget+55 SQL/-25 Rust,+50 tests (670 total migration
+case cap); preserve and test cancellation with actual AccessExclusiveLock on the
+legacy relation, not a long query-string substring truncated by pg_stat_activity.
+Add SQLx's documented standard Cargo build.rs rerun-if-changed=migrations so adding
+migration2 is observed on stable Rust, and enforce LF SQL checkout for checksums.
+No custom development tool: this is Cargo's supported compile dependency hook.
+
+Migration-artifact bypass reproduces:1 selected case FAILS (12 filtered),0.031s;
+raw checked-in migration1 accepts a legacy table missing its optimistic unique
+constraint. Three post-run reviews: (1) actual result is Ok(PgQueryResult), not
+requiredSQLSTATE55000; (2) the real SQL artifact executes with Rust preflight
+omitted, and explicit rollback/fixture repair occurs before assertion; (3) data
+remains unchanged and later tests are not contaminated. Fix the artifact itself,
+then remove the bypassable Rust preflight and bootstrap reentrant acquisition.
+
+Self-validating migration artifact run:13/13 native cases pass,zero skips,24.207s;
+strict all-target Clippy passes. Three post-run reviews:
+1. Acceptance: direct SQL rejects missing legacy uniqueness with55000; normal
+   legacy upgrade preserves rows/positions and metadata; every existing migration,
+   role, checksum, contention and cancellation case passes.
+2. Falsifiers: shipped-script witness was red before SQL guard; actual native
+   AccessExclusiveLock on the legacy relation proves cancellation reaches ALTER
+   without relying on a query string that may be truncated. Zero locks before
+   retry and zero migration records remain asserted. SQLx owns bootstrap locking.
+3. Loopholes: first fixture took23.896s while others <=40ms; no latency/SLO claim
+   is made from this run. Record and investigate that tail duringPG8 capacity;
+   do not drop it from results. The new build.rs is only Cargo's documented
+   migration-directory dependency instruction, not a validation/tool suite.
+
+PG4a rebased onto corrected PG3b26f0556:104/104 native cases pass,zero skips/no
+filter,14.576s. Three post-run reviews:
+1. Acceptance: all91 existing cases plus13 migration laws run; source contains
+   caller-head preservation and both native race scenarios. Read-only runtime,
+   legacy/empty metadata, SQL artifact self-validation and cleanup still pass.
+2. Falsifiers: the original bypass is rejected by the artifact itself; actual
+   AccessExclusiveLock, not a potentially truncated query, drives cancellation.
+   Zero retained advisory locks and unchanged independent rows remain asserted.
+3. Loopholes: no case dropped, deadline relaxed or result reclassified. Five
+   unsigned/NUL/long-key requirements remain in the representation research
+   checkout and are not claimed fixed here. The new first-fixture latency is
+   recorded; this run makes no performance/SLO claim.
+
+Local x86_64 Linux build request could not resolve the configured nixos.local
+builder and was cancelled before tests. No native-Linux proof is credited.
+The configured aarch64-linux builder is actively building the same supported
+hook/archive integration path. Its first snapshot predates recent SQL guard/
+PG3 changes; use it for harness validation only, then require matched current
+native artifacts and a controlled failing-pipeline proof before delivery.
+
+PG3 protected delivery: PR377 merged 2026-10-18T08:42:47Z as
+f87afc12dd6dabe4acd7847e98756858f5fb4c86, headb26f0556fa74d45f2e072fd93269e9c04913e589.
+All40 checks green;1 expected scheduled mutation-sweep skip, zero unresolved
+threads. CI39110924458 and mutation39110924430 inspected after completion.
+Three post-run reviews: (1) full1536 workspace/4 separate compiler suites and
+feature matrix pass, native baseline is real; (2) fresh-cluster10 mutants include
+7 caught/3 compilation-unviable, zero missed/timeouts; (3) scheduled-only skip is
+not credited, NixOS cached integration is not fresh native evidence, no threshold
+changed. Local91-case isolated native proof supplements that older harness.
+No publication or complete PG3/adapter acceptance claim follows this focused merge.
+
+Native Nix hook candidate, aarch64-linux derivation
+/nix/store/ipyv7sp5mh6s59pmxzq3whjjfvzfygxd-mnesis-postgres-integration:
+fresh PostgreSQL18.6,102/102 pass,zero skips,16.614s, clean server shutdown.
+Three post-run reviews: (1) all then-current102 cases ran through native hook;
+(2) real COMMIT-loss/notification/migration fixtures run, not DB-free returns;
+(3) this precedes latest PG3 collision and migration-script guard: harness candidate
+only, not matched current source. Current104-case artifact and a deliberately
+failing pipeline proof are required. Offline x86 builder ran no tests; no credit.
+
+Matched PG4a gates complete, unchanged source SHA256d59835191badbc8b17869597e7b6d0339f6604c1a2513b97a0ffe0bb4b0e3613:
+12 Darwin checks pass (audit/TOML reused;10 rebuilt),1549 workspace cases pass,
+four compiler exclusions owned by separate Linux jobs,467.299s nextest. Native
+ARM Linux supported hook:104/104 pass,zero skips,13.409s, fresh18.6 cluster and
+clean shutdown; /nix/store/fb9lkf51i60m2ylv848slzy6ikp7plkq-mnesis-postgres-integration.
+Three post-run reviews for EACH gate:
+1. Contract: all13 migration cases plus91 prior cases retained. Runtime requires
+   only read/insert role, explicit admin migration, repeatable legacy preservation.
+2. Falsifiers: direct SQL bypass, native cancellation/zero-lock-before-retry,
+   forced uniqueness wait, commit acknowledgement loss and recovery all execute.
+3. Oracle:104 includes no skips or filtering; workspace DB-free returns are not
+   double-counted as native proof. Exact source hash frozen; dependency audit
+   passed without adding RSA ignore. Previous102-case harness is superseded.
+
+Controlled pipeline failure proof: same matched archive and supported native
+hook, ONLY DATABASE_URL role replaced with mnesis_intentionally_missing via
+Nix overrideAttrs (one-off command, no repository tooling). Native SQLSTATE28000
+fails first database test;14 DB-free passes,1 failure,89 not run,zero skips.
+Nix build exits1 instead of accepting tee success. Hook shuts fresh server down
+on the failure path. Three post-run reviews: (1) expected failure is actual
+nextest setup failure propagated by pipefail; (2) original masking pipeline
+would return tee success for exactly this output; (3) intentionally unrun89 are
+not credited, no product assertion/filter changed and no failure artifact was
+installed. This proves harness fail-closed behavior, not a storage-fault law.
+
+Normal signed commit hook repeated all12 matched checks from cache successfully.
+Three reviews: acceptance/source hash unchanged, native proof remains separately
+104 cases, cached workspace checks are not counted as fresh execution. New build
+transcripts retain diagnostic content with trailing spaces removed for diff hygiene;
+raw temporary originals are preserved. No production source changed after gates.

@@ -37,8 +37,9 @@ async fn pool(name: &str, capacity: u32) -> Option<PgPool> {
 
 async fn open(name: &str) -> Option<(PostgresStore, PgPool)> {
     let backing = pool(name, 4).await?;
+    PostgresStore::migrate(&backing).await.unwrap();
     let store = PostgresStore::from_pool(backing.clone()).await.unwrap();
-    sqlx::query("TRUNCATE events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
         .execute(&backing)
         .await
         .unwrap();
@@ -70,7 +71,7 @@ async fn listener(backing: &PgPool, name: &str, previous: Option<i32>) -> i32 {
 
 async fn insert(backing: &PgPool, id: &StreamKey) {
     sqlx::query(
-        "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
          VALUES ($1, 1, 'Final', 1, 'payload'::bytea)",
     )
     .bind(id.as_bytes())
@@ -449,7 +450,7 @@ async fn overlong_binary_notification_payload_does_not_reject_a_committed_append
     assert_eq!(event.version(), Version::INITIAL);
     assert_eq!(event.payload(), b"payload");
     assert_eq!(
-        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM events")
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM mnesis.events")
             .fetch_one(&backing)
             .await
             .unwrap(),
