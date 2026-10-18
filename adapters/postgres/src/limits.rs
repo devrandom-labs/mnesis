@@ -5,7 +5,8 @@ use mnesis_store::BatchSize;
 /// Resident page limits, including the maximum accepted individual row.
 ///
 /// Bytes count stream ID, event type, payload, metadata and 32 scalar bytes.
-/// Snapshot rows count ID, state and the same 32-byte scalar allowance.
+/// Snapshot and checkpoint rows count ID, state and 32 scalar bytes.
+/// Listing rows count ID and the same 32-byte scalar allowance.
 /// A row exceeding `bytes` is rejected by writes and reported by reads without
 /// fetching its body. Raise this explicitly to read larger existing rows.
 /// Client memory also includes bounded per-row bookkeeping and frame decoding.

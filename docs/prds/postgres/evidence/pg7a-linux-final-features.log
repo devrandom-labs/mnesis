@@ -1,0 +1,32 @@
+  Extracting 15 binaries and 1 build script output directory to /build/nextest-archive-BLlc1A
+   Extracted 18 files to /build/nextest-archive-BLlc1A in 0.75s
+────────────
+ Nextest run ID 3242f0f3-5610-405e-9577-2f419ec3c143 with nextest profile: default
+    Starting 1 test across 1 binary (14 tests and 14 binaries skipped)
+        PASS [   0.265s] (1/1) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+────────────
+     Summary [   0.266s] 1 test run: 1 passed, 14 skipped
+  Extracting 15 binaries and 1 build script output directory to /build/nextest-archive-dGnJps
+   Extracted 18 files to /build/nextest-archive-dGnJps in 0.74s
+────────────
+ Nextest run ID 4bfb57da-b695-4004-9070-9142b26d26a4 with nextest profile: default
+    Starting 1 test across 1 binary (15 tests and 14 binaries skipped)
+        PASS [   0.312s] (1/1) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+────────────
+     Summary [   0.312s] 1 test run: 1 passed, 15 skipped
+  Extracting 15 binaries and 1 build script output directory to /build/nextest-archive-hFN1dh
+   Extracted 18 files to /build/nextest-archive-hFN1dh in 0.73s
+────────────
+ Nextest run ID 97659849-c687-4da1-a6d6-1d003a3485d6 with nextest profile: default
+    Starting 1 test across 1 binary (2 tests and 14 binaries skipped)
+        PASS [   0.373s] (1/1) mnesis-postgres::projection_tests real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position
+────────────
+     Summary [   0.374s] 1 test run: 1 passed, 2 skipped
+  Extracting 15 binaries and 1 build script output directory to /build/nextest-archive-AddOwY
+   Extracted 18 files to /build/nextest-archive-AddOwY in 0.73s
+────────────
+ Nextest run ID 12d3df21-3519-443b-87e2-b97ffc52e1b7 with nextest profile: default
+    Starting 1 test across 1 binary (7 tests and 14 binaries skipped)
+        PASS [   0.368s] (1/1) mnesis-postgres::listing_tests binary_ids_list_once_across_pages_and_reopen
+────────────
+     Summary [   0.368s] 1 test run: 1 passed, 7 skipped

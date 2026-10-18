@@ -1,0 +1,192 @@
+
+log/adapters__postgres__src__schema.rs_line_47_col_5.log
+256:    thread 'corrupt_metadata_is_not_stale_and_cannot_be_replaced' (13467) panicked at adapters/postgres/tests/checkpoint_tests.rs:728:5:
+257-    assertion failed: matches!(reopened, Err(PostgresError::Schema { .. }))
+258-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+259-
+260-  Cancelling due to test failure:
+261-────────────
+262-     Summary [   1.100s] 32/184 tests run: 31 passed, 1 failed, 0 skipped
+263-        FAIL [   0.054s] ( 32/184) mnesis-postgres::checkpoint_tests corrupt_metadata_is_not_stale_and_cannot_be_replaced
+264-warning: 152/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+265-error: test run failed
+
+log/adapters__postgres__src__schema.rs_line_89_col_8.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (14043) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Schema { reason: "checkpoint columns, bounds, logging, primary key or identity reference differ" }
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+93-  Cancelling due to test failure:
+94-────────────
+95-     Summary [   0.066s] 12/184 tests run: 11 passed, 1 failed, 0 skipped
+96-        FAIL [   0.019s] ( 12/184) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+97-warning: 172/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+98-error: test run failed
+
+log/adapters__postgres__src__store__checkpoint.rs_line_26_col_9.log
+51:error[E0277]: the trait bound `PgAllPos: Default` is not satisfied
+52-  --> adapters/postgres/src/store/checkpoint.rs:26:59
+53-   |
+54-26 |         Ok((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default())) /* ~ changed by cargo-mutants ~ */
+55-   |                                                           ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PgAllPos`
+56-   |
+57-help: consider annotating `PgAllPos` with `#[derive(Default)]`
+58-  --> adapters/postgres/src/position.rs:31:1
+59-   |
+60-31 + #[derive(Default)]
+
+log/adapters__postgres__src__store__checkpoint.rs_line_58_col_9.log
+53:error[E0277]: the trait bound `CheckpointHydrated<Vec<u8>, PgAllPos>: Default` is not satisfied
+54-  --> adapters/postgres/src/store/checkpoint.rs:58:12
+55-   |
+56-58 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+57-   |            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `CheckpointHydrated<Vec<u8>, PgAllPos>`
+58-
+59:error[E0277]: the trait bound `CheckpointHydrated<Vec<u8>, position::PgAllPos>: Default` is not satisfied
+60-  --> adapters/postgres/src/store/checkpoint.rs:58:12
+61-   |
+62-58 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+
+log/adapters__postgres__src__store__checkpoint.rs_line_59_col_26.log
+140:    thread 'acknowledged_checkpoint_pair_survives_client_process_termination' (14840) panicked at adapters/postgres/tests/checkpoint_tests.rs:86:13:
+141-    assertion `left == right` failed
+142-      left: Stale { revision: 1, stored_schema: 4294967295 }
+143-     right: Found { revision: 1, position: PgAllPos { txid: 18446744073709551615, seq: 18446744073709551615 }, state: [115, 97, 118, 101, 100, 32, 98, 101, 102, 111, 114, 101, 32, 99, 108, 105, 101, 110, 116, 32, 83, 73, 71, 75, 73, 76, 76] }
+144-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+145-
+146-  Cancelling due to test failure:
+147-────────────
+148-     Summary [   1.643s] 29/184 tests run: 28 passed, 1 failed, 0 skipped
+149-        FAIL [   0.093s] ( 29/184) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination
+
+log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22.log
+146:    thread 'byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage' (15617) panicked at adapters/postgres/tests/checkpoint_tests.rs:384:14:
+147-    called `Result::unwrap()` on an `Err` value: RowLimit { actual: 37, limit: 37 }
+148-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+149-
+150-  Cancelling due to test failure:
+151-────────────
+152-     Summary [   1.739s] 31/184 tests run: 30 passed, 1 failed, 0 skipped
+153-        FAIL [   0.079s] ( 31/184) mnesis-postgres::checkpoint_tests byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage
+154-warning: 153/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+155-error: test run failed
+
+log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_001.log
+140:    thread 'acknowledged_checkpoint_pair_survives_client_process_termination' (16372) panicked at adapters/postgres/tests/checkpoint_tests.rs:87:64:
+141-    called `Result::unwrap()` on an `Err` value: RowLimit { actual: 78, limit: 16777216 }
+142-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+143-
+144-  Cancelling due to test failure:
+145-────────────
+146-     Summary [   1.533s] 29/184 tests run: 28 passed, 1 failed, 0 skipped
+147-        FAIL [   0.090s] ( 29/184) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination
+148-warning: 155/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+149-error: test run failed
+
+log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_002.log
+146:    thread 'byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage' (17150) panicked at adapters/postgres/tests/checkpoint_tests.rs:384:14:
+147-    called `Result::unwrap()` on an `Err` value: RowLimit { actual: 37, limit: 37 }
+148-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+149-
+150-  Cancelling due to test failure:
+151-────────────
+152-     Summary [   1.692s] 31/184 tests run: 30 passed, 1 failed, 0 skipped
+153-        FAIL [   0.078s] ( 31/184) mnesis-postgres::checkpoint_tests byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage
+154-warning: 153/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+155-error: test run failed
+
+log/adapters__postgres__src__store__checkpoint.rs_line_90_col_5.log
+196:    thread 'aggregate_cache_and_checkpoint_with_identical_ids_remain_independent' (17921) panicked at adapters/postgres/tests/checkpoint_tests.rs:315:10:
+197-    called `Result::unwrap()` on an `Err` value: Rejected(Conflict { expected: Some(1), actual: None })
+198-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+199-
+200-  Cancelling due to test failure:
+201-────────────
+202-     Summary [   1.691s] 30/184 tests run: 29 passed, 1 failed, 0 skipped
+203-        FAIL [   0.065s] ( 30/184) mnesis-postgres::checkpoint_tests aggregate_cache_and_checkpoint_with_identical_ids_remain_independent
+204-warning: 154/184 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+205-error: test run failed
+
+log/adapters__postgres__src__store__checkpoint.rs_line_90_col_5_001.log
+39:error[E0277]: the trait bound `PgAllPos: Default` is not satisfied
+40-  --> adapters/postgres/src/store/checkpoint.rs:90:60
+41-   |
+42-90 |     Ok(Some((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default()))) /* ~ changed by cargo-mutants ~ */
+43-   |                                                            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PgAllPos`
+44-   |
+45-help: consider annotating `PgAllPos` with `#[derive(Default)]`
+46-  --> adapters/postgres/src/position.rs:31:1
+47-   |
+48-31 + #[derive(Default)]
+
+log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5.log
+30:error[E0599]: no variant, associated function, or constant named `new` found for enum `CheckpointError<E>` in the current scope
+31-   --> adapters/postgres/src/store/checkpoint.rs:103:22
+32-    |
+33-103 |     CheckpointError::new() /* ~ changed by cargo-mutants ~ */
+34-    |                      ^^^ variant, associated function, or constant not found in `CheckpointError<_>`
+35-
+36-For more information about this error, try `rustc --explain E0599`.
+37-error: could not compile `mnesis-postgres` (lib) due to 1 previous error
+38-warning: build failed, waiting for other jobs to finish...
+39-error: could not compile `mnesis-postgres` (lib test) due to 1 previous error
+
+log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_001.log
+30:error[E0599]: no variant, associated function, or constant named `from_iter` found for enum `CheckpointError<E>` in the current scope
+31-   --> adapters/postgres/src/store/checkpoint.rs:103:22
+32-    |
+33-103 |     CheckpointError::from_iter([Default::default()]) /* ~ changed by cargo-mutants ~ */
+34-    |                      ^^^^^^^^^ variant, associated function, or constant not found in `CheckpointError<_>`
+35-
+36-For more information about this error, try `rustc --explain E0599`.
+37-error: could not compile `mnesis-postgres` (lib) due to 1 previous error
+38-warning: build failed, waiting for other jobs to finish...
+39-error: could not compile `mnesis-postgres` (lib test) due to 1 previous error
+
+log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_002.log
+30:error[E0599]: no variant, associated function, or constant named `new` found for enum `CheckpointError<E>` in the current scope
+31-   --> adapters/postgres/src/store/checkpoint.rs:103:22
+32-    |
+33-103 |     CheckpointError::new(Default::default()) /* ~ changed by cargo-mutants ~ */
+34-    |                      ^^^ variant, associated function, or constant not found in `CheckpointError<_>`
+35-
+36-For more information about this error, try `rustc --explain E0599`.
+37-error: could not compile `mnesis-postgres` (lib) due to 1 previous error
+38-warning: build failed, waiting for other jobs to finish...
+39-error: could not compile `mnesis-postgres` (lib test) due to 1 previous error
+
+log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_003.log
+30:error[E0283]: type annotations needed
+31-   --> adapters/postgres/src/store/checkpoint.rs:103:5
+32-    |
+33-103 |     CheckpointError::from(Default::default()) /* ~ changed by cargo-mutants ~ */
+34-    |     ^^^^^^^^^^^^^^^ cannot infer type for type parameter `T` declared on the trait `From`
+35-    |
+36-    = note: multiple `impl`s satisfying `CheckpointError<PostgresError>: From<_>` found in the following crates: `core`, `mnesis_store`:
+37-            - impl<E> From<CheckpointRejection> for CheckpointError<E>;
+38-            - impl<T> From<T> for T;
+39-
+
+log/adapters__postgres__src__store__checkpoint.rs_line_114_col_9.log
+44:error[E0277]: the trait bound `CheckpointHydrated<Vec<u8>, PgAllPos>: Default` is not satisfied
+45-   --> adapters/postgres/src/store/checkpoint.rs:114:12
+46-    |
+47-114 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+48-    |            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `CheckpointHydrated<Vec<u8>, PgAllPos>`
+49-
+50:error[E0277]: the trait bound `CheckpointHydrated<Vec<u8>, position::PgAllPos>: Default` is not satisfied
+51-   --> adapters/postgres/src/store/checkpoint.rs:114:12
+52-    |
+53-114 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+
+log/adapters__postgres__src__store__checkpoint.rs_line_136_col_9.log
+266:    thread 'acknowledged_checkpoint_pair_survives_client_process_termination' (18840) panicked at adapters/postgres/tests/checkpoint_tests.rs:86:13:
+267-    assertion `left == right` failed
+268-      left: Absent
+269-     right: Found { revision: 1, position: PgAllPos { txid: 18446744073709551615, seq: 18446744073709551615 }, state: [115, 97, 118, 101, 100, 32, 98, 101, 102, 111, 114, 101, 32, 99, 108, 105, 101, 110, 116, 32, 83, 73, 71, 75, 73, 76, 76] }
+270-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+271-
+272-  Cancelling due to test failure:
+273-────────────
+274-     Summary [   1.536s] 29/184 tests run: 28 passed, 1 failed, 0 skipped
+275-        FAIL [   0.086s] ( 29/184) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination

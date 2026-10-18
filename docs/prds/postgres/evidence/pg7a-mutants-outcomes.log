@@ -1,0 +1,399 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.273893459,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 22.070662833,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:27:5: replace page -> Result<VecDeque<PageRow<Key>>, PostgresError> with Ok(VecDeque::new())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "page",
+            "return_type": "-> Result<VecDeque<PageRow<Key>>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 27,
+              "column": 5
+            },
+            "end": {
+              "line": 50,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(VecDeque::new())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_27_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_27_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.767798333,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 10.146964083,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:27:5: replace page -> Result<VecDeque<PageRow<Key>>, PostgresError> with Ok(VecDeque::from_iter([PageRow::new()]))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "page",
+            "return_type": "-> Result<VecDeque<PageRow<Key>>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 27,
+              "column": 5
+            },
+            "end": {
+              "line": 50,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(VecDeque::from_iter([PageRow::new()]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_27_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_27_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.513733584,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:27:5: replace page -> Result<VecDeque<PageRow<Key>>, PostgresError> with Ok(VecDeque::from_iter([PageRow::from_iter([Default::default()])]))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "page",
+            "return_type": "-> Result<VecDeque<PageRow<Key>>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 27,
+              "column": 5
+            },
+            "end": {
+              "line": 50,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(VecDeque::from_iter([PageRow::from_iter([Default::default()])]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_27_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_27_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.46498,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:27:5: replace page -> Result<VecDeque<PageRow<Key>>, PostgresError> with Ok(VecDeque::from_iter([PageRow::new(Default::default())]))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "page",
+            "return_type": "-> Result<VecDeque<PageRow<Key>>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 27,
+              "column": 5
+            },
+            "end": {
+              "line": 50,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(VecDeque::from_iter([PageRow::new(Default::default())]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_27_col_5_003.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_27_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.408766083,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:27:5: replace page -> Result<VecDeque<PageRow<Key>>, PostgresError> with Ok(VecDeque::from_iter([PageRow::from(Default::default())]))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "page",
+            "return_type": "-> Result<VecDeque<PageRow<Key>>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 27,
+              "column": 5
+            },
+            "end": {
+              "line": 50,
+              "column": 34
+            }
+          },
+          "replacement": "Ok(VecDeque::from_iter([PageRow::from(Default::default())]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_27_col_5_004.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_27_col_5_004.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.40403225,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/listing.rs:59:9: replace <impl StreamLister for PostgresStore>::list_streams -> Result<Self::StreamList, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/listing.rs",
+          "function": {
+            "function_name": "<impl StreamLister for PostgresStore>::list_streams",
+            "return_type": "-> Result<Self::StreamList, PostgresError>",
+            "span": {
+              "start": {
+                "line": 56,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 59,
+              "column": 9
+            },
+            "end": {
+              "line": 81,
+              "column": 10
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__listing.rs_line_59_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__listing.rs_line_59_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.42153125,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 6,
+  "missed": 0,
+  "caught": 1,
+  "timeout": 0,
+  "unviable": 5,
+  "success": 0,
+  "start_time": "2026-10-18T16:06:32.32037Z",
+  "end_time": "2026-10-18T16:07:21.904185Z",
+  "cargo_mutants_version": "27.1.0"
+}

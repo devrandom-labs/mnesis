@@ -1,0 +1,52 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-export/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.68s
+────────────
+ Nextest run ID 7f4cdcf8-e6a8-4dd6-83a5-957fdf3e2db7 with nextest profile: default
+    Starting 2 tests across 1 binary (6 tests skipped)
+        FAIL [   0.072s] (1/2) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_forge_transaction_visibility
+  stdout ───
+
+    running 1 test
+    test an_untrusted_search_path_cannot_forge_transaction_visibility ... FAILED
+
+    failures:
+
+    failures:
+        an_untrusted_search_path_cannot_forge_transaction_visibility
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'an_untrusted_search_path_cannot_forge_transaction_visibility' (98480585) panicked at adapters/postgres/tests/listing_tests.rs:114:5:
+    assertion `left == right` failed
+      left: []
+     right: [[99, 97, 110, 111, 110, 105, 99, 97, 108, 45, 108, 105, 115, 116, 105, 110, 103]]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.040s] (2/2) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_replace_the_captured_snapshot
+  stdout ───
+
+    running 1 test
+    test an_untrusted_search_path_cannot_replace_the_captured_snapshot ... FAILED
+
+    failures:
+
+    failures:
+        an_untrusted_search_path_cannot_replace_the_captured_snapshot
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'an_untrusted_search_path_cannot_replace_the_captured_snapshot' (98480596) panicked at adapters/postgres/tests/listing_tests.rs:114:5:
+    assertion `left == right` failed
+      left: []
+     right: [[99, 97, 110, 111, 110, 105, 99, 97, 108, 45, 108, 105, 115, 116, 105, 110, 103]]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.114s] 2 tests run: 0 passed, 2 failed, 6 skipped
+        FAIL [   0.072s] (1/2) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_forge_transaction_visibility
+        FAIL [   0.040s] (2/2) mnesis-postgres::listing_tests an_untrusted_search_path_cannot_replace_the_captured_snapshot
+error: test run failed

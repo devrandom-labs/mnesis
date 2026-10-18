@@ -13,6 +13,7 @@ keywords = ["event-sourcing", "event-store", "postgres"]
 categories = ["database"]
 
 [features]
+export = ["mnesis-store/export"]
 import = ["mnesis-store/import"]
 projection = ["mnesis-store/projection"]
 snapshot = ["mnesis-store/snapshot"]

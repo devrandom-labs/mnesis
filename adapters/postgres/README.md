@@ -136,3 +136,24 @@ COMMIT acknowledgement preserves `CommitUnknown` through the codec; a caller
 timeout can follow a successful commit and never proves rollback or safe retry.
 Reload the saved pair before continuing. Application command IDs, duplicate
 detection, and controller worker fencing remain outside this adapter.
+
+## Stream listing
+
+The `export` feature implements `StreamLister`. Each event stream appears once;
+keys used only by snapshots or projection checkpoints are absent. Binary IDs
+remain unchanged. Empty listings terminate, and exhausted cursors stay exhausted.
+
+Listing captures committed event membership when it opens. Streams committed
+before capture remain visible even behind an unrelated active transaction;
+streams created or first appended afterward are excluded from that listing.
+Pages follow internal key order; callers should rely on the trait's unordered
+enumeration contract. Immutable event rows preserve this view without retaining
+a database transaction or connection between pages.
+
+The existing `Limits` bound page rows and bytes; listing bytes count ID plus 32
+scalar bytes. An oversized ID returns `RowLimit` without transferring its body,
+then ends the cursor. Memory includes the bounded page and Postgres's captured
+transaction visibility record, whose size depends on active transactions.
+
+Listing and ordinary per-stream exports capture independent views. Their
+composition does not guarantee a consistent multi-stream backup.

@@ -217,3 +217,17 @@ checking yanked status because registry entries are unavailable. Green overall
 check is not evidence that yanked status was verified. Inspect maintained audit/
 registry behavior and exact inputs, keep vulnerability/license failures blocking,
 and obtain actual final registry evidence without a custom tool or new ignore.
+
+PG7a pre-edit (PG6b source7599588e/PR383 awaiting CI): implement only bounded,
+finite StreamLister before consistent export. Existing RawEventStore supplies
+EventExporter blanket; reuse export feature and BoxStream, SQLx keyset pages,
+existing Limits/PageRow/corruption mapping. No new framework/runtime/dependency
+or public type. Budget <=180 added/10 removed production Rust (including SQL
+strings), one Cargo feature/module declaration, <=450 native test lines. Revert
+listing owner/feature if finite visibility, one-per-event-key, page/body budget,
+connection release or reopen laws fail; never weaken those tests. State-only keys
+are absent. Ordinary listing freezes safe transaction cutoff, then keyset pages;
+no whole-catalog fetch or connection retained while idle between pages. First
+characterization is missing trait API (zero runtime), then real native tests and
+an isolated unbounded-list control must reject actual whole-backlog loading.
+PG6b parent delivery still must complete; no PG7 release/readiness claim.

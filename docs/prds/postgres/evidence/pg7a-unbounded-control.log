@@ -1,0 +1,35 @@
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/adapters/postgres)
+   Compiling mnesis v0.4.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/tmp/mnesis-pg7a-unbounded-control.xBPZbI/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.06s
+────────────
+ Nextest run ID d17e7373-83c8-4c7c-8a93-66f69512f593 with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   0.236s] (1/1) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+  stdout ───
+
+    running 1 test
+    test first_id_does_not_load_the_whole_catalog ... FAILED
+
+    failures:
+
+    failures:
+        first_id_does_not_load_the_whole_catalog
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.22s
+
+  stderr ───
+
+    thread 'first_id_does_not_load_the_whole_catalog' (98469699) panicked at adapters/postgres/tests/listing_tests.rs:205:5:
+    first listing item allocated 3415412 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.243s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   0.236s] (1/1) mnesis-postgres::listing_tests first_id_does_not_load_the_whole_catalog
+error: test run failed

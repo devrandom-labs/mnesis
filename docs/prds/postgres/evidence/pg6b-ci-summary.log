@@ -1,0 +1,11 @@
+Nix Flake Check	Flake Check	2026-10-18T15:41:08.3595852Z mnesis-fuzz-replay> test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T15:41:09.3614640Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T15:41:10.3633474Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+Nix Flake Check	Flake Check	2026-10-18T15:49:04.1165712Z mnesis-nextest>      Summary [  97.334s] 1563 tests run: 1563 passed (2 slow), 4 skipped
+Nix Flake Check	Flake Check	2026-10-18T15:50:34.3409685Z mnesis-postgres-integration>      Summary [   0.057s] 1 test run: 1 passed, 14 skipped
+Nix Flake Check	Flake Check	2026-10-18T15:50:35.7269536Z mnesis-postgres-integration>      Summary [   0.050s] 1 test run: 1 passed, 15 skipped
+Nix Flake Check	Flake Check	2026-10-18T15:50:37.3438453Z mnesis-postgres-integration>      Summary [   0.059s] 1 test run: 1 passed, 2 skipped
+Nix Flake Check	Flake Check	2026-10-18T15:51:02.0486189Z mnesis-postgres-integration>      Summary [  23.503s] 184 tests run: 184 passed, 0 skipped
+Compile-fail tests	Kernel compile-fail tests	2026-10-18T15:40:24.8453081Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 71.72s
+Compile-fail tests	Macro compile-fail tests	2026-10-18T15:40:39.2417681Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s
+Compile-fail tests	Store compile-fail tests	2026-10-18T15:40:52.1604847Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.88s
