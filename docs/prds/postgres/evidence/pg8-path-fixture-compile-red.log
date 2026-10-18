@@ -1,0 +1,24 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-path/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-path/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-path/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-path/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-path/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-path/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-path/crates/store-testing)
+error[E0521]: borrowed data escapes outside of function
+   --> adapters/postgres/tests/all_noskip_tests.rs:150:5
+    |
+142 | async fn shadowed_ordering(statement: &str) {
+    |                            ---------  - let's call the lifetime of this reference `'1`
+    |                            |
+    |                            `statement` is a reference that is only valid in the function body
+...
+150 |     sqlx::raw_sql(statement).execute(&pool).await.unwrap();
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+    |     |
+    |     `statement` escapes the function body here
+    |     argument requires that `'1` must outlive `'static`
+
+For more information about this error, try `rustc --explain E0521`.
+error: could not compile `mnesis-postgres` (test "all_noskip_tests") due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test all_noskip_tests` exited with code 101

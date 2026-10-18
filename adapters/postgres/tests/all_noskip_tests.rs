@@ -52,11 +52,16 @@
 
 mod support;
 
-use futures::StreamExt;
-use mnesis_postgres::{PgAllPos, PostgresStore};
-use mnesis_store::StreamKey;
+use std::sync::Arc;
+
+use futures::{StreamExt, TryStreamExt};
+use mnesis::Version;
+use mnesis_postgres::{History, PgAllPos, PostgresError, PostgresStore};
 use mnesis_store::store::RawEventStore;
-use sqlx::PgPool;
+use mnesis_store::{PendingBatch, StreamKey, pending_envelope};
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{PgPool, Postgres, Transaction};
+use tokio::sync::Barrier;
 
 // ---------------------------------------------------------------------------
 // Infrastructure
@@ -104,6 +109,153 @@ async fn drain_all(
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
+
+async fn held_event(pool: &PgPool, history: History) -> (Transaction<'_, Postgres>, PgAllPos) {
+    let number = support::key(pool, b"earlier").await;
+    let mut transaction = pool.begin().await.unwrap();
+    let (txid, seq): (String, i64) = sqlx::query_as(
+        "INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) \
+         VALUES ($1, 1, $2, 1, $3) RETURNING txid::text, global_seq",
+    )
+    .bind(number)
+    .bind(b"Earlier".as_slice())
+    .bind(b"first".as_slice())
+    .fetch_one(&mut *transaction)
+    .await
+    .unwrap();
+    let position = PgAllPos::new(history, txid.parse().unwrap(), u64::try_from(seq).unwrap());
+    (transaction, position)
+}
+
+async fn read_outcome(
+    store: &PostgresStore,
+    from: Option<PgAllPos>,
+) -> Result<Vec<(PgAllPos, String, Vec<u8>)>, Box<PostgresError>> {
+    store
+        .read_all(from)
+        .await
+        .map_err(Box::new)?
+        .map_ok(|(pos, key, event)| (pos, event.event_type().to_owned(), key.as_bytes().to_vec()))
+        .try_collect()
+        .await
+        .map_err(Box::new)
+}
+
+async fn shadowed_ordering(statement: &'static str) {
+    let Some((store, pool)) = setup().await else {
+        return;
+    };
+    sqlx::raw_sql("CREATE SCHEMA ordering")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::raw_sql(statement).execute(&pool).await.unwrap();
+    let runtime = PgPoolOptions::new()
+        .max_connections(4)
+        .connect_with(
+            pool.connect_options()
+                .as_ref()
+                .clone()
+                .options([("search_path", "ordering,pg_catalog")]),
+        )
+        .await
+        .unwrap();
+    let opened = PostgresStore::from_pool(runtime.clone()).await;
+    if opened.is_err() {
+        runtime.close().await;
+        sqlx::raw_sql("DROP SCHEMA ordering CASCADE")
+            .execute(&pool)
+            .await
+            .unwrap();
+    }
+    let reader = opened.unwrap();
+    let (older, first) = held_event(&pool, store.history()).await;
+    let barrier = Arc::new(Barrier::new(2));
+    let later = {
+        let writer_barrier = Arc::clone(&barrier);
+        let writer = store.clone();
+        tokio::spawn(async move {
+            writer_barrier.wait().await;
+            let event = pending_envelope(Version::INITIAL)
+                .event_type("Later")
+                .payload(b"second".as_slice())
+                .build()
+                .unwrap();
+            writer
+                .append(
+                    &StreamKey::from_slice(b"later"),
+                    None,
+                    PendingBatch::of(&event),
+                )
+                .await
+                .unwrap()
+        })
+    };
+    barrier.wait().await;
+    let second = later.await.unwrap();
+    let held = read_outcome(&reader, None).await;
+    older.commit().await.unwrap();
+    let all = read_outcome(&reader, None).await;
+    let resumed = read_outcome(&reader, Some(first)).await;
+    let boundary = PgAllPos::new(store.history(), first.txid(), u64::MAX);
+    let beyond = read_outcome(&reader, Some(boundary)).await;
+    drop(reader);
+    runtime.close().await;
+    sqlx::raw_sql("DROP SCHEMA ordering CASCADE")
+        .execute(&pool)
+        .await
+        .unwrap();
+    let expected = vec![
+        (first, "Earlier".to_owned(), b"earlier".to_vec()),
+        (second, "Later".to_owned(), b"later".to_vec()),
+    ];
+    assert_eq!(read_outcome(&store, None).await.unwrap(), expected);
+    assert_eq!(held.unwrap(), Vec::new(), "must withhold the newer commit");
+    assert_eq!(all.unwrap(), expected);
+    assert_eq!(resumed.unwrap(), expected[1..]);
+    assert_eq!(beyond.unwrap(), expected[1..]);
+}
+
+#[tokio::test]
+async fn all_ordering_ignores_shadowed_current_snapshot() {
+    shadowed_ordering(
+        "CREATE FUNCTION ordering.pg_current_snapshot() RETURNS pg_catalog.pg_snapshot \
+         LANGUAGE sql AS $$ SELECT '1:1:'::pg_catalog.pg_snapshot $$",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn all_ordering_ignores_shadowed_snapshot_xmin() {
+    shadowed_ordering(
+        "CREATE FUNCTION ordering.pg_snapshot_xmin(pg_catalog.pg_snapshot) \
+         RETURNS pg_catalog.xid8 LANGUAGE sql \
+         AS $$ SELECT '18446744073709551615'::pg_catalog.xid8 $$",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn all_ordering_ignores_shadowed_cutoff_operator() {
+    shadowed_ordering(
+        "CREATE FUNCTION ordering.less(pg_catalog.xid8, pg_catalog.xid8) \
+         RETURNS pg_catalog.bool LANGUAGE sql AS $$ SELECT true $$; \
+         CREATE OPERATOR ordering.< (FUNCTION = ordering.less, \
+         LEFTARG = pg_catalog.xid8, RIGHTARG = pg_catalog.xid8)",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn all_ordering_ignores_shadowed_resume_operator() {
+    shadowed_ordering(
+        "CREATE FUNCTION ordering.greater(pg_catalog.xid8, pg_catalog.xid8) \
+         RETURNS pg_catalog.bool LANGUAGE sql AS $$ SELECT false $$; \
+         CREATE OPERATOR ordering.> (FUNCTION = ordering.greater, \
+         LEFTARG = pg_catalog.xid8, RIGHTARG = pg_catalog.xid8)",
+    )
+    .await;
+}
 
 /// The `$all` no-skip linearizability test under out-of-order commits.
 ///

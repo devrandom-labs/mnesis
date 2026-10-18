@@ -213,3 +213,12 @@ socket close. Actual Linux red retains SQLx0.9 Io(BrokenPipe32). Reuse native
 pg_stat_activity Lock observation to establish query in flight before termination;
 then require exact original57P01 rather than broaden error acceptance. No adapter
 cause mapping or runtime change. Keep raw175/1/35UNRUN Linux evidence.
+# Global read search path, accessed 2026-10-18
+
+PostgreSQL 18 official schema documentation:
+https://www.postgresql.org/docs/18/ddl-schemas.html#DDL-SCHEMAS-PATH
+and https://www.postgresql.org/docs/18/typeconv-oper.html.
+An explicitly ordered pg_catalog may follow caller schemas. Functions and
+operators follow search-path resolution; OPERATOR(pg_catalog.<) is supported
+qualified syntax. Applicability: SQLx caller pools retain their configured
+search path. Native tests must establish actual adapter impact before a fix.

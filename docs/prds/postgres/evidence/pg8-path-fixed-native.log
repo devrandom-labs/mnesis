@@ -1,0 +1,13 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-path/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.79s
+────────────
+ Nextest run ID dcd3cfca-d742-4fe0-bf14-d8ebeb284789 with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [   0.035s] (1/6) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+        PASS [   0.035s] (2/6) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+        PASS [   0.050s] (3/6) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+        PASS [   0.050s] (4/6) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_cutoff_operator
+        PASS [   0.049s] (5/6) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+        PASS [   0.051s] (6/6) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_snapshot_xmin
+────────────
+     Summary [   0.270s] 6 tests run: 6 passed, 0 skipped
