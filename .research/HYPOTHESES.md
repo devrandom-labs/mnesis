@@ -371,3 +371,20 @@ claim. Whole PG7 operator drill must independently assert old-primary shutdown
 exit status), actual Projection restart, bounded completed chunks and logical
 rebuild. These remain explicit falsifiers; current physical-copy coherence is
 not failover fencing. Current product source freezes through final gate/CI.
+# PG8 global read search path (2026-10-18)
+
+Threatened invariant: caller pool search paths must not change the safe global
+transaction cutoff or exclusive resume comparisons. Workload: two real writers
+with an older uncommitted event and a newer committed event; a separate reader
+pool puts a test-owned schema before pg_catalog. Independently shadow the two
+snapshot functions and xid8 comparison operators. Require empty reads while the
+older writer is held, then exact ordered events and exclusive resume, including
+u64::MAX sequence resume. Gather outcomes and remove injected objects before
+asserting, so a failing witness cannot poison subsequent cases.
+
+Pre-edit budget: <=200 new native-test lines, <=20 production Rust/SQL-string
+lines, no public API, dependencies, migrations, kernel, runtime or tooling edits.
+Falsifier: all four original-source native witnesses pass unchanged. If they
+fail, qualify only the proven builtin functions/operators, then re-run the same
+oracles and relevant native/conformance checks. Rollback boundary: this slice's
+test and store-query edits only. Research/PR delivery records are separate.

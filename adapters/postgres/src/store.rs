@@ -690,11 +690,12 @@ impl RawEventStore for PostgresStore {
 
         // Every transaction below this cutoff has already settled. Later
         // commits cannot extend this scan, and no old row can appear behind it.
-        let upper: String =
-            sqlx::query_scalar("SELECT pg_snapshot_xmin(pg_current_snapshot())::text")
-                .fetch_one(self.pool())
-                .await
-                .map_err(PostgresError::Sqlx)?;
+        let upper: String = sqlx::query_scalar(
+            "SELECT pg_catalog.pg_snapshot_xmin(pg_catalog.pg_current_snapshot())::text",
+        )
+        .fetch_one(self.pool())
+        .await
+        .map_err(PostgresError::Sqlx)?;
         let limits = self.inner.limits;
         let state = (
             self.pool().clone(),
@@ -707,20 +708,20 @@ impl RawEventStore for PostgresStore {
                 if rows.is_empty() {
                     let mut query = QueryBuilder::<Postgres>::new(page::START);
                     query
-                        .push("txid < ")
+                        .push("txid OPERATOR(pg_catalog.<) ")
                         .push_bind(&ceiling)
                         .push("::text::xid8");
                     if let Some(position) = after {
                         if let Ok(sequence) = i64::try_from(position.seq()) {
                             query
-                                .push(" AND (txid, global_seq) > (")
+                                .push(" AND (txid, global_seq) OPERATOR(pg_catalog.>) (")
                                 .push_bind(position.txid().to_string())
                                 .push("::text::xid8, ")
                                 .push_bind(sequence)
                                 .push(")");
                         } else {
                             query
-                                .push(" AND txid > ")
+                                .push(" AND txid OPERATOR(pg_catalog.>) ")
                                 .push_bind(position.txid().to_string())
                                 .push("::text::xid8");
                         }

@@ -361,7 +361,7 @@ to `PgAllPos` and projection checkpoint rows. Its breaking constructor requires
 all three saved components. Native tests reject copied cluster/database bindings,
 future transaction IDs (including the exact upper bound), and foreign positions
 before pool acquisition; populated-v4 migration rollback/backfill and coherent
-physical recovery are exercised. This slice is not yet merged. Completed bounded
+physical recovery are exercised. This slice merged in PR387. Completed bounded
 CBOR interchange, projection restart and the full operator drill remain required.
 
 ### PG8 Secure operation, lifecycle and capacity

@@ -7,6 +7,10 @@ production requirements, including bounded reads, notification recovery, commit
 uncertainty, atomic import, snapshots, projection state, migrations and operations.
 See the [status index](../../docs/prd-backlog/status.md) for dependencies and delivery.
 
+Global reads use PostgreSQL's built-in snapshot functions and comparison operators
+explicitly, preserving transaction cutoffs and exclusive resume with caller pool
+search paths that put application schemas before `pg_catalog`.
+
 ## Quickstart
 
 ```toml

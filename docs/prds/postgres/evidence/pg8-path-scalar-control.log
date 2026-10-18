@@ -1,0 +1,37 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-path-controls.FsopcM/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-path-controls.FsopcM/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.85s
+────────────
+ Nextest run ID 7ecb5ed9-980e-4648-9949-b4025e2016dd with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [   0.050s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_resume_operator ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_resume_operator
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_resume_operator' (100878285) panicked at adapters/postgres/tests/all_noskip_tests.rs:216:5:
+    assertion `left == right` failed
+      left: []
+     right: [(PgAllPos { history: History([210, 16, 84, 76, 39, 145, 77, 189, 159, 89, 49, 2, 115, 181, 241, 54]), txid: 101896, seq: 2 }, "Later", [108, 97, 116, 101, 114])]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.051s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [   0.050s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+error: test run failed

@@ -1,0 +1,48 @@
+    Blocking waiting for file lock on package cache
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-path/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-path/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-path/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-path/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-path/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-path/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-path/crates/store-testing)
+error: the `Err`-variant returned from this function is very large
+   --> adapters/postgres/tests/all_noskip_tests.rs:133:6
+    |
+133 | ) -> Result<Vec<(PgAllPos, String, Vec<u8>)>, PostgresError> {
+    |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 216 bytes
+    |
+    = help: try reducing the size of `mnesis_postgres::PostgresError`, for example by boxing large elements or replacing it with `Box<mnesis_postgres::PostgresError>`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#result_large_err
+    = note: `-D clippy::result-large-err` implied by `-D clippy::all`
+    = help: to override `-D clippy::all` add `#[allow(clippy::result_large_err)]`
+
+error: `barrier` is shadowed
+   --> adapters/postgres/tests/all_noskip_tests.rs:173:13
+    |
+173 |         let barrier = Arc::clone(&barrier);
+    |             ^^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/all_noskip_tests.rs:171:9
+    |
+171 |     let barrier = Arc::new(Barrier::new(2));
+    |         ^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_reuse
+    = note: requested on the command line with `-D clippy::shadow-reuse`
+
+error: `beyond` is shadowed
+   --> adapters/postgres/tests/all_noskip_tests.rs:199:9
+    |
+199 |     let beyond = read_outcome(&reader, Some(beyond)).await;
+    |         ^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/all_noskip_tests.rs:198:9
+    |
+198 |     let beyond = PgAllPos::new(store.history(), first.txid(), u64::MAX);
+    |         ^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_reuse
+
+error: could not compile `mnesis-postgres` (test "all_noskip_tests") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

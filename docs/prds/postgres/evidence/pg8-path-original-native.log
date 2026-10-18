@@ -1,0 +1,94 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-path/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.92s
+────────────
+ Nextest run ID f3567cb3-f937-47bd-a5f2-c4f88e827855 with nextest profile: default
+    Starting 4 tests across 1 binary (2 tests skipped)
+        FAIL [   0.080s] (1/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_current_snapshot ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_current_snapshot
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.06s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_current_snapshot' (100803782) panicked at adapters/postgres/tests/all_noskip_tests.rs:212:5:
+    assertion `left == right` failed
+      left: []
+     right: [(PgAllPos { history: History([69, 81, 160, 52, 204, 216, 67, 170, 170, 242, 178, 185, 82, 113, 188, 245]), txid: 99698, seq: 1 }, "Earlier", [101, 97, 114, 108, 105, 101, 114]), (PgAllPos { history: History([69, 81, 160, 52, 204, 216, 67, 170, 170, 242, 178, 185, 82, 113, 188, 245]), txid: 99699, seq: 2 }, "Later", [108, 97, 116, 101, 114])]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.044s] (2/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_cutoff_operator
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_cutoff_operator ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_cutoff_operator
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_cutoff_operator' (100803795) panicked at adapters/postgres/tests/all_noskip_tests.rs:211:5:
+    assertion `left == right` failed: must withhold the newer commit
+      left: [(PgAllPos { history: History([69, 81, 160, 52, 204, 216, 67, 170, 170, 242, 178, 185, 82, 113, 188, 245]), txid: 99706, seq: 2 }, "Later", [108, 97, 116, 101, 114])]
+     right: []
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.039s] (3/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_resume_operator ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_resume_operator
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_resume_operator' (100803808) panicked at adapters/postgres/tests/all_noskip_tests.rs:212:20:
+    called `Result::unwrap()` on an `Err` value: Sqlx(Database(PgDatabaseError { severity: Error, code: "0A000", message: "could not determine interpretation of row comparison operator >", detail: None, hint: Some("Row comparison operators must be associated with btree operator families."), position: Some(Original(340)), where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("parse_expr.c"), line: Some(2940), routine: Some("make_row_comparison_op") }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.040s] (4/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_snapshot_xmin
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_snapshot_xmin ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_snapshot_xmin
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_snapshot_xmin' (100803822) panicked at adapters/postgres/tests/all_noskip_tests.rs:211:5:
+    assertion `left == right` failed: must withhold the newer commit
+      left: [(PgAllPos { history: History([69, 81, 160, 52, 204, 216, 67, 170, 170, 242, 178, 185, 82, 113, 188, 245]), txid: 99720, seq: 2 }, "Later", [108, 97, 116, 101, 114])]
+     right: []
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.208s] 4 tests run: 0 passed, 4 failed, 2 skipped
+        FAIL [   0.080s] (1/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+        FAIL [   0.044s] (2/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_cutoff_operator
+        FAIL [   0.039s] (3/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+        FAIL [   0.040s] (4/4) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_snapshot_xmin
+error: test run failed

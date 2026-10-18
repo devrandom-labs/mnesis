@@ -1,0 +1,264 @@
+    test foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair ... FAILED
+
+    failures:
+
+    failures:
+        foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair' (13934) panicked at adapters/postgres/tests/checkpoint_tests.rs:566:9:
+    assertion failed: matches!(read, Err(PostgresError::HistoryMismatch { expected, actual }) if
+        expected == store.history() && actual == foreign)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.384s] 34/211 tests run: 33 passed, 1 failed, 0 skipped
+        FAIL [   0.054s] ( 34/211) mnesis-postgres::checkpoint_tests foreign_saved_history_rejects_without_loading_state_or_replacing_the_pair
+warning: 177/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test all_noskip_exclusive_resume_after_out_of_order_commits ... FAILED
+
+    failures:
+
+    failures:
+        all_noskip_exclusive_resume_after_out_of_order_commits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (14625) panicked at adapters/postgres/tests/all_noskip_tests.rs:94:45:
+    open read_all: HistoryMismatch { expected: History([233, 205, 245, 223, 141, 153, 70, 181, 134, 215, 159, 100, 145, 240, 141, 228]), actual: History([233, 205, 245, 223, 141, 153, 70, 181, 134, 215, 159, 100, 145, 240, 141, 228]) }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.070s] 12/211 tests run: 11 passed, 1 failed, 0 skipped
+        FAIL [   0.037s] ( 12/211) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+warning: 199/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test all_noskip_exclusive_resume_after_out_of_order_commits ... FAILED
+
+    failures:
+
+    failures:
+        all_noskip_exclusive_resume_after_out_of_order_commits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (15339) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+    called `Result::unwrap()` on an `Err` value: DatabaseHistory
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.049s] 12/211 tests run: 11 passed, 1 failed, 0 skipped
+        FAIL [   0.014s] ( 12/211) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+warning: 199/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test acknowledged_checkpoint_pair_survives_client_process_termination ... FAILED
+
+    failures:
+
+    failures:
+        acknowledged_checkpoint_pair_survives_client_process_termination
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+
+  stderr ───
+
+    thread 'acknowledged_checkpoint_pair_survives_client_process_termination' (16222) panicked at adapters/postgres/tests/checkpoint_tests.rs:228:56:
+    called `Result::unwrap()` on an `Err` value: Schema { reason: "schema is not migrated; run PostgresStore::migrate with the migration role" }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.737s] 29/211 tests run: 28 passed, 1 failed, 0 skipped
+        FAIL [   0.012s] ( 29/211) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination
+warning: 182/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test conformance_atomic::check_atomic_conflict_aborts_all ... FAILED
+
+    failures:
+
+    failures:
+        conformance_atomic::check_atomic_conflict_aborts_all
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (17015) panicked at crates/store-testing/src/atomic.rs:125:10:
+    a conflicting run must abort the batch: Some(PgAllPos { history: History([217, 157, 47, 209, 148, 214, 72, 158, 185, 5, 177, 29, 246, 140, 57, 191]), txid: 0, seq: 0 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.157s] 14/211 tests run: 13 passed, 1 failed, 0 skipped
+        FAIL [   0.038s] ( 14/211) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+warning: 197/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test conformance_atomic::check_atomic_conflict_aborts_all ... FAILED
+
+    failures:
+
+    failures:
+        conformance_atomic::check_atomic_conflict_aborts_all
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (17716) panicked at crates/store-testing/src/atomic.rs:125:10:
+    a conflicting run must abort the batch: Some(PgAllPos { history: History([217, 157, 47, 209, 148, 214, 72, 158, 185, 5, 177, 29, 246, 140, 57, 191]), txid: 0, seq: 1 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.140s] 14/211 tests run: 13 passed, 1 failed, 0 skipped
+        FAIL [   0.034s] ( 14/211) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+warning: 197/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test conformance_atomic::check_atomic_conflict_aborts_all ... FAILED
+
+    failures:
+
+    failures:
+        conformance_atomic::check_atomic_conflict_aborts_all
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (18415) panicked at crates/store-testing/src/atomic.rs:125:10:
+    a conflicting run must abort the batch: Some(PgAllPos { history: History([217, 157, 47, 209, 148, 214, 72, 158, 185, 5, 177, 29, 246, 140, 57, 191]), txid: 1, seq: 0 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.137s] 14/211 tests run: 13 passed, 1 failed, 0 skipped
+        FAIL [   0.033s] ( 14/211) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+warning: 197/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test conformance_atomic::check_atomic_conflict_aborts_all ... FAILED
+
+    failures:
+
+    failures:
+        conformance_atomic::check_atomic_conflict_aborts_all
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (19115) panicked at crates/store-testing/src/atomic.rs:125:10:
+    a conflicting run must abort the batch: Some(PgAllPos { history: History([217, 157, 47, 209, 148, 214, 72, 158, 185, 5, 177, 29, 246, 140, 57, 191]), txid: 1, seq: 1 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.146s] 14/211 tests run: 13 passed, 1 failed, 0 skipped
+        FAIL [   0.036s] ( 14/211) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+warning: 197/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test conformance_atomic::check_atomic_conflict_aborts_all ... FAILED
+
+    failures:
+
+    failures:
+        conformance_atomic::check_atomic_conflict_aborts_all
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (19868) panicked at crates/store-testing/src/atomic.rs:125:10:
+    a conflicting run must abort the batch: None
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.144s] 14/211 tests run: 13 passed, 1 failed, 0 skipped
+        FAIL [   0.037s] ( 14/211) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+warning: 197/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+    running 1 test
+    test aggregate_cache_and_checkpoint_with_identical_ids_remain_independent ... FAILED
+
+    failures:
+
+    failures:
+        aggregate_cache_and_checkpoint_with_identical_ids_remain_independent
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'aggregate_cache_and_checkpoint_with_identical_ids_remain_independent' (20885) panicked at adapters/postgres/tests/checkpoint_tests.rs:344:10:
+    called `Result::unwrap()` on an `Err` value: Rejected(Conflict { expected: Some(1), actual: None })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.172s] 30/211 tests run: 29 passed, 1 failed, 0 skipped
+        FAIL [   0.049s] ( 30/211) mnesis-postgres::checkpoint_tests aggregate_cache_and_checkpoint_with_identical_ids_remain_independent
+warning: 181/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+
+    failures:
+
+    failures:
+        acknowledged_checkpoint_pair_survives_client_process_termination
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.06s
+
+  stderr ───
+
+    thread 'acknowledged_checkpoint_pair_survives_client_process_termination' (21803) panicked at adapters/postgres/tests/checkpoint_tests.rs:87:13:
+    assertion `left == right` failed
+      left: Absent
+     right: Found { revision: 1, position: PgAllPos { history: History([109, 207, 227, 42, 204, 123, 65, 185, 158, 225, 119, 173, 171, 237, 204, 235]), txid: 18446744073709551615, seq: 18446744073709551615 }, state: [115, 97, 118, 101, 100, 32, 98, 101, 102, 111, 114, 101, 32, 99, 108, 105, 101, 110, 116, 32, 83, 73, 71, 75, 73, 76, 76] }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   1.078s] 29/211 tests run: 28 passed, 1 failed, 0 skipped
+        FAIL [   0.063s] ( 29/211) mnesis-postgres::checkpoint_tests acknowledged_checkpoint_pair_survives_client_process_termination
+warning: 182/211 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)

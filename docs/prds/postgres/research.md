@@ -4682,3 +4682,142 @@ evidence/other-package deletion, no raw rm/cache purge or hook bypass. Another
 Nix process is independently building Labcast; verified its cwd, left it alone.
 Retry SAME signed commit and unchanged full gate; no parallelism/test/workload/
 limit/lint configuration change.
+# Continuation, history delivery and global-read search path — 2026-10-18
+
+Fresh scalar-resume negative control in isolated worktree
+/tmp/mnesis-path-controls.FsopcM, package-clean proof target, native control DB:
+reverted ONLY the u64-sequence fallback comparison to unqualified txid >.
+The unchanged resume-operator law fails0.051s at the final large-sequence oracle:
+actual[] vs exact later event. THREE reviews: (1) a position with u64::MAX seq
+still permits a later transaction; (2) actual SUT compiled fresh and the other
+function/row/cutoff qualifications remain intact, so the independent scalar
+branch is falsified; (3) the two-event positive control and ordinary row-resume
+assertions pass before the final failure, cleanup precedes assertions, five
+other tests are filtered, not skipped runtime cases. Production source remains
+fully qualified and unchanged. Raw /tmp/mnesis-pg8-path-scalar-control.log.
+
+Current full native all-feature suite:215/215pass42.586s,0skips; strict
+all-feature/all-target adapter Clippy passes without lint changes. THREE reviews:
+(1) the four default-core query regressions join the complete previous211cases;
+(2) actual local Postgres17.10 plus independent18.6restore processes run; all
+history/migration/cancel/uncertain-commit/atomic/cache/checkpoint/session owners
+remain selected; (3) exact-output oracles and previous numeric/byte/deadline
+boundaries are retained, no skip credit, Linux execution remains independently
+pending. Product delta9added/8removed lines and fixture156added/4removed remain
+within the pre-edit20/200budgets. No API/migration/dependency/runtime changes.
+
+PR387 protected normal squash merged2026-10-18T20:23:02Z by joeldsouzax,
+exact merge2b181b12d1040f1527d6a28375fd5db91a9d1129 from reviewed signedb2410ad.
+All40checks passed and one scheduled-only sweep skipped; no review threads.
+Actual final CI native suites:211/211 in40.890s,35.104s,42.118s (two workflows
+and separate package/check executions, not three distinct feature matrices).
+Every suite reviewed THREE ways: (1) all advertised features and full native law
+selection; (2) real PostgreSQL supplied and211actual cases execute; (3) zero skips,
+raw logs match reviewed revision; same laws repeated do not multiply coverage.
+Each associated five one-case smokes reviewed THREE ways: owning capability
+present; selected native law actually runs; all other cases filtered, no isolated
+feature-build credit. Full CI workspace1567/1567 in80.641s and121.218s likewise
+reviewed THREE ways: owning complete workspace gate, real nextest execution,
+four compiler cases unselected and DB-free cases contribute zero native proof.
+Existing per-package feature jobs retained original default/none/all unit runs;
+for EACH run the three reviews are: exact package and configured feature set,
+actual unit bodies execute, zero-body harnesses/compile-only checks receive no
+behavior proof and no native database proof. Feature isolation source checks are
+not additional runtime executions. Compile-fail jobs verify intended diagnostics.
+Four original LibFuzzer campaigns completed61s each with counts6636851,
+9917547,1854424,1219752 for wire,value,header,chunk. Four locked AFL campaigns
+hit original time limits and had no crash artifacts. EACH campaign THREE reviews:
+owning real decoder/value target; actual campaign after successful locked build;
+no reduced duration/corpus/assertions, no artifact indicates observed crashes,
+but this does not establish the still-pending zero-exit crash-gate fault proof.
+Raw /tmp/mnesis-pr387-ci.log, -ci-call.log, -fuzz.log and mutants artifact retained.
+
+Path slice strict Clippy first rejected three fixture issues: two shadowed names
+and large returned adapter error. THREE reviews: contract/oracles unchanged;
+compile-only failure means planned full native run DID NOT start; rename fixture
+locals and box the concrete error solely to retain failures through cleanup,
+without type erasure, product error/API edits, or lint relaxation.
+
+Qualified-query native run: six/six pass0.270s, zero skips. THREE reviews:
+(1) both original no-skip laws and four new exact-output laws are selected;
+(2) actual native functions/operators remain injected while read_all runs, with
+two genuinely overlapping writers and the same original-red oracles;
+(3) no errors are ignored, injections are cleaned before assertion, full drain
+and both exclusive-resume branches are asserted. Default positive control also
+returns the exact two events. This is targeted proof, not whole-adapter delivery.
+
+Original-source global ordering run: four native laws, four failures in0.208s;
+two unrelated existing laws filtered (not runtime skips). THREE reviews:
+(1) exact no-skip cutoff, full ordered output, row resume and unsigned sequence
+resume remain the contract; (2) current-snapshot substitution hides both events,
+xmin and cutoff-operator substitutions release the later commit while the older
+transaction is held, and the resume-operator substitution produces native0A000
+when refilling a row comparison; (3) each law executed actual read_all, actual
+spawned append overlapping a held older transaction, positive default-pool
+control and cleanup before assertions. No deadline/workload/oracle is weakened.
+The resume error arises even in a full drain's second page; it is not evidence
+that the scalar large-sequence branch has been independently falsified yet.
+Raw /tmp/mnesis-pg8-path-original-native.log is retained. Minimal fix qualifies
+the two snapshot functions and three comparisons at their existing owning query.
+
+PR387 final downloaded mutation artifact12149346087, run39161571503, exact
+headb2410ad4480ec1382fb50cc1c82b688e2b51aca3: baseline211/211native passed36.111s,
+27candidates,11caught,16unviable,0survivors/timeouts. Baseline THREE reviews:
+(1) unchanged complete selected feature suite; (2) native database configured in
+the mutation job and bodies execute; (3) no runtime skips, source head matches,
+subsequent fail-fast mutants do not receive211-case pass credit.
+Every runtime mutant's FIRST failure reviewed in three distinct ways below.
+
+| Mutant | Contract review | Actual fault/falsifier review | Oracle and scope review |
+| --- | --- | --- | --- |
+| History::check -> Ok | Foreign checkpoint history must reject | foreign_saved_history exact HistoryMismatch assertion fails | Fixture repairs injected history/FK before assertion;33passed/177unrun |
+| History::check == -> != | Same history resumes must work | exclusive-resume law gets HistoryMismatch with identical bytes | SUT fails at open;11passed/199unrun, not foreign-history coverage |
+| history::load delete ! | Valid cluster binding must open | unchanged no-skip setup gets DatabaseHistory | Startup false rejection;11passed/199unrun, not copied-binding proof |
+| migrate -> Ok | Explicit migration must install schema | process-checkpoint fixture gets exact unmigrated Schema error | Native open failure;28passed/182unrun, not a crash-survival run |
+| insert_one -> (0,0) | Conflicting run must reject atomically | shared conflict law unexpectedly gets Some position(0,0) | Actual append bypass detected;13passed/197unrun |
+| insert_one -> (0,1) | Conflicting run must reject atomically | same shared law gets Some position(0,1) | Actual append bypass detected;13passed/197unrun |
+| insert_one -> (1,0) | Conflicting run must reject atomically | same shared law gets Some position(1,0) | Actual append bypass detected;13passed/197unrun |
+| insert_one -> (1,1) | Conflicting run must reject atomically | same shared law gets Some position(1,1) | Actual append bypass detected;13passed/197unrun |
+| atomic_append_many -> None | Nonempty conflict cannot acknowledge | same shared conflict law gets None success | Owning atomic SUT called;13passed/197unrun |
+| checkpoint lock -> None | Existing revision remains visible to CAS | aggregate/cache independence law gets Conflict expected1 actualNone | Observable revision loss;29passed/181unrun |
+| commit_checkpoint -> revision1 | Acknowledged pair must persist | process law reads Absent instead of exact Found pair | Child actually exits after SIGKILL;28passed/182unrun; no power-loss claim |
+
+All16unviable compile diagnostics independently inspected. THREE reviews for each:
+(1) these replacements target typed construction, not executable behavior;
+(2) Default is absent for store/history/position/stream/hydrated types, or const
+as_bytes cannot call Box::new; (3) builds fail before tests, zero runtime catches.
+Affected sites: builder56; history22(two),38; position34; schema39,49;
+store99,121,600,685; atomic74(SomeDefault); checkpoint33,67,100(SomeDefault),124.
+The native manual SQL/identity controls recorded earlier supplement these limits;
+they are not replaced by a manufactured mutation percentage.
+
+PR387 at review:40SUCCESS/1scheduledSKIPPED, mergeStateCLEAN, no review threads.
+No required check bypass or release publication is authorized by a local pass.
+
+The previous status turn was a verified wait: both identified PR387 Nix jobs
+were confirmed live; it was not implementation progress. Goal service now reports
+active after resumption. Independent native regression work is proceeding.
+
+History final signed commit b2410ad4480ec1382fb50cc1c82b688e2b51aca3 opened PR387.
+Normal unmodified commit gate passed on its second attempt after supported
+package-cache cleanup. Workspace nextest1567/1567 passed504.323s,14slow and
+four compiler cases unselected. THREE reviews: (1) complete owning workspace
+gate and unchanged property workloads; (2) actual nextest bodies ran, but absent
+DATABASE_URL means this Darwin gate contributes zero native Postgres proof;
+(3) no deadline, durability, lint, or assertion relaxation, and cached derivations
+are not fresh runtime evidence. Separate actual Linux211 and native16-feature
+matrix evidence remains authoritative for database execution.
+Darwin audit-tmpdir emitted a classifier crash despite Nix exit0. Exact current
+rooted output has two files only: coverage text (SF:/ bytes) and target.tar.zst
+(28b52ffd). No ELF/shebang candidate occurs in this output file set. This scopes
+the diagnostic for this artifact only; it does not fix the upstream helper or
+audit compressed contents. Linux native output fixup was clean.
+
+Global-read characterization first attempt did not compile: SQLx0.9 raw_sql
+requires static SQL here; helper accepted an unconstrained borrowed string.
+THREE reviews: (1) the four laws still require exact withheld/ordered/resumed
+events from real overlapping writers; (2) E0521 is fixture compilation failure,
+zero native tests executed and zero product-defect credit; (3) repair only the
+helper lifetime to &'static str, matching all literal callers; preserve all
+oracles, injections, SUT calls and cleanup. Raw /tmp/mnesis-pg8-path-original.log
+preserved separately before rerun.
