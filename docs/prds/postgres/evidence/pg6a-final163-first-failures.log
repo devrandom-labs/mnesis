@@ -1,0 +1,161 @@
+CaughtMutant log/adapters__postgres__src__schema.rs_line_32_col_5.log
+324:    thread 'checksum_is_rejected_without_repair' (97693166) panicked at adapters/postgres/tests/migration_tests.rs:336:5:
+325-    assertion failed: matches!(opened, Err(PostgresError::Schema { .. }))
+326-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+327-
+328-  Cancelling due to test failure: 
+329-────────────
+CaughtMutant log/adapters__postgres__src__schema.rs_line_38_col_5.log
+395:    thread 'checksum_is_rejected_without_repair' (97697581) panicked at adapters/postgres/tests/migration_tests.rs:336:5:
+396-    assertion failed: matches!(opened, Err(PostgresError::Schema { .. }))
+397-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+398-
+399-  Cancelling due to test failure: 
+400-────────────
+CaughtMutant log/adapters__postgres__src__schema.rs_line_47_col_5.log
+400:    thread 'checksum_is_rejected_without_repair' (97705377) panicked at adapters/postgres/tests/migration_tests.rs:336:5:
+401-    assertion failed: matches!(opened, Err(PostgresError::Schema { .. }))
+402-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+403-
+404-  Cancelling due to test failure: 
+405-────────────
+CaughtMutant log/adapters__postgres__src__schema.rs_line_80_col_8.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97709519) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Schema { reason: "snapshot columns, bounds, logging, primary key or identity reference differ" }
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+93-  Cancelling due to test failure: 
+94-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_402_col_5.log
+175:    thread 'invalid_requests_are_rejected_before_a_closed_pool_is_touched' (97713782) panicked at adapters/postgres/tests/atomic_tests.rs:453:5:
+176-    assertion failed: matches!(store.atomic_append_many(&[run("first"), oversize]).await,
+177-        Err(AtomicAppendError::Store(mnesis_postgres::PostgresError::RowLimit
+178-        { .. })))
+179-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+180-
+CaughtMutant log/adapters__postgres__src__store.rs_line_415_col_5.log
+130:    thread 'store::caller_byte_overflow_is_distinct_from_persisted_corruption' (97717735) panicked at adapters/postgres/src/store.rs:425:5:
+131-    assertion failed: matches!(validate_bytes(&[usize::MAX], Limits::default()),
+132-        Err(PostgresError::SizeOverflow { source: Some(_) }))
+133-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+134-
+135-  Cancelling due to test failure: 
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15.log
+122:    thread 'invalid_requests_are_rejected_before_a_closed_pool_is_touched' (97721410) panicked at adapters/postgres/tests/atomic_tests.rs:453:5:
+123-    assertion failed: matches!(store.atomic_append_many(&[run("first"), oversize]).await,
+124-        Err(AtomicAppendError::Store(mnesis_postgres::PostgresError::RowLimit
+125-        { .. })))
+126-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+127-
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15_001.log
+95:    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (97724973) panicked at crates/store-testing/src/row.rs:130:29:
+96-    append of 1 rows failed: Store(RowLimit { actual: 42, limit: 16777216 })
+97-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+98-
+99-  Cancelling due to test failure: 
+100-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15_002.log
+419:    thread 'byte_edges_count_binary_keys_utf8_and_optional_metadata' (97730232) panicked at adapters/postgres/tests/read_tests.rs:397:10:
+420-    called `Result::unwrap()` on an `Err` value: Store(RowLimit { actual: 100, limit: 100 })
+421-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+422-
+423-  Cancelling due to test failure: 
+424-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5.log
+437:    thread 'snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state' (97735331) panicked at adapters/postgres/tests/outcome_tests.rs:336:10:
+438-    called `Result::unwrap()` on an `Err` value: Sqlx(RowNotFound)
+439-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+440-
+441-  Cancelling due to test failure: 
+442-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_001.log
+383:    thread 'caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair' (97739941) panicked at adapters/postgres/tests/outcome_tests.rs:395:38:
+384-    snapshot commit response must remain held: Err(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"snapshots\" violates foreign key constraint \"snapshots_key_fkey\"", detail: Some("Key (key)=(0) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("snapshots"), column: None, data_type: None, constraint: Some("snapshots_key_fkey"), file: Some("ri_triggers.c"), line: Some(2783), routine: Some("ri_ReportViolation") })))
+385-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+386-
+387-  Cancelling due to test failure: 
+388-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_002.log
+383:    thread 'caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair' (97747657) panicked at adapters/postgres/tests/outcome_tests.rs:405:56:
+384-    called `Result::unwrap()` on an `Err` value: RowNotFound
+385-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+386-
+387-  Cancelling due to test failure: 
+388-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_003.log
+383:    thread 'caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair' (97753184) panicked at adapters/postgres/tests/outcome_tests.rs:395:38:
+384-    snapshot commit response must remain held: Err(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"snapshots\" violates foreign key constraint \"snapshots_key_fkey\"", detail: Some("Key (key)=(-1) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("snapshots"), column: None, data_type: None, constraint: Some("snapshots_key_fkey"), file: Some("ri_triggers.c"), line: Some(2783), routine: Some("ri_ReportViolation") })))
+385-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+386-
+387-  Cancelling due to test failure: 
+388-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5.log
+141:    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (97757077) panicked at crates/store-testing/src/row.rs:130:29:
+142-    append of 1 rows failed: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"events\" violates foreign key constraint \"events_stream_id_fkey\"", detail: Some("Key (stream_id)=(0) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("events"), column: None, data_type: None, constraint: Some("events_stream_id_fkey"), file: Some("ri_triggers.c"), line: Some(2783), routine: Some("ri_ReportViolation") })))
+143-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+144-
+145-  Cancelling due to test failure: 
+146-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5_001.log
+141:    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (97760777) panicked at crates/store-testing/src/row.rs:130:29:
+142-    append of 1 rows failed: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"events\" violates foreign key constraint \"events_stream_id_fkey\"", detail: Some("Key (stream_id)=(1) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("events"), column: None, data_type: None, constraint: Some("events_stream_id_fkey"), file: Some("ri_triggers.c"), line: Some(2783), routine: Some("ri_ReportViolation") })))
+143-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+144-
+145-  Cancelling due to test failure: 
+146-────────────
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5_002.log
+141:    thread 'conformance_atomic::check_atomic_conflict_aborts_all' (97764389) panicked at crates/store-testing/src/row.rs:130:29:
+142-    append of 1 rows failed: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"events\" violates foreign key constraint \"events_stream_id_fkey\"", detail: Some("Key (stream_id)=(-1) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("events"), column: None, data_type: None, constraint: Some("events_stream_id_fkey"), file: Some("ri_triggers.c"), line: Some(2783), routine: Some("ri_ReportViolation") })))
+143-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+144-
+145-  Cancelling due to test failure: 
+146-────────────
+Unviable log/adapters__postgres__src__store__snapshot.rs_line_27_col_9.log
+66:error[E0277]: the trait bound `Hydrated<Vec<u8>, Version>: Default` is not satisfied
+67-  --> adapters/postgres/src/store/snapshot.rs:27:12
+68-   |
+69-27 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+70-   |            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `Hydrated<Vec<u8>, Version>`
+71-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_37_col_26.log
+401:    thread 'snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state' (97769489) panicked at adapters/postgres/tests/outcome_tests.rs:339:5:
+402-    assertion `left == right` failed
+403-      left: Stale { stored_schema: 1 }
+404-     right: Found { position: Version(1), state: [115, 110, 97, 112, 115, 104, 111, 116, 45, 111, 108, 100, 45, 48, 56, 49] }
+405-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+406-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22.log
+479:    thread 'byte_ceiling_precedes_storage_and_stale_bodies_are_not_fetched' (97774995) panicked at adapters/postgres/tests/snapshot_tests.rs:534:5:
+480-    assertion failed: matches!(bounded.hydrate(&id, NonZeroU32::MIN).await,
+481-        Err(PostgresError::RowLimit { actual: 41, limit: 37 }))
+482-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+483-
+484-  Cancelling due to test failure: 
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22_001.log
+401:    thread 'snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state' (97780059) panicked at adapters/postgres/tests/outcome_tests.rs:338:64:
+402-    called `Result::unwrap()` on an `Err` value: RowLimit { actual: 66, limit: 16777216 }
+403-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+404-
+405-  Cancelling due to test failure: 
+406-────────────
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22_002.log
+479:    thread 'byte_ceiling_precedes_storage_and_stale_bodies_are_not_fetched' (97785421) panicked at adapters/postgres/tests/snapshot_tests.rs:546:53:
+480-    called `Result::unwrap()` on an `Err` value: RowLimit { actual: 37, limit: 37 }
+481-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+482-
+483-  Cancelling due to test failure: 
+484-────────────
+Unviable log/adapters__postgres__src__store__snapshot.rs_line_61_col_9.log
+48:error[E0277]: the trait bound `Hydrated<Vec<u8>, Version>: Default` is not satisfied
+49-  --> adapters/postgres/src/store/snapshot.rs:61:12
+50-   |
+51-61 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+52-   |            ^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `Hydrated<Vec<u8>, Version>`
+53-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_89_col_9.log
+425:    thread 'caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair' (97793368) panicked at adapters/postgres/tests/outcome_tests.rs:395:38:
+426-    snapshot commit response must remain held: Ok(())
+427-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+428-
+429-  Cancelling due to test failure: 
+430-────────────

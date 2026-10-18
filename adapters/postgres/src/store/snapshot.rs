@@ -95,9 +95,9 @@ impl SnapshotStore<Vec<u8>, Version> for PostgresStore {
         sqlx::query(
             "INSERT INTO mnesis.snapshots (key, schema_version, version, state) \
              VALUES ($1, $2, $3::text::numeric, $4) ON CONFLICT (key) DO UPDATE \
-             SET schema_version = EXCLUDED.schema_version, version = EXCLUDED.version, state = EXCLUDED.state",
+             SET schema_version = EXCLUDED.schema_version, version = EXCLUDED.version, state = EXCLUDED.state RETURNING key",
         ).bind(key).bind(i64::from(schema_version.get())).bind(position.as_u64().to_string()).bind(state)
-            .execute(&mut *tx).await.map_err(PostgresError::Sqlx)?;
+            .fetch_one(&mut *tx).await.map_err(PostgresError::Sqlx)?;
         tx.commit().await.map_err(PostgresError::commit)
     }
 }

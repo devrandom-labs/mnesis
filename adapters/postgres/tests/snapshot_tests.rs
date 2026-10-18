@@ -31,6 +31,70 @@ const CHILD: &str = "MNESIS_POSTGRES_SNAPSHOT_CHILD";
 const ACK: &str = "MNESIS_POSTGRES_SNAPSHOT_ACK";
 
 #[tokio::test]
+async fn suppressed_snapshot_writes_fail_without_changing_cache_or_creating_keys() {
+    if std::env::var("DATABASE_URL").is_err() {
+        return;
+    }
+    let (store, pool) = fixture().await;
+    let existing = StreamKey::from_slice(b"existing-cache");
+    let missing = StreamKey::from_slice(b"missing-cache");
+    let original = vec![1];
+    store
+        .commit(&existing, NonZeroU32::MIN, Version::INITIAL, &original)
+        .await
+        .unwrap();
+    sqlx::raw_sql("CREATE FUNCTION mnesis.snapshot_skip() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NULL; END $$")
+        .execute(&pool).await.unwrap();
+    let mut results = Vec::new();
+    for (statement, id) in [
+        (
+            "CREATE TRIGGER snapshot_skip BEFORE INSERT ON mnesis.snapshots FOR EACH ROW EXECUTE FUNCTION mnesis.snapshot_skip()",
+            &missing,
+        ),
+        (
+            "CREATE TRIGGER snapshot_skip BEFORE UPDATE ON mnesis.snapshots FOR EACH ROW EXECUTE FUNCTION mnesis.snapshot_skip()",
+            &existing,
+        ),
+    ] {
+        sqlx::raw_sql(statement).execute(&pool).await.unwrap();
+        results.push(
+            store
+                .commit(id, NonZeroU32::MIN, Version::new(2).unwrap(), &vec![2])
+                .await,
+        );
+        sqlx::raw_sql("DROP TRIGGER snapshot_skip ON mnesis.snapshots")
+            .execute(&pool)
+            .await
+            .unwrap();
+    }
+    sqlx::raw_sql("DROP FUNCTION mnesis.snapshot_skip()")
+        .execute(&pool)
+        .await
+        .unwrap();
+    let absent = store.hydrate(&missing, NonZeroU32::MIN).await.unwrap();
+    let unchanged = store.hydrate(&existing, NonZeroU32::MIN).await.unwrap();
+    let keys: i64 = sqlx::query_scalar("SELECT count(*) FROM mnesis.keys")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    for outcome in results {
+        assert!(
+            matches!(outcome, Err(PostgresError::Sqlx(sqlx::Error::RowNotFound))),
+            "suppressed write must fail before COMMIT, got {outcome:?}"
+        );
+    }
+    assert_eq!(absent, Hydrated::Absent);
+    assert_eq!(
+        unchanged,
+        Hydrated::Found {
+            position: Version::INITIAL,
+            state: original
+        }
+    );
+    assert_eq!(keys, 1);
+}
+
+#[tokio::test]
 async fn runtime_role_writes_cache_without_mutating_keys_events_or_schema() {
     if std::env::var("DATABASE_URL").is_err() {
         return;

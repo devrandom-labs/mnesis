@@ -1,0 +1,16 @@
+  Extracting 12 binaries and 1 build script output directory to /build/nextest-archive-fRTYSW
+   Extracted 15 files to /build/nextest-archive-fRTYSW in 0.63s
+────────────
+ Nextest run ID a8392d8d-5b9a-41d5-b270-15a330ded41b with nextest profile: default
+    Starting 1 test across 1 binary (14 tests and 11 binaries skipped)
+        PASS [   0.145s] (1/1) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+────────────
+     Summary [   0.146s] 1 test run: 1 passed, 14 skipped
+  Extracting 12 binaries and 1 build script output directory to /build/nextest-archive-qrz4S4
+   Extracted 15 files to /build/nextest-archive-qrz4S4 in 0.61s
+────────────
+ Nextest run ID 505d4c59-0123-4e82-a811-bbe28569ff1a with nextest profile: default
+    Starting 1 test across 1 binary (15 tests and 11 binaries skipped)
+        PASS [   0.133s] (1/1) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+────────────
+     Summary [   0.133s] 1 test run: 1 passed, 15 skipped

@@ -35,12 +35,14 @@ subject to the same obligations.
 
 PG5 merged after139 native cases,113 default-feature cases,26 mutation candidates
 (12 caught/14 unviable/no survivors), all40 CI checks and no review threads.
-PG6 aggregate snapshot candidate passes162 native cases including codec/aggregate
+PG6 aggregate snapshot candidate passes163 native cases including codec/aggregate
 composition, client SIGKILL, restricted login, corruption/byte bounds, migration
 rollback/repair and coherent schema-view cancellation. All current feature
-combinations and corrected-source Linux pass; mutation/full gates and focused
-delivery remain pending. The first mutation result was rejected for fixture
-poisoning; a clean sweep is required. Conditional
+combinations, corrected-source Linux and clean mutation sweep pass; final full
+gate, CI and focused delivery remain pending in
+[PR382](https://github.com/devrandom-labs/mnesis/pull/382). The first mutation
+result was rejected for fixture poisoning; a later native suppression regression
+found and fixed a falsely acknowledged cache write. Conditional
 projection checkpoint implementation remains the next PG6 slice.
 All prerequisite edges stay visible after prerequisite acceptance.
 

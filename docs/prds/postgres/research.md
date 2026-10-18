@@ -2412,3 +2412,143 @@ workspace execution credited to cached results. Final Linux derivation
 JSON-only rebuild log stops in compilation and supplies no test execution proof.
 Final evidence-only amendment retains identical Rust/SQL/test/flake inputs and
 again uses the normal gate; all-cache checks are reuse, not another fresh run.
+
+PG6a reopened during PG6b design, BEFORE further implementation: SnapshotStore
+uses execute() and ignores affected-row count. A valid native BEFORE trigger can
+return NULL, producing successful command status with zero rows saved. Hypothesis:
+current commit incorrectly returns Ok and may commit a newly created raw key.
+Pre-edit budget <=5 production lines plus <=75 native lines. Reproduce BOTH
+suppressed INSERT and suppressed ON CONFLICT UPDATE against real17.10. Preserve
+all fixture cleanup before assertions. Expected contract: definite pre-COMMIT
+storage failure, old pair retained, missing pair absent and no orphan committed
+new key. Compare SQLx supported fetch_one with RETURNING against custom count/error
+machinery; no new public error or retry classification. PR382 must not merge
+until actual red/fix and final native/mutation/Linux/full gates rerun. PG6b source
+is preserved separately; this discovery is not dismissed as a cache optimization.
+
+Suppressed-write characterization first attempt fails E0277 during compilation:
+SQLx0.9 SqlSafeStr rejects a formatted dynamic CREATE TRIGGER string. Zero runtime
+cases. Three reviews: contract oracle not exercised; supported SQL safety boundary
+caught test-fixture construction, not an adapter defect; no red reproduction
+credited. Replace two fixed operations with two static SQL literals, not a safety
+escape wrapper. Then rerun the original unchanged adapter.
+
+Native suppressed-write reproduction FAILS as intended:0passed/1failed/15filtered,
+24.922s, actual public commit returned Ok after trigger suppressed storage.
+Three reviews: (1) valid cache replacement requires a stored pair or an error;
+(2) actual BEFORE INSERT and BEFORE UPDATE both executed with cleanup BEFORE
+assertions; native independent facts (confirmed after the test process completed)
+show existing old pair, missing cache, TWO committed raw keys; (3) no fixture,
+timeout or unrun case credited, real incorrect Ok is the failure. Use supported
+SQLx fetch_one + RETURNING key: zero-row command becomes typed RowNotFound before
+COMMIT, rolling back any newly created key, without a new error/check framework.
+This addresses zero affected rows; it does not promise defense against a malicious
+database operator rewriting arbitrary returned values. No retry-safety weakening.
+
+Suppressed INSERT/UPDATE regression passes1/1,15filtered,14.736s. Three reviews:
+(1) both native suppressions return exact Sqlx(RowNotFound) before COMMIT; (2)
+missing cache stays absent, existing complete pair stays old, and raw key count
+is exactly1, proving failed creation rolled back; (3) triggers/function cleaned
+before assertions, original incorrect Ok really failed the same law, no skipped
+case or constructor latency excused. Private SQL UPSERT adds RETURNING key and
+supported fetch_one, no new variant/policy. Native setup tail14.7s remains unexplained
+PG8 evidence even outside the full workspace test run; do not claim a causal
+explanation or tune deadlines merely to pass. Full163 now includes this law.
+
+Corrected complete163/163 native passes45.275s, zero skips/no filter. Three
+reviews: (1) new native suppressed-write rollback law and all prior event/snapshot
+contracts execute; (2) actual original false Ok is rejected, exact missing cache/
+old pair/new-key rollback are asserted, COMMIT uncertainty still has native
+ACK-loss/timeout witnesses; (3) no timeout, filter, assertion or fixture cleanup
+weakened, eleven ordinary units included, setup tails retained as unresolved PG8
+measurement. Strict all-target/all-feature Clippy passes. Final production source
+diffSHA4862f765357b6549c691337c51b4353cffcc0b3dd16d2b9c5329f88a9081ccd1.
+Fresh separate18.6 mutation baseline163/163 passes20s, three reviews confirm real
+server/full expected suite/no skip; baseline alone proves no mutation coverage.
+
+Updated snapshot-only137/137 passes21.659s, zero skips/no filter. Three reviews:
+new suppression failure/rollback law works without import; original snapshot
+consumer/pair/uncertainty/corruption laws remain; no filtered/import proof credited.
+Updated ARM Linux18.6 full163/163 passes20.867s, zero skips; exact atomic1/1 at
+0.146s and snapshot1/1 at0.133s. Three reviews of EACH: expected complete feature
+archive and selectors; real native fault/consumer/new suppression evidence;
+smokes are separate filtered runs and installed run.log is same execution.
+Artifact/nix/store/1lh77qhvkks0fyhyjnflr9lrpbfm307v-mnesis-postgres-integration.
+
+Candidate PR382 head475a73ff CI native162/162 passes24.891s; exact atomic1/0.080s,
+snapshot1/0.058s separately. Three reviews of EACH: real database and expected
+feature suite, original native laws, installed-log replay counted once; this
+CANDIDATE lacks the newly found suppression law and is NOT final-source evidence.
+Candidate compiler job117685117671 passes four functions (2/108.20s,1/3.90s,
+1/11.69s). Three reviews of EACH run: actual intended compile-pass/fail fixtures;
+diagnostics enforced by trybuild; four functions excluded from ordinary nextest
+are covered, not added to its count. Candidate mutationCI23=21caught2unviable,
+baseline25s. Three reviews: real freshDB/full feature baseline; source matches
+local corrected first-failure proofs; CI summary alone lacks per-case logs, so
+it cannot independently prove which assertion killed each mutation.
+
+Pre-edit CI evidence budget <=9 YAML lines: preserve mutants.out using SAME
+stock actions/upload-artifact@v4 and always/if-no-files-found pattern already
+owned by fuzz.yml. No new runtime/tool/framework/custom validator. Mutation exit
+status still owns gating; a docs-only PR may have no mutations. For this code PR,
+require downloading outcomes/log/diff and reviewing every CI first failure before
+merge. Missing expected artifact prevents our acceptance, never papered over by
+summary ratio. This implements the user's three-review requirement on CI cases.
+
+Updated default native116/116 passes25.883s, zero skips/no filter. Three reviews:
+current feature-independent migration/view/event contracts; original read/wake/
+commit faults; no optional snapshot capability claimed from disabled code and
+no cached or filtered result counted. Snapshot-only/full native separately
+cover the changed UPSERT. Updated import-only follows serially on localcluster.
+
+Updated import-only142/142 passes39.200s, zero skips/no filter. Three reviews:
+atomic/import feature works without snapshot impl; original transaction/event/
+recovery laws remain; no snapshot capability credited from disabled code. All
+four current combinations now pass at corrected source (116/142/137/163).
+Fresh final163 native mutation baseline is20.190s; all23 finish in7min and server
+stops cleanly.21 caught/2 E0277unviable/zero missed/timeout. Three reviews for
+EVERY run: match mutated contract to actual first failure; inspect actual native
+values/errors; check source, fixture cleanup, filtering and timing loopholes.
+All first failures retained separately; no VersionMismatch contamination. Exact
+checksum/valid-layout rejection, overflow/oversize/edge behavior, valid raw-key
+commit, snapshot pair/schema/byte boundaries fail as intended. No-op commit
+still dies at COMMIT fault-entry guard, not an independent persistence oracle;
+our new original-source suppressed-write red/fix supplies actual zero-row storage
+proof. Existing direct cache shared laws execute in full suite. Neither of the
+Default substitutions compiles and neither counts caught. No exclusions or
+assertion weakening. Updated normal full gate and CI at pushed head remain.
+
+Candidate head475a CI39130711194 completes green; PR382 has40 green/one scheduled
+skip at that head. Complete CI logs inspected: native162/24.897s in Nix check is
+a separate actual run from native162/24.891s in integration job; installed replay
+of24.891s is not third run. Nix workspace1561/121.259s with4 exclusions, separately
+covered four compiler functions. Three reviews for EACH native/smoke/workspace/
+compiler and feature-matrix run: intended source/feature contract; actual original
+regressions/diagnostics; exact counts, expected empty harnesses, filters and replay
+limits. Core feature-matrix successes do not prove Postgres optional capabilities;
+its native feature matrix is separate. Whole candidate remains superseded by
+new163-case suppression fix, which still needs new-head CI and artifact review.
+CI feature jobs include expected zero-case library harnesses: compile evidence,
+not new behavioral coverage. No four-exclusion or installed-log double credit.
+
+PG9 dependency audit follow-up: candidate crate-audit log emits inability to
+check registry yanked status (`No such crate in crates.io index`) despite green
+vulnerability gate. Do not describe that as verified yanked-package status.
+Inspect owner/tool behavior and use maintained Cargo/audit/registry facilities
+for final delivery evidence; no custom checker or new security ignore. Full
+vulnerability/license and clean registry-consumer proofs remain required.
+
+Hardened-source NORMAL signed hook passes ALL12:1561 workspace tests/489.257s,
+four compiler exclusions; two cached checks/ten built. Signed followup
+ e2367cd0dfb15a84422453f4eb33f63cce85119a has valid signature. Three reviews:
+(1) required complete workspace/check matrix at corrected source; (2) native
+163-case/feature/Linux/mutation proofs remain separately required and passed;
+(3) no shortened workload, deadline, filter or source exception, no four-case
+compiler or DB-free/installed-log double credit. Native startup tails remain
+PG8 measurement, not hidden by this passing gate. Raw log
+/tmp/mnesis-pg6a-final163-workspace.log; nextest derivation
+ w25gn62nfxians5f3dl73sqvqcxawl94-mnesis-nextest-0.4.0.
+Final evidence amendment uses the same normal hook; cached reuse adds zero
+fresh runs. Then push corrected head, rerun ALL CI, inspect uploaded CI mutation
+outcomes/logs/diffs and review threads before protected merge. Original candidate
+475a's40 green checks never substitute for that new-head delivery verification.

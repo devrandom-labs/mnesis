@@ -85,6 +85,14 @@ jobs:
               -- --test-threads=1 -E 'not test(compile_fail)'
           SH
 
+      - name: Keep mutation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutants
+          path: mutants.out/
+          if-no-files-found: ignore
+
   # Nightly path: one full-crate sweep per rolled-out crate. Add a crate here
   # AND commit its `.mutants-baselines/<crate>.json` to bring it under the gate.
   mutants-sweep:

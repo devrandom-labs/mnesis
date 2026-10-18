@@ -93,7 +93,8 @@ the existing key lookup/insert and sequence grants. They need no key updates,
 event rewrites or DDL. Startup validates all installed metadata in one brief
 read-only database snapshot; canceling it releases that view.
 
-State, schema and version are written in one transaction. A schema mismatch
+State, schema and version are written in one transaction. A suppressed write is
+an error and rolls back any new key. A schema mismatch
 returns `Stale`; corrupted metadata is an error. The configured byte ceiling
 counts ID, state and32 scalar bytes. Stale or over-limit reads do not fetch the
 body; writes reject over-limit input before beginning a transaction. Empty state

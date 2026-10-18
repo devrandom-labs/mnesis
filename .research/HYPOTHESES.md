@@ -202,3 +202,18 @@ Exact tool output can be retained as a log without changing compiled sources or
 skipping checks. Compare supported scoped filesets for actual fixture/SQL owners
 against baseline derivation identity and required compiler/input tests; no manual
 hash edits, skip gates or ad hoc filter framework. Current PG6a adds no filter rule.
+
+PG7 position-context question remains OPEN: current public PgAllPos::new(txid,seq)
+contains no database/history identity. Persisted profile checks may detect a
+copied foreign database but cannot distinguish identical numeric cursor pairs
+from different histories. Reproduce against two real databases before choosing
+minimal adapter-owned context/serialization changes. Preserve supported in-place
+upgrade data/positions, explicitly resolve legacy history without inventing lost
+provenance, and measure representation cost. No new kernel API or chosen history
+scheme is justified before that witness and compatibility decision.
+
+PG9 audit evidence gap: actual candidate CI39130711194 crate-audit prints errors
+checking yanked status because registry entries are unavailable. Green overall
+check is not evidence that yanked status was verified. Inspect maintained audit/
+registry behavior and exact inputs, keep vulnerability/license failures blocking,
+and obtain actual final registry evidence without a custom tool or new ignore.
