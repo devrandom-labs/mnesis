@@ -1,112 +1,100 @@
 # Progress
 
-Persistent goal ACTIVE, no token budget. Complete all required PG0–PG9, protected
-merges, existing publication and clean registry consumer. PG10 is conditional.
-Requirements: docs/prds/postgres.md. Dependencies: docs/prd-backlog/status.md.
-Detailed evidence and THREE reviews after EVERY run: docs/prds/postgres/research.md.
-Review contract, actual defect falsifiers, then assertion/skips/timing loopholes.
-Never weaken tests, hide survivors, count unviable mutants as caught, or count
-DB-free/filtered/replayed/cached output as fresh native execution.
+Persistent goal ACTIVE, no token budget. Deliver ALL required PG0–PG9 through
+protected merges, existing publication and exact clean registry consumer.
+PG10 conditional. PRD docs/prds/postgres.md; dependency backlog
+ docs/prd-backlog/status.md; detailed commands/raw evidence/THREE reviews after
+EVERY run in docs/prds/postgres/research.md. Never stop at a local slice/pass.
 
-After compaction read canonical skill and FULL references/protocol.md:
-/Users/joel/nix-config/modules/home/devrandom-research/skill/SKILL.md.
-Root/global CLAUDE.md apply. No subagents authorized. Nix owns development/checks;
-no framework, runtime, custom tooling or project Python. Strict Clippy, max80
-lines/function. Signed conventional commits with normal nix flake check hook;
-protected squash with all CI/review threads resolved. Preserve worktrees/stashes
-by NAME. Root remains docs/postgres-prd8357, own work preserved, remote deleted;
-do not recreate that remote branch.
+After recovery read canonical /Users/joel/nix-config/modules/home/devrandom-research/
+skill/SKILL.md and FULL references/protocol.md. Root/global CLAUDE apply. No agents
+are authorized. Nix owns development/checks; no new runtime/framework/custom tools
+or project Python. Strict Clippy/max80 function lines. Signed conventional commits
+with NORMAL nix flake check hook, no bypass. Protected squash after ALL CI,
+mutations, native runs and reviews resolve. Preserve worktrees/stashes by NAME.
+Root remains docs/postgres-prd8357, own work preserved, remote deleted after376;
+do not recreate remote. Automatic release PR378 must wait whole acceptance.
 
-Protected focused merges (whole-adapter acceptance/release still OPEN):
-PR376 7db7cf83f74d9ae53b45ca9aae6c548572c73e91, read/wake.
-PR377 f87afc12dd6dabe4acd7847e98756858f5fb4c86, phase errors/races.
-PR379 e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1, migrations/SQLx0.9/native Nix hook.
-PR380 49ffe78f166b7d6a787ea898dfba454218a697e9, lossless values/binary keys,
-2026-10-18T10:05:58Z; corrected event-prefix fault headf4f4a1bd.
-Native113 on17.10/freshLinux18.6,1558 default workspace+4 separate compiler cases,
-19 mutants14 caught5 unviable0 missed;40 green checks/one scheduled skip.
-PG4 feature-complete; PG1/2/3 still have cross-capability/PG8 obligations.
+Protected merges:
+376 7db7cf83f74d9ae53b45ca9aae6c548572c73e91 reads/wakes.
+377 f87afc12dd6dabe4acd7847e98756858f5fb4c86 commit phases/native races.
+379 e1ee1dc29c30b0116da14e4cd595a4d8c0c7beb1 migrations/SQLx0.9/native Nix.
+380 49ffe78f166b7d6a787ea898dfba454218a697e9 lossless unsigned/binary keys.
+381 be2e52ec3468657d36684506eed53fe060bef080 atomic/import,11:33Z,40green1skip,
+139native/113default/1558workspace+4compiler. CI39122783424 mutation39122783429.
+PG4/5 feature-complete; PG1/2/3 retain cross-capability/PG8 obligations.
 
-ACTIVE PG5 worktree /private/tmp/mnesis-postgres-atomic, branchwork/postgres-atomic.
-Aligned onto main49ffe78f preserving parent records; snapshots
-/tmp/mnesis-pg5-prealignment-tree and .patch. Older prePG5 baseline in
-/tmp/mnesis-pg5-base-tree. First signed commit493f7e68361e5815c5927699bef6be5ac84ddfc7
-passes normal hook; documentation amendment underway, then push/open focused PR.
-No PG5 PR/review/merge yet. Do not merge release PR378 before whole goal acceptance.
+CURRENT PG6a /private/tmp/mnesis-postgres-state branchwork/postgres-state.
+First SIGNED commit1886d1cb3af63293a335019d0dc5070a407aa8ae retained snapshot source.
+Docs/evidence amendment now pending, then push/open focusedPR, inspectALL CI,
+resolve reviews/failures, protectedmerge. No PG6 PR yet. Do not stop after PG6a.
+PG5 worktree /private/tmp/mnesis-postgres-atomic retained3d310e31, remote deleted.
+Safety /tmp/mnesis-pg6a-prealignment-tree/.patch retained.
 
-PG5 source:199 added/43 removed/net156 (budget210/60/net170), private129-line
-store/atomic.rs and shared parent insert/head helpers. No public adapter API,
-error type, dependency or runtime added. All routes/runs/bytes beforeBEGIN; ALL
-heads beforeANY key/event write/XID; one transaction, highest position, emptyNone.
-Native unique rejection rolls back and reads actual head; failed observation
-retains ORIGINAL23505. COMMIT only through PostgresError::commit, never safe retry
-on timeout. Local wakes cover every target before ONE250ms whole-batch hint budget.
-Classifier now requires native schema mnesis and exact table/constraint; real
-foreign-schema trigger proved prior raw/atomic false conflicts.
+PG6a existing SnapshotStore<Vec<u8>,Version>, snapshotfeature, migration3 logged
+snapshots. Atomic pair/conditional body fetch, unsigned domains, pre-BEGIN bounds,
+unconditional older-cache overwrite, CommitUnknown source preserved throughcodec.
+Shared generic private read_key/create_key avoids ID copies and catalogUPDATE.
+SizeOverflow input error preserves conversion source instead of CorruptRow.
+Runtime catalog validation uses brief READ ONLY REPEATABLE READ with scoped
+close_on_drop: cancellation clears pinned view, caller pool stays owned bycaller.
+Actual mixed-pair response hold,1MiB allocation bounds, real Counter Snapshotting,
+real LOGIN leastprivilege, clientSIGKILL, native COMMIT ACK loss/caller timeout,
+corruption and frozen2→3 migration collision/forward repair/positions covered.
+Production170added/22removed within180/25;SQL43/100. No newruntime/dependency/API.
+Source diffSHA d614c2afe3d6ee297fa22ec9681e3194593dee9344e58f3049b82f4bf72e5c32.
 
-PG5 verification, all three reviews recorded:
-- Final139/0skips/no filter on17.10 (66.891s under workspace disk load) and fresh
-  Linux18.6 (21.938s). Ten ordinary unit cases are included in139, not139 distinct
-  database-using laws. Default native113/0skips25.249s.
-- Linux artifact /nix/store/h1afzq97r02p31k35pnzly9s4gpyi7c7-mnesis-postgres-integration.
-  Separate exact atomic smoke1 passes0.449s, not added to139. Same derivation in
-  Linux checks and packages; psql preflight/pipefail/installed feature.log/run.log.
-  Missing import feature exactselector --no-tests=fail exits4, zero cases credited.
-- Real COMMIT ACK loss and scoped caller timeout preserve all6 rows/oneXID.
-  All heads beforeXID is witnessed by second-head Bind hold BEFORE snapshot;
-  archived early-write mutant really fails B[2,1]. Native final-run collision
-  rolls back3 earlier events/new keys; SELECT revocation42501 still exposes
-  ORIGINAL23505. Real SSI40001 and deadlock40P01 retain exact causes/no SUT rows.
-- Public Store/EventImporter both policies: exact conflict/corrupt reports, final
-  native23514 whole rollback versus earlier per-stream commit, duplicate routes
-  zero writes, typed CommitUnknown through wrapper without resubmission.
-- Direct local-wake case drops native NotificationResponse frames while holding
-  first hint; all target/global waits ready before1s fallback. Archived first
-  wake omission fails readiness0.219s, not setup/timing; positive0.428s.
-- Automated26:12 caught14 compile-unviable0 missed/timeout on snapshot138, fresh
-  physically separate18.6 server cleanly stopped. Every first failure inspected.
-  Two hint removals are fault-entry guards, not independent data witnesses;
-  archived missing-wake control provides actual invariant proof. First sweep24
-  had2 MISSED; added missing-head and unrelated-unique guard cases killed both,
-  no exclusions. CI reruns full diff with final139 before merge.
-- Normal signed hook12 checks (2 cached/10 built), fresh1558 default workspace,
-  4 compiler exclusions447.021s. Earlier138 gate12/1558/545.710s is candidate only.
-  Earlier125/127 gates likewise superseded. Four compiler cases need separate CI.
-Production diff SHA256 d21bb61135c2f6abb82cc1ceef6e1bea979817cea0c38c5e706d00b97a992941.
+FINAL local native17.10: default116/28.593s,import142/41.972s,snapshot136/15.470s,
+all162/43.725s,zero skips. Eleven ordinary unit cases included in all162.
+Missing-snapshot selector import-only correctlyexit4/zero cases.
+Fresh ARM18.6 all162/29.821s plus separateatomic1/2.702s andsnapshot1/8.373s.
+Artifact/nix/store/kmvfxnly8y4dbhgcz3k0hn5zv9x2qgb7-mnesis-postgres-integration.
+Matching Darwin12checks passes1561workspace/557.266s+4compilerexclusions needingCI.
+NORMAL signedhook elevenalreadybuilt+samefreshnextest, countedONCE, nottwo runs.
+Three distinct reviews recorded for EACH run including filtered/cached/failed.
+Fresh split/body/READ COMMITTED controls fail actual invariants; original shared
+Cargo target controls marked PROVISIONAL, never supersede fresh-source controls.
 
-Immediate next: finish docs amendment normal hook (cache is not fresh execution),
-push/open focused PR, inspect every CI/review outcome, resolve failures and merge
-through protected workflow with matching head. Keep backlog/PRD/delivery evidence
-current. Then PG6 implementation and all remaining phases; do not stop at PG5.
+CRITICAL honesty: first nominal23mutants21caught2unviable REJECTED. A checksum
+negative failed BEFORE restoring metadata, poisoning later runs VersionMismatch1.
+Corrected both checksum/future-version tests captureobservations/restoreBEFORE
+assertions and splitcases. CLEAN fresh sweep23=21caught2E0277unviable,0missed/
+timeout,13min,allfirstfailuresinspected,servercleanlystopped. No poisonedcredit.
+Snapshotcommitnoop firstcaught by actualCOMMIT fault-entryguard, notindependent
+postcommit persistenceoracle; wrongkeyconstant canfailvalidcommit beforefault.
+Otherfailures matchexactchecksum/validshape/inputoverflow/oversize/edge/rawkey/
+fullpaircontracts. Directsharedcachelaw and freshSQLcontrols supplybehaviorproof.
+Logs/outcomes infeatureevidence; /tmp/mnesis-pg6a-clean-* rawlogs preserved.
 
-PG6 preparation recorded in HYPOTHESES/SOURCES: separate unconditional aggregate
-cacheVersion and projectionPgAllPos revisionCAS; sole next_revision authority;
-full unsigned values/empty state; native NO KEY UPDATE catalog lock candidate
-must prove CAS and event FK overlap. New versioned feature-independent tables,
-atomic read/write pairs, stale/body byte bounds, real consumers and uncertainty.
-Found input-overflow currently misclassified as CorruptRow: research narrow typed
-input error/shared accounting, no sentinel/saturating arithmetic or fake envelope.
+NEXT PG6b design/budget in HYPOTHESES: existing CheckpointStore<Vec<u8>,PgAllPos>,
+projectionfeature, separate migration4. next_revision sole policy. Lockcheckpoint
+row SELECTFORUPDATE; absent INSERT fullvalidrecord ONCONFLICTNOTHING, loser
+observesactualwinnerunderlock andreturnsownerConflict. RawkeyNO KEY UPDATE lock
+REJECTED native42501 underSELECTINSERT; no immutablekeyUPDATEgrants/placeholders/
+unconditionalcheckpointbypass/unknownretry. Fullu64rev/txid/seq,nonzero schema,
+zeroPgAllPosvalid,emptybody,boundedpair,realCAS races/rebuild/overflow/corruption,
+Projectionstepper/typedcodec, uncertainty/cancelreload,clientkill/upgrade required.
 
-PG7: bounded StreamLister, finite consistent ExportSession, completed format2/
-Fjall interchange, physical versus logical restore and foreign-history safety.
-PG8: TLS/auth/redaction/deadlines/lifecycle, logged/fsync/synchronous_commit profile
-including new pool connections, native restarts/restore, foreign-DB watermark,
-10k/100k/1m and1/16/128 capacity matrix,30min mixed soak. Intermittent Darwin
-setup tails4–24s remain unproven; PGUSER avoids whoami2 fallback but fixture29ms
-then insertgate4.244s disproved that alone. Keep PG8 investigation; no invented SLO.
-PG9: full isolated/default/each/all features and expected-suite absence proof,
-remove EXISTINGscripts/check-features.py through maintainedcargo-hack, patched
-event-listener/remove existing advisory ignore, docs/example/changelog, two fresh
-whole-repository audits, minimization (prepared Vec duplicates indices/references),
-all protected merges/publication/clean registry consumer. Labcast owns command IDs,
-deduplication and worker fencing. PG10 requires selected consumer.
+PG7 boundedstreamlisting excludes snapshot-onlykeys; finite consistentExportSession
+using existingTokio/SQLx,format2/Fjallinterchange,physical/logicalrestore and foreign
+history safety contract still open. No chosen newkernelAPI/framework.
+PG8 TLSVerifyFull/auth/redaction/immutablegrants/deadlines/boundedshutdown,
+logged/fsync/full_page_writes/synchronous_commit includingfuturepoolconns,
+restart/restore/foreignDBwatermark,10k/100k/1m with1/16/128consumers and30minsoak.
+Investigate search_path funcs/operators and variableDarwin/disk-load tails;
+no inventedSLO or durability relaxation. PG9 fullfeatureabsence/downstream checks,
+removeEXISTINGPythonfeaturetool via maintainedcargo-hack,patch event-listener/
+removeexistingadvisoryignore, docs/example/changelog, twofreshwholeworkspaceaudits,
+minimization, protecteddelivery/publication/cleanregistryconsumer. Labcast IDs/
+dedup/workerfencing stayLabcast. PG10 requiresselectedconsumer.
 
-ENV: PG17.10 /tmp/mnesis-postgres-pg0, Unix/tmp port55432. URL
-postgres:///mnesis_pg4?host=/tmp&port=55432&user=joel; PGUSER=joel.
-NEVER independent native suites concurrently in SAME CLUSTER even different DBs:
-snapshot xmin is cluster-wide. Parallel needs physically separate clusters.
-Recorded profiles REUSE via `nix develop /tmp/mnesis-postgres-shell-199 -c ...`
-and shell-ci (PG18.6). --profile records anew. Shared native target
-/Users/joel/orca/workspaces/nexus/main/target. Direct cargo-mutants mutants avoids
-personal plugin brokenlibiconv. ARM Linux builder works; x86nixos.local DNS offline,
-no host config/TLS bypass fixes. Keep exact artifacts/logs in feature evidence.
+ENV localPG17.10 /tmp/mnesis-postgres-pg0 socket/tmp port55432, PG6DBmnesis_pg6a,
+URLpostgres:///mnesis_pg6a?host=/tmp&port=55432&user=joel PGUSERjoel. NEVER independent
+native suites concurrently in SAME CLUSTER even differentDBs (xminclusterwide).
+Fresh physically separate18.6 for mutants/Linux. Reuse recorded Nixprofiles
+`nix develop /tmp/mnesis-postgres-shell-199 -c ...` and shell-ci. --profile records
+new rather than reuses. Sharedtargetrootworkspace/target. Directcargo-mutants
+mutants avoids brokenpersonalplugin. ARMlinux-builderworks; x86nixos.localDNS
+fails, nohostfixes. Disk~11GiBfree. Onlystateworktreegeneratedtarget cleaned545.9MiB;
+proof-target /tmp/mnesis-pg6a-proof-target.z1jmzk leftintact becauseCargo rejects
+missingCACHEDIR.TAG; no bypass/rawdeletion/broadGC. Sourcecontrols/logs kept.

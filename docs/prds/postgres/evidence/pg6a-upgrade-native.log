@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.54s
+────────────
+ Nextest run ID 4ce1a6ad-a714-4f96-9d45-10359e6c359a with nextest profile: default
+    Starting 1 test across 12 binaries (159 tests skipped)
+        PASS [   0.052s] (1/1) mnesis-postgres::upgrade_tests snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collision
+────────────
+     Summary [   0.052s] 1 test run: 1 passed, 159 skipped

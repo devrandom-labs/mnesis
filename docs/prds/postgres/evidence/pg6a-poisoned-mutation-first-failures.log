@@ -1,0 +1,115 @@
+CaughtMutant log/adapters__postgres__src__schema.rs_line_32_col_5.log
+324:    thread 'checksum_and_newer_schema_are_rejected_without_repair' (97248974) panicked at adapters/postgres/tests/migration_tests.rs:323:5:
+325-    assertion failed: matches!(PostgresStore::from_pool(pool.clone()).await,
+326-        Err(PostgresError::Schema { .. }))
+327-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+CaughtMutant log/adapters__postgres__src__schema.rs_line_38_col_5.log
+182:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97252428) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+183-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+184-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+185-
+CaughtMutant log/adapters__postgres__src__schema.rs_line_47_col_5.log
+187:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97255885) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+188-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+189-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+190-
+CaughtMutant log/adapters__postgres__src__schema.rs_line_80_col_8.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97259422) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store.rs_line_402_col_5.log
+142:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97262903) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+143-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+144-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+145-
+CaughtMutant log/adapters__postgres__src__store.rs_line_415_col_5.log
+130:    thread 'store::caller_byte_overflow_is_distinct_from_persisted_corruption' (97266427) panicked at adapters/postgres/src/store.rs:425:5:
+131-    assertion failed: matches!(validate_bytes(&[usize::MAX], Limits::default()),
+132-        Err(PostgresError::SizeOverflow { source: Some(_) }))
+133-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97269928) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15_001.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97273498) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store.rs_line_424_col_15_002.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97276980) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5.log
+125:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97280509) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+126-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+127-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+128-
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_001.log
+125:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97284009) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+126-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+127-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+128-
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_002.log
+125:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97287495) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+126-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+127-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+128-
+CaughtMutant log/adapters__postgres__src__store.rs_line_451_col_5_003.log
+125:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97291018) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+126-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+127-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+128-
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5.log
+135:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97294550) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+136-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+137-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+138-
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5_001.log
+135:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97298083) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+136-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+137-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+138-
+CaughtMutant log/adapters__postgres__src__store.rs_line_475_col_5_002.log
+135:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97301601) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+136-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+137-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+138-
+Unviable log/adapters__postgres__src__store__snapshot.rs_line_27_col_9.log
+66:error[E0277]: the trait bound `Hydrated<Vec<u8>, Version>: Default` is not satisfied
+67-  --> adapters/postgres/src/store/snapshot.rs:27:12
+68-   |
+69-27 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_37_col_26.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97305207) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97308773) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22_001.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97312313) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_40_col_22_002.log
+89:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97315875) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+90-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+91-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+92-
+Unviable log/adapters__postgres__src__store__snapshot.rs_line_61_col_9.log
+48:error[E0277]: the trait bound `Hydrated<Vec<u8>, Version>: Default` is not satisfied
+49-  --> adapters/postgres/src/store/snapshot.rs:61:12
+50-   |
+51-61 |         Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+CaughtMutant log/adapters__postgres__src__store__snapshot.rs_line_89_col_9.log
+167:    thread 'all_noskip_exclusive_resume_after_out_of_order_commits' (97319463) panicked at adapters/postgres/tests/all_noskip_tests.rs:76:41:
+168-    called `Result::unwrap()` on an `Err` value: Migration(VersionMismatch(1))
+169-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+170-

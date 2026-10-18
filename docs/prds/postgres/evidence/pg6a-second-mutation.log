@@ -1,0 +1,499 @@
+The files belonging to this database system will be owned by user "joel".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/mnesis-pg6a-second-mutants.W39oU5/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... America/New_York
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /tmp/mnesis-pg6a-second-mutants.W39oU5/data -l logfile start
+
+waiting for server to start.... done
+server started
+Found 23 mutants to test
+FAILED   Unmutated baseline in 33s build + 24s test
+
+*** baseline
+
+*** cargo nextest run --no-run --verbose --package=mnesis-postgres@0.4.0 --all-features
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.189
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.4
+   Compiling serde v1.0.229
+   Compiling typenum v1.20.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling futures-core v0.3.33
+   Compiling version_check v0.9.5
+   Compiling parking_lot_core v0.9.12
+   Compiling scopeguard v1.2.0
+   Compiling memchr v2.8.3
+   Compiling litemap v0.8.2
+   Compiling bytes v1.12.1
+   Compiling writeable v0.6.3
+   Compiling itoa v1.0.18
+   Compiling futures-sink v0.3.33
+   Compiling lock_api v0.4.14
+   Compiling generic-array v0.14.7
+   Compiling futures-channel v0.3.33
+   Compiling icu_normalizer_data v2.2.0
+   Compiling icu_properties_data v2.2.0
+   Compiling utf8_iter v1.0.4
+   Compiling futures-io v0.3.33
+   Compiling futures-task v0.3.33
+   Compiling zmij v1.0.23
+   Compiling crossbeam-utils v0.8.22
+   Compiling slab v0.4.12
+   Compiling thiserror v2.0.19
+   Compiling once_cell v1.21.4
+   Compiling serde_json v1.0.151
+   Compiling rand_core v0.10.1
+   Compiling equivalent v1.0.2
+   Compiling getrandom v0.4.3
+   Compiling autocfg v1.5.1
+   Compiling tracing-core v0.1.36
+   Compiling log v0.4.33
+   Compiling percent-encoding v2.3.2
+   Compiling allocator-api2 v0.2.21
+   Compiling num-traits v0.2.19
+   Compiling foldhash v0.2.0
+   Compiling hashbrown v0.16.1
+   Compiling errno v0.3.14
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.2
+   Compiling cpufeatures v0.2.17
+   Compiling signal-hook-registry v1.4.8
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling form_urlencoded v1.2.2
+   Compiling parking v2.2.1
+   Compiling hashbrown v0.17.1
+   Compiling crc-catalog v2.5.0
+   Compiling digest v0.10.7
+   Compiling hashlink v0.11.1
+   Compiling hybrid-array v0.4.15
+   Compiling crc v3.4.0
+   Compiling sha2 v0.10.9
+   Compiling base64 v0.22.1
+   Compiling cmov v0.5.4
+   Compiling semver v1.0.28
+   Compiling indexmap v2.14.0
+   Compiling crypto-common v0.2.2
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.13
+   Compiling rustc_version v0.4.1
+   Compiling ctutils v0.4.3
+   Compiling block-buffer v0.12.1
+   Compiling httparse v1.10.1
+   Compiling http v1.4.2
+   Compiling try-lock v0.2.5
+   Compiling event-listener v5.4.1
+   Compiling target-triple v1.0.1
+   Compiling winnow v1.0.4
+   Compiling want v0.3.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling curve25519-dalek v4.1.3
+   Compiling digest v0.11.3
+   Compiling toml_parser v1.1.2+spec-1.1.0
+   Compiling http-body v1.1.0
+   Compiling getrandom v0.2.17
+   Compiling atomic-waker v1.1.2
+   Compiling zeroize v1.9.0
+   Compiling zerocopy v0.8.55
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling httpdate v1.0.3
+   Compiling subtle v2.6.1
+   Compiling signature v2.2.0
+   Compiling tinyvec_macros v0.1.1
+   Compiling toml v1.1.3+spec-1.1.0
+   Compiling tinyvec v1.12.0
+   Compiling rand_core v0.6.4
+   Compiling dissimilar v1.0.11
+   Compiling ed25519 v2.2.3
+   Compiling synstructure v0.13.2
+   Compiling tower-service v0.3.3
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.19
+   Compiling termcolor v1.4.1
+   Compiling regex-syntax v0.8.11
+   Compiling glob v0.3.4
+   Compiling unicode-normalization v0.1.25
+   Compiling hmac v0.13.0
+   Compiling cpufeatures v0.3.0
+   Compiling chacha20 v0.10.2
+   Compiling unicode-properties v0.1.4
+   Compiling unicode-bidi v0.3.18
+   Compiling rand v0.10.3
+   Compiling hkdf v0.13.0
+   Compiling sha2 v0.11.1
+   Compiling ed25519-dalek v2.2.0
+   Compiling atoi v2.0.0
+   Compiling md-5 v0.11.0
+   Compiling dotenvy v0.15.7
+   Compiling stringprep v0.1.5
+   Compiling whoami v2.1.3
+   Compiling byteorder v1.5.0
+   Compiling hex v0.4.3
+   Compiling arrayvec v0.7.8
+   Compiling bitflags v2.13.1
+   Compiling heck v0.5.0
+   Compiling rustix v1.1.4
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/adapters/postgres)
+   Compiling fastrand v2.5.0
+   Compiling regex-automata v0.4.16
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+   Compiling tracing-attributes v0.1.31
+   Compiling equator-macro v0.4.2
+   Compiling zerocopy-derive v0.8.55
+   Compiling mnesis v0.4.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/mnesis)
+   Compiling equator v0.4.2
+   Compiling futures-util v0.3.33
+   Compiling smallvec v1.15.2
+   Compiling either v1.16.0
+   Compiling trybuild v1.0.118
+   Compiling zerofrom v0.1.8
+   Compiling aligned-vec v0.6.4
+   Compiling tracing v0.1.44
+   Compiling parking_lot v0.12.5
+   Compiling tempfile v3.27.0
+   Compiling yoke v0.8.3
+   Compiling tokio v1.53.1
+   Compiling futures-intrusive v0.5.0
+   Compiling futures-executor v0.3.33
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling futures v0.3.33
+   Compiling mnesis-store v0.4.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/store)
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling tokio-stream v0.1.19
+   Compiling hyper v1.11.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling hyper-util v0.1.20
+   Compiling url v2.5.8
+   Compiling sqlx-core v0.9.0
+   Compiling sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/workspace-hack)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling mnesis-wake v0.4.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/crates/store-testing)
+   Compiling sqlx-macros v0.9.0
+   Compiling sqlx v0.9.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 30.15s
+
+*** result: Success
+
+*** cargo nextest run --verbose --package=mnesis-postgres@0.4.0 --all-features --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+────────────
+ Nextest run ID 26fba59e-9143-4150-aeeb-43930735c501 with nextest profile: default
+    Starting 160 tests across 12 binaries
+       START [         ] (  1/160) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact error::tests::corrupt_row_display_truncates_overlong_stream_id --nocapture
+        PASS [   0.007s] (  1/160) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+       START [         ] (  2/160) mnesis-postgres error::tests::satisfies_error_send_sync_static
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact error::tests::satisfies_error_send_sync_static --nocapture
+        PASS [   0.007s] (  2/160) mnesis-postgres error::tests::satisfies_error_send_sync_static
+       START [         ] (  3/160) mnesis-postgres hex::tests::decode_accepts_uppercase
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::decode_accepts_uppercase --nocapture
+        PASS [   0.006s] (  3/160) mnesis-postgres hex::tests::decode_accepts_uppercase
+       START [         ] (  4/160) mnesis-postgres hex::tests::empty_round_trips
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::empty_round_trips --nocapture
+        PASS [   0.007s] (  4/160) mnesis-postgres hex::tests::empty_round_trips
+       START [         ] (  5/160) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::encodes_known_vector_lowercase --nocapture
+        PASS [   0.007s] (  5/160) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+       START [         ] (  6/160) mnesis-postgres hex::tests::non_hex_char_is_rejected
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::non_hex_char_is_rejected --nocapture
+        PASS [   0.007s] (  6/160) mnesis-postgres hex::tests::non_hex_char_is_rejected
+       START [         ] (  7/160) mnesis-postgres hex::tests::odd_length_is_rejected
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::odd_length_is_rejected --nocapture
+        PASS [   0.007s] (  7/160) mnesis-postgres hex::tests::odd_length_is_rejected
+       START [         ] (  8/160) mnesis-postgres hex::tests::round_trips_all_byte_values
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact hex::tests::round_trips_all_byte_values --nocapture
+        PASS [   0.007s] (  8/160) mnesis-postgres hex::tests::round_trips_all_byte_values
+       START [         ] (  9/160) mnesis-postgres position::tests::accessors_round_trip
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact position::tests::accessors_round_trip --nocapture
+        PASS [   0.007s] (  9/160) mnesis-postgres position::tests::accessors_round_trip
+       START [         ] ( 10/160) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact position::tests::ord_is_txid_first_then_seq --nocapture
+        PASS [   0.006s] ( 10/160) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+       START [         ] ( 11/160) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/mnesis_postgres-392e31c66323d3e7 --exact store::caller_byte_overflow_is_distinct_from_persisted_corruption --nocapture
+        PASS [   0.006s] ( 11/160) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+       START [         ] ( 12/160) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/all_noskip_tests-3dede6c140fd2af0 --exact all_noskip_exclusive_resume_after_out_of_order_commits --nocapture
+        PASS [   0.300s] ( 12/160) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+       START [         ] ( 13/160) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/all_noskip_tests-3dede6c140fd2af0 --exact all_noskip_out_of_order_commits --nocapture
+        PASS [   0.081s] ( 13/160) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+       START [         ] ( 14/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact conformance_atomic::check_atomic_conflict_aborts_all --nocapture
+        PASS [   0.203s] ( 14/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_conflict_aborts_all
+       START [         ] ( 15/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_duplicate_targets_reject_all
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact conformance_atomic::check_atomic_duplicate_targets_reject_all --nocapture
+        PASS [   0.949s] ( 15/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_duplicate_targets_reject_all
+       START [         ] ( 16/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_empty_batch_is_noop
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact conformance_atomic::check_atomic_empty_batch_is_noop --nocapture
+        PASS [   0.221s] ( 16/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_empty_batch_is_noop
+       START [         ] ( 17/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_malformed_runs_reject_all
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact conformance_atomic::check_atomic_malformed_runs_reject_all --nocapture
+        PASS [   2.071s] ( 17/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_malformed_runs_reject_all
+       START [         ] ( 18/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact conformance_atomic::check_atomic_multi_stream_commits_all --nocapture
+        PASS [   0.415s] ( 18/160) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+       START [         ] ( 19/160) mnesis-postgres::atomic_tests import_corrupt_prefix_reports_exact_persisted_progress
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact import_corrupt_prefix_reports_exact_persisted_progress --nocapture
+        PASS [   0.109s] ( 19/160) mnesis-postgres::atomic_tests import_corrupt_prefix_reports_exact_persisted_progress
+       START [         ] ( 20/160) mnesis-postgres::atomic_tests import_duplicate_routes_reject_before_any_catalog_or_event_write
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact import_duplicate_routes_reject_before_any_catalog_or_event_write --nocapture
+        PASS [   0.192s] ( 20/160) mnesis-postgres::atomic_tests import_duplicate_routes_reject_before_any_catalog_or_event_write
+       START [         ] ( 21/160) mnesis-postgres::atomic_tests import_policies_preserve_final_conflict_and_exact_partial_reports
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact import_policies_preserve_final_conflict_and_exact_partial_reports --nocapture
+        PASS [   0.516s] ( 21/160) mnesis-postgres::atomic_tests import_policies_preserve_final_conflict_and_exact_partial_reports
+       START [         ] ( 22/160) mnesis-postgres::atomic_tests import_storage_error_preserves_only_previous_per_stream_transactions
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact import_storage_error_preserves_only_previous_per_stream_transactions --nocapture
+        PASS [   0.451s] ( 22/160) mnesis-postgres::atomic_tests import_storage_error_preserves_only_previous_per_stream_transactions
+       START [         ] ( 23/160) mnesis-postgres::atomic_tests invalid_requests_are_rejected_before_a_closed_pool_is_touched
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact invalid_requests_are_rejected_before_a_closed_pool_is_touched --nocapture
+        PASS [   0.202s] ( 23/160) mnesis-postgres::atomic_tests invalid_requests_are_rejected_before_a_closed_pool_is_touched
+       START [         ] ( 24/160) mnesis-postgres::atomic_tests missing_expected_head_cannot_create_a_version_gap_or_commit_a_prefix
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact missing_expected_head_cannot_create_a_version_gap_or_commit_a_prefix --nocapture
+        PASS [   0.316s] ( 24/160) mnesis-postgres::atomic_tests missing_expected_head_cannot_create_a_version_gap_or_commit_a_prefix
+       START [         ] ( 25/160) mnesis-postgres::atomic_tests readers_cannot_observe_the_staged_prefix
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact readers_cannot_observe_the_staged_prefix --nocapture
+        PASS [   0.334s] ( 25/160) mnesis-postgres::atomic_tests readers_cannot_observe_the_staged_prefix
+       START [         ] ( 26/160) mnesis-postgres::atomic_tests rejected_final_insert_rolls_back_all_events_and_new_keys
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact rejected_final_insert_rolls_back_all_events_and_new_keys --nocapture
+        PASS [   0.269s] ( 26/160) mnesis-postgres::atomic_tests rejected_final_insert_rolls_back_all_events_and_new_keys
+       START [         ] ( 27/160) mnesis-postgres::atomic_tests reopen_preserves_every_run_and_the_highest_position
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact reopen_preserves_every_run_and_the_highest_position --nocapture
+        PASS [   0.373s] ( 27/160) mnesis-postgres::atomic_tests reopen_preserves_every_run_and_the_highest_position
+       START [         ] ( 28/160) mnesis-postgres::atomic_tests unrelated_unique_failure_on_an_existing_head_is_not_a_conflict
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/atomic_tests-0ec0b3032093f620 --exact unrelated_unique_failure_on_an_existing_head_is_not_a_conflict --nocapture
+        PASS [   0.331s] ( 28/160) mnesis-postgres::atomic_tests unrelated_unique_failure_on_an_existing_head_is_not_a_conflict
+       START [         ] ( 29/160) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_conflict_leaves_store_unchanged --nocapture
+        PASS [   0.085s] ( 29/160) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+       START [         ] ( 30/160) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_large_payload_round_trips --nocapture
+        PASS [   0.152s] ( 30/160) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+       START [         ] ( 31/160) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_max_length_event_type_round_trips --nocapture
+        PASS [   0.153s] ( 31/160) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+       START [         ] ( 32/160) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_metadata_absent_vs_present_distinct --nocapture
+        PASS [   0.135s] ( 32/160) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+       START [         ] ( 33/160) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_prefix_stream_ids_isolated --nocapture
+        PASS [   0.193s] ( 33/160) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+       START [         ] ( 34/160) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_version_gap_batch_rejected --nocapture
+        PASS [   0.096s] ( 34/160) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+       START [         ] ( 35/160) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_boundary::check_wrong_first_version_rejected --nocapture
+        PASS [   0.100s] ( 35/160) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+       START [         ] ( 36/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_lifecycle::check_reopen_conflict_state_intact --nocapture
+        PASS [   0.130s] ( 36/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+       START [         ] ( 37/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_lifecycle::check_reopen_preserves_events --nocapture
+        PASS [   0.111s] ( 37/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+       START [         ] ( 38/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_lifecycle::check_reopen_preserves_position_watermark --nocapture
+        PASS [   0.197s] ( 38/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+       START [         ] ( 39/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_lifecycle::check_reopen_subscription_catches_up --nocapture
+        PASS [   0.075s] ( 39/160) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+       START [         ] ( 40/160) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_linearizability::check_caught_up_boundary_race --nocapture
+        PASS [   0.136s] ( 40/160) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+       START [         ] ( 41/160) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_linearizability::check_concurrent_distinct_streams_all_land --nocapture
+        PASS [   0.109s] ( 41/160) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+       START [         ] ( 42/160) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_linearizability::check_concurrent_same_stream_single_winner --nocapture
+        PASS [   0.156s] ( 42/160) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+       START [         ] ( 43/160) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_linearizability::check_wake_after_idle --nocapture
+        PASS [   0.209s] ( 43/160) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+       START [         ] ( 44/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_boundary_then_new_append --nocapture
+        PASS [   0.164s] ( 44/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+       START [         ] ( 45/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_empty_store_yields_none --nocapture
+        PASS [   0.147s] ( 45/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+       START [         ] ( 46/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_from_is_exclusive --nocapture
+        PASS [   0.136s] ( 46/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+       START [         ] ( 47/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_global_order_across_streams --nocapture
+        PASS [   0.148s] ( 47/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+       START [         ] ( 48/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_items_carry_their_stream_key --nocapture
+        PASS [   0.201s] ( 48/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+       START [         ] ( 49/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_metadata_round_trips --nocapture
+        PASS [   0.146s] ( 49/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+       START [         ] ( 50/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_all_multi_resume_cycles --nocapture
+        PASS [   0.137s] ( 50/160) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+       START [         ] ( 51/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_append_conflict_is_surfaced --nocapture
+        PASS [   0.101s] ( 51/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+       START [         ] ( 52/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_append_retry_after_conflict_succeeds --nocapture
+        PASS [   0.125s] ( 52/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+       START [         ] ( 53/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_append_returns_assigned_all_position --nocapture
+        PASS [   0.093s] ( 53/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+       START [         ] ( 54/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_append_then_read_round_trips --nocapture
+        PASS [   0.128s] ( 54/160) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+       START [         ] ( 55/160) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_empty_read_yields_none --nocapture
+        PASS [   0.122s] ( 55/160) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+       START [         ] ( 56/160) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_large_stream_completes --nocapture
+        PASS [   0.243s] ( 56/160) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+       START [         ] ( 57/160) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_multi_event_append_returns_last_position --nocapture
+        PASS [   0.104s] ( 57/160) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+       START [         ] ( 58/160) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_read_stream_from_is_inclusive --nocapture
+        PASS [   0.145s] ( 58/160) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+       START [         ] ( 59/160) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist --nocapture
+        PASS [   0.139s] ( 59/160) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+       START [         ] ( 60/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_absent_stream_waits_then_delivers --nocapture
+        PASS [   0.123s] ( 60/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+       START [         ] ( 61/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live --nocapture
+        PASS [   0.164s] ( 61/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+       START [         ] ( 62/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_backlog_then_caught_up_then_live --nocapture
+        PASS [   0.124s] ( 62/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+       START [         ] ( 63/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_beyond_head_filters_below_bound --nocapture
+        PASS [   0.102s] ( 63/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+       START [         ] ( 64/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam --nocapture
+        PASS [   0.366s] ( 64/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+       START [         ] ( 65/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_subscription_resume_strict_after --nocapture
+        PASS [   0.054s] ( 65/160) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+       START [         ] ( 66/160) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_two_subscribers_same_stream_both_receive --nocapture
+        PASS [   0.072s] ( 66/160) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+       START [         ] ( 67/160) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact conformance_sequence::check_versions_strictly_monotonic_and_fused --nocapture
+        PASS [   0.120s] ( 67/160) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+       START [         ] ( 68/160) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/conformance_tests-a3873b26b098683e --exact pg_all_pos_ord_txid_first --nocapture
+        PASS [   0.009s] ( 68/160) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+       START [         ] ( 69/160) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact a_pool_with_one_connection_is_rejected_before_it_can_starve_queries --nocapture
+        PASS [   0.011s] ( 69/160) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+       START [         ] ( 70/160) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact all_rescans_after_a_long_held_snapshot_commits_without_a_hint --nocapture
+        PASS [   1.121s] ( 70/160) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+       START [         ] ( 71/160) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact clones_share_one_listener_and_last_drop_preserves_the_callers_pool --nocapture
+        PASS [   0.094s] ( 71/160) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+       START [         ] ( 72/160) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact closing_the_callers_pool_completes_with_a_live_subscription --nocapture
+        PASS [   0.084s] ( 72/160) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+       START [         ] ( 73/160) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact initial_listener_acquisition_failure_recovers_after_service_returns --nocapture
+        PASS [   1.209s] ( 73/160) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+       START [         ] ( 74/160) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact listener_disconnect_and_a_final_unnotified_commit_recover --nocapture
+        PASS [   1.133s] ( 74/160) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+       START [         ] ( 75/160) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact listener_subscription_failure_recovers_after_the_acquired_backend_dies --nocapture
+        PASS [   1.136s] ( 75/160) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+       START [         ] ( 76/160) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers --nocapture
+        PASS [   1.172s] ( 76/160) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+       START [         ] ( 77/160) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact overlong_binary_notification_payload_does_not_reject_a_committed_append --nocapture
+        PASS [   0.303s] ( 77/160) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+       START [         ] ( 78/160) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact terminal_receive_error_after_failed_reconnection_is_retried --nocapture
+        PASS [   1.287s] ( 78/160) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+       START [         ] ( 79/160) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/lifecycle_tests-c20992cb863af060 --exact wake_between_arm_and_first_poll_is_preserved --nocapture
+        PASS [   0.667s] ( 79/160) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+       START [         ] ( 80/160) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/migration_tests-364daf20777693ca --exact adoption_preserves_empty_metadata_as_corruption_and_null_as_absence --nocapture
+        PASS [   0.985s] ( 80/160) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+       START [         ] ( 81/160) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/migration_tests-364daf20777693ca --exact caller_search_path_cannot_redirect_event_storage --nocapture
+        PASS [   0.462s] ( 81/160) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+       START [         ] ( 82/160) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+             command: /private/tmp/nix-shell.OU2yKE/cargo-mutants-mnesis-postgres-state-XdSmAq.tmp/target/debug/deps/migration_tests-364daf20777693ca --exact cancelling_a_blocked_migration_releases_its_session_and_transaction --nocapture
+        FAIL [   0.490s] ( 82/160) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+  stdout ───
+
+    running 1 test
+    test cancelling_a_blocked_migration_releases_its_session_and_transaction ... FAILED
+
+    failures:
+
+    failures:
+        cancelling_a_blocked_migration_releases_its_session_and_transaction
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.47s
+
+  stderr ───
+
+    thread 'cancelling_a_blocked_migration_releases_its_session_and_transaction' (97175591) panicked at adapters/postgres/tests/migration_tests.rs:582:5:
+    assertion `left == right` failed
+      left: 3
+     right: 2
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [  23.436s] 82/160 tests run: 81 passed, 1 failed, 0 skipped
+        FAIL [   0.490s] ( 82/160) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+warning: 78/160 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
+
+*** result: Failure(100)
+
+ERROR cargo test failed in an unmutated tree, so no mutants were tested
+waiting for server to shut down.... done
+server stopped

@@ -157,3 +157,48 @@ settings before writes or use supported scoped settings with explicit operator
 contract. Preserve independent replication/failover guarantees. No passing native
 suite by itself establishes this profile, and no server setting may be silently
 weakened to speed tests.
+
+PG6 key-row NO KEY UPDATE candidate REJECTED before implementation: native42501
+with existing SELECT/INSERT grants requires extra UPDATE on immutable key catalog.
+Do not weaken permissions. Lock native checkpoint row itself; absent-creation
+race needs valid full INSERT ON CONFLICT DO NOTHING plus observing winner's
+revision, with sole next_revision authority for revision/schema/order policy.
+First deliver aggregate cache snapshot feature/migration3 as PG6a (budget and
+falsifiers in feature research), then conditional checkpointPG6b. Do not mark all
+PG6 complete at the first sub-slice. PG5 PR381 checks/review remain pending.
+
+PG8 security audit follow-up: inspect caller search_path with pg_catalog explicitly
+placed last and custom equivalent operators/functions. Owned relation names alone
+do not constrain unqualified builtin lookup; pg_get_constraintdef output may also
+change qualification. Prove supported profile/SQL behavior before claiming namespace
+independence. Consider scoped canonical validation and qualified native functions/
+operators versus session changes; measure read/append overhead. No new tenant or
+connection framework, and no caller-owned global setting changes without contract.
+
+PG6b locked-owner design after PG6a: implement existing
+CheckpointStore<Vec<u8>,PgAllPos> under projection, with migration4 separate from
+aggregate cache. Initial bounded change <=260 production Rust added/30 removed,
+<=100 SQL lines, <=500 native law lines and <=100 existing proxy lines; reserve
+separate explicit consumer/privilege/recovery verification passes before retention.
+Full unsigned revision/schema/position domains (zero PgAllPos valid), empty state,
+metadata corruption before Stale and byte-bounded body selection are acceptance.
+Read metadata under native checkpoint SELECT FOR UPDATE. Absent creation uses
+next_revision(None) then a full valid INSERT ON CONFLICT DO NOTHING; lost creation
+observes committed winner under row lock and returns the owner's exact conflict.
+Existing record validates sole CheckpointWrite::next_revision authority then
+replaces revision/schema/position/state in one transaction. No placeholders,
+unconditional checkpoint API, extra key UPDATE grants or CommitUnknown retries.
+Falsifiers: two real concurrent creators/updaters both win; loser reports wrong
+actual revision; forbidden schema/position/rebuild/overflow changes any byte;
+reader observes mixed pair; actual committed write after ACK loss becomes safe
+retry; canceled write consumer continues without reload. Include real projection
+stepper, native typed-codec errors, same-ID snapshot/checkpoint separation, actual
+client kill and migration collision/repair. PG6b starts after focused PG6a source
+is retained; this design is not runtime or whole-PG6 acceptance evidence.
+
+PG9 source-filter minimization expanded: raw evidence JSON also enters the broad
+fixture JSON filter, causing complete rebuilds on documentation-only amendments.
+Exact tool output can be retained as a log without changing compiled sources or
+skipping checks. Compare supported scoped filesets for actual fixture/SQL owners
+against baseline derivation identity and required compiler/input tests; no manual
+hash edits, skip gates or ad hoc filter framework. Current PG6a adds no filter rule.

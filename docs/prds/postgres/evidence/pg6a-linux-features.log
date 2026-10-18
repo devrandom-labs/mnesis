@@ -1,0 +1,16 @@
+  Extracting 12 binaries and 1 build script output directory to /build/nextest-archive-UrEAIJ
+   Extracted 15 files to /build/nextest-archive-UrEAIJ in 0.96s
+────────────
+ Nextest run ID 1f7a0441-f1eb-426e-9887-d8bbbedebfc4 with nextest profile: default
+    Starting 1 test across 1 binary (14 tests and 11 binaries skipped)
+        PASS [   2.701s] (1/1) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+────────────
+     Summary [   2.702s] 1 test run: 1 passed, 14 skipped
+  Extracting 12 binaries and 1 build script output directory to /build/nextest-archive-QDEzz8
+   Extracted 15 files to /build/nextest-archive-QDEzz8 in 0.85s
+────────────
+ Nextest run ID 8c0f1d00-9aab-432e-aad7-37777b55c599 with nextest profile: default
+    Starting 1 test across 1 binary (14 tests and 11 binaries skipped)
+        PASS [   8.369s] (1/1) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+────────────
+     Summary [   8.373s] 1 test run: 1 passed, 14 skipped

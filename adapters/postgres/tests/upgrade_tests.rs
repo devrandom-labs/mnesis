@@ -14,7 +14,7 @@ use mnesis_store::{PendingBatch, RawEventStore, StreamKey};
 use sqlx::PgPool;
 use sqlx::migrate::{MigrateError, Migrator};
 
-async fn previous() -> Option<PgPool> {
+async fn previous(version: i64) -> Option<PgPool> {
     let url = std::env::var("DATABASE_URL").ok()?;
     let pool = PgPool::connect(&url).await.unwrap();
     sqlx::raw_sql("DROP SCHEMA IF EXISTS mnesis CASCADE; DROP VIEW IF EXISTS public.events")
@@ -25,7 +25,7 @@ async fn previous() -> Option<PgPool> {
     let mut first = Migrator::with_migrations(
         embedded
             .iter()
-            .filter(|m| m.version == 1)
+            .filter(|m| m.version <= version)
             .cloned()
             .collect(),
     );
@@ -41,6 +41,89 @@ async fn previous() -> Option<PgPool> {
     Some(pool)
 }
 
+#[tokio::test]
+async fn snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collision() {
+    let Some(pool) = previous(2).await else {
+        return;
+    };
+    let id = StreamKey::from_bytes("snapshot-upgrade");
+    let number: i64 =
+        sqlx::query_scalar("INSERT INTO mnesis.keys (value) VALUES ($1) RETURNING number")
+            .bind(id.as_bytes())
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    let original: (i64, String) = sqlx::query_as("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload) VALUES ($1, 1, 'Old', 1, 'old'::bytea) RETURNING global_seq, txid::text")
+        .bind(number).fetch_one(&pool).await.unwrap();
+    let old = PgAllPos::new(
+        original.1.parse().unwrap(),
+        u64::try_from(original.0).unwrap(),
+    );
+    sqlx::raw_sql("CREATE TABLE mnesis.snapshots (foreign_value text); INSERT INTO mnesis.snapshots VALUES ('keep')")
+        .execute(&pool).await.unwrap();
+    let rejected = PostgresStore::migrate(&pool).await;
+    let applied: Vec<i64> =
+        sqlx::query_scalar("SELECT version FROM mnesis._sqlx_migrations ORDER BY version")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+    let foreign: Vec<String> = sqlx::query_scalar("SELECT foreign_value FROM mnesis.snapshots")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+    sqlx::query("ALTER TABLE mnesis.snapshots RENAME TO saved_snapshots")
+        .execute(&pool)
+        .await
+        .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
+    assert!(
+        matches!(rejected, Err(PostgresError::Migration(MigrateError::ExecuteMigration(ref source, 3)))
+        if source.as_database_error().and_then(sqlx::error::DatabaseError::code).as_deref() == Some("42P07"))
+    );
+    assert_eq!(applied, [1, 2]);
+    assert_eq!(foreign, ["keep".to_owned()]);
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let restored: Vec<_> = store
+        .read_all(None)
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(restored.len(), 1);
+    assert_eq!(restored[0].0, old);
+    assert_eq!(restored[0].1, id);
+    assert_eq!(restored[0].2.payload(), b"old");
+    let event = pending_envelope(Version::new(2).unwrap())
+        .event_type("New")
+        .payload(b"new".as_slice())
+        .build()
+        .unwrap();
+    let next = store
+        .append(&id, Some(Version::INITIAL), PendingBatch::of(&event))
+        .await
+        .unwrap();
+    assert!(next > old);
+    assert_eq!(next.seq(), old.seq().checked_add(1).unwrap());
+    let after: Vec<_> = store
+        .read_all(Some(old))
+        .await
+        .unwrap()
+        .try_collect()
+        .await
+        .unwrap();
+    assert_eq!(after.len(), 1);
+    assert_eq!(after[0].0, next);
+    assert_eq!(after[0].2.version(), Version::new(2).unwrap());
+    assert_eq!(
+        sqlx::query_scalar::<_, String>("SELECT foreign_value FROM mnesis.saved_snapshots")
+            .fetch_one(&pool)
+            .await
+            .unwrap(),
+        "keep"
+    );
+}
+
 async fn old_row(pool: &PgPool, version: i64) -> (i64, String) {
     sqlx::query_as("INSERT INTO mnesis.events (stream_id, version, event_type, schema_version, payload, metadata) VALUES ('upgrade'::bytea, $1, 'Old', 4294967295, 'old'::bytea, 'meta'::bytea) RETURNING global_seq, txid::text")
         .bind(version).fetch_one(pool).await.unwrap()
@@ -48,7 +131,9 @@ async fn old_row(pool: &PgPool, version: i64) -> (i64, String) {
 
 #[tokio::test]
 async fn populated_version_one_preserves_position_and_next_identity() {
-    let Some(pool) = previous().await else { return };
+    let Some(pool) = previous(1).await else {
+        return;
+    };
     let before = old_row(&pool, 1).await;
     PostgresStore::migrate(&pool).await.unwrap();
     PostgresStore::migrate(&pool).await.unwrap();
@@ -100,7 +185,9 @@ async fn populated_version_one_preserves_position_and_next_identity() {
 
 #[tokio::test]
 async fn rejected_version_two_rolls_back_and_preserves_repairable_version_one() {
-    let Some(pool) = previous().await else { return };
+    let Some(pool) = previous(1).await else {
+        return;
+    };
     let before = old_row(&pool, -1).await;
     let failure = PostgresStore::migrate(&pool).await.unwrap_err();
     assert!(
@@ -153,7 +240,9 @@ async fn rejected_version_two_rolls_back_and_preserves_repairable_version_one() 
 
 #[tokio::test]
 async fn foreign_public_view_is_rejected_without_replacement() {
-    let Some(pool) = previous().await else { return };
+    let Some(pool) = previous(1).await else {
+        return;
+    };
     old_row(&pool, 1).await;
     sqlx::query("CREATE VIEW public.events AS SELECT 'foreign'::text AS owner")
         .execute(&pool)

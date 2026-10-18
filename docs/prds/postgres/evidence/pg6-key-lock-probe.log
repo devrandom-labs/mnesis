@@ -1,0 +1,10 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+BEGIN
+CREATE ROLE
+GRANT
+GRANT
+SET
+ERROR:  42501: permission denied for table keys
+LOCATION:  aclcheck_error, aclchk.c:2845
+ROLLBACK
+Native row lock requires an additional UPDATE privilege

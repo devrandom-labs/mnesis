@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+────────────
+ Nextest run ID de4c7ba8-6e8a-4240-8982-b140ab981ae4 with nextest profile: default
+    Starting 1 test across 12 binaries (149 tests skipped)
+        FAIL [   0.036s] (1/1) mnesis-postgres::snapshot_tests stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+  stdout ───
+
+    running 1 test
+    test stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body ... FAILED
+
+    failures:
+
+    failures:
+        stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body' (96907585) panicked at adapters/postgres/tests/snapshot_tests.rs:60:5:
+    stale snapshot allocated 6294809 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure: 
+────────────
+     Summary [   0.037s] 1 test run: 0 passed, 1 failed, 149 skipped
+        FAIL [   0.036s] (1/1) mnesis-postgres::snapshot_tests stale_and_oversized_snapshot_reads_do_not_allocate_the_stored_body
+error: test run failed

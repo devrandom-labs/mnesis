@@ -6,7 +6,7 @@ use std::time::Duration;
 use bytes::Bytes;
 use futures::StreamExt;
 use futures::stream::{BoxStream, try_unfold};
-use mnesis::{ErrorId, Version};
+use mnesis::{ErrorId, Id, Version};
 use mnesis_store::StreamKey;
 use mnesis_store::envelope::PersistedEnvelope;
 use mnesis_store::error::{AppendError, AppendValidationError};
@@ -27,6 +27,9 @@ use crate::position::PgAllPos;
 
 #[cfg(feature = "import")]
 mod atomic;
+
+#[cfg(feature = "snapshot")]
+mod snapshot;
 
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
 /// (`notify_committed`) publishes on it; each store's listener task subscribes.
@@ -403,20 +406,53 @@ fn validate_sizes(
             event.payload().len(),
             event.metadata().map_or(0, <[u8]>::len),
         ];
-        let actual = lengths
-            .into_iter()
-            .try_fold(32_i64, |total, length| {
-                i64::try_from(length)
-                    .ok()
-                    .and_then(|size| total.checked_add(size))
-            })
-            .ok_or_else(|| corrupt(ErrorId::from_display(id), "row byte count overflow"))?;
-        let limit = i64::from(limits.bytes.get());
-        if actual > limit {
-            return Err(PostgresError::RowLimit { actual, limit });
-        }
+        validate_bytes(&lengths, limits)?;
     }
     Ok(())
+}
+
+fn validate_bytes(lengths: &[usize], limits: Limits) -> Result<(), PostgresError> {
+    let actual = lengths.iter().try_fold(32_i64, |total, &length| {
+        let size = i64::try_from(length).map_err(|source| PostgresError::SizeOverflow {
+            source: Some(source),
+        })?;
+        total
+            .checked_add(size)
+            .ok_or(PostgresError::SizeOverflow { source: None })
+    })?;
+    let limit = i64::from(limits.bytes.get());
+    if actual > limit {
+        return Err(PostgresError::RowLimit { actual, limit });
+    }
+    Ok(())
+}
+
+#[cfg(all(test, target_pointer_width = "64"))]
+#[test]
+#[allow(
+    clippy::unwrap_used,
+    reason = "host-sized arithmetic boundary assertions"
+)]
+fn caller_byte_overflow_is_distinct_from_persisted_corruption() {
+    assert!(matches!(
+        validate_bytes(&[usize::MAX], Limits::default()),
+        Err(PostgresError::SizeOverflow { source: Some(_) })
+    ));
+    assert!(matches!(
+        validate_bytes(&[usize::try_from(i64::MAX).unwrap()], Limits::default()),
+        Err(PostgresError::SizeOverflow { source: None })
+    ));
+}
+
+async fn read_key(
+    conn: &mut sqlx::PgConnection,
+    id: &impl Id,
+) -> Result<Option<i64>, PostgresError> {
+    sqlx::query_scalar("SELECT number FROM mnesis.keys WHERE value = $1")
+        .bind(id.as_ref())
+        .fetch_optional(conn)
+        .await
+        .map_err(PostgresError::Sqlx)
 }
 
 /// Read a key and its committed head without assigning a transaction ID.
@@ -435,12 +471,12 @@ async fn read_head(
 }
 
 /// Resolve a missing binary key with native exact equality under hash collisions.
-async fn create_key(conn: &mut sqlx::PgConnection, id: &StreamKey) -> Result<i64, PostgresError> {
+async fn create_key(conn: &mut sqlx::PgConnection, id: &impl Id) -> Result<i64, PostgresError> {
     let inserted = sqlx::query_scalar(
         "INSERT INTO mnesis.keys (value) VALUES ($1) \
          ON CONFLICT ON CONSTRAINT keys_value_key DO NOTHING RETURNING number",
     )
-    .bind(id.as_bytes())
+    .bind(id.as_ref())
     .fetch_optional(&mut *conn)
     .await
     .map_err(PostgresError::Sqlx)?;
@@ -448,11 +484,9 @@ async fn create_key(conn: &mut sqlx::PgConnection, id: &StreamKey) -> Result<i64
         return Ok(number);
     }
     // A new READ COMMITTED statement sees the concurrent winning key.
-    sqlx::query_scalar("SELECT number FROM mnesis.keys WHERE value = $1")
-        .bind(id.as_bytes())
-        .fetch_one(conn)
-        .await
-        .map_err(PostgresError::Sqlx)
+    read_key(conn, id)
+        .await?
+        .ok_or(PostgresError::Sqlx(sqlx::Error::RowNotFound))
 }
 
 /// Map a sqlx error to an `AppendError<PostgresError>` store variant.

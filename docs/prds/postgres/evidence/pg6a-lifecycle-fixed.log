@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-state/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.61s
+────────────
+ Nextest run ID 0fe8b037-6f32-49ef-8a0e-d4c5ab98f79f with nextest profile: default
+    Starting 1 test across 12 binaries (159 tests skipped)
+        PASS [   1.087s] (1/1) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+────────────
+     Summary [   1.091s] 1 test run: 1 passed, 159 skipped

@@ -25,7 +25,7 @@ async fn fixture() -> Option<(PostgresStore, PgPool)> {
         .unwrap();
     PostgresStore::migrate(&pool).await.unwrap();
     let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
-    sqlx::query("TRUNCATE mnesis.events, mnesis.keys RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events, mnesis.snapshots, mnesis.keys RESTART IDENTITY")
         .execute(&pool)
         .await
         .unwrap();

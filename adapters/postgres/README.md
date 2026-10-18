@@ -57,8 +57,8 @@ next sequence. The second migration removes the redundant stream index and
 retains the unique stream/version and global watermark indexes. Invalid stored
 scalar values abort the upgrade transaction; repair the reported data under
 maintenance before retrying. Foreign `public.events` views are rejected and
-preserved. Never rewrite an applied migration checksum. Future snapshot and
-projection capabilities can share raw key identity; a key alone does not prove
+preserved. Never rewrite an applied migration checksum. Snapshot and future
+projection capabilities share raw key identity; a key alone does not prove
 that an event stream exists.
 
 ## Atomic writes
@@ -78,3 +78,29 @@ A native stream/version race reports the observed committed head after rollback;
 if that observation fails, the original database error remains a store error.
 All local wakes precede one bounded native-hint deadline for the whole batch.
 The completion PRD still tracks required import, recovery and capacity evidence.
+
+## Aggregate snapshots
+
+The `snapshot` feature implements `SnapshotStore<Vec<u8>, Version>`. Use the
+existing `CodecSnapshotStore` and `Snapshotting` wrappers from `mnesis-store` for
+typed aggregate state. This is an unconditional cache: the last committed pair
+replaces the previous one, including an older version. Conditional projection
+state is a separate capability tracked in the completion PRD.
+
+Migration3 installs the logged snapshot table regardless of compiled features.
+Runtime cache writers need `SELECT, INSERT, UPDATE` on `mnesis.snapshots`, plus
+the existing key lookup/insert and sequence grants. They need no key updates,
+event rewrites or DDL. Startup validates all installed metadata in one brief
+read-only database snapshot; canceling it releases that view.
+
+State, schema and version are written in one transaction. A schema mismatch
+returns `Stale`; corrupted metadata is an error. The configured byte ceiling
+counts ID, state and32 scalar bytes. Stale or over-limit reads do not fetch the
+body; writes reject over-limit input before beginning a transaction. Empty state
+and the full nonzero unsigned version/schema ranges are supported.
+
+`CommitUnknown` retains its SQLx cause, including through the codec wrapper.
+Caller cancellation can follow an actual commit. Reload before making another
+storage decision; aggregate cache failure never reverses an acknowledged event
+append. Client SIGKILL recovery is tested; server restart, durability and release
+acceptance remain tracked by the PRD.
