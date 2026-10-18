@@ -31,6 +31,9 @@ mod atomic;
 #[cfg(feature = "snapshot")]
 mod snapshot;
 
+#[cfg(feature = "projection")]
+mod checkpoint;
+
 /// The `LISTEN/NOTIFY` channel every store instance shares. The write side
 /// (`notify_committed`) publishes on it; each store's listener task subscribes.
 const NOTIFY_CHANNEL: &str = "mnesis_events";

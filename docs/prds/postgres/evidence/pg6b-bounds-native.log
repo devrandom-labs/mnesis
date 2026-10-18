@@ -1,0 +1,17 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.45s
+────────────
+ Nextest run ID 17c78ea1-3e96-43c8-af7d-f36f0f8dd7df with nextest profile: default
+    Starting 10 tests across 1 binary
+        PASS [   2.684s] ( 1/10) mnesis-postgres::checkpoint_tests aggregate_cache_and_checkpoint_with_identical_ids_remain_independent
+        PASS [   0.044s] ( 2/10) mnesis-postgres::checkpoint_tests byte_edges_and_oversized_input_preserve_the_checkpoint_before_storage
+        PASS [   0.037s] ( 3/10) mnesis-postgres::checkpoint_tests corrupt_revision_is_not_stale_and_cannot_be_replaced
+        PASS [   0.032s] ( 4/10) mnesis-postgres::checkpoint_tests explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacement
+        PASS [   0.032s] ( 5/10) mnesis-postgres::checkpoint_tests missing_revision_and_invalid_rebuild_do_not_create_or_replace_state
+        PASS [   0.041s] ( 6/10) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+        PASS [   0.037s] ( 7/10) mnesis-postgres::checkpoint_tests reopen_preserves_unsigned_extremes_empty_state_and_revision_overflow
+        PASS [   0.040s] ( 8/10) mnesis-postgres::checkpoint_tests stale_and_oversized_reads_omit_the_megabyte_checkpoint_body
+        PASS [   0.032s] ( 9/10) mnesis-postgres::checkpoint_tests stale_schema_and_position_rejections_preserve_the_complete_pair
+        PASS [   0.036s] (10/10) mnesis-postgres::checkpoint_tests suppressed_creation_and_update_fail_without_fabricating_a_revision_conflict
+────────────
+     Summary [   3.017s] 10 tests run: 10 passed, 0 skipped

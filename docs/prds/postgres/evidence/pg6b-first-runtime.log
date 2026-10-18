@@ -1,0 +1,13 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.10s
+────────────
+ Nextest run ID a5113c4b-6490-4f9a-8570-f93c3b680fd1 with nextest profile: default
+    Starting 6 tests across 1 binary
+        PASS [  27.350s] (1/6) mnesis-postgres::checkpoint_tests corrupt_revision_is_not_stale_and_cannot_be_replaced
+        PASS [   0.042s] (2/6) mnesis-postgres::checkpoint_tests explicit_schema_rebuild_preserves_revision_and_rejects_stale_replacement
+        PASS [   0.048s] (3/6) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+        PASS [   0.041s] (4/6) mnesis-postgres::checkpoint_tests reopen_preserves_unsigned_extremes_empty_state_and_revision_overflow
+        PASS [   0.036s] (5/6) mnesis-postgres::checkpoint_tests stale_schema_and_position_rejections_preserve_the_complete_pair
+        PASS [   0.037s] (6/6) mnesis-postgres::checkpoint_tests suppressed_creation_and_update_fail_without_fabricating_a_revision_conflict
+────────────
+     Summary [  27.555s] 6 tests run: 6 passed, 0 skipped

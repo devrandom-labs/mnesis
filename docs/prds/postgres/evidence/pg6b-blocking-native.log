@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.77s
+────────────
+ Nextest run ID 21d73553-47b6-448c-ae2d-0b8e2a966bad with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        PASS [  27.772s] (1/1) mnesis-postgres::checkpoint_tests overlapping_creators_and_advancers_have_one_complete_winner
+────────────
+     Summary [  27.773s] 1 test run: 1 passed, 5 skipped

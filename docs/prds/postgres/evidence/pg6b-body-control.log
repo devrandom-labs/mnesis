@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+────────────
+ Nextest run ID 8bf5b7d3-35ba-4d31-8d6b-182008d31070 with nextest profile: default
+    Starting 1 test across 1 binary (10 tests skipped)
+        FAIL [   0.055s] (1/1) mnesis-postgres::checkpoint_tests stale_and_oversized_reads_omit_the_megabyte_checkpoint_body
+  stdout ───
+
+    running 1 test
+    test stale_and_oversized_reads_omit_the_megabyte_checkpoint_body ... FAILED
+
+    failures:
+
+    failures:
+        stale_and_oversized_reads_omit_the_megabyte_checkpoint_body
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'stale_and_oversized_reads_omit_the_megabyte_checkpoint_body' (98195591) panicked at adapters/postgres/tests/checkpoint_tests.rs:436:5:
+    stale checkpoint allocated 6306290 bytes
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.055s] 1 test run: 0 passed, 1 failed, 10 skipped
+        FAIL [   0.055s] (1/1) mnesis-postgres::checkpoint_tests stale_and_oversized_reads_omit_the_megabyte_checkpoint_body
+error: test run failed

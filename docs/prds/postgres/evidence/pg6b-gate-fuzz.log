@@ -1,0 +1,105 @@
+got build log for '/nix/store/84cb4c1d6r116xqhzlv5y7yy1yfw0hpw-mnesis-fuzz-replay-0.4.0.drv' from 'daemon'
+cargoArtifacts not set, will not reuse any cargo artifacts
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/rmgbkpf01x3branxp7hicvcr85c6b7ry-mnesis-fuzz-source
+source root is mnesis-fuzz-source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+will append /nix/var/nix/builds/nix-85524-152288374/mnesis-fuzz-source/.cargo-home/config.toml with contents of /nix/store/yzib3np6icns7fikkdhnz8b4kaf2zy4y-vendor-cargo-deps/config.toml
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo test --no-fail-fast
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.189
+   Compiling getrandom v0.3.4
+   Compiling cfg-if v1.0.4
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling zerocopy v0.8.55
+   Compiling winnow v0.5.40
+   Compiling toml_datetime v0.6.3
+   Compiling semver v1.0.28
+   Compiling futures-sink v0.3.33
+   Compiling futures-core v0.3.33
+   Compiling thiserror v2.0.19
+   Compiling futures-io v0.3.33
+   Compiling anyhow v1.0.104
+   Compiling futures-channel v0.3.33
+   Compiling slab v0.4.12
+   Compiling rustc_version v0.4.1
+   Compiling pin-project-lite v0.2.17
+   Compiling memchr v2.8.3
+   Compiling futures-task v0.3.33
+   Compiling either v1.17.0
+   Compiling arrayvec v0.7.8
+   Compiling crc32c v0.6.8
+   Compiling bytes v1.12.1
+   Compiling pretty-hex v0.4.2
+   Compiling indexmap v2.14.0
+   Compiling lazy_static v1.5.0
+   Compiling futures-util v0.3.33
+   Compiling toml_edit v0.20.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling rand_core v0.9.5
+   Compiling rand_xoshiro v0.7.0
+   Compiling proc-macro-crate v2.0.2
+   Compiling futures v0.3.33
+   Compiling thiserror-impl v2.0.19
+   Compiling mnesis v0.4.0 (/nix/var/nix/builds/nix-85524-152288374/mnesis-fuzz-source/crates/mnesis)
+   Compiling ppv-lite86 v0.2.21
+   Compiling equator-macro v0.4.2
+   Compiling bolero-generator-derive v0.13.4
+   Compiling minicbor-derive v0.19.5
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.5
+   Compiling bolero-generator v0.13.5
+   Compiling equator v0.4.2
+   Compiling aligned-vec v0.6.4
+   Compiling minicbor v2.3.0
+   Compiling mnesis-store v0.4.0 (/nix/var/nix/builds/nix-85524-152288374/mnesis-fuzz-source/crates/store)
+   Compiling fuzz-common v0.0.0 (/nix/var/nix/builds/nix-85524-152288374/mnesis-fuzz-source/fuzz-common)
+   Compiling bolero-engine v0.13.4
+   Compiling bolero v0.13.4
+   Compiling mnesis-fuzz v0.0.0 (/nix/var/nix/builds/nix-85524-152288374/mnesis-fuzz-source/fuzz)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.34s
+     Running tests/cbor.rs (target/debug/deps/cbor-4d6d93fec782730a)
+
+running 2 tests
+test cbor_decode_header ... ok(B
+test cbor_decode_chunk ... ok(B
+
+test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+     Running tests/value.rs (target/debug/deps/value-6c6ae8850cba4bf5)
+
+running 1 test
+test value_event_type ... ok(B
+
+test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+     Running tests/wire.rs (target/debug/deps/wire-531d45418a25ef3b)
+
+running 1 test
+test wire_decode_frame ... ok(B
+
+test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+'target' does not exist, will NOT output to /nix/store/ildq5bs92mgli26qqsxalv3lysh1jiyh-mnesis-fuzz-replay-0.4.0/target.tar.zst
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-85524-152288374/ in /nix/store/ildq5bs92mgli26qqsxalv3lysh1jiyh-mnesis-fuzz-replay-0.4.0...
+patching script interpreter paths in /nix/store/ildq5bs92mgli26qqsxalv3lysh1jiyh-mnesis-fuzz-replay-0.4.0

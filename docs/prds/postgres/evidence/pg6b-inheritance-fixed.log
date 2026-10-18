@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+────────────
+ Nextest run ID 5e007047-c14f-4810-a818-a6f844f98f02 with nextest profile: default
+    Starting 1 test across 1 binary (14 tests skipped)
+        PASS [   0.059s] (1/1) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+────────────
+     Summary [   0.059s] 1 test run: 1 passed, 14 skipped

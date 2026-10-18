@@ -1,0 +1,24 @@
+  Extracting 14 binaries and 1 build script output directory to /build/nextest-archive-tSntrI
+   Extracted 17 files to /build/nextest-archive-tSntrI in 0.75s
+────────────
+ Nextest run ID 8fffb630-7d74-476e-a8e2-4c349628e78d with nextest profile: default
+    Starting 1 test across 1 binary (14 tests and 13 binaries skipped)
+        PASS [   0.199s] (1/1) mnesis-postgres::atomic_tests conformance_atomic::check_atomic_multi_stream_commits_all
+────────────
+     Summary [   0.199s] 1 test run: 1 passed, 14 skipped
+  Extracting 14 binaries and 1 build script output directory to /build/nextest-archive-bLTckU
+   Extracted 17 files to /build/nextest-archive-bLTckU in 0.68s
+────────────
+ Nextest run ID 91bfce33-6a2d-450c-9373-8cf587a235fd with nextest profile: default
+    Starting 1 test across 1 binary (15 tests and 13 binaries skipped)
+        PASS [   0.403s] (1/1) mnesis-postgres::snapshot_tests conformance_snapshot::check_snapshot_absent_then_commit_then_found
+────────────
+     Summary [   0.403s] 1 test run: 1 passed, 15 skipped
+  Extracting 14 binaries and 1 build script output directory to /build/nextest-archive-JP3t6e
+   Extracted 17 files to /build/nextest-archive-JP3t6e in 0.78s
+────────────
+ Nextest run ID 9da93fea-674a-4daa-8c07-830f41607a39 with nextest profile: default
+    Starting 1 test across 1 binary (2 tests and 13 binaries skipped)
+        PASS [   0.278s] (1/1) mnesis-postgres::projection_tests real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position
+────────────
+     Summary [   0.278s] 1 test run: 1 passed, 2 skipped

@@ -11,6 +11,10 @@
 
 mod support;
 
+#[cfg(feature = "projection")]
+#[path = "support/projection.rs"]
+mod projection;
+
 #[cfg(feature = "import")]
 #[path = "support/sections.rs"]
 mod sections;
@@ -19,21 +23,35 @@ mod sections;
 use futures::{FutureExt, TryStreamExt};
 use std::future::pending;
 use std::io::{self, Write, stderr};
-#[cfg(feature = "snapshot")]
+#[cfg(any(feature = "snapshot", feature = "projection"))]
 use std::num::NonZeroU32;
+#[cfg(feature = "projection")]
+use std::num::NonZeroU64;
 use std::path::PathBuf;
 use std::pin::pin;
 use std::str::FromStr;
 use std::time::Duration;
 
 use mnesis::Version;
+#[cfg(feature = "projection")]
+use mnesis_postgres::PgAllPos;
 use mnesis_postgres::{PostgresError, PostgresStore};
-#[cfg(feature = "snapshot")]
+#[cfg(any(feature = "snapshot", feature = "projection"))]
 use mnesis_store::JsonCodec;
+#[cfg(feature = "projection")]
+use mnesis_store::checkpoint::{
+    CheckpointError, CheckpointHydrated, CheckpointMode, CheckpointStore, CheckpointWrite,
+};
 use mnesis_store::envelope::{PendingBatch, PendingEnvelope, pending_envelope};
+#[cfg(feature = "projection")]
+use mnesis_store::state::AfterEventTypes;
+#[cfg(any(feature = "snapshot", feature = "projection"))]
+use mnesis_store::state::{CodecSnapshotStore, CodecSnapshotStoreError};
 #[cfg(feature = "snapshot")]
-use mnesis_store::state::{CodecSnapshotStore, CodecSnapshotStoreError, Hydrated, SnapshotStore};
+use mnesis_store::state::{Hydrated, SnapshotStore};
 use mnesis_store::{AppendError, RawEventStore, StreamKey};
+#[cfg(feature = "projection")]
+use mnesis_store::{Projection, ProjectionError, ProjectionStateError};
 use sqlx::PgPool;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
 use tempfile::TempDir;
@@ -53,8 +71,8 @@ enum Fault {
     HoldHint,
     #[cfg(feature = "import")]
     HoldSecondHead,
-    #[cfg(feature = "snapshot")]
-    HoldSnapshot,
+    #[cfg(any(feature = "snapshot", feature = "projection"))]
+    HoldState,
     #[cfg(feature = "snapshot")]
     HoldValidation,
 }
@@ -68,8 +86,8 @@ enum Observation {
     Hint,
     #[cfg(feature = "import")]
     SecondHead,
-    #[cfg(feature = "snapshot")]
-    Snapshot,
+    #[cfg(any(feature = "snapshot", feature = "projection"))]
+    State,
     #[cfg(feature = "snapshot")]
     Validation,
 }
@@ -190,10 +208,10 @@ async fn forward(
                     let mut resume = mode.clone();
                     resume.wait_for(|phase| matches!(phase, Fault::Pass)).await.map_err(io::Error::other)?;
                 }
-                #[cfg(feature = "snapshot")]
-                if tag == b'D' && matches!(fault, Fault::HoldSnapshot)
-                    && body.windows(SNAPSHOT_OLD.len()).any(|part| part == SNAPSHOT_OLD) {
-                    observed.send_replace(Observation::Snapshot);
+                #[cfg(any(feature = "snapshot", feature = "projection"))]
+                if tag == b'D' && matches!(fault, Fault::HoldState)
+                    && body.windows(STATE_OLD.len()).any(|part| part == STATE_OLD) {
+                    observed.send_replace(Observation::State);
                     let mut resume = mode.clone();
                     resume.wait_for(|phase| matches!(phase, Fault::Pass)).await.map_err(io::Error::other)?;
                 }
@@ -223,8 +241,8 @@ async fn forward(
     }
 }
 
-#[cfg(feature = "snapshot")]
-const SNAPSHOT_OLD: &[u8] = b"snapshot-old-081";
+#[cfg(any(feature = "snapshot", feature = "projection"))]
+const STATE_OLD: &[u8] = b"snapshot-old-081";
 
 #[cfg(feature = "snapshot")]
 #[tokio::test]
@@ -310,20 +328,15 @@ async fn snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state() {
     };
     let id = StreamKey::from_bytes("snapshot-read-pair");
     store
-        .commit(
-            &id,
-            NonZeroU32::MIN,
-            Version::INITIAL,
-            &SNAPSHOT_OLD.to_vec(),
-        )
+        .commit(&id, NonZeroU32::MIN, Version::INITIAL, &STATE_OLD.to_vec())
         .await
         .unwrap();
-    proxy.fault.send_replace(Fault::HoldSnapshot);
+    proxy.fault.send_replace(Fault::HoldState);
     let client = store.clone();
     let target = id.clone();
     let mut pending = JoinSet::new();
     pending.spawn(async move { client.hydrate(&target, NonZeroU32::MIN).await });
-    proxy.observed(Observation::Snapshot).await;
+    proxy.observed(Observation::State).await;
     let independent = PostgresStore::from_pool(control).await.unwrap();
     independent
         .commit(
@@ -340,7 +353,7 @@ async fn snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state() {
         captured,
         Hydrated::Found {
             position: Version::INITIAL,
-            state: SNAPSHOT_OLD.to_vec()
+            state: STATE_OLD.to_vec()
         }
     );
     assert_eq!(
@@ -410,6 +423,254 @@ async fn caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair() {
 #[cfg(feature = "import")]
 const SECOND_HEAD: &[u8] = b"pg5-order-second";
 
+#[cfg(feature = "projection")]
+#[tokio::test]
+async fn checkpoint_hydration_keeps_the_captured_revision_position_and_state_together() {
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_slice(b"checkpoint-pair");
+    let original = PgAllPos::new(1, 9);
+    let revision = store
+        .commit_checkpoint(
+            &id,
+            CheckpointWrite {
+                expected: None,
+                schema_version: NonZeroU32::MIN,
+                position: original,
+                state: &STATE_OLD.to_vec(),
+                mode: CheckpointMode::Advance,
+            },
+        )
+        .await
+        .unwrap();
+    proxy.fault.send_replace(Fault::HoldState);
+    let client = store.clone();
+    let target = id.clone();
+    let mut pending = JoinSet::new();
+    pending.spawn(async move { client.hydrate_checkpoint(&target, NonZeroU32::MIN).await });
+    proxy.observed(Observation::State).await;
+    let independent = PostgresStore::from_pool(control).await.unwrap();
+    let next = PgAllPos::new(2, 0);
+    let replacement = b"checkpoint-new".to_vec();
+    let updated = independent
+        .commit_checkpoint(
+            &id,
+            CheckpointWrite {
+                expected: Some(revision),
+                schema_version: NonZeroU32::MIN,
+                position: next,
+                state: &replacement,
+                mode: CheckpointMode::Advance,
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(updated.get(), 2);
+    proxy.fault.send_replace(Fault::Pass);
+    assert_eq!(
+        pending.join_next().await.unwrap().unwrap().unwrap(),
+        CheckpointHydrated::Found {
+            revision,
+            position: original,
+            state: STATE_OLD.to_vec(),
+        }
+    );
+    assert_eq!(
+        store
+            .hydrate_checkpoint(&id, NonZeroU32::MIN)
+            .await
+            .unwrap(),
+        CheckpointHydrated::Found {
+            revision: updated,
+            position: next,
+            state: replacement,
+        }
+    );
+}
+
+#[cfg(feature = "projection")]
+#[tokio::test]
+async fn codec_checkpoint_commit_retains_unknown_outcome_after_native_commit() {
+    let Some((mut proxy, raw, control)) = fixture().await else {
+        return;
+    };
+    let store = CodecSnapshotStore::new(raw, JsonCodec::default());
+    let id = StreamKey::from_slice(b"checkpoint-unknown");
+    let position = PgAllPos::new(u64::MAX, u64::MAX);
+    let state = mnesis_test_domains::CounterState { value: 7 };
+    proxy.fault.send_replace(Fault::DropCommit);
+    let result = store
+        .commit_checkpoint(
+            &id,
+            CheckpointWrite {
+                expected: None,
+                schema_version: NonZeroU32::MIN,
+                position,
+                state: &state,
+                mode: CheckpointMode::Advance,
+            },
+        )
+        .await;
+    proxy.observed(Observation::Committed).await;
+    assert!(matches!(result,
+        Err(CheckpointError::Store(CodecSnapshotStoreError::Store(PostgresError::CommitUnknown(sqlx::Error::Io(ref source)))))
+        if source.kind() == io::ErrorKind::UnexpectedEof));
+    let saved: (String, i64, String, String, Vec<u8>) = sqlx::query_as(
+        "SELECT c.revision::text, c.schema_version, c.txid::text, c.global_seq::text, c.state \
+         FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key WHERE k.value = $1",
+    )
+    .bind(id.as_bytes())
+    .fetch_one(&control)
+    .await
+    .unwrap();
+    assert_eq!(
+        saved,
+        (
+            "1".to_owned(),
+            1,
+            u64::MAX.to_string(),
+            u64::MAX.to_string(),
+            b"{\"value\":7}".to_vec()
+        )
+    );
+    assert_eq!(count(&control).await, 0);
+    proxy.fault.send_replace(Fault::Pass);
+    assert_eq!(
+        store
+            .hydrate_checkpoint(&id, NonZeroU32::MIN)
+            .await
+            .unwrap(),
+        CheckpointHydrated::Found {
+            revision: NonZeroU64::MIN,
+            position,
+            state,
+        }
+    );
+}
+
+#[cfg(feature = "projection")]
+#[tokio::test]
+async fn caller_timeout_after_checkpoint_commit_preserves_every_saved_field() {
+    let Some((mut proxy, store, control)) = fixture().await else {
+        return;
+    };
+    let id = StreamKey::from_slice(b"checkpoint-cancel");
+    let position = PgAllPos::new(7, 9);
+    let state = b"committed".to_vec();
+    let schema = NonZeroU32::new(u32::MAX).unwrap();
+    let write = CheckpointWrite {
+        expected: None,
+        schema_version: schema,
+        position,
+        state: &state,
+        mode: CheckpointMode::Advance,
+    };
+    proxy.fault.send_replace(Fault::HoldCommit);
+    {
+        let mut attempt = pin!(store.commit_checkpoint(&id, write));
+        tokio::select! {
+            result = &mut attempt => panic!("checkpoint COMMIT response must remain held: {result:?}"),
+            () = proxy.observed(Observation::Committed) => {},
+        }
+        assert!(
+            timeout(Duration::from_millis(20), &mut attempt)
+                .await
+                .is_err()
+        );
+    }
+    let saved: (String, i64, String, String, Vec<u8>) = sqlx::query_as(
+        "SELECT c.revision::text, c.schema_version, c.txid::text, c.global_seq::text, c.state \
+         FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key WHERE k.value = $1",
+    )
+    .bind(id.as_bytes())
+    .fetch_one(&control)
+    .await
+    .unwrap();
+    assert_eq!(
+        saved,
+        (
+            "1".to_owned(),
+            i64::from(u32::MAX),
+            "7".to_owned(),
+            "9".to_owned(),
+            state
+        )
+    );
+    assert_eq!(count(&control).await, 0);
+}
+
+#[cfg(feature = "projection")]
+#[tokio::test]
+async fn cancelled_projection_reloads_the_committed_pair_before_continuing() {
+    let Some((mut proxy, raw, control)) = fixture().await else {
+        return;
+    };
+    let events = projection::events(&raw).await;
+    let id = StreamKey::from_slice(b"cancelled-projector");
+    let codec = CodecSnapshotStore::new(&raw, JsonCodec::default());
+    let mut stepper = Projection::load(
+        id.clone(),
+        projection::Counter,
+        AfterEventTypes::new(&["Incremented", "Set"]),
+        &codec,
+        NonZeroU32::MIN,
+    )
+    .await
+    .unwrap();
+    drop(proxy.seen.borrow_and_update());
+    proxy.fault.send_replace(Fault::HoldCommit);
+    {
+        let mut attempt = pin!(stepper.advance(events[0].clone()));
+        tokio::select! {
+            result = &mut attempt => panic!("stepper COMMIT response must remain held: {result:?}"),
+            status = timeout(Duration::from_secs(3), proxy.seen.changed()) => status.unwrap().unwrap(),
+        }
+        assert_eq!(*proxy.seen.borrow(), Observation::Committed);
+        assert!(
+            timeout(Duration::from_millis(20), &mut attempt)
+                .await
+                .is_err()
+        );
+    }
+    assert!(matches!(
+        stepper.state(),
+        Err(ProjectionStateError::ReloadRequired)
+    ));
+    assert!(matches!(
+        stepper.advance(events[1].clone()).await,
+        Err(ProjectionError::State(ProjectionStateError::ReloadRequired))
+    ));
+    let independent = PostgresStore::from_pool(control.clone()).await.unwrap();
+    let saved = CodecSnapshotStore::new(independent, JsonCodec::default());
+    let resumed = Projection::load(
+        id.clone(),
+        projection::Counter,
+        AfterEventTypes::new(&["Incremented", "Set"]),
+        &saved,
+        NonZeroU32::MIN,
+    )
+    .await
+    .unwrap();
+    assert_eq!(resumed.checkpoint(), Some(events[0].0));
+    assert_eq!(
+        resumed.state().unwrap(),
+        &mnesis_test_domains::CounterState { value: 1 }
+    );
+    assert_eq!(
+        saved
+            .hydrate_checkpoint(&id, NonZeroU32::MIN)
+            .await
+            .unwrap(),
+        CheckpointHydrated::Found {
+            revision: NonZeroU64::MIN,
+            position: events[0].0,
+            state: mnesis_test_domains::CounterState { value: 1 },
+        }
+    );
+    assert_eq!(count(&control).await, 2);
+}
+
 #[cfg(feature = "import")]
 async fn forward_heads(
     client: &mut tokio::net::unix::OwnedReadHalf,
@@ -467,7 +728,7 @@ async fn fixture() -> Option<(Proxy, PostgresStore, PgPool)> {
     sqlx::raw_sql("DROP TRIGGER IF EXISTS ssi_read ON mnesis.events; DROP TRIGGER IF EXISTS foreign_unique ON mnesis.events; DROP FUNCTION IF EXISTS mnesis.ssi_read(); DROP FUNCTION IF EXISTS mnesis.foreign_unique(); DROP SCHEMA IF EXISTS mnesis_foreign CASCADE")
         .execute(&control).await.unwrap();
     let setup = PostgresStore::from_pool(control.clone()).await.unwrap();
-    sqlx::query("TRUNCATE mnesis.events RESTART IDENTITY")
+    sqlx::query("TRUNCATE mnesis.events, mnesis.snapshots, mnesis.checkpoints RESTART IDENTITY")
         .execute(&control)
         .await
         .unwrap();

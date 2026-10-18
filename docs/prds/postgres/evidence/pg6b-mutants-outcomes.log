@@ -1,0 +1,1057 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.520569125,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 21.771793833,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/schema.rs:47:5: replace validate_current -> Result<(), PostgresError> with Ok(())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/schema.rs",
+          "function": {
+            "function_name": "validate_current",
+            "return_type": "-> Result<(), PostgresError>",
+            "span": {
+              "start": {
+                "line": 46,
+                "column": 1
+              },
+              "end": {
+                "line": 95,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 47,
+              "column": 5
+            },
+            "end": {
+              "line": 94,
+              "column": 11
+            }
+          },
+          "replacement": "Ok(())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__schema.rs_line_47_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__schema.rs_line_47_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 7.832660125,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.083551417,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/schema.rs:89:8: delete ! in validate_current",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/schema.rs",
+          "function": {
+            "function_name": "validate_current",
+            "return_type": "-> Result<(), PostgresError>",
+            "span": {
+              "start": {
+                "line": 46,
+                "column": 1
+              },
+              "end": {
+                "line": 95,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 89,
+              "column": 8
+            },
+            "end": {
+              "line": 89,
+              "column": 9
+            }
+          },
+          "replacement": "",
+          "genre": "UnaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__schema.rs_line_89_col_8.log",
+      "diff_path": "diff/adapters__postgres__src__schema.rs_line_89_col_8.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 14.118621209,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.433444042,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:26:9: replace Metadata::validate -> Result<(NonZeroU64, NonZeroU32, PgAllPos), PostgresError> with Ok((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default()))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Metadata::validate",
+            "return_type": "-> Result<(NonZeroU64, NonZeroU32, PgAllPos), PostgresError>",
+            "span": {
+              "start": {
+                "line": 25,
+                "column": 5
+              },
+              "end": {
+                "line": 40,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 26,
+              "column": 9
+            },
+            "end": {
+              "line": 39,
+              "column": 41
+            }
+          },
+          "replacement": "Ok((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default()))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_26_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_26_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.479182084,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:58:9: replace Row::hydrate -> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Row::hydrate",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 52,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 58,
+              "column": 9
+            },
+            "end": {
+              "line": 81,
+              "column": 11
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_58_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_58_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.462647917,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:59:26: replace != with == in Row::hydrate",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Row::hydrate",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 52,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 59,
+              "column": 26
+            },
+            "end": {
+              "line": 59,
+              "column": 28
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_59_col_26.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_59_col_26.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.82640475,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.197904792,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:65:22: replace > with == in Row::hydrate",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Row::hydrate",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 52,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 65,
+              "column": 22
+            },
+            "end": {
+              "line": 65,
+              "column": 23
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_65_col_22.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.59904575,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.2047205,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:65:22: replace > with < in Row::hydrate",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Row::hydrate",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 52,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 65,
+              "column": 22
+            },
+            "end": {
+              "line": 65,
+              "column": 23
+            }
+          },
+          "replacement": "<",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 6.771023292,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.107647,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:65:22: replace > with >= in Row::hydrate",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "Row::hydrate",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 52,
+                "column": 5
+              },
+              "end": {
+                "line": 82,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 65,
+              "column": 22
+            },
+            "end": {
+              "line": 65,
+              "column": 23
+            }
+          },
+          "replacement": ">=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_002.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_65_col_22_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 7.107576792,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.218057,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:90:5: replace lock -> Result<Option<(NonZeroU64, NonZeroU32, PgAllPos)>, PostgresError> with Ok(None)",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "lock",
+            "return_type": "-> Result<Option<(NonZeroU64, NonZeroU32, PgAllPos)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 85,
+                "column": 1
+              },
+              "end": {
+                "line": 100,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 90,
+              "column": 5
+            },
+            "end": {
+              "line": 99,
+              "column": 17
+            }
+          },
+          "replacement": "Ok(None)",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_90_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_90_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.230913792,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.379469208,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:90:5: replace lock -> Result<Option<(NonZeroU64, NonZeroU32, PgAllPos)>, PostgresError> with Ok(Some((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default())))",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "lock",
+            "return_type": "-> Result<Option<(NonZeroU64, NonZeroU32, PgAllPos)>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 85,
+                "column": 1
+              },
+              "end": {
+                "line": 100,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 90,
+              "column": 5
+            },
+            "end": {
+              "line": 99,
+              "column": 17
+            }
+          },
+          "replacement": "Ok(Some((1.try_into().unwrap(), 1.try_into().unwrap(), Default::default())))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_90_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_90_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.515605084,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:103:5: replace storage -> CheckpointError<PostgresError> with CheckpointError::new()",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "storage",
+            "return_type": "-> CheckpointError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 103,
+              "column": 5
+            },
+            "end": {
+              "line": 103,
+              "column": 56
+            }
+          },
+          "replacement": "CheckpointError::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_103_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.508634917,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:103:5: replace storage -> CheckpointError<PostgresError> with CheckpointError::from_iter([Default::default()])",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "storage",
+            "return_type": "-> CheckpointError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 103,
+              "column": 5
+            },
+            "end": {
+              "line": 103,
+              "column": 56
+            }
+          },
+          "replacement": "CheckpointError::from_iter([Default::default()])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_001.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.515940541,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:103:5: replace storage -> CheckpointError<PostgresError> with CheckpointError::new(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "storage",
+            "return_type": "-> CheckpointError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 103,
+              "column": 5
+            },
+            "end": {
+              "line": 103,
+              "column": 56
+            }
+          },
+          "replacement": "CheckpointError::new(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_002.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.466150459,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:103:5: replace storage -> CheckpointError<PostgresError> with CheckpointError::from(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "storage",
+            "return_type": "-> CheckpointError<PostgresError>",
+            "span": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 103,
+              "column": 5
+            },
+            "end": {
+              "line": 103,
+              "column": 56
+            }
+          },
+          "replacement": "CheckpointError::from(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_003.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_103_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.519306125,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:114:9: replace <impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore>::hydrate_checkpoint -> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError> with Ok(Default::default())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "<impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore>::hydrate_checkpoint",
+            "return_type": "-> Result<CheckpointHydrated<Vec<u8>, PgAllPos>, PostgresError>",
+            "span": {
+              "start": {
+                "line": 109,
+                "column": 5
+              },
+              "end": {
+                "line": 129,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 114,
+              "column": 9
+            },
+            "end": {
+              "line": 128,
+              "column": 10
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_114_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_114_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.472167792,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "adapters/postgres/src/store/checkpoint.rs:136:9: replace <impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore>::commit_checkpoint -> Result<NonZeroU64, CheckpointError<PostgresError>> with Ok(1.try_into().unwrap())",
+          "package": "mnesis-postgres",
+          "file": "adapters/postgres/src/store/checkpoint.rs",
+          "function": {
+            "function_name": "<impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore>::commit_checkpoint",
+            "return_type": "-> Result<NonZeroU64, CheckpointError<PostgresError>>",
+            "span": {
+              "start": {
+                "line": 131,
+                "column": 5
+              },
+              "end": {
+                "line": 189,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 136,
+              "column": 9
+            },
+            "end": {
+              "line": 188,
+              "column": 21
+            }
+          },
+          "replacement": "Ok(1.try_into().unwrap())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/adapters__postgres__src__store__checkpoint.rs_line_136_col_9.log",
+      "diff_path": "diff/adapters__postgres__src__store__checkpoint.rs_line_136_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 13.565704083,
+          "process_status": "Success",
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--no-run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.180941,
+          "process_status": {
+            "Failure": 100
+          },
+          "argv": [
+            "cargo",
+            "nextest",
+            "run",
+            "--verbose",
+            "--package=mnesis-postgres@0.4.0",
+            "--all-features",
+            "--test-threads=1"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 16,
+  "missed": 0,
+  "caught": 8,
+  "timeout": 0,
+  "unviable": 8,
+  "success": 0,
+  "start_time": "2026-10-18T15:20:38.796792Z",
+  "end_time": "2026-10-18T15:22:33.03424Z",
+  "cargo_mutants_version": "27.1.0"
+}

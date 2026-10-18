@@ -1,0 +1,8 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.18s
+────────────
+ Nextest run ID b08c6e33-ec94-4c00-87b1-11b117144be4 with nextest profile: default
+    Starting 1 test across 1 binary (15 tests skipped)
+        PASS [   0.093s] (1/1) mnesis-postgres::outcome_tests cancelled_projection_reloads_the_committed_pair_before_continuing
+────────────
+     Summary [   0.094s] 1 test run: 1 passed, 15 skipped

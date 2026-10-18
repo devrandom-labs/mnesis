@@ -1,0 +1,8 @@
+   Compiling mnesis v0.4.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/tmp/mnesis-pg6b-lock-control.m6lSZn/crates/store-testing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.54s

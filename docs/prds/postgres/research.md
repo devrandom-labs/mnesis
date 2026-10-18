@@ -2552,3 +2552,568 @@ Final evidence amendment uses the same normal hook; cached reuse adds zero
 fresh runs. Then push corrected head, rerun ALL CI, inspect uploaded CI mutation
 outcomes/logs/diffs and review threads before protected merge. Original candidate
 475a's40 green checks never substitute for that new-head delivery verification.
+PG6a focused PR382 opened at signed475a73ff8e72566d029515e6c03f744e16623695:
+https://github.com/devrandom-labs/mnesis/pull/382. Final normal hook12/12 allcached.
+Three reviews: existing required gate executed without bypass; nextest/native
+source identities match retained fresh proofs; cached checks add zero fresh test
+runs. CI39130711194 and mutation39130711227 queued; all review/CI/protected merge
+still required. PG6b starts separately while CI runs, not a claim PG6a merged.
+
+PG6b pre-edit locked ownership: existing checkpoint.rs next_revision owns revision
+comparison, schema/rebuild/position validation and overflow. Reuse it under actual
+Postgres row lock; no duplicated predicate policy in SQL. Migration4 checkpoint
+record uses separate table/raw key number, schema/revision/txid/global_seq/state;
+all u64 scalars remain lossless NUMERIC(20,0), zero position is valid, revision
+nonzero. All fields read/replaced together, metadata validated before Stale,
+byte limits before BEGIN and body materialization. Existing SQLx/Tokio facilities
+only; no dependency/framework/runtime/new public checkpoint API.
+Budget recorded BEFORE implementation in HYPOTHESES:260/30 productionRust,
+100SQL,500 native laws,100 existing proxy lines; later consumer/recovery passes
+need separate explicit budgets. First four test categories precede implementation:
+protocol rejection/rebuild, persisted reopen/extremes, corruption/overflow, and
+native overlapping creators/advancers. Preseed raw key for true absent checkpoint
+race; otherwise key creation serialization could conceal broken checkpointCAS.
+Hold native BEFORE INSERT/UPDATE trigger with an administrative advisory lock,
+observe both writers blocked in their actual checkpoint operations, then release.
+Creation loser must observe exact winner revision; update loser exact next one.
+Use isolated mnesis_pg6b DB on local17.10, serial suites; no PG6a local suite runs
+concurrently. Real PG6a CI owns separate clusters. All failed/filtered/native runs
+receive three reviews; E0277 missing implementation is zero runtime evidence.
+
+PG6b initial five native law cases fail compilation:22 E0599 errors all identify
+missing CheckpointStore methods/trait bound. Zero runtime cases. Three reviews:
+(1) tests invoke existing public contract, not a replacement test model; (2)
+current adapter demonstrably lacks this capability; (3) no syntax/feature typo or
+native result credited. Native protocol/lifecycle/boundary/overlapping-writer
+laws exist before implementation. No production checkpoint code written yet.
+
+Work pauses on PG6b implementation to handle a PG6a finding on its OWN branch:
+execute() does not prove snapshot UPSERT actually changed a row if BEFORE trigger
+returns NULL. Native red case underway in /private/tmp/mnesis-postgres-state.
+Preserve this worktree's feature/test/docs changes; do not mix parent fix here
+before focused retention/review. Parent PR382 must await corrected evidence.
+
+PG6b resumes after hardened parent source retained/pushed as signedc72f38ca in
+PR382. Final parent amendment normal gate12/12 passes:11cached, same-input WASM
+rebuilt; three reviews confirm required gate/source identity/no fresh test credit.
+Parent new-head CI still required, including downloading `mutants` artifact.
+Child work saved in named stash `PG6b initial laws before snapshot hardening
+c72f38ca`, OIDb51e18ce53f0a3e9326676e014d3bdab26778392; stash KEPT. Fast-forwarded
+child to c72f38ca, applied stash, resolved single append/append research conflict
+by retaining BOTH complete records. Parent hardened source/test/workflow files
+have zero diff against parent HEAD. Initial law source and tracked patch also
+saved in /tmp/mnesis-pg6b-initial-laws.rs and before-parent-alignment.patch.
+Before implementation, extend corruption lifecycle with actual reopen rejection
+and require zero-row checkpoint writes to fail: absent no-op is NOT an actual
+creation-race winner; it must not fabricate Conflict(None,None) or commit a key.
+Use supported INSERT RETURNING optional for legitimate race, then require actual
+locked winner or RowNotFound; UPDATE RETURNING requires a row. Initial test
+budget500 still applies; no helper framework or repeated write policy.
+
+Migration4 DDL introspection against actual migrated mnesis.keys on local17.10
+runs entirely inside BEGIN/ROLLBACK; exact native constraint definitions recorded
+in pg6b-native-shape.log. Three reviews: current migration SQL is exercised;
+actual native definitions (including zero-valid position bounds) drive independent
+read-only shape validation; rollback preserves parent schema/metadata/data and
+this is NOT checkpoint runtime-behavior evidence. Metadata FromRow flatten is a
+supported pinned SQLx0.9 feature. Initial product uses one native row lock and
+sole next_revision policy; zero-row INSERT observes winner underlock, suppression
+with no winner returns RowNotFound. SQL static INSERT/UPDATE share all field
+bindings; existing-row zero update likewise cannot be acknowledged. No retry.
+Checkpoint metadata/nullable selected body use different types rather than dummy
+fields or mode flags. Migration4 validates even when projection is disabled.
+
+First PG6b implementation attempt fails E0382 compilation before runtime: adding
+the next catalog query reused a moved &mut PgConnection. Three reviews: shared
+validation transaction contract retained; actual compiler detects missing
+reborrow, not a checkpoint behavioral failure; zero runtime cases/no coverage
+credit. Reborrow the snapshot query's connection explicitly, preserving the same
+brief read-only repeatable-read transaction and cancellation cleanup.
+
+First six native checkpoint laws PASS6/6,27.555s, zero skips. Three reviews:
+(1) exact creation/advance/rebuild/stale/position/overflow/error/reopen contracts;
+(2) actual two INSERT contenders with preseeded key and two advancing writers
+have one complete winner and exact loser revision, corruption stays corrupt,
+suppressed creation/update return storage failure with no orphan key; (3) all
+cleanup precedes assertions, no unrelated error accepted as CAS conflict, no
+runtime proof credited to the earlier compile failures. First cold fixture27.350s
+remains unresolved PG8; other laws0.036–0.048s. This is targeted capability proof,
+not whole PG6/delivery. Case review found the overlap wait depends on SQL casing.
+Replace query text matching with native blocking PID relationships: creation
+requires two DIRECT waiters on the trigger gate; advancement allows a row-lock
+waiter behind the first writer. Preserve the actual creation race; a key-catalog
+serialization must not masquerade as two creators. No deadline increase.
+
+Strict initial Clippy rejects the private SQLx-to-checkpoint error constructor
+because it can be const. No runtime test failure and no lint relaxation: make
+that existing constructor const, then rerun strict all-target/all-feature checks.
+
+PG6a final headc72f38ca CI39133566393 passes all40 checks/one scheduled skip.
+Native163/25.347s integration job and163/20.601s Nix-check job are TWO actual runs;
+installed25.347s replay is not third. Their exact atomic/snapshot smoke pairs
+1/0.071s+1/0.057s and1/0.045s+1/0.040s are separate filtered proofs, not added to163.
+Workspace1561/88.605s with four compiler exclusions; separate compiler functions
+2/108.46s,1/3.88s,1/12.19s all pass at SAME head. Three distinct reviews of EACH
+native/smoke/workspace/compiler/feature-matrix run: source/expected contracts;
+actual original and new suppression regressions/diagnostics; skips, empty harness,
+feature and installed-log limits. No failed/filtered/DB-free coverage credited.
+
+CI mutation39133566425 artifact`mutants`,ID12139461392 downloaded and reviewed
+locally, all outcomes/log/diff available. Baseline163/24.886s;23candidates21caught,
+2E0277unviable,0missed/timeout. Three reviews for EVERY candidate run: changed
+contract and exact first failure; actual native error/value/fault; residual-state,
+source/timing/filter loopholes. No poison. CI key-lookup mutations differ in valid
+race interleaving: one produces TWO concurrent winners[0,2], others RowNotFound
+or actualFK23503, all reject the mapping/valid-write contract. Snapshot schema/
+size flips reject exact pair/limits; no-op commit caught at native COMMIT-entry
+guard, not described as independent persistence proof. New native zero-row red/
+fix plus direct cache laws supply separate storage evidence. Unviable never
+counted caught. Artifact upload uses existing stock action and succeeded.
+PR merge statusCLEAN/MERGEABLE at reviewedc72, zero reviews/threads to resolve;
+normal protected squash with matching head next, no admin/bypass or early release.
+
+PG6a DELIVERED through protected squash PR382 on2026-10-18T14:14:32Z:
+merge090504ae3b2081c03cfd8960f6edc5c0058fb3b2, reviewed headc72f38cab09df220f2c1f78aad96757c51b7ab0c.
+All40 checks green/one scheduled skip; no unresolved review threads; matching
+head, no admin/bypass. CI39133566393, mutation39133566425 and artifact12139461392
+are final-head evidence. Publication/full PG6 and adapter acceptance stay OPEN.
+
+Second strict Clippy pass finds similar local state/stale names and a test helper
+needlessly owning expected rejection. Rename the mismatch result and borrow the
+expected rejection, retaining ALL exact comparisons. No lint level changes or
+runtime assertion weakening. Private error constructor now const as requested.
+
+Strict third all-target/all-feature Clippy passes. Native blocking-PID race
+selection1/1 passes27.773s, five filtered. Three reviews: both real absent-row
+creators directly wait on the trigger gate; existing-row advancement has actual
+lock overlap with exact winner/loser/full pair; no query-casing dependence,
+deadline or assertion weakening, filtered cases not credited. Cold fixture tail
+near27s repeats independently of full workspace tests and remains PG8 research.
+Next align child safely onto merged090504ae; parent and reviewed c72 trees are
+identical by git diff. Save named stash and apply index so all tracked/untracked
+product/test/evidence and prior staging survive; no mixed reset of source files.
+
+Child safely aligned onto merged090504ae using KEPT stashfbcc7d919c5df03ee3216065de84a63ddb825992,
+empty-range rebase fromc72 and apply --index; source trees equal, all staged/
+untracked work restored without conflict or negative parent changes.
+
+PG6b bounded-state verification pass BEFORE edits: <=220 additional native lines,
+zero production changes, reuse existing allocation fixture. Cover1MiB stale and
+oversize reads without body allocation, exact byte edge/pre-BEGIN closed-pool
+rejection, invalid rebuilds and same-ID aggregate/projection separation. Then
+wire-pair/uncertainty and real-consumer verification receive their own explicit
+budgets; no initial500-line test-budget concealment. These reject observable
+state loss/resource behavior, not a reimplementation of next_revision.
+
+Before verification/retention, bounded-state test budget refined220→260 lines:
+rustfmt gives251 added including four full laws, shared allocation import and
+a real bounded-store fixture. Missing-record CAS and both directions of namespace
+independence are included rather than weakening coverage to meet an estimate.
+Actual product remains unchanged203/1Rust,49SQL. Strict all-target/all-feature
+Clippy passes. This is a transparent pre-verification budget revision, not a
+claim the original220 estimate was met. Next run all ten native checkpoint laws.
+
+All ten native checkpoint laws PASS10/10,3.017s, zero skips. Three reviews:
+(1) missing/stale revisions, invalid rebuilds, byte limits and namespace independence
+match owner contracts; (2)1MiB stale/oversize reads stay below262144 allocated
+bytes, exact37-byte edge succeeds,38-byte input rejects even on closed pool,
+snapshot and checkpoint updates leave each other intact; (3) actual allocation
+counter warmed before sampling, no println-as-assert/filter/skip or backend-error
+alias accepted. All ten include the original six with strengthened blocking-PID
+probe. Strict Clippy passes; no full-suite or release credit yet.
+
+PG6b transport verification budget BEFORE editing: <=230 new native test lines,
+<=35 changed existing proxy/fixture lines, zero production changes. Reuse held
+state DataRow and actual COMMIT marker: capture old complete checkpoint while
+independent real update commits; after release require old record, then new.
+Native ACK loss through existing codec retains exact CommitUnknown/UnexpectedEof,
+actual caller timeout after COMMIT preserves full revision/schema/position/body.
+Rename private shared snapshot probe to state and enable it for either feature;
+no new transport runtime/framework. Reset events AND both state tables before
+outcome cases so isolated repeats cannot inherit prior checkpoint revisions.
+
+Projection-only native transport3/3 PASS0.156s,12filtered; strict all-target/
+all-feature Clippy passes. Three reviews: (1) full old revision/position/state
+captured while a real independent replacement commits; native ACK loss propagates
+exact typed CommitUnknown/UnexpectedEof through codec; caller timeout follows
+actual COMMIT and preserves all fields; (2) independent native queries verify
+revision1/full unsigned positions/schema/state and zero event writes, no retry;
+(3) actual fault-entry markers observed, future truly dropped after20ms held
+reply, subset/filtered cases not credited, new fixture resets both state tables
+for repeat isolation. Existing snapshot probe behavior still needs full regression
+coverage with renamed shared marker. No whole-PG6/delivery claim.
+
+PG6b real-consumer verification BEFORE edits: <=300 native consumer lines plus
+<=80 shared test fixture lines and <=100 existing outcome-case lines; zero product
+changes/dependencies. Use existing Counter/CounterEvent/CounterState/CounterError,
+a small checked Projector, real repository-produced events, RawEventStore read+
+DecodedStreamExt, CodecSnapshotStore and actual Projection load/advance/rebuild.
+Verify exclusive resume, schema mismatch/rebuild preserving revisions, a real
+stale writer requiring reload, and actual caller cancellation after COMMIT making
+the stepper unusable until reload. Shared pure projector/event fixture is used by
+consumer and wire case; it is not a fake store, framework or runtime runner.
+
+Real-consumer strict compile check caught one unused test import, zero runtime;
+removed the unused PostgresError import without lint changes. Consumer source
+214lines/shared fixture62 within300/80 budget. Native cancellation case is added
+through the same real projector/repository/decoder fixture: after actual COMMIT,
+drop stepper future, require ReloadRequired on access/advance, then independently
+reload exact committed state/revision/position. No resubmission after timeout.
+
+Pre-run cancellation case review found an old COMMIT watch value from seeding
+history through the proxy. Mere equality would not prove THIS checkpoint committed.
+Mark the old version seen BEFORE arming, then require a NEW watch change and exact
+Committed phase before the20ms timeout. Preserve3s fault-entry bound. Other new
+raw timeout/ACK-loss cases arm before first proxy commit; pair case waits for
+State, not the earlierCommitted value. No stale marker accepted as actual fault.
+
+Cancellation freshness compile check failed E0615 because the existing receiver
+field is `seen`, while `observed` is a method. Zero runtime; use the actual
+receiver, preserving fresh-version semantics and exact phase assertion. No
+suppression, annotation workaround or claimed passing consumer case.
+
+Real projection consumers3/3 PASS18.079s, zero skips. Three reviews: (1) real
+repository-produced events decoded from native read_all drive existing stepper/
+codec; exact persisted state/global position resumes exclusively, explicit schema
+rebuild preserves revision1→4; (2) actual stale writer returns exact conflict and
+is unusable until reload, resumed state cannot double-apply old event; (3) fixed
+two-event collection supports replay/duplicate consumers rather than unbounded
+product loading, exact remaining tuple and revision counts prevent Set(4) from
+masking duplicate replay. First fixture18.001s remains PG8 observation. This is
+real adapter integration, no fake store/new kernel API/runtime.
+
+PG6b least-privilege and migration verification BEFORE edits: <=110 native lines
+each, zero product changes. Real LOGIN checkpoint writer gets metadata/key lookup,
+key INSERT/sequence USAGE and checkpoint SELECT/INSERT/UPDATE, no key mutation,
+event rewrite/delete, checkpoint delete or DDL. Exact42501 denials and true
+current_user/session_user identity; cleanup before assertions. Frozen migration3
+fixture contains actual event plus full-range snapshot: foreign checkpoints table
+must fail migration4 transaction with42P07, preserve exact metadata/data/position,
+then explicit rename and forward repair retain next sequence/exclusive resume.
+Do not rewrite applied migration SQL/checksums or discard a foreign object.
+
+Cancellation consumer native1/1 PASS0.094s,15filtered. Three reviews after this
+run: (1) actual Projection/codec consumer becomes ReloadRequired after canceled
+persistence and cannot advance until reload; (2) a fresh watch change proves THIS
+checkpoint COMMIT preceded timeout, independent reload yields revision1/state1/
+first position and native history remains exactly two events; (3) old seeding
+COMMIT is marked seen before arming, held reply future actually drops, exact pair
+and blocked-access assertions remain,15filtered cases receive no runtime credit.
+No retry is issued after uncertainty. Log /tmp/mnesis-pg6b-cancelled-consumer-native.log.
+
+Restricted-role Clippy check rejected86/80 function lines; zero runtime. Consolidate
+only the repeated five identical expected permission codes into vec![Some(...);5].
+All five independent denied operations and exact42501 assertions remain. No lint
+allow, deadline, privilege or production change.
+
+Restricted-role native1/1 PASS3.581s,9filtered, projection-only. Three reviews:
+(1) real LOGIN/current_user/session_user proves the supported runtime grants can
+create and conditionally advance checkpoints without key UPDATE or DDL;
+(2) exact persisted revision2/position(2,0)/state[2] follows real INSERT then UPDATE,
+while five native privilege probes fail exact42501; (3) expected codes have five
+entries matching the five attempted operations, privileged setup is separate,
+runtime pool closes and role cleanup precedes all assertions. Filtered cases are
+not credited. Strict all-feature Clippy passes, no lint/privilege relaxation.
+
+Migration compile check rejects107/80 function lines, zero runtime. Split the
+history/next-sequence/exclusive-resume assertions into a private test helper;
+keep the entire collision/metadata/cache/foreign-object sequence together.
+Before runtime verification/retention, migration test budget110→150 formatted
+lines: the original estimate omitted three exact checksum snapshots and full
+unsigned/binary cache preservation. No production budget change; all acceptance
+and failure assertions stay. No applied migration or lint change.
+
+PG6b process-termination verification BEFORE edits: <=90 native lines, zero
+production changes. Reuse existing support/process.rs kill-after-real-ACK fixture;
+child commits full-range revision/schema/position/state through actual adapter,
+retains handles, parent confirms native SIGKILL and independently reopens exact
+record. Client crash evidence only, no server/power-loss durability claim.
+
+Migration3→4 native1/1 PASS0.057s,4filtered (default features). Three reviews:
+(1) actual frozen migration3 with event and unsigned/binary snapshot hits native
+42P07 at migration4, retains exact existing checksums/success flags, then explicit
+rename repairs forward; (2) exact full-range cache and foreign row remain, event
+position unchanged, next sequence is old+1 and exclusive resume returns only new
+version2; (3) repair occurs before assertions, no applied SQL/checksum edits or
+foreign-object deletion, default-feature execution proves validation does not
+require capability feature unification. Only this one case receives runtime credit.
+Stronger follow-up captures cache immediately after failure as well, before repair,
+to directly establish rollback preservation independently of forward repair.
+
+Added direct post-failure cache capture: strict compile81/80 lines, zero runtime;
+name the existing versions vector before the unchanged exact[1,2,3] assertion.
+No helper framework, lint relaxation or reduced checks. Crash fixture writes
+revision1 with maximum schema/position, rather than claiming a maximum revision.
+
+First complete PG6b native all-feature regression:183/183 PASS20.158s,zero skips,
+14 binaries. Three reviews after this run:
+1. Contract: native CAS, full unsigned state/revision/positions, explicit rebuild,
+real projection resume/reload, bounds and namespace separation all run alongside
+existing append/atomic/import/snapshot/migration/wake contracts.
+2. Defect/fault: actual overlap gate admits one complete winner; real ACK loss and
+post-COMMIT timeout preserve uncertainty and saved pair; new child acknowledges
+revision1/full-range schema+position then native SIGKILL, independent reopen exact;
+migration collision retains cache both immediately after failure and after repair,
+checksums unchanged, exact next sequence/exclusive resume remain.
+3. Oracle/provenance: actual DATABASE_URL PG17.10, serial shared cluster,0skips,
+source compiled from checkpoint worktree; both renamed snapshot wire regressions
+and new checkpoint holds pass, all four real consumer cases execute, role cleanup
+and corruption repair precede assertions. No installed-log replay, filtered cases,
+cache or compile failures credited. Existing snapshot process test also runs.
+Log: evidence/pg6b-full-native.log. This is not Linux/full-flake/CI/merge/release.
+
+PG6b shape falsifier BEFORE edits: <=90 native test lines, <=4 SQL validation
+lines,0 Rust production. Threat: native inheritance reads descendants but parent
+PK/FK do not enforce descendant uniqueness, so a validator checking only relkind,
+columns and parent constraints could accept multiple checkpoint rows for one ID.
+Create a real inherited child containing a duplicate key with distinct saved
+state; require startup Schema rejection, cleanup child before assertions. First
+run must reject current source if shape guard is missing. Then reject either
+parent/child inheritance through existing pg_catalog validation, no new runtime,
+API, migration/checksum rewrite or per-query workaround. Other catalog owners
+remain subject to final whole-repository audit rather than a silent readiness claim.
+
+Inheritance ORIGINAL native0/1 FAIL0.052s,14filtered at exact startup-rejection
+assertion. Three reviews: (1) supported checkpoint profile requires unique rawID
+record and coherent CAS; (2) native query actually returns two distinct saved
+states under ONE key from parent+child, but current startup accepts the schema;
+(3) exact[parent,child] assertion executes first, child and inserted parent row
+are removed BEFORE failure assertion, no timeout/fixture/compile failure or
+missing feature passed as the intended red. Default-feature SUT freshly compiled
+from this worktree. Actual original unsafe-schema acceptance reproduced.
+
+Inheritance FIXED native1/1 PASS0.059s,14filtered. Three reviews: (1) startup now
+rejects unsupported inheritance using existing read-only coherent schema view;
+(2) same exact duplicate native[parent,child] rows that original source accepted
+are rejected as Schema after two-line pg_inherits check; (3) default-feature
+fresh compile path recorded, cleanup still BEFORE assertions, no ONLY query that
+could silently hide foreign rows or metadata repair. Only this case credited;
+full183 run predates this production fix and must be repeated at final source.
+
+PG6b remaining metadata boundary verification BEFORE edits: <=180 native lines,
+zero product changes. Extend existing corruption law to revision0/>MAX,
+schema0/negative/>MAX, txid/sequence negative/>MAX. Native DROP guard+UPDATE,
+actual matching/stale reads and conditional write must preserve CorruptRow,
+not Stale/Conflict or a raw SQLx failure. Capture exact full corrupted row before
+and after attempted write; restore value and original CHECK before assertions.
+Keep tests against actual adapter metadata validation, not replicated parser or
+next_revision. The original revision0 case remains among the same canonical laws.
+
+Metadata-helper compile check E0521: SQLx0.9 accepts static literal SQL without
+unsafe assertion, and Id helper accidentally added an extra reference. Zero
+runtime. State literal arguments explicitly &'static str and pass existing
+borrowed StreamKey directly. No dynamic SQL safety escape, ownership/API change
+or lint relaxation.
+
+PG6b CI/capability wiring BEFORE edits: <=7 Nix lines in existing integration
+check, one --no-tests=fail projection consumer selector before full archive run;
+<=35 README lines documenting exact grants/CAS/reload/migration4 behavior and
+<=8 changelog lines. No new job, framework, package or runtime. Verify selector
+with projection absent fails, so --all-features cannot silently omit capability.
+
+Expanded metadata+both inheritance directions native2/2 PASS0.149s,24filtered.
+Three reviews: (1) all nine corrupt scalar witnesses return CorruptRow on matching
+AND stale reads and store-wrapped CorruptRow on conditional writes, missing guards
+reject startup; (2) exact full native corrupted row remains unchanged and final
+repaired checkpoint is revision1/position(1,1)/state[7], inherited descendants and
+an inherited parent both reject Schema; (3) each mutation repairs original value/
+CHECK BEFORE assertions, both inheritance edges detached/dropped before assertions,
+zero skips among selected cases, no raw SQLx/Conflict/Stale alias accepted. Initial
+E0521 compilation gets no runtime credit. Strict Clippy current source passes.
+
+Final-source default native118/118 PASS14.182s,0skips. Three reviews: (1) default
+feature intentionally has no checkpoint/snapshot/import API but validates all four
+migrations and both checkpoint inheritance edges; (2) original read/wake/commit
+fault laws and3→4 collision/cache/checksum/resume preservation actually run;
+(3) DATABASE_URL realPG17.10/serial, capability-only binaries correctly contain
+zero cases rather than falsepasses, no selective filter, all118 named cases
+reviewed; source compiled current worktree. This is default-only evidence.
+
+Final-source import-only native144/144 PASS18.901s,0skips. Three reviews:
+(1) all default118 plus26 import/atomic cases execute without snapshot/projection
+feature unification; (2) native atomic overlap, rejected final write, whole/per-stream
+progress and ACK-loss/timeout/real-deadlock preservation run alongside schema4
+upgrade and original read/wake regressions; (3) all144 named cases in real serial
+PG17.10, no missing selected feature, repeated log credit or ignored failure.
+Filtered capability binaries are absent, not claimed as exercised.
+
+Final-source snapshot-only native139/139 PASS15.168s,0skips. Three reviews:
+(1) unconditional snapshot semantics and all five shared conformance laws remain
+present without import/projection features; (2) renamed held-old-state read still
+forces independent replacement, native suppression/ACK-loss/caller-timeout and
+SIGKILL recovery execute,3→4 migration preserves caches; (3) all139 named real
+serial PG17.10 cases reviewed, no projection API credited from feature unification,
+no threshold/skip/oracle changes. Snapshot-only evidence, not final all-features.
+
+Fresh isolated lock-omission control native0/1 FAIL0.042s,10filtered. Three reviews:
+(1) removing only FOR UPDATE violates one-winner revision CAS; (2) actual overlap
+returns BOTH writes Ok(2), expected loser is exact Conflict{Some(1),Some(2)},
+failure is semantic, not gate/deadline/setup; (3) isolated proof target adapter
+artifacts explicitly cleaned837.5MiB and adapter recompiled from control manifest
+/tmp/mnesis-pg6b-lock-control.m6lSZn before running, compile path retained in log.
+No stale shared target credit; working product untouched, no exclusions/relaxation.
+
+Evidence whitespace housekeeping: strip trailing spaces only in committed copies
+of native catalog/failure extracts, retaining original /tmp logs unchanged. No
+case names, errors, values, timings or verdicts changed. git diff --check had
+correctly identified terminal-output spaces, not production/test defects.
+
+Final-source projection-only native136/136 PASS15.449s,0skips. Three reviews:
+(1) all118 default plus18 projection cases execute without snapshot/import;
+(2) actual two-writer overlap, nine corrupted metadata witnesses, suppressed writes,
+1MiB allocation/byte edges, real stepper rebuild/stale/canceled reload, full pair
+hold/ACK loss, LOGIN and SIGKILL laws execute; (3) all136 named cases reviewed,
+namespace law intentionally requires snapshot and is not credited here, literal
+SQL source/manifest/current feature prove isolated compilation. Zero skipped
+selected tests; no deadline/threshold/expectation reduction.
+
+Fresh isolated unconditional-body control native0/1 FAIL0.055s,10filtered. Three
+reviews: (1) bounded stale reads must omit state body before transfer/allocation;
+(2) changing only CASE ELSE to return c.state makes actual1MiB stale hydration
+allocate6,306,290 bytes, failing original262,144-byte ceiling; (3) isolated proof
+target adapter cleaned106.7MiB then explicitly recompiled from body-control
+manifest, no stale/shared artifact, SQL source and compile log retained. Failure
+is allocation assertion, not setup/timeout/decoding, threshold unchanged, working
+source untouched. Oversized branch is unrun after first assertion and NOT credited.
+
+Final-source import+snapshot native165/165 PASS20.139s,0skips. Three reviews:
+(1) default118/import26/snapshot21 compose without projection unification;
+(2) shared atomic/snapshot laws and independent wire COMMIT/old-pair/rollback/
+SIGKILL/migration preservation actually run together; (3) all165 named native
+PG17.10 cases reviewed, zero omitted selected cases, projection absent and not
+credited, DB-free paths/cached compile not counted as fresh tests.
+
+Fresh isolated split-read control native0/1 FAIL0.045s,15filtered. Three reviews:
+(1) hydration must return one coherent revision/position/state record; (2) adding
+only an independent body SELECT yields actual revision1/position(1,9)/NEW state,
+expected same old revision/position with OLD state, while independent writer
+commits revision2; (3) failure is exact record assertion after real held DataRow,
+not fault-entry/timeout, proof target adapter cleaned106.7MiB and recompiled from
+explicit split-control manifest, no shared stale artifact credit. Working product
+unchanged; next positive full source run remains required.
+
+Final-source import+projection native162/162 PASS21.371s,0skips. Three reviews:
+(1) default118/import26/projection18 compose without snapshot; (2) checkpoint
+CAS and independent projection persistence run beside atomic/import outcome
+faults and exact migration/cache preservation; (3) all162 named real serial
+PG17.10 cases reviewed, no snapshot/namespace credit, no filtered selected case,
+all source compiled current worktree. Separate physical PG18.6 mutation cluster
+started for16 generated changed-source candidates; baseline/outcomes pending.
+
+PG18.6 mutation BASELINE native184/184 PASS21.461s,0skips,14binaries (8.52s build).
+Three reviews: (1) complete selected adapter suite with projection API present;
+(2) strengthened metadata/inheritance and all actual overlap/transport/consumer/
+SIGKILL/upgrade laws execute on fresh independent physical cluster; (3) actual
+native database, no default-return skips, cloned source compiled by cargo-mutants
+with maintained default timeout109s derived from measured baseline. Baseline is
+not a mutant caught;16 generated candidates remain to review independently.
+
+ARM Linux18.6 existing integration derivation PASS, native184/18427.815s,0skips.
+Three reviews: (1) all four capability/contract families compiled and selected;
+(2) native full suite includes new inheritance/metadata witnesses, real consumers,
+uncertain commits, childSIGKILL and migration4 repair alongside original laws;
+(3) actual remote builder executed fresh archive,14binaries,zero selected skips,
+installed log is this SAME run, never an extra execution. Full flake/CI still due.
+Separate Linux smoke1 atomic1/1 PASS0.199s: reviews(1) import feature selector;
+(2) actual multi-stream all-or-none native conformance; (3) --no-tests=fail and
+pipefail remain,14 filtered cases/13binaries do not receive runtime credit.
+Separate Linux smoke2 snapshot1/1 PASS0.403s: reviews(1) snapshot selector;
+(2) absent→commit→exact found real store law; (3) --no-tests=fail/pipefail,15filtered/
+13binaries not extra tests. Separate smoke3 projection1/1 PASS0.278s: reviews
+(1) projection selector; (2) real repository/decoder/codec stepper saves/resumes
+exact pair exclusively; (3) --no-tests=fail/pipefail,2filtered/13binaries not
+credited, no DB-free skip or fake consumer. Missing-feature negative still due.
+
+Final-source snapshot+projection native158/158 PASS16.442s,0skips. Three reviews:
+(1) default118/snapshot21/projection18 plus one bidirectional namespace law;
+(2) both state stores with identical rawID remain independent in BOTH directions,
+actual old-pair/commit uncertainty and all consumer/rebuild/reload laws execute;
+(3) all158 named cases reviewed on real serial PG17.10, import absent/not credited,
+zero selected skips, capability combination is actual compilation rather than
+workspace feature unification. Last remaining local combination is all-features.
+
+Generated mutation cases reviewed independently as results arrived. Each row
+records three reviews: threatened contract; actual first-failure falsifier; oracle/
+provenance limit. Full native baseline is184; fail-fast unrun cases are NOT passes.
+
+| Candidate | Review1 contract | Review2 observed failure | Review3 oracle/provenance |
+| --- | --- | --- | --- |
+| schema47 returnOk | Startup rejects missing guards | Corrupt metadata test reopens unsupported shape and does not get Schema | Repair occurs BEFORE failed assertion; actual native case32,152unrun, no poisoned checksum fixture. |
+| schema89 delete! | Valid schema opens | Native out-of-order setup receives Schema for valid checkpoints | First native open refusal,12/184 run,172unrun; valid-input rejection catch, not corruption acceptance proof. |
+| metadata26 default | Preserve decoded metadata | E0277 PgAllPos lacks Default | Unviable build only,0native, never caught credit. |
+| row58 default | Hydration result preserves state | E0277 CheckpointHydrated lacks Default | Unviable build only,0native, never caught credit. |
+| row59 !=→== | Matching schema returns Found | Native SIGKILL/reopen returns Stale for matchingMAX schema | Exact full-pair assertion after actual acknowledged commit/processkill,29run155unrun. |
+| row65 >→== | Exact byte limit accepted | Actual37/limit37 returns RowLimit | Existing exact edge unwrap rejects false error,31run153unrun; no bound relaxation. |
+| row65 >→< | Below-limit row accepted | Actual78/limit16777216 returns RowLimit after SIGKILL | Exact durable Found expected,29run155unrun; process cleanup complete before failure. |
+| row65 >→>= | Exact byte limit accepted | Actual37/limit37 returns RowLimit | Same exact-edge oracle,31run153unrun; independent source mutation, no invented extra workload. |
+| lock90 None | Existing revision observed | Valid namespace checkpoint advance gets Conflict{Some1,None} | Actual update fails expected success,30run154unrun; separate native FOR UPDATE control proves true two-winner race. |
+| lock90 SomeDefault | Saved position valid | E0277 PgAllPos lacks Default | Unviable build only,0native. |
+| storage103 new() | Typed store source retained | E0599 missing constructor | Unviable build only,0native, no error-path coverage claim. |
+| storage103 from_iter | Typed store source retained | E0599 missing constructor | Unviable build only,0native. |
+| storage103 new(default) | Typed store source retained | E0599 missing constructor | Unviable build only,0native. |
+| storage103 from(default) | Typed store source retained | E0283 ambiguous From | Unviable build only,0native. |
+| hydrate114 default | Complete hydration result | E0277 CheckpointHydrated lacks Default | Unviable build only,0native. |
+| commit136 returnOk1 | Acknowledged checkpoint must persist | Actual child receives success/ACK and dies by SIGKILL, reopen returns Absent | Exact full record assertion,29run155unrun; independent data proof, not merely COMMIT-entry guard. |
+
+Final mutation summary16:8caught8unviable0missed0timeout. All16 first outcomes
+reviewed three ways above; eight type errors are NOT successful runtime evidence.
+No exclusions, cap/timeout changes, replacement or weakened tests. SQL-specific
+FOR UPDATE/body/split invariants independently falsified by fresh controls.
+Final artifact copies use .log suffix for JSON evidence to preserve existing Nix
+source filtering; originals retained /tmp/mnesis-pg6b-mutants/mutants.out.
+
+Final-source all-features native184/184 PASS20.811s,0skips,14binaries. Three reviews:
+(1) every default/import/snapshot/projection contract and namespace law runs;
+(2) latest both-direction inheritance, nine metadata faults, true CAS overlap,
+wire-pair/uncertainty, real stepper consumers, LOGIN/SIGKILL and upgrade4 cases
+execute with unchanged original read/notification/atomic laws; (3) actual serial
+PG17.10, current source explicitly compiled, all expected184 present, no filtered
+case/compiled-only/cache/log-replay credit. All EIGHT feature combinations now
+have fresh native evidence:118,144,139,136,165,162,158,184; all0skips.
+
+Missing-projection negative exits4:0tests/no tests to run under SAME required
+selector with feature absent. Three reviews: (1) integration must fail if projection
+suite absent; (2) default-feature binary actually selects0 and --no-tests=fail
+returns nonzero, paired with actual Linux selected1/1; (3) no compile/DB/setup
+error mistaken for absence,0runtime successes and no native evidence credited.
+No feature or selector loosened. Log evidence/pg6b-missing-projection.log.
+
+PG6b pre-commit minimization: product203added/1removedRust,51SQL,one Cargo feature,
+five existing-gate Nix lines; within260/30Rust100SQL budgets. Zero new public
+methods/types, dependency/lock changes, runtime tasks, framework or tools.
+Existing next_revision is sole revision/schema/position policy; native row lock
+only supplies serialized current facts. Existing key helper and commit classifier
+own identity/uncertainty. SQLx flatten removes duplicate metadata decoder; static
+INSERT/UPDATE share bindings. Two-line inheritance guard retained only after real
+original red. All applied prior migrations untouched. Native test budgets preserve
+readable laws and explicit negative evidence, no test-only production seam.
+Full normal signed commit hook/CI/protected delivery still pending. Changed Rust
+diff SHA4061f1d5647320d21429f71eb52d20d6dabcd100bc0e60e5d2866c728a013f50.
+
+Full-gate fuzz replay reviews (logs /tmp/mnesis-pg6b-gate-fuzz.log), each AFTER
+execution, no Postgres-native credit:
+- CBOR header/chunk2/2 PASS1.00s: review1 completion/parse boundaries; review2
+actual existing decoder fuzz targets/corpus, no replacement decoder; review3
+0filtered/ignored, short retained replay is not an extended fuzz campaign or
+format interchange evidence. Existing assertions/targets unchanged.
+- Event type1/1 PASS1.00s: review1 value boundary contract; review2 actual owned
+value fuzz target with existing corpus; review3 no skips/filters, no database or
+full payload correctness inferred from this target.
+- Wire frame1/1 PASS1.00s: review1 wire decoder boundaries; review2 actual canonical
+frame decoder/fuzz fixture; review3 no skips/filters, no new tests/threshold or
+claim that short replay establishes every adapter behavior.
+
+Normal signed commit full hook passes at d1b9c387574acfa7f3136c4aab9283c521a4da13,
+G signature verification, no bypass. All12 named Darwin checks green (audit cached,
+11 fresh). Workspace nextest1563/1563 PASS464.283s,13slow,4explicit compiler-function
+exclusions. Three reviews: (1) whole workspace gate includes adapter compilation,
+core/store/Fjall/inmemory/wake contracts, unchanged compiler owners have dedicated
+CI jobs still required; (2) new source/schema/capabilities compiled with strict
+all-feature/all-target Clippy and actual independent native184/Linux184 evidence
+above, original source controls remain failing; (3) workspace run has NO native
+DATABASE_URL and returns from DB-dependent tests, so1563 is NOT new database
+coverage;4excluded functions are not successes here. Existing property tests
+completed unchanged (last random-version case388.944s), no workload/deadline edits.
+Fuzz replay reviews recorded separately above. Fresh complete hook output retained
+/tmp/mnesis-pg6b-commit.log and native artifacts already committed; docs-only
+amendment reruns normal hook and any cached checks receive no extra runtime credit.

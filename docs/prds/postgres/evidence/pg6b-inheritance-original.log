@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-checkpoints/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+────────────
+ Nextest run ID 953fa0f7-eee8-46ae-a92b-414d75d1e153 with nextest profile: default
+    Starting 1 test across 1 binary (14 tests skipped)
+        FAIL [   0.048s] (1/1) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+  stdout ───
+
+    running 1 test
+    test opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key ... FAILED
+
+    failures:
+
+    failures:
+        opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key' (98159642) panicked at adapters/postgres/tests/migration_tests.rs:58:5:
+    startup must reject inherited checkpoint rows beyond parent uniqueness
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.052s] 1 test run: 0 passed, 1 failed, 14 skipped
+        FAIL [   0.048s] (1/1) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+error: test run failed
