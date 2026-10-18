@@ -1,0 +1,58 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+The files belonging to this database system will be owned by user "joel".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/mnesis-mutants.adZRL3/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... America/New_York
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /tmp/mnesis-mutants.adZRL3/data -l logfile start
+
+waiting for server to start.... done
+server started
+Found 10 mutants to test
+ok       Unmutated baseline in 18s build + 16s test
+ INFO Auto-set test timeout to 85s
+10 mutants tested in 3m: 7 caught, 3 unviable
+waiting for server to shut down.... done
+server stopped
+Success	baseline
+Unviable	adapters/postgres/src/error.rs:62:9: replace PostgresError::commit -> Self with Default::default()
+CaughtMutant	adapters/postgres/src/error.rs:66:62: replace || with && in PostgresError::commit
+Unviable	adapters/postgres/src/store.rs:351:5: replace insert_one -> Result<PgAllPos, AppendError<PostgresError>> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/store.rs:385:19: replace match guard is_stream_conflict(&e) with true in insert_one
+CaughtMutant	adapters/postgres/src/store.rs:385:19: replace match guard is_stream_conflict(&e) with false in insert_one
+CaughtMutant	adapters/postgres/src/store.rs:477:5: replace is_stream_conflict -> bool with true
+CaughtMutant	adapters/postgres/src/store.rs:477:5: replace is_stream_conflict -> bool with false
+CaughtMutant	adapters/postgres/src/store.rs:491:9: replace PostgresStore::notify_committed with ()
+CaughtMutant	adapters/postgres/src/store.rs:494:25: replace >= with < in PostgresStore::notify_committed
+Unviable	adapters/postgres/src/store.rs:532:9: replace <impl RawEventStore for PostgresStore>::append -> Result<Self::AllPosition, AppendError<Self::Error>> with Ok(Default::default())
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/baseline.log:     Summary [  16.527s] 91 tests run: 91 passed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_494_col_25.log:    thread 'stalled_hint_acknowledgement_cannot_hold_confirmed_success' (95269067) panicked at adapters/postgres/tests/outcome_tests.rs:118:10:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_494_col_25.log:     Summary [  12.225s] 76/91 tests run: 75 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5_001.log:    thread 'a_native_unique_collision_preserves_the_callers_expected_head' (95262392) panicked at adapters/postgres/tests/outcome_tests.rs:609:22:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5_001.log:     Summary [   8.684s] 68/91 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_491_col_9.log:    thread 'stalled_hint_acknowledgement_cannot_hold_confirmed_success' (95265770) panicked at adapters/postgres/tests/outcome_tests.rs:118:10:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_491_col_9.log:     Summary [  15.131s] 76/91 tests run: 75 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5.log:    thread 'identity_sequence_collision_is_not_an_optimistic_conflict' (95259225) panicked at adapters/postgres/tests/outcome_tests.rs:457:5:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5.log:     Summary [   9.085s] 71/91 tests run: 70 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__error.rs_line_66_col_62.log:    thread 'server_rejections_at_commit_preserve_the_code_and_outcome' (95250356) panicked at adapters/postgres/tests/outcome_tests.rs:419:27:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__error.rs_line_66_col_62.log:     Summary [   9.964s] 75/91 tests run: 74 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19_001.log:    thread 'conformance_linearizability::check_concurrent_same_stream_single_winner' (95256100) panicked at crates/store-testing/src/linearizability.rs:61:27:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19_001.log:     Summary [   0.901s] 30/91 tests run: 29 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19.log:    thread 'identity_sequence_collision_is_not_an_optimistic_conflict' (95253713) panicked at adapters/postgres/tests/outcome_tests.rs:457:5:
+/tmp/mnesis-pg3-mutation-fresh/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19.log:     Summary [   9.809s] 71/91 tests run: 70 passed, 1 failed, 0 skipped

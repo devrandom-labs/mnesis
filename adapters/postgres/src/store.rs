@@ -345,6 +345,7 @@ fn narrow_inserts<'a>(
 async fn insert_one(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     id: &StreamKey,
+    expected: Option<Version>,
     row: &PreparedInsert<'_>,
 ) -> Result<PgAllPos, AppendError<PostgresError>> {
     let returned: Result<(i64, i64), sqlx::Error> = sqlx::query_as(
@@ -383,7 +384,7 @@ async fn insert_one(
         // rule 3: one variant = one failure domain).
         Err(e) if is_stream_conflict(&e) => Err(AppendError::Conflict {
             stream_id: ErrorId::from_display(id),
-            expected: Some(row.env.version()),
+            expected,
             actual: None, // a racer committed; exact actual unknown here
         }),
         Err(e) => Err(AppendError::Store(PostgresError::Sqlx(e))),
@@ -550,9 +551,9 @@ impl RawEventStore for PostgresStore {
         // overwrites it, so the value after the loop is the LAST row's — the
         // position `append` returns (#330). No `Option`, because
         // `PendingBatch` guarantees the head exists.
-        let mut assigned = insert_one(&mut tx, id, &head).await?;
+        let mut assigned = insert_one(&mut tx, id, expected_version, &head).await?;
         for row in &tail {
-            assigned = insert_one(&mut tx, id, row).await?;
+            assigned = insert_one(&mut tx, id, expected_version, row).await?;
         }
 
         tx.commit()

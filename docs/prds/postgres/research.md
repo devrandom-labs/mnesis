@@ -828,3 +828,104 @@ adapter/test/manifest/lock hash remains3f681b11f5b4c68b9986d70adf952e66c998a774b
 (2) unchanged native90-case evidence and original COMMIT/constraint failures still
 apply; (3) cached checks are not a fresh native run, and new Linux PR377 jobs
 remain required. PR376 CI/delivery records are added without changing that code.
+
+PR377 real-database mutation CI run39107773089 FAILED:10 candidates,6 caught,
+3 unviable,1 missed: replace is_stream_conflict with false. Three post-run case
+reviews: (1) negative unrelated-unique cases pass, but no forced native positive
+uniqueness collision grades the classifier; (2) existing concurrent writers can
+serialize before their head reads, yielding a preflight conflict and missing the
+actual INSERT collision; (3) do not exclude the survivor or soften the gate.
+Add a real uncommitted competing row, observe SUT INSERT waiting on its native
+transaction lock under a unique process application name, then commit the winner.
+Check both empty and existing heads, exact conflict metadata and unchanged durable
+winner/prefix. Budget+110 native test lines within650 total, production+10/-10
+only if this exposes incorrect diagnostics. Run the new case before production
+changes, retain its failure, then require full native/mutation/gate proof again.
+
+Forced positive-collision characterization FAILS on the current PR code: after
+observing the actual INSERT blocked on the winner's transaction, it returns
+Conflict but expectedSome(Version1) rather than the caller's expectedNone. Three
+post-run reviews: (1) the empty-head metadata assertion is the exact failure;
+(2) independent durable rows contain only the committed winner and the native
+lock guard rules out serial preflight conflict; (3) the existing-head loop was
+not reached after this first failure and is not credited. Preserve known caller
+head in native conflict diagnostics; actual remains unknown until reconciliation.
+Pass that known value through the existing private insert helper (+4 lines),
+then rerun both head scenarios and the missed classifier mutation unchanged.
+
+Native after preserving caller expected head:91 pass/zero skips,16.787s. Three
+post-run reviews: (1) both empty and existing heads reach the actual INSERT lock,
+return exact caller expectedNone/Some1 with unknown actual, and retain only the
+winner plus known prefix; (2) original metadata witness failed on Some1 versus
+None and the independent lock/data oracle rejects serial preflight substitutes;
+(3) strict Clippy still rejects the new case length95>80 and one redundant
+closure. Extract the native waiting observation into its own private test helper,
+retain every assertion and both iterations, then falsify the previously missed
+classifier replacement and rerun strict/full verification. This native pass
+alone does not authorize retention while Clippy/gates are red.
+
+The previously missed false-classifier mutant now fails on actual23505 from
+public.events/events_stream_id_version_key (0/1,11 filtered,0.044s), after observing
+the INSERT's native wait. Three reviews: (1) failure is Store(Sqlx23505) versus
+required Conflict, not setup/build; (2) exact table/constraint and unchanged
+independent winner rows prove the intended positive path; (3) source restored
+byte-for-byte, no exclusion/threshold change, and filtered cases not credited.
+Test helper extraction keeps both scenarios and every assertion; strict Clippy
+now passes. Actual file640<=650 native-test budget. Full native91 and complete
+automatic in-diff sweep must rerun before retaining this correction.
+
+Refactored native run:91 pass/zero skips,13.671s. Automated diff sweep:10 mutants,
+7 caught/3 compile-unviable,zero missed/timeouts; baseline91 pass in12.867s.
+Three post-run reviews (each run):
+1. Acceptance: every native case ran; both expected-head scenarios preserve exact
+   caller metadata and independent committed rows. Mutation verdicts identify
+   actual compilation versus assertion failure, never classify unviable as caught.
+2. Falsifiers: false match guard reaches the new forced-collision case; false
+   classifier happens to hit actual23505 in the older concurrent law this time.
+   True classifier/guard fails unrelated PK, commit-code boolean mutation fails
+   rejection mapping, and missing hints fail the actual fault-observation guard.
+   Manual false-classifier proof specifically reached the new deterministic case.
+3. Loophole FOUND: I ran these two suites concurrently in different databases of
+   ONE cluster. The cluster-wide snapshot watermark can cause interference even
+   with separate tables. A native probe confirms a held22861 in mnesis_pg0 pins
+   mnesis_pg_mutants cutoff exactly22861; releasing it advances the cutoff. All
+   cases passed and inspected mutant failures are relevant, but use a fresh
+   isolated-cluster sweep as primary evidence and rerun the91 suite without a
+   competing cluster peer. Never run independent native suites concurrently on
+   one cluster again. CI jobs already initialize separate clusters. This also
+   creates an explicitPG8 shared-cluster lag/operations obligation; no unsafe
+   watermark shortcut is authorized.
+
+Cross-database facility probe completed successfully: held22861 pins another
+DB's cutoff22861; after rollback cutoff22862, exact booleans asserted by psql.
+Three post-run reviews: (1) writer and observer use different named DBs in the
+same17.10 cluster; (2) observation waits for the writer's actual PgSleep after
+assigning its XID, and pin disappears on rollback; (3) this is cluster-isolation/
+operations evidence, not an adapter recovery acceptance test. Neither competing
+native suite was running during the probe. Keep the safe cluster-wide watermark.
+The re-run sweep uses a NEW18.6 cluster and fixed explicit mnesis test role; the
+91-case suite uses17.10 alone. They no longer share transaction state.
+
+Isolated-cluster proof:17.10 native91/91,zero skips/no filter,22.453s; fresh18.6
+mutation cluster baseline91/91,16.527s,10 candidates/7 caught/3 compile-unviable,
+zero missed/timeouts. Fresh server stopped and its temporary cluster disappeared.
+Three post-run reviews for EACH native run and full sweep:
+1. Acceptance: both native baselines include12 outcome cases. Exact empty and
+   existing caller heads, unknown actual, native INSERT wait and winner rows
+   pass. All previous phase/source/repository/read/wake laws remain present.
+2. Falsifiers: fresh false-classifier mutant fails the new deterministic case;
+   false guard is caught by real native23505 in the concurrent law, true paths
+   fail unrelated PK, commit-code boolean fails mapping and absent hints fail
+   actual injected-fault observation. Each first failure was inspected.
+3. Loopholes: these runs use physically separate clusters, not just different
+   DBs. No compiler rejection is counted caught; no skipped baseline, survivor,
+   timeout, assertion/deadline reduction or modified notification policy is hidden.
+
+Matched PG3 full Darwin gate passes all12 checks,1,536 workspace cases/four
+compiler exclusions,485.246s nextest. Source/test/manifest/lock diff SHA256:
+1f0994b7d03fafcad465e1f347b2f9f3690a1ff9c289cf249acaa7efe3af8fac.
+Three post-run reviews: (1) the new case adds one suite case with two actual
+head scenarios; native91 is separate from DB-free returns; (2) original bad
+metadata and false-classifier failures are preserved and the fresh sweep has no
+viable survivor; (3) source hash is unchanged, no thresholds or exclusions were
+altered, and protected Linux jobs must re-run on the corrected PR377 head.

@@ -26,7 +26,7 @@ use tempfile::TempDir;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{UnixListener, UnixStream};
 use tokio::sync::watch;
-use tokio::task::{JoinHandle, JoinSet};
+use tokio::task::{JoinHandle, JoinSet, yield_now};
 use tokio::time::timeout;
 
 #[derive(Clone, Copy)]
@@ -170,7 +170,9 @@ async fn forward(
 
 async fn fixture() -> Option<(Proxy, PostgresStore, PgPool)> {
     let url = std::env::var("DATABASE_URL").ok()?;
-    let options = PgConnectOptions::from_str(&url).unwrap();
+    let options = PgConnectOptions::from_str(&url)
+        .unwrap()
+        .application_name(&format!("mnesis-outcomes-{}", std::process::id()));
     let control = PgPoolOptions::new()
         .max_connections(4)
         .connect_with(options.clone())
@@ -535,4 +537,104 @@ async fn closed_data_pool_fails_before_begin_with_no_committed_rows() {
         )))
     ));
     assert_eq!(count(&control).await, 0);
+}
+
+#[tokio::test]
+async fn a_native_unique_collision_preserves_the_callers_expected_head() {
+    for expected in [None, Some(Version::INITIAL)] {
+        let Some((_proxy, store, control)) = fixture().await else {
+            return;
+        };
+        let key = StreamKey::from_bytes("contender");
+        let prefix = events();
+        if expected.is_some() {
+            store
+                .append(&key, None, PendingBatch::new(&prefix[..1]).unwrap())
+                .await
+                .unwrap();
+        }
+        let number = expected.map_or(0, Version::as_u64).checked_add(1).unwrap();
+        let mut winner = control.begin().await.unwrap();
+        sqlx::query(
+            "INSERT INTO events (stream_id, version, event_type, schema_version, payload) \
+            VALUES ($1, $2, 'Winner', 1, 'winner'::bytea)",
+        )
+        .bind(key.as_bytes())
+        .bind(i64::try_from(number).unwrap())
+        .execute(&mut *winner)
+        .await
+        .unwrap();
+        let contender = tokio::spawn(async move {
+            let event = pending_envelope(Version::new(number).unwrap())
+                .event_type("Contender")
+                .payload(b"loser".as_slice())
+                .build()
+                .unwrap();
+            store
+                .append(&key, expected, PendingBatch::new(&[event]).unwrap())
+                .await
+        });
+        wait_for_insert(&control).await;
+        winner.commit().await.unwrap();
+        let result = contender.await.unwrap();
+        let stored: Vec<(i64, Vec<u8>)> =
+            sqlx::query_as("SELECT version, payload FROM events ORDER BY version")
+                .fetch_all(&control)
+                .await
+                .unwrap();
+        let wanted = match expected {
+            None => vec![(1, b"winner".to_vec())],
+            Some(_) => vec![(1, b"payload".to_vec()), (2, b"winner".to_vec())],
+        };
+        assert_eq!(
+            stored, wanted,
+            "the rejected contender must not persist any row"
+        );
+        match result {
+            Err(AppendError::Conflict {
+                stream_id,
+                expected: observed,
+                actual,
+            }) => {
+                assert_eq!(stream_id.to_string(), "contender");
+                assert_eq!(
+                    observed, expected,
+                    "report the caller's head, not its proposed next version"
+                );
+                assert_eq!(
+                    actual, None,
+                    "the post-race head is unknown without reconciliation"
+                );
+            }
+            other => panic!("native stream/version collision misclassified: {other:?}"),
+        }
+    }
+}
+
+async fn wait_for_insert(control: &PgPool) {
+    let name = control
+        .connect_options()
+        .get_application_name()
+        .unwrap()
+        .to_owned();
+    timeout(Duration::from_secs(3), async {
+        loop {
+            let waiting: i64 = sqlx::query_scalar(
+                "SELECT count(*) FROM pg_locks l \
+                JOIN pg_stat_activity a ON a.pid = l.pid \
+                WHERE l.locktype = 'transactionid' AND NOT l.granted \
+                AND a.application_name = $1 AND a.query LIKE 'INSERT INTO %events %'",
+            )
+            .bind(&name)
+            .fetch_one(control)
+            .await
+            .unwrap();
+            if waiting == 1 {
+                break;
+            }
+            yield_now().await;
+        }
+    })
+    .await
+    .expect("the actual INSERT must wait on the uncommitted winning row");
 }

@@ -1,0 +1,30 @@
+Found 10 mutants to test
+ok       Unmutated baseline in 16s build + 13s test
+ INFO Auto-set test timeout to 67s
+10 mutants tested in 3m: 7 caught, 3 unviable
+Success	baseline
+Unviable	adapters/postgres/src/error.rs:62:9: replace PostgresError::commit -> Self with Default::default()
+CaughtMutant	adapters/postgres/src/error.rs:66:62: replace || with && in PostgresError::commit
+Unviable	adapters/postgres/src/store.rs:351:5: replace insert_one -> Result<PgAllPos, AppendError<PostgresError>> with Ok(Default::default())
+CaughtMutant	adapters/postgres/src/store.rs:385:19: replace match guard is_stream_conflict(&e) with true in insert_one
+CaughtMutant	adapters/postgres/src/store.rs:385:19: replace match guard is_stream_conflict(&e) with false in insert_one
+CaughtMutant	adapters/postgres/src/store.rs:477:5: replace is_stream_conflict -> bool with true
+CaughtMutant	adapters/postgres/src/store.rs:477:5: replace is_stream_conflict -> bool with false
+CaughtMutant	adapters/postgres/src/store.rs:491:9: replace PostgresStore::notify_committed with ()
+CaughtMutant	adapters/postgres/src/store.rs:494:25: replace >= with < in PostgresStore::notify_committed
+Unviable	adapters/postgres/src/store.rs:532:9: replace <impl RawEventStore for PostgresStore>::append -> Result<Self::AllPosition, AppendError<Self::Error>> with Ok(Default::default())
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/baseline.log:     Summary [  12.867s] 91 tests run: 91 passed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_494_col_25.log:    thread 'stalled_hint_acknowledgement_cannot_hold_confirmed_success' (95137693) panicked at adapters/postgres/tests/outcome_tests.rs:118:10:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_494_col_25.log:     Summary [  11.044s] 76/91 tests run: 75 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5_001.log:    thread 'conformance_linearizability::check_concurrent_same_stream_single_winner' (95128987) panicked at crates/store-testing/src/linearizability.rs:61:27:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5_001.log:     Summary [   0.608s] 30/91 tests run: 29 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19_001.log:    thread 'a_native_unique_collision_preserves_the_callers_expected_head' (95119696) panicked at adapters/postgres/tests/outcome_tests.rs:609:22:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19_001.log:     Summary [   8.368s] 68/91 tests run: 67 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__error.rs_line_66_col_62.log:    thread 'server_rejections_at_commit_preserve_the_code_and_outcome' (95106395) panicked at adapters/postgres/tests/outcome_tests.rs:419:27:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__error.rs_line_66_col_62.log:     Summary [   8.658s] 75/91 tests run: 74 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_491_col_9.log:    thread 'stalled_hint_acknowledgement_cannot_hold_confirmed_success' (95134472) panicked at adapters/postgres/tests/outcome_tests.rs:118:10:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_491_col_9.log:     Summary [  13.309s] 76/91 tests run: 75 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5.log:    thread 'identity_sequence_collision_is_not_an_optimistic_conflict' (95125440) panicked at adapters/postgres/tests/outcome_tests.rs:457:5:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_477_col_5.log:     Summary [   8.392s] 71/91 tests run: 70 passed, 1 failed, 0 skipped
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19.log:    thread 'identity_sequence_collision_is_not_an_optimistic_conflict' (95113589) panicked at adapters/postgres/tests/outcome_tests.rs:457:5:
+/tmp/mnesis-pg3-mutation-fixed/mutants.out/log/adapters__postgres__src__store.rs_line_385_col_19.log:     Summary [   8.721s] 71/91 tests run: 70 passed, 1 failed, 0 skipped

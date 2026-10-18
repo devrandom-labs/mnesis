@@ -1,0 +1,16 @@
+✅ checks.aarch64-darwin.mnesis-toml-fmt (previously built)
+✅ checks.aarch64-darwin.mnesis-audit (previously built)
+running 10 flake checks...
+✅ checks.aarch64-darwin.mnesis-fuzz-replay
+✅ checks.aarch64-darwin.mnesis-wasm
+✅ checks.aarch64-darwin.mnesis-fmt
+✅ checks.aarch64-darwin.mnesis-clippy
+✅ checks.aarch64-darwin.mnesis-nostd
+✅ checks.aarch64-darwin.mnesis-deny
+✅ checks.aarch64-darwin.mnesis-hakari
+✅ checks.aarch64-darwin.mnesis-doc
+✅ checks.aarch64-darwin.mnesis-nextest
+✅ checks.aarch64-darwin.mnesis-store-nostd
+warning: The check omitted these incompatible systems: aarch64-linux, x86_64-darwin, x86_64-linux
+[32;1m    Starting[0m [1m1536[0m tests across [1m122[0m binaries ([1m4[0m tests [33;1mskipped[0m)
+[32;1m     Summary[0m [ 485.246s] [1m1536[0m tests run: [1m1536[0m [32;1mpassed[0m ([1m13[0m [33;1mslow[0m), [1m4[0m [33;1mskipped[0m

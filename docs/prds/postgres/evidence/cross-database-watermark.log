@@ -1,0 +1,17 @@
+Postgres17.10, one cluster, writer=mnesis_pg0, observer=mnesis_pg_mutants.
+observer=mnesis_pg_mutants held_in_other_database=22861 cutoff=22861 pinned=t
+BEGIN
+ held  
+-------
+ 22861
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+ROLLBACK
+Observed second tool-output chunk: after_rollback_cutoff=22862 released=t
+Both snapshot comparisons were asserted using psql \if and \quit 1 on failure.
+The two observer lines are a transcript of actual tool stdout; writer output above is unchanged.

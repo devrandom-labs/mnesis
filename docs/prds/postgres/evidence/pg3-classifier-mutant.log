@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-pg3-delivery/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.92s
+────────────
+ Nextest run ID e153af7a-0442-41b0-87fe-dfabd7f7237c with nextest profile: default
+    Starting 1 test across 1 binary (11 tests skipped)
+        FAIL [   0.043s] (1/1) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+  stdout ───
+
+    running 1 test
+    test a_native_unique_collision_preserves_the_callers_expected_head ... FAILED
+
+    failures:
+
+    failures:
+        a_native_unique_collision_preserves_the_callers_expected_head
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.02s
+
+  stderr ───
+
+    thread 'a_native_unique_collision_preserves_the_callers_expected_head' (95064534) panicked at adapters/postgres/tests/outcome_tests.rs:609:22:
+    native stream/version collision misclassified: Err(Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "23505", message: "duplicate key value violates unique constraint \"events_stream_id_version_key\"", detail: Some("Key (stream_id, version)=(\\x636f6e74656e646572, 1) already exists."), hint: None, position: None, where: None, schema: Some("public"), table: Some("events"), column: None, data_type: None, constraint: Some("events_stream_id_version_key"), file: Some("nbtinsert.c"), line: Some(673), routine: Some("_bt_check_unique") }))))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.044s] 1 test run: 0 passed, 1 failed, 11 skipped
+        FAIL [   0.043s] (1/1) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+error: test run failed
