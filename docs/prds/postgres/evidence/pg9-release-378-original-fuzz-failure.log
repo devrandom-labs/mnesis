@@ -1,0 +1,78 @@
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	﻿2026-10-18T16:58:10.2938467Z ##[group]Run cargo afl build --release --locked --bin wire_decode_frame
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.2938989Z ^[[36;1mcargo afl build --release --locked --bin wire_decode_frame^[[0m
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3001194Z shell: /usr/bin/bash -e {0}
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3001447Z env:
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3001651Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3002110Z   AFL_SKIP_CPUFREQ: 1
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3002347Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3002621Z   AFL_NO_AFFINITY: 1
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3002844Z   CARGO_HOME: /home/runner/.cargo
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3003089Z   CARGO_INCREMENTAL: 0
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3003303Z   CARGO_TERM_COLOR: always
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:10.3003531Z ##[endgroup]
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:12.4464454Z ^[[1m^[[92m    Updating^[[0m crates.io index
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:12.5492620Z ^[[1m^[[91merror^[[0m: cannot update the lock file /home/runner/work/mnesis/mnesis/fuzz-afl/Cargo.lock because --locked was passed to prevent this
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:12.5493832Z help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+deep-fuzz-afl (wire_decode_frame)	Build CMPLOG-instrumented target	2026-10-18T16:58:12.5524774Z ##[error]Process completed with exit code 101.
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	﻿2026-10-18T16:59:14.0299663Z ##[group]Run cargo afl build --release --locked --bin value_event_type
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0300566Z ^[[36;1mcargo afl build --release --locked --bin value_event_type^[[0m
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0389186Z shell: /usr/bin/bash -e {0}
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0389466Z env:
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0389677Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0390154Z   AFL_SKIP_CPUFREQ: 1
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0390402Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0390678Z   AFL_NO_AFFINITY: 1
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0390901Z   CARGO_HOME: /home/runner/.cargo
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0391154Z   CARGO_INCREMENTAL: 0
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0391369Z   CARGO_TERM_COLOR: always
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:14.0391595Z ##[endgroup]
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:16.1931897Z ^[[1m^[[92m    Updating^[[0m crates.io index
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:16.2711397Z ^[[1m^[[91merror^[[0m: cannot update the lock file /home/runner/work/mnesis/mnesis/fuzz-afl/Cargo.lock because --locked was passed to prevent this
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:16.2712648Z help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+deep-fuzz-afl (value_event_type)	Build CMPLOG-instrumented target	2026-10-18T16:59:16.2745744Z ##[error]Process completed with exit code 101.
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	﻿2026-10-18T16:59:39.8642994Z ##[group]Run cargo afl build --release --locked --bin cbor_decode_chunk
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8643968Z ^[[36;1mcargo afl build --release --locked --bin cbor_decode_chunk^[[0m
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8732976Z shell: /usr/bin/bash -e {0}
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8733305Z env:
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8733771Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8734081Z   AFL_SKIP_CPUFREQ: 1
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8734345Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8734640Z   AFL_NO_AFFINITY: 1
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8734886Z   CARGO_HOME: /home/runner/.cargo
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8735173Z   CARGO_INCREMENTAL: 0
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8735691Z   CARGO_TERM_COLOR: always
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:39.8735977Z ##[endgroup]
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:42.0290878Z ^[[1m^[[92m    Updating^[[0m crates.io index
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:42.2411027Z ^[[1m^[[91merror^[[0m: cannot update the lock file /home/runner/work/mnesis/mnesis/fuzz-afl/Cargo.lock because --locked was passed to prevent this
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:42.2412616Z help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+deep-fuzz-afl (cbor_decode_chunk)	Build CMPLOG-instrumented target	2026-10-18T16:59:42.2447190Z ##[error]Process completed with exit code 101.
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	﻿2026-10-18T16:59:26.4406792Z ##[group]Run cargo afl build --release --locked --bin cbor_decode_header
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4407357Z ^[[36;1mcargo afl build --release --locked --bin cbor_decode_header^[[0m
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4469625Z shell: /usr/bin/bash -e {0}
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4469957Z env:
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4470344Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4470629Z   AFL_SKIP_CPUFREQ: 1
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4470875Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4471152Z   AFL_NO_AFFINITY: 1
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4471378Z   CARGO_HOME: /home/runner/.cargo
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4471633Z   CARGO_INCREMENTAL: 0
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4471847Z   CARGO_TERM_COLOR: always
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:26.4472070Z ##[endgroup]
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:28.6027703Z ^[[1m^[[92m    Updating^[[0m crates.io index
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:28.7194975Z ^[[1m^[[91merror^[[0m: cannot update the lock file /home/runner/work/mnesis/mnesis/fuzz-afl/Cargo.lock because --locked was passed to prevent this
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:28.7196194Z help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+deep-fuzz-afl (cbor_decode_header)	Build CMPLOG-instrumented target	2026-10-18T16:59:28.7225329Z ##[error]Process completed with exit code 101.
+fuzz-gate	Require every fuzz leg green	﻿2026-10-18T17:01:04.5264002Z ##[group]Run for result in success failure; do
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5264778Z ^[[36;1mfor result in success failure; do^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5265395Z ^[[36;1m  if [ "$result" != "success" ]; then^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5266163Z ^[[36;1m    echo "::error::a fuzz leg finished with result: $result"^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5266896Z ^[[36;1m    exit 1^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5267401Z ^[[36;1m  fi^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5267825Z ^[[36;1mdone^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.5268279Z ^[[36;1mecho "all fuzz legs green"^[[0m
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6529372Z shell: /usr/bin/bash -e {0}
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6530669Z env:
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6531244Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6531912Z ##[endgroup]
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6779694Z ##[error]a fuzz leg finished with result: failure
+fuzz-gate	Require every fuzz leg green	2026-10-18T17:01:04.6797076Z ##[error]Process completed with exit code 1.

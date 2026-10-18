@@ -271,3 +271,19 @@ selector, default skip not a successful native session. Same product450/80,
 600initial native budget. Update docs to disclose one pool lease/task per session,
 per-cursor bounds, finite lifetime, LOCAL1s disconnect checks preserving shorter
 caller interval, pool close/cleanup, retained native MVCC cost and network limits.
+2026-10-18 user-requested PG9 release checks repair, isolated work/release-checks
+from merged88a4575b, preserve PG7b PR385 f94333c7649a1a69e875728bc4a5553355f11fa7.
+Actual releasePR378 head8836a37c run39147192934 all4AFLbuilds fail locked manifest
+BEFORE fuzzing; neither retry nor removing --locked proves repair. Compare root
+release version edits with selected isolated fuzz lock graphs, reproduce exact
+cargo --locked resolution failure in release-head worktree, then supported Cargo
+updates must preserve unrelated registry pins. Keep same4targets/durations/gates.
+Pre-edit budget: <=80existing release-workflow lines,0productionRust,0newscript/
+framework/tool/runtime,0manualversion changes inmain. Use supported release-plz
+output and ordinary Cargo/GitHub APIs; separate checkout so publishing CANNOT use
+unmerged releasePR head. App-authored verified commits, expectedHeadOid prevents
+concurrent overwrite. Existing release workflow owns refresh; no competing bot.
+Current transient repair may update releasePR locks with exact evidence; protected
+PR378 MUSTremainunmerged until whole-adapter acceptance. Separate CodSpeed decode
+-10.42% across3payloads needs actualsame-environment evidence, no threshold raise,
+benchmark deletion or manualacknowledge. User explicitly requested fixing asgo.

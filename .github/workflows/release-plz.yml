@@ -25,6 +25,7 @@ on:
 jobs:
   release-plz:
     name: Release
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
       group: release-plz-${{ github.ref }}
@@ -52,11 +53,55 @@ jobs:
           private-key: ${{ secrets.RELEASE_PLZ_APP_PRIVATE_KEY }}
 
       - name: Create or update release PR
+        id: release-pr
         uses: release-plz/action@v0.5
         with:
           command: release-pr
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      # Keep the publishing checkout on the triggering main commit. Resolving
+      # the release PR's isolated fuzz workspaces must never publish its head.
+      - name: Checkout release PR for lockfile updates
+        if: steps.release-pr.outputs.prs_created == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ fromJSON(steps.release-pr.outputs.pr).head_branch }}
+          path: release-pr
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Synchronize isolated fuzz lockfiles
+        if: steps.release-pr.outputs.prs_created == 'true'
+        working-directory: release-pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_BRANCH: ${{ fromJSON(steps.release-pr.outputs.pr).head_branch }}
+        run: |
+          cargo update --manifest-path fuzz/Cargo.toml -p mnesis -p mnesis-store
+          cargo update --manifest-path fuzz-afl/Cargo.toml -p mnesis -p mnesis-store
+          if git diff --quiet -- fuzz/Cargo.lock fuzz-afl/Cargo.lock; then
+            exit 0
+          fi
+          jq -n \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg branch "$RELEASE_BRANCH" \
+            --arg expected "$(git rev-parse HEAD)" \
+            --rawfile replay fuzz/Cargo.lock \
+            --rawfile afl fuzz-afl/Cargo.lock \
+            '{query: "mutation ($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid } } }",
+              variables: {input: {
+                branch: {repositoryNameWithOwner: $repository, branchName: $branch},
+                expectedHeadOid: $expected,
+                message: {headline: "chore(release): synchronize fuzz workspace locks"},
+                fileChanges: {additions: [
+                  {path: "fuzz/Cargo.lock", contents: ($replay | @base64)},
+                  {path: "fuzz-afl/Cargo.lock", contents: ($afl | @base64)}
+                ]}
+              }}}' > "$RUNNER_TEMP/release-locks.json"
+          # The App commit is GitHub-signed and triggers the required PR checks.
+          # An updated PR head fails the expectedHeadOid check instead of overwrite.
+          gh api graphql --input "$RUNNER_TEMP/release-locks.json"
 
       # workspace-hack must never leak into the published manifests. `cargo hakari
       # disable` strips the workspace-hack dependency edges before publish; it is

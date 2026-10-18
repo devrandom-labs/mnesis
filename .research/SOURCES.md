@@ -161,3 +161,22 @@ must test network loss/TLS/pool resource behavior; local success not partition p
 Transaction_timeout researched alternative terminates native session, but17int32
 milliseconds restricts lifetime domain and doesn't independently make early Drop
 cleanup prompt; not needed for first socket-check experiment.
+2026-10-18 release repair primary sources:
+https://release-plz.dev/docs/github/output (PR output and supported post-update
+commit workflow); https://raw.githubusercontent.com/release-plz/action/v0.5/action.yml
+(actual prs_created false +pr{} when none); https://docs.github.com/en/graphql/reference/commits
+(server-signed createCommitOnBranch/expectedHeadOid; live schema confirmsbranchName).
+Cargo own selected1.99 --locked resolution and targeted -p updates used; no lock
+relaxation in CI. Existing Cesr App/signing pattern inspected, release-plz current
+release workflow kept owner. Native GitHub STALE_DATA control returnsnull/nochange.
+https://codspeed.io/docs/instruments/cpu/regression-causes and /reducing-variance
+(official primary explanation, hardware/layout are hypotheses, not proof here).
+Actual public report https://app.codspeed.io/devrandom-labs/mnesis/branches/release-plz-2026-10-18T07-25-51Z
+confirms EPYC7763vs9V74 with equal reported flags; compiler/tool/image logs match.
+No performance gate change based only on that warning. Traces or controlled
+same-environment evidence still pending.
+CodSpeed shipped primary client /_next/static/chunks/pages/_app-4791e6a5e5fedc20.js
+FindBenchmarkCallGraph uses repository(...provider:GITHUB).benchmarkResultById
+callGraphPresignedUrl, public readonly https://gql.codspeed.io. Actual v3 node/
+edge self times reconcile501.6667=>560ns exactly. Full large-payload traces kept
+as evidence; no credentials/expiring download URLs retained in project.
