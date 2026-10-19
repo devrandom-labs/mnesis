@@ -40,6 +40,7 @@ Protected focused merges:
 - PR394 stream and saved-state identity, committed heads and independent mutation fixtures: `5ef3e742c63a2f4078ec28057559b5439af28234`.
 - PR392 verified TLS and restricted runtime permissions: `8f03ae8553ab6410fdfbe7660ab84ec0873efae0`.
 - PR395 native durability profile and phase-accurate transaction outcomes: `f7d390d4c50936b2912207c2d417a8c24a899e0c`.
+- PR396 native byte accounting across caller search paths: `766394cd508046dbce3ae6893a1b9c9da805c941`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -115,6 +116,12 @@ PG10 requires a selected consumer and explicit acknowledgement contract before
 activation. Labcast owns command IDs, deduplication and stale-worker rejection.
 Published adapter version and clean registry-consumer verification: pending.
 
+PG9 dependency slice under verification: unwaived deny reproduces the selected
+event-listener5.4.1 advisory.5.4.2 removes the exception and one redundant package;
+current unwaived audit of all three locks,11wake integration cases and255actual
+native Postgres cases pass. Bare-metal/full gate and protected delivery remain.
+This does not close feature-isolation, fuzz crash-gate or broader PG8 acceptance.
+
 PG4–PG6 acceptance reopened: native caller-name witnesses against protected main
 49104117 returned first-body when asked for second's stream under a caller
 search path with application bytea equality. Schema-qualified tables alone do
@@ -150,5 +157,7 @@ The next accounting slice reproduces four native byte-limit bypasses when a
 caller application supplies octet_length(bytea). Normal larger-limit writes stay
 valid; bounded readers must still return exact RowLimit errors. Minimal native
 function qualification passes all9names laws, including the original identity
-and head laws. Complete current-source checks and protected delivery are pending;
+and head laws. Complete current-source checks and protected delivery passed in
+PR396 after all40requiredCIchecks, four255-case native Linux runs, verified
+mutation artifact(1actualcatch/6compiler-only/0survivors) and0threads;
 SUM/window/integer/catalog and migration-metadata hypotheses remain open.

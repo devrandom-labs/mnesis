@@ -7411,3 +7411,308 @@ ENTIRE committed productdiff matches frozen
 clean worktree before recordupdates. Gate/workloads/assertions/filters/policies
 unchanged. Record-only signedamend next; unchanged cachedoutputs are ZERO new
 runtime tests. Then focusedPR and actualLinuxCI/artifact/protecteddelivery.
+# PG9 patched wake dependency — baseline, 2026-10-19
+
+Patched complete actual native Postgres suite PASS251/251,0skipped,65.600s,
+--locked --all-features --test-threads=1 --no-tests=fail, using the existing
+PG17 socket55432 mnesis_pg7b and private native cluster fixtures. Raw
+/tmp/mnesis-pg9-advisory-native.log. This worktree is still protectedf7 parent,
+so it does NOT include PR396's four unmerged accounting laws.
+Three reviews immediately after this run:
+1. Contract: existing native ordering, bounded reads, recovery, transaction phase
+   and actual post-COMMIT uncertainty, migrations, writes, saved state, backup,
+   TLS/permissions and durability laws all remain selected and pass.
+2. Execution/falsifier: all251 named cases actually executed with DATABASE_URL,
+   one suite/cluster, zero skipped; retained original advisory red plus unchanged
+   existing regressions provide distinct evidence. No guarded no-DB credit.
+3. Assertions/source/selection: no test source, skip guard, filters, timeout,
+   expected result or byte/count limit changed. Inspect actual native logs, not
+   only exit0; full feature selection remains explicit. These correctness timings
+   are not capacity, equal-durability performance or30-minute soak acceptance.
+
+Patched wake suite: cargo nextest --locked -p mnesis-wake-nostd --all-features
+--no-tests=fail PASS11/11,0skipped,0.163s (compile9.03s), run
+e7a340dc-fcb5-4ed5-adc7-233554a70ccd. Raw /tmp/mnesis-pg9-advisory-wake.log.
+Three reviews immediately after this run:
+1. Contract: actual GlobalWake arm/wake, fresh rearm, unrelated/global fanout,
+   future/handle lifetime and cross-thread subscriber delivery remain required.
+2. Execution/falsifier:11 named existing runtime tests executed, including two
+   actual Tokio barrier/task concurrency cases and Embassy catch-up/live flow;
+   this is neither a zero-test library harness nor a database test.
+3. Assertions/source/selection: unchanged tests park listeners before fanout,
+   assert no-wake pending, bound required deliveries5s, and check exact ordered
+   Embassy events1/2/CaughtUp/3. Fifty parked-wake races and16x100churn retain
+   original workload. No excludes/skips/relaxed limits or new test implementation.
+   Host tests do not prove bare-metal build or all possible memory interleavings.
+
+Patched policy/graph checks: native cargo-deny advisories+licenses PASS without
+any ignore; cargo-audit PASS separately over root385/fuzz70/AFL41dependencies,
+current database1338advisories. Unmatched license allowances remain warnings,
+not advisories. No runtime tests in these checks. Raw logs:
+/tmp/mnesis-pg9-advisory-patched-deny.log and
+/tmp/mnesis-pg9-advisory-audit-{.,fuzz,fuzz-afl}.log.
+Three reviews after each check: (1) scope is that exact owned lock and unwaived
+policy, not whole release acceptance; (2) actual zero exits/current database and
+the retained original0221 red distinguish a repaired gate from a suppressed
+finding; (3) source diff updates only5.4.1→5.4.2, removes concurrent-queue and its
+three edges, adds zero packages and does not change either fuzz lock or tests.
+Supported hakari regeneration removes its two obsolete edges, with diff now0;
+the initial hakari diff1 is retained as required generated-owner evidence.
+Exact upstream patched listen/notify/Notify::fence and T:Send bounds inspected.
+
+Isolated fix/postgres-advisory worktree starts at protectedf7d390d4; accounting
+PR396b0 remains frozen. Existing ledgers resumed with canonical init, skill and
+full protocol; user root modifications preserved. Budget recorded before edits.
+
+Original unwaived cargo-deny returned1, `advisories FAILED`, identifying actual
+selected event-listener5.4.1 and RustSec0221. Only a temporary copy of deny.toml
+had its exception removed; original manifest/lock/policy remained unchanged.
+Raw: /tmp/mnesis-pg9-advisory-original-deny.log; temporary directory retained at
+the path in /tmp/mnesis-pg9-advisory-control-path. No runtime tests executed.
+
+Three independent reviews of the baseline check:
+1. Contract: production acceptance requires the selected dependency to be patched
+   and the advisory exception removed, preserving wake semantics and no_std.
+2. Execution/falsifier: actual Cargo-resolved root graph with the current advisory
+   database rejects5.4.1 under the unwaived policy; this is an advisory gate red,
+   not a demonstrated runtime exploit or concurrency-test failure.
+3. Assertions/source/selection: inspect the exact advisory/package/version and
+   failure exit, not merely a nonzero command. Both other owned locks lack the
+   affected package. No dependency changes, test excludes or baseline resets.
+
+Accounting evidence-only signed amend22308 PASSall12previouslybuilt outputs,
+ZERO fresh runtime runs; current signedb0d613eaed11daf2d475c937d4c3d675ca284661 GPGgood.
+ENTIRE productdiff stillcmp frozen0d2e801d...PASS, whitespacePASS. Normalpush
+created focusedPR396 https://github.com/devrandom-labs/mnesis/pull/396 at exactb0,
+no force/admin. RequiredCI started (initialpushCI39285646413); no localjobs.
+Next actualnativeLinuxCI/artifact/CodSpeed/threads then protectedmerge; don'tleave
+greenfocusedchanges waiting or falselymark wholeadapter delivered.
+# PG8 accounting current CI review — signed b0d613ea, 2026-10-19
+
+DELIVERED: normal protected exact-head squash PR396 merged2026-10-19T16:49:55Z,
+commit766394cd508046dbce3ae6893a1b9c9da805c941. All40requiredSUCCESS/1scheduledSKIP,
+0threads; complete merged TREE equals reviewed signedb0, not only source paths.
+Delivery/check/thread/performance/mutation snapshots and raw actual logs retained
+under /tmp/mnesis-accounting-b0-*. No waiver, admin merge or publication.
+Whole PG7/8/9 evidence and full release/clean-registry consumer remain required.
+
+Final push Nix job118170676378 completed SUCCESS: workspace1586PASS137.601s4slow
+(four established compiler exclusions); native255PASS61.805s0skip,7smokes;
+replay2/1/1PASS1s each. Three independent reviews after EACH run: (1) compare its
+actual selected workspace/native/replay contract with the immutable head and
+required optional owners; (2) fresh build/execution and complete native set,
+not reused outputs or echoed runs; (3) unchanged assertion source, filters,
+limits/corpus/feature selection, distinguishing no-DB workspace guards from
+actual native database proof. No PG8 capacity credit from these timings.
+Final exact signedb0 source SHA0d2e801dd8c9a626caaf8797133023a128988b4ed54c7318628bfc81e32f6230
+matches frozen pre-gate product byte-for-byte; whitespace/GPGgood. Final API
+snapshot CLEAN,40SUCCESS/1scheduledSKIP,0threads. Current final check/thread JSON
+retained; normal protected exact-head merge next, no bypass or threshold change.
+
+
+Completed PR full Nix job118170709132: actual workspace1586PASS102.346s2slow,
+four established compiler-fixture exclusions; actual additional native255PASS
+57.835s0skip plus seven one-law smokes; replay2/1/1PASS1s each. Three reviews
+after EACH run: (1) full selected workspace contract and optional native owners,
+with default workspace feature union kept distinct from all-feature DB archive;
+(2) actual fresh build/run logs, zero native skips, separate counted executions;
+(3) unchanged exclusions/guards/assertions/limits, no no-DB pass claimed native,
+existing fuzz source/corpus/workloads unchanged. Current signed code hashes and
+source scope remain unchanged. Push full Nix job118170676378 is still QUEUED.
+
+PR compiler118170709336: actual2/1/1PASS117.45/14.45/17.94s, all three reviews
+repeated for each compiler owner as above, unchanged exact stderr cases/no
+ignored/filtered/failed. Final unreviewed matrix modes now reviewed individually:
+push kernel15/15/15, store217/217/217, store-testing0/0/0 and PR wake-nostd0/0/0.
+For each actual harness the contract/source, execution and assertion/selection
+reviews agree with the earlier matrix review; zero harnesses prove compilation
+only. All selected unit assertions are unchanged and retain their full scope.
+
+
+PR native job118170709358 actual255PASS61.633s0skip and seven one-case smokes;
+all three reviews above repeated independently against this job's raw log and
+current head, not credited from the push run. Its second printed255summary is
+the installed-log echo, zero extra executions. Native jobs still required inside
+the two full Linux Nix checks, whose current handles remain live.
+
+All four actual AFL60s/CMPLOG campaigns reviewed: wire0/header2/chunk18/value0
+new corpus items; each reports0crashes/0timeouts and the time-limit termination.
+Three reviews for EACH: (1) unchanged target parsing/value laws and input set;
+(2) actual end statistics, CMPLOG confirmation and clean uploads, not inferred
+from workflowgreen; (3) current source/duration/no changed failure thresholds.
+This clean evidence does NOT prove the known zero-exit saved-crash gate rejects
+a fault; that independent PG9 acceptance remains required. Both fuzz engines'
+actual raw job logs retained under /tmp/mnesis-accounting-b0-job-<id>.log.
+
+
+Completed push native job118170676951 actual255PASS62.313s0skip, plus seven actual
+one-law feature smokes. Its installed run.log echo repeats the same255run and is
+NOT an additional execution. Three reviews after each smoke and full suite:
+1. Contract: selected atomic/snapshot/projection/listing/session/TLS/durability
+   smoke owners prove optional cases are present; complete255 includes all four
+   new accounting laws and existing native contracts, not only smoke selection.
+2. Execution/falsifier: live isolated Linux Postgres, no-tests=fail on seven
+   smokes, explicit nonempty URL and SQLprobe, actual compile/archive/execution;
+   full255zero skipped. Smoke skips are unrelated cases excluded by selection.
+3. Assertions/source/selection: reviewed immutable signedb0 source and current
+   archived set, original caps64/exacterrors unchanged, no pipeline/test/timeout
+   edits or database guards counted as native evidence. Seven selected smokes
+   and one complete run retained distinctly from the echoed installed log.
+
+Push compiler job118170676765 actual2/1/1PASS87.71/11.16/13.57s. Three reviews
+after each owner run: (1) existing malformed-domain/schema/API diagnostics stay
+required; (2) actual trybuild cases run in plain checkout, not omitted by the
+Nix compiler-fixture exclusion; (3) unchanged sources/expected stderr/feature
+selection and0failed/ignored/filtered. Compiler fixtures are not database laws.
+
+Four actual libFuzzer campaigns finish61s each: wire8,982,140/header2,841,252/
+chunk2,272,854/value9,601,392 executions, no crash failure. Three reviews after
+each: (1) unchanged parser/value invariants; (2) actual terminal count and ASan/
+value-profile logs; (3) unchanged sources/duration/corpus/settings, no Postgres
+or omitted-crash-gate acceptance inferred. AFL legs still being collected.
+
+
+Further completed matrix jobs downloaded individually under
+/tmp/mnesis-accounting-b0-job-<jobid>.log, current job metadata retained for both
+push39285646413 and PR39285656117. Newly inspected runs: push Fjall131/131/131,
+wake17/17/17, inmemory25/25/30; PR store-testing0/0/0, store217/217/217,
+inmemory25/25/30, kernel15/15/15, Fjall131/131/131 (default/no-default/all).
+Three reviews for EACH actual run: (1) exact unit-owner contracts stay unchanged,
+and optional inmemory laws appear only in all-features; (2) actual runtime counts,
+0failed/ignored/filtered in each log, with store-testing0 getting no runtime
+credit; (3) unchanged selected assertions/feature commands and no test/gate
+edits, preserving the distinction between library checks, unit tests, integration
+laws and native Postgres. These do not close PG9's downstream/feature gap.
+
+CodSpeed check118173905265 SUCCESS, actual run39285656109, against protectedf7:
+43untouched/3skipped with baseline fallback;17system-call warnings retained.
+Raw /tmp/mnesis-accounting-b0-codspeed.log includes actual benchmark execution,
+plus restore/save cache-service warnings (job still succeeds), not a benchmark
+regression. Three reviews: (1) existing kernel/Fjall/wire suite coverage only,
+not Postgres capacity; (2) actual report and revision comparison, not inference
+from checkgreen; (3) unchanged benchmark sources/thresholds, baseline-substituted
+three cases and unmeasured system calls explicitly excluded from new evidence.
+Current review-thread query returns0; recheck exact head and checks before merge.
+
+
+Actual mutation artifact12202629030, exact headb0/run39285656132 downloaded and
+SHA256 VERIFIED against GitHub0a18b86e21e665fea68b9dcae23da713f4efa790fb8f9771a77f1331e1575730.
+ZIP /tmp/mnesis-accounting-b0-mutants.zip and unpacked directory retained.
+Baseline255PASS59.181s0skip. Sevenvariants:1runtimecaught/6compilerunviable,
+0survivors/timeouts. ALL seven diffs/first outcomes reviewed: each substitutes
+one return only. Snapshot/checkpoint Default(E0277) and four PageRow constructors/
+Default(E0599/E0277) are compiler-only and get ZERO runtime catch credit.
+The one runtime variant returns empty listing; actual firstfailure is the
+completed-chunk final-conflict law observing missing listed stream, not a poisoned
+schema.34cases executed33PASS/1FAIL3.105s, no42P06. No claim this automated
+mutation proves each SQL literal guard; the four retained original native reds do.
+Three reviews after baseline and after the one mutant runtime run: (1) baseline
+selects complete actual DB suite; mutant threatens real event inventory contract;
+(2) correct-source all255pass and the bad empty-return actuallyfails on observable
+missing inventory; (3) actual failure source/assertion, seven exact diffs, no skip/
+filter change or contaminated fixture, six compile failures kept distinct.
+
+
+Live exact-head CI is running/queued; no all-green/merge claim yet. Downloaded
+actual completed job logs118170676922(push wake-nostd),118170676800(push macros),
+118170709561(PR wake),118170709612(PR macros), kept under
+/tmp/mnesis-accounting-b0-{push-wake-nostd,push-macros,pr-wake,pr-macros}.log.
+For EACH of their default/no-default/all test runs (twelve harness runs):
+1. Contract review: existing selected lib-test owners are unaffected by the SQL
+   change. Macros1/1/1 and wake17/17/17 check their existing unit contracts;
+   wake-nostd0/0/0 proves only compilation, not its integration wake protocol.
+2. Execution/falsifier review: actual logs include three cargo test invocations
+   per job and zero exit with0failed/ignored/filtered. No database runs or native
+   Postgres credit. These are executions, unlike reused gate outputs.
+3. Assertion/source/selection review: unchanged assertions and package selections
+   retain existing checks; lib-only scope omits external wake-nostd integration
+   laws. Feature-isolation and actual optional Postgres suites remain PG9 work;
+   green0-test harnesses do not satisfy them. No test filters or skips changed.
+
+## PG9 patched wake dependency — first signed gate and protected integration
+
+Final combined normal signed gate28513 exits0, signed0f407cce G; all12 named host
+checks PASS (10rebuilt/2previouslybuilt per hook). Actual1586workspacePASS622.698s
+15slow4compilerexcluded; replay2/1/1PASS1.00/1.00/1.02s; no_std/store-no_std/Wasm
+complete. Native255PASS90.562s0skip is distinct actual DB proof. Final signed
+product diff remains byte-identical2803SHA over protected766; GPG/whitespacePASS.
+Raw integrated-hook/nextest/replay/nostd logs and three reviews retained at
+/tmp/mnesis-pg9-advisory-integrated-*.
+Three reviews after each remaining compile-only owner: supported pinned targets
+and wake/store ownership, actual completed build logs rather than host runtime
+substitution, unchanged source/feature gates and no warning/lint relaxation.
+No native or capacity claim from build-only checks. User steering: keep remaining
+work tied to explicit PG0–PG9 requirements, prioritize operations/CI/docs/release,
+and stop expanding security edge-case research. Original required TLS/role/
+dependency checks remain covered. Current metadata work is ordinary startup
+allocation/correctness with two reproduced failures, not new security scope.
+One record-only normal signed amend next; cache status must be inspected, not
+assumed. Then focused PR/current CI/protected delivery; no full-release claim.
+
+
+Combined protected-parent native suite68930 exited0:255PASS90.562s0skip,
+compile11.50s, run68940e29-f124-4436-a04d-dcc178a03c78. Raw integrated-native.log.
+Three independent reviews immediately after this run:
+1. Contract: dependency patch composes with ALL four newly merged byte-accounting
+   laws and the existing native ordering, reads, uncertainty, migration, saved
+   state, backup, TLS/permissions and durability contracts.
+2. Execution/falsifier: all255 actual named native cases executed with explicit
+   database URL, --locked/--all-features/one thread/--no-tests=fail; zero skips,
+   not inferred from the earlier251 or an empty/guarded workspace harness.
+3. Assertions/source/selection: exact original signed accounting source now
+   composes with unchanged2803dependency diff; all tests/expected errors/byte
+   limits/case selection/timeouts unchanged. Complete actual log inspected, no
+   stopped/suppressed cases.90.562s is correctness timing, not capacity proof or
+   an established diagnosis of variation from prior67.963s sample.
+
+
+Normal signed full gate70705 exits0; original signeddb52f645ff2d0959c1f37c039407f338a0acab6b
+retained at work/postgres-advisory-f7-proof. All12 named host checks pass, including
+bare-metal/store-no_std/Wasm; actual workspace1585PASS603.626s15slow4compiler
+exclusions and replay2/1/1PASS1s each. Full raw logs and three reviews retained at
+/tmp/mnesis-pg9-advisory-{hook,gate-nextest,gate-replay}.log and gate-reviews.md.
+All tests/assertions/workloads unchanged; cause of slower timing unestablished.
+
+Three reviews after each compiled no_std/Wasm owner: supported pinned targets and
+unchanged wake feature ownership; actual completed native build logs, not host
+runtime substitution; source/config/selection unchanged, no warnings or std gate
+relaxation. Unwaived Nix audit/deny and supported hakari logs show successful
+commands. A later path-info inspection finds an absent Hakari cache output, while
+its derivation identity matches the exact completed successful gate log. Cause
+not established; this is not an additional test run or a failed test verdict.
+Raw inspection failure retained; no claim that every output remains in cache.
+
+PR396 protected-merged766394cd at16:49:55Z after40requiredgreen/0threads; complete
+merge tree equals reviewedb0. Dependency branch now signed3861c0b8d7c10201546e87e79da13fe5ad255481
+on that parent. Five RESEARCH-ONLY rebase conflicts resolved using Git's ordinary
+union of both histories. Protected EXPERIMENTS prefix byte-identical and JSONL
+valid. Full product diff over the new parent STILL byte-identical to frozen
+2803e43f13db6d0fbb127dfa5bc7947ba03eaf42714daaa0d5e8041ff27f9c18; no Rust/test
+conflicts. Original signed commit and all conflict stages preserved at paths in
+/tmp/mnesis-pg9-advisory-rebase-path. Accounting postgate/CI/delivery working
+records also merged with the ordinary three-way union; original worktree intact.
+Combined revision still requires actual255native and normal signed full gate,
+current Linux CI, focused PR/protected merge; first251 onf7 is isolated proof.
+PG9 dependency signed gate70705: completed runtime review before the final build outputs finish; source/index remain frozen.
+
+Actual instrumented workspace:1585PASS603.626s15slow,4 established compiler-fixture exclusions. Fresh completed derivation log ggrp9py35physffh8fsvkhwxzqz3jakl, not cached/no-DB native evidence. Cause of the slower duration versus earlier495s sample remains unestablished.
+
+Three independent reviews after the workspace run:
+1. Contract: preserve all selected kernel/store/adapter/wake invariants; existing complete native251 run and unwaived advisory check remain distinct. Workspace feature unification does not prove every isolated Postgres feature or actual DB execution.
+2. Execution/falsifier: actual1585 named cases passed, not an empty harness or inferred exit. Fifteen slow cases finished; the last two Fjall version properties retain256 generated cases and unchanged bounds. No process was restarted or test omitted to complete the gate.
+3. Assertions/source/selection: source and index remained frozen at productSHA2803e43f13db6d0fbb127dfa5bc7947ba03eaf42714daaa0d5e8041ff27f9c18. No tests, expected results, filters, limits, lints or workloads changed. Four compile fixtures stay in their established separate plain-checkout jobs. Guarded no-DB adapter passes get no native credit; full PG8 performance/capacity/soak remain pending.
+
+Actual replay:2/1/1PASS, each1.00s, fresh yp7sf0s7phzw7ll7g94pmg6g0h4yvmn0 derivation. Three reviews after EACH harness: (1) unchanged wire/CBOR corpus and bounded-random invariants; (2) actual existing harness executes and succeeds; (3) exact source/corpus/filter/duration unchanged, no coverage-guided campaign or Postgres proof inferred.
+
+Readonly one-second OS sampling was unavailable for a Nix build-user process without additional privileges; no escalation, process change or causal diagnosis. Raw /tmp/mnesis-pg9-advisory-slow-property-sampling.log retained. Completed test process and live overall gate were distinguished; no missing child was treated as a reason to restart a live gate.
+Combined protected-parent gate28513 runtime reviews, before remaining build-only outputs finish. Dependency source/index remain frozen.
+
+Actual complete instrumented workspace1586PASS622.698s15slow,4 established compiler-fixture exclusions, across136binaries. Actual native255PASS90.562s is separate proof. No metadata-probe files from the independent worktree are part of this gate source.
+Three reviews immediately after the workspace run:
+1. Contract: preserve all selected workspace contracts and compose the reviewed accounting fix with the patched dependency. Default workspace feature union does not substitute for isolated adapter features or the native database suite.
+2. Execution/falsifier: actual fresh azbj8qv7 derivation executes1586 cases with0failures; existing slow Fjall property workloads finish intact. No restart, lowered proptest count, timeout waiver or omitted test.
+3. Assertions/source/selection: exact2803dependency product diff and reviewed766accounting source; no test/assertion/cap/filter/baseline changes. Four compiler fixtures remain in their existing plain-checkout jobs. No guarded no-DB pass is credited as native proof. Concurrent independent metadata characterization used a separate target and process-local allocator; correctness timings are not a capacity comparison.
+
+Actual fresh replay qlj4acd7:2/1/1PASS1.00/1.00/1.02s. Three reviews after EACH harness: unchanged corpus/wire/CBOR invariants, actual completed execution/counts, unchanged source/selection/duration. Not a coverage-guided campaign or Postgres capacity result.
+
+Both the isolated first gate603.626s and combined622.698s are retained. These noisy whole-workspace timings do not establish a dependency performance regression or improvement; no such claim is made. Ordinary tests and current source records remain authoritative.

@@ -930,3 +930,42 @@ only the actual octet_length collision defect, no blanket SQL-name safety claim.
 Update PRD/backlog/progress with protected durability delivery and current narrow
 accounting verification; do not expand into SUM/window/integer hypotheses before
 this proved slice is delivered. Full native255 is running; preserve product source.
+# PG9 patched wake dependency — pre-edit, 2026-10-19
+
+Threat: root Cargo.lock selects event-listener5.4.1, which RustSec0221 identifies
+as unsound; deny.toml suppresses that exact advisory. The two fuzz locks contain
+no event-listener. Current three locks contain no time/refinery, so the old
+time0009 audit exception also needs an unwaived check rather than retention.
+
+Experiment: preserve the existing dependency owner and use its compatible5.4.2
+patch. Before changing it, run cargo-deny against a temporary copy of the current
+policy with its advisory ignore removed; require the actual selected5.4.1 red.
+Then raise the workspace minimum to5.4.2, use Cargo's precise update, remove the
+resolved deny exception and absent-time audit exceptions, and revalidate the
+existing wake concurrency source claims against the exact patched source.
+
+Budget: root Cargo.toml one replacement line; root lock at most20changed lines,
+no added packages; deny.toml at most10removed lines; audit.toml at most10removed
+lines (delete the empty configuration if no policy remains); flake.nix at most
+3removed lines; wake-nostd one comment replacement; changelog at most5added lines
+(ordinary Fixed heading, entry and separating blank lines).
+No executable Rust, public API, test selection, lint, baseline, dependency family,
+framework, runtime, tooling or new test file. Existing research/backlog owners
+record evidence. Revert the dependency/policy slice if unsupported, if the narrow
+update adds unrelated packages, or if wake/native/no_std/complete gates regress.
+
+Proof: inspect exact upstream license/MSRV and listen/notify fences; compare
+root lock graph before/after; run unwaived current cargo-deny and cargo-audit over
+all owned locks, actual wake tests, complete native Postgres suite, and unchanged
+signed full Nix gate (including bare-metal wake). Three independent reviews after
+every actual test run; compile checks and cached gates get no native-test credit.
+PR396 remains frozen and gets immediate delivery attention when its CI completes.
+
+Pre-edit budget refinement from actual Cargo/hakari evidence:5.4.2 drops its
+concurrent-queue edge. The supported `cargo hakari generate --diff` returns1
+because two generated workspace-hack edges are now redundant, not because a
+test failed. Add only the required generated-manifest removal (two lines) and
+the matching existing workspace-hack lock edges to this slice. No hand-written
+dependency replacement or new package. Keep the <=20line lock budget; inspect
+the actual final graph before accepting it. Required generated owners must stay
+current rather than retaining redundant dependencies to meet an estimate.

@@ -1,3 +1,48 @@
+# Current dependency integration — 2026-10-19
+
+Active worktree /tmp/mnesis-postgres-advisory, fix/postgres-advisory. PR396 now
+protected-merged766394cd508046dbce3ae6893a1b9c9da805c941 at16:49:55Z after40green/
+0threads; entire reviewedb0 tree exact.20 focused merges, not published.
+
+Dependency source2803SHA frozen record unchanged:5.4.2/zero new packages, one
+concurrent-queue removed, supported hakari regen, event/time exceptions removed,
+no executable Rust/API/tests/framework changes. Original unwaived5.4.1 red retained.
+Actual wake11PASS0.163s/native251PASS65.600s onf7; unwaived audit all three locks/
+denyPASS. First normal signed fullgate70705 now TERMINAL0, signeddb52f645 G,
+all12checks PASS, workspace1585PASS603.626s15slow4compilerexcluded, replay2/1/1
+PASS1s each, no_std/store-no_std/WasmPASS, all three reviews recorded. Missing
+posthoc Hakari cache output does not erase actual completed log; same derivation
+identity, no claimed cause or extra execution. Raw /tmp/mnesis-pg9-advisory-*.
+
+Rebased clean signed commit onto protected766: current3861c0b8d7c10201546e87e79da13fe5ad255481 G.
+Five RESEARCH-ONLY conflicts ordinary Git union, protected append-only JSONL
+prefix exact/valid, original signed branch work/postgres-advisory-f7-proof retained,
+all stages /tmp/mnesis-pg9-advisory-rebase-path. Source product diff EXACT original
+2803e43f13db6d0fbb127dfa5bc7947ba03eaf42714daaa0d5e8041ff27f9c18 over new parent.
+Accounting postgate/CI/delivery working records merged with normal three-way
+union; original worktree and root user branch/research edits preserved.
+
+CURRENT final combined normal signed gate28513 TERMINAL0, signed0f407cce G,
+all12PASS(10rebuilt/2cached),1586workspacePASS622.698s15slow4compilerexcluded,
+replay2/1/1PASS1.00/1.00/1.02s, no_std/store-no_std/WasmPASS. Sourcecmp2803/GPG/
+whitespacePASS; THREE reviews recorded. One record-only normal signed amend next,
+inspect actual cache status; then focused PR/current CI/protected merge promptly.
+Original native integrated255 suite68930 TERMINAL0,255PASS90.562s0skip
+(11.50scompile), log/tmp/mnesis-pg9-advisory-integrated-native.log. All THREE
+reviews recorded. Next normal SIGNED amend incorporating current evidence/
+backlog/progress, full unchanged Nix gate for combined source;
+freeze index/source until terminal, sourcehash/GPG/actual logs/three reviews;
+focused PR/current CI/Linux/artifacts/protected merge. PRbody draft/tmp/mnesis-pg9-advisory-pr.md
+still needs combined counts and gate evidence before publishing. No approval needed.
+
+ALL remaining PG7/8/9 requirements including SQL aggregates/operators/catalog/
+bounded migration metadata, lifecycle/diagnostics, capacity10k100k1m×1/16/128,
+recovery timings/30minsoak, Python removal/feature isolation/AFL crash gate,
+docs/two fresh audits/publication/registry actualDB consumer remain. Goal ACTIVE,
+no budget; do not complete after a local pass or this dependency delivery.
+
+## Historical pointers — superseded
+
 # Current accounting delivery — 2026-10-19 16:16 UTC
 
 Worktree /tmp/mnesis-postgres-accounting branchfix/postgres-accounting, protected
@@ -38,6 +83,33 @@ unboundedmigrationmetadata actualwitnesses, PG7operatortimings, PG8 lifecycle/
 diagnostics/capacity10k100k1m×1/16/128+30minsoak, PG9 Python/cargo-hack/nativefeature/
 AFLzeroexit/advisories/Nixunusedoutputs/minimization/twoaudits/release/registryconsumer.
 Read-only preparedfollowups /tmp/mnesis-postgres-followups-20261019.md, not delivered.
+# Current PG9 dependency work — 2026-10-19
+
+fix/postgres-advisory in /tmp/mnesis-postgres-advisory starts at protectedf7d390d4.
+PR396 accounting stays frozen at signedb0d613ea, CI39285646413/39285656117 and
+fuzz39285656097/mutants39285656132/CodSpeed39285656109 currently running/queued.
+Deliver that focused repair promptly after actual logs/artifacts/reviews pass.
+
+Original unwaived deny check actually rejects locked event-listener5.4.1/0221.
+Patch5.4.2 updates only one version and removes concurrent-queue, zero added
+packages. Workspace minimum, generated hakari and obsolete advisory policies
+updated within recorded budget; no executable Rust, API, framework or test change.
+Current unwaived deny advisories/licenses and audit on ALL THREE locks PASS,
+current database1338 advisories. Source/MSRV1.60/license/fence evidence recorded;
+all three reviews for each check in feature research. Wake11PASS0.163s0skip and FULL
+native251PASS65.600s0skip, compilation17.77s, actual sessions48203/91109 exited0;
+three reviews for each run in research. Next normal signed full Nix gate,
+source/index frozen until terminal; inspect actual no_std/coverage/replay, then
+focused PR/current reviewed CI/protected merge. Do not waive anything.
+
+Saved persistent goal now ACTIVE/no token budget (authoritative get_goal), unlike
+the older historical blocked pointers below. Whole PG7/8/9 scope remains required,
+including capacity/recovery/30minsoak, feature/AFL/Python work, docs/two audits,
+publication and registry real-DB consumer. No final readiness claim.
+Root user branch/research edit, every prior worktree/stash/target/proof preserved.
+
+## Historical pointers — superseded
+
 ## Current durability delivery — 2026-10-19 05:39 UTC
 
 Protected parent8f03ae85; signed64f325f6 GPGgood. Normal unchanged signedgate99009
@@ -636,3 +708,11 @@ Exactfrozenproduct0d2e801d.../whitespacePASS, no gateorpolicychanges. Record-onl
 signedamend next, identicaloutputs cachedZEROnewtests; focusedPR/currentLinuxCI/
 artifact/CodSpeed/thread review and normalprotectedmerge next. No localjobs now.
 Do notleave greenfocusedchanges waiting whilebroadening another investigation.
+
+LATEST: PR396 OPEN at signedb0d613eaed11daf2d475c937d4c3d675ca284661 G. Fullsigned
+gate75846 all12PASS,1586workspacePASS495.606s15slow4compilerexcluded, replay2/1/1
+PASS1s each, allTHREEreviewed. Record-onlyamend22308 all12CACHED,0newruns.
+Frozenproduct0d2e801d.../whitespace exactPASS. Normalpush/PR done; CI initially
+39285646413push, discover all PR/fuzz/mutants/CodSpeed runIDs as they appear.
+No localjobs. Review actualLinux255runs and artifact firstfailures before exact
+normalprotectedmerge, promptly when green. Preserve local postgate evidenceappend.
