@@ -969,3 +969,53 @@ the matching existing workspace-hack lock edges to this slice. No hand-written
 dependency replacement or new package. Keep the <=20line lock budget; inspect
 the actual final graph before accepting it. Required generated owners must stay
 current rather than retaining redundant dependencies to meet an estimate.
+# PG4 bounded migration metadata — pre-edit, 2026-10-19
+
+Threat: runtime schema validation fetches every migration row and each complete
+checksum before rejecting unknown versions or mismatched digests. A corrupted or
+unsupported metadata table can therefore cause unbounded startup allocation even
+though the binary embeds only five migrations. Current source finding, NOT yet
+a reproduced defect. Ownership stays in Postgres schema.rs and migration tests.
+
+Before editing production, add two real database allocation laws using the
+existing support/memory.rs allocator: a correct checksum prefix plus32MiB tail,
+and100,000 unknown metadata rows. Require Schema rejection, unchanged native
+metadata, restoration before assertions and successful reopening after repair.
+Measure incremental peak allocation across actual from_pool; budget2MiB for
+startup, independently of malformed metadata length/count. Original code must
+fail the allocation oracle. Do not confuse SQL fixture generation with a bounded
+store read, or a returned rejection with a memory bound.
+
+Candidate minimal fix: SQLx QueryBuilder and native pg_catalog.substr, returning
+only one byte beyond the longest embedded checksum, and at most one row beyond
+the embedded migration count. Compute both bounds from MIGRATIONS with checked
+addition, preserving exact equality/length/version/success checks. No hardcoded
+checksum length or migration count; no new protocol state, framework, runtime or
+dependency. Compare supported SQLx streaming; plain streaming alone leaves the
+server result unbounded and must close the connection after rejection, while
+native projection/LIMIT cap the response itself. Do not add a custom cursor.
+
+Budget: existing schema.rs at most40added/10removed production lines, at most one
+private metadata helper if required by the80line function lint; zero public API.
+Existing migration_tests.rs696lines may grow by at most180lines (max876), including
+allocator imports/two native laws and an ordinary private measurement helper only
+if needed. Each function stays<=80lines. Changelog<=5lines, README<=5lines. Existing
+research/backlog owners record evidence. Roll back this slice if exact checksums,
+unknown-version rejection, runtime privileges or migration semantics regress.
+
+After actual original reds, run targeted/relevant complete native cases, independent
+wrong-limit and truncated-prefix controls, strict lint and unchanged full signed
+Nix gate. Three contract/execution/assertion reviews after EACH actual test run.
+Current dependency signed gate28513 remains frozen; do not run another native or
+build job until that handle is terminal. Deliver its focused PR promptly oncegreen.
+
+Scheduling refinement BEFORE execution: actual live nextest derivation azbj8qv7
+has neither DATABASE_URL nor impureEnvVars, and uses its private Nix target tree.
+Its adapter guards therefore make no native database calls. One dedicated native
+suite can characterize the two metadata laws using the existing shared developer
+target and PG17 cluster, with no other native suite running. Allocator counters
+are process-local; external CPU load cannot turn32MiB into a2MiB allocation pass.
+This supersedes the conservative all-builds wait above only for this independent
+characterization. Keep ONE full Nix gate and ONE actual native suite, never two
+native suites or shared-target builds. Do not infer comparable performance from
+timings under concurrent host load. Dependency source/index remain frozen.

@@ -7716,3 +7716,180 @@ Three reviews immediately after the workspace run:
 Actual fresh replay qlj4acd7:2/1/1PASS1.00/1.00/1.02s. Three reviews after EACH harness: unchanged corpus/wire/CBOR invariants, actual completed execution/counts, unchanged source/selection/duration. Not a coverage-guided campaign or Postgres capacity result.
 
 Both the isolated first gate603.626s and combined622.698s are retained. These noisy whole-workspace timings do not establish a dependency performance regression or improvement; no such claim is made. Ordinary tests and current source records remain authoritative.
+# PG4 bounded runtime metadata — original witness, 2026-10-19
+
+Complete current native suite86557 exits0:257PASS74.826s0skip, --locked/
+--all-features/one thread/--no-tests=fail, supported --success-output immediate.
+Raw /tmp/mnesis-pg4-metadata-native.log includes successful numeric measurements.
+Three independent reviews after this actual run:
+1. Contract: all existing migration/ordering/read/recovery/transaction/atomic/
+   state/backup/TLS/durability cases compose with the two bounded-startup laws.
+2. Execution/falsifier: all257 actual native cases execute with zero skips, and
+   the original two reds plus two independent wrong-bound reds remain retained.
+3. Assertions/source/selection: original caps, inputs, checksum/version equality,
+   expected errors and restoration unchanged; no excluded cases or baseline/lint
+   changes. Successful stdout exposes measurements from the same full run rather
+   than adding a measurement-only execution. Correctness timing is not capacity.
+
+
+Independent wrong-prefix control: same isolated worktree, row limit restored to
+correct candidate; ONLY checksum checked_add(1)→checked_add(0). Actual1FAIL0.405s,
+compile11.51s, run28262655-a1cc-4330-9ae4-844b3fd60ba0;16unselected. It accepts
+the correct48byte prefix of a33,554,480byte checksum and allocates22,115peak bytes.
+Original Schema assertion fails AFTER restoring the exact original checksum and
+successful repaired open. Three reviews: (1) bounded memory alone must not make
+an overlong digest valid; (2) actual bad native query opens the store, failing the
+correctness assertion rather than a setup/compile problem; (3) exactly one bound
+token changed, original input/cap/assertions/cleanup intact and no poisoned schema.
+Candidate source remains unchanged; control state/diffs/log retained separately.
+Next complete native suite will also expose successful allocation measurements
+using nextest's supported success output, without an extra measurement-only run.
+
+
+Independent wrong-count control: isolated retained worktree
+/tmp/mnesis-metadata-controls.E8INXH differs from candidate ONLY row-bound
+checked_add(1)→checked_add(0). Actual1FAIL1.123s (compile19.85s),16unselected,
+run36f83274-38ba-44d6-a718-b3a19b1c5cf0. It accepts100,005rows while allocating
+only22,115peak bytes; Schema assertion fails AFTER exact metadata restoration and
+successful repaired open. Raw wrong-count.log retained. Three reviews:
+1. Contract: a small-memory implementation must still reject an unsupported
+   migration, so the input/type/error oracle remains independently required.
+2. Execution/falsifier: actual bad native query returns a successfully opened
+   store and fails the original Schema assertion, not compile/setup or memory.
+3. Assertions/source/selection: one bound-token change only, unchanged native
+   data/count/memory cap and cleanup;16focused omissions are unrelated cases.
+   The candidate worktree remains correct and untouched. No fixture poisoning.
+
+
+Minimal fixed query passes both actual native regressions:2PASS3.181s,15focused
+unselected, compile28.99s, runce20aad7-3811-4376-9e8e-197989681223. No assertion,
+cap, input or test selection changed. Source24added/7removed lines (within40/10),
+zero new private/public type or API. SQLx QueryBuilder renders compiler-owned
+numeric bounds derived from MIGRATIONS with checked addition; native substr and
+LIMIT return at most one byte/row beyond the known shape. Existing exact digest,
+version and success checks remain unchanged. Explicit SQLx administrative
+migration behavior is unchanged; this slice bounds runtime schema validation.
+
+Three independent reviews after this actual run:
+1. Contract: reject wrong/unsupported metadata while bounding runtime startup
+   allocation; normal metadata remains accepted after each exact repair.
+2. Execution/falsifier: the same two previously failing native laws now pass,
+   actually invoking from_pool, including schema rejection and repaired reopening;
+   original134MB/11MB reds retained. Successful pass proves the fixed2MiB upper
+   bound; hidden success stdout gives no exact smaller allocation claim yet.
+3. Assertions/source/selection: exact original test file/caps/workload/cleanup
+   unchanged,15unselected from focus only; no DB guards counted as native. Extra
+   byte/row preserves rejection, with independent bad-bound controls next.
+
+
+Base protected766394cd; production schema.rs unchanged. Existing migration owner
+adds125test lines,821/876budget, reuses allocation accounting and real from_pool.
+Original native run935406e5-bcc4-4a53-9263-8bcf6cdde47b exits100: two actualFAIL,
+4.963s (compile40.71s), --no-fail-fast/one thread with real PG17.15unselected
+cases/20other binaries omitted by the focused filter, not runtime skips.
+100,005metadata rows allocate11,028,315incremental peak bytes; a33,554,480byte
+checksum allocates134,204,367bytes. Both reject Schema, preserve metadata exactly,
+restore their mutation and successfully reopen BEFORE allocation assertions.
+Raw original /tmp/mnesis-pg4-metadata-original.log retained. Limit2,097,152bytes
+was recorded before execution and remains unchanged. This is ordinary startup
+memory/correctness scope; no new security acceptance or public feature is added.
+
+Three independent reviews after this actual run:
+1. Contract: runtime opening must reject unsupported metadata without memory
+   scaling with its row count or checksum body; checksum/version exactness stays.
+2. Execution/falsifier: two actual named native cases fail at the allocation
+   assertions, not compile/setup or a different returned error. No-fail-fast lets
+   both execute; source/error/unchanged-data assertions and repaired open passed
+   before each allocation panic. Original source remains unchanged until now.
+3. Assertions/source/selection: actual counters wrap only from_pool, fixture
+   generation occurs before measurement, and process-local peak deltas reject
+   both original defects. Correct digest prefix plus tail will also reject a fix
+   that silently truncates to exact digest length; extra rows reject a limit that
+   hides unknown versions. Cleanup BEFORE assertions avoids mutation poisoning.
+   Existing host Nix gate has no DATABASE_URL/impure env and a distinct target;
+   no simultaneous native suite. Timings under host load get no capacity credit.
+
+## PG4 startup bounds — final native measurements and compiler checks
+
+The same complete 257-case native run records incremental peak allocations of
+2,813 bytes for 100,005 metadata rows and 2,814 bytes for a 33,554,480-byte
+checksum, below the original 2,097,152-byte cap. This measures the caller's
+startup allocation window, not server memory, retained RSS or capacity.
+Strict all-feature/all-target Clippy passed in 9.36s; strict no-default/all-target
+Clippy passed in 11.96s and workspace formatting passed. Compiler/format checks
+execute zero product tests and earn no runtime credit. Three reviews: contract
+and feature combinations unchanged; actual compiler exit0 under existing denied
+warnings; no lint, fixture, cap, selection or assertion changes.
+
+Frozen four-file product diff SHA256:
+da2c52f4fdb1de272cfc09b5c052eb2c63269145b6536128c796394a3af1d103.
+Next integrate onto reviewed dependency PR397 before its first signed full gate;
+preserve the entire WIP and verify the product diff byte-for-byte after integration.
+The dependency update is required delivery maintenance; user steering limits
+further security work to explicit PG0–PG9 acceptance. Operational and release
+requirements remain the priority after the current startup-memory fix.
+
+## PG4 combined reviewed dependency integration
+
+Combined source on reviewed dependency205b01c4 passes the entire real-Postgres
+suite:257PASS63.461s,0skips, compile12.81s. Same original migration inputs record
+2,813/2,814 incremental peak bytes. Raw
+/tmp/mnesis-pg4-metadata-integrated-native.log is retained with the original reds,
+fixed run and independent wrong-count/wrong-prefix controls. Product diff remains
+byte-identical da2c52f4; no dependency/API/test/threshold changes during integration.
+The entire WIP stash is retained. Four research-only conflicts used ordinary
+Git union; the protected parent's JSONL prefix is byte-identical and JSONL valid.
+An initial shell inspection used zsh's reserved path variable and failed before
+merging files or executing tests; the corrected /bin/sh command uses record.
+This setup error earns zero execution or product-defect credit.
+
+Three independent reviews after the actual combined run:
+1. Contract: every selected migration, ordering, uncertainty, atomic/import,
+   state, backup, recovery and lifecycle law passes with bounded startup.
+2. Execution/falsifier: all257 native cases actually execute,0skips; original
+   two allocation reds and two wrong-bound Schema failures remain independently
+   retained. A compiled or guarded workspace run is not substituted.
+3. Assertions/source/selection: source diff byte-identical to frozen candidate;
+   original checksum/count/cap/Schema/cleanup/reopen assertions intact, no omitted
+   selected laws or weakened lints/workloads. No capacity claim from this timing.
+
+Next normal signed full Nix gate freezes source/index until terminal. Delivery
+requires actual Linux CI, review and protected merge after the dependency parent.
+
+Eight native/control/compiler logs are committed under the existing evidence
+folder as pg4-metadata-*.log. Copies remove terminal trailing blanks only for
+Git whitespace checks; exact unmodified raw /tmp logs remain retained. This
+formatting does not alter test selection, assertions, inputs or result counts.
+
+## PG4 signed full gate and protected parent
+
+Normal signed gate18512 exits0, first signedfe050eb29898ef80857956cb8c6c7e0df93fb9ff G:
+all12hostchecksPASS (10built/2cached). Actual workspace1588PASS566.907s15slow,
+4existing compiler-fixture exclusions,136binaries. For this actual run, three
+reviews: unchanged workspace contracts plus two guarded startup regressions;
+actual executed1588 with native257 separately proven (no DB guard credit here);
+unchanged filters/workloads/assertions/lints and all exclusions explicit.
+Actual replay2/1/1PASS1.00/1.00/1.01s: EACH invocation three-reviewed for owning
+corpus contracts, actual execution, and unchanged corpus/oracles/selection.
+Actual no_std/store-no_std/Wasm builds complete; no hardware runtime credit.
+Docs/Clippy/fmt/TOML/Hakari/unwaived audit/deny checks pass. Raw normal gate and
+per-owner logs retained under/tmp/mnesis-pg4-metadata-* and mnesis-pg4-*-nostd/wasm.
+
+PR397 protected merge3313567f8714f655c7ed65f0fb9be62caa463b0a at17:47:45Z,
+exact reviewed205b01c4 entire tree byte-identical.40SUCCESS/1scheduledSKIP,
+0threads.21focusedprotectedmerges, not published. All final Linux job evidence
+and three reviews are retained in the operations research record pending its
+integration, with exact delivery snapshot/tmp/mnesis-pg9-advisory-delivery.json.
+
+Metadata signed rebase onto that protected parent givesc565230c G; ENTIREtree
+matches original reviewedfe050, product diff remains exactda2c52f4. Original
+signed proof branch work/postgres-metadata-205b-proof retained. No merge conflicts
+or source mutation. This does not create another test execution. Record-only
+normal signed amend next; inspect actual cached/runtime status rather than assume.
+Then normal push/focused PR and Linux CI/protected delivery; no approval pending.
+
+Evidence-only signed amend55938 exits0 at c33c6e0c G: all12checks cached,
+running0flakechecks, ZERO new runtime tests. Frozen four-file product stillda2c52f4.
+Correct the PRD's dependency pointer from in-CI to merged; final normal signed
+record amend preserves the product and all verification policies. Publish after
+terminal/sourcecmp/signature/actual cache inspection, without another source edit.

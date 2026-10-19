@@ -132,6 +132,10 @@ All runtime opens also require `SELECT` on `mnesis.history` and `mnesis.events`,
 including roles that only write cached state. No runtime role needs to update
 or delete history metadata.
 
+Runtime validation bounds metadata transfer using the migrations embedded in the
+binary. Unknown versions, incomplete records and differing checksums still reject;
+full checksum equality remains required.
+
 Migrations live in the published crate and use SQLx transactions and locks.
 Adoption of a verified legacy `public.events` table preserves its rows, positions
 and identity sequence. A compatibility view prevents older constructors from

@@ -161,3 +161,19 @@ and head laws. Complete current-source checks and protected delivery passed in
 PR396 after all40requiredCIchecks, four255-case native Linux runs, verified
 mutation artifact(1actualcatch/6compiler-only/0survivors) and0threads;
 SUM/window/integer/catalog and migration-metadata hypotheses remain open.
+
+Current follow-up: dependency PR397 is open at signed205b01c4 with all12 local
+checks passing,255 combined native cases and no new packages. PG4 startup-memory
+bounds pass257 actual native cases; two unchanged original allocation failures
+and two independently failing wrong-bound controls are retained. The metadata
+candidate is now based on reviewed PR397 with byte-identical product changes;
+combined native/full gate and protected delivery are pending. Operational,
+capacity, recovery, feature/fuzz gates, documentation and release evidence remain.
+User steering limits security work to explicit required acceptance checks.
+
+Dependency PR397 protected-merged as3313567f8714f655c7ed65f0fb9be62caa463b0a
+after all40CIchecks,0threads, four255-case Linux native runs and unchanged full
+Nix gates. Runtime migration metadata slice passes257native cases and all12host
+Nix checks (1588workspace tests); focused Linux/protected delivery follows.
+Publication, remaining operations/capacity and final whole-adapter acceptance
+are still pending. Security work remains limited to explicit required checks.

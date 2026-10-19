@@ -414,3 +414,16 @@ settings and qualify the adapter's own required native accounting calls.
 - https://rustsec.org/advisories/RUSTSEC-2026-0009.html: patched time>=0.3.47.
   Current root/fuzz/fuzz-afl locks contain neither time nor refinery. Their old
   exception comments describe an absent graph, not an evidenced current blocker.
+# PG4 metadata preparation — accessed2026-10-19
+
+Exact locked sqlx-core0.9.0/src/migrate/migration.rs computes embedded checksums
+with Sha384::digest and exposes their bytes through each Migration. Derive bounds
+from those embedded checksums rather than duplicating the current48-byte size.
+PostgreSQL18 official binary string documentation
+https://www.postgresql.org/docs/18/functions-binarystring.html documents bytea
+substr with an explicit length. Exact17.10 applicability needs native execution.
+Official SQLx0.9 Migrator docs page failed to open; use the actual locked source,
+not inferred API behavior. Existing native migration laws own checksum/future
+version rejection, restoration and runtime privileges. No proof claimed yet for
+the new allocation hypothesis; old count/checksum-error laws alone do not bound
+transfer or memory.

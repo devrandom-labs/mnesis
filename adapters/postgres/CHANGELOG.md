@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bound runtime migration metadata reads while preserving exact checksum and
+  unsupported-version rejection.
 - Application `octet_length` functions cannot bypass event, stream-ID, snapshot
   or checkpoint row byte limits.
 

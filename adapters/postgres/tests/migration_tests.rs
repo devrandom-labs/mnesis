@@ -3,7 +3,9 @@
 
 mod support;
 
+use std::io::{Write, stderr};
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::time::Duration;
 
 use futures::{StreamExt, TryStreamExt};
@@ -17,6 +19,129 @@ use sqlx::postgres::PgPoolOptions;
 use tokio::sync::Barrier;
 use tokio::task::yield_now;
 use tokio::time::timeout;
+
+#[path = "support/memory.rs"]
+mod memory;
+use memory::{LIVE, PEAK};
+
+async fn measured_open(pool: &PgPool) -> (Result<PostgresStore, PostgresError>, usize) {
+    let before = LIVE.load(Ordering::Relaxed);
+    PEAK.store(before, Ordering::Relaxed);
+    let opened = PostgresStore::from_pool(pool.clone()).await;
+    let peak = PEAK.load(Ordering::Relaxed).checked_sub(before).unwrap();
+    (opened, peak)
+}
+
+#[tokio::test]
+async fn oversized_migration_checksum_rejects_without_loading_its_body() {
+    let Some(pool) = fixture().await else { return };
+    let (version, checksum): (i64, Vec<u8>) = sqlx::query_as(
+        "SELECT version, checksum FROM mnesis._sqlx_migrations ORDER BY version LIMIT 1",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    let tail = 33_554_432_i32;
+    sqlx::query(
+        "UPDATE mnesis._sqlx_migrations SET checksum = checksum OPERATOR(pg_catalog.||) \
+         pg_catalog.repeat('x', $1)::bytea WHERE version = $2",
+    )
+    .bind(tail)
+    .bind(version)
+    .execute(&pool)
+    .await
+    .unwrap();
+    let (opened, peak) = measured_open(&pool).await;
+    let unchanged: (i32, Vec<u8>) = sqlx::query_as(
+        "SELECT pg_catalog.octet_length(checksum), pg_catalog.substr(checksum, 1, $1) \
+         FROM mnesis._sqlx_migrations WHERE version = $2",
+    )
+    .bind(i32::try_from(checksum.len()).unwrap())
+    .bind(version)
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    // Restore before assertions so a failed allocation law cannot poison later tests.
+    sqlx::query("UPDATE mnesis._sqlx_migrations SET checksum = $1 WHERE version = $2")
+        .bind(&checksum)
+        .bind(version)
+        .execute(&pool)
+        .await
+        .unwrap();
+    drop(PostgresStore::from_pool(pool.clone()).await.unwrap());
+    writeln!(
+        stderr().lock(),
+        "checksum bytes={}, startup peak={peak}",
+        unchanged.0
+    )
+    .unwrap();
+    assert!(matches!(opened, Err(PostgresError::Schema { .. })));
+    assert_eq!(
+        unchanged,
+        (
+            i32::try_from(checksum.len())
+                .unwrap()
+                .checked_add(tail)
+                .unwrap(),
+            checksum,
+        )
+    );
+    assert!(
+        peak <= 2_097_152,
+        "startup loaded an oversized checksum: peak={peak}"
+    );
+}
+
+#[tokio::test]
+async fn excessive_migration_rows_reject_without_loading_the_backlog() {
+    let Some(pool) = fixture().await else { return };
+    let (count, latest): (i64, i64) =
+        sqlx::query_as("SELECT count(*), max(version) FROM mnesis._sqlx_migrations")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    let checksum: Vec<u8> =
+        sqlx::query_scalar("SELECT checksum FROM mnesis._sqlx_migrations ORDER BY version LIMIT 1")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    let first = latest.checked_add(1).unwrap();
+    let last = latest.checked_add(100_000).unwrap();
+    sqlx::query(
+        "INSERT INTO mnesis._sqlx_migrations \
+         (version, description, success, checksum, execution_time) \
+         SELECT n, 'future', true, $3, 0 FROM pg_catalog.generate_series($1::int8, $2::int8) n",
+    )
+    .bind(first)
+    .bind(last)
+    .bind(checksum)
+    .execute(&pool)
+    .await
+    .unwrap();
+    let (opened, peak) = measured_open(&pool).await;
+    let unchanged: i64 = sqlx::query_scalar("SELECT count(*) FROM mnesis._sqlx_migrations")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    sqlx::query("DELETE FROM mnesis._sqlx_migrations WHERE version BETWEEN $1 AND $2")
+        .bind(first)
+        .bind(last)
+        .execute(&pool)
+        .await
+        .unwrap();
+    drop(PostgresStore::from_pool(pool.clone()).await.unwrap());
+    writeln!(
+        stderr().lock(),
+        "migration rows={unchanged}, startup peak={peak}"
+    )
+    .unwrap();
+    assert!(matches!(opened, Err(PostgresError::Schema { .. })));
+    assert_eq!(unchanged, count.checked_add(100_000).unwrap());
+    assert!(
+        peak <= 2_097_152,
+        "startup loaded the migration backlog: peak={peak}"
+    );
+}
 
 async fn fixture() -> Option<PgPool> {
     let url = std::env::var("DATABASE_URL").ok()?;

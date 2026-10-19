@@ -1,0 +1,30 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.51s
+────────────
+ Nextest run ID 28262655-a1cc-4330-9ae4-844b3fd60ba0 with nextest profile: default
+    Starting 1 test across 1 binary (16 tests and 20 binaries skipped)
+        FAIL [   0.400s] (1/1) mnesis-postgres::migration_tests oversized_migration_checksum_rejects_without_loading_its_body
+  stdout ───
+
+    running 1 test
+    test oversized_migration_checksum_rejects_without_loading_its_body ... FAILED
+
+    failures:
+
+    failures:
+        oversized_migration_checksum_rejects_without_loading_its_body
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.38s
+
+  stderr ───
+    checksum bytes=33554480, startup peak=22115
+
+    thread 'oversized_migration_checksum_rejects_without_loading_its_body' (109895027) panicked at adapters/postgres/tests/migration_tests.rs:78:5:
+    assertion failed: matches!(opened, Err(PostgresError::Schema { .. }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.405s] 1 test run: 0 passed, 1 failed, 16 skipped
+        FAIL [   0.400s] (1/1) mnesis-postgres::migration_tests oversized_migration_checksum_rejects_without_loading_its_body
+error: test run failed

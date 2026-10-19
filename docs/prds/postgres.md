@@ -1,9 +1,9 @@
 # Postgres adapter completion
 
-Status: active (PG4 isolation; PG7 measurements; PG8 security/operations; PG9 remain). Updated: 2026-10-19.
+Status: active (PG4 startup bounds; PG7 measurements; PG8 operations/capacity; PG9 remain). Updated: 2026-10-19.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: `fix/postgres-advisory`.
+Planning branch: `docs/postgres-prd`. Current slice: `fix/postgres-metadata`; dependency PR397 is merged.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
