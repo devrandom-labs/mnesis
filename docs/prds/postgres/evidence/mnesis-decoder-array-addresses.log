@@ -1,0 +1,128 @@
+
+/tmp/mnesis-release-performance-target/release/deps/fjall_benchmarks-138285fb91733059:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+000000010015cab0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame>:
+10015cab0:     	cmp	x1, #0xb
+10015cab4:     	b.hs	0x10015cac4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x14>
+10015cab8:     	mov	w11, #0x0               ; =0
+10015cabc:     	mov	w9, #0xb                ; =11
+10015cac0:     	b	0x10015caf4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x44>
+10015cac4:     	ldrb	w10, [x0]
+10015cac8:     	cmp	w10, #0x1
+10015cacc:     	b.eq	0x10015cb10 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x60>
+10015cad0:     	cmp	w10, #0x2
+10015cad4:     	b.ne	0x10015cb70 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0xc0>
+10015cad8:     	mov	w9, #0xb                ; =11
+10015cadc:     	mov	w10, #0x1               ; =1
+10015cae0:     	mov	w11, #0x1               ; =1
+10015cae4:     	sub	x12, x1, x11
+10015cae8:     	cmp	x12, #0x9
+10015caec:     	b.hi	0x10015cb28 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x78>
+10015caf0:     	mov	w11, #0x0               ; =0
+10015caf4:     	strb	w11, [x8, #0x8]
+10015caf8:     	strb	w10, [x8, #0x9]
+10015cafc:     	stp	w9, wzr, [x8, #0x10]
+10015cb00:     	str	x1, [x8, #0x18]
+10015cb04:     	mov	w9, #0x2                ; =2
+10015cb08:     	str	w9, [x8]
+10015cb0c:     	ret
+10015cb10:     	mov	w10, #0x0               ; =0
+10015cb14:     	mov	w9, #0x13               ; =19
+10015cb18:     	mov	w11, #0x9               ; =9
+10015cb1c:     	sub	x12, x1, x11
+10015cb20:     	cmp	x12, #0x9
+10015cb24:     	b.ls	0x10015caf0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x40>
+10015cb28:     	add	x11, x0, x11
+10015cb2c:     	ldr	w9, [x11]
+10015cb30:     	ldur	w12, [x11, #0x6]
+10015cb34:     	ldrh	w11, [x11, #0x4]
+10015cb38:     	cbz	w10, 0x10015cb7c <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0xcc>
+10015cb3c:     	cbz	w9, 0x10015cba4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0xf4>
+10015cb40:     	add	x10, x11, #0xb
+10015cb44:     	cmp	x1, x10
+10015cb48:     	b.lo	0x10015cb90 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0xe0>
+10015cb4c:     	cmn	w12, #0x1
+10015cb50:     	b.eq	0x10015cbe8 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x138>
+10015cb54:     	add	x11, x10, x12
+10015cb58:     	cmp	x1, x11
+10015cb5c:     	b.lo	0x10015cbcc <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x11c>
+10015cb60:     	lsr	x12, x11, #32
+10015cb64:     	cbnz	x12, 0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cb68:     	mov	w12, #0x1               ; =1
+10015cb6c:     	b	0x10015cbf0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x140>
+10015cb70:     	mov	w9, #0x0                ; =0
+10015cb74:     	mov	w11, #0x1               ; =1
+10015cb78:     	b	0x10015caf4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x44>
+10015cb7c:     	cbz	w9, 0x10015cba4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0xf4>
+10015cb80:     	mov	w11, w11
+10015cb84:     	add	x10, x11, #0x13
+10015cb88:     	cmp	x1, x10
+10015cb8c:     	b.hs	0x10015cbb8 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x108>
+10015cb90:     	mov	w9, #0x2                ; =2
+10015cb94:     	strb	w9, [x8, #0x8]
+10015cb98:     	stp	x11, x1, [x8, #0x10]
+10015cb9c:     	str	w9, [x8]
+10015cba0:     	ret
+10015cba4:     	mov	w9, #0x5                ; =5
+10015cba8:     	strb	w9, [x8, #0x8]
+10015cbac:     	mov	w9, #0x2                ; =2
+10015cbb0:     	str	w9, [x8]
+10015cbb4:     	ret
+10015cbb8:     	cmn	w12, #0x1
+10015cbbc:     	b.eq	0x10015cc2c <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x17c>
+10015cbc0:     	add	x11, x10, x12
+10015cbc4:     	cmp	x1, x11
+10015cbc8:     	b.hs	0x10015cc38 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x188>
+10015cbcc:     	mov	w9, #0x3                ; =3
+10015cbd0:     	strb	w9, [x8, #0x8]
+10015cbd4:     	str	w12, [x8, #0xc]
+10015cbd8:     	str	x1, [x8, #0x10]
+10015cbdc:     	mov	w9, #0x2                ; =2
+10015cbe0:     	str	w9, [x8]
+10015cbe4:     	ret
+10015cbe8:     	mov	w12, #0x0               ; =0
+10015cbec:     	mov	x11, x10
+10015cbf0:     	neg	w13, w11
+10015cbf4:     	and	x13, x13, #0xf
+10015cbf8:     	add	x13, x13, x11
+10015cbfc:     	cmp	x13, x1
+10015cc00:     	b.hi	0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc04:     	lsr	x14, x13, #32
+10015cc08:     	cbnz	x14, 0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc0c:     	lsr	x14, x1, #32
+10015cc10:     	cbnz	x14, 0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc14:     	stp	w12, w10, [x8]
+10015cc18:     	mov	w12, #0xb               ; =11
+10015cc1c:     	stp	w11, w12, [x8, #0x8]
+10015cc20:     	stp	w10, w13, [x8, #0x10]
+10015cc24:     	stp	w1, w9, [x8, #0x18]
+10015cc28:     	ret
+10015cc2c:     	mov	w12, #0x0               ; =0
+10015cc30:     	mov	x11, x10
+10015cc34:     	b	0x10015cc44 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x194>
+10015cc38:     	lsr	x12, x11, #32
+10015cc3c:     	cbnz	x12, 0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc40:     	mov	w12, #0x1               ; =1
+10015cc44:     	neg	w13, w11
+10015cc48:     	and	x13, x13, #0xf
+10015cc4c:     	add	x13, x13, x11
+10015cc50:     	cmp	x13, x1
+10015cc54:     	b.hi	0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc58:     	lsr	x14, x13, #32
+10015cc5c:     	cbnz	x14, 0x10015cc68 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b8>
+10015cc60:     	lsr	x14, x1, #32
+10015cc64:     	cbz	x14, 0x10015cc80 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1d0>
+10015cc68:     	mov	w9, #0x4                ; =4
+10015cc6c:     	strb	w9, [x8, #0x8]
+10015cc70:     	str	x1, [x8, #0x10]
+10015cc74:     	mov	w9, #0x2                ; =2
+10015cc78:     	str	w9, [x8]
+10015cc7c:     	ret
+10015cc80:     	stp	w12, w10, [x8]
+10015cc84:     	mov	w12, #0x13              ; =19
+10015cc88:     	stp	w11, w12, [x8, #0x8]
+10015cc8c:     	stp	w10, w13, [x8, #0x10]
+10015cc90:     	stp	w1, w9, [x8, #0x18]
+10015cc94:     	ret

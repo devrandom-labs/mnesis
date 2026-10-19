@@ -243,3 +243,27 @@ lines979–981 specify manifest-present-but-not-on-disk,1106–1114 checksum mis
 Explicit --format=plain selects the actual pg_basebackup format even when its
 PG_VERSION marker is absent. Native current tests check both exact diagnostics
 and repaired success; exit1 alone previously accepted the wrong tar/WAL error.
+
+2026-10-19 decoder performance: actual current PR392 check summary
+/tmp/mnesis-pr392-performance.json and releasefe0fbee check summary retain same
+three10.42%regressions plus different-runtime-environments warning; not a waived
+comparison. Existing primary CodSpeed callgraph evidence and rejected inline
+experiment live in preserved /tmp/mnesis-release-performance research/evidence.
+Actual current crates/store/src/wire.rs: decode_frame_body has only one caller;
+header-size selection is already derivable from passed FrameHeader. Moving it
+changes no parsing rule, but performance must be measured, not inferred.
+
+2026-10-19 primary CodSpeed docs: https://codspeed.io/docs/instruments/cpu,
+https://codspeed.io/docs/instruments/cpu/regression-causes and
+https://codspeed.io/docs/instruments/cpu/reducing-variance. Weighted executed
+instructions plus simulated L1/LLmiss costs; possible function/code layout and
+runner variance. Applicability: explains evidence to inspect, NOT actual cause
+or waiver. Keep exact existing benchmarks/gates unchanged in this experiment.
+Exact installed codspeed-criterion-compat-walltime5.0.1 src/lib.rs835+ supports
+--save-baseline/--baseline; used named existing-tool baselines, no custom tooling.
+
+2026-10-19 Rust Reference https://doc.rust-lang.org/reference/attributes/codegen.html#the-cold-attribute:
+cold suggests a function is infrequently called; compiler may use that fact, no
+performance guarantee. Applicability limited to actual overflow-error constructor,
+never marking the normal decoder cold. Existing std Option::ok_or_else/Result
+map_err preserve fallible construction; actual generated/runtime cost still due.

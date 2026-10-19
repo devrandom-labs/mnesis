@@ -1,0 +1,34 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-decoder/crates/workspace-hack)
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-decoder/crates/mnesis)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-decoder/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-decoder/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-decoder/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-decoder/adapters/fjall)
+    Finished `bench` profile [optimized] target(s) in 2.95s
+     Running benches/fjall_benchmarks.rs (/tmp/mnesis-release-performance-target/release/deps/fjall_benchmarks-138285fb91733059)
+Benchmarking encoding/decode_frame/small_64B
+Benchmarking encoding/decode_frame/small_64B: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/small_64B: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/small_64B: Analyzing
+encoding/decode_frame/small_64B
+                        time:   [2.5093 ns 2.5387 ns 2.5722 ns]
+Found 3 outliers among 30 measurements (10.00%)
+  3 (10.00%) high severe
+Benchmarking encoding/decode_frame/medium_1KB
+Benchmarking encoding/decode_frame/medium_1KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/medium_1KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/medium_1KB: Analyzing
+encoding/decode_frame/medium_1KB
+                        time:   [2.5021 ns 2.5061 ns 2.5101 ns]
+Found 2 outliers among 30 measurements (6.67%)
+  1 (3.33%) low mild
+  1 (3.33%) high mild
+Benchmarking encoding/decode_frame/large_64KB
+Benchmarking encoding/decode_frame/large_64KB: Warming up for 1.0000 s
+Benchmarking encoding/decode_frame/large_64KB: Collecting 30 samples in estimated 3.0000 s (1.1B iterations)
+Benchmarking encoding/decode_frame/large_64KB: Analyzing
+encoding/decode_frame/large_64KB
+                        time:   [2.5008 ns 2.5041 ns 2.5076 ns]
+Found 2 outliers among 30 measurements (6.67%)
+  1 (3.33%) low severe
+  1 (3.33%) low mild

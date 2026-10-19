@@ -27,3 +27,20 @@ are not automatic improvements. Revert, never retain solely for CodSpeed green.
 Original failed profile:1additional L1/LLmiss, identical instruction contribution;
 cache/hardware/layout cause still distinct from causal fix. Raw candidate/base
 logs retained in docs/prds/postgres/evidence/pg9-release-performance-*.log.
+
+2026-10-19: moving header-size choice from decode_frame into the only body decoder
+(+6/-10Rustlines, no interface/workload/gate changes) rejected. Existing native
+three-workload candidate2.705–2.727ns; saved-original actual --bench A/B/A returns
+roughly2.5–2.64ns. Small/medium regress beyond their baseline interval variation;
+whole binary size unchanged6704128. Exact logs /tmp/mnesis-decoder-{parent-first,
+parent-second,candidate-first,parent-return-measured}.log, source -body-candidate.rs.
+Reverted only source, gitdiff0. Do not retry to chase cold simulation green. Earlier
+standalone invocation without --bench was smoke only and gets NO timing credit.
+
+2026-10-19: shared #[cold] OffsetOverflow factory plus lazy construction rejected
+(+16/-33Rustlines). Actual same3native workloads report +2.88..5.55/+3.29..6.46/
++1.48..5.56% vs current saved-parent control, no improvement. LLVM same function
+address/file size but changed branches, no emitted independent factory; do not
+claim code-equivalence from failed symbol-only empty dumps. Exact address dumps
+and candidate source/binary retained /tmp/mnesis-decoder-*. Source reverted only
+own file, gitdiff0. A shorter source or potential x86 layout shift is not evidence.

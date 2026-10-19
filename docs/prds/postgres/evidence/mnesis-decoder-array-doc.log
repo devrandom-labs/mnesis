@@ -1,0 +1,25 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.66s
+   Doc-tests mnesis_store
+
+running 11 tests
+test crates/store/src/builder.rs - builder::RepositoryBuilder (line 70) ... ignored
+test crates/store/src/builder.rs - builder::Store<S>::repository (line 388) ... ignored
+test crates/store/src/codec.rs - codec (line 17) ... ignored
+test crates/store/src/codec.rs - codec::bytemuck::BytemuckCodec (line 352) ... ignored
+test crates/store/src/codec.rs - codec::serde::SerdeCodec (line 207) ... ignored
+test crates/store/src/projection.rs - projection::Projection (line 153) ... ignored
+test crates/store/src/repository.rs - repository::EventStore (line 192) ... ignored
+test crates/store/src/repository.rs - repository::EventStore (line 220) ... ignored
+test crates/store/src/store.rs - store::Store (line 26) ... ignored
+test crates/store/src/store.rs - store::Store<S>::raw (line 64) ... ignored
+test crates/store/src/subscription.rs - subscription::Subscription (line 50) ... ignored
+
+test result: ok. 0 passed; 0 failed; 11 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test crates/store/src/envelope.rs - envelope::pending_envelope (line 424) ... ignored
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.54s

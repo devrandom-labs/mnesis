@@ -1,0 +1,438 @@
+   Compiling ptr_meta v0.3.1
+   Compiling simdutf8 v0.1.5
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-decoder/crates/mnesis)
+   Compiling getrandom v0.3.4
+   Compiling munge v0.4.7
+   Compiling crossbeam-deque v0.8.7
+   Compiling bytemuck v1.25.2
+   Compiling half v2.7.1
+   Compiling approx v0.5.1
+   Compiling clap_lex v1.1.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-decoder/crates/workspace-hack)
+   Compiling anstyle v1.0.14
+   Compiling plotters-backend v0.3.7
+   Compiling ciborium-io v0.2.2
+   Compiling rancor v0.1.2
+   Compiling anyhow v1.0.104
+   Compiling nix v0.31.3
+   Compiling rand_core v0.9.5
+   Compiling clap_builder v4.6.2
+   Compiling rayon-core v1.13.0
+   Compiling statrs v0.18.0
+   Compiling plotters-svg v0.3.7
+   Compiling itertools v0.10.5
+   Compiling colored v3.1.1
+   Compiling cast v0.3.0
+   Compiling bytecheck v0.8.2
+   Compiling ciborium-ll v0.2.2
+   Compiling same-file v1.0.6
+   Compiling regex v1.13.1
+   Compiling plotters v0.3.7
+   Compiling tinytemplate v1.2.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling walkdir v2.5.0
+   Compiling ciborium v0.2.2
+   Compiling rend v0.5.4
+   Compiling wait-timeout v0.2.1
+   Compiling is-terminal v0.4.17
+   Compiling rayon v1.12.0
+   Compiling codspeed v5.0.1
+   Compiling fnv v1.0.7
+   Compiling oorandom v11.1.5
+   Compiling anes v0.1.6
+   Compiling lazy_static v1.5.0
+   Compiling quick-error v1.2.3
+   Compiling bit-vec v0.8.0
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.5
+   Compiling rand_xorshift v0.4.0
+   Compiling criterion-plot v0.5.0
+   Compiling sharded-slab v0.1.7
+   Compiling tracing-log v0.2.0
+   Compiling rusty-fork v0.3.1
+   Compiling matchers v0.2.0
+   Compiling clap v4.6.4
+   Compiling bit-set v0.8.0
+   Compiling console v0.16.4
+   Compiling thread_local v1.1.10
+   Compiling similar v2.7.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling unarray v0.1.4
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-decoder/crates/test-domains)
+   Compiling static_assertions v1.1.0
+   Compiling proptest v1.11.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling insta v1.48.0
+   Compiling codspeed-criterion-compat-walltime v5.0.1
+   Compiling rkyv v0.8.17
+   Compiling codspeed-criterion-compat v5.0.1
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-decoder/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-decoder/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-decoder/crates/store-testing)
+   Compiling mnesis-inmemory v0.4.0 (/private/tmp/mnesis-decoder/adapters/inmemory)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.25s
+────────────
+ Nextest run ID d7967fcc-11a6-4a72-9fed-ca5ac37161c5 with nextest profile: default
+    Starting 40 tests across 1 binary (177 tests skipped)
+        PASS [   0.020s] ( 1/40) mnesis-store wire::tests::align_padding_zero_offset_yields_zero
+  stdout ───
+
+    running 1 test
+    test wire::tests::align_padding_zero_offset_yields_zero ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.020s] ( 2/40) mnesis-store wire::tests::align_padding_on_boundary_yields_zero
+  stdout ───
+
+    running 1 test
+    test wire::tests::align_padding_on_boundary_yields_zero ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.021s] ( 3/40) mnesis-store wire::tests::corrupt_version_byte_surfaces_unsupported_not_panic
+  stdout ───
+
+    running 1 test
+    test wire::tests::corrupt_version_byte_surfaces_unsupported_not_panic ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.021s] ( 4/40) mnesis-store wire::tests::decode_empty_buffer_is_too_short_not_version_error
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_empty_buffer_is_too_short_not_version_error ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.021s] ( 5/40) mnesis-store wire::tests::decode_rejects_every_unknown_version_byte
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_rejects_every_unknown_version_byte ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.021s] ( 6/40) mnesis-store wire::tests::align_padding_one_above_boundary_yields_fifteen
+  stdout ───
+
+    running 1 test
+    test wire::tests::align_padding_one_above_boundary_yields_fifteen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.022s] ( 7/40) mnesis-store wire::tests::decode_rejects_corrupt_schema_version_zero
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_rejects_corrupt_schema_version_zero ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.022s] ( 8/40) mnesis-store wire::tests::decode_reads_a_v1_frame_dropping_its_global_seq
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_reads_a_v1_frame_dropping_its_global_seq ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.022s] ( 9/40) mnesis-store wire::tests::decode_frame_rejects_corrupt_schema_version_zero
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_frame_rejects_corrupt_schema_version_zero ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.024s] (10/40) mnesis-store wire::tests::align_padding_one_below_boundary_yields_one
+  stdout ───
+
+    running 1 test
+    test wire::tests::align_padding_one_below_boundary_yields_one ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.011s] (11/40) mnesis-store wire::tests::empty_payload_still_aligned
+  stdout ───
+
+    running 1 test
+    test wire::tests::empty_payload_still_aligned ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.012s] (12/40) mnesis-store wire::tests::decode_rejects_truncated_value
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_rejects_truncated_value ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.013s] (13/40) mnesis-store wire::tests::decode_rejects_truncated_event_type
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_rejects_truncated_event_type ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.012s] (14/40) mnesis-store wire::tests::encode_frame_accepts_value_newtypes
+  stdout ───
+
+    running 1 test
+    test wire::tests::encode_frame_accepts_value_newtypes ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.012s] (15/40) mnesis-store wire::tests::empty_event_type_permitted
+  stdout ───
+
+    running 1 test
+    test wire::tests::empty_event_type_permitted ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.014s] (16/40) mnesis-store wire::tests::decode_rejects_truncated_metadata
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_rejects_truncated_metadata ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.014s] (17/40) mnesis-store wire::tests::execute_buffer_length_equals_layout_total
+  stdout ───
+
+    running 1 test
+    test wire::tests::execute_buffer_length_equals_layout_total ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.012s] (18/40) mnesis-store wire::tests::execute_padding_bytes_are_zero
+  stdout ───
+
+    running 1 test
+    test wire::tests::execute_padding_bytes_are_zero ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.010s] (19/40) mnesis-store wire::tests::frame_header_read_from_accepts_exactly_size
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_read_from_accepts_exactly_size ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.010s] (20/40) mnesis-store wire::tests::frame_header_read_from_rejects_buffer_below_size
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_read_from_rejects_buffer_below_size ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.010s] (21/40) mnesis-store wire::tests::frame_header_some_zero_metadata_distinct_from_none
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_some_zero_metadata_distinct_from_none ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.013s] (22/40) mnesis-store wire::tests::frame_header_none_metadata_encodes_sentinel
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_none_metadata_encodes_sentinel ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.011s] (23/40) mnesis-store wire::tests::frame_header_write_into_writes_all_fields_at_correct_offsets
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_write_into_writes_all_fields_at_correct_offsets ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.013s] (24/40) mnesis-store wire::tests::layout_concrete_no_metadata_example
+  stdout ───
+
+    running 1 test
+    test wire::tests::layout_concrete_no_metadata_example ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.053s] (25/40) mnesis-store wire::tests::align_padding_invariants
+  stdout ───
+
+    running 1 test
+    test wire::tests::align_padding_invariants ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.04s
+
+
+        PASS [   0.011s] (26/40) mnesis-store wire::tests::max_event_type_accepted
+  stdout ───
+
+    running 1 test
+    test wire::tests::max_event_type_accepted ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.014s] (27/40) mnesis-store wire::tests::layout_concrete_with_metadata_example
+  stdout ───
+
+    running 1 test
+    test wire::tests::layout_concrete_with_metadata_example ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.013s] (28/40) mnesis-store wire::tests::meta_len_u32_max_is_absent_sentinel
+  stdout ───
+
+    running 1 test
+    test wire::tests::meta_len_u32_max_is_absent_sentinel ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.008s] (29/40) mnesis-store wire::tests::plan_then_execute_matches_encode_frame_concrete
+  stdout ───
+
+    running 1 test
+    test wire::tests::plan_then_execute_matches_encode_frame_concrete ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+
+        PASS [   0.051s] (30/40) mnesis-store wire::tests::frame_header_round_trip
+  stdout ───
+
+    running 1 test
+    test wire::tests::frame_header_round_trip ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.04s
+
+
+        PASS [   0.058s] (31/40) mnesis-store wire::tests::layout_structural_invariants
+  stdout ───
+
+    running 1 test
+    test wire::tests::layout_structural_invariants ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.05s
+
+
+        PASS [   0.132s] (32/40) mnesis-store wire::tests::decode_offsets_in_bounds_on_success
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_offsets_in_bounds_on_success ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.11s
+
+
+        PASS [   0.148s] (33/40) mnesis-store wire::tests::decode_never_panics
+  stdout ───
+
+    running 1 test
+    test wire::tests::decode_never_panics ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.13s
+
+
+        PASS [   0.206s] (34/40) mnesis-store wire::tests::build_then_decode_round_trips
+  stdout ───
+
+    running 1 test
+    test wire::tests::build_then_decode_round_trips ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+        PASS [   0.191s] (35/40) mnesis-store wire::tests::execute_invariants
+  stdout ───
+
+    running 1 test
+    test wire::tests::execute_invariants ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.18s
+
+
+        PASS [   0.203s] (36/40) mnesis-store wire::tests::encoded_frame_carries_v2_version_byte
+  stdout ───
+
+    running 1 test
+    test wire::tests::encoded_frame_carries_v2_version_byte ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+        PASS [   0.195s] (37/40) mnesis-store wire::tests::payload_pointer_is_16_aligned
+  stdout ───
+
+    running 1 test
+    test wire::tests::payload_pointer_is_16_aligned ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+        PASS [   0.205s] (38/40) mnesis-store wire::tests::header_fields_are_recoverable
+  stdout ───
+
+    running 1 test
+    test wire::tests::header_fields_are_recoverable ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+        PASS [   0.196s] (39/40) mnesis-store wire::tests::plan_execute_equals_encode_frame
+  stdout ───
+
+    running 1 test
+    test wire::tests::plan_execute_equals_encode_frame ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+        PASS [   0.199s] (40/40) mnesis-store wire::tests::ranges_recover_each_field
+  stdout ───
+
+    running 1 test
+    test wire::tests::ranges_recover_each_field ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.19s
+
+
+────────────
+     Summary [   0.256s] 40 tests run: 40 passed, 177 skipped

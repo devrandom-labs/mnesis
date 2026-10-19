@@ -496,3 +496,76 @@ only, no shared executable change. Existing canonical import laws and adapter
 atomic tests pin reachedNone when this request commits nothing, even for a
 nonempty target; do not change those semantics. Clarify request progress vs
 current target head, retain independent exact destination contents assertions.
+
+# PG9 decoder call boundary — before edit, 2026-10-19
+
+ReleasePR378 and TLS PR392 both fail the same original decoder workloads:
+501.7->560ns,10.42%, each of64/1024/65536payloads. Existing downloaded profiles
+show identical35ns instruction cost and one extra L1/last-level cache miss in
+public decode_frame. Placement/alignment is a hypothesis, NOT proven cause.
+Existing outer #[inline] candidate was rejected25–36%slower/+512binarybytes;
+DO NOT repeat it or alter workloads/threshold/cache/metric to pass.
+
+Inspect actual production owner: decode_frame reads FrameHeader, chooses its
+body header size, then passes both the header and redundant derived size to a
+single-use private decode_frame_body. Hypothesis: move format-dependent size
+selection into the body owner that uses it, removing the redundant argument and
+public wrapper work while retaining one common checked body decoder. No new
+abstraction. Candidate budget<=18existing Rustlines changed,0new API/deps/methods/
+benchmark/workload/inline hints/gate changes. All error values/priority, V1/V2,
+metadata None/Some(empty), padding/bounds and arithmetic safety unchanged. If
+function length exceeds80, reject/refine without a lint allowance.
+
+Before source change measure CURRENT unchanged parent49104117 through actual
+existing Fjall decoder benchmark in pinned Nix/Rust1.99, release, three original
+payloads,30samples,1swarmup/3smeasurement, repeated twice for current noise. Use
+supported Criterion named baseline if available; preserve exact current baseline
+binary. Do not measure during own native regression jobs. Existing prior ARM
+baseline is reference only; no attribution of CLI comparisons against old saved
+failed-inline samples. Then one causal code move, same workload repeated, exact
+wire/product tests/fuzz and binary size. Reject native regression or semantics
+change. Native ARM cannot waive x86 simulation: CI+exact release head must pass.
+If head-specific placements remain sensitive, investigate further; never manual
+ack/reset/threshold or easier benchmark. Preserve existing performance worktree
+and records unchanged; new isolated /tmp/mnesis-decoder based protectedmain.
+
+# PG9 overflow error paths — next independent experiment, 2026-10-19
+
+Body-boundary move REJECTED/reverted; original saved-binary measured A/B/A
+restored lower native runtime. Next credible cost: decode_frame_body repeats the
+same OffsetOverflow construction11times, including eager ok_or expressions.
+Hypothesis: one private cold error constructor and lazy ok_or_else preserve exact
+error fields/priority while keeping exceptional code out of the hot path. Standard
+Rust #[cold] is a supported hint, not proof; no annotation on normally hot code.
+Budget<=60Rustline churn, one<=8line private function,0new public API/deps,
+0benchmark/input/threshold/gate/inline changes. Start from original parent code,
+not rejected candidate. Native baselines and saved original already recorded;
+use same actual three workloads/30samples/warmup/measurement and named actual
+parent-return baseline, inspect binary size, then actual wire/property/fuzz,
+strict and full checks IF performance permits. Reject real native regression,
+any changed error/format behavior, unnecessary code cost or unchanged final
+release failure. Native ARM alone never waives x86 check. Rollback one ownerfile.
+
+# PG9 fixed header fields — independent experiment, 2026-10-19
+
+Both body-boundary and cold-error candidates rejected/reverted. Actual parent
+LLVM decoder includes six panic_bounds_check call sites after an explicit header
+length check. Current reader chooses dynamic per-field offsets and does byte-by-
+byte indexed loads; compiler has not eliminated their bounds machinery. Hypothesis:
+use maintained core slice::first_chunk and an exact array pattern for the common
+fixed schema/event-length/metadata fields, choosing only the V1/V2 starting point.
+An array reference proves field width before loads, removes indexed arithmetic
+and unreachable panic paths, with no unsafe/custom codec/dependency.
+
+Before edits budget<=100Rustline churn,0new public API/format/deps/framework,
+0new generic helper. Preserve initial minimum11 priority, unsupported-version
+priority, exact V1minimum19, endian fields, absent/empty metadata and all decoded
+ranges/errors. Remove two obsolete V1 internal offset constants; keep V2 offsets
+only for existing test fixtures if no production consumer remains (verify all
+references first). Type/pattern determines common fixed field width; no competing
+layout registry. All size/offset arithmetic safety preserved. Existing exact
+wire/property/fuzz/consumer laws must pass. Same original actual benchmarks and
+named baselines; inspect native code size/bounds removal, reject slowdown beyond
+noise, CI x86/release proof still required. No hints, workload/metric/cache/gate
+changes. Rollback ONLY ownerfile. First_chunk is stable core facility on pinned
+Rust1.99; verify exact local primary docs/source, not an external new crate.

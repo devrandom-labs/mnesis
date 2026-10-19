@@ -1,0 +1,79 @@
+   Compiling ptr_meta_derive v0.3.1
+   Compiling bytecheck_derive v0.8.2
+    Checking simdutf8 v0.1.5
+   Compiling getrandom v0.3.4
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-decoder/crates/workspace-hack)
+   Compiling munge_macro v0.4.7
+   Compiling cfg_aliases v0.2.2
+   Compiling crossbeam-deque v0.8.7
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-decoder/crates/mnesis)
+   Compiling rkyv_derive v0.8.17
+   Compiling bytemuck_derive v1.11.0
+   Compiling anyhow v1.0.104
+   Compiling rayon-core v1.13.0
+   Compiling codspeed v5.0.1
+   Compiling nix v0.31.3
+    Checking approx v0.5.1
+    Checking half v2.7.1
+    Checking clap_lex v1.1.0
+    Checking ciborium-io v0.2.2
+    Checking anstyle v1.0.14
+    Checking plotters-backend v0.3.7
+    Checking ptr_meta v0.3.1
+    Checking bytemuck v1.25.2
+    Checking munge v0.4.7
+    Checking clap_builder v4.6.2
+    Checking ciborium-ll v0.2.2
+    Checking statrs v0.18.0
+    Checking plotters-svg v0.3.7
+    Checking itertools v0.10.5
+    Checking rand_core v0.9.5
+    Checking colored v3.1.1
+    Checking same-file v1.0.6
+    Checking cast v0.3.0
+    Checking plotters v0.3.7
+    Checking ciborium v0.2.2
+    Checking walkdir v2.5.0
+    Checking regex v1.13.1
+    Checking clap v4.6.4
+    Checking tinytemplate v1.2.1
+    Checking ppv-lite86 v0.2.21
+    Checking is-terminal v0.4.17
+    Checking wait-timeout v0.2.1
+    Checking lazy_static v1.5.0
+    Checking criterion-plot v0.5.0
+    Checking quick-error v1.2.3
+    Checking oorandom v11.1.5
+    Checking anes v0.1.6
+    Checking bit-vec v0.8.0
+   Compiling codspeed-criterion-compat v5.0.1
+    Checking rayon v1.12.0
+    Checking fnv v1.0.7
+    Checking sharded-slab v0.1.7
+    Checking rand_chacha v0.9.0
+    Checking rand v0.9.5
+    Checking rand_xorshift v0.4.0
+    Checking rusty-fork v0.3.1
+    Checking tracing-log v0.2.0
+    Checking bit-set v0.8.0
+    Checking matchers v0.2.0
+    Checking console v0.16.4
+    Checking thread_local v1.1.10
+    Checking similar v2.7.0
+    Checking unarray v0.1.4
+    Checking nu-ansi-term v0.50.3
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-decoder/crates/test-domains)
+    Checking static_assertions v1.1.0
+    Checking proptest v1.11.0
+    Checking tracing-subscriber v0.3.23
+    Checking insta v1.48.0
+    Checking rancor v0.1.2
+    Checking bytecheck v0.8.2
+    Checking rend v0.5.4
+    Checking codspeed-criterion-compat-walltime v5.0.1
+    Checking rkyv v0.8.17
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-decoder/crates/store)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-decoder/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-decoder/crates/store-testing)
+    Checking mnesis-inmemory v0.4.0 (/private/tmp/mnesis-decoder/adapters/inmemory)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.57s
