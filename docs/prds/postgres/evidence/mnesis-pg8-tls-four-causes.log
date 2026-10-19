@@ -1,0 +1,59 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.06s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.56s
+────────────
+ Nextest run ID 7341fb04-37db-4840-bf21-137353794614 with nextest profile: default
+    Starting 4 tests across 1 binary
+        PASS [   1.277s] (1/4) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+  stdout ───
+
+    running 1 test
+    test verified_tls_preserves_authentication_errors_and_rejects_plaintext ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.26s
+
+
+        PASS [   1.241s] (2/4) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.23s
+
+
+        PASS [   1.875s] (3/4) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_open_append_read_close_and_reopen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.87s
+
+
+        FAIL [   1.614s] (4/4) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.61s
+
+  stderr ───
+
+    thread 'verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema' (102831588) panicked at adapters/postgres/tests/security_tests.rs:420:5:
+    assertion failed: matches!(errors.as_slice(),
+        [AppendError::Conflict { actual: Some(Version::INITIAL), .. }])
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   6.012s] 4 tests run: 3 passed, 1 failed, 0 skipped
+        FAIL [   1.614s] (4/4) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+error: test run failed

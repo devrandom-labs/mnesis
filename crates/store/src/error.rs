@@ -145,6 +145,9 @@ impl<A, EncErr, DecErr, UpErr, VerifyErr> From<KernelError>
 /// optimistic concurrency) from adapter-level failures (I/O, connection).
 /// This lets the `EventStore` facade map conflicts to
 /// [`StoreError::Conflict`] without opaque wrapping.
+/// A conflict's `actual` is an optional head observation. `None` can mean an
+/// empty stream or an unobserved head after a concurrent constraint collision.
+/// Reload to establish the current head; do not infer an empty stream from it.
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum AppendError<E> {

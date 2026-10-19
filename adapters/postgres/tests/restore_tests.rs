@@ -5,14 +5,17 @@
     reason = "native restore assertions"
 )]
 
-use std::io;
 #[cfg(all(feature = "projection", feature = "snapshot"))]
 use std::io::{Write, stderr};
-use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::Command;
+#[cfg(all(feature = "projection", feature = "snapshot"))]
+use std::process::Output;
 use std::sync::Arc;
 #[cfg(all(feature = "projection", feature = "snapshot"))]
 use std::time::Instant;
+
+#[path = "support/cluster.rs"]
+mod cluster;
 
 #[cfg(all(feature = "projection", feature = "snapshot"))]
 #[path = "support/consumer.rs"]
@@ -42,45 +45,20 @@ use mnesis_store::{Repository, Store};
 use mnesis_test_domains::{Counter as AggregateCounter, CounterEvent, TestId};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
-use tempfile::TempDir;
 use tokio::sync::Barrier;
 
-struct Cluster {
-    directory: TempDir,
-}
+use cluster::Cluster;
 
 impl Cluster {
-    fn new() -> Self {
-        let directory = tempfile::Builder::new()
-            .prefix("mnesis-restore-")
-            .tempdir_in("/tmp")
-            .unwrap();
-        Self { directory }
-    }
-
     fn start() -> Self {
-        let cluster = Self::new();
-        let initialized = Command::new("initdb")
-            .args(["--no-sync", "--auth=trust", "-U", "mnesis", "-D"])
-            .arg(cluster.data())
-            .output()
-            .unwrap();
-        assert!(initialized.status.success(), "{initialized:?}");
+        let cluster = Self::initialize();
         cluster.boot();
         cluster
     }
 
     fn boot(&self) {
-        let options = format!("-h '' -k {} -p 55436", self.directory.path().display());
-        let started = Command::new("pg_ctl")
-            .arg("-D")
-            .arg(self.data())
-            .arg("-l")
-            .arg(self.directory.path().join("postgres.log"))
-            .args(["-o", &options, "-w", "start"])
-            .output()
-            .unwrap();
-        assert!(started.status.success(), "{started:?}");
+        let options = format!("-h '' -k {} -p 55436", self.socket().display());
+        self.launch(&options);
     }
 
     #[cfg(all(feature = "projection", feature = "snapshot"))]
@@ -97,18 +75,6 @@ impl Cluster {
         let verified = target.verify();
         assert!(verified.status.success(), "{verified:?}");
         target
-    }
-
-    fn data(&self) -> PathBuf {
-        self.directory.path().join("data")
-    }
-
-    fn stop(&self) -> io::Result<Output> {
-        Command::new("pg_ctl")
-            .arg("-D")
-            .arg(self.data())
-            .args(["-m", "fast", "-w", "stop"])
-            .output()
     }
 
     #[cfg(all(feature = "projection", feature = "snapshot"))]
@@ -136,12 +102,12 @@ impl Cluster {
     fn url(&self) -> String {
         format!(
             "postgres:///postgres?host={}&port=55436&user=mnesis",
-            self.directory.path().display()
+            self.socket().display()
         )
     }
 
     fn copy_into(&self, target: &Self) {
-        let dump = self.directory.path().join("backup.sql");
+        let dump = self.socket().join("backup.sql");
         let dumped = Command::new("pg_dump")
             .args([
                 "--no-owner",
@@ -166,12 +132,6 @@ impl Cluster {
             .output()
             .unwrap();
         assert!(restored.status.success(), "{restored:?}");
-    }
-}
-
-impl Drop for Cluster {
-    fn drop(&mut self) {
-        let _stopped = self.stop();
     }
 }
 

@@ -1,0 +1,41 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.71s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+────────────
+ Nextest run ID a50bd752-2737-4c8c-98da-9ed9f36ce221 with nextest profile: default
+    Starting 4 tests across 1 binary
+        PASS [   1.300s] (1/4) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+  stdout ───
+
+    running 1 test
+    test verified_tls_preserves_authentication_errors_and_rejects_plaintext ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.29s
+
+
+        FAIL [   1.185s] (2/4) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.18s
+
+  stderr ───
+
+    thread 'verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause' (102823755) panicked at adapters/postgres/tests/security_tests.rs:324:5:
+    Sqlx(Io(Custom { kind: InvalidData, error: InvalidCertificate(UnknownIssuer) }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   2.488s] 2/4 tests run: 1 passed, 1 failed, 0 skipped
+        FAIL [   1.185s] (2/4) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+warning: 2/4 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed

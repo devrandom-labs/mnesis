@@ -422,6 +422,7 @@
               dontBuild = true;
               doCheck = true;
               nativeCheckInputs = with pkgs; [
+                openssl
                 postgresql
                 postgresqlTestHook
                 cargo-nextest
@@ -462,6 +463,11 @@
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   -E 'binary(session_tests) & test(explicit_close_and_drop_release_native_views_and_allow_reopen)' \
                   2>&1 | tee -a postgres-feature.log
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  -E 'binary(security_tests) & test(verified_tls_runtime_can_open_append_read_close_and_reopen)' \
+                  2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
@@ -500,6 +506,7 @@
             cargo-hakari
             cargo-mutants
             cargo-nextest
+            openssl
             postgresql
             tree
             cloc

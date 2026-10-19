@@ -1,0 +1,104 @@
+error[rejected]: failed to satisfy license requirements
+   ┌─ /Users/joel/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webpki-roots-1.0.9/Cargo.toml:26:12
+   │
+26 │ license = "CDLA-Permissive-2.0"
+   │            ━━━━━━━━━━━━━━━━━━━
+   │            │
+   │            rejected: license is not explicitly allowed
+   │
+   ├ CDLA-Permissive-2.0 - Community Data License Agreement Permissive 2.0:
+   ├   - No additional metadata available for license
+   ├ webpki-roots v1.0.9
+     └── sqlx-core v0.9.0
+         ├── sqlx v0.9.0
+         │   └── mnesis-postgres v0.4.0
+         ├── sqlx-macros v0.9.0
+         │   └── sqlx v0.9.0 (*)
+         ├── sqlx-macros-core v0.9.0
+         │   └── sqlx-macros v0.9.0 (*)
+         ├── sqlx-postgres v0.9.0
+         │   ├── sqlx v0.9.0 (*)
+         │   └── sqlx-macros-core v0.9.0 (*)
+         └── (build) workspace-hack v0.1.0
+             ├── mnesis-cross-crate-test v0.0.0
+             ├── mnesis-example-axum-todos v0.0.0
+             ├── mnesis-example-closing-the-books v0.0.0
+             ├── mnesis-example-fjall-end-to-end v0.0.0
+             ├── mnesis-example-inmemory v0.0.0
+             ├── mnesis-example-projection-tokio v0.0.0
+             ├── mnesis-example-signed-events v0.0.0
+             ├── mnesis-example-store-and-kernel v0.0.0
+             ├── mnesis-example-store-inmemory v0.0.0
+             ├── mnesis-fjall v0.4.0
+             │   ├── mnesis-example-axum-todos v0.0.0 (*)
+             │   ├── mnesis-example-fjall-end-to-end v0.0.0 (*)
+             │   ├── mnesis-example-signed-events v0.0.0 (*)
+             │   ├── (dev) mnesis-fjall v0.4.0 (*)
+             │   └── (dev) mnesis-postgres v0.4.0 (*)
+             ├── mnesis-inmemory v0.4.0
+             │   ├── mnesis-example-projection-tokio v0.0.0 (*)
+             │   ├── mnesis-example-store-and-kernel v0.0.0 (*)
+             │   ├── mnesis-example-store-inmemory v0.0.0 (*)
+             │   ├── (dev) mnesis-inmemory v0.4.0 (*)
+             │   ├── (dev) mnesis-macros v0.4.0
+             │   │   └── mnesis v0.4.0
+             │   │       ├── (dev) mnesis v0.4.0 (*)
+             │   │       ├── mnesis-cross-crate-test v0.0.0 (*)
+             │   │       ├── (dev) mnesis-example-axum-todos v0.0.0 (*)
+             │   │       ├── mnesis-example-closing-the-books v0.0.0 (*)
+             │   │       ├── mnesis-example-fjall-end-to-end v0.0.0 (*)
+             │   │       ├── mnesis-example-inmemory v0.0.0 (*)
+             │   │       ├── mnesis-example-projection-tokio v0.0.0 (*)
+             │   │       ├── (dev) mnesis-example-signed-events v0.0.0 (*)
+             │   │       ├── mnesis-example-store-and-kernel v0.0.0 (*)
+             │   │       ├── mnesis-example-store-inmemory v0.0.0 (*)
+             │   │       ├── mnesis-fjall v0.4.0 (*)
+             │   │       ├── mnesis-inmemory v0.4.0 (*)
+             │   │       ├── (dev) mnesis-macros v0.4.0 (*)
+             │   │       ├── mnesis-postgres v0.4.0 (*)
+             │   │       ├── mnesis-store v0.4.0
+             │   │       │   ├── mnesis-example-axum-todos v0.0.0 (*)
+             │   │       │   ├── mnesis-example-fjall-end-to-end v0.0.0 (*)
+             │   │       │   ├── mnesis-example-projection-tokio v0.0.0 (*)
+             │   │       │   ├── mnesis-example-signed-events v0.0.0 (*)
+             │   │       │   ├── mnesis-example-store-and-kernel v0.0.0 (*)
+             │   │       │   ├── mnesis-example-store-inmemory v0.0.0 (*)
+             │   │       │   ├── mnesis-fjall v0.4.0 (*)
+             │   │       │   ├── mnesis-inmemory v0.4.0 (*)
+             │   │       │   ├── (dev) mnesis-macros v0.4.0 (*)
+             │   │       │   ├── mnesis-postgres v0.4.0 (*)
+             │   │       │   ├── (dev) mnesis-store v0.4.0 (*)
+             │   │       │   ├── mnesis-store-testing v0.4.0
+             │   │       │   │   ├── (dev) mnesis-fjall v0.4.0 (*)
+             │   │       │   │   ├── (dev) mnesis-inmemory v0.4.0 (*)
+             │   │       │   │   ├── (dev) mnesis-postgres v0.4.0 (*)
+             │   │       │   │   ├── (dev) mnesis-store v0.4.0 (*)
+             │   │       │   │   └── (dev) mnesis-store-testing v0.4.0 (*)
+             │   │       │   ├── mnesis-wake v0.4.0
+             │   │       │   │   ├── mnesis-fjall v0.4.0 (*)
+             │   │       │   │   ├── mnesis-inmemory v0.4.0 (*)
+             │   │       │   │   ├── mnesis-postgres v0.4.0 (*)
+             │   │       │   │   └── (dev) mnesis-store-testing v0.4.0 (*)
+             │   │       │   └── (dev) mnesis-wake-nostd v0.4.0
+             │   │       ├── mnesis-store-testing v0.4.0 (*)
+             │   │       ├── mnesis-test-domains v0.0.0
+             │   │       │   ├── (dev) mnesis v0.4.0 (*)
+             │   │       │   ├── (dev) mnesis-postgres v0.4.0 (*)
+             │   │       │   └── (dev) mnesis-store v0.4.0 (*)
+             │   │       └── (dev) mnesis-wake-nostd v0.4.0 (*)
+             │   ├── (dev) mnesis-store v0.4.0 (*)
+             │   ├── (dev) mnesis-store-testing v0.4.0 (*)
+             │   └── (dev) mnesis-wake-nostd v0.4.0 (*)
+             ├── mnesis-macros v0.4.0 (*)
+             ├── mnesis-postgres v0.4.0 (*)
+             ├── mnesis-store-testing v0.4.0 (*)
+             ├── mnesis-test-domains v0.0.0 (*)
+             └── mnesis-wake v0.4.0 (*)
+
+warning[license-not-encountered]: license was not encountered
+   ┌─ /private/tmp/mnesis-postgres-security/deny.toml:24:6
+   │
+24 │     "MPL-2.0", # Mozilla Public License
+   │      ━━━━━━━ unmatched license allowance
+
+licenses FAILED

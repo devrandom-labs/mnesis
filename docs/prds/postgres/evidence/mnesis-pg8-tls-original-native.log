@@ -1,0 +1,38 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.87s
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-security/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-security/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.69s
+────────────
+ Nextest run ID 4ca0b727-fe8e-4fab-80ef-2c9c417cfc7b with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [  12.681s] (1/1) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_open_append_read_close_and_reopen ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_runtime_can_open_append_read_close_and_reopen
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.67s
+
+  stderr ───
+
+    thread 'verified_tls_runtime_can_open_append_read_close_and_reopen' (102673524) panicked at adapters/postgres/tests/security_tests.rs:203:10:
+    called `Result::unwrap()` on an `Err` value: Tls("TLS upgrade required by connect options but SQLx was built without TLS support enabled")
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [  12.684s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [  12.681s] (1/1) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+error: test run failed

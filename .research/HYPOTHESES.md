@@ -657,3 +657,93 @@ Falsifier: repeated failing head controls still leave ordering schema, produce
 original repeated-control failure, then exact same controls with fixed cleanup;
 rerun actual mutation CI and inspect every first failure. Do not merge on current
 reported14caught; no waiver or fixture-failure credit.
+
+# PG8 verified TLS and runtime permissions — pre-edit2026-10-18
+
+Threatened invariant: SQLx caller pools must support actual certificate/hostname
+verification, authentication and least-privilege runtime access, with no plaintext
+fallback in the production example. Current exact0.9 manifests enable no TLS
+backend; source inspection is not a runtime witness. First add a real private
+native SSL server/CA and require VerifyFull to succeed. Establish that it fails
+for missing TLS support before selecting supported SQLx TLS features. Retain
+positive controls for all negative CA/hostname/auth cases and exact native causes.
+
+Initial budget:0productionRust/API/dependency changes before witness; <=650new
+native test/helper lines, <=100existing native-cluster lines moved into one
+private support owner plus <=30restore caller edits. Reuse common initdb/pg_ctl/
+directory/cleanup at its second consumer; keep restore-only backup methods with
+restore tests. No public test seam, custom server framework, runner or tooling.
+<=3Nix package-list edits add existing nixpkgs OpenSSL CLI where native fixtures
+execute; pinned Nix owns all tools. Do not use a host OpenSSL or install ad hoc.
+
+After actual witness, a separate record must compare SQLx-supported Rustls/ring,
+native-TLS and AWS-LC selections for fit/license/maintenance/advisory/dependency/
+build cost before changing the adapter's one Cargo TLS feature. Expected no
+productionRust/API change, <=20new transitive packages/250lock lines; explain
+actuals/revise before expansion, never weaken gates. Required tests cover saved
+lifecycle/pool ownership, wrong CA/hostname/auth and redaction, no TLS downgrade,
+restricted role append/read plus rejected DDL/event mutation, and actual
+Barrier/spawn competing appends over verified TLS. Final complete native/Linux/
+feature gates, release consumer and durability/operations evidence remain due.
+Rollback is this slice only if supported SQLx facilities cannot meet the contract;
+never retry uncertain writes automatically or add a custom TLS stack.
+
+After actual native MissingTLS witness, select SQLx0.9's supported
+ tls-rustls-ring-webpki feature for the adapter (one existing Cargo feature edit,
+0new public API/productionRust/runtime). SQLx owns handshake/hostname/cert parsing.
+Ring's supported0.17 line avoids AWS-LC's extra build/provider dependencies;
+WebPKI roots are reproducible across supported Darwin/Linux rather than loading
+ambient OS roots. SQLx appends explicit ssl_root_cert to its built-in roots;
+document this scope rather than promise CA-file-only trust. Native-TLS adds
+platform-dependent SecureTransport/OpenSSL/SChannel; no tested need for alternate
+protocol support. AWS-LC/PQ/FIPS profiles remain separate claims, not defaults.
+
+Exact dependency floor for this delivery: current RustSec Oct14 advisories0346–0349
+all patched Rustls>=0.23.46 (not stale cached releasespage0.23.45); live official
+GitHub releases/latest confirms0.23.46 published2026-10-14. Ring AES advisory0009
+patched>=0.17.12, old unmaintained<0.17 not selected. Audit and deny actual resolved
+lock; do not add ignores or accept an older patch. SQLx0.9 MSRV1.94 fits pinned1.99;
+Rustls/ring supported ecosystem, MIT/Apache/ISC-compatible, WebPKI-rootMPL2 allowed
+by existing deny policy. Verify exact downloaded licenses and actual lock costs.
+Expected<=20newpackages/250lock lines, no unrelated updates. Measure first build
+cost and owning runtime tests, then full native/Linux/feature and consumer proof.
+
+Resolved-library evidence revises root selection BEFORE next edit: WebPKI roots
+current1.0.9 require unapproved CDLA-Permissive2, so reject that candidate without
+changing deny policy or downgrading trust data. Select supported Rustls/ring
+native-roots instead; configured custom CA and VerifyFull stay unchanged. Actual
+native certificate+name semantics, negative controls and both OSes still required.
+Root sourcing is deployment-owned OS/native trust plus explicitly added CA, not
+bundled Mozilla set or exclusive custom CA. Allow<=24newpackages/350locklines for
+maintained platform certificate readers (SecurityFramework/Schannel/openssl-probe)
+while preserving0productionRust/API,1existingSQLx feature edit,2Nix CLI entries.
+Native-TLS/AWS-LC not chosen: Rustls provider and TLS1.2/1.3 remain the same, only
+supported root loader changes. Re-evaluate actual license/maintenance/advisory/
+build/runtime cost. No weakened verification, gate policy or old-root pin.
+
+Before correcting TLS race fixture: allow<=5 shared AppendError doc lines only,
+0executable changes. Diagnostic-only run proves expectedNone/actualNone native
+constraint collision. Existing PR377 forced-collision laws explicitly preserve
+unknown actual until reload; preflight conflicts may instead observeSome1.
+Require exact stream/caller expected and only those two permitted observations,
+plus independent one-winner/exact committed event oracle. Do not force scheduling,
+change the established error mapping, accept Store failures, or infer empty from
+unknown. Document this existing optional observation once at AppendError owner.
+
+Before final native CI wiring/generation: allow<=10existing checkPhase lines for
+one --no-tests=fail TLS smoke using the existing integration archive, alongside
+existing capability smokes; absence of the security binary/law must fail. Retain
+normal complete native run and all current gates. Regenerate existing managed
+workspace-hack through cargo-hakari after TLS dependency change; expected<=25
+managed manifest lines plus corresponding local lock edges. No manual generated
+manifest policy edits, new runner, framework or replacement tooling. Revisit
+actual cost if generation exceeds this ceiling, not by skipping verification.
+
+Before public example/documentation: budget<=70 new adapter example Rust lines,
+<=120 public README lines plus PRD/backlog/evidence updates. Use existing SQLx
+PgConnectOptions VerifyFull and an explicit CA file with caller-owned pool, no
+new dependency/interface/URL normalizer. Separate migration privileges from
+runtime open. Do not log DSNs/options/passwords. Explain native OS roots plus
+additional CA, exact returned error/source semantics, restricted event grants
+and state-only UPDATE rights. Example must compile in existing Cargo/Nix gates;
+actual native security tests own failure injection, not the example.

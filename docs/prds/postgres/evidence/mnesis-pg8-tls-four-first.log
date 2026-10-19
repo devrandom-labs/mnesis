@@ -1,0 +1,32 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 24.21s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.43s
+────────────
+ Nextest run ID 482ff8a2-34c7-4375-b45d-fc63d4607f2a with nextest profile: default
+    Starting 4 tests across 1 binary
+        FAIL [   1.174s] (1/4) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+  stdout ───
+
+    running 1 test
+    test verified_tls_preserves_authentication_errors_and_rejects_plaintext ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_preserves_authentication_errors_and_rejects_plaintext
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.16s
+
+  stderr ───
+
+    thread 'verified_tls_preserves_authentication_errors_and_rejects_plaintext' (102758406) panicked at adapters/postgres/tests/security_tests.rs:349:5:
+    Sqlx(Io(Os { code: 2, kind: NotFound, message: "No such file or directory" }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.177s] 1/4 tests run: 0 passed, 1 failed, 0 skipped
+        FAIL [   1.174s] (1/4) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+warning: 3/4 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed

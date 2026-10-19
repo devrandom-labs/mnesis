@@ -1,0 +1,57 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+error: the `Err`-variant returned from this function is very large
+  --> adapters/postgres/examples/secure.rs:22:20
+   |
+19 |     Store(#[from] PostgresError),
+   |     ---------------------------- the largest variant contains at least 216 bytes
+...
+22 | async fn read() -> Result<(), ExampleError> {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: try reducing the size of `ExampleError`, for example by boxing large elements or replacing it with `Box<ExampleError>`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#result_large_err
+   = note: `-D clippy::result-large-err` implied by `-D clippy::all`
+   = help: to override `-D clippy::all` add `#[allow(clippy::result_large_err)]`
+
+error: use of `println!`
+  --> adapters/postgres/examples/secure.rs:37:9
+   |
+37 |         println!("First event version: {}", event.version());
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#print_stdout
+   = note: requested on the command line with `-D clippy::print-stdout`
+
+error: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+  --> adapters/postgres/examples/secure.rs:47:5
+   |
+47 | /     match read().await {
+48 | |         Ok(()) => ExitCode::SUCCESS,
+49 | |         // Connection inputs and options can contain secrets, including in Debug.
+50 | |         Err(_) => {
+...  |
+54 | |     }
+   | |_____^
+   |
+   = note: you might want to preserve the comments from inside the `match`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#single_match_else
+   = note: `-D clippy::single-match-else` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::single_match_else)]`
+help: try
+   |
+47 ~     if let Ok(()) = read().await { ExitCode::SUCCESS } else {
+48 +         eprintln!("Postgres read failed; check configuration and database logs.");
+49 +         ExitCode::FAILURE
+50 +     }
+   |
+
+error: use of `eprintln!`
+  --> adapters/postgres/examples/secure.rs:51:13
+   |
+51 |             eprintln!("Postgres read failed; check configuration and database logs.");
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#print_stderr
+   = note: requested on the command line with `-D clippy::print-stderr`
+
+error: could not compile `mnesis-postgres` (example "secure") due to 4 previous errors

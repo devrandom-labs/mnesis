@@ -1,0 +1,84 @@
+     Locking 7 packages to highest compatible versions
+      Adding core-foundation v0.10.1
+      Adding core-foundation-sys v0.8.7
+      Adding openssl-probe v0.2.1
+      Adding rustls-native-certs v0.8.4
+      Adding schannel v0.1.29
+      Adding security-framework v3.7.0
+      Adding security-framework-sys v2.17.0
+   Compiling core-foundation-sys v0.8.7
+   Compiling security-framework-sys v2.17.0
+   Compiling core-foundation v0.10.1
+    Checking security-framework v3.7.0
+    Checking rustls-native-certs v0.8.4
+    Checking sqlx-core v0.9.0
+    Checking sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+    Checking sqlx v0.9.0
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.80s
+
+real	0m6.856s
+user	0m7.414s
+sys	0m1.639s
+warning[license-not-encountered]: license was not encountered
+   ┌─ /private/tmp/mnesis-postgres-security/deny.toml:24:6
+   │
+24 │     "MPL-2.0", # Mozilla Public License
+   │      ━━━━━━━ unmatched license allowance
+
+licenses ok
+    Checking security-framework v3.7.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+    Checking rustls-native-certs v0.8.4
+    Checking sqlx-core v0.9.0
+    Checking sqlx-postgres v0.9.0
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-security/crates/test-domains)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+    Checking sqlx v0.9.0
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.89s
+   Compiling zeroize v1.9.0
+   Compiling core-foundation-sys v0.8.7
+   Compiling untrusted v0.9.0
+   Compiling ring v0.17.14
+   Compiling rustls-pki-types v1.15.1
+   Compiling curve25519-dalek v4.1.3
+   Compiling core-foundation v0.10.1
+   Compiling security-framework-sys v2.17.0
+   Compiling security-framework v3.7.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling rustls-webpki v0.103.15
+   Compiling rustls-native-certs v0.8.4
+   Compiling rustls v0.23.46
+   Compiling sqlx-core v0.9.0
+   Compiling sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-security/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+   Compiling sqlx v0.9.0
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.83s
+────────────
+ Nextest run ID 50072929-99f1-4665-a167-7cde2fcb03ea with nextest profile: default
+    Starting 1 test across 1 binary
+        PASS [   2.143s] (1/1) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_open_append_read_close_and_reopen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s
+
+
+────────────
+     Summary [   2.145s] 1 test run: 1 passed, 0 skipped

@@ -1,0 +1,46 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-security/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-security/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+error: pub(crate) struct inside private module
+ --> adapters/postgres/tests/support/cluster.rs:9:1
+  |
+9 | pub(super) struct Cluster {
+  | ----------^^^^^^^^^^^^^^^
+  | |
+  | help: consider using: `pub`
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#redundant_pub_crate
+  = note: `-D clippy::redundant-pub-crate` implied by `-D clippy::nursery`
+  = help: to override `-D clippy::nursery` add `#[allow(clippy::redundant_pub_crate)]`
+
+error: this function has too many lines (84/80)
+  --> adapters/postgres/tests/security_tests.rs:31:5
+   |
+31 |     fn start() -> Self {
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+   = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: `rows` shadows a previous, unrelated binding
+   --> adapters/postgres/tests/security_tests.rs:216:9
+    |
+216 |     let rows: Vec<_> = reopened
+    |         ^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/security_tests.rs:195:9
+    |
+195 |     let rows: Vec<_> = store
+    |         ^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_unrelated
+    = note: requested on the command line with `-D clippy::shadow-unrelated`
+
+error: could not compile `mnesis-postgres` (test "security_tests") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

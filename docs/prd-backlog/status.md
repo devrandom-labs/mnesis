@@ -15,7 +15,7 @@ or local pass does not establish whole-adapter delivery.
 | PG5 | Atomic writes and import | active | PG1, PG2, PG3, PG4 | PG7, PG9 |
 | PG6 | Aggregate snapshots and projection state | active | PG3, PG4 | PG7, PG9 |
 | PG7 | Export, backup and restore | active | PG1, PG4, PG5, PG6 | PG9 |
-| PG8 | Secure operation, lifecycle and capacity | blocked | PG1, PG2, PG3, PG4 | PG9 |
+| PG8 | Secure operation, lifecycle and capacity | active | PG1, PG2, PG3, PG4 | PG9 |
 | PG9 | Complete verification, minimization and delivery | blocked | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
 
@@ -37,6 +37,7 @@ Protected focused merges:
 - PR390 verified physical backups and restored projection consumer: `2247c739525f9d8765179b7d9f7f67c6b43bd32f`.
 - PR391 backup route and failure cases: `49104117b87010206fb4b25be1b4d3d6e6635b22`.
 - PR393 decoder performance repair: `f207923a6131ea0270e0e8b22810d8cb3afb7adc`.
+- PR394 stream and saved-state identity, committed heads and independent mutation fixtures: `5ef3e742c63a2f4078ec28057559b5439af28234`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -87,16 +88,19 @@ are protected-merged in PR389 after all40checks and zero unresolved threads.
 The physical operator drill passes224native/Linux laws, verifies manifest/WAL,
 checks old-primary shutdown and resumes the actual saved projection before a
 new append/advance; it is protected-merged in PR390 after all40checks and no
-unresolved review threads. The
-remaining backup failure/route cases remain PG7 acceptance work.
+unresolved review threads.
 Six new completed-chunk laws now pass230 combined native cases, including binary
 caller routing, late duplicate/final-conflict policy reports, snapshot consistency
 across an overlapping atomic commit, missing/oversized final inventory files and
 explicit salvage with retained provenance. Two fresh native controls reject
-ordinary-view substitution and omitted inventory preflight. These changes are
-protected-merged in PR391 after230/230Linux laws and the unchanged full signed
-Nix gate. PG7 is still active. Logical operator timing/profile evidence remains
-to record.
+ordinary-view substitution and omitted inventory preflight. Protected-merged in
+PR391 after230/230Linux laws, the unchanged signed full Nix gate, all40CIchecks
+and zero unresolved threads. PG7 is still active: logical operator timing/profile
+evidence remains to record. PG8 verified TLS and restricted runtime role laws
+are under combined-source verification, with supported SQLx TLS explicitly selected and
+separate certificate/name verification controls rejecting both weakened policies.
+Durability, remaining lifecycle/recovery/diagnostics and capacity/soak evidence
+remain required; no full operations or release claim follows these focused laws.
 Release lock synchronization is protected-merged in PR386. Its live workflow
 created a verified App commit on release PR378; all four original locked AFL
 builds and campaigns pass. The original10.42% decoder regression is retained in
@@ -119,7 +123,10 @@ pass the original oracles; current-source verification and protected delivery
 remain required. Atomic/import share the repaired head owner; no blanket claim
 that all remaining query-name hypotheses are settled.
 
-The query repair is open in PR394 at95a00bc15d72cd04ee79ab25600ec321e03b019e,
-with235 native cases passing on the protected decoder parent and all12 local
-Nix checks passing. Current combined-source CI and protected delivery are pending.
-TLS PR392 is being verified separately; neither adds durability or capacity proof.
+The query repair is protected-merged in PR394 from signed4ac45d46, with235 native
+cases and all12 local Nix checks passing, all40 required CI checks and no unresolved
+threads. Independent artifact review accepts14 runtime catches and2 compiler
+unviable cases; the first eight contaminated catches were rejected and retained.
+TLS PR392 now passes240 combined native cases and all12 local checks on the same
+source. Its final protected-parent CI and delivery remain pending. Neither adds
+durability or capacity proof; byte-accounting/integer/catalog hypotheses stay open.

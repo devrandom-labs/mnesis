@@ -1,0 +1,79 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-security/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-security/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.32s
+────────────
+ Nextest run ID 34baffb2-475c-4e02-9c89-e0dea89e1bec with nextest profile: default
+    Starting 7 tests across 1 binary
+        PASS [   0.913s] (1/7) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+  stdout ───
+
+    running 1 test
+    test committed_transactions_above_an_unrelated_xmin_still_open ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.90s
+
+
+        PASS [   1.504s] (2/7) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+  stdout ───
+
+    running 1 test
+    test copied_future_transactions_reject_before_global_history_can_be_used ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.49s
+
+
+        PASS [   1.327s] (3/7) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+  stdout ───
+
+    running 1 test
+    test copied_native_database_bindings_reject_without_repair ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.32s
+
+
+        PASS [   0.684s] (4/7) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+  stdout ───
+
+    running 1 test
+    test foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.68s
+
+
+        PASS [   1.326s] (5/7) mnesis-postgres::restore_tests physical_backup_preserves_history_state_and_metadata_and_can_advance
+  stdout ───
+
+    running 1 test
+    test physical_backup_preserves_history_state_and_metadata_and_can_advance ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.32s
+
+
+        PASS [   1.033s] (6/7) mnesis-postgres::restore_tests physical_manifest_rejects_corrupt_and_missing_files_before_boot
+  stdout ───
+
+    running 1 test
+    test physical_manifest_rejects_corrupt_and_missing_files_before_boot ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.02s
+
+  stderr ───
+    corrupt backup verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: checksum mismatch for file \"PG_VERSION\"\n" }; missing file verifier: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "pg_verifybackup: error: \"PG_VERSION\" is present in the manifest but not on disk\n" }
+
+        PASS [   1.169s] (7/7) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+  stdout ───
+
+    running 1 test
+    test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.16s
+
+  stderr ───
+    physical recovery fixture: backup=216.464166ms, stopped-primary-to-reloaded-projection=132.697042ms, checkpoint=PgAllPos { history: History([126, 156, 250, 171, 75, 91, 76, 212, 141, 117, 195, 37, 189, 71, 240, 87]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([126, 156, 250, 171, 75, 91, 76, 212, 141, 117, 195, 37, 189, 71, 240, 87]), txid: 770, seq: 3 }
+
+────────────
+     Summary [   7.957s] 7 tests run: 7 passed, 0 skipped

@@ -1,0 +1,30 @@
+cargoVendorDir not set, will not automatically configure vendored sources
+cargoArtifacts not set, will not reuse any cargo artifacts
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/sz1hk8xrzwifvd39h0ql49lc0hgp7g90-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
+[32m INFO[0m [1mtaplo[0m:[1mformat_files[0m:[1mload_config[0m: found configuration file [3mpath[0m[2m=[0m"/nix/var/nix/builds/nix-52626-1515561160/source/taplo.toml"
+[32m INFO[0m [1mtaplo[0m:[1mformat_files[0m:[1mcollect_files[0m: found files [3mtotal[0m[2m=[0m26 [3mexcluded[0m[2m=[0m1 [3mfiles[0m[2mRunning phase: ensureTargetDir
+@nix { "action": "setPhase", "phase": "ensureTargetDir" }
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+doing a full archive install of target to /nix/store/86qknchgsifw7hcmshxrzdl6l58g0ml8-mnesis-tomlfmt-0.4.0/target.tar.zst
+                                                                               Read:     0   B  ==>  0%                                                                               /*stdin*\            :  0.72%   (  10.0 KiB =>     74 B, /nix/store/86qknchgsifw7hcmshxrzdl6l58g0ml8-mnesis-tomlfmt-0.4.0/target.tar.zst)
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-52626-1515561160/ in /nix/store/86qknchgsifw7hcmshxrzdl6l58g0ml8-mnesis-tomlfmt-0.4.0...
+patching script interpreter paths in /nix/store/86qknchgsifw7hcmshxrzdl6l58g0ml8-mnesis-tomlfmt-0.4.0
