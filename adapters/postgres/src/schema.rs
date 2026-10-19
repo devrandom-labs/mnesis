@@ -5,7 +5,7 @@ use sqlx::migrate::Migrator;
 use sqlx::{Connection, PgConnection, PgPool};
 
 use crate::error::PostgresError;
-use crate::{History, history};
+use crate::{History, durability, history};
 
 static MIGRATIONS: LazyLock<Migrator> = LazyLock::new(|| {
     let mut migrator = sqlx::migrate!("./migrations");
@@ -21,6 +21,7 @@ pub async fn migrate(pool: &PgPool) -> Result<(), PostgresError> {
     // SQLx can return early before unlocking on errors. Never return a session
     // lock to the caller's shared pool, even on cancellation.
     connection.close_on_drop();
+    durability::validate(&mut connection).await?;
     // SQLx serializes schema creation, validation and each migration transaction.
     MIGRATIONS
         .run_direct(None, &mut *connection, false)
@@ -36,6 +37,7 @@ pub async fn validate_pool(pool: &PgPool) -> Result<History, PostgresError> {
 }
 
 async fn validate(connection: &mut PgConnection) -> Result<History, PostgresError> {
+    durability::validate(connection).await?;
     let mut view = connection
         .begin_with("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")
         .await

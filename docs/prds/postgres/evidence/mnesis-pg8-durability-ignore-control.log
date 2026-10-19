@@ -1,0 +1,36 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.19s
+────────────
+ Nextest run ID 4ba0af70-60a7-4f8d-9a33-a0d12104f5b2 with nextest profile: default
+    Starting 1 test across 1 binary (6 tests skipped)
+        FAIL [   1.014s] (1/1) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_append ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.99s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_append' (103184556) panicked at adapters/postgres/tests/durability_tests.rs:185:5:
+    Ok(PgAllPos { history: History([205, 159, 16, 43, 206, 18, 78, 177, 135, 142, 213, 76, 136, 121, 118, 96]), txid: 123708, seq: 2 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.034s] 1 test run: 0 passed, 1 failed, 6 skipped
+        FAIL [   1.014s] (1/1) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+error: test run failed

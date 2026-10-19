@@ -68,6 +68,7 @@ enum Fault {
     DropInsert,
     DropCommit,
     HoldCommit,
+    RejectCommit(&'static str),
     HoldHint,
     #[cfg(feature = "import")]
     HoldSecondHead,
@@ -83,6 +84,7 @@ enum Observation {
     Begun,
     Inserted,
     Committed,
+    CommitSent,
     Hint,
     #[cfg(feature = "import")]
     SecondHead,
@@ -177,16 +179,8 @@ async fn forward(
     let server = UnixStream::connect(destination).await?;
     let (mut client_read, mut client_write) = client.into_split();
     let (mut server_read, mut server_write) = server.into_split();
-    #[cfg(feature = "import")]
-    let initial = *mode.borrow();
     tokio::select! {
-        result = async {
-            #[cfg(feature = "import")]
-            if matches!(initial, Fault::HoldSecondHead) {
-                return forward_heads(&mut client_read, &mut server_write, mode.clone(), observed.clone()).await;
-            }
-            tokio::io::copy(&mut client_read, &mut server_write).await.map(|_| ())
-        } => result,
+        result = forward_commands(&mut client_read, &mut server_write, mode.clone(), observed.clone()) => result,
         result = async {
             loop {
                 // Backend protocol: one-byte tag, four-byte BE length including
@@ -672,11 +666,10 @@ async fn cancelled_projection_reloads_the_committed_pair_before_continuing() {
     assert_eq!(count(&control).await, 2);
 }
 
-#[cfg(feature = "import")]
-async fn forward_heads(
+async fn forward_commands(
     client: &mut tokio::net::unix::OwnedReadHalf,
     server: &mut tokio::net::unix::OwnedWriteHalf,
-    mut mode: watch::Receiver<Fault>,
+    mode: watch::Receiver<Fault>,
     observed: watch::Sender<Observation>,
 ) -> io::Result<()> {
     // SSL is disabled for this Unix-only fixture. Startup has no message tag.
@@ -698,6 +691,7 @@ async fn forward_heads(
             .ok_or_else(|| io::Error::other("invalid test frontend packet"))?;
         let mut body = vec![0; usize::try_from(body_size).unwrap()];
         client.read_exact(&mut body).await?;
+        #[cfg(feature = "import")]
         if tag == b'B'
             && body
                 .windows(SECOND_HEAD.len())
@@ -705,12 +699,27 @@ async fn forward_heads(
             && matches!(*mode.borrow(), Fault::HoldSecondHead)
         {
             observed.send_replace(Observation::SecondHead);
-            mode.wait_for(|phase| !matches!(phase, Fault::HoldSecondHead))
+            let mut resume = mode.clone();
+            resume
+                .wait_for(|phase| !matches!(phase, Fault::HoldSecondHead))
                 .await
                 .map_err(io::Error::other)?;
         }
+        if tag == b'Q' && body == b"COMMIT\0" {
+            let fault = *mode.borrow();
+            if let Fault::RejectCommit(code) = fault {
+                observed.send_replace(Observation::CommitSent);
+                // A real server supplies the injected error at the client's
+                // COMMIT boundary. This does not execute a server COMMIT.
+                body = format!(
+                    "DO $$ BEGIN RAISE EXCEPTION USING ERRCODE='{code}', MESSAGE='commit boundary witness'; END $$\0"
+                ).into_bytes();
+            }
+        }
         server.write_u8(tag).await?;
-        server.write_u32(length).await?;
+        server
+            .write_u32(u32::try_from(body.len()).unwrap().checked_add(4).unwrap())
+            .await?;
         server.write_all(&body).await?;
     }
 }
@@ -931,13 +940,13 @@ async fn stalled_hint_acknowledgement_cannot_hold_confirmed_success() {
 }
 
 #[tokio::test]
-async fn server_rejections_at_commit_preserve_the_code_and_outcome() {
+async fn deferred_rejections_before_commit_preserve_the_code_and_known_outcome() {
     for code in ["23514", "40001", "40P01", "40003"] {
         let Some((_proxy, store, control)) = fixture().await else {
             return;
         };
-        // Inject exact server error codes in a DEFERRED trigger. This verifies
-        // commit-stage mapping; it does not claim a real SSI/deadlock campaign.
+        // SET CONSTRAINTS runs these checks before the adapter sends COMMIT.
+        // The known phase proves rollback even for a raised 40003 SQLSTATE.
         // Only the four literal SQLSTATEs above enter this test DDL.
         sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
             "CREATE FUNCTION test_commit_reject() RETURNS trigger LANGUAGE plpgsql AS \
@@ -961,12 +970,39 @@ async fn server_rejections_at_commit_preserve_the_code_and_outcome() {
         .await
         .unwrap();
         assert_eq!(persisted, 0);
+        let source = match result {
+            Err(AppendError::Store(PostgresError::Sqlx(source))) => source,
+            other => panic!("incorrect pre-COMMIT outcome for {code}: {other:?}"),
+        };
+        assert!(
+            matches!(source, sqlx::Error::Database(error) if error.code().as_deref() == Some(code))
+        );
+    }
+}
+
+#[tokio::test]
+async fn server_errors_after_sending_commit_preserve_the_code_and_outcome() {
+    for code in ["23514", "40001", "40P01", "40003"] {
+        let Some((mut proxy, store, control)) = fixture().await else {
+            return;
+        };
+        proxy.fault.send_replace(Fault::RejectCommit(code));
+        let rows = events();
+        let result = store
+            .append(
+                &StreamKey::from_bytes("commit-boundary"),
+                None,
+                PendingBatch::new(&rows).unwrap(),
+            )
+            .await;
+        proxy.observed(Observation::CommitSent).await;
+        assert_eq!(count(&control).await, 0);
         let source = match (code, result) {
             ("40003", Err(AppendError::Store(PostgresError::CommitUnknown(source))))
             | ("23514" | "40001" | "40P01", Err(AppendError::Store(PostgresError::Sqlx(source)))) => {
                 source
             }
-            (_, other) => panic!("incorrect commit-stage outcome for {code}: {other:?}"),
+            (_, other) => panic!("incorrect COMMIT boundary outcome for {code}: {other:?}"),
         };
         assert!(
             matches!(source, sqlx::Error::Database(error) if error.code().as_deref() == Some(code))

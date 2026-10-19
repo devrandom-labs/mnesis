@@ -1,6 +1,6 @@
 # Postgres status and dependencies
 
-Updated: 2026-10-18. Requirements and observable acceptance live in the
+Updated: 2026-10-19. Requirements and observable acceptance live in the
 [Postgres PRD](../prds/postgres.md); detailed checks and three reviews after every
 run live in the [research record](../prds/postgres/research.md). A focused merge
 or local pass does not establish whole-adapter delivery.
@@ -38,6 +38,7 @@ Protected focused merges:
 - PR391 backup route and failure cases: `49104117b87010206fb4b25be1b4d3d6e6635b22`.
 - PR393 decoder performance repair: `f207923a6131ea0270e0e8b22810d8cb3afb7adc`.
 - PR394 stream and saved-state identity, committed heads and independent mutation fixtures: `5ef3e742c63a2f4078ec28057559b5439af28234`.
+- PR392 verified TLS and restricted runtime permissions: `8f03ae8553ab6410fdfbe7660ab84ec0873efae0`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -97,7 +98,7 @@ ordinary-view substitution and omitted inventory preflight. Protected-merged in
 PR391 after230/230Linux laws, the unchanged signed full Nix gate, all40CIchecks
 and zero unresolved threads. PG7 is still active: logical operator timing/profile
 evidence remains to record. PG8 verified TLS and restricted runtime role laws
-are under combined-source verification, with supported SQLx TLS explicitly selected and
+are protected-merged in PR392, with supported SQLx TLS explicitly selected and
 separate certificate/name verification controls rejecting both weakened policies.
 Durability, remaining lifecycle/recovery/diagnostics and capacity/soak evidence
 remain required; no full operations or release claim follows these focused laws.
@@ -119,14 +120,25 @@ search path with application bytea equality. Schema-qualified tables alone do
 not preserve stream identity. Original red and three reviews are retained in
 the research record. Follow-up native failures prove a forged committed head and
 misrouted snapshot writes and snapshot/checkpoint reads. Minimal query repairs
-pass the original oracles; current-source verification and protected delivery
-remain required. Atomic/import share the repaired head owner; no blanket claim
+pass the original oracles and are protected-merged in PR394 after actual mutation
+artifact review rejected fixture-poisoned catches. Atomic/import share the repaired head owner; no blanket claim
 that all remaining query-name hypotheses are settled.
 
 The query repair is protected-merged in PR394 from signed4ac45d46, with235 native
 cases and all12 local Nix checks passing, all40 required CI checks and no unresolved
 threads. Independent artifact review accepts14 runtime catches and2 compiler
 unviable cases; the first eight contaminated catches were rejected and retained.
-TLS PR392 now passes240 combined native cases and all12 local checks on the same
-source. Its final protected-parent CI and delivery remain pending. Neither adds
+TLS PR392 is protected-merged after240 combined native cases and all12 local checks,
+all40 final required CI checks passing and zero unresolved threads. Neither adds
 durability or capacity proof; byte-accounting/integer/catalog hypotheses stay open.
+
+The dependent durability candidate now passes251 combined native cases and140
+complete no-default cases, including profile/restart laws and separate phase
+oracles. A conservative250-green candidate was rejected: deferred40003 now fails
+before COMMIT, where the owned transaction is known uncommitted. A new actual
+client-COMMIT-boundary test preserves40003 uncertainty; both wrong mappers have
+native failing controls. Actual post-server-COMMIT lost-ack/timeout laws remain.
+The first signed gate failed before nextest execution from storage exhaustion;
+original failure retained, no bypass. The corrected signed gate passes all12
+checks with1585 instrumented workspace cases passing; required LinuxCI and
+protected delivery remain pending. No capacity or release acceptance is inferred.

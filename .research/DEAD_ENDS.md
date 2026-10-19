@@ -44,3 +44,10 @@ address/file size but changed branches, no emitted independent factory; do not
 claim code-equivalence from failed symbol-only empty dumps. Exact address dumps
 and candidate source/binary retained /tmp/mnesis-decoder-*. Source reverted only
 own file, gitdiff0. A shorter source or potential x86 layout shift is not evidence.
+
+2026-10-19: conservative deferred-finalization Unknown mapper rejected. It made
+old deferred40003 fixture pass but discarded known pre-COMMIT phase; independent
+phase-specific native test FAIL26.422s despite earlier250green. Correct source
+maps drain errorsSqlx, preserves literalCOMMIT mapper. New clientCOMMIT fault
+observes actual frontend boundary and uses native server error, not fakeSSI or
+an executed serverCOMMIT. Prior250green remains historical, not finalproof.

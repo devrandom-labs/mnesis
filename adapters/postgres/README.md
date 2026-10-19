@@ -80,8 +80,37 @@ Caller pool acquisition timeouts bound waiting for a pool lease. They do not
 establish a statement/lock deadline or prove rollback after a write timeout.
 Keep at least two connections available for the shared listener and data work;
 the adapter rejects a pool configured with only one. Follow the transaction
-outcome rules below for any interrupted write. Durability, restart, capacity and
-other operational profiles remain under the completion PRD.
+outcome rules below for any interrupted write. Capacity and remaining operational
+profiles stay under the completion PRD.
+
+## Durability
+
+The local durable-write profile requires logged tables, `fsync=on`,
+`full_page_writes=on`, and `synchronous_commit` other than `off`. Runtime opening
+and explicit migration reject incompatible settings with
+`PostgresError::Durability`, naming the setting. The adapter preserves configured
+`on`, `local`, `remote_write`, and `remote_apply` modes; it never silently replaces
+them with a weaker policy. Replication guarantees require a separate tested
+deployment profile.
+
+Every event, atomic import, snapshot and checkpoint write runs deferred
+constraints before checking its transaction's settings and issuing COMMIT. This
+also checks replacement pool connections and settings changed by write triggers.
+A durability rejection rolls back the write and its new keys. The caller's pool
+settings are not changed. Keep the server and storage profile fixed while writers
+run; these checks do not certify administrative changes or storage hardware.
+
+An error before issuing COMMIT leaves this owned transaction uncommitted.
+After COMMIT is sent, `CommitUnknown` retains the original cause and requires
+reconciliation; it never proves that retrying is safe. A caller timeout can follow
+an actual commit. Reload saved state before continuing after a failed or canceled
+checkpoint write. Command identity, duplicate detection and worker fencing remain
+application responsibilities.
+
+Native tests verify immediate primary crash/restart recovery of acknowledged
+events and saved pairs, including subsequent append and exclusive resume. This
+is process-crash evidence for the tested local profile. Hardware power loss,
+cross-node failover, deployment recovery targets and capacity remain separate.
 
 ## MSRV & stability
 
@@ -173,8 +202,8 @@ and the full nonzero unsigned version/schema ranges are supported.
 `CommitUnknown` retains its SQLx cause, including through the codec wrapper.
 Caller cancellation can follow an actual commit. Reload before making another
 storage decision; aggregate cache failure never reverses an acknowledged event
-append. Client SIGKILL recovery is tested; server restart, durability and release
-acceptance remain tracked by the PRD.
+append. Client SIGKILL and immediate primary restart recovery are tested for the
+local profile above; complete release acceptance remains tracked by the PRD.
 
 ## Projection checkpoints
 

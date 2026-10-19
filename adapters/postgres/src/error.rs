@@ -51,6 +51,10 @@ pub enum PostgresError {
     #[error("pool capacity {actual} cannot accommodate the listener and data queries")]
     PoolCapacity { actual: u32 },
 
+    /// An asynchronous or unsafe native setting cannot receive durable acknowledgement.
+    #[error("postgres setting {setting}=off cannot provide the durable write profile")]
+    Durability { setting: ErrorId<32> },
+
     /// A `sqlx`/postgres I/O, connection, or query error.
     #[error("postgres error: {0}")]
     Sqlx(#[source] sqlx::Error),

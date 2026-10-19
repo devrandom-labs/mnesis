@@ -17,6 +17,7 @@
 //! adapter, written to validate the adapter contract before the 1.0 freeze.
 
 mod builder;
+mod durability;
 mod error;
 mod hex;
 mod history;

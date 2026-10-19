@@ -1,3 +1,67 @@
+## Current durability delivery — 2026-10-19 05:39 UTC
+
+Protected parent8f03ae85; signed64f325f6 GPGgood. Normal unchanged signedgate99009
+PASSall12, workspace1585PASS494.308s15slow4compilerexcluded, replay2/1/1each1s,
+allTHREEreviewed. Source/committeddiff exact8e21c659d8b1401bd0c2bf2697a2e0d7c2a3d0be18872d31b319be9f963ee506,
+whitespacePASS. No source/index mutations during gate. Record-only signed amend
+next: unchanged outputs cached, ZERO new runs; then focused PR/LinuxCI/artifact/
+CodSpeed/thread review/protectedmerge. Native251all75.943s +140no-default30.952s
+0skip remain distinct realDBproof; strictall/all and no-default/allClippy/fmtPASS.
+Known preCOMMITSqlx vs literalCOMMITunknown preserved, both wrongmapper controls
+actuallyfail, original postserverCOMMITlostack/timeout unchanged/pass.
+
+Scoped standard cache deletion89647 on four unrooted/referrerfree oldnextest
+outputs stillpendingfinalpath5rwi; three prior1GB removals complete, rawlogs
+preserved, rooted oldgjks explicitlyexcluded. No broadGC/target/rawbaseline/
+worktree deletion or unrelated process targeted. No local native/build jobs now
+except cache deletion; source mustfreezeagain during evidenceamend gate.
+
+PR378 regenerated2475b90f all40requiredgreen/1scheduledskip, OPEN; original
+releasepipeline defect fixed, finalpublication must await ALL acceptance.
+Next source findings prepared ONLYread-only in/tmp/mnesis-postgres-followups-20261019.md:
+byteaccounting/nativefunctions/operators/catalog/unboundedmigrationmetadata,
+PG9 Python/cargo-hack/nativefeatures/AFL/advisory/Nixunusedarchives. ALL remaining
+PG7 operator timings, PG8 lifecycle/diagnostics/capacity/30minsoak, PG9 finalaudits/
+minimization/release/cleanregistryconsumer required. No goalcomplete claim.
+Saved goal remains externalBLOCKED; authorizedcurrent work continues, no bypass.
+
+## Earlier pointers — superseded by the entry above
+
+# Postgres durability — current pointer
+
+Authorized work continues; saved goal externally BLOCKED, no budget. Do not alter
+goal storage or bypass safeguards. Read canonical research skill/full protocol.
+Root docs/postgres-prd8357c0c2 and USER research.md edit remain untouched.
+
+Protected main5ef3e742 contains17 focused merges through PR394. TLS PR392 now
+remoteSIGNEDf2cfeaa186f08282201d56a30791bb92a7501471, finalCI running. Combined
+native240PASS87.470s0skip and fullgate1577PASS476.059s, all12checks; protected-parent
+rebase ENTIRE TREE identical before record-only cachedgate0freshruns. TLS must
+protected-merge before this dependent durability delivery. Query mutation artifact
+12163146175 VERIFIED14real catches/2unviable/0survivors/timeouts, no fixture poison.
+
+This worktree work/postgres-durability now based on TLSf2cfeaa1. Original complete
+tracked/untracked candidate saved in retained stashb2e13e44d4288a2fc4711302c9c5c6585a0d5054
+and /tmp/mnesis-durability-integration.ljilXn. Five research conflicts only; all
+four append records compare exact491base prefixes in child and parent. Both complete
+progress records preserved below. No source conflict. Shared cluster helper
+already in TLSparent compares identical; no duplicate addition.
+
+Existing candidate:37privateRustlines/80budget,29existingchurn/35budget,
+634native-testlines/650budget, no new dependencies/framework/runtime/publicmethod.
+Final precommit drain SET CONSTRAINTS ALL IMMEDIATE, then native durability guard,
+then existing commit-uncertainty mapper. Original actual deferred red and10focused
+passes retained; prior240full suite predates deferred extension and is NOT current.
+Now compare exact source/test copies, inspect merged patch, run actual combined
+full native suite/default/each/all verification and normal full signedgate/LinuxCI.
+Do not assume250 by adding sibling counts. Every run gets THREEreviews. One local
+native suite and one fullNixgate at a time; no local jobs active at integration.
+
+Remaining PG7 operator timings; PG8 query policy/diagnostics/lifecycle/capacity/
+30minsoak; PG9 matrix/Python/AFL/advisories/audits/minimization/merge/release/registry
+consumer still required. Do not mark whole goal complete or publish early.
+
+## Preserved parent progress before durability integration
 # Postgres delivery — current pointer
 
 Current user turn authorizes ongoing repository work. Saved goal remains BLOCKED
@@ -449,3 +513,79 @@ Nowstageownedproof then normalSIGNEDamend/fullgate; max-jobs2 per-run Nix schedu
 only, unchangedfullhook and test workloads. Preserveindex/source untilterminal.
 Query4acfreshCI currently31SUCCESS/6running; independentmutationevidence pending.
 TLSremote276oldCI38SUCCESS/2Nixpending, do notmerge sibling source beforecombined.
+
+## Preserved durability progress before integration
+# PG8 durability slice
+
+Whole goal ACTIVE PG0–PG9 through publication/registry consumer. Root progress
+/Users/joel/orca/workspaces/nexus/main/.research/PROGRESS.md tracks other branches.
+Preserve root user docs/prds/postgres/research.md modification and all worktrees/
+stashes. Read canonical skill+full protocol on recovery. No delegation authorized.
+
+Current /tmp/mnesis-postgres-durability branchwork/postgres-durability based
+protectedmain49104117. Source changes are UNCOMMITTED. One private32line durability
+owner checks current_setting for fsync/full_page_writes/synchronous_commitoff;
+startup and four transaction commit owners use it, preserving exact original
+COMMIT uncertainty mapping, never overriding stronger modes. One error variant,
+0new APIs/methods/config types/dependencies. Existing source18+/11-=29churn vs
+25estimate; revised35 before expansion, private32/80lines.
+
+Original startup native1FAIL0.047s and actual replaced-pool four write laws all
+fiveFAIL0.229s,0skips. Healthy on and seed acknowledgement/native LISTEN controls,
+old/new PID differs, exact newsettingoff. Current exact typed-error and settled
+independent row/key/state assertions fivePASS1.951s. SevenlawsPASS13.893s including
+all4nonoff mode preservation and AFTER-INSERT setting change. Strictall/all2.42s,
+default6.91s ClippyPASS, formattingPASS,0lint allowances. Native test354lines,
+budget revised600 for two unsafe-server and actual process-crash recovery laws;
+common66line cluster source copied exact from TLS owner as explicit dependency,
+staged to preserve identical add during future parent rebase. No new testframework.
+Need protected TLS parent rebase before final combined source/delivery checks.
+
+Three runtime controls compiled fresh in /tmp/mnesis-durability-controls.7o1ffu:
+ignore commit-guard result FAIL1.034s at actualOk; commit-then-return-Durability
+FAIL1.109s: error assertion passes but independent settled counts2/2 vs1/1 reject;
+clean startup-guard ignored FAIL0.086s at unsafe open. One earlier mixed-setup
+startup run0.047s intentionally excluded cleancontrol credit; wrong checkout
+self-copy mistake recorded, corrected exact commit owner restored by absolute
+path/cmp and sole schema diff verified. Controls use separate proof target
+/tmp/mnesis-pg6a-proof-target.z1jmzk, supported package-clean before each. Same
+physical PG17 cluster as mainDB: NEVER run native suites concurrently acrossDBs.
+Control worktree retains ONLY startup mutant. Correct product source unchanged.
+Every run3reviewed; source-failure and compile reds preserved in research.md.
+Logs /tmp/mnesis-pg8-durability-*.log. Next native tests: unsafe server profiles,
+acknowledged event/cache/checkpoint recovery across immediate native server stop,
+then full native regressions/default/feature/Linux/source-frozen normal signed
+gate/focusedPR/CI/protectedmerge. Need cost/latency comparison before parity claim.
+Native17 profile exacton/on/on; locked Nix native hook does NOT disablefsync.
+No completion/power-loss/replication or publication claim.
+
+Other slice /tmp/mnesis-postgres-security all235local nativePASS68.032s; Linux
+235/235PASS96.943s0skips, six filtered one-case capabilitysmokes pass. Normal
+signed full gate64030 still RUNNING, do not edit that source/index. Linux64404done0.
+No securityPR yet. ReleasePR378 open atfe0fbee,3decoder sizes each10.42%regression,
+latest actual check summary retained /tmp/mnesis-release-fe0fbee-performance.json.
+No waiver or accepted fix/publication. PG7 operator measurements, PG8 remaining
+operations/capacity/30minsoak, PG9 verification/minimization/advisories/release remain.
+
+DURABILITY current deferred-trigger extension37/80privateRustlines,
+634/650testlines,29/35existingchurn. Originalactual1FAIL4.554s settledcounts2/2
+vshealthy1/1 afterdeferrednative trigger; earlier2failedcommandsZEROtests/no catch.
+Retained nativeSETCONSTRAINTSALLIMMEDIATE beforevalidation/COMMIT preserves
+uncertaintymapping. Focused10PASS89.180s0skips, strictClippy6.09sPASS, all3reviews,
+rawcopiescheckedintrimmedspaces/endnewlineonly, originaltmpunchanged. Prior
+full240105.061s is PREdeferred source, notcurrentproof. Noactivejobsinthis tree.
+Waitfocusedquery/TLSdelivery beforecurrentparent rebase/fullmatrix/Linux/gate/PR.
+Do notreset/popstash/dropworktrees. Commoncluster17.10neverparallelownnative.
+
+CURRENT integrated firstfull41420 FAILED174/250:173PASS1FAIL39.183s, original
+unchanged40003deferred-finalization oracle mappedSqlx insteadUnknown. Retainedred,
+all3reviews. ONE mapperline reuses existingPostgresError::commit for deferreddrain;
+public/private docsclarifyconservativefinalization, no test changed. Sourcebudget
+35/35existingchurn, private37/80, tests634/650. Targetunchangedoutcome32PASS16.593s;
+FULLcurrent250PASS60.177s0skip. Focusednativefeatures default7/14.686s,snapshot8/
+27.708s,projection8/4.562s,import8/16.023s,export7/25.565s all0skip/3reviews.
+Strictall/allClippy7.48s+fmtPASS. README33+/4-, changelog2+, existingNixsmoke5+
+usesno-tests=fail for newdurabilityowner. No nativefullgate/Linux credit yet.
+Stagingcurrentformattedsource/evidence then normalSIGNEDfullgate(maxjobs2), only
+onebuild/native suite atatime. No localjobs active now. TLS PR392f2currentCI39green/
+1Nixpending; mustprotectedmergebeforedependentDurabilitydelivery. Currentparentf2.

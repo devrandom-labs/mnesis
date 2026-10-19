@@ -23,7 +23,7 @@ use crate::error::PostgresError;
 use crate::hex;
 use crate::page::{self, Order, PageRow};
 use crate::position::PgAllPos;
-use crate::{History, Limits};
+use crate::{History, Limits, durability};
 
 #[cfg(feature = "import")]
 mod atomic;
@@ -624,9 +624,7 @@ impl RawEventStore for PostgresStore {
             .await
             .map_err(|error| append_error(id, expected_version, error))?;
 
-        tx.commit()
-            .await
-            .map_err(|source| AppendError::Store(PostgresError::commit(source)))?;
+        durability::commit(tx).await.map_err(AppendError::Store)?;
 
         // Wake AFTER durable commit (WakeSource contract: wake post-commit).
         self.notify_committed(id.as_bytes()).await;

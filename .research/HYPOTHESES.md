@@ -747,3 +747,158 @@ runtime open. Do not log DSNs/options/passwords. Explain native OS roots plus
 additional CA, exact returned error/source semantics, restricted event grants
 and state-only UPDATE rights. Example must compile in existing Cargo/Nix gates;
 actual native security tests own failure injection, not the example.
+
+# PG8 durability profile — original witness before production change
+
+Writable-primary acknowledgement must include local WAL flush in the supported
+profile. PostgreSQL18 runtime-config-wal documents non-off synchronous_commit
+modes wait for local flush, while off can acknowledge transactions subsequently
+lost on crash. fsync/full_page_writes and honest storage remain separate server
+requirements; cross-node failover not established. Startup alone cannot prove
+settings on a different/future pooled connection. Preserve stronger replication
+settings; never overwrite remote_apply with on or label a commit timeout safe.
+
+First witness budget<=70 new native test lines, zero production/API/lock/tool
+changes. With real PostgreSQL and native SHOW controls, prove healthy on open
+succeeds and asynchronous caller-pool open rejects. Current source appears to
+validate only schema. Witness must fail if actual unsupported off opens normally;
+a generic baseline error is not final typed rejection evidence. Record actual
+result before choosing a minimal private transaction-owner/profile policy.
+Subsequent witnesses must cover a changed/replaced connection AFTER successful
+open, all four write owners, restart, and exact rejection/no writes. A new named
+configuration error would require separate pre-edit budget and exact assertions.
+No crash/data-loss claim from SHOW alone, no forced server setting or storage claim.
+
+After observed startup red, extend pre-fix native budget<=310 total test lines
+for actual REPLACED pooled connection after successful startup, covering append,
+atomic append, snapshot and checkpoint separately. Existing SQLx set_connect_options
+updates FUTURE connections only; observe native old/new backend IDs and exact
+on/off settings. Reserve listener deterministically via native pg_stat_activity,
+capacity2 leaves one data connection, close it then require different replacement
+PID. Prove normal event acknowledgement first, then unsupported writes must
+reject and preserve exact independent state after pool shutdown settles rollback.
+Use one small private fixture, no proxy/runtime/framework. Production still0
+until these original-source laws execute. A pre-write startup check alone cannot
+satisfy these cases. Do not alter stronger replication settings or make physical
+power-loss claims. Final errors must be specific, not arbitrary is_err greens.
+
+After all5actual original reds, minimal production experiment budget<=80 new
+private Rust lines, <=25 existing caller/enum/module lines changed,0dependency/
+migration/config types/new public methods. One new PostgresError durability
+variant names the rejected setting. Existing native current_setting is the
+supported authority: reject off for fsync/full_page_writes/synchronous_commit,
+preserve all non-off commit modes including remote_apply unchanged. Check startup
+on its existing scoped connection and immediately BEFORE each actual COMMIT on
+the same write transaction, after database-side effects/triggers. One private
+owner validates and commits; replace four caller commit blocks, preserving
+PostgresError::commit unknown-outcome mapping and original SQLx sources. A check
+failure before any COMMIT rolls back staged work, never sends a fake success.
+Do not build an independent transaction/retry framework or override caller GUCs.
+
+Falsifiers: any baseline five law stays green/acknowledged; exact unsupported
+setting not retained; rejected staged event/key/cache/checkpoint becomes visible
+after pool cleanup; stronger replication setting rewritten; server-rejected or
+lost COMMIT response changes existing PG3 classification. Add actual native
+trigger changing setting during write and fresh runtime check-omission controls.
+Profile check is configuration evidence, not proof of honest disk/power loss;
+server reload/operator configuration remains trusted deployment ownership.
+Measure extra roundtrip/alloc costs with representative writes before claiming
+performance parity. Every existing native fault law and full feature/Linux/gate
+must pass; final startup/commit checks cannot replace restart/recovery/soak work.
+
+Before next durability tests: revise native budget<=450 total lines (current258)
+to cover preserved on/local/remote_write/remote_apply, AFTER-INSERT setting change,
+and independent unsafe-server profiles after shared cluster owner delivery. The
+310estimate covered replacement only; no acceptance dropped. Rollback same
+slice,0new dev/runtime dependencies. Final checked source budgets and deliberate
+check-omission controls remain required. Keep connection settings at owning pool;
+use bound native set_config for controlled experiments, not a new policy object.
+
+Source-budget review after first retained candidate: private owner32/80lines;
+existing source18added/11removed=29churn versus estimated25. Four extra import/
+replacement lines were omitted. Revise existing-source ceiling to35churn before
+further changes; scope remains one private validator/commit owner and one error
+variant with no API method/type/dependency/framework addition. No duplicate GUC
+policy or weakened commit classification justifies a smaller-looking alternative.
+
+Before unsafe-server and primary-crash proof: revise test ceiling<=600lines plus
+reuse of the existing66line private cluster owner from TLS slice (exact shared
+file, no new machinery). Current354lines cover pool settings/trigger only; two
+independent private server settings and actual immediate-stop/restart recovery
+need explicit native process/status and persisted-state assertions. Keep helpers
+private, max80lines/function, no mode flags/tool/framework. Source dependency on
+TLS test owner is explicit; protected rebase onto TLS before final delivery.
+Server settings: healthy migrate first, stop checked, restart with fsyncoff or
+full_page_writesoff, native exact control then typed runtime/migration rejection
+with installed metadata preserved. Separate healthy-profile immediate server
+stop/restart recovers acknowledged events/history and, when enabled, snapshot/
+checkpoint pairs, then permits subsequent append. This establishes PostgreSQL
+process-crash recovery only, not OS/hardware power-loss, replicas or failover.
+The production32line owner and existing29line churn remain within revised35.
+
+Fresh guard audit: native current_setting functions are qualified, but their
+text equality operators are not. Prior PG388 proved caller search_path can put
+application schemas before pg_catalog. Hypothesis: a matching application
+text=text operator can suppress guard rejection AFTER successful startup. Before
+any fix add<=40native lines; revised test ceiling650 from600 to cover this new
+credible concern (current591). Use actual existing off replacement then inject
+only data connection search_path/native text operator, not schema-validation
+fixture failure. Preserve exact expected Durability setting and settled row map.
+Production remains unchanged until actual red. Minimal potential fix only three
+native operator qualifications, +3/-3existinglinechurn (29->35 current ceiling),
+0extra interfaces/deps/mechanisms. Reject control if it fails only setup/query
+syntax or returns arbitrary schema error. No fake supported-search-path claim.
+
+## PG8 deferred trigger durability — before test edit
+
+Current private commit helper validates synchronous_commit AFTER writes but
+BEFORE COMMIT; a DEFERRABLE INITIALLY DEFERRED constraint trigger may change it
+only during COMMIT. Source hypothesis only. Extend existing immediate-trigger
+native law with a second deferred schedule on a fresh Fixture, same schema
+cleanup BEFORE assertions, independent settled counts BEFORE typed rejection.
+No weaker oracle. New test stays<=650lines; no production change before actual
+red. Native one-test run only after current query235suite terminal. If reproduced,
+consider native SET CONSTRAINTS ALL IMMEDIATE inside owned transaction before
+last durability validation, leaving original commit error mapping untouched.
+Private module80line budget retained, existing caller churn35 unchanged; no
+runtime/API/schema migration/tool/dependency changes. Need exact primary docs,
+original red, all write-owner outcomes and strict checks before retaining.
+
+# Durability integration: deferred finalization must preserve outcome policy
+
+Current full native run fails old exact40003 oracle after deferred checks move
+from COMMIT to SET CONSTRAINTS. New drain currently maps every failure to Sqlx,
+which loses the existing conservative finalization boundary. Candidate: ONE
+private mapper line reuses PostgresError::commit; no original test change, no new
+public method or cause erasure. Preserve explicit23514/40001/40P01 rollback and
+40003unknown. Clarify public error docs to include conservative deferred-finalization
+uncertainty before explicit COMMIT; do not claim this40003 fixture proves committed
+rows. Budget remains <=35existingchurn and80private lines (current29/37; docs <=4extra).
+Falsifier: unchanged four-code native oracle still fails, actual after-COMMIT lost
+response/timeout becomes safe, or any healthy/rejection/durability native law fails.
+Full250 must rerun after targeted existing outcome suite; no exclusion or timeout
+change. Unknown is conservative; it never proves a commit occurred or retry safety.
+
+Durability documentation budget before editing: at most45 README lines and
+3Unreleased changelog lines plus status/progress updates, no additional Rust/API/
+SQL or tools. Describe exact startup/write guards, preserved stronger modes,
+conservative finalization uncertainty, measured process-restart boundary and
+unchanged caller settings. Keep hardware/failover/capacity and final release
+acceptance explicitly pending. Existing release-plz still owns version publication;
+no guessed released version or stale quickstart-version repair in this slice.
+
+PG3/PG8 phase correction, pre-edit budget (2026-10-19): deferred constraints
+now execute before the adapter sends COMMIT. A failure at that point proves
+this owned transaction was never committed, independently of the SQLSTATE.
+Reject the conservative drain→CommitUnknown candidate despite250green tests:
+it discarded known phase to satisfy an old fault fixture. Retain its evidence.
+Falsifier: same real deferred40003 must be Sqlx with independently zero rows;
+current conservative candidate must fail this precise phase law. Preserve
+literal-COMMIT mapping and all lost-ack/timeout laws. Reuse the EXISTING private
+frontend relay for a native SQLSTATE rejection observed only when the client
+actually sends COMMIT; this is an injected boundary error, not a real SSI or
+server-commit campaign. Verify the client boundary observation explicitly.
+Budget: production existing Rust stays<=35line churn (restore original unknown
+outcome docs, pre-COMMIT error Sqlx); existing outcome test/relay<=150line churn,
+no new fixture framework/runtime/API, no assertion/exclusion/workload relaxation.
+Rollback only this phase experiment, preserving every red and source snapshot.

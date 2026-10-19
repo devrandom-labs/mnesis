@@ -1,0 +1,17 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+error: `setting` shadows a previous, unrelated binding
+   --> adapters/postgres/tests/durability_tests.rs:625:78
+    |
+625 | ...   matches!(&result, Err(AppendError::Store(PostgresError::Durability { setting })) if setting.to_string() == "synchronous_commi...
+    |                                                                            ^^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/durability_tests.rs:604:10
+    |
+604 |     let (setting, redirected): (String, bool) = sqlx::query_as(
+    |          ^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_unrelated
+    = note: requested on the command line with `-D clippy::shadow-unrelated`
+
+error: could not compile `mnesis-postgres` (test "durability_tests") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

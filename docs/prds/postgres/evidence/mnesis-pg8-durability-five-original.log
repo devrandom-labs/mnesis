@@ -1,0 +1,22 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+error[E0599]: no method named `build` found for struct `WithVersion` in the current scope
+  --> adapters/postgres/tests/durability_tests.rs:93:56
+   |
+93 |         let event = pending_envelope(Version::INITIAL).build().unwrap();
+   |                                                        ^^^^^ method not found in `WithVersion`
+
+error[E0599]: no method named `build` found for struct `WithVersion` in the current scope
+   --> adapters/postgres/tests/durability_tests.rs:150:52
+    |
+150 |     let event = pending_envelope(Version::INITIAL).build().unwrap();
+    |                                                    ^^^^^ method not found in `WithVersion`
+
+error[E0599]: no method named `build` found for struct `WithVersion` in the current scope
+   --> adapters/postgres/tests/durability_tests.rs:173:50
+    |
+173 |         head: pending_envelope(Version::INITIAL).build().unwrap(),
+    |                                                  ^^^^^ method not found in `WithVersion`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mnesis-postgres` (test "durability_tests") due to 3 previous errors
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test durability_tests --all-features` exited with code 101

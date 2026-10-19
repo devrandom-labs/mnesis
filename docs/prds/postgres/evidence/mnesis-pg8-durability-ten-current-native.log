@@ -1,0 +1,97 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.65s
+────────────
+ Nextest run ID 7b78cb0f-46ab-47f7-9c71-2a0d8f6ec6af with nextest profile: default
+    Starting 10 tests across 1 binary
+        PASS [  30.423s] ( 1/10) mnesis-postgres::durability_tests a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+  stdout ───
+
+    running 1 test
+    test a_setting_changed_by_a_native_write_trigger_rejects_before_commit ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 30.40s
+
+
+        PASS [   0.231s] ( 2/10) mnesis-postgres::durability_tests application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+  stdout ───
+
+    running 1 test
+    test application_text_comparisons_cannot_hide_an_unsafe_commit_setting ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.22s
+
+
+        PASS [   0.102s] ( 3/10) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+  stdout ───
+
+    running 1 test
+    test asynchronous_connection_settings_reject_before_runtime_open ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.09s
+
+
+        PASS [   1.157s] ( 4/10) mnesis-postgres::durability_tests immediate_primary_restart_recovers_acknowledged_events_and_saved_state
+  stdout ───
+
+    running 1 test
+    test immediate_primary_restart_recovers_acknowledged_events_and_saved_state ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 1.15s
+
+
+        PASS [   0.219s] ( 5/10) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_append ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.21s
+
+
+        PASS [   0.282s] ( 6/10) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.27s
+
+
+        PASS [   0.248s] ( 7/10) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.22s
+
+
+        PASS [   0.165s] ( 8/10) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_snapshot
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_snapshot ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.16s
+
+
+        PASS [   0.860s] ( 9/10) mnesis-postgres::durability_tests supported_commit_modes_are_preserved_after_acknowledged_writes
+  stdout ───
+
+    running 1 test
+    test supported_commit_modes_are_preserved_after_acknowledged_writes ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.85s
+
+
+        PASS [   1.874s] (10/10) mnesis-postgres::durability_tests unsafe_server_settings_reject_runtime_and_migration_without_repair
+  stdout ───
+
+    running 1 test
+    test unsafe_server_settings_reject_runtime_and_migration_without_repair ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 1.87s
+
+
+────────────
+     Summary [  35.565s] 10 tests run: 10 passed, 0 skipped

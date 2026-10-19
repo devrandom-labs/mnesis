@@ -1,0 +1,105 @@
+got build log for '/nix/store/c3j3qpip8q7nfrc0yng9g0l12wvdq296-mnesis-fuzz-replay-0.4.0.drv' from 'daemon'
+cargoArtifacts not set, will not reuse any cargo artifacts
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/0v6qpabh45irccw26wiwgi9ilmnlwy7p-mnesis-fuzz-source
+source root is mnesis-fuzz-source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+will append /nix/var/nix/builds/nix-23727-3496547974/mnesis-fuzz-source/.cargo-home/config.toml with contents of /nix/store/yzib3np6icns7fikkdhnz8b4kaf2zy4y-vendor-cargo-deps/config.toml
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo test --no-fail-fast
+[1m[92m   Compiling[0m proc-macro2 v1.0.107
+[1m[92m   Compiling[0m quote v1.0.47
+[1m[92m   Compiling[0m unicode-ident v1.0.24
+[1m[92m   Compiling[0m libc v0.2.189
+[1m[92m   Compiling[0m getrandom v0.3.4
+[1m[92m   Compiling[0m cfg-if v1.0.4
+[1m[92m   Compiling[0m equivalent v1.0.2
+[1m[92m   Compiling[0m hashbrown v0.17.1
+[1m[92m   Compiling[0m zerocopy v0.8.55
+[1m[92m   Compiling[0m toml_datetime v0.6.3
+[1m[92m   Compiling[0m winnow v0.5.40
+[1m[92m   Compiling[0m semver v1.0.28
+[1m[92m   Compiling[0m futures-sink v0.3.33
+[1m[92m   Compiling[0m futures-core v0.3.33
+[1m[92m   Compiling[0m thiserror v2.0.19
+[1m[92m   Compiling[0m futures-io v0.3.33
+[1m[92m   Compiling[0m anyhow v1.0.104
+[1m[92m   Compiling[0m futures-channel v0.3.33
+[1m[92m   Compiling[0m slab v0.4.12
+[1m[92m   Compiling[0m pin-project-lite v0.2.17
+[1m[92m   Compiling[0m rustc_version v0.4.1
+[1m[92m   Compiling[0m memchr v2.8.3
+[1m[92m   Compiling[0m futures-task v0.3.33
+[1m[92m   Compiling[0m arrayvec v0.7.8
+[1m[92m   Compiling[0m either v1.17.0
+[1m[92m   Compiling[0m bytes v1.12.1
+[1m[92m   Compiling[0m crc32c v0.6.8
+[1m[92m   Compiling[0m lazy_static v1.5.0
+[1m[92m   Compiling[0m indexmap v2.14.0
+[1m[92m   Compiling[0m pretty-hex v0.4.2
+[1m[92m   Compiling[0m futures-util v0.3.33
+[1m[92m   Compiling[0m toml_edit v0.20.2
+[1m[92m   Compiling[0m syn v2.0.119
+[1m[92m   Compiling[0m syn v3.0.3
+[1m[92m   Compiling[0m rand_core v0.9.5
+[1m[92m   Compiling[0m rand_xoshiro v0.7.0
+[1m[92m   Compiling[0m proc-macro-crate v2.0.2
+[1m[92m   Compiling[0m futures v0.3.33
+[1m[92m   Compiling[0m thiserror-impl v2.0.19
+[1m[92m   Compiling[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-23727-3496547974/mnesis-fuzz-source/crates/mnesis)
+[1m[92m   Compiling[0m equator-macro v0.4.2
+[1m[92m   Compiling[0m bolero-generator-derive v0.13.4
+[1m[92m   Compiling[0m minicbor-derive v0.19.5
+[1m[92m   Compiling[0m ppv-lite86 v0.2.21
+[1m[92m   Compiling[0m bolero-generator v0.13.5
+[1m[92m   Compiling[0m equator v0.4.2
+[1m[92m   Compiling[0m rand_chacha v0.9.0
+[1m[92m   Compiling[0m rand v0.9.5
+[1m[92m   Compiling[0m aligned-vec v0.6.4
+[1m[92m   Compiling[0m minicbor v2.3.0
+[1m[92m   Compiling[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-23727-3496547974/mnesis-fuzz-source/crates/store)
+[1m[92m   Compiling[0m fuzz-common v0.0.0 (/nix/var/nix/builds/nix-23727-3496547974/mnesis-fuzz-source/fuzz-common)
+[1m[92m   Compiling[0m bolero-engine v0.13.4
+[1m[92m   Compiling[0m bolero v0.13.4
+[1m[92m   Compiling[0m mnesis-fuzz v0.0.0 (/nix/var/nix/builds/nix-23727-3496547974/mnesis-fuzz-source/fuzz)
+[1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 4.63s
+[1m[92m     Running[0m tests/cbor.rs (target/debug/deps/cbor-de6ad7e2d021eeff)
+
+running 2 tests
+test cbor_decode_header ... [32mok(B[m
+test cbor_decode_chunk ... [32mok(B[m
+
+test result: [32mok(B[m. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+[1m[92m     Running[0m tests/value.rs (target/debug/deps/value-49da1c62bf8e3568)
+
+running 1 test
+test value_event_type ... [32mok(B[m
+
+test result: [32mok(B[m. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+[1m[92m     Running[0m tests/wire.rs (target/debug/deps/wire-f1f3adae280eaf28)
+
+running 1 test
+test wire_decode_frame ... [32mok(B[m
+
+test result: [32mok(B[m. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+'target' does not exist, will NOT output to /nix/store/9g1lcrpq20gm1f4ylrzwn2mwcybkvc7j-mnesis-fuzz-replay-0.4.0/target.tar.zst
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-23727-3496547974/ in /nix/store/9g1lcrpq20gm1f4ylrzwn2mwcybkvc7j-mnesis-fuzz-replay-0.4.0...
+patching script interpreter paths in /nix/store/9g1lcrpq20gm1f4ylrzwn2mwcybkvc7j-mnesis-fuzz-replay-0.4.0

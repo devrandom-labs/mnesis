@@ -5,6 +5,8 @@ use std::num::NonZeroU32;
 use mnesis::{ErrorId, Id, Version};
 use mnesis_store::state::{Hydrated, SnapshotStore};
 
+use crate::durability;
+
 use super::{
     PostgresError, PostgresStore, corrupt, corrupt_value, create_key, read_key, validate_bytes,
 };
@@ -99,6 +101,6 @@ impl SnapshotStore<Vec<u8>, Version> for PostgresStore {
              SET schema_version = EXCLUDED.schema_version, version = EXCLUDED.version, state = EXCLUDED.state RETURNING key",
         ).bind(key).bind(i64::from(schema_version.get())).bind(position.as_u64().to_string()).bind(state)
             .fetch_one(&mut *tx).await.map_err(PostgresError::Sqlx)?;
-        tx.commit().await.map_err(PostgresError::commit)
+        durability::commit(tx).await
     }
 }

@@ -5,6 +5,8 @@ use mnesis_store::import::{
 };
 use sqlx::{PgConnection, Postgres, Transaction};
 
+use crate::durability;
+
 use super::{
     PgAllPos, PostgresError, PostgresStore, create_key, head_version, insert_run,
     is_stream_conflict, read_head, validate_sizes,
@@ -111,9 +113,8 @@ impl AtomicAppend for PostgresStore {
                 return Err(self.rejected(tx, index, write, error).await);
             }
         };
-        tx.commit()
+        durability::commit(tx)
             .await
-            .map_err(PostgresError::commit)
             .map_err(AtomicAppendError::Store)?;
         for write in writes {
             self.wake_registry().wake(write.target.as_bytes());

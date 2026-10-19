@@ -1,0 +1,108 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+────────────
+ Nextest run ID c61e0997-e80e-4676-bfb5-c29f42072e75 with nextest profile: default
+    Starting 5 tests across 1 binary
+        FAIL [   0.048s] (1/5) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+  stdout ───
+
+    running 1 test
+    test asynchronous_connection_settings_reject_before_runtime_open ... FAILED
+
+    failures:
+
+    failures:
+        asynchronous_connection_settings_reject_before_runtime_open
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'asynchronous_connection_settings_reject_before_runtime_open' (103060125) panicked at adapters/postgres/tests/durability_tests.rs:58:10:
+    asynchronous commit must reject the durable runtime profile
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.063s] (2/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_append ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.05s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_append' (103060134) panicked at adapters/postgres/tests/durability_tests.rs:168:10:
+    replacement asynchronous append must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.040s] (3/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append' (103060144) panicked at adapters/postgres/tests/durability_tests.rs:189:10:
+    replacement asynchronous atomic append must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.035s] (4/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint' (103060153) panicked at adapters/postgres/tests/durability_tests.rs:234:10:
+    replacement asynchronous checkpoint must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.042s] (5/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_snapshot
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_snapshot ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_snapshot
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_snapshot' (103060164) panicked at adapters/postgres/tests/durability_tests.rs:209:10:
+    replacement asynchronous snapshot must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   0.229s] 5 tests run: 0 passed, 5 failed, 0 skipped
+        FAIL [   0.048s] (1/5) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+        FAIL [   0.063s] (2/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+        FAIL [   0.040s] (3/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_atomic_append
+        FAIL [   0.035s] (4/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint
+        FAIL [   0.042s] (5/5) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_snapshot
+error: test run failed

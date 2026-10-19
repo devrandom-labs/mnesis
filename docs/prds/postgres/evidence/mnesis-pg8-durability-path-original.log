@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.59s
+────────────
+ Nextest run ID 1de0ee4e-bda0-44cf-a77a-a7e63652c54d with nextest profile: default
+    Starting 1 test across 1 binary (9 tests skipped)
+        FAIL [   0.058s] (1/1) mnesis-postgres::durability_tests application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+  stdout ───
+
+    running 1 test
+    test application_text_comparisons_cannot_hide_an_unsafe_commit_setting ... FAILED
+
+    failures:
+
+    failures:
+        application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.04s
+
+  stderr ───
+
+    thread 'application_text_comparisons_cannot_hide_an_unsafe_commit_setting' (103226656) panicked at adapters/postgres/tests/durability_tests.rs:624:5:
+    Ok(PgAllPos { history: History([179, 53, 250, 190, 91, 67, 71, 164, 160, 140, 7, 170, 101, 209, 14, 238]), txid: 123761, seq: 2 })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.063s] 1 test run: 0 passed, 1 failed, 9 skipped
+        FAIL [   0.058s] (1/1) mnesis-postgres::durability_tests application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+error: test run failed

@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.90s
+────────────
+ Nextest run ID 90883be2-0385-4d63-948b-906664aa857c with nextest profile: default
+    Starting 1 test across 1 binary (9 tests skipped)
+        FAIL [   4.550s] (1/1) mnesis-postgres::durability_tests a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+  stdout ───
+
+    running 1 test
+    test a_setting_changed_by_a_native_write_trigger_rejects_before_commit ... FAILED
+
+    failures:
+
+    failures:
+        a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 4.53s
+
+  stderr ───
+
+    thread 'a_setting_changed_by_a_native_write_trigger_rejects_before_commit' (103781242) panicked at adapters/postgres/tests/durability_tests.rs:171:9:
+    assertion `left == right` failed
+      left: (2, 2, 0, 0)
+     right: (1, 1, 0, 0)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   4.554s] 1 test run: 0 passed, 1 failed, 9 skipped
+        FAIL [   4.550s] (1/1) mnesis-postgres::durability_tests a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+error: test run failed
