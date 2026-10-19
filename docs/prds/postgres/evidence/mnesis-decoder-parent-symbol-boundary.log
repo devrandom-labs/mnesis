@@ -1,0 +1,2 @@
+000000010015c930 T mnesis_store::wire::decode_frame
+000000010015cc10 T mnesis_store::wire::encode_frame

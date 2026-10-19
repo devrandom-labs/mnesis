@@ -1,0 +1,190 @@
+
+/tmp/mnesis-release-performance-target/release/deps/fjall_benchmarks-138285fb91733059:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+000000010015c930 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame>:
+10015c930:     	stp	x29, x30, [sp, #-0x10]!
+10015c934:     	mov	x29, sp
+10015c938:     	cmp	x1, #0xb
+10015c93c:     	b.hs	0x10015c94c <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1c>
+10015c940:     	mov	w16, #0x0               ; =0
+10015c944:     	mov	w10, #0xb               ; =11
+10015c948:     	b	0x10015ca60 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x130>
+10015c94c:     	ldrb	w9, [x0]
+10015c950:     	mov	w16, #0x1               ; =1
+10015c954:     	cmp	w9, #0x2
+10015c958:     	b.eq	0x10015c978 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x48>
+10015c95c:     	cmp	w9, #0x1
+10015c960:     	b.ne	0x10015ca5c <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x12c>
+10015c964:     	cmp	x1, #0x13
+10015c968:     	b.hs	0x10015cab0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x180>
+10015c96c:     	mov	w16, #0x0               ; =0
+10015c970:     	mov	w10, #0x13              ; =19
+10015c974:     	b	0x10015c948 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x18>
+10015c978:     	mov	w9, #0x7                ; =7
+10015c97c:     	mov	w10, #0x5               ; =5
+10015c980:     	mov	w17, #0x1               ; =1
+10015c984:     	orr	x2, x17, #0x2
+10015c988:     	cmp	x2, x1
+10015c98c:     	b.hs	0x10015cacc <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x19c>
+10015c990:     	add	x11, x17, #0x3
+10015c994:     	cmp	x11, x1
+10015c998:     	b.hs	0x10015cba0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x270>
+10015c99c:     	cmp	x10, x1
+10015c9a0:     	b.hs	0x10015cbb0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x280>
+10015c9a4:     	add	x12, x10, #0x1
+10015c9a8:     	cmp	x12, x1
+10015c9ac:     	b.hs	0x10015cbc0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x290>
+10015c9b0:     	cmp	x9, x1
+10015c9b4:     	b.hs	0x10015cbd0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x2a0>
+10015c9b8:     	add	x13, x9, #0x1
+10015c9bc:     	cmp	x13, x1
+10015c9c0:     	b.hs	0x10015cbe0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x2b0>
+10015c9c4:     	add	x14, x9, #0x2
+10015c9c8:     	cmp	x14, x1
+10015c9cc:     	b.hs	0x10015cbf0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x2c0>
+10015c9d0:     	add	x15, x9, #0x3
+10015c9d4:     	cmp	x15, x1
+10015c9d8:     	b.hs	0x10015cc00 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x2d0>
+10015c9dc:     	add	x17, x0, x17
+10015c9e0:     	ldrb	w3, [x17]
+10015c9e4:     	ldrb	w2, [x0, x2]
+10015c9e8:     	ldrb	w4, [x0, x11]
+10015c9ec:     	ldrb	w10, [x0, x10]
+10015c9f0:     	ldrb	w17, [x17, #0x1]
+10015c9f4:     	ldrb	w11, [x0, x12]
+10015c9f8:     	orr	x11, x10, x11, lsl #8
+10015c9fc:     	ldrb	w9, [x0, x9]
+10015ca00:     	ldrb	w10, [x0, x13]
+10015ca04:     	ldrb	w12, [x0, x14]
+10015ca08:     	ldrb	w13, [x0, x15]
+10015ca0c:     	orr	w9, w9, w10, lsl #8
+10015ca10:     	orr	w9, w9, w12, lsl #16
+10015ca14:     	orr	w12, w9, w13, lsl #24
+10015ca18:     	orr	w9, w3, w17, lsl #8
+10015ca1c:     	orr	w9, w9, w2, lsl #16
+10015ca20:     	orr	w9, w9, w4, lsl #24
+10015ca24:     	cbz	w16, 0x10015ca80 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x150>
+10015ca28:     	cbz	w9, 0x10015caa4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x174>
+10015ca2c:     	add	x10, x11, #0xb
+10015ca30:     	cmp	x1, x10
+10015ca34:     	b.lo	0x10015ca94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x164>
+10015ca38:     	cmn	w12, #0x1
+10015ca3c:     	b.eq	0x10015cb08 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1d8>
+10015ca40:     	add	x11, x10, w12, uxtw
+10015ca44:     	cmp	x1, x11
+10015ca48:     	b.lo	0x10015caf4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1c4>
+10015ca4c:     	lsr	x12, x11, #32
+10015ca50:     	cbnz	x12, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015ca54:     	mov	w12, #0x1               ; =1
+10015ca58:     	b	0x10015cb10 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1e0>
+10015ca5c:     	mov	w10, #0x0               ; =0
+10015ca60:     	strb	w16, [x8, #0x8]
+10015ca64:     	strb	w9, [x8, #0x9]
+10015ca68:     	stp	w10, wzr, [x8, #0x10]
+10015ca6c:     	str	x1, [x8, #0x18]
+10015ca70:     	mov	w9, #0x2                ; =2
+10015ca74:     	str	w9, [x8]
+10015ca78:     	ldp	x29, x30, [sp], #0x10
+10015ca7c:     	ret
+10015ca80:     	cbz	w9, 0x10015caa4 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x174>
+10015ca84:     	mov	w11, w11
+10015ca88:     	add	x10, x11, #0x13
+10015ca8c:     	cmp	x1, x10
+10015ca90:     	b.hs	0x10015cae0 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1b0>
+10015ca94:     	mov	w9, #0x2                ; =2
+10015ca98:     	strb	w9, [x8, #0x8]
+10015ca9c:     	stp	x11, x1, [x8, #0x10]
+10015caa0:     	b	0x10015ca74 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x144>
+10015caa4:     	mov	w9, #0x5                ; =5
+10015caa8:     	strb	w9, [x8, #0x8]
+10015caac:     	b	0x10015ca70 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x140>
+10015cab0:     	mov	w16, #0x0               ; =0
+10015cab4:     	mov	w9, #0xf                ; =15
+10015cab8:     	mov	w10, #0xd               ; =13
+10015cabc:     	mov	w17, #0x9               ; =9
+10015cac0:     	orr	x2, x17, #0x2
+10015cac4:     	cmp	x2, x1
+10015cac8:     	b.lo	0x10015c990 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x60>
+10015cacc:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cad0:     	add	x2, x2, #0xb20
+10015cad4:     	mov	w0, #0xb                ; =11
+10015cad8:     	mov	w1, #0xb                ; =11
+10015cadc:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cae0:     	cmn	w12, #0x1
+10015cae4:     	b.eq	0x10015cb40 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x210>
+10015cae8:     	add	x11, x10, w12, uxtw
+10015caec:     	cmp	x1, x11
+10015caf0:     	b.hs	0x10015cb4c <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x21c>
+10015caf4:     	mov	w9, #0x3                ; =3
+10015caf8:     	strb	w9, [x8, #0x8]
+10015cafc:     	str	w12, [x8, #0xc]
+10015cb00:     	str	x1, [x8, #0x10]
+10015cb04:     	b	0x10015ca70 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x140>
+10015cb08:     	mov	w12, #0x0               ; =0
+10015cb0c:     	mov	x11, x10
+10015cb10:     	neg	w13, w11
+10015cb14:     	and	x13, x13, #0xf
+10015cb18:     	add	x13, x13, x11
+10015cb1c:     	cmp	x13, x1
+10015cb20:     	b.hi	0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb24:     	lsr	x14, x13, #32
+10015cb28:     	cbnz	x14, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb2c:     	lsr	x14, x1, #32
+10015cb30:     	cbnz	x14, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb34:     	stp	w12, w10, [x8]
+10015cb38:     	mov	w12, #0xb               ; =11
+10015cb3c:     	b	0x10015cb84 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x254>
+10015cb40:     	mov	w12, #0x0               ; =0
+10015cb44:     	mov	x11, x10
+10015cb48:     	b	0x10015cb58 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x228>
+10015cb4c:     	lsr	x12, x11, #32
+10015cb50:     	cbnz	x12, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb54:     	mov	w12, #0x1               ; =1
+10015cb58:     	neg	w13, w11
+10015cb5c:     	and	x13, x13, #0xf
+10015cb60:     	add	x13, x13, x11
+10015cb64:     	cmp	x13, x1
+10015cb68:     	b.hi	0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb6c:     	lsr	x14, x13, #32
+10015cb70:     	cbnz	x14, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb74:     	lsr	x14, x1, #32
+10015cb78:     	cbnz	x14, 0x10015cb94 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x264>
+10015cb7c:     	stp	w12, w10, [x8]
+10015cb80:     	mov	w12, #0x13              ; =19
+10015cb84:     	stp	w11, w12, [x8, #0x8]
+10015cb88:     	stp	w10, w13, [x8, #0x10]
+10015cb8c:     	stp	w1, w9, [x8, #0x18]
+10015cb90:     	b	0x10015ca78 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x148>
+10015cb94:     	mov	w9, #0x4                ; =4
+10015cb98:     	strb	w9, [x8, #0x8]
+10015cb9c:     	b	0x10015cb00 <__RNvNtCs2EhgzryKJAt_12mnesis_store4wire12decode_frame+0x1d0>
+10015cba0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cba4:     	add	x2, x2, #0xb38
+10015cba8:     	mov	x0, x11
+10015cbac:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cbb0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cbb4:     	add	x2, x2, #0xb50
+10015cbb8:     	mov	x0, x10
+10015cbbc:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cbc0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cbc4:     	add	x2, x2, #0xb68
+10015cbc8:     	mov	x0, x12
+10015cbcc:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cbd0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cbd4:     	add	x2, x2, #0xb80
+10015cbd8:     	mov	x0, x9
+10015cbdc:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cbe0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cbe4:     	add	x2, x2, #0xb98
+10015cbe8:     	mov	x0, x13
+10015cbec:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cbf0:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cbf4:     	add	x2, x2, #0xbb0
+10015cbf8:     	mov	x0, x14
+10015cbfc:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>
+10015cc00:     	adrp	x2, 0x10045f000 <_anon.92cbb1307e90f5cdd8860fa3f99e3619.10>
+10015cc04:     	add	x2, x2, #0xbc8
+10015cc08:     	mov	x0, x15
+10015cc0c:     	bl	0x1003244f8 <__RNvNtCsjIpoRzUjyHQ_4core9panicking18panic_bounds_check>

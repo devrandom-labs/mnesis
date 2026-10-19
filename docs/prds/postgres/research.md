@@ -5397,3 +5397,176 @@ all40checksSUCCESS/one scheduledskip/no reviewthreads. No admin/waiver.
 Final backup source41c6732e already passed actual230native/Linux and unchanged
 full gate; append final evidence/docs, then source-equivalent child-only rebase
 onto physicalsquash. Cached subsequent gates are not extra runtime executions.
+
+## PG9 decoder boundary baseline — 2026-10-19
+
+On protected parent49104117, actual original owning decoder benchmark executes
+all three original workloads twice,30samples/case,1s warmup/3s measurement,
+Rust1.99.0/LLVM23.1.1 on M4Pro/aarch64Darwin. First95%intervals small2.5093–2.5722,
+medium2.5021–2.5101,large2.5008–2.5076ns. Secondsmall2.5089–2.5157,
+medium2.5423–2.6182,large2.6419–2.7294ns. THREE reviews for EACH run: same actual
+production decoder and unchanged three payloads; exact existing benchmark/input
+and compiled binary138285fb91733059, setup outside timing, all30samples execute;
+raw outliers/intervals retained and named Criterion baselines avoid comparison
+against prior rejected inline results. Noise/drift is material (roughly9% across
+large intervals); native warm ARM does NOT waive deterministic x86 simulation.
+No product edit preceded these baselines, no concurrent own native suite during
+timing. /tmp/mnesis-decoder-parent-{first,second}.log, -environment.log.
+
+Official CodSpeed CPU, regression-causes and reducing-variance docs accessed
+2026-10-19 explain weighted instructions/cache costs and possible code-layout,
+runner and allocator variance. Existing observed CPU-model mismatch is evidence
+of environment difference, not proof of this regression's cause. Do not change
+benchmark isolation/metric/cache behavior to erase the original gate. Candidate
+remains the recorded single production-owner move; reject if correctness or
+native performance regresses beyond measured variation, require actual CI.
+
+First decoder-owner candidate16Rustlines churn (+6/-10, within18) actually runs
+all3original workloads with30samples: small2.7052–2.7155ns (+7.81..9.00%vssecond
+namedparent), medium2.7173–2.7247 (+3.35..6.19%),large2.7168–2.7274 (+0.66..3.12%).
+THREE reviews: actual production decoder/unchanged payloads and error algorithm;
+only header-size choice moved to its using body owner, original command/named
+baseline, no benchmark/gate/hint change; raw intervals/outliers retained, small
+regression exceeds its own parent interval variation though earlier large-run
+drift exists. Not accepted or called improvement. Both whole binaries6704128bytes
+(file size, not text-only). Run saved original executable as A/B/A control before
+causal conclusion; no source minimization justifies a real runtime regression.
+/tmp/mnesis-decoder-candidate-first.log. Initial stat command used incompatible
+BSD flag in GNU environment; original output kept -parent-size-first.log, actual
+byte count corrected with wc and independently compared. No result fabricated.
+
+Saved-binary control invocation initially ran Criterion TEST mode:3inputs print
+Testing/Success and complete without timing. THREE reviews: A/B/A requires actual
+measurement; real original executable only does three decode smoke cases; no
+30sample/interval/timing or A/B/A credit. Keep /tmp/mnesis-decoder-parent-return.log.
+Exact installed Criterion5source923/998+ confirms standalone invocation needs
+--bench (Cargo supplies it automatically). Repeat with that supported flag to
+match original cargo bench mode, same input/filter/warmup/samples. No source or
+benchmark alteration. Rename smoke log separately instead of overwriting it.
+
+Actual measured saved-original A/B/A control executes all3original workloads,
+30samples/1swarmup/3smeasurement; original intervals return to approximately
+2.5–2.64ns versus candidate2.705–2.727ns. THREE reviews: same production owner/
+original input sizes; exact saved pre-edit executable in actual --bench mode,
+not earlier smoke; full raw intervals/outliers retained, native ARM only and
+not a CodSpeed waiver. Small/medium return below candidate, so reject the body-
+boundary move for real runtime cost. Revert ONLY owned16line wire change;
+gitdiff versus parentwire is empty. Exact rejected source saved
+/tmp/mnesis-decoder-body-candidate.rs, binaries preserved; no production change
+retained, no easier benchmark/gate/threshold/inline attribute used. Native
+current noise does not justify accepting a consistent slower source candidate.
+/tmp/mnesis-decoder-parent-return-measured.log is authoritative, not its smoke log.
+
+Cold overflow candidate49Rustline churn(+16/-33) runs same three actual workloads,
+30samples, unchanged benchmark/metric/input. Intervals small2.6180–2.7108,
+medium2.6059–2.6916,large2.5975–2.6660ns; named parent-return comparison reports
++2.88..5.55/+3.29..6.46/+1.48..5.56%. THREE reviews: same production decoder,
+exact error fields/priority and original three inputs; actual supported cold/lazy
+construction candidate builds and executes, native whole binary6704128bytes;
+all CIs/outliers retained, no improvement claimed or gate waived. Native drift
+still overlaps previous large baseline, while small/medium show slower reports.
+Not accepted: inspect generated owner code and saved-original control before
+keeping any source change. /tmp/mnesis-decoder-cold-first.log.
+
+Cold factory rejected, source reverted to exact parent (gitdiff0). Actual pinned
+LLVM owner disassembly at0x10015c930..0x10015cc10 has190lines each, changes branch
+layout but does not eliminate the normal header work; no emitted separate cold
+factory symbol. Initial symbol-filter commands produced only warnings/two-line
+headers: NO instruction-equivalence credit. Address-based dump actually contains
+instructions and is retained. Same whole file size is not equal machine code.
+Measured candidate gives no speed improvement and reports slower small/medium;
+smaller source alone is insufficient. Exact rejected source/binary preserved
+/tmp/mnesis-decoder-cold-candidate.rs and -cold-benchmark. No retained production
+change or claimed release repair. Raw -parent/-cold-addresses.log show actual
+code, not empty -assembly/-instructions attempts.
+
+Exact-header array candidate formattingPASS, strict store all-feature/all-target
+ClippyPASS9.57s,40actual wire lawsPASS0.256s/177filtered. THREE reviews for EACH:
+unchanged header/V1/V2/endian/metadata/error priority/range contract; actual
+maintained core::slice::first_chunk (stable1.77 primarydocs) and exact inferred
+array pattern compile on pinned1.99, all40selected existing wire laws execute;
+filtered177 are not successes/full-store proof, no new unsafe/unchecked arithmetic,
+assertion/lint/error weakening or original benchmark change. Source26+/34-=60
+churn within100, two obsolete V1offsets removed, V2offsets remain for existing test
+fixtures only after workspace reference inspection. /tmp/mnesis-decoder-array-{clippy,wire}.log.
+Official https://doc.rust-lang.org/core/primitive.slice.html#method.first_chunk
+returns borrowed fixed array or None on short input, no allocation. Missing local
+rust-src package is not primary-source verification; official docs plus exact
+compiler execution are the evidence. Native performance still unproven.
+
+Exact-array actual benchmarkPASS all3original30sample workloads: small1.5489–1.5590,
+medium1.5691–1.6777,large1.5553–1.6242ns versus current original2.5–2.64ns; named
+comparison improvements35.68–40.30%. THREE reviews: same actual production decoder,
+original payloads, native error algorithm and ownership; ONLY safe fixed-header
+view/pattern replaces repeated indexed loads, benchmark/metric/gates/hints untouched;
+all raw intervals/outliers retained, improvement exceeds current native drift,
+but NOT x86/CI/release proof. Wholefile6704128bytes unchanged; decoder symbol span
+old0x10015c930..0x10015cc10=736bytes, new0x10015cab0..0x10015cc98=488bytes,
+not a claimed wholebinary text-size reduction. Need actual new instruction dump,
+complete owning tests/fuzz, no_std/platform matrix, normal gate and protectedCI.
+/tmp/mnesis-decoder-array-first.log. Candidate remains uncommitted.
+
+Complete store owning run651/651PASS17.808s, zero skips. THREE reviews: all
+existing store/wire/value/import/export/checkpoint/consumer and diagnostic laws
+must preserve their contract; actual complete selected all-feature target set
+executes, including compiler fixture owner and original malformed/header/range
+cases; no filtered cases or new allowances, no PostgreSQL proof inferred from
+inmemory/store tests, no API/error priority change accepted. Source unchanged
+since40wire laws/native benchmark. /tmp/mnesis-decoder-array-store-native.log.
+
+Actual full LLVM bounded decoder dump128lines has ZERO panic_bounds_check call
+sites; original bounded190line owner has8 (earlier hypothesis guessed6). New
+compiled owner488vs736bytes; applies to inspected AArch64 artifact only. This
+supports the specific eliminated bounds machinery, not a guess about x86 cache
+miss causation or a wholebinary size saving. Failed symbol-only empty attempts
+remain excluded, address dumps contain real instructions. No unsafe introduced.
+
+Full Fjall owning run232/232PASS550.736s,12slow,0skips. THREE reviews: persisted
+wire decode/read/import/export and all shared store laws must preserve behavior;
+actual native engine/corruption/journal fault/property/state-machine cases execute,
+including slow64/128/256case owners without lowering their budgets; exact existing
+assertions unchanged, no filtered/timeout/ignored success or hardwarepower-loss
+credit. Existing proptest SourceParallel persistence-path warnings retained;
+not an assertion failure or new fix. /tmp/mnesis-decoder-array-fjall-native.log.
+Store doctest command exits0 but ALL12examples are existing ignored cases (11+1).
+THREE reviews: documentation code must not gain false execution credit; actual
+rustdoc invocation0.79s/mergedcompile0.54s; ZERO examples execute, no doctest
+behavior proof. Full existing compiler fixtures execute separately above.
+
+Independent aarch64 Linux native Postgres package
+/nix/store/fivsg16crwp8dfqjgrv7vmsxq91f9nx7-mnesis-postgres-integration
+passes230/230in43.840s,0skips, plus five filtered one-case capability smokes
+1.818/3.113/3.139/2.364/0.776s. THREE reviews for EACH actualrun: current parent
+adapter/backup/restore behavior must compose with changed core decoder; actual
+PostgreSQL/tools and source archive execute including Fjall interchange; full
+suite0skips, smokes deliberatelyfiltered, no TLS/durability additions on THIS
+branch or count extrapolation. /tmp/mnesis-decoder-array-linux.log. Normal
+signed full gate and actual x86 CI/performance/release proof still pending.
+
+Normal SIGNED full-hook commit61368a255ee05fed3763674c569dea109042b219(G)
+completed0, unchanged nix flake check, all12Darwin checks successful. Fresh
+workspace1571PASS568.764s,13slow/4compiler-fixture exclusions; replay actual
+CBOR2/value1/wire1 each1.00s. THREE reviews for EACH gate run:
+1. Contract: wire/header error precedence, all existing store/kernel/adapter
+   consumers, no_std/wasm and public/feature surfaces remain unchanged.
+2. Execution/falsifier: actual pinned strict release all-target Clippy, nextest,
+   native replay corpus and target builds execute. Full workspace native DB
+   guards return early WITHOUT DATABASE_URL: no fresh PostgreSQL behavior credit
+   from this Darwin gate. Independent Linux230 proof recorded separately.
+3. Oracles/limits: no test/input/assertion/filter/lint/benchmark/gate changed;
+   four compiler owners deliberately excluded here, not missing successes.
+   Replay2/1/1 are short corpus checks, not long fuzz campaigns. Nix audit scans
+   locked1280advisories/364deps yet emits missing registry/yank index errors and
+   existing allowed event-listener warning; derivation0 DOES NOT mean complete
+   clean live security/yank audit. Deny preserves existing policy/duplicates and
+   license warnings. Incompatible platform warning retained; no x86 CI proof yet.
+Raw fullgate /tmp/mnesis-decoder-array-hook.log, extracted nextest/replay and
+nine other derivation logs retained under /tmp/mnesis-decoder-array-*gate*.log.
+
+Initial staged whitespace check reported a new blank line at EOF in eight
+benchmark evidence copies; shell did not stop the signed hook, so whitespace
+was NOT initially clean. After terminal commit, normalize only those owned
+checked-in copies to exactly one final newline (original /tmp logs unchanged),
+record full gate and perform normal signed evidence-only amendment. Executable
+source must compare byte-identical to61368a25 before push. No bypass/cached run
+claimed as a new full test execution.

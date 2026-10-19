@@ -83,9 +83,11 @@ pub(crate) const VERSION_OFFSET: usize = 0;
 pub(crate) const SCHEMA_VERSION_OFFSET: usize = 1;
 
 /// Offset of the `event_type_len` field in a V2 header.
+#[cfg(test)]
 pub(crate) const EVENT_TYPE_LEN_OFFSET: usize = 5;
 
 /// Offset of the `meta_len` field in a V2 header.
+#[cfg(test)]
 pub(crate) const META_LEN_OFFSET: usize = 7;
 
 /// Fixed header size of a **V1** frame (decode-only, pre-freeze transition):
@@ -96,8 +98,6 @@ const HEADER_FIXED_SIZE_V1: usize = 19;
 /// V1 fixed-field offsets (decode-only). The 8-byte `global_seq` at offset 1 is
 /// read and discarded — V2 drops it, and `DecodedFrame` no longer carries it.
 const SCHEMA_VERSION_OFFSET_V1: usize = 9;
-const EVENT_TYPE_LEN_OFFSET_V1: usize = 13;
-const META_LEN_OFFSET_V1: usize = 15;
 
 /// Sentinel `meta_len` value meaning "no metadata field present".
 pub(crate) const META_LEN_ABSENT: u32 = u32::MAX;
@@ -258,39 +258,31 @@ impl FrameHeader {
                 version: version_byte,
             },
         )?;
-        let (schema_off, et_len_off, meta_off) = match format_version {
-            FrameFormatVersion::V1 => {
-                if value.len() < HEADER_FIXED_SIZE_V1 {
-                    return Err(DecodeError::ValueTooShort {
-                        min: HEADER_FIXED_SIZE_V1,
-                        actual: value.len(),
-                    });
-                }
-                (
-                    SCHEMA_VERSION_OFFSET_V1,
-                    EVENT_TYPE_LEN_OFFSET_V1,
-                    META_LEN_OFFSET_V1,
-                )
-            }
-            FrameFormatVersion::V2 => (
-                SCHEMA_VERSION_OFFSET,
-                EVENT_TYPE_LEN_OFFSET,
-                META_LEN_OFFSET,
-            ),
+        let (schema_off, minimum) = match format_version {
+            FrameFormatVersion::V1 => (SCHEMA_VERSION_OFFSET_V1, HEADER_FIXED_SIZE_V1),
+            FrameFormatVersion::V2 => (SCHEMA_VERSION_OFFSET, Self::SIZE),
         };
-        let schema_version = u32::from_le_bytes([
-            value[schema_off],
-            value[schema_off + 1],
-            value[schema_off + 2],
-            value[schema_off + 3],
-        ]);
-        let event_type_len = u16::from_le_bytes([value[et_len_off], value[et_len_off + 1]]);
-        let meta_field = u32::from_le_bytes([
-            value[meta_off],
-            value[meta_off + 1],
-            value[meta_off + 2],
-            value[meta_off + 3],
-        ]);
+        let &[
+            schema0,
+            schema1,
+            schema2,
+            schema3,
+            event0,
+            event1,
+            metadata0,
+            metadata1,
+            metadata2,
+            metadata3,
+        ] = value
+            .get(schema_off..)
+            .and_then(<[u8]>::first_chunk)
+            .ok_or(DecodeError::ValueTooShort {
+                min: minimum,
+                actual: value.len(),
+            })?;
+        let schema_version = u32::from_le_bytes([schema0, schema1, schema2, schema3]);
+        let event_type_len = u16::from_le_bytes([event0, event1]);
+        let meta_field = u32::from_le_bytes([metadata0, metadata1, metadata2, metadata3]);
         let metadata_len = if meta_field == META_LEN_ABSENT {
             None
         } else {
