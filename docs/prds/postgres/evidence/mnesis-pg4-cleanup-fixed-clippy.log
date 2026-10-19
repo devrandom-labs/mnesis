@@ -1,0 +1,9 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-queries/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-queries/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.49s

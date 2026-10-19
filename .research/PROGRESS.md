@@ -122,3 +122,105 @@ All3reviews recorded incl DBguard earlyreturn and incomplete audit/yankindex.
 Afterterminal corrected8ownedevidencecopies EOFblanklines; raworiginals unchanged.
 Normal signed evidenceamendnext, sourceequiv61368a25 mandatory then focusedPR
 actualx86CodSpeed/fuzz/mutationsallCIreviews/protectedmerge; releaseNOTfixedyet.
+## Current native query isolation work — recovery pointer
+
+Decoderworktree /tmp/mnesis-decoder normal SIGNED fullNixcommit session65997
+still running (log /tmp/mnesis-decoder-array-hook.log); do not mutate itsindex.
+After terminal fix eight evidencecopies' blank EOF whitespace then normal signed
+evidenceamend; sourceequivalence/no bypass. TLS PR392 open allchecks except
+CodSpeed; no merge/waiver. Durabilityworktree preserves full240native pass+controls.
+New /tmp/mnesis-postgres-queries branchfix/postgres-queries base49104117,
+production UNCHANGED. Native namesoriginal actual1FAIL0.088s at first-body vs
+second-body; healthy+operatorcontrols pass, schema dropped before oracle. Three
+reviews recorded there; PG4 reopened. Follow-up3laws original run1 COMPILEFAIL
+(payloadarray notIntoBytes),0tests/no nativecredit;3reviews recorded, corrected
+input supportedstr only. Follow-up2 session running, logfile
+/tmp/mnesis-pg8-names-followup2-original.log. No concurrent localnative suites.
+Read queryworktree records for next step; headforgery and snapshotrouting proof
+BEFORE productionfixbudget<=35existinglines. Entire PG0-PG9 remains active,
+release/publication/registryconsumer unverified; root USERresearch edit untouched.
+
+LATEST queryworktree native5original laws all FAIL0.258s (stream disclosure,
+forgedMAX persists1000, snapshotread/write misroute, checkpoint pairdisclosure).
+Budgeted minimal13line SQLrepair8+/5- passes same5in0.281s and full235in57.439s
+0skips, all3reviewed. StrictClippy4.70sPASS. Feature-scopednative names matrix
+nowrunning default/snapshot/projection/import/export sequential, logs
+/tmp/mnesis-pg8-names-{default,snapshot,projection,import,export}.log.
+Initial Linux47383 started BEFORE newteststaged: excludes5laws, DO NOTcredit
+fullnewsource; staged current Linux74113 uses kd12f4...tests/9qshfm...integration.
+Decoderhook65997 stillrunning its unaltered fullgate, preserveindex/source.
+LiveReleasePR378 head9d5ccbb3 actual0.5.0 allninecrates, APIbreakingPgAllPosarity
+reported: prior0.4.1patchconcern disproved, nofixneeded. Stillunmerged/unpublished.
+
+Decoder signed evidenceamend84281DONE0 final9f81cbddd15b86cdb797b247ee9303d252595591 G;
+all12samepreviouslybuiltNixderivations0freshtests,3reviews: unchangedcontracts,
+sourceequivalence61368a25verifiedforcrates/adapters/manifests/locks/Nix/workflows,
+cachedoutputsnotfreshproof. Fullbase whitespacePASS, cleanstatus, normalpush
+75485DONE0. FocusedPRcreatecommandrunning; /tmp/mnesis-decoder-pr-create.log.
+Actualx86CI/CodSpeed/fuzz/mutations review+protectedmerge mandatory beforeTLSrebase.
+
+PR393 OPEN https://github.com/devrandom-labs/mnesis/pull/393 exactsignedhead
+9f81cbddd15b86cdb797b247ee9303d252595591. Protectedbase49104117; fullgatefresh
+1571pass568.764s13slow/4compilerexcluded; evidenceamendcachedsame12outputs,
+noextraexecutions. Sourceequivalence61368a25 andfullbasewhitespacepassed.
+Noactualx86performance/CIresultyet; noautorelease/mergewaiver. Querybranch
+five original native reds now passfull235in57.439s andfeature-names2/4/3/2/2
+zero skips, all3reviews. CorrectstagednativeLinux74113 stillcompiling; initial
+unstagedrun47383ONLY230pass59.022s0skips(no5newlawcredit),5smokes reviewed.
+
+Final querynative235PASS48.365s0skips includes unchangedcallersearch_pathassertion
+via sharedtestcleanup, strictClippy2.99sPASS, all3reviewed. Finaltest314/360lines.
+Linux78554 drv9fmwd4...tests/3ppfg9...integration srcjfiyyl... names_tests cmp
+FAILED atline70: earlier stage-vs-rustfmt timing DID capture different formatting.
+Inspectdiff and record limits; final formatted-source Linux still required.
+PG4/5/6 reopened pendingdelivery.
+Durability new credible deferredconstrainttrigger hypothesis recorded beforeedit:
+existingnative immediate-triggerlaw now includes seconddeferredschedule with
+settlednativecountsassert BEFORE error. Productionguard UNCHANGED vs saved
+/tmp/mnesis-durability-predeferred.rs. Firstcommandexit2unquotedfilter shellsyntax,
+ZEROtests3reviewed; secondcorrectquotedactualtestrunning
+/tmp/mnesis-pg8-durability-deferred2-original.log. Querylocalnative19912DONE0,
+no overlappinglocalPGsuites. Next fix ONLY after actualred+3reviews.
+
+QUERY focused delivery next: /tmp/mnesis-postgres-queries branchfix/postgres-queries,
+production13churn(8+/5-) only3SQLowners; tests314/360lines, original5reds preserved.
+Finalpathpreserving native235PASS48.365s0skips, strictClippy2.99sPASS. Intermediate
+Linux23554.267s, pathhelperLinux23538.043s0skips all3reviewed, latterhelper has
+ONLY4formatlinebreakdiff fromcurrentworkingfile. BytewisecmpFAILED honestly.
+Final formatted-source Linux35265 nowrunning /tmp/mnesis-pg8-names-formatted-linux.log.
+Normal SIGNED fullNixcommitnext; source/indexfrozenwhilehookrunning. Need actual
+finalLinux, allgate/replayreviews, focusedPR/allCI/mutations/threadreview beforemerge.
+Durabilitydeferredtrigger production UNCHANGED, originalattempt3running54058,
+priorfirstshellsyntaxexit2/secondSqlSafeStrcompile101 bothZEROtests and3reviewed.
+
+CURRENTquery parentf207923a, signedrebasedb8531258. Combined native235PASS53.423s
+0skips; all3reviews recorded. Preserved finalformattedpredecoderLinux23592.338s
+and normalpredecoderfullgate1573PASS563.191s14slow/4compilerexcluded/replay2/1/1.
+Added actual PR393finalCI+protectedmerge evidence fromdecoderownedappend; no
+sourcechange. Normal SIGNED amendment now runs complete combinedNix gate, freeze
+index/source untilterminal. Then clean/whitespace/sourceequiv, normalpush,
+focusedPR/allCI/currentLinux/thread/mutationreview/protectedmerge.
+TLSrebasedsigned3fa39a4d0ff8d4b9d6eefac5993d8a6b74b03df0 onf207, sourceequals
+03052633 except EXACT protectedwire.rs; saved CI stashae4650 retained+suffix
+appliedmanually afterprefixcheck. TLSnative next onlyafterquerynativeDONE.
+
+LATEST query signed serial retry59677DONE0 head95a00bc15d72cd04ee79ab25600ec321e03b019e G,
+all12Nixchecks; fresh1573PASS523.520s14slow4compilerexcluded/replay2/1/1each1s.
+THREEreviews appended locally, executable sourceeqb853PASS. Push focused queryPR
+next; actual combined Linux/CI/CodSpeed/artifact reviews before protected merge.
+TLS serial signed retry34027 now running alone, /tmp/mnesis-pg8-tls-serial-hook.log.
+No simultaneous full local gates. Disk19GiB after query completes. No publication.
+
+CURRENT PR394 oldsigned95a00bc1 CI stilltwoNixjobsrunning; mutationartifact12161164145
+16raw14caught2unviable actuallyEIGHT42P06fixturefailures, REJECTED. Newowned
+4testlinecleanup in all_noskip_tests capturesappend/join, DROPbeforeunwrap. Native
+originalcontrol FK23503then42P06 red; candidate23503twice+namespace0 aftereach.
+Healthyfull235PASS78.426s0skip, strictClippy6.49sPASS, actual3reviewsrecords. No
+productchange beyondoriginal13SQLlines, no relaxation. Stageownedevidence then
+normalSIGNEDamend/fullgate SERIAL (TLSgatefinished), sourcefrozen. Needpushnewhead
+with exactlease95a00bc1 onlyaftergate0/GPG/whitespace, actualfreshmutationCI proof.
+TLSnewSIGNED276bbdd2 normalleasedpushDONE0, PR392 newrequiredCIinprogress.
+Itsserialfullgateall12fresh1575PASS536.315s15slow4compilerexcluded/replay2/1/1.
+Do NOTmergeoldquerysourceon misleading rawcatches or completewholegoal. Afternew
+querysignedhead available, stackTLS ontoquery to testcombinedsource once; retain
+all docs/suffixes/stashes. No otherown localnative/fullgate jobs nowactive.

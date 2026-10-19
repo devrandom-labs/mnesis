@@ -1,0 +1,11 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
+────────────
+ Nextest run ID 314bb207-69cd-402d-a80b-ff6c9df3d1f6 with nextest profile: default
+    Starting 4 tests across 1 binary
+        PASS [   0.057s] (1/4) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_snapshots_state
+        PASS [   0.041s] (2/4) mnesis-postgres::names_tests application_byte_equality_cannot_redirect_a_snapshot_write
+        PASS [   0.047s] (3/4) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        PASS [   0.044s] (4/4) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+────────────
+     Summary [   0.191s] 4 tests run: 4 passed, 0 skipped

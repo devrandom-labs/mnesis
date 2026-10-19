@@ -11,9 +11,9 @@ or local pass does not establish whole-adapter delivery.
 | PG1 | Bounded reads and stable positions | active | PG0 | PG5, PG7, PG8 |
 | PG2 | Recovery without notifications | active | PG0 | PG5, PG8 |
 | PG3 | Transaction outcomes and retry safety | active | PG0 | PG5, PG6, PG8 |
-| PG4 | Schema, migrations and representation | feature-complete | PG0 | PG5, PG6, PG7, PG8 |
-| PG5 | Atomic writes and import | feature-complete | PG1, PG2, PG3, PG4 | PG7, PG9 |
-| PG6 | Aggregate snapshots and projection state | feature-complete | PG3, PG4 | PG7, PG9 |
+| PG4 | Schema, migrations and representation | active | PG0 | PG5, PG6, PG7, PG8 |
+| PG5 | Atomic writes and import | active | PG1, PG2, PG3, PG4 | PG7, PG9 |
+| PG6 | Aggregate snapshots and projection state | active | PG3, PG4 | PG7, PG9 |
 | PG7 | Export, backup and restore | active | PG1, PG4, PG5, PG6 | PG9 |
 | PG8 | Secure operation, lifecycle and capacity | blocked | PG1, PG2, PG3, PG4 | PG9 |
 | PG9 | Complete verification, minimization and delivery | blocked | PG5, PG6, PG7, PG8 | — |
@@ -35,6 +35,8 @@ Protected focused merges:
 - PR388 global ordering across caller search paths: `651aabf35e94b7b0e98e9e87eff19f6964df95f3`.
 - PR389 completed bounded backups and logical projection recovery: `49b32374041843a87980fc6f74a945f51f0b9ea3`.
 - PR390 verified physical backups and restored projection consumer: `2247c739525f9d8765179b7d9f7f67c6b43bd32f`.
+- PR391 backup route and failure cases: `49104117b87010206fb4b25be1b4d3d6e6635b22`.
+- PR393 decoder performance repair: `f207923a6131ea0270e0e8b22810d8cb3afb7adc`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -91,15 +93,33 @@ Six new completed-chunk laws now pass230 combined native cases, including binary
 caller routing, late duplicate/final-conflict policy reports, snapshot consistency
 across an overlapping atomic commit, missing/oversized final inventory files and
 explicit salvage with retained provenance. Two fresh native controls reject
-ordinary-view substitution and omitted inventory preflight. These changes await
-protected delivery after230/230Linux laws and the unchanged full signed Nix gate;
-PG7 is still active. Logical operator timing/profile evidence remains to record.
+ordinary-view substitution and omitted inventory preflight. These changes are
+protected-merged in PR391 after230/230Linux laws and the unchanged full signed
+Nix gate. PG7 is still active. Logical operator timing/profile evidence remains
+to record.
 Release lock synchronization is protected-merged in PR386. Its live workflow
 created a verified App commit on release PR378; all four original locked AFL
-builds and campaigns pass. The independent decoder performance check still
-fails by10.42%; it has no accepted fix or waiver.
+builds and campaigns pass. The original10.42% decoder regression is retained in
+the research record. PR393 repairs it without changing benchmarks or thresholds;
+release PR378 at c5ec958221a3f488af3258532e8c8ef2c4480d74 now has all40 required
+checks passing, including actual CodSpeed. This is not final adapter acceptance.
 No publication is claimed. All prerequisite edges stay visible.
 
 PG10 requires a selected consumer and explicit acknowledgement contract before
 activation. Labcast owns command IDs, deduplication and stale-worker rejection.
 Published adapter version and clean registry-consumer verification: pending.
+
+PG4–PG6 acceptance reopened: native caller-name witnesses against protected main
+49104117 returned first-body when asked for second's stream under a caller
+search path with application bytea equality. Schema-qualified tables alone do
+not preserve stream identity. Original red and three reviews are retained in
+the research record. Follow-up native failures prove a forged committed head and
+misrouted snapshot writes and snapshot/checkpoint reads. Minimal query repairs
+pass the original oracles; current-source verification and protected delivery
+remain required. Atomic/import share the repaired head owner; no blanket claim
+that all remaining query-name hypotheses are settled.
+
+The query repair is open in PR394 at95a00bc15d72cd04ee79ab25600ec321e03b019e,
+with235 native cases passing on the protected decoder parent and all12 local
+Nix checks passing. Current combined-source CI and protected delivery are pending.
+TLS PR392 is being verified separately; neither adds durability or capacity proof.

@@ -267,3 +267,34 @@ cold suggests a function is infrequently called; compiler may use that fact, no
 performance guarantee. Applicability limited to actual overflow-error constructor,
 never marking the normal decoder cold. Existing std Option::ok_or_else/Result
 map_err preserve fallible construction; actual generated/runtime cost still due.
+
+2026-10-19 current parent49104117 source: store.rs read_key SELECT number WHERE
+value=$1 and read_head SELECT MAX(version)...WHERE value=$1, unqualified. Prior
+PG388 already reproduced operator/function search_path redirection for global
+ordering. Query identity risk remains unproven until current native witness.
+Use existing SQLx/PgPool and native CREATE OPERATOR facilities; no new crate or
+protocol/control framework. Native protected profile/caller pool is the owner.
+
+2026-10-19 PostgreSQL18 official current primary documents inspected:
+https://www.postgresql.org/docs/18/typeconv-oper.html operator resolution1/2:
+identical operand types use earliest search-path operator; qualified OPERATOR
+restricts candidates to that schema. Exact typed bytea inputs avoid unknown-type
+ambiguity. https://www.postgresql.org/docs/18/typeconv-func.html function
+resolution1 likewise chooses earliest identical argument signature; qualify
+numeric aggregate pg_catalog.max. https://www.postgresql.org/docs/18/ddl-schemas.html
+explicit pg_catalog placement permits earlier application functions/operators.
+Native current17.10 witnesses establish applicability with actual SQLx0.9 pools;
+primary docs alone are not runtime evidence. Keep caller settings unchanged.
+
+2026-10-19 PG9 preparation (no implementation): locked Crane47b6b27ed9a3a9181415e4367d0c30ab2a0e0250
+at /nix/store/44k6cm6lbjpfq3xnl9wg0jpqa5rpsvmf-source/lib/{cargoClippy,cargoNextest,mkCargoDerivation}.nix
+and https://crane.dev/API.html confirm doInstallCargoArtifacts controls output
+archiving without selecting tests; actual check consumers still need verification.
+Cargo-hack https://github.com/taiki-e/cargo-hack#--no-dev-deps explicitly warns
+that no-dev-deps mutates real manifests temporarily. Locked Nixpkgs provides0.6.45,
+MIT/Apache-2.0, so evaluate only in an isolated source tree, not an active index.
+Cargo metadata format remains owned by https://doc.rust-lang.org/cargo/commands/cargo-metadata.html.
+RustSec https://rustsec.org/advisories/RUSTSEC-2026-0221.html and upstream
+https://github.com/smol-rs/event-listener/releases/tag/v5.4.2 confirm the existing
+5.4.1 advisory is patched by5.4.2. Existing ignore is not production acceptance;
+compatibility/no_std/dependency/lockfile evidence is still required before update.

@@ -1,0 +1,26 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+error[E0277]: the trait bound `mnesis_store::bytes::Bytes: From<&[u8; 13]>` is not satisfied
+   --> adapters/postgres/tests/names_tests.rs:129:18
+    |
+129 |         .payload(b"must-not-land")
+    |          ------- ^^^^^^^^^^^^^^^^ the trait `From<&[u8; 13]>` is not implemented for `mnesis_store::bytes::Bytes`
+    |          |
+    |          required by a bound introduced by this call
+    |
+    = help: `mnesis_store::bytes::Bytes` implements trait `From<T>`:
+              From<&[u8]>
+              From<&str>
+              From<Box<[u8]>>
+              From<BytesMut>
+              From<Vec<u8>>
+              From<std::string::String>
+    = note: required for `&[u8; 13]` to implement `Into<mnesis_store::bytes::Bytes>`
+note: required by a bound in `WithEventType::payload`
+   --> crates/store/src/envelope.rs:375:40
+    |
+375 |     pub fn payload(self, payload: impl Into<Bytes>) -> WithPayload {
+    |                                        ^^^^^^^^^^^ required by this bound in `WithEventType::payload`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `mnesis-postgres` (test "names_tests") due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test names_tests --all-features` exited with code 101

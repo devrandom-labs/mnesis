@@ -128,7 +128,8 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
              CASE WHEN c.schema_version = $2 AND c.history = $4 AND \
                  octet_length(k.value)::bigint + octet_length(c.state)::bigint + 48 <= $3 \
                  THEN c.state END AS state \
-             FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key WHERE k.value = $1",
+             FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key \
+             WHERE k.value OPERATOR(pg_catalog.=) $1",
         )
         .bind(id.as_ref()).bind(i64::from(schema_version.get())).bind(limit).bind(self.history().as_bytes())
         .fetch_optional(self.pool()).await.map_err(PostgresError::Sqlx)?;

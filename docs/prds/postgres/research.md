@@ -5570,3 +5570,432 @@ checked-in copies to exactly one final newline (original /tmp logs unchanged),
 record full gate and perform normal signed evidence-only amendment. Executable
 source must compare byte-identical to61368a25 before push. No bypass/cached run
 claimed as a new full test execution.
+
+## Caller query names: original stream-isolation failure
+
+Protected parent49104117, Rust1.99, native PostgreSQL17.10, existing Unix socket
+cluster55432, unchanged SQLx0.9 default statement cache. Exact command:
+`cargo nextest run -p mnesis-postgres --all-features --test names_tests --test-threads=1 --success-output immediate`
+inside existing Nix shell, DATABASE_URL set to mnesis_pg7b. Actual1run/1FAIL,
+0PASS/0skip,0.088s summary (case0.083s), not an inferred source finding. Original
+raw `/tmp/mnesis-pg8-names-original.log` is preserved unchanged.
+
+Three independent reviews after this run:
+1. Contract: raw second stream identity must select its own exact payload and
+   INITIAL version; returning first-body is cross-stream disclosure, not a
+   legitimate order or visibility choice. PG4 acceptance is reopened.
+2. Execution/falsifier: actual healthy migrate+two acknowledged appends, healthy
+   second-body read, native LISTEN idle readiness, two-lease caller pool, real
+   application bytea operator. Native ordinary equality TRUE and explicit
+   pg_catalog equality FALSE establish actual search-path selection. Actual SUT
+   then returns first-body at final payload assertion. No production changes.
+3. Oracle/source limits: exact1row and INITIAL assertions pass before exact bytes
+   fail (left first-body/right second-body). Injected schema dropped BEFORE final
+   result assertions, no downstream fixture poisoning. DATABASE_URL exists and
+   test body executes;0skips. This proves read_head bytea routing only, not every
+   query name, authorization bypass or arbitrary SQL injection. Default statement
+   cache retained. Head-forgery/state-write follow-ups separately budgeted before
+   editing; no blanket completion claim.
+
+Follow-up original run1 exited101 at compilation, zero tests executed. Three
+reviews: (1) no contract behavior exercised; (2) no native fault/aggregate/state
+execution, no catch credited; (3) literal byte array is not Into<Bytes>, while
+supported &str is. Correct the test payload input only, preserve compiler log
+`/tmp/mnesis-pg8-names-followup-original.log` before rerunning. Production unchanged.
+
+Follow-up2 ORIGINAL actual3FAIL/0PASS/0skip,0.433s. Three reviews:
+1. Contract: original read disclosure repeats; snapshot second write overwrites
+   first's acknowledged state (only first key remains with second-state), and
+   forged numeric MAX makes expected999/event1000 return Ok over actual head1.
+   These violate identity, cache ownership and contiguous committed versions.
+2. Execution: each uses fresh migrated/truncated native store; no-fail-fast and
+   one test thread execute all3. Healthy first/second event seeding precedes
+   injection. Real maximum selection control yields (999,1); actual append
+   returns PgAllPos, not a setup failure. Actual independent native state query
+   after dropping injected schema returns wrong first-key/second-state pair.
+3. Oracles/limits: exact payload/state assertions reject actual wrong values;
+   max test captures independent native rows BEFORE its result assertion but
+   assertion panics first on unexpected Ok, so persisted-gap assertion was not
+   reached. Move existing exact rows assertion earlier and repeat original for
+   direct row-level proof before repair. No production edits, no mutation credit;
+   retain both raw originals. Schemas cleaned before assertions in all3. Native
+   equality control is explicit in read law, maximum control in head law; snapshot
+   state law independently tests shared read_key's write path. This is not yet
+   coverage for snapshot/checkpoint read WHERE clauses; add state-read witness
+   within320-line test budget before editing those SQL owners.
+
+Follow-up3 ORIGINAL actual4FAIL/0PASS/0skip,1.032s. Three reviews:
+1. Contract: unchanged stream and state-write failures repeat; added state-read
+   law asks second and requires exact second-state/INITIAL. MAX law now first
+   checks independent settled native rows; original actually inserted version1000
+   and must-not-land after two version1 events. No contiguous-version guarantee.
+2. Execution: all four actual SUT paths execute with real DB under same caller
+   pool; independent catalog-qualified MAX control distinguishes999 from1. Four
+   test processes sequential, all schemas removed before final oracles. Exact
+   original payload evidence is retained, not replaced by post-fix-only tests.
+3. Assertions/limits: state-read final exact pair fails, same schema and version
+   do not hide wrong body; state-write exact two rows fails, read exact body fails,
+   head persisted-row assertion fails before typed conflict oracle.0skips. No
+   nonnative controls or timing assumptions substitute for DB execution. This
+   does not prove checkpoint read WHERE, integer joins, page byte accounting or
+   schema validation. Preserve those remaining hypotheses, not an all-SQL claim.
+
+Read-only release audit: live PR378 now head9d5ccbb386f41397e8cd53e4172954334909be80
+explicitly selects0.5.0 for all nine crates and lists PgAllPos::new2->3 arity as
+breaking. Prior concern about shipping this as0.4.1 is disproved by current actual
+release output; no version/policy edit warranted. This is not publication proof.
+
+Follow-up4 ORIGINAL actual5FAIL/0PASS/0skip,0.258s. Three reviews:
+1. Contract: original four failures repeat; independent checkpoint read must
+   return second's exact revision/position/state, never first's saved pair.
+   It instead returns first's position/state despite matching revision/schema.
+2. Execution: actual read_all positions from two real acknowledged seed events
+   feed production commit_checkpoint calls BEFORE operator injection; production
+   hydrate_checkpoint(second) executes while caller path is active. Native
+   schema removed before final exact enum comparison. No fixture setup failure.
+3. Source/oracles: checkpoint full Found enum distinguishes pair mixing/disclosure;
+   MAX row-level assertion again sees actual1000/must-not-land. All5sequential
+   native bodies run,0skips, not unit/mocked/equivalence-only evidence. Existing
+   tests' result assertions retained. Scoped repair now justified for read_key,
+   read_head MAX+identity, snapshot/cache and checkpoint lookup WHERE; integer
+   joins/bounds/catalog validation remain separate untested risks.
+
+Minimal query repair actual5/5PASS0.281s,0skips. Three reviews:
+1. Contracts unchanged: exact own event/cache/checkpoint pair, rejection of
+   forged999 with actual1, no inserted1000. All five ORIGINAL red laws pass with
+   identical inputs/faults/oracles; no retry/commit mapping changed.
+2. Execution: actual same17.10 DB and supported caller pool/statement cache,
+   application objects remain selected for native controls; SUT now uses explicit
+   pg_catalog bytea operations/MAX, preserving caller search_path. Native settled
+   two-row query verifies no gap and both independent snapshot states survive.
+3. Source/oracles:8added/5removed=13existing Rust churn in3SQL owners,35budget;
+   newtest317/360lines. No API/schema/deps/session mutation/long transactions or
+   allowances. Result-type conflict exactexpected999/actualINITIAL passes after
+   row oracle. This is targeted5law proof, not complete matrix or capacity proof.
+
+Strict adapter all-feature/all-target ClippyPASS4.70s. Three reviews: typed SQL
+changes preserve public contracts and compile all call sites; actual pinned
+compiler/lints execute existing and new targets; no lint allowances added or
+thresholds changed. This does not count as native DB proof. Names full native
+run continues. Initial Linux command started before new names_tests.rs was
+staged, so Nix Git source excludes that untracked file: DO NOT credit it as
+new5law native proof even if terminal green. Stage names owner then run exact
+new-source derivation separately; retain initial command/result honestly.
+
+Complete current all-feature native run235/235PASS57.439s,0skips. Three reviews:
+1. Contracts: previous230 plus all5identity/head/state laws preserve ordering,
+   byte bounds, snapshots/CAS, atomic import, finite export, migration/recovery,
+   and uncertainty across actual wrappers. No stronger durability/TLS claim.
+2. Execution: actual17.10 shared cluster, one testthread, DATABASE_URL present;
+   fault transport/independent rows, private physical18.6 recovery tools and
+   actual Fjall interchange execute; no concurrent localnative suite.
+3. Assertions/source: original red oracles unchanged after13line SQL repair;
+   all235execute0skips, no filtered cases hidden. This branch does NOT contain
+   TLS5 or durability10:235count coinciding with TLS branch is not combinedproof.
+   No result inferred for Linux/fullNix/CI/mutations until actual completion.
+
+Isolated-feature native names runs complete default2/2(0.102s),snapshot4/4(0.191s),
+projection3/3(0.141s),import2/2(0.097s),export2/2(0.084s),all0skips. THREE reviews
+for EACH actualrun:1same exact identity/head/state invariants within its feature;
+2native DB+actual productionSUT executes with original operator/aggregate faults;
+3cfg-disabled laws are absent rather than credited, selected suite counts exact,
+no workspaceallfeatures results substituted. These are targeted names laws, not
+complete perfeature adapter/nativeCI or isolated downstream consumer proof.
+
+Initial Linux run before staging new test owner exited0: protected230/230PASS
+59.022s,0skips plus5filtered one-case smokes0.354/0.500/0.431/0.301/0.548s,
+/nix/store/gir2s697dm4y6xpanhpnwrkfws61caf5-mnesis-postgres-integration.
+Three reviews for EACH actualrun:1existing native contracts still apply to13line
+SQLcandidate;2real independent Linux18.6 engine/tools execute existing230;
+3new5names cases are ABSENT from first Nix Git archive, so zero new-law Linux
+credit and not matched complete sourceproof. Retain initial actual result/log
+without replacing it. Correctly staged new-source Linux kd12f4/9qshfm remains
+running. No completion inferred until actual235includesnamesowner in its log.
+
+Correct staged intermediate Linux source executes actual235/235PASS54.267s,
+0skips and5one-case filtered smokes0.945/0.622/0.825/0.703/0.850s. THREE reviews
+for EACH run:1all previous230+five names contracts compose;2actual18.6 native
+Linux archive includes all5 names_tests cases (not omitted first archive);
+3exact unweakened original oracles pass, all235run0skips, smokes deliberately
+filtered. Additional caller search_path preservation assertion was added after
+this archive snapshot: this is intermediate5law proof, NOT that extra oracle's
+final Linux result. Current final Linux78554 remainsrunning; preserve both.
+
+Final path-preservation local source native235/235PASS48.365s,0skips.
+THREE reviews:1same5identity/head/pair contracts plus unchanged caller pool GUC;
+2all actual production/fault/migration/recovery laws execute on native17.10,
+SHOW captures the only available data lease after SUT, cleanup precedes exact
+path and original result assertions;3new helper only consolidates test cleanup,
+original5oracles remain, no SQLrepair change or weaker assertions/filters.
+No new feature-matrix or Linux credit inferred from this local full run.
+
+Final strict all-feature/all-target adapter ClippyPASS2.99s. Three reviews:
+unchanged product/feature contracts; actual final path-preservation test/helper
+compiles through pinned lint policy; no allow/threshold changes, no native proof
+from compilation. Actual wc reports final testowner314/360lines after cleanup
+deduplication, not a source-budget estimate.
+
+Caller-path assertion Linux run235/235PASS38.043s0skips,5filteredsmokes
+1.440/2.629/1.943/3.202/2.057s. THREE reviews for EACH:1original5invariants AND
+unchanged caller GUC now asserted;2actual18.6 Linux SUT executes all235;3archive
+contains the helper but its two chained await lines precede rustfmt normalization.
+Bytewise cmp reports difference atline70; actual diff is ONLY four line breaks
+in test helper, no assertion/input/product change. Do not claim byte-identical
+final source; a final formatted-source Linux run follows after staging is stable.
+Preserve /tmp/mnesis-pg8-names-final-linux.log and exact derivation JSON; root
+progress's premature cmp-success text corrected immediately after inspecting
+actual failed cmp. No gate result fabricated from that comparison.
+
+Before signed full gate normalize ONLY owned checked-in evidence copies' trailing
+spaces and final newlines; all raw /tmp originals remain unmodified. This is
+presentation normalization, not discarded failures/control output. Final source
+and test assertions unchanged. Final formatted Linux command separate; normal
+signed full Nix gate must complete without bypass before push/merge.
+
+Query original normal SIGNED full gate67804DONE0 at77bef05b8b4190e0329494567769d941f8f0c4c6(G):
+all12Darwinchecks, workspace1573PASS563.191s14slow/4compilerexclusions, short
+replay2/1/1each1s. THREE reviews for EACH actualrun:1unchanged existing owner
+contracts+two unconditional names laws;2actual pinnedrelease/coverage/no_std/
+wasm/lints and corpus checks execute;3DBguard earlyreturn without DATABASE_URL
+means extra registered laws are NOT native DB credit; no changed assertions/
+filters/allowances, compilerexcludedseparateCI, audit/yank blindness retained.
+
+Final formatted predecoder Linux actual235PASS92.338s0skips plus5filteredonecase
+smokes1.215/1.938/1.099/0.956/12.058s, artifact
+/nix/store/5zar4rqafm3qskdsv9s7vypl39n47dg0-mnesis-postgres-integration.
+THREE reviews for EACH actualrun:1all230+five identity/head/pair/pathpreservation
+contracts;2actual18.6 native tools and all5 names SUT cases execute;3source
+src2ljf2lpy0kp6g3vkyc7qbrz3llc7nbnj names_tests bytecmp FINAL formatted filePASS,
+zero runtime skips, capabilitysmokes intentionallyfiltered, no extrapolated
+TLS/durability/decoder-combined proof. Earlier cmpfailed archive preserved as
+format-only intermediate, never relabeled. This final run predates decoderbase.
+
+Protected decoderPR393 mergef207923a6131ea0270e0e8b22810d8cb3afb7adc is now parent.
+Signedrebase resolved ONLY five record conflicts: verified exact oldbase prefix
+in both parent+child for append-only experiments/hypotheses/sources/research,
+kept fullparent then fullchild suffix. Progress preserves exact106-line common
+prefix and both fullsuffixes. No evidence discarded or product source rewritten.
+Adapter/manifests/locks/Nix/workflows compare byte-identical to77bef05b after
+rebase; changed parent core decoder now requires actual combined validation.
+Use one combined native suite, unchanged full signed Nix amendment, and required
+CI's real Linux execution; do not add redundant standalone Linux reruns when
+those CI runs establish the exact combined source. No release/completionclaim.
+
+## Decoder PR393 final CI review before protected merge
+
+Reviewed exact signed9f81cbddd15b86cdb797b247ee9303d252595591 against protected
+49104117. Current40SUCCESS/1scheduledSKIP,0threads,MERGEABLE/CLEAN. CI39185929403
+and39185948529; fuzz39185948594; mutation39185948595; CodSpeed39185948558.
+Raw /tmp/mnesis-pr393-{ci-call,ci,fuzz,mutants,performance}.log plus API checks,
+threads and downloaded artifact retained. THREE reviews for EACH actual run:
+
+| Actual evidence | Contract review | Execution/falsifier review | Oracle/source/limit review |
+| --- | --- | --- | --- |
+| Workspace1571 twice116.523/125.395s,4compiler exclusions each | Whole existing Rust owner contracts unchanged | Actual Linux release/coverage runs | Same source/assertions/filters;2/4slow retained, compiler cases separately2/1/1 |
+| Native230 four runs49.643/53.328/49.584/50.059s | All protected parent adapter/storage/recovery laws compose | Four distinct realPostgres executions,0skips | Duplicate installed summaries excluded; no TLS/querynames/durability counts added |
+| Twenty filtered native one-case capability smokes | Each registered capability exists | Actual selected named test executes | Other cases intentionallyfiltered, not added to full230 totals |
+| Compiler2/1/1 each CI,84.52/3.23/9.25s and110.73/4.05/12.42s | Existing compile rejection contracts | Actual trybuild owners execute | Four fullgate exclusions accounted separately, no missing-test success |
+| Feature jobs each CI: kernel15/15/15,macros1/1/1,store217/217/217,wake17/17/17,inmemory25/25/30,Fjall131/131/131 | Existing default/none/all library contracts | Actual selected library checks and unit harnesses | Nostd/store-testing0/0/0 compile-only, PG omitted from this matrix remains PG9 |
+| Replay2/1/1 each1s in both CI | CBOR/value/frame error and roundtrip invariants | Actual short seeded replay owners | Short corpus coverage, not long random or nativeDB evidence |
+| LibFuzzer61s each wire13,630,546/header1,899,447/chunk1,338,760/value5,929,371 | Original malformed/header/codec invariants | Actual four ASan campaigns on unchanged fuzz owners | No crash, no changed seeds/time limits/oracles; finite campaigns not exhaustive proof |
+| AFL4x60s,0savedcrash/timeout each,CMPLOGconfirmed | Same four failure domains | Actual instrumentation and native fuzz runs | Calibration warnings retained; existing zero-exit crash-gate fault-proof still PG9, no invented catch |
+| Mutation baseline650PASS10.605s,1compiler exclusion; solemutant UNVIABLE | Existing store laws preserve behavior | Baseline actually executes; replacement needs nonexistent FrameHeader::Default | ZERO catches/zero viable mutants, not runtime catch. Downloaded12158550134 digest272a25fc4ce9319df781e50fed6ae02342900916e15cf50365b5eb63ff703d0c, diff+firstcompiler error inspected |
+| CodSpeed PASS all3changed decode sizes501.7->397.2ns,+26.29%reported efficiency | Same existing actual production decoder and original3payloads | Simulation changed source at exact head, gate passes without waiver |40untouched/3skippedbaselinefallback, runtime-environment and17syscall warnings retained; simulation not wallclock, native A/B/A independently recorded |
+
+Only executable diff remains26+/34- header owner; benchmark/workload/metric/input/
+gates/dependencies untouched, no unsafe or added hint. Completed signed localgate,
+sourceequivalent evidenceamend and fullbasewhitespace checks retained. Remaining
+whole-adapter acceptance/publication/registryconsumer NOT claimed. Post-CI evidence
+is an owned uncommitted documentation append, not a new executable/reviewed head.
+
+Protected normal squash PR393 MERGED2026-10-19T01:54:59Z exact reviewed signed
+head9f81cbddd15b86cdb797b247ee9303d252595591, merge
+f207923a6131ea0270e0e8b22810d8cb3afb7adc. All40checks pass,1scheduledskip,
+0threads, downloaded mutation artifact explicitly0runtimecatches/1unviable.
+CodSpeed501.7->397.2ns at3existingdecode sizes, warnings/3unrelatedskips retained.
+No admin/bypass/thresholdreset/manualack. This fixes demonstrated decoder
+regression at PR393; releasehead/TLS/newsource still require their actual gates.
+No whole-adapter completion/publication inferred.
+
+Combined protected decoder+query source native235/235PASS53.423s0skips.
+THREE reviews:1all original ordering/checkpoint/atomicity/outcome/identity/head/
+saved-pair contracts preserved after newcore parent;2actual17.10 complete suite,
+private18.6 physical tools and five names laws run on signed rebased source;
+3exact original assertions/faults/feature selection unchanged,0skips, newdecoder
+is actual protected owner not a sibling source assumption. This branch still
+has neither TLS5nor durability10;235is not their combined total. Normal signed
+amendment follows and requiredCI establishes exactcombined Linux source.
+
+Combined normal signed amendment attempt5226 FAILED exit1. Actual workspace
+1573run:1572PASS/1FAIL/4compilerexclusions,13slow,623.143s. Last Fjall property
+owner fails536.809s at native StorageFull/os28 (minimal generated input[1],168
+successful cases), and LLVM profile write also reports No space left on device.
+THREEreviews:1original storage/version invariant still required, no test changed;
+2actual complete selected workspace executes under concurrent local Nix gates,
+real disk exhaustion reaches owner and profiling writes;3FAILED is retained,
+not credited as passing fullgate or waived as harmless infrastructure. DBguards
+still not native credit. No product/test/workload/lint/timeout change justified
+by this resource failure. Original logs /tmp/mnesis-pg8-names-combined-hook.log
+and -combined-nextest-diskfull.log retained. Signed commit remains b8531258,
+so no failed amendment/push/delivery claimed.
+
+Both failed Nix builds have discharged temporary trees; actual df now22GiB free.
+No broad GC/raw cache deletion, source reset or unrelated job termination. Run
+one full signed gate at a time, keep all original failure evidence, preserve
+original proptest budgets. Other sharedtargets/performance/proof artifacts stay.
+
+Serial signed-gate retry59677 completed successfully at signed head
+95a00bc15d72cd04ee79ab25600ec321e03b019e (good GPG signature). All12 local
+Nix checks passed. Fresh nextest1573/1573PASS523.520s,14slow,4compiler exclusions;
+fresh short fuzz replay2/1/1PASS, each1.00s. Original failed623.143s run remains
+above, without waiver. Logs /tmp/mnesis-pg8-names-serial-{hook,nextest,replay}.log.
+THREE independent reviews after this run:
+1 Contract: workspace storage/version/order/atomicity and decoding invariants
+remain unchanged; the query repairs preserve native identity/head and saved-pair
+contracts. The actual original names assertions and cleanup owner were reread.
+2 Execution/falsifier: fresh nextest and three replay commands actually executed;
+all original Fjall property budgets remain. This gate's DATABASE_URL guards can
+return early, so its PostgreSQL registrations add NO native proof; separate235
+native53.423s and required combined-source Linux CI supply that boundary.
+3 Assertions/source/limits: executable source compares exactly to b8531258,
+including tests, manifests/locks, Nix and workflows. Four compiler exclusions are
+retained, replay durations are short smoke evidence rather than a new long fuzz
+campaign. No counts combine TLS5 or durability10. Whitespace/GPG checks pass.
+Post-gate documentation is kept locally for the next necessary evidence commit;
+no fresh execution is claimed for cached checks or a later documentation edit.
+
+PR394 exact95a00bc1 first CI push run39195623984 completed-job review (workflow
+still running). Direct GitHub job-log API downloaded the actual finished logs;
+`gh run view --job --log` refused until whole-workflow completion, so those initial
+empty files supplied no evidence. Original full logs now /tmp/mnesis-pr394-push-*.log.
+Each listed command run received these THREE independent reviews:
+
+| Actual command runs | 1 Contract | 2 Execution and falsifier | 3 Assertions, selection and limits |
+| --- | --- | --- | --- |
+| Kernel compiler2PASS72.06s, macro compiler1PASS2.81s, store compiler1PASS8.01s | Required invalid construction, version literal and live export borrow rejection remain. | Actual trybuild fixture lines are all ok, including valid nonzero control and invalid zero codegen case; no snapshot blessing command. | Reread all three runner sources: kernel2 registrations, others1 each; count registrations separately from fixtures. No exclusions/ignored cases or DB credit. |
+| Kernel lib default/no-default/all:15/15/15PASS | Kernel aggregate/version laws unchanged. | Three actual cargo test invocations, no ignored/filtered tests. | Full lib selection at each mode; integration/compiler fixtures are separate, dev-dependency unification remains a PG9 limit. |
+| Macros lib default/no-default/all:1/1/1PASS | Parsing/expansion contract unchanged. | Three actual unit commands; compiler-rejection suites run separately above. | Zero ignored/filtered; one lib unit is not complete macro API evidence. |
+| Store lib default/no-default/all:217/217/217PASS,3.22/2.98/3.30s | Wire/value/store contracts unchanged by SQL-only repair. | All three actual suites execute; protected wire decoder source retained. | Full lib suites, zero skips; separate integration/fuzz/native evidence remains required. |
+| Wake lib default/no-default/all:17/17/17PASS, each0.15s | Arming, routing, generation and cancellation contract remains. | Actual three unit commands; sources retain concrete Tokio tests. | Zero ignored/filtered; not a live PostgreSQL listener/reconnect proof. |
+| Inmemory lib default/no-default/all:25/25/30PASS, each0.05s | Inmemory persistence/optional capability contracts unchanged. | Actual3 commands show all-feature adds5 tests, no artificial common total. | Zero ignored/filtered; this adapter's laws cannot substitute for Postgres. |
+| Fjall lib default/no-default/all:131/131/131PASS,2.51/2.49/2.50s | Fjall storage/order contract unchanged. | Actual3 commands and seven preceding lib checks are visible in downloaded job log. | Unit-only feature checks, zero ignored/filtered; property/integration owners are separate. |
+| Wake-nostd lib default/no-default/all:0/0/0; store-testing lib default/no-default/all:0/0/0 | Both must compile under advertised selections. | All six real harness invocations finish but execute ZERO tests. | Compile-only evidence, not six behavior passes; downstream conformance and no_std targets remain separate. |
+
+These first completed jobs do not establish native Postgres, exact-head CodSpeed,
+fuzz, mutation, final CI or protected delivery. Current CI still running; no merge.
+
+PR394 first current-combined Linux native job117877686721 in PR workflow
+39195637612 is SUCCESS. Actual complete suite235/235PASS42.711s,0skips,19binaries;
+all FIVE names laws execute (0.042/0.038/0.040/0.040/0.040s). Five preceding
+one-case capability smokes also execute. The later cat of installed run.log is
+an ECHO of the same42.711s run, not another execution. Raw downloaded job log
+/tmp/mnesis-pr394-pr-postgres.log.
+THREE reviews for the full run and each of its five smoke commands:
+1 Contract: native stream identity, exact committed head, separate snapshot keys,
+and checkpoint saved-pair invariants align with original failing witnesses; all
+old order/resume/atomicity/migration/recovery laws stay selected. Smoke owners
+remain atomic/snapshot/projection/listing/session rather than proxy assertions.
+2 Execution/falsifier: required native Nix hook opens the real database and actual
+235 archive tests run serially, including each hostile caller-name control. The
+five no-tests=fail smoke commands execute their concrete owners. An attempted
+earlier fetch of still-running push-job logs returned404 and gives no proof.
+3 Assertions/source/limits: final314-line names source was reread with exact body,
+settled rows BEFORE Conflict, unchanged SHOW search_path, and complete saved-pair
+oracles. Full suite0skips; smoke filters intentionally exclude others, so their
+skips are selection rather than total-suite gaps. This source combines protected
+decoder with query repair, NOT TLS/durability; no extra count from echoed logs.
+Current workflow's remaining checks, mutation evidence and protected merge remain.
+
+PR394 deep-fuzz run39195637553 SUCCESS, actual full log
+/tmp/mnesis-pr394-fuzz.log downloaded (terminal CLI session89316exit0).
+Each of the eight actual campaigns received THREE independent reviews:
+1 Contract: unchanged shared fuzz-common owners exercise production wire/header/
+chunk/value decoding; no query-name, TLS, database or recovery coverage inferred.
+2 Execution/falsifier: LibFuzzer four61s campaigns actually complete wire11,230,479,
+header1,744,944, chunk2,132,677 and value7,046,139 runs. Four original AFL60s
+campaigns each show CMPLOG engaged and0saved crashes/0saved timeouts; discoveries
+wire0/header2/chunk14/value0. These are campaign reports, not exit-code-only claims.
+3 Assertions/source/limits: reread Bolero wrappers and existing AFL workflow;
+shared production targets unchanged and neither input sets nor workloads reduced.
+Calibration instability, redundant seed/instrumentation warnings and AFL variable
+warning remain in raw evidence. AFL's zero-exit-on-crash behavior still needs
+PG9's explicit crash-gate falsifier; these clean runs cannot establish it. No
+mutation catches or native database results inferred from fuzzing success.
+
+PR394 mutation review REJECTS raw14caught as adequate evidence. Artifact12161164145
+SHA25668224bde5803893cd4183e9364e963ed98c3ee7b029355aef063fc1e51a7f0af actually
+matches downloaded zip. Baseline235PASS49.299s.16variants report14caught/2unviable,
+0survivors/timeouts. All first failures inspected: read_key4runtime failures,
+read_headNone actual Conflict-vs-Store oracle, read_head(0,None) actual FK23503 in
+spawned append; followingEIGHT read_head variants only fail42P06 schema ordering
+already exists. They are contaminated, NOT validated catches. Two hydrate
+Default variants are compiler E0277 unviable, no runtime credit. Three reviews
+for baseline/each variant: contract still demands real order/head/key behavior;
+actual faults separate six own-SUT runtime failures from eight fixture failures;
+assertion/source review finds append.unwrap/join.unwrap BEFORE DROP in existing
+shadowed_ordering. Fail-fast excludes remaining cases per mutant; not235 passes
+per variant. Original artifact/logs remain in /tmp/mnesis-pr394-mutants-reviewed
+and -mutants.zip. Cleanup repair and repeated independent controls required;
+current green mutation check alone is rejected as merge evidence.
+
+Cleanup original-source native control first run63448exit100: one FAIL6.338s,
+5filtered. Fresh dedicated database mnesis_pg4_cleanup_xrkk8n, isolated control
+worktree /tmp/mnesis-query-cleanup.xRKk8n at95a00bc1; ONLY read_head replaced by
+Ok(Some((0,None))) with explicit unused-argument binding. THREEreviews:1the
+ordinary append must succeed under healthy source and order/resume contract
+unchanged;2actual Pg17.10 append fails FK23503, exact key0 missing, spawned task
+panics then join unwrap also panics;3reread source shows native probe cleanup
+lies after both unwraps, so the actual first SUT failure can poison following
+runs. This intentionally failing test is NOT a production regression or passing
+control. Original log /tmp/mnesis-pg4-cleanup-original-first.log retained. Repeat
+identical mutant/test/database WITHOUT cleanup to falsify independence next.
+
+Cleanup original-source repeated control exit100: one FAIL, same real database,
+source/mutant/test selection unchanged and no intervening cleanup. THREEreviews:
+1independence requires the second run to reach its own append fault;2actual second
+run instead fails SQLSTATE42P06 schema ordering already exists, before SUT;
+3fivefiltered tests remain explicit, this is actual native contamination matching
+the eight rejected CI catches, not a compiler-only or theoretical concern.
+Raw /tmp/mnesis-pg4-cleanup-original-second.log retained. Proceed with <=8test-line
+cleanup repair; no product SQL or regression assertion is relaxed.
+
+Cleanup candidate first control3624exit100: one intentional FAIL0.105s,5filtered.
+Owned stale probe from original red explicitly dropped ONCE before this candidate
+run. THREEreviews:1same bad native head0 still rejected, no assertion removed;
+2actual append fails FK23503 at AFTER-cleanup result unwrap, independent catalog
+query afterward reports ordering namespace count0;3same spawn+Barrier overlap,
+real Pg17.10 and every order/resume assertion retained, rawfirst logs preserved.
+This is expected failing-control evidence, not a passing suite. Source inspection
+also catches a shadowed local name against unchanged Clippy policy; rename that
+captured result before the repeated control, without adding any allowance.
+
+Cleanup candidate repeated control57068exit100: intentional one FAIL0.064s,
+5filtered. NO cleanup between the two candidate runs; only captured local name
+renamed to comply with existing shadow lints. THREEreviews:1same head0 fault
+must remain rejected, no production repair or weakened oracle;2actual second run
+reaches its OWN FK23503 at post-cleanup unwrap and independent namespace query
+again returns0;3unchanged Barrier/spawn/read/resume/body assertions, no42P06 and
+no compile-only credit. Control source stays isolated, query production remains
+13line native-operation repair. Actual retained test delta2+/2-=4churn<=8budget.
+Original repeatedred0.045s, candidatefirst0.105s and second0.064s all retained.
+Raw /tmp/mnesis-pg4-cleanup-{original,fixed}-{first,second}.log plus fixed catalog
+logs; no runtime catch credit for compiler-unviable or contaminated variants.
+
+Cleanup healthy current-source native72223exit0:235/235PASS78.426s,0skips.
+THREEreviews:1original stream/global order, resume, atomicity, snapshots and saved
+pairs remain required with test cleanup before failure;2actual complete native
+suite executes on healthy query-worktree product source, including five names
+and four shadowed-ordering laws, no injected read_head stub in this worktree;
+3all existing payload/settled-row/typed-error/boundary oracles unchanged, tests
+not dropped or added to inflate count, no feature filtering and0skips. The
+contended-host import_storage_error case took41.777s; total is validation timing,
+not capacity or latency-target evidence. Exact4test-line diff stays within budget;
+production8+/5- unchanged. Original and both failed-control schedules retained.
+
+Cleanup final strict all-feature/all-target Clippy31554exit0,6.49s; unchanged
+warnings, shadow and line policies, no allowance. Format check passed before
+healthy native suite. This is compilation/lint evidence, not extra test executions.
+Post-cleanup source is now frozen for normal signed gate; native failures and
+healthy235 proof copied below with whitespace-only presentation normalization,
+original /tmp logs unchanged. Exact mutation artifact digest and rejected first
+verdict remain available; fresh CI must establish independent catches.

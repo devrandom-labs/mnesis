@@ -1,0 +1,39 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-query-cleanup.xRKk8n/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.14s
+────────────
+ Nextest run ID 487870c8-cabd-4274-892a-fedf14e38876 with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [   6.332s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_current_snapshot ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_current_snapshot
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 6.32s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_current_snapshot' (104778660) panicked at adapters/postgres/tests/all_noskip_tests.rs:191:18:
+    called `Result::unwrap()` on an `Err` value: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "23503", message: "insert or update on table \"events\" violates foreign key constraint \"events_stream_id_fkey\"", detail: Some("Key (stream_id)=(0) is not present in table \"keys\"."), hint: None, position: None, where: None, schema: Some("mnesis"), table: Some("events"), column: None, data_type: None, constraint: Some("events_stream_id_fkey"), file: Some("ri_triggers.c"), line: Some(2610), routine: Some("ri_ReportViolation") })))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+    thread 'all_ordering_ignores_shadowed_current_snapshot' (104778660) panicked at adapters/postgres/tests/all_noskip_tests.rs:195:30:
+    called `Result::unwrap()` on an `Err` value: JoinError::Panic(Id(13), "called `Result::unwrap()` on an `Err` value: Store(Sqlx(Database(PgDatabaseError { severity: Error, code: \"23503\", message: \"insert or update on table \\\"events\\\" violates foreign key constraint \\\"events_stream_id_fkey\\\"\", detail: Some(\"Key (stream_id)=(0) is not present in table \\\"keys\\\".\"), hint: None, position: None, where: None, schema: Some(\"mnesis\"), table: Some(\"events\"), column: None, data_type: None, constraint: Some(\"events_stream_id_fkey\"), file: Some(\"ri_triggers.c\"), line: Some(2610), routine: Some(\"ri_ReportViolation\") })))", ...)
+
+  Cancelling due to test failure:
+────────────
+     Summary [   6.338s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [   6.332s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+error: test run failed
