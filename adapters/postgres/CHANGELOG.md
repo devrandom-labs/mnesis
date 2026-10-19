@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-postgres-v0.4.0...mnesis-postgres-v0.5.0) - 2026-10-19
+
+### Added
+
+- *(postgres)* enforce the local durable write profile ([#395](https://github.com/devrandom-labs/mnesis/pull/395))
+- *(postgres)* enable verified TLS and prove runtime permissions ([#392](https://github.com/devrandom-labs/mnesis/pull/392))
+- *(postgres)* [**breaking**] bind resume positions to their event history ([#387](https://github.com/devrandom-labs/mnesis/pull/387))
+- *(postgres)* retain finite consistent export views ([#385](https://github.com/devrandom-labs/mnesis/pull/385))
+- *(postgres)* enumerate committed event streams ([#384](https://github.com/devrandom-labs/mnesis/pull/384))
+- *(postgres)* persist projection checkpoints ([#383](https://github.com/devrandom-labs/mnesis/pull/383))
+- *(postgres)* persist aggregate snapshots ([#382](https://github.com/devrandom-labs/mnesis/pull/382))
+- *(postgres)* commit atomic imports across streams ([#381](https://github.com/devrandom-labs/mnesis/pull/381))
+- *(postgres)* add explicit validated schema migrations ([#379](https://github.com/devrandom-labs/mnesis/pull/379))
+
+### Fixed
+
+- *(postgres)* bound runtime migration metadata reads ([#398](https://github.com/devrandom-labs/mnesis/pull/398))
+- *(postgres)* use native lengths for row limits ([#396](https://github.com/devrandom-labs/mnesis/pull/396))
+- *(postgres)* preserve stream identities across caller query names ([#394](https://github.com/devrandom-labs/mnesis/pull/394))
+- *(postgres)* preserve global ordering across caller search paths ([#388](https://github.com/devrandom-labs/mnesis/pull/388))
+- *(postgres)* preserve full event values and binary identities ([#380](https://github.com/devrandom-labs/mnesis/pull/380))
+- *(postgres)* preserve uncertain commit outcomes ([#377](https://github.com/devrandom-labs/mnesis/pull/377))
+- *(postgres)* bound replay and recover subscriptions ([#376](https://github.com/devrandom-labs/mnesis/pull/376))
+
+### Other
+
+- *(postgres)* verify backup routing and recovery failures ([#391](https://github.com/devrandom-labs/mnesis/pull/391))
+- *(postgres)* verify physical backup and consumer recovery ([#390](https://github.com/devrandom-labs/mnesis/pull/390))
+- *(postgres)* verify bounded backups and projection recovery ([#389](https://github.com/devrandom-labs/mnesis/pull/389))
+
 ### Added
 
 - Native pool, statement and lock deadline coverage, including startup,

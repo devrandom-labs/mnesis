@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.4.0...mnesis-store-v0.5.0) - 2026-10-19
+
+### Added
+
+- *(postgres)* enable verified TLS and prove runtime permissions ([#392](https://github.com/devrandom-labs/mnesis/pull/392))
+
+### Fixed
+
+- *(postgres)* bound replay and recover subscriptions ([#376](https://github.com/devrandom-labs/mnesis/pull/376))
+
+### Other
+
+- *(store)* read frame headers through bounded arrays ([#393](https://github.com/devrandom-labs/mnesis/pull/393))
+- *(postgres)* verify backup routing and recovery failures ([#391](https://github.com/devrandom-labs/mnesis/pull/391))
+
 ## [0.4.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-store-v0.3.1...mnesis-store-v0.4.0) - 2026-10-03
 
 ### Fixed

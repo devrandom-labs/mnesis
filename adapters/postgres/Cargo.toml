@@ -21,9 +21,9 @@ snapshot = ["mnesis-store/snapshot"]
 [dependencies]
 bytes = { workspace = true, features = ["std"] }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-mnesis = { version = "0.4.0", path = "../../crates/mnesis" }
-mnesis-store = { version = "0.4.0", path = "../../crates/store", features = ["subscription"] }
-mnesis-wake = { version = "0.4.0", path = "../../crates/wake" }
+mnesis = { version = "0.5.0", path = "../../crates/mnesis" }
+mnesis-store = { version = "0.5.0", path = "../../crates/store", features = ["subscription"] }
+mnesis-wake = { version = "0.5.0", path = "../../crates/wake" }
 sqlx = { workspace = true, features = ["migrate", "tls-rustls-ring-native-roots"] }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["rt", "sync", "time"] }
