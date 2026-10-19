@@ -36,7 +36,7 @@ crc32c = "0.6.8"
 criterion = { package = "codspeed-criterion-compat", version = "5.0.1", features = ["html_reports"] }
 ed25519-dalek = "2.2.0"
 embassy-executor = { version = "0.10.0", features = ["platform-std", "executor-thread"] }
-event-listener = { version = "5.4.1", default-features = false }
+event-listener = { version = "5.4.2", default-features = false }
 fjall = { version = "3", features = ["bytes_1"] }
 foldhash = "0.2.0"
 futures = { version = "0.3", default-features = false, features = ["alloc"] }

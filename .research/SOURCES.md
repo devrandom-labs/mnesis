@@ -400,3 +400,17 @@ pg_catalog placement in search_path. Native locked17.10 original failures verify
 actual applicability here; ordinary trusted application functions suffice, not
 an assumed malicious-input or arbitrarycode-execution claim. Preserve caller
 settings and qualify the adapter's own required native accounting calls.
+# PG9 patched dependency sources — accessed 2026-10-19
+
+- https://rustsec.org/advisories/RUSTSEC-2026-0221.html: affected StackSlot permits
+  non-Send tags across threads; patched >=5.4.2. Official release
+  https://github.com/smol-rs/event-listener/releases/tag/v5.4.2 names this fix.
+  Exact downloaded5.4.2 Cargo.toml: Rust1.60, edition2021, MIT OR Apache-2.0,
+  default std optional. Existing Rust1.99 and core+alloc wake ownership fit.
+- Exact5.4.2 src/lib.rs listen eagerly inserts the listener; notify uses the
+  existing notification fence. StackSlot Send/Sync now require T:Send. The
+  existing eventcount generation proof still requires its own actual tests and
+  bare-metal build; upstream statements alone do not establish adapter behavior.
+- https://rustsec.org/advisories/RUSTSEC-2026-0009.html: patched time>=0.3.47.
+  Current root/fuzz/fuzz-afl locks contain neither time nor refinery. Their old
+  exception comments describe an absent graph, not an evidenced current blocker.

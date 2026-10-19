@@ -168,9 +168,6 @@
 
           mnesis-audit = craneLib.cargoAudit {
             inherit src advisory-db;
-            # RUSTSEC-2026-0009: time 0.3.x DoS — transitive dep from refinery 0.8.x
-            # Cannot fix until refinery upgrades to rusqlite 0.39+
-            cargoAuditExtraArgs = "--ignore RUSTSEC-2026-0009";
           };
           mnesis-deny = craneLib.cargoDeny { inherit src; };
           # Run tests with cargo-nextest, fused with cargo-llvm-cov for coverage.

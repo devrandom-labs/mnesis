@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Require the patched event-listener dependency without an advisory exception.
+
 ## [0.4.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-wake-nostd-v0.3.1...mnesis-wake-nostd-v0.4.0) - 2026-10-03
 
 ### Fixed
