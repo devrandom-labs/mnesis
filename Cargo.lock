@@ -1665,7 +1665,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "arrayvec",
  "codspeed-criterion-compat",
@@ -1816,7 +1816,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-fjall"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "aligned-vec",
  "arrayvec",
@@ -1842,7 +1842,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-inmemory"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bytes",
  "codspeed-criterion-compat",
@@ -1860,7 +1860,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-macros"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "futures",
  "mnesis",
@@ -1887,7 +1887,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-postgres"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bytes",
  "futures",
@@ -1906,7 +1906,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-store"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "aligned-vec",
  "arrayvec",
@@ -1938,7 +1938,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-store-testing"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bytes",
  "futures",
@@ -1964,7 +1964,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-wake"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "foldhash",
  "mnesis-store",
@@ -1976,7 +1976,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-wake-nostd"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "embassy-executor",
  "event-listener",
