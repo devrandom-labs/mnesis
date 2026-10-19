@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-wake-v0.4.0...mnesis-wake-v0.5.0) - 2026-10-19
+
+### Other
+
+- release v0.5.0 ([#378](https://github.com/devrandom-labs/mnesis/pull/378))
+
 ## [0.4.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-wake-v0.3.1...mnesis-wake-v0.4.0) - 2026-10-03
 
 ### Fixed
