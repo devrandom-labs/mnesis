@@ -1,0 +1,48 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-durability-phase.Wqpt5d/adapters/fjall)
+warning: associated function `commit` is never used
+   --> adapters/postgres/src/error.rs:115:19
+    |
+112 | impl PostgresError {
+    | ------------------ associated function in this implementation
+...
+115 |     pub(crate) fn commit(source: sqlx::Error) -> Self {
+    |                   ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mnesis-postgres` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.70s
+────────────
+ Nextest run ID 6ece7d2a-99e9-4b76-a1d1-2671409ca138 with nextest profile: default
+    Starting 1 test across 1 binary (32 tests skipped)
+        FAIL [  15.541s] (1/1) mnesis-postgres::outcome_tests server_errors_after_sending_commit_preserve_the_code_and_outcome
+  stdout ───
+
+    running 1 test
+    test server_errors_after_sending_commit_preserve_the_code_and_outcome ... FAILED
+
+    failures:
+
+    failures:
+        server_errors_after_sending_commit_preserve_the_code_and_outcome
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 32 filtered out; finished in 15.52s
+
+  stderr ───
+
+    thread 'server_errors_after_sending_commit_preserve_the_code_and_outcome' (105781333) panicked at adapters/postgres/tests/outcome_tests.rs:1005:27:
+    incorrect COMMIT boundary outcome for 40003: Err(Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "40003", message: "commit boundary witness", detail: None, hint: None, position: None, where: Some("PL/pgSQL function inline_code_block line 1 at RAISE"), schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("pl_exec.c"), line: Some(3911), routine: Some("exec_stmt_raise") }))))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [  15.544s] 1 test run: 0 passed, 1 failed, 32 skipped
+        FAIL [  15.541s] (1/1) mnesis-postgres::outcome_tests server_errors_after_sending_commit_preserve_the_code_and_outcome
+error: test run failed

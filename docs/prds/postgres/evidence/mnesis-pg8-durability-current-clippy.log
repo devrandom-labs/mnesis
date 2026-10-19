@@ -1,0 +1,29 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+error: `options` is shadowed
+   --> adapters/postgres/tests/durability_tests.rs:104:13
+    |
+104 |         let options = options.application_name(&name);
+    |             ^^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/durability_tests.rs:92:13
+    |
+ 92 |         let options = address
+    |             ^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_reuse
+    = note: requested on the command line with `-D clippy::shadow-reuse`
+
+error: called `.err().expect()` on a `Result` value
+   --> adapters/postgres/tests/durability_tests.rs:227:10
+    |
+227 |           .err()
+    |  __________^
+228 | |         .expect("replacement asynchronous snapshot must reject");
+    | |_______________^ help: try: `expect_err`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#err_expect
+    = note: `-D clippy::err-expect` implied by `-D clippy::all`
+    = help: to override `-D clippy::all` add `#[allow(clippy::err_expect)]`
+
+error: could not compile `mnesis-postgres` (test "durability_tests") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

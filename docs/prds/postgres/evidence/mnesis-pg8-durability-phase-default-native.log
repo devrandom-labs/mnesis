@@ -1,0 +1,151 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/fjall)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.57s
+────────────
+ Nextest run ID 3f3ac0ac-f7c1-4113-a247-6779ffd2bb7a with nextest profile: default
+    Starting 140 tests across 21 binaries
+        PASS [   0.013s] (  1/140) mnesis-postgres error::tests::corrupt_row_display_truncates_overlong_stream_id
+        PASS [   0.008s] (  2/140) mnesis-postgres error::tests::satisfies_error_send_sync_static
+        PASS [   0.007s] (  3/140) mnesis-postgres hex::tests::decode_accepts_uppercase
+        PASS [   0.007s] (  4/140) mnesis-postgres hex::tests::empty_round_trips
+        PASS [   0.007s] (  5/140) mnesis-postgres hex::tests::encodes_known_vector_lowercase
+        PASS [   0.007s] (  6/140) mnesis-postgres hex::tests::non_hex_char_is_rejected
+        PASS [   0.007s] (  7/140) mnesis-postgres hex::tests::odd_length_is_rejected
+        PASS [   0.007s] (  8/140) mnesis-postgres hex::tests::round_trips_all_byte_values
+        PASS [   0.007s] (  9/140) mnesis-postgres position::tests::accessors_round_trip
+        PASS [   0.007s] ( 10/140) mnesis-postgres position::tests::ord_is_txid_first_then_seq
+        PASS [   0.007s] ( 11/140) mnesis-postgres store::caller_byte_overflow_is_distinct_from_persisted_corruption
+        PASS [   0.045s] ( 12/140) mnesis-postgres::all_noskip_tests all_noskip_exclusive_resume_after_out_of_order_commits
+        PASS [   0.034s] ( 13/140) mnesis-postgres::all_noskip_tests all_noskip_out_of_order_commits
+        PASS [   0.046s] ( 14/140) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+        PASS [   0.045s] ( 15/140) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_cutoff_operator
+        PASS [   0.045s] ( 16/140) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_resume_operator
+        PASS [   0.045s] ( 17/140) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_snapshot_xmin
+        PASS [   0.035s] ( 18/140) mnesis-postgres::conformance_tests conformance_boundary::check_conflict_leaves_store_unchanged
+        PASS [   0.050s] ( 19/140) mnesis-postgres::conformance_tests conformance_boundary::check_large_payload_round_trips
+        PASS [   0.032s] ( 20/140) mnesis-postgres::conformance_tests conformance_boundary::check_max_length_event_type_round_trips
+        PASS [   0.031s] ( 21/140) mnesis-postgres::conformance_tests conformance_boundary::check_metadata_absent_vs_present_distinct
+        PASS [   0.034s] ( 22/140) mnesis-postgres::conformance_tests conformance_boundary::check_prefix_stream_ids_isolated
+        PASS [   0.029s] ( 23/140) mnesis-postgres::conformance_tests conformance_boundary::check_version_gap_batch_rejected
+        PASS [   0.028s] ( 24/140) mnesis-postgres::conformance_tests conformance_boundary::check_wrong_first_version_rejected
+        PASS [   0.040s] ( 25/140) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_conflict_state_intact
+        PASS [   0.041s] ( 26/140) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_events
+        PASS [   0.042s] ( 27/140) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_preserves_position_watermark
+        PASS [   0.040s] ( 28/140) mnesis-postgres::conformance_tests conformance_lifecycle::check_reopen_subscription_catches_up
+        PASS [   0.063s] ( 29/140) mnesis-postgres::conformance_tests conformance_linearizability::check_caught_up_boundary_race
+        PASS [   0.041s] ( 30/140) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_distinct_streams_all_land
+        PASS [   0.033s] ( 31/140) mnesis-postgres::conformance_tests conformance_linearizability::check_concurrent_same_stream_single_winner
+        PASS [   0.138s] ( 32/140) mnesis-postgres::conformance_tests conformance_linearizability::check_wake_after_idle
+        PASS [   0.033s] ( 33/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_boundary_then_new_append
+        PASS [   0.029s] ( 34/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_empty_store_yields_none
+        PASS [   0.031s] ( 35/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_from_is_exclusive
+        PASS [   0.031s] ( 36/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_global_order_across_streams
+        PASS [   0.031s] ( 37/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_items_carry_their_stream_key
+        PASS [   0.030s] ( 38/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_metadata_round_trips
+        PASS [   0.035s] ( 39/140) mnesis-postgres::conformance_tests conformance_sequence::check_all_multi_resume_cycles
+        PASS [   0.032s] ( 40/140) mnesis-postgres::conformance_tests conformance_sequence::check_append_conflict_is_surfaced
+        PASS [   0.032s] ( 41/140) mnesis-postgres::conformance_tests conformance_sequence::check_append_retry_after_conflict_succeeds
+        PASS [   0.032s] ( 42/140) mnesis-postgres::conformance_tests conformance_sequence::check_append_returns_assigned_all_position
+        PASS [   0.031s] ( 43/140) mnesis-postgres::conformance_tests conformance_sequence::check_append_then_read_round_trips
+        PASS [   0.027s] ( 44/140) mnesis-postgres::conformance_tests conformance_sequence::check_empty_read_yields_none
+        PASS [   0.093s] ( 45/140) mnesis-postgres::conformance_tests conformance_sequence::check_large_stream_completes
+        PASS [   0.030s] ( 46/140) mnesis-postgres::conformance_tests conformance_sequence::check_multi_event_append_returns_last_position
+        PASS [   0.031s] ( 47/140) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_from_is_inclusive
+        PASS [   0.032s] ( 48/140) mnesis-postgres::conformance_tests conformance_sequence::check_read_stream_inclusive_read_all_exclusive_coexist
+        PASS [   0.030s] ( 49/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_absent_stream_waits_then_delivers
+        PASS [   0.032s] ( 50/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_all_backlog_then_caught_up_then_live
+        PASS [   0.032s] ( 51/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_backlog_then_caught_up_then_live
+        PASS [   0.035s] ( 52/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_beyond_head_filters_below_bound
+        PASS [   0.138s] ( 53/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_large_backlog_crosses_chunk_seam
+        PASS [   0.031s] ( 54/140) mnesis-postgres::conformance_tests conformance_sequence::check_subscription_resume_strict_after
+        PASS [   0.032s] ( 55/140) mnesis-postgres::conformance_tests conformance_sequence::check_two_subscribers_same_stream_both_receive
+        PASS [   0.032s] ( 56/140) mnesis-postgres::conformance_tests conformance_sequence::check_versions_strictly_monotonic_and_fused
+        PASS [   0.009s] ( 57/140) mnesis-postgres::conformance_tests pg_all_pos_ord_txid_first
+        PASS [   0.072s] ( 58/140) mnesis-postgres::durability_tests a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+        PASS [   0.037s] ( 59/140) mnesis-postgres::durability_tests application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+        PASS [   0.029s] ( 60/140) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+        PASS [   1.226s] ( 61/140) mnesis-postgres::durability_tests immediate_primary_restart_recovers_acknowledged_events_and_saved_state
+        PASS [   0.037s] ( 62/140) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+        PASS [   0.110s] ( 63/140) mnesis-postgres::durability_tests supported_commit_modes_are_preserved_after_acknowledged_writes
+        PASS [   1.917s] ( 64/140) mnesis-postgres::durability_tests unsafe_server_settings_reject_runtime_and_migration_without_repair
+        PASS [   0.012s] ( 65/140) mnesis-postgres::lifecycle_tests a_pool_with_one_connection_is_rejected_before_it_can_starve_queries
+        PASS [   1.037s] ( 66/140) mnesis-postgres::lifecycle_tests all_rescans_after_a_long_held_snapshot_commits_without_a_hint
+        PASS [   0.089s] ( 67/140) mnesis-postgres::lifecycle_tests clones_share_one_listener_and_last_drop_preserves_the_callers_pool
+        PASS [   0.029s] ( 68/140) mnesis-postgres::lifecycle_tests closing_the_callers_pool_completes_with_a_live_subscription
+        PASS [   1.138s] ( 69/140) mnesis-postgres::lifecycle_tests initial_listener_acquisition_failure_recovers_after_service_returns
+        PASS [   1.039s] ( 70/140) mnesis-postgres::lifecycle_tests listener_disconnect_and_a_final_unnotified_commit_recover
+        PASS [   1.051s] ( 71/140) mnesis-postgres::lifecycle_tests listener_subscription_failure_recovers_after_the_acquired_backend_dies
+        PASS [   1.138s] ( 72/140) mnesis-postgres::lifecycle_tests malformed_duplicate_and_unrelated_hints_do_not_forge_events_or_markers
+        PASS [   0.154s] ( 73/140) mnesis-postgres::lifecycle_tests overlong_binary_notification_payload_does_not_reject_a_committed_append
+        PASS [   1.153s] ( 74/140) mnesis-postgres::lifecycle_tests terminal_receive_error_after_failed_reconnection_is_retried
+        PASS [   0.027s] ( 75/140) mnesis-postgres::lifecycle_tests wake_between_arm_and_first_poll_is_preserved
+        PASS [   0.056s] ( 76/140) mnesis-postgres::migration_tests adoption_preserves_empty_metadata_as_corruption_and_null_as_absence
+        PASS [   0.048s] ( 77/140) mnesis-postgres::migration_tests caller_search_path_cannot_redirect_event_storage
+        PASS [   0.041s] ( 78/140) mnesis-postgres::migration_tests cancelling_a_blocked_migration_releases_its_session_and_transaction
+        PASS [   0.041s] ( 79/140) mnesis-postgres::migration_tests checksum_is_rejected_without_repair
+        PASS [   0.037s] ( 80/140) mnesis-postgres::migration_tests concurrent_migrations_apply_one_record_and_release_locks
+        PASS [   0.039s] ( 81/140) mnesis-postgres::migration_tests failed_legacy_move_rolls_back_and_can_be_repaired
+        PASS [   0.041s] ( 82/140) mnesis-postgres::migration_tests fresh_install_is_explicit_and_repeated_migration_preserves_data
+        PASS [   0.045s] ( 83/140) mnesis-postgres::migration_tests legacy_adoption_preserves_payload_metadata_and_checkpoint
+        PASS [   0.038s] ( 84/140) mnesis-postgres::migration_tests newer_schema_is_rejected_without_repair
+        PASS [   0.043s] ( 85/140) mnesis-postgres::migration_tests opening_a_prepared_database_does_not_require_writes
+        PASS [   0.028s] ( 86/140) mnesis-postgres::migration_tests opening_rejects_a_missing_optimistic_constraint
+        PASS [   0.030s] ( 87/140) mnesis-postgres::migration_tests opening_rejects_a_wrong_optimistic_constraint_with_the_right_name
+        PASS [   0.039s] ( 88/140) mnesis-postgres::migration_tests opening_rejects_inherited_checkpoint_rows_outside_the_parent_primary_key
+        PASS [   0.048s] ( 89/140) mnesis-postgres::migration_tests runtime_role_reads_and_appends_without_schema_creation_rights
+        PASS [   0.039s] ( 90/140) mnesis-postgres::migration_tests shipped_sql_rejects_legacy_mismatch_without_rust_preflight
+        PASS [   0.037s] ( 91/140) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        PASS [   0.035s] ( 92/140) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+        PASS [   0.076s] ( 93/140) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+        PASS [   0.063s] ( 94/140) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+        PASS [   0.044s] ( 95/140) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+        PASS [   0.129s] ( 96/140) mnesis-postgres::outcome_tests deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+        PASS [   0.041s] ( 97/140) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+        PASS [   0.037s] ( 98/140) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+        PASS [   0.038s] ( 99/140) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+        PASS [   0.038s] (100/140) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+        PASS [   0.127s] (101/140) mnesis-postgres::outcome_tests server_errors_after_sending_commit_preserve_the_code_and_outcome
+        PASS [   0.290s] (102/140) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+        PASS [   0.041s] (103/140) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+        PASS [   0.044s] (104/140) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+        PASS [   0.043s] (105/140) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+        PASS [   0.029s] (106/140) mnesis-postgres::read_tests byte_edges_count_binary_keys_utf8_and_optional_metadata
+        PASS [   0.073s] (107/140) mnesis-postgres::read_tests cancelling_reads_waiting_for_pool_capacity_releases_their_requests
+        PASS [   0.033s] (108/140) mnesis-postgres::read_tests corruption_on_a_later_page_terminates_without_skipping
+        PASS [   0.031s] (109/140) mnesis-postgres::read_tests finite_scans_exclude_later_appends_and_release_the_connection_between_pages
+        PASS [   0.076s] (110/140) mnesis-postgres::read_tests first_event_does_not_retain_the_whole_backlog
+        PASS [   0.127s] (111/140) mnesis-postgres::read_tests large_rows_obey_the_default_byte_budget
+        PASS [   0.089s] (112/140) mnesis-postgres::read_tests oversized_legacy_row_stops_without_fetching_its_body_or_skipping
+        PASS [   0.021s] (113/140) mnesis-postgres::read_tests oversized_tail_rejects_the_entire_append_before_writing
+        PASS [   0.518s] (114/140) mnesis-postgres::read_tests page_edges_preserve_versions_and_exclusive_global_resume
+        PASS [   0.037s] (115/140) mnesis-postgres::representation_tests concurrent_large_key_writers_share_one_identity_and_one_winner
+        PASS [   0.033s] (116/140) mnesis-postgres::representation_tests full_unsigned_maximum_round_trips_and_overflow_leaves_it_unchanged
+        PASS [   0.032s] (117/140) mnesis-postgres::representation_tests incompressible_binary_key_beyond_notify_limit_round_trips
+        PASS [   0.035s] (118/140) mnesis-postgres::representation_tests real_hash_collision_keeps_both_binary_identities
+        PASS [   0.031s] (119/140) mnesis-postgres::representation_tests scalar_constraints_reject_invalid_stored_values
+        PASS [   0.033s] (120/140) mnesis-postgres::representation_tests sequential_append_crosses_the_signed_version_boundary
+        PASS [   0.043s] (121/140) mnesis-postgres::representation_tests startup_rejects_missing_key_equality_and_scalar_guards
+        PASS [   0.033s] (122/140) mnesis-postgres::representation_tests unsigned_global_sequence_still_includes_later_transactions
+        PASS [   0.033s] (123/140) mnesis-postgres::representation_tests utf8_event_type_with_nul_round_trips
+        PASS [   0.030s] (124/140) mnesis-postgres::representation_tests valid_unsigned_stream_bound_returns_empty_instead_of_narrowing
+        PASS [   0.842s] (125/140) mnesis-postgres::restore_tests committed_transactions_above_an_unrelated_xmin_still_open
+        PASS [   1.741s] (126/140) mnesis-postgres::restore_tests copied_future_transactions_reject_before_global_history_can_be_used
+        PASS [   1.492s] (127/140) mnesis-postgres::restore_tests copied_native_database_bindings_reject_without_repair
+        PASS [   0.773s] (128/140) mnesis-postgres::restore_tests foreign_resume_and_checkpoint_positions_reject_before_pool_acquisition
+        PASS [   1.448s] (129/140) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+        PASS [   1.611s] (130/140) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+        PASS [   2.307s] (131/140) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+        PASS [   1.925s] (132/140) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+        PASS [   1.152s] (133/140) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+        PASS [   1.037s] (134/140) mnesis-postgres::subscription_tests all_recovers_the_final_missing_hint
+        PASS [   1.058s] (135/140) mnesis-postgres::subscription_tests stream_recovers_the_final_missing_hint
+        PASS [   0.083s] (136/140) mnesis-postgres::upgrade_tests checkpoint_upgrade_preserves_history_cache_checksums_and_foreign_data
+        PASS [   0.041s] (137/140) mnesis-postgres::upgrade_tests foreign_public_view_is_rejected_without_replacement
+        PASS [   0.053s] (138/140) mnesis-postgres::upgrade_tests populated_version_one_preserves_position_and_next_identity
+        PASS [   0.053s] (139/140) mnesis-postgres::upgrade_tests rejected_version_two_rolls_back_and_preserves_repairable_version_one
+        PASS [   0.049s] (140/140) mnesis-postgres::upgrade_tests snapshot_upgrade_preserves_positions_and_repairs_a_foreign_table_collision
+────────────
+     Summary [  30.952s] 140 tests run: 140 passed, 0 skipped

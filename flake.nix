@@ -468,6 +468,11 @@
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   -E 'binary(security_tests) & test(verified_tls_runtime_can_open_append_read_close_and_reopen)' \
                   2>&1 | tee -a postgres-feature.log
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                  --workspace-remap "$PWD" \
+                  --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
+                  -E 'binary(durability_tests) & test(asynchronous_connection_settings_reject_before_runtime_open)' \
+                  2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \

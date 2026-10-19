@@ -1,0 +1,12 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+error: this function has too many lines (90/80)
+   --> adapters/postgres/tests/durability_tests.rs:486:7
+    |
+486 | async fn immediate_primary_restart_recovers_acknowledged_events_and_saved_state() {
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+    = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (test "durability_tests") due to 1 previous error

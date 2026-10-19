@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.10s
+────────────
+ Nextest run ID a23c07be-6876-4154-bdd8-303533a106ce with nextest profile: default
+    Starting 1 test across 1 binary (6 tests skipped)
+        FAIL [   0.041s] (1/1) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+  stdout ───
+
+    running 1 test
+    test asynchronous_connection_settings_reject_before_runtime_open ... FAILED
+
+    failures:
+
+    failures:
+        asynchronous_connection_settings_reject_before_runtime_open
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'asynchronous_connection_settings_reject_before_runtime_open' (103194280) panicked at adapters/postgres/tests/durability_tests.rs:60:10:
+    asynchronous commit must reject the durable runtime profile
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.047s] 1 test run: 0 passed, 1 failed, 6 skipped
+        FAIL [   0.041s] (1/1) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+error: test run failed

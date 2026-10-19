@@ -1,0 +1,39 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.15s
+────────────
+ Nextest run ID 7ade4fab-9185-4e81-9443-798b52fc2ea9 with nextest profile: default
+    Starting 32 tests across 1 binary
+        PASS [   0.084s] ( 1/32) mnesis-postgres::outcome_tests a_native_unique_collision_preserves_the_callers_expected_head
+        PASS [   0.299s] ( 2/32) mnesis-postgres::outcome_tests atomic_hint_deadline_covers_every_target_together
+        PASS [   0.171s] ( 3/32) mnesis-postgres::outcome_tests caller_timeout_after_atomic_commit_is_not_rollback
+        PASS [   0.069s] ( 4/32) mnesis-postgres::outcome_tests caller_timeout_after_checkpoint_commit_preserves_every_saved_field
+        PASS [   0.064s] ( 5/32) mnesis-postgres::outcome_tests caller_timeout_after_server_commit_never_proves_rollback
+        PASS [   0.064s] ( 6/32) mnesis-postgres::outcome_tests caller_timeout_after_snapshot_commit_does_not_erase_the_saved_pair
+        PASS [   0.077s] ( 7/32) mnesis-postgres::outcome_tests cancelled_projection_reloads_the_committed_pair_before_continuing
+        PASS [   0.041s] ( 8/32) mnesis-postgres::outcome_tests cancelling_runtime_open_releases_its_view_and_preserves_the_callers_pool
+        PASS [   0.048s] ( 9/32) mnesis-postgres::outcome_tests checkpoint_hydration_keeps_the_captured_revision_position_and_state_together
+        PASS [   0.042s] (10/32) mnesis-postgres::outcome_tests closed_data_pool_fails_before_begin_with_no_committed_rows
+        PASS [   0.041s] (11/32) mnesis-postgres::outcome_tests codec_checkpoint_commit_retains_unknown_outcome_after_native_commit
+        PASS [   0.058s] (12/32) mnesis-postgres::outcome_tests every_head_is_read_before_an_atomic_writer_can_obtain_its_transaction_id
+        PASS [   0.292s] (13/32) mnesis-postgres::outcome_tests every_local_atomic_target_wakes_before_the_first_native_hint_finishes
+        PASS [  11.016s] (14/32) mnesis-postgres::outcome_tests failed_atomic_head_reconciliation_retains_the_original_unique_source
+        PASS [   0.044s] (15/32) mnesis-postgres::outcome_tests final_atomic_unique_race_rolls_back_prefix_and_reports_the_observed_head
+        PASS [   0.047s] (16/32) mnesis-postgres::outcome_tests identical_constraint_names_in_a_foreign_schema_are_not_optimistic_conflicts
+        PASS [   0.041s] (17/32) mnesis-postgres::outcome_tests identity_sequence_collision_is_not_an_optimistic_conflict
+        PASS [   0.070s] (18/32) mnesis-postgres::outcome_tests import_wrapper_preserves_uncertainty_for_both_policies_without_resubmission
+        PASS [   0.038s] (19/32) mnesis-postgres::outcome_tests loss_before_begin_response_cannot_commit_events
+        PASS [   0.040s] (20/32) mnesis-postgres::outcome_tests loss_during_inserts_rolls_back_the_uncommitted_prefix
+        PASS [   0.044s] (21/32) mnesis-postgres::outcome_tests lost_atomic_commit_ack_preserves_the_whole_transaction_and_source
+        PASS [   0.085s] (22/32) mnesis-postgres::outcome_tests lost_commit_acknowledgement_still_leaves_the_whole_batch_durable
+        PASS [   3.053s] (23/32) mnesis-postgres::outcome_tests real_deadlock_aborts_the_atomic_writer_without_optimistic_reclassification
+        PASS [   0.077s] (24/32) mnesis-postgres::outcome_tests real_serialization_failure_preserves_definite_rejection_and_no_owned_event
+        PASS [   0.043s] (25/32) mnesis-postgres::outcome_tests runtime_schema_validation_keeps_one_read_only_database_view
+        PASS [   0.132s] (26/32) mnesis-postgres::outcome_tests server_rejections_at_commit_preserve_the_code_and_outcome
+        PASS [   0.047s] (27/32) mnesis-postgres::outcome_tests snapshot_hydration_cannot_mix_a_captured_version_with_a_later_state
+        PASS [   0.292s] (28/32) mnesis-postgres::outcome_tests stalled_hint_acknowledgement_cannot_hold_confirmed_success
+        PASS [   0.043s] (29/32) mnesis-postgres::outcome_tests transparent_transport_preserves_confirmed_append
+        PASS [   0.045s] (30/32) mnesis-postgres::outcome_tests uncertain_commit_survives_repository_execution_and_requires_reload
+        PASS [   0.042s] (31/32) mnesis-postgres::outcome_tests uncertain_snapshot_commit_preserves_the_native_source_through_the_codec
+        PASS [   0.040s] (32/32) mnesis-postgres::outcome_tests unrelated_unique_constraint_is_not_an_optimistic_conflict
+────────────
+     Summary [  16.593s] 32 tests run: 32 passed, 0 skipped

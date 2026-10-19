@@ -1,0 +1,30 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.77s
+────────────
+ Nextest run ID caa58c3d-b6fb-4f56-a6b8-e9f87c8fa694 with nextest profile: default
+    Starting 1 test across 1 binary (31 tests skipped)
+        FAIL [  26.418s] (1/1) mnesis-postgres::outcome_tests deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+  stdout ───
+
+    running 1 test
+    test deferred_rejections_before_commit_preserve_the_code_and_known_outcome ... FAILED
+
+    failures:
+
+    failures:
+        deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 31 filtered out; finished in 26.41s
+
+  stderr ───
+
+    thread 'deferred_rejections_before_commit_preserve_the_code_and_known_outcome' (105741541) panicked at adapters/postgres/tests/outcome_tests.rs:966:22:
+    incorrect pre-COMMIT outcome for 40003: Err(Store(CommitUnknown(Database(PgDatabaseError { severity: Error, code: "40003", message: "commit rejection witness", detail: None, hint: None, position: None, where: Some("PL/pgSQL function test_commit_reject() line 1 at RAISE"), schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("pl_exec.c"), line: Some(3911), routine: Some("exec_stmt_raise") }))))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [  26.422s] 1 test run: 0 passed, 1 failed, 31 skipped
+        FAIL [  26.418s] (1/1) mnesis-postgres::outcome_tests deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+error: test run failed

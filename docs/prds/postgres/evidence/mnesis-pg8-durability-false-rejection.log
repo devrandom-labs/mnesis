@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-durability-controls.7o1ffu/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.96s
+────────────
+ Nextest run ID 03bdb010-2e52-45ee-b8ec-d3a7db9a9113 with nextest profile: default
+    Starting 1 test across 1 binary (6 tests skipped)
+        FAIL [   1.104s] (1/1) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+  stdout ───
+
+    running 1 test
+    test replacement_connection_cannot_acknowledge_an_asynchronous_append ... FAILED
+
+    failures:
+
+    failures:
+        replacement_connection_cannot_acknowledge_an_asynchronous_append
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.10s
+
+  stderr ───
+
+    thread 'replacement_connection_cannot_acknowledge_an_asynchronous_append' (103189458) panicked at adapters/postgres/tests/durability_tests.rs:158:9:
+    assertion `left == right` failed
+      left: (2, 2, 0, 0)
+     right: (1, 1, 0, 0)
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.109s] 1 test run: 0 passed, 1 failed, 6 skipped
+        FAIL [   1.104s] (1/1) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+error: test run failed

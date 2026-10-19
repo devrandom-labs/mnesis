@@ -1,0 +1,10 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.57s
+────────────
+ Nextest run ID 682c5214-a414-4496-b9e1-045a6068cb0e with nextest profile: default
+    Starting 2 tests across 1 binary (31 tests skipped)
+        SLOW [> 60.000s] (───) mnesis-postgres::outcome_tests deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+        PASS [  94.662s] (1/2) mnesis-postgres::outcome_tests deferred_rejections_before_commit_preserve_the_code_and_known_outcome
+        PASS [   0.130s] (2/2) mnesis-postgres::outcome_tests server_errors_after_sending_commit_preserve_the_code_and_outcome
+────────────
+     Summary [  94.794s] 2 tests run: 2 passed (1 slow), 31 skipped

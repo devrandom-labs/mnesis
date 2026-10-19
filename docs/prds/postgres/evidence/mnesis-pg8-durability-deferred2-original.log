@@ -1,0 +1,35 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-durability/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-durability/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store-testing)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/fjall)
+error[E0277]: dynamic SQL strings should be audited for possible injections
+   --> adapters/postgres/tests/durability_tests.rs:344:23
+    |
+344 | ...   sqlx::raw_sql(&format!("CREATE OR REPLACE FUNCTION mnesis.durability_probe() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN PERFORM pg_catalog.set_config('synchronous_commit', 'off', true); RETURN NEW; END $$; {trigger} FOR EACH ROW EXECUTE FUNCTION mnesis.durability_probe()"))
+    |       ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ dynamic SQL string
+    |       |
+    |       required by a bound introduced by this call
+    |
+    = help: the trait `SqlSafeStr` is not implemented for `&std::string::String`
+    = note: prefer literal SQL strings with bind parameters or `QueryBuilder` to add dynamic data to a query.
+
+            To bypass this error, manually audit for potential injection vulnerabilities and wrap with `AssertSqlSafe()`.
+            For details, see the docs for `SqlSafeStr`.
+
+    = note: this trait is only implemented for `&'static str`, not all `&str` like the compiler error may suggest
+help: the trait `SqlSafeStr` is implemented for `&str`
+   --> /Users/joel/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-core-0.9.0/src/sql_str.rs:52:1
+    |
+ 52 | impl SqlSafeStr for &'static str {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `raw_sql`
+   --> /Users/joel/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-core-0.9.0/src/raw_sql.rs:119:26
+    |
+119 | pub fn raw_sql(sql: impl SqlSafeStr) -> RawSql {
+    |                          ^^^^^^^^^^ required by this bound in `raw_sql`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `mnesis-postgres` (test "durability_tests") due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test durability_tests --all-features` exited with code 101

@@ -6682,3 +6682,568 @@ query mutation/CI/merge suffix only after exact prefix comparisons. Backlog now
 records protected PR394 without closing remaining query policy/PG8/PG9 acceptance.
 No product/manifests/locks/Nix/workflow change. Normal signed evidence amendment
 uses unchanged full hook; cached checks must be labelled0fresh executions.
+
+## PG8 durability original witness — 2026-10-19
+
+Actual original-source runtime-open witnessFAIL0.047s, one case, zero skips.
+THREE reviews: asynchronous commits must not silently inherit the durable runtime
+profile; healthy explicit-on native SHOW and actual migrated store open succeed,
+explicit-off native SHOW confirms off and the SAME from_pool succeeds incorrectly,
+so expected rejection fails; this is actual SUT acceptance, not missing database,
+setup, compiler, crash or data-loss evidence. /tmp/mnesis-pg8-durability-original.log
+retained. Initial coarse rejection oracle is characterization only; final typed
+setting error and no-write assertions are required before acceptance.
+
+Five-law extension initially does not compile: three envelope builders omitted
+required typestate event_type/payload steps (E0599). THREE reviews: real valid
+writes must be attempted after replacement; zero native execution because
+compiler rejects fixture construction; use the established complete envelope
+builder, no SUT change or defect credit. Keep
+/tmp/mnesis-pg8-durability-five-original.log. First startup-only native red remains
+valid; this failed compile cannot substitute for replaced-connection evidence.
+
+Current original five laws all execute and FAIL0.229s, zero skips. THREE reviews
+for EACH run/case: durable runtime startup and each acknowledged write must reject
+unsupported async settings; healthy native migrated control and acknowledged
+seed append succeed, native LISTEN is established, capacity2 has one data slot,
+SQLx future options are changed, original connection is closed and native new PID
+is distinct with synchronous_commit exactlyoff; actual SUT then incorrectly
+returns success for append0.063s/atomic0.040s/checkpoint0.035s/snapshot0.042s
+(startup0.048s), causing each corresponding rejection expectation to fail. No
+compiler/setup/timeout/connection error counted as runtime proof. Final-green
+oracles still require exact typed setting errors and independent settled database
+contents; baseline uses coarse expected-rejection only to show absent protection.
+Raw /tmp/mnesis-pg8-durability-five-current-original.log retained. No production
+change preceded these observed reds, and no data-loss-on-crash claim follows.
+
+Native profile probe returns exact on|on|on for fsync/full_page_writes/
+synchronous_commit. THREE reviews: establish selected server settings before
+profile experiment; actual supported psql query executes on native17.10; this
+is configuration observation, not crash/flush/power-loss verification. Raw
+/tmp/mnesis-pg8-durability-native-profile.log. First fix ClippyFAIL shadow_reuse;
+formatPASS, zero native execution. THREE reviews: unchanged warning contract;
+actual private validation owner rejected before tests; rename only the extracted
+unsafe-setting binding, no allow/assertion change. Keep
+/tmp/mnesis-pg8-durability-fixed-clippy.log.
+
+Second fix check formatPASS, ClippyFAIL only fixture option shadowing and
+err().expect() on Debug unit result; zero native execution. THREE reviews:
+unchanged warning/test contracts; actual compiler/linter rejects these exact
+fixture-only issues after private production guard compiles; rename runtime
+options and use expect_err for unit result, no lint/behavior/assertion weakening.
+/tmp/mnesis-pg8-durability-current-clippy.log retained.
+
+Current five durability lawsPASS1.951s, zero skips, strictall/all ClippyPASS2.37s
+and formatPASS. THREE reviews for EACH check/case: startup and all four write
+boundaries must reject exact synchronous_commit configuration; actual replacement
+backend/native settings/healthy seed execute, and every write returns the exact
+Durability setting through its own wrapper; after dropping the store and waiting
+for caller-pool closure, independent admin reads assert exact (events,keys,caches,
+checkpoints)=(1,1,0,0), original native transaction/sequence and payload unchanged.
+No arbitrary failure, unknown commit, skipped case or uncommitted-only read counts
+as acceptance. Compile-only checks provide no extra database credit. Raw
+/tmp/mnesis-pg8-durability-verified-{clippy,five}.log. Existing PG3 regression suite,
+unsafe server profiles, stronger modes, trigger changes and omission controls
+still required; five laws do not complete durability acceptance.
+
+Seven durability lawsPASS13.893s, zero skips; strictall/all ClippyPASS2.42s,
+default/all-target ClippyPASS6.91s and formattingPASS. THREE reviews for EACH
+command/case: original five exact rejection/settled-state laws retained, plus
+all four non-off modes must remain unchanged and a native AFTER-INSERT setting
+change must reject before COMMIT; actual new-backend/healthy seed controls execute,
+four actual mode writes acknowledge and retain their exact mode and native row
+map after pool closure, trigger uses transaction-local off and exact wrapper
+rejects with subsequent native setting restoredon; no replication/power-loss
+claim, arbitrary error, skipped case, no-fail false green, or lint relaxation.
+All prior reds remain. Sources test354/450lines, private product32/80 and existing
+source29/35churn. Raw /tmp/mnesis-pg8-durability-{seven-native,seven-clippy,default-clippy}.log.
+Fresh independent ignore-check and commit-then-return-rejection controls will
+challenge both error and settled-storage assertions before full acceptance.
+
+Fresh isolated ignore-check control actuallyFAIL1.034s, one case/six filtered.
+THREE reviews: replacement async append must return exact durable-profile error;
+ONLY private commit guard's validation result is deliberately ignored, startup
+checks remain, actual native replacement/off controls pass and SUT returns
+Ok(position); runtime assertion fails at exact returned result, not compilation,
+setup, timeout or synthetic model. Correct source unchanged. Separate detached
+/tmp/mnesis-durability-controls.7o1ffu, proof target package-clean before run;
+/tmp/mnesis-pg8-durability-ignore-control.log retained. No mutation percentage.
+Fresh commit-then-return-rejection control actuallyFAIL1.109s, one case/six
+filtered. THREE reviews: a definite configuration rejection must commit nothing;
+ONLY private commit owner retains the validation error, nevertheless commits,
+and returns that error after COMMIT; exact error/wrapper assertion PASSES, then
+after pool cleanup the independent native oracle finds (2,2,0,0) instead of
+(1,1,0,0), so runtime storage assertion rejects the false rejection. This is
+actual native committed data despite a matching error, not compile/setup failure
+or a mirrored implementation test. Correct source unchanged. Raw
+/tmp/mnesis-pg8-durability-false-rejection.log retained. This directly falsifies
+returning a safe-looking error after successful commit; no retry-safety weakening.
+
+Locked Nix postgresqlTestHook inspected through exact evaluated derivation: it
+initializes native default settings and appends postgresqlExtraSettings, with
+no fsync-off override. Earlier concern about an implicit unsafe fast profile
+is disproved for this selected hook. No Nix config edit needed; native actual
+server-profile/restart tests still required. No source inference gets runtime
+flush/crash credit.
+
+Startup-only control initiallyFAIL0.047s, one case/six filtered, at exact runtime
+startup rejection expectation. THREE reviews: runtime startup must reject off;
+actual healthy native on/migrated open then off SHOW execute and unsafe open
+succeeds; however invocation ran in control checkout and attempted self-copies,
+leaving the earlier commit-then-error mutation alongside startup-check omission.
+That commit path is not called by this test, but this is NOT clean single-change
+control evidence. Keep /tmp/mnesis-pg8-durability-startup-control.log and rerun
+with exact correct commit owner restored from absolute product path. Correct
+product checkout unaffected. Record setup mistake rather than credit or erase it.
+
+Clean startup-only control actuallyFAIL0.086s, one case/six filtered. THREE
+reviews: unsupported startup profile must reject; exact correct private commit
+owner restored byte-for-byte, diff verifies ONLY startup validator result is
+ignored, real healthy on/open and native off controls pass then unsafe open
+succeeds; failure is exact expected-rejection assertion after native execution,
+not compile/setup/timeout or leftover commit behavior. Previous mixed-setup run
+is retained separately and gets no clean-control credit. Raw
+/tmp/mnesis-pg8-durability-startup-clean-control.log. Control worktree intentionally
+retains ONLY this startup mutant, correct product source unchanged.
+
+Server/restart extension formatPASS then strict ClippyFAIL solely90/80line
+restart test; zero new native cases executed. THREE reviews: process-crash and
+unsafe profile contract retained; actual linter prevents native run; extract
+native immediate-stop/status assertions into one private lifecycle helper and
+keep each state capability's save/check helpers feature-local to avoid unused
+position obligations in snapshot-only builds. No lint relaxation, new public seam
+or hidden test skip. /tmp/mnesis-pg8-durability-restart-clippy.log retained.
+
+Restart helper revision formatPASS, ClippyFAIL at81/80lines, zero native/default/
+snapshot-only cases run. THREE reviews: all restart/state assertions retained;
+actual linter counts remaining testbody; remove a one-use envelope local by
+constructing the same envelope at append, no compressed formatting, allowance,
+assertion removal or capability skip. Keep
+/tmp/mnesis-pg8-durability-nine-current-clippy.log. Shared helper/state separation
+remains meaningful and cfg-local, not an alternate runtime/framework.
+
+Nine durability lawsPASS26.030s,0skips. Strictall/all Clippy1.20s, default/all-target
+0.31s, snapshot-only durability target1.33s and formattingPASS. THREE reviews for
+EACH command/case: prior seven invariants retained plus unsafe native server
+settings and process-crash persistence; actual independent18.6servers first
+migrate healthy, restart with fsyncoff/full_page_writesoff, SHOW exactoff, runtime
+AND migrator reject exact namedsetting while versions1–5 stay; immediate -m
+shutdown actually succeeds and status3 precedes restart, acknowledged event,
+history, snapshot and checkpoint pair reopen exactly and later append/resume
+advance. All observable assertions remain, no genericerror/skip/setup credit or
+hardware/failover claim; compilation-only configurations are not native feature
+coverage. Test591/600lines plus exact reused shared66line cluster owner; actual
+source budgets unchanged. /tmp/mnesis-pg8-durability-nine-verified-*.log retained.
+
+New guard audit witness actuallyFAIL0.063s, one case/nine filtered, expected
+rejection sees actualOk(position). THREE reviews: caller search_path must not
+redirect durability facts; actual existing healthy startup/acknowledged seed and
+replacement off controls pass, native text equality is proven redirectedfalse,
+then actual SUT wrongly commits while only guard comparisons are overridden;
+cleanup drops injected schema BEFORE assertion, so failure is neither poisoned
+schema validation nor setup/SQLsyntax/generic error. Current candidate guard
+introduced this unqualified-operator gap; do not accept its earlier9greens as
+completion. /tmp/mnesis-pg8-durability-path-original.log retained. Minimal fix
+qualifies exactly three equality operators, within revised35source churn.
+
+Qualified-guard formatPASS then ClippyFAIL fixture shadow_unrelated: native
+setting local and match field both named setting. THREE reviews: exact hostile
+path oracle unchanged; compiler/linter rejects naming before native execution;
+rename only native-control local, no policy/oracle/lint weakening. Original
+runtime red remains valid, but zero fixed/native credit yet. Keep
+/tmp/mnesis-pg8-durability-ten-clippy.log. Actual source budgets remain private32
+lines (operator qualification changes bytes inside this NEW file), existing
+18+/11-=29churn; previous forecast35 conservatively counted qualifications as
+existing lines, not actual growth.
+
+Qualified guard ten-law runPASS35.565s,0skips; strictall/all ClippyPASS2.84s,
+formatPASS. THREE reviews for EACH: all previous startup/replacement/mode/trigger/
+server/crash/settled-state invariants plus hostile text comparison; actual native
+on/off/newPID and injectedoperatorfalse controls execute, exact Durability wrapper
+rejects and settled independent rows remain unchanged; no filtered/earlyreturn/
+arbitraryerror/lint waiver or power-loss credit. New operator gap is corrected
+before delivery, original red preserved. /tmp/mnesis-pg8-durability-ten-current-*.log.
+Source budget32private lines and existing29churn,629/650testlines +reused66helper.
+Need current source default/state feature native checks, full regression and cost
+comparison, protected TLS parent rebase/complete Linux/gate/PR delivery.
+
+Full current durability branch native240/240PASS105.061s, zero skips. THREE
+reviews: all existing adapter/order/commit-uncertainty/migration/atomic/state/
+backup/restore laws plus ten durability laws retained; actual17.10shared database
+and independent18.6servers execute complete all-feature set; no filtered cases,
+no skipped database, original commit-loss/timeout classification regressions
+still pass, no TLS laws on THIS parent (TLS235 is a separate source and must not
+be added as if combined). New source remains uncommitted. Raw
+/tmp/mnesis-pg8-durability-full-native.log. Final TLS/decoder parent rebase still
+requires combined-source native/Linux/gate and protected delivery.
+
+Deferred-trigger original attempt1 exited2 in bash before nextest: unquoted
+filter parentheses are shell syntax. THREE reviews: no durability contract
+execution; no native trigger/fault or mutation catch; format command succeeded
+but ZERO tests started. Preserve /tmp/mnesis-pg8-durability-deferred-original-call.log
+and use quoted supported nextest expression in separate attempt2. Production
+module remains byte-identical to /tmp/mnesis-durability-predeferred.rs.
+
+Deferred-trigger attempt2 exits101 at compilation, ZERO native tests. THREE
+reviews: no durability invariant exercised; no immediate/deferred native catch;
+SQLx0.9 intentionally rejects dynamic format String as SqlSafeStr. Keep literal
+function SQL and two full static trigger statements, not AssertSqlSafe bypass.
+Preserve /tmp/mnesis-pg8-durability-deferred2-original.log. Product guard unchanged.
+
+Deferred-trigger attempt3 ACTUAL native1FAIL4.554s,9filtered/0pass. THREEreviews:
+1. A claimed precommit durability rejection must not acknowledge or persist an
+   asynchronous event. Settled independent counts are2events/2keys instead of
+   healthy1/1; cache/checkpoint counts stay0. Current precommit guard is insufficient.
+2. Actual healthy seed+replacement backend/off control then on mode, real AFTER
+   INSERT trigger, later DEFERRABLE INITIALLY DEFERRED constraint trigger. Existing
+   immediate schedule completes before the second deferred schedule in the same
+   registered law. Native schema cleanup precedes independent settlement; store
+   dropped and caller pool closed before querying rows. Product module compared
+   byte-identical to saved predeferred source. This is actual storage failure,
+   not compiler/unviable mutation evidence.
+3. Exact settled counts fail BEFORE typed rejection oracle, so a safe-looking
+   returned error cannot hide a committed write. Error/setting checks remain,
+   no weakened expectations.9other laws filtered, not passing/nativefullcredit.
+   Deferred phase attribution follows sequential source/control execution; raw
+   failure labels the shared settled-count helper, not a distinct named test.
+   Preserve raw /tmp/mnesis-pg8-durability-deferred3-original.log.
+
+Primary PostgreSQL18 SET CONSTRAINTS docs (accessed2026-10-19) state that switching
+ALL to IMMEDIATE retroactively executes pending deferred constraint triggers in
+this owned transaction; CREATE TRIGGER docs describe commit-time constraint
+triggers. Use native supported statement before final setting validation, after
+all write statements. No changes to COMMIT's existing uncertainty mapping, no
+configuration override, and no changes outside this transaction. Additional
+native roundtrip cost must be measured in PG8 equal-durability capacity profile.
+
+Deferred-trigger fixed focused run10/10PASS89.180s,1slow,0skips. THREEreviews:
+1all exact durability startup/replacement/writer/profile/crash laws remain,
+immediate+deferred schedule now both preserve independent settled1/1/0/0 counts
+and exact Durability{synchronous_commit} rejection with restoredon session;
+2real17.10 application cluster and private18.6 restart/processcrash tools execute,
+native SET CONSTRAINTS precedes final profile validation in owned transaction;
+3existing error mappings/positive4commitmodes/original typed sources unchanged,
+no timeout/skip/filteredcase accepted as passing, deferred actualred retained.
+This is focused10law proof only; final fullsuite/combinedTLS/currentLinux, full
+gate and delivery remain. New native roundtrip cost must be measured, not assumed.
+
+Deferred-trigger retained source strict all-feature/all-target ClippyPASS6.09s.
+THREEreviews:1all four write-owner error/public contracts remain;2pinnedcompiler
+checks actual native static SQL query and typed Transaction ownership;3no lint
+allowances/threshold changes, zero native behavior credit from compilation.
+Actual budgets37/80new private production lines,634/650native-testlines and
+existing18added/11removed=29churn<=35. Native original storage red and fixed10
+laws recorded above; prior full240 predates deferred-drain addition, so never
+claim current full240/combinedTLS/query/Linux/protected delivery from it.
+
+TLS final protected-parent cached-gate proof restored by exact parent prefix:
+
+Final protected-parent signed evidence amend34064 completed0 at GOOD GPG
+f2cfeaa186f08282201d56a30791bb92a7501471. All12checks are PREVIOUSLY BUILT,
+ZERO fresh test runs. THREEreviews:1unchanged complete contracts;2actual hook
+executes and reuses exact prior derivations, no invented fresh/native pass;
+3all product/test/manifests/locks/Nix/workflows byteequal tested0ac0c21c,
+fullbasewhitespace and GPG pass, latest only records/status changes. Prior actual
+combined240native87.470s and1577workspace476.059s remain the behavioral proof;
+current-head requiredCI must execute or explicitly disclose cache reuse. Normal
+exactlease againstremote276bbdd2 follows. No protected TLS merge/publication yet.
+
+Durability integration pre-run: original tracked+untracked work preserved in
+stashb2e13e44d4288a2fc4711302c9c5c6585a0d5054 (retained), snapshot
+/tmp/mnesis-durability-integration.ljilXn. Branch moved from49104117 onto tested
+TLS/queryf2cfeaa1 while its finalCI runs; prerequisite must merge before durability
+delivery. Stash apply conflicts ONLY in five records, no executable conflict.
+Four append records merged after exact491base prefix comparisons on both sides;
+complete old progress and parent progress retained. Existing cluster helper now
+owned by TLSparent and compares byte-identical, no duplicate new helper credit.
+New private durability.rs37lines and durability_tests.rs634lines compare exact
+saved candidate; existing seven Rust owners18+/11-=29churn, unchanged budgets
+80private/35existing/650tests. Full merged patch reread: four writes call SAME
+precommit drain/guard and original commit-uncertainty mapper, startup+migrate guard,
+no modified native lookup repair/TLS/core/manifest/lock/Nix/workflow. No new method,
+dependency, framework, runtime or test assertion. Actual combined fullsuite now
+required; old focused10pass and old240predeferred suite are not combined proof.
+
+Integrated durability full-native41420 FAILED exit100:174/250 executed,
+173PASS/1FAIL39.183s,0skips,76not run duefail-fast. Original unchanged owner
+server_rejections_at_commit_preserve_the_code_and_outcome fails0.138s: deferred
+SQLSTATE40003 is returned as Sqlx instead of CommitUnknown. THREEreviews:
+1PG3 explicitly forbids treating completion-unknown as verified rollback and all
+old uncertainty assertions remain required;2actual real-server deferred trigger
+now executes during new SET CONSTRAINTS finalization, before explicit COMMIT,
+independent persisted rows0 and exact40003 retained;3this is an integration defect
+in new error mapping, not proof of lost COMMIT acknowledgement or a test to weaken.
+Actual TCP after-server-commit suppression/timeout owners remain separate. Original
+/tmp/mnesis-pg8-durability-integrated-native.log retained; no250pass claim.
+
+Integration correction keeps the unchanged four-code oracle and TCP commit-loss/
+timeout laws. Deferred drain now reuses existing PostgresError::commit finalization
+policy; no new classifier, cause erasure, retry or excluded test. This is explicitly
+CONSERVATIVE before literal COMMIT: an unknown finalization error never proves a
+commit occurred, and cannot become a safe retry merely because checks moved.
+Public error docs now state this boundary. Existing-owner churn34/35 with two
+replaced doc lines/three new; private module37/80 unchanged. No assertion or
+workload changed. This tradeoff may require reconciliation for earlier finalization
+errors; no precision or no-rollback claim is invented. Target entire old outcome
+suite, then complete combined native250 again.
+
+Unchanged complete outcome suite51526PASS32/32 in16.593s,0skips after using the
+existing finalization mapper for the deferred drain. THREEreviews:1all old outcome,
+atomic/import/repository/cache propagation and retry-uncertainty laws remain;
+2actual32 native cases execute, including four literal deferred codes AND real
+TCP after-server-COMMIT response suppression/timeout with independent committed
+rows;3outcome_tests.rs byteequal TLSparentf2cfeaa1, no assertion/control/filter or
+timeout change. Four-code trigger proves conservative classification, not that
+COMMIT was sent; actual transport owners separately prove committed uncertainty.
+Source preserves original SQLSTATE/cause and all-or-none settlement. This is
+selected32 proof, not full250 or currentLinux proof. Raw
+/tmp/mnesis-pg8-durability-outcome-fixed.log retained alongside original integratedred.
+
+Final wording states the same conservative boundary in two public doc lines and
+updates the private mapper's phase wording, without tests or logic changes.
+Actual existing-owner churn35/35 (21added14removed), private37/80, tests634/650.
+No budget relaxation; full combined native rerun follows on this exact source.
+
+Corrected integrated full native74472PASS250/250 in60.177s,0skips. THREEreviews:
+1all previous230adapter laws plus actual5names+5TLS+10durability registrations
+execute together, preserving order/resume/atomicity/exact saved pairs and conservative
+unknown finalization;2real Pg17.10 plus private18.6TLS/restore/fsync/fullpage/crash
+fixtures execute; both immediate/deferred setting-trigger schedules and four
+preserved supported commit modes run under their existing registrations, not
+inflated counts;3source includes only budgeted guards/newerror/docs and original
+uncertainty mapper reuse, outcome_tests.rs unchanged, all exact causes/settledrows/
+Barriers/oracles retained,0filter/skip, no hardware-powerloss/failover/capacity claim.
+Original174/250 failure and selected32fixed proof retained independently; failed
+first full run is not relabelled. Current-source Linux/native feature and full
+signed gate/CI still due. Raw
+/tmp/mnesis-pg8-durability-integrated-fixed-native.log; full defaults/optional-owner
+focused laws follow before staging the final formatted source for Linux archive.
+
+Integrated no-default-features durability27522PASS7/7 in14.686s,0skips. THREEreviews:
+1default append/startup/trigger/mode/restart/native-setting contracts still required;
+2actual seven native cases execute, including both trigger schedules, real server
+restart and two unsafe server settings;3cfg-gated atomic/snapshot/checkpoint cases
+are NOT compiled/credited here, so7 is not10, and this selected owner is not full
+per-feature conformance. Same finalizer/error docs and old exact oracles, no filter
+inside durability binary. Native saved-state coverage remains in actual full250.
+
+Integrated snapshot-only durability12835PASS8/8 in27.708s,0skips. THREEreviews:
+1adds the snapshot write's real off-setting rejection and restarted saved pair to
+seven common laws;2actual native snapshot paths execute with default/projection/
+import disabled, supported modes and immediate/deferred schedules retained;
+3atomic/checkpoint cases not compiled/credited, same oracles and no internal
+filter, this focused8 is not the full snapshot conformance matrix. Raw
+/tmp/mnesis-pg8-durability-integrated-snapshot.log retained. No source change.
+
+Integrated projection-only durability76715PASS8/8 in4.562s,0skips. THREEreviews:
+1common seven laws plus real checkpoint off-setting rejection and exact recovered
+saved revision/position/state;2actual native projection owner runs with optional
+snapshot/import disabled, real private restart and preserved modes/triggers;
+3no extra atomic/snapshot credit, same source and independent settled-row oracles,
+no filter/ignored cases. Focused8 remains distinct from full projected conformance
+and currentLinux. Raw /tmp/mnesis-pg8-durability-integrated-projection.log.
+
+Integrated import-only durability34814PASS8/8 in16.023s,0skips. THREEreviews:
+1common seven plus actual atomic off-setting rejection/all-or-none settlement;
+2real native atomic write owner executes with snapshot/projection disabled and
+existing overlap/restart/mode/trigger laws retained;3same exact causes/settled
+rows, no added filter or artificial cases, and focused8 does not replace full
+atomic/import conformance. Raw /tmp/mnesis-pg8-durability-integrated-import.log.
+
+Integrated export-only durability87521PASS7/7 in25.565s,0skips. THREEreviews:
+1export feature keeps common startup/write/profile/restart laws;2actual seven
+native cases run with atomic/snapshot/projection disabled, no test binary absence;
+3same original assertions and no internal filter/ignored case, no export session
+or backup conformance credit from this focused owner. All five focused feature
+runs are separately recorded; complete CI feature matrix still PG9.
+
+Durability CI registration pre-edit budget: add exactly5lines to the existing
+native integration smokes, selecting asynchronous_connection_settings_reject_before_runtime_open
+with --no-tests=fail. Reuse current Nix/nextest/Postgres facility and complete
+all-feature suite. This makes an absent durability test owner fail the required
+job, without a new checker/tool/framework or fixed arbitrary test-count gate.
+Actual Linux execution is requiredCI; no redundant manualLinux rerun is needed
+before the same required CI commands. Preserve complete-suite and smoke evidence
+separately. No lints/workloads/exclusions change.
+
+Integrated strict all-feature/all-target Clippy70994PASS7.48s, formatPASS;
+no lint allowance or policy change. Compile/lint evidence adds no test runs.
+README actual33added4removed/45line budget; changelog2added/3budget; existing
+Rust35/35, private37/80, test634/650, Nixsmoke5/5. No publicmethod/dependency/
+framework/runtime/tooling addition. Final source staged only AFTER formatting
+and native/feature proofs. Complete new source inclusion required for Nix archive;
+current required LinuxCI will execute seven smokes plus fullsuite, not native
+proof from Darwin guards. Source will remain frozen during normal signed gate.
+
+Integrated signed gate72759 FAIL before nextest execution: output51gyycg...drv
+compilation hitNoSpace while writing instrumented dependencies. SIX completed
+checks doc/fmt/replay/deny/hakari/clippy; nostd/store-nostd/wasm cancelled, no full
+gate credit and no test pass invented. THREEreviews:1no changed contract or
+weakened workload;2compiler failure is storage, zero nextest runtime/catch;
+3same frozen source4fc4dd... remained, original raw hook log preserved at
+/tmp/mnesis-pg8-durability-integrated-hook.log. Build concurrency alreadymax2,
+no second local full gate; next retry must address actual space without deleting
+raw baselines or bypassing hook. Replay fresh log will be inspected separately.
+
+Reconsideration:250green conservative-finalization candidate is NOT accepted as
+final PG3 policy. Deferred40003 is raised before literalCOMMIT now; owned phase
+proves no commit, so mapping that error Unknown throws away information. Record
+new phase falsifier before editing, retain prior reds/greens and reject candidate
+based on contract rather than preserving old test assumptions. Existing commit
+mapper/lost-ack/timeout invariants must remain unchanged. Follow existing relay
+instead of adding a test framework. See new HYPOTHESES/SOURCES entry and150line
+existing-test budget. No rewrite of append-only experiments.
+
+Failed full gate replay log independently inspected: fresh2/1/1PASS1.01/1/1s.
+THREEreviews:1existing replay inputs/contracts unchanged;2actual test bodies ran
+under preserved gate source, unlike nextest compile failure;3not nativeDB proof,
+no added corpus or coverage claim. Raw integrated-replay.log retained.
+
+Final TLS f2cfeaa CI review (2026-10-19): push39199782445 and PR39199786060
+both terminalSUCCESS. THREE independent reviews for each actual run:
+1contract: workspace1577PASS117.517/137.262s with4compiler cases separately
+selected; four REAL Linux native240PASS55.873/58.250 standalone and58.505/57.313
+Nix,0skips, all5identity plus5TLS laws visibly executed. Installed-log echoes are
+not extra executions. Each native job's six one-case smokes passed separately.
+2fault/falsifier: original TLS absence/wrongCA/hostname controls remain retained;
+actual native cases assert exact causes, settled event/state pairs, restricted
+role privileges, overlapping writer result, caller-pool/reopen semantics. The
+main workspace guards are not counted as real-database proof. Existing query
+cleanup fixture now precedes assertion; no schema-poisoning false catches.
+3selection/assertions: no source/test/filter/gate changes since signedf2;
+compiler2/1/1 passed95.63/16.24/13.23s push and93.71/12.95/14.54s PR; each
+feature unit matrix remains15/15/15kernel,1/1/1macros,217/217/217store,
+17/17/17wake,25/25/30inmemory,131/131/131Fjall,0/0/0nostd andstore-testing.
+Zero-case harnesses are compilation only; matrix still omitsPostgres (PG9).
+Replay each2/1/1PASS1s; no new replay corpus or coverage credit invented.
+
+Fuzz39199786217 THREEreviews:1same four input invariants/real production entry
+points;2four61s libFuzzer campaigns wire7,544,825/header2,613,663/chunk2,254,914/
+value5,959,047 and four60s AFL++CMPLOG campaigns;3actual AFL savedcrashes0/
+timeouts0, discoveries wire0/header1/chunk9/value0, no clean-run-only AFL crash
+gate falsifier credit (stillPG9). Mutants39199786177 actualNoMutantsToFilter,
+no artifact/0variants/0runtimecatches, not mutation coverage of TLS. CodSpeed
+check117891822169SUCCESS:3decode sizes426.4→368.1ns(+15.85%reported),40untouched,
+3skippedbaselinefallback; syscalls/environment warnings retained, no PG latency
+claim. Raw logs /tmp/mnesis-tls-f2-{push-ci,pr-ci,fuzz,mutants}.log and performance
+JSON. All40requiredSUCCESS/1scheduledsweepSKIP,CLEAN,0reviewthreads at exactf2;
+normal exact-head protected merge next, no admin/waiver/publication claim.
+
+TLS PR392 MERGED2026-10-19T05:09:59Z at8f03ae8553ab6410fdfbe7660ab84ec0873efae0, normal exact-head squashf2cfeaa,40requiredSUCCESS/1scheduledSKIP/0threads. Fetched protected merge ENTIRETREE equals reviewedf2; root user branch/work untouched. No publication claim.
+
+Phase falsifier45039 actualRED1FAIL26.422s (31nonselected), compiledfresh4.77s.
+THREEreviews:1before-COMMIT failures must preserve known rollback, regardless
+of40003string;2same native deferredtrigger raises40003 during drain, independent
+count0 and trigger cleanup occurred BEFORE error assertion;3specific received
+CommitUnknown vs requiredSqlx fails, unchanged exactSQLSTATE/0row assertions,
+no skipped DB guard or synthetic-only error. Raw phase-original.log retained.
+This rejects the conservative mapper candidate even though earlier250green.
+
+Phase-fixed75087 actual2PASS94.794s,1slow,31nonselected. THREEreviews:
+1contract: real deferred40003 beforeCOMMIT nowSqlx and zero independentrows,
+while same code after OBSERVED clientCOMMIT remainsCommitUnknown; otherthree
+codes preserve exact typed native causes;2actualserver raises both kinds, new
+relay observes actualQ/COMMIT and substitutesDO, no false actual-server-COMMIT
+claim, allfourcodeslooped;3specific original source/row assertions retained,
+no guard/ignored/filter expansion credit.94.662s deferred case is a slow observed
+sample, causeUNESTABLISHED (coincident local command stalls), not dismissed as
+contention or accepted latency. NewCOMMIT boundary case0.130s. No othercases
+credit; existing post-server-COMMIT lost-ack/timeout still require fullregression.
+
+Tool responsiveness restored05:15; diagnostic/echo completed, scopedduPID75667
+already exited before queuedkill, killreturnedNoSuchProcess and touched nothing.
+No native jobs now. Next wrong-final-COMMIT mapper control in isolated worktree.
+
+Wrong final-COMMIT mapper control14923 native1FAIL15.544s at exact40003Sqlx
+insteadUnknown,32nonselected; compilation7.70s, expected now-unused commit helper
+warning is confined to rejected mutant. THREEreviews:1client-sentCOMMIT requires
+uncertainty except proven server rejection;2actual clientQ observed, nativeDO
+error preserves40003, zero independently visible rows, error assertion FAILS;
+3unchanged literal code/typed source expectation rejects mutant, compiler warning
+is NOT catch, no skip/timeouts credited. Isolated /tmp/mnesis-durability-phase.Wqpt5d
+preserved with sole wrong final mapper; product source remains correct. Raw
+phase-commit-control.log. New dual-phase law demonstrably rejects both bad mappers.
+
+Scoped cache maintenance: query found rooted old check outputgjks... and explicitly
+EXCLUDED it. Four old nextest outputs9ngh/xgdw/qh3/5rwi each1.086–1.087GB have
+zero roots AND zero referrers immediately checked; original build logs saved
+before per-path supported nix store delete. No broadGC or raw baseline/target/
+worktree deletion. Operation89647 currently waits for existing daemon-owned
+GC(max1GB) lock; do not kill unrelated daemon or claim freed space until done.
+
+Phase source strictall/allClippy25107PASS3.19s and no-default/all-targetClippy
+PASS3.43s, formatPASS. No allowances/lint relaxations, compile-only proof not test
+run. Existing source29/35churn; outcome relay/tests72/150. Starting complete current
+native suite unfiltered; prior250 is superseded conservative candidate evidence.
+
+Final phase-correct full native77886 PASS251/25175.943s,0skipped. THREEreviews:
+1contract: all prior240 plus10native durability laws and the new COMMIT-boundary
+law visibly execute together; no inferred sibling arithmetic. Event order,
+bounded reads/missing-final-hint/watermark recovery, atomic/import, snapshot/CAS,
+migrations/history/backup and TLS identities remain actual regressions.
+2fault/falsifier: original10 durability reds/controls retained; native deferred
+setting-off rejected beforecommit, independent settled data/state/key assertions;
+phase deferred40003Sqlx0.143s and client-COMMIT40003Unknown0.166s both pass.
+Actual post-server-COMMIT lost-ack0.047s and caller-timeout0.075s still prove
+committed rows and uncertain/no delivered outcome; not replaced by DO injection.
+3assertions/source: no ignored/filter/guard exclusions in251, all source frozen
+during run, wrong drain and wrong final mapper controls actually fail. Exact
+native causes/counts/state pairs/privilege checks retained. Prior slow deferred
+sample94.662s is preserved; current0.143s does not establish its cause. Full run
+75.943s is correctness evidence, not capacity/parity/soak or power-loss proof.
+
+Phase-correct default32215 nativePASS140/14030.952s0skip. THREEreviews:
+1complete no-default package actually runs core/read/wake/migration/TLS and7
+unconditional durability laws plus both phase laws, no optional capability credit;
+2native failures/rows/trigger boundaries are real, same wrong-mapper controls
+reject mismatches, actual lost-ack/timeout retained;3no DB guard skips or nextest
+filter, all140visible, disabled feature owners absent by cfg rather than claimed
+passed. Strict no-default/all-targetClippy already passed. Prior focused5feature
+samples retained as earlier-candidate evidence, not full current feature matrix.
+
+Protected-parent integration: retained stash recorded in
+/tmp/mnesis-durability-phase-protected-parent-stash; git rebase skipped identical
+TLSf2 patch already protected as8f03ae85. StashAPPLIED--index, not popped/dropped.
+ENTIRE pending binarydiff before/after comparesidentical, including records and
+source, not merely selected files. Native251/140 proofs remain exact source.
+Raw phase/failure/replay logs copied to evidence with trailing presentation spaces
+normalized only; originals retained in/tmp. Next normalSIGNEDgate maxjobs1 to
+reduce simultaneous disk peaks, unchanged hook/commands/workload/exclusions.
+
+Replay completed before whole gate: inspected current c3j3...derivation log,
+fresh compilation4.63s then actual2/1/1PASS1s each. THREE reviews:1unchanged
+existing corpus/input invariants/production entry points;2actual replay bodies
+executed, not copied baseline/cached run;3git diff confirms zero fuzz source/lock/
+corpus changes, no new coverage/nativeDB/capacity credit. Raw phase-gate-replay.log.
+Keep source/index frozen during still-running signed gate99009; merge this review
+into durable records only after terminal gate, without pretending added docs were
+part of the previous source snapshot.
+
+Instrumented workspace nextest finished:1585PASS494.308s,15slow,4compilerexcluded,
+136binaries; release compilation2min, coverage report emitted. THREEreviews:
+1all selected workspace contracts/fixtures run under frozen source; workspace
+feature union is NOT adapter --all-features; count increases by7unconditional
+native guard cases plus1phase law, no assumed1588;2actual test execution includes
+existing Fjall/properties/faults, while DB-guarded adapter returns are compilation/
+harness proof ONLY, separate actual native251 and no-default140 remain DB proof;
+3unchanged compiler exclusion4, unchanged fixture assertions/source/workloads,
+no new skip/timeout/percentage waiver, native all-feature coverage not invented.
+Current log /tmp/mnesis-pg8-durability-phase-gate-nextest.log. Full gate99009 still
+running later no_std/wasm checks; do not credit complete gate/commit yet.
+
+FINAL signed gate99009PASS all12 checks at signed64f325f670e49de74e3bae259976f13f760ac32a
+(GPGgood), parent protected8f03ae85. Workspace1585PASS494.308s15slow4compilerexcluded
+and replay2/1/1each1s independently THREEreviewed above; no nativeDB credit from
+workspace guard returns. Audit/TOML were alreadycached, other10 rebuilt; no false
+claim of12 fresh runs. no_std/store-no_std/Wasm compilation checks passed.
+ENTIRE committed productdiff compares exact frozen8e21c659d8b1401bd0c2bf2697a2e0d7c2a3d0be18872d31b319be9f963ee506,
+whitespacePASS, clean worktree before record-only updates. No gate/workload/lint/
+threshold changes. Evidence-only normal signed amend will run unchanged hook
+again; unchanged outputs are cached and do NOT represent new test executions.
+
+Release PR378 regenerated at2475b90f840f78f604a5f663fd59508a9b34a821 (App6fd3d574
+plus existing lock-sync2475b90f) now40requiredSUCCESS/1scheduledSKIP and remainsOPEN.
+Original reported pipeline failure fixed, no final publication/acceptance claim;
+remaining adapter prerequisites still block merging release. Current checks
+snapshot /tmp/mnesis-release-2475-checks.json. Final release evidence must use
+its eventual reviewed head and actual registry consumer, not this intermediate.

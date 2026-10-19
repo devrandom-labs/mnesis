@@ -8,7 +8,7 @@ use mnesis_store::checkpoint::{
 };
 use sqlx::PgConnection;
 
-use crate::History;
+use crate::{History, durability};
 
 use super::{
     PgAllPos, PostgresError, PostgresStore, corrupt, corrupt_value, create_key, read_key,
@@ -199,9 +199,8 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
             )?;
             return Err(storage(sqlx::Error::RowNotFound));
         }
-        tx.commit()
+        durability::commit(tx)
             .await
-            .map_err(PostgresError::commit)
             .map_err(CheckpointError::Store)?;
         Ok(revision)
     }

@@ -339,3 +339,55 @@ Ring LICENSE explicitly refers current Apache2/ISC BoringSSL plus once_cell;
 existing deny policy passed without clarification changes. Native trust is
 OS-provided roots plus callerCA through SQLx; no CA-file-only guarantee. Actual
 TLS1.2/1.3/provider choice remains supported SQLx Rustls/ring; no custom verifier.
+
+## PG8 durability profile research — accessed2026-10-19
+
+PostgreSQL18 official https://www.postgresql.org/docs/18/runtime-config-wal.html
+synchronous_commit table: all non-off modes wait for local flush; off can report
+success before crash safety. Replication meanings differ and must be preserved.
+fsync/full_page_writes off can compromise crash recovery independently; turning
+fsync back on requires proper buffer synchronization. Native tools/settings and
+actual restart evidence still required, not inferred from these specifications.
+https://www.postgresql.org/docs/18/wal-reliability.html documents storage honesty;
+https://www.postgresql.org/docs/18/sql-set.html defines transaction-local settings.
+Locked SQLx0.9 PgConnectOptions::options supports startup GUCs; pool queries share
+per-connection state. Actual adapter builder validates schema only; store.rs,
+atomic.rs,snapshot.rs,checkpoint.rs separately begin write transactions. Initial
+source finding remains unproven until real adapter witness. No maintained crate
+needed: existing SQLx transaction and native Postgres GUC controls are the owners.
+
+Accessed2026-10-19 PostgreSQL18 primary reference:
+https://www.postgresql.org/docs/18/sql-set-constraints.html retroactive pending
+constraint-trigger execution when switching DEFERRED to IMMEDIATE; ALL applies
+inside the current transaction, no session-wide setting override.
+https://www.postgresql.org/docs/18/sql-createtrigger.html distinguishes ordinary
+AFTER and DEFERRABLE INITIALLY DEFERRED constraint triggers at COMMIT. Applicability
+confirmed by current native original red and unchanged-oracle fixed10law run.
+
+2026-10-19 durability integration: https://www.postgresql.org/docs/18/sql-set-constraints.html
+states switching deferred constraints to IMMEDIATE retroactively executes outstanding
+checks; failure rejects the SET command. https://www.postgresql.org/docs/18/errcodes-appendix.html
+names40003 statement_completion_unknown distinctly from40001 serialization_failure
+and40P01 deadlock_detected. SQLx0.9 transaction API
+https://docs.rs/sqlx/0.9.0/sqlx/struct.Transaction.html retains owned commit/rollback
+facilities. Moving deferred checks does not justify weakening the established
+conservative completion-unknown finalization policy; actual phase and independent
+row settlement remain separate evidence.
+
+The docs.rs SQLx0.9 Transaction fetch above returned an internal error. Actual API
+proof inspected locally at Cargo's locked sqlx-core-0.9.0/src/transaction.rs:
+commit consumes self and delegates to TransactionManager before clearing open;
+rollback and Drop facilities retain ownership. Do not label the failed web fetch
+as a successful source read. PostgreSQL18 SET CONSTRAINTS/error-code sources did
+load successfully; native phase/failure evidence remains authoritative here.
+
+2026-10-19 phase audit: PostgreSQL18 SET CONSTRAINTS
+https://www.postgresql.org/docs/18/sql-set-constraints.html explicitly makes
+pending deferred checks retroactive inside SET CONSTRAINTS; constraint triggers
+fire there too. PostgreSQL18 protocol flow
+https://www.postgresql.org/docs/18/protocol-flow.html simple-query cycle keeps
+actual frontend Query and backend ErrorResponse boundaries observable in the
+existing private Unix relay. SQLx0.9 adapter calls transaction.commit only
+AFTER drain+validation; source proves no own COMMIT on preceding error. Native
+SQLSTATE alone cannot replace that known phase. Injected DO error at client
+COMMIT boundary will not be claimed as actual server COMMIT/SSI/deadlock.

@@ -1,0 +1,8 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.19s
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.43s

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Native durability checks before opening, migration and write acknowledgement,
+  preserving configured commit modes and uncertain transaction finalization.
 - Finite consistent export sessions with one native view across listing and
   stream reads, bounded pages, and cleanup on expiry, Drop, or caller pool close.
 - Bounded event-only stream listing with frozen committed visibility, binary IDs,

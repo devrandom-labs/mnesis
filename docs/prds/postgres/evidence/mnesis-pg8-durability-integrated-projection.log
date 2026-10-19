@@ -1,0 +1,15 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.23s
+────────────
+ Nextest run ID 3f238666-af89-464d-9e01-a18c265fdfcb with nextest profile: default
+    Starting 8 tests across 1 binary
+        PASS [   0.345s] (1/8) mnesis-postgres::durability_tests a_setting_changed_by_a_native_write_trigger_rejects_before_commit
+        PASS [   0.230s] (2/8) mnesis-postgres::durability_tests application_text_comparisons_cannot_hide_an_unsafe_commit_setting
+        PASS [   0.126s] (3/8) mnesis-postgres::durability_tests asynchronous_connection_settings_reject_before_runtime_open
+        PASS [   0.993s] (4/8) mnesis-postgres::durability_tests immediate_primary_restart_recovers_acknowledged_events_and_saved_state
+        PASS [   0.148s] (5/8) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_append
+        PASS [   0.157s] (6/8) mnesis-postgres::durability_tests replacement_connection_cannot_acknowledge_an_asynchronous_checkpoint
+        PASS [   0.618s] (7/8) mnesis-postgres::durability_tests supported_commit_modes_are_preserved_after_acknowledged_writes
+        PASS [   1.943s] (8/8) mnesis-postgres::durability_tests unsafe_server_settings_reject_runtime_and_migration_without_repair
+────────────
+     Summary [   4.562s] 8 tests run: 8 passed, 0 skipped

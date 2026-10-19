@@ -1,0 +1,25 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-durability/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-durability/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-durability/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-durability/adapters/fjall)
+error: `setting` is shadowed
+  --> adapters/postgres/src/durability.rs:19:17
+   |
+19 |     if let Some(setting) = setting {
+   |                 ^^^^^^^
+   |
+note: previous binding is here
+  --> adapters/postgres/src/durability.rs:9:9
+   |
+ 9 |     let setting: Option<String> = sqlx::query_scalar(
+   |         ^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_reuse
+   = note: requested on the command line with `-D clippy::shadow-reuse`
+
+error: could not compile `mnesis-postgres` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `mnesis-postgres` (lib test) due to 1 previous error
