@@ -1,0 +1,60 @@
+   Compiling event-listener v5.4.2
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Checking sqlx-core v0.9.0
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store)
+    Checking sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-operations/crates/workspace-hack)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store-testing)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-operations/crates/test-domains)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/fjall)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+    Checking sqlx v0.9.0
+error: unused import: `futures::StreamExt`
+  --> adapters/postgres/tests/deadline_tests.rs:13:5
+   |
+13 | use futures::StreamExt;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `-D unused-imports` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: redundant closure
+  --> adapters/postgres/tests/deadline_tests.rs:70:31
+   |
+70 |             source.code().map(|value| value.into_owned())
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace the closure with the method itself: `std::borrow::Cow::into_owned`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#redundant_closure_for_method_calls
+   = note: `-D clippy::redundant-closure-for-method-calls` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::redundant_closure_for_method_calls)]`
+
+error: `panic` should not be present in production code
+   --> adapters/postgres/tests/deadline_tests.rs:151:9
+    |
+151 |         panic!("expected the native pre-COMMIT lock error");
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#panic
+    = note: requested on the command line with `-D clippy::panic`
+
+error: `panic` should not be present in production code
+   --> adapters/postgres/tests/deadline_tests.rs:192:9
+    |
+192 |         panic!("expected the native pre-COMMIT statement error");
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#panic
+
+error: `panic` should not be present in production code
+   --> adapters/postgres/tests/deadline_tests.rs:230:9
+    |
+230 |         panic!("expected the native startup lock error");
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#panic
+
+error: could not compile `mnesis-postgres` (test "deadline_tests") due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...

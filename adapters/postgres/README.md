@@ -83,6 +83,44 @@ the adapter rejects a pool configured with only one. Follow the transaction
 outcome rules below for any interrupted write. Capacity and remaining operational
 profiles stay under the completion PRD.
 
+## Deadlines and shutdown
+
+Configure deadlines on the caller's pool and native connection options:
+
+```rust,ignore
+let options = options.options([
+    ("statement_timeout", "5s"),
+    ("lock_timeout", "1s"),
+]);
+let pool = PgPoolOptions::new()
+    .max_connections(8)
+    .acquire_timeout(Duration::from_secs(2))
+    .connect_with(options)
+    .await?;
+```
+
+These values illustrate configuration; choose deployment limits from measured
+workloads. Acquisition covers pool admission and connection establishment.
+Statement timeout covers server work; lock timeout covers each lock wait.
+Set a shorter lock limit when distinguishing lock contention from statement
+execution matters. Configure migration deadlines separately for maintenance.
+
+Native tests exercise exhausted pools, blocked startup and appends, and a
+statement deadline after an insert has been staged. Those errors occur before
+COMMIT and roll back their event/key changes. Their classification does not
+apply to an interrupted COMMIT or a caller timeout after commit: reconcile those
+outcomes under the rules below. Read errors may be native connection failures
+before an acquisition deadline expires.
+
+Opening validates the schema before returning. The listener starts in the
+background; opening does not promise its first LISTEN has completed. Reads and
+subscription rescans work while notifications are unavailable. Clones share
+one listener; last-handle drop aborts it. Drop active cursors and store handles
+before calling `pool.close().await` when the application owns the pool.
+Dropping a store leaves that pool usable. SQLx pool closure waits for outstanding
+leases, so application tasks must release their own leases and export sessions.
+Native tests verify bounded close even while the server remains stopped.
+
 ## Durability
 
 The local durable-write profile requires logged tables, `fsync=on`,

@@ -1,0 +1,54 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.73s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s
+────────────
+ Nextest run ID b0525cfb-3c2f-470c-b50d-4c0adf76540b with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.707s] (1/5) mnesis-postgres::deadline_tests exhausted_pool_bounds_reads_and_append_before_any_write
+  stdout ───
+
+    running 1 test
+    test exhausted_pool_bounds_reads_and_append_before_any_write ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.69s
+
+
+        PASS [   0.511s] (2/5) mnesis-postgres::deadline_tests lock_deadline_rejects_append_then_releases_its_transaction
+  stdout ───
+
+    running 1 test
+    test lock_deadline_rejects_append_then_releases_its_transaction ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.49s
+
+
+        PASS [  23.943s] (3/5) mnesis-postgres::deadline_tests permanent_server_loss_bounds_operations_and_pool_shutdown
+  stdout ───
+
+    running 1 test
+    test permanent_server_loss_bounds_operations_and_pool_shutdown ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 23.93s
+
+
+        PASS [   0.365s] (4/5) mnesis-postgres::deadline_tests startup_obeys_the_native_lock_deadline_without_changing_metadata
+  stdout ───
+
+    running 1 test
+    test startup_obeys_the_native_lock_deadline_without_changing_metadata ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.34s
+
+
+        PASS [  15.431s] (5/5) mnesis-postgres::deadline_tests statement_deadline_rolls_back_an_already_staged_insert
+  stdout ───
+
+    running 1 test
+    test statement_deadline_rolls_back_an_already_staged_insert ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 15.42s
+
+
+────────────
+     Summary [  41.005s] 5 tests run: 5 passed, 0 skipped

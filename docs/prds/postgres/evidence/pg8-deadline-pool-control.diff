@@ -1,0 +1,11 @@
+--- /tmp/mnesis-pg8-deadline-candidate.rs	2026-10-19 13:35:49
++++ /tmp/mnesis-deadline-controls.XRdWk1/adapters/postgres/tests/deadline_tests.rs	2026-10-19 13:37:18
+@@ -35,7 +35,7 @@
+         .unwrap();
+     let pool = PgPoolOptions::new()
+         .max_connections(2)
+-        .acquire_timeout(Duration::from_millis(200))
++        .acquire_timeout(Duration::from_secs(5))
+         .connect_with(
+             options
+                 .application_name("mnesis-deadline")

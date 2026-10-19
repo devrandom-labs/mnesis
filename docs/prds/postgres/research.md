@@ -7893,3 +7893,271 @@ running0flakechecks, ZERO new runtime tests. Frozen four-file product stillda2c5
 Correct the PRD's dependency pointer from in-CI to merged; final normal signed
 record amend preserves the product and all verification policies. Publish after
 terminal/sourcecmp/signature/actual cache inspection, without another source edit.
+
+## PG8 supported deadline characterization — preparation
+
+The prior goal turn made delivery progress: dependency PR397 opened and metadata
+combined257native proof completed. Its signed gate remains live18512; operations
+work is isolated in /tmp/mnesis-postgres-operations. Scope is explicitly required
+PG8 acquisition/statement/lock/permanent-outage behavior using existing controls.
+First strict Clippy attempt exits101 on one unused import, one redundant closure
+and three explicit panic macros in the new test fixture. No native tests execute.
+Three reviews: original production untouched; actual compiler failure gets zero
+runtime/falsifier credit; repair fixture syntax under the unchanged denied lints,
+with exact error/rollback/cleanup oracles preserved. No lint allowance is added.
+
+Strict Clippy repair passes2.49s: zero product tests executed. Three reviews:
+existing public controls unchanged; actual all-feature/all-target compiler pass;
+original warnings remain denied, no selection/assertion relaxation. Before the
+first native run, strengthen rollback checks to compare both actual event and
+key inventories across each rejected write, with healthy follow-up append after
+cleanup. This checks the preregistered no-partial-write invariant, not a new API.
+
+First five-case native run:4PASS/1FAIL12.178s,0skip, compile5.12s;
+strict Clippy before it PASS2.24s. Actual acquisition, lock, startup and statement
+oracles pass; permanent-outage test assumes every native failure is PoolTimedOut
+and fails that assertion. The actual error was not included in the first panic.
+No production-defect credit is claimed for that unjustified fixture assumption.
+Before changing the expected type, retain the red and rerun the same oracle with
+its actual typed error in the assertion message. Three reviews: (1) native
+unavailability can reach an existing socket as well as acquisition, so timeout
+classification requires evidence; (2) five actual native executions, not guards,
+with the one exact failing assertion retained; (3) watchdogs, native SQLSTATE
+checks, inventory pairs, restoration and healthy follow-up appends stay intact.
+No cap, lints, runtime or production code changes. Private-cluster RAII stops the
+outage fixture even on this assertion failure; shared-schema mutations restored.
+
+Same permanent-outage oracle with diagnostic text fails again:1FAIL0.969s,
+4focused omissions, compile timing in raw outage-type.log. Actual error is
+Sqlx(Io(Os { code:2, kind:NotFound, message:"No such file or directory" })); the
+native Unix socket has been removed by the actual stopped server. Three reviews:
+(1) bounded unavailable-server reads need not wait for an acquisition timeout;
+(2) actual native typed error proves the fixture assumption wrong, not a product
+bug; (3) no error-code/cap/source/selection changes in this diagnostic run.
+Correct the expected type specifically to native Io(NotFound), additionally prove
+socket exists before stop and is absent after it. Keep three attempts, watchdogs,
+pool-size/close oracles and server lifetime unchanged. This is a documented
+fixture correction based on observed native behavior, not arbitrary error success.
+
+Configured native suite now5PASS41.005s0skip, strictall/allClippyPASS1.73s,
+compile1.35s. This proves supported controls on unchanged production, not a new
+adapter timeout policy. Slow fixture startup/cleanup under current host load
+is not a latency or capacity result. Three reviews:
+1. Contract: actual pre-COMMIT statement/lock rejections retain57014/55P03;
+   failed admission and rejected inserts preserve both event/key inventories;
+   metadata unchanged after bounded startup rejection; stopped-server reads and
+   shutdown remain bounded and poolsize returns0.
+2. Execution/falsifier: five real named laws execute,0skip; private Unix socket
+   exists before native stop and disappears afterward; three reads require the
+   specific observed Io(NotFound), with arbitrary success/error types rejected.
+3. Assertions/source/selection: watchdogs/configs/healthy post-cleanup appends and
+   original typed checks intact; the narrowly corrected native-error expectation
+   is documented with two retained reds and no production-defect claim. Existing
+   lost-ack and after-COMMIT timeout laws stay unchanged; no safe-retry inference.
+
+Next controls: copy the exact five-case fixture to an isolated retained worktree.
+First suppress only native startup settings using take(0), leaving all three
+native error oracles/cleanup intact; those three laws must fail. Then restore
+settings and lengthen only the owning pool's acquisition deadline beyond the
+unchanged watchdog; admission law must fail. Do not merge either wrong config.
+
+Native-option suppression control executes3cases:3FAIL17.206s,2focused
+omissions, compile17.74s. Only change is options(settings.iter().take(0).copied())
+in the isolated fixture. Each lock/startup/statement case reaches its original
+exact55P03/57014 oracle and fails after releasing the held lock or trigger,
+capturing unchanged inventories/metadata and successful repaired use. Three
+reviews: (1) supported native controls, not watchdog cancellation, must produce
+the claimed native errors; (2) all three real named failures reject their disabled
+configuration, not compile/setup/poisoning; (3) same watchdogs, original oracles,
+inputs, native cleanup and healthy use, with two unrelated filtered laws unrun.
+Raw native-control.log and one-line diff retained, no production mutations.
+
+Acquisition wrong-option control: restore native settings exactly, change ONLY
+owning pool acquire_timeout200ms→5s. Actual1FAIL6.396s,4focused omissions,
+compile4.50s. Same three-second watchdog expires on blocked read/append; after
+release, inventory comparison and healthy append pass, then the original read
+PoolTimedOut assertion fails. The later append assertion is not reached, so no
+independent negative-control catch is credited to that assertion. Three reviews:
+(1) caller pool policy, not a new adapter timeout, owns admission; (2) one actual
+named runtime failure at the intended oracle, not compile/setup; (3) single-line
+control diff, original assertions/watchdogs/cleanup and workloads unchanged.
+Wrong configs stay isolated in /tmp/mnesis-deadline-controls.XRdWk1, never merged.
+All five correct-config native laws already passed; full integrated suite and
+protected delivery remain pending. Product Rust/API/dependencies unchanged.
+
+## PR397 completed Linux owner checks at signed205b01c4
+
+Current head205b01c4bbe6f022702c482d13e2f7f9d6a4ffcd; two Nix flake jobs still
+live,38checksSUCCESS/1scheduledSKIP; zero review threads, independently queried.
+Completed logs fetched from the actual job API, retained at
+/tmp/mnesis-pg9-advisory-job-<id>.log. Review covers EACH actual invocation below,
+not just its green aggregate. Final protected delivery is still pending.
+
+Standalone native push118201421475:255PASS62.147s0skip, seven distinct native
+one-case capability smokes; PR118201438653:255PASS61.076s0skip plus seven smokes.
+Their installed run.log echo repeats the same summary, not a second native run.
+For each of these16 actual invocations, three reviews: (1) unchanged full selected
+ordering/transaction/state/backup/lifecycle contract or named smoke capability;
+(2) actual PG18 fixture and compiled5.4.2 dependency execute, no no-DB guard credit;
+(3) original test sources/oracles and all-feature archive selection unchanged,
+full runs0skip, smoke omissions explicit and no isolated-feature coverage claim.
+
+Push and PR each run default/no-default/all LIB matrices on eight packages:
+kernel15/15/15, macros1/1/1, store217/217/217, wake17/17/17,
+inmemory25/25/30, Fjall131/131/131, wake-nostd0/0/0 and store-testing0/0/0.
+For EACH of48 library invocations, three reviews: owning feature contract;
+actual --lib execution and counts (zero-case binaries get zero runtime credit);
+unchanged flags/assertions and no ignored/filtered cases. These jobs omit the
+Postgres package and cannot prove its advertised feature isolation; PG9 remains.
+Two Feature isolation jobs merely aggregate matrix success, ZERO further runs.
+Compiler fixtures each2/1/1PASS: push119.93/14.76/17.89s, PR115.66/15.39/18.17s.
+Each of six invocations reviewed for owning diagnostics contract, actual compiler
+fixture execution and unchanged expected diagnostics/selection. No native proof.
+
+LibFuzzer jobs wire/header/chunk/value each61s:13,075,390/2,552,820/2,161,682/
+9,438,340 iterations, no finding. AFL counterparts each60s/CMPLOG:
+0/3/13/0 new items,0crashes/0timeouts. EACH of eight campaigns has three reviews:
+unchanged target contracts/corpora; actual locked campaigns and duration;
+unchanged failing-exit pipeline/inputs and no threshold relaxation. Clean AFL
+campaigns do NOT prove the required saved-crash-with-zero-exit gate, still PG9.
+Runner warnings about low-value seed cases remain retained in raw logs.
+
+Mutation job118201437149 says No mutants to filter: executable Rust is unchanged.
+Actual artifacts endpoint has0artifacts. No baseline, mutant execution or runtime
+catch is credited; this zero-applicable result is distinct from prior PR396.
+CodSpeed check118203806844 SUCCESS against205b01c4/main766:43untouched,3skipped
+with baseline fallback,17syscall-instrumentation warnings. Existing four suite
+job118201437526 completed, no benchmarks or thresholds changed. Three reviews:
+unchanged benchmark contracts; actual owner run/report; skips and simulation
+limits explicit, ZERO Postgres capacity claim. Cache service and Node-version
+warnings are retained, without unrelated workflow changes in this slice.
+
+Strict no-default/all-target Clippy passes15.70s and formatting passes after the
+final five-law test source. Three reviews: supported no-feature adapter contract;
+actual compiler completion with ZERO runtime tests; unchanged denied lints,
+feature graph and all assertions. No capacity/timing claim. New deadline owner
+297/380lines, existing README38/45lines, changelog2/3; zero production Rust,
+API, dependency, migration or runtime changes, within preregistered budget.
+Evidence copies remove trailing terminal blanks only; /tmp raw logs stay exact.
+Metadata gate18512 remains live/frozen, dependency397 two live Nix jobs remain;
+operations integration/full-suite proof waits for reviewed metadata parent.
+
+## PR397 final Nix/CI review
+
+Both final Nix Linux jobs nowPASS at exact205b01c4. Push118201421591 actual
+workspace1586PASS133.949s3slow4compilerexclusions; PR118201438615 actual
+workspace1586PASS140.900s4slow4compilerexclusions. Each run independently reviewed
+three times: unchanged owning workspace contracts; actual executed counts with
+compile fixtures separately exercised; unchanged filters/oracles and no no-DB
+workspace guard counted as native evidence.
+Each Nix job executes seven distinct native smokes plus full255native:
+push69.309s0skip, PR61.742s0skip. EACH of these16 actual native invocations gets
+three reviews: same selected capability/full transaction/order/state/recovery
+contract; actual PG18 and patched listener graph; unchanged test bodies and
+archive selection, smoke omissions explicit. Combined with standalone jobs,
+four255-case Linux runs and28smokes execute. No echoed log is counted again.
+Each job's replay2/1/1PASS1s each is THREE reviewed for unchanged corpus contracts,
+actual bounded replay execution, and unchanged assertions/corpus/selection; no
+capacity or saved-AFL-crash gate credit. All other named Nix checks PASS.
+
+Final current snapshot:40SUCCESS/1scheduledSKIP/0threads, head205b01c4 GPGgood,
+merge stateCLEAN. Normal exact-head protected squash next; no admin/waiver or
+threshold changes. Sourcehash2803 unchanged, published delivery still pending.
+
+## PG8 operations integrated with bounded startup
+
+Metadata PR398 OPEN at reviewed signedb60fdf4929337654d7a785fe93d524d66371211f;
+normal full gate12PASS including1588workspace566.907s,257native separately,
+record amendments all12cached/0fresh runs. Dependency397 is already protected.
+Operations WIP stash retained (pointer/tmp/mnesis-pg8-deadline-integration-stash).
+Rebased onto reviewedb60; six research-only conflicts use ordinary Git union.
+All parent append-only JSONL lines remain an exact prefix; JSONL validates.
+Original deadline test source byte-identical to frozen297line candidate. Whole
+product patch is byte-identical after removing only Git index hash headers:
+parent metadata legitimately changed the README/changelog base-file hashes;
+all owned hunk text, offsets, changes and test bytes stay exact. Original and
+integrated patches remain retained, no weakened source comparison claim.
+
+Integrated strictall/allClippy9.62sPASS (0runtime tests). Full actual native
+262PASS63.889s0skip, compile10.77s,22binaries. Original five deadline laws run
+alongside both startup bounds and all prior ordering/uncertainty/atomic/state/
+backup/recovery/lifecycle laws. EACH actual run has three reviews:
+1. Contract: original native SQLSTATEs and no-partial-event/key writes, healthy
+   post-cleanup reuse, bounded startup and unavailable-server release compose
+   with the existing commit uncertainty and durable recovery contract.
+2. Execution/falsifier: all262 actual selected native laws execute,0skip; four
+   wrong-config failures and two incorrect fixture-error assumptions remain
+   retained and separately classified, not fabricated product defects.
+3. Assertions/source/selection: original test source and owned hunk changes
+   unchanged after parent integration, strict existing lints, no test omissions,
+   watchdog/budget relaxations or new runtime/framework/dependency. Correctness
+   timing here is not a capacity result. Original after-COMMIT timeout laws pass.
+
+Normal signed full gate next, maxjobs1/source-index freeze until terminal.
+Focused PR/current Linux/protected merge follow after parent398; do not stop at
+this test slice, diagnostics and remaining PG7/8/9 delivery remain required.
+
+## PR398 final Linux owners and delivery review
+
+Exact signed headb60fdf4929337654d7a785fe93d524d66371211f now40SUCCESS/
+1scheduledSKIP. Full downloaded joblogs /tmp/mnesis-pg4-metadata-job-<id>.log.
+Standalone push118213729683 actual257PASS55.518s0skip; PR118213750325 actual
+257PASS63.856s0skip, each plus seven distinct native capability smokes. Push
+Nix118213729688 actual1588workspacePASS113.428s1slow4compilerexclusions,
+257nativePASS58.006s0skip plus seven smokes/replay2/1/1each1s. PRNix118213750017
+actual1588workspacePASS147.040s4slow4compilerexclusions,257nativePASS63.739s0skip
+plus seven smokes/replay2/1/1each1s. Each native/workspace/replay invocation has
+three independent reviews: selected owner contract and new startup-memory laws;
+actual PG/native counts and compiler boundaries; unchanged tests/oracles/caps/
+archive/filter policies with exclusions explicit. Installed run.log echoes are
+ZERO new runs. Four257native runs/28smokes are distinct; workspace guarded tests
+are not database evidence. All remaining named Nix owners passed.
+
+Push and PR each execute three library unit modes on eight packages:
+15/15/15kernel,1/1/1macros,217/217/217store,17/17/17wake,25/25/30inmemory,
+131/131/131Fjall,0/0/0wake-nostd and store-testing. EACH of48invocations gets
+three reviews: actual feature-owner contract; real --lib counts (zero cases earn
+zero runtime credit); unchanged defaults/no-default/all flags and assertions,
+no ignored/filtered tests. These still omit isolated Postgres feature execution.
+Compile fixtures each2/1/1PASS: push121.80/15.32/18.57s, PR118.81/14.88/18.07s.
+EACH of six invocations reviewed for intended diagnostics, actual compiler
+execution and unchanged expected messages/test selection; no native credit.
+
+LibFuzzer wire/header/chunk/value each61s:7,541,739/3,219,430/2,061,857/6,806,864
+iterations, no finding. AFL/CMPLOG counterparts each60s:0/1/15/0new items,
+0crashes/0timeouts. EACH of eight campaigns gets three reviews: unchanged target
+contract/corpus; actual locked execution/time; unchanged failure pipeline/input
+and no threshold/corpus relaxation. Clean campaigns do not prove the outstanding
+saved-crash-with-zero-exit gate. CodSpeed118216049442 SUCCESS:43untouched,
+3skipped/baselinefallback,17syscallwarnings. Actual four-suite job118213750495
+completes; three reviews preserve benchmark contracts/execution/simulation and
+skip limits, with ZERO Postgres capacity claim. Owner CI cache/deprecation
+warnings remain retained. Mutation artifact baseline/sole E0277unviable review
+is in diagnostics research; no runtime catch is credited from that artifact.
+
+Final zero-thread/current-head/merge-state check then normal protected exact-head
+squash; no admin/waiver/threshold changes. Full PG7/8/9 release acceptance remains.
+
+## PG8 operations signed full gate and protected parent
+
+Normal signed gate28287 exits0 at4fed170499a36911e4a51f2abf049db26a8aaffa G;
+all12hostchecksPASS(10built2cached). Actual1593workspacePASS616.035s15slow,
+4established compiler exclusions/137binaries. Three reviews: owning unchanged
+workspace contracts plus five guard-returning tests; actual1593 execution with
+262native proof separately retained, no guarded-host database credit; unchanged
+workloads/assertions/filters and all exclusions explicit. Each actual replay
+2/1/1PASS1s gets three reviews for corpus contract, actual bounded execution and
+unchanged inputs/oracles/selection. Actual no_std/store/Wasm builds and named
+docs/Clippy/fmt/TOML/Hakari/unwaived audit/deny checks complete; no hardware claim.
+Raw owner logs/tmp/mnesis-pg8-operations-gate-* and mnesis-pg8-*-nostd/wasm retained.
+
+Metadata PR398 protected-merged8df11b218d959622a26c743c31ca68e0b8782388 at18:14:56Z,
+40SUCCESS/1scheduledSKIP/0threads. Entire reviewedb60tree exact;22focused merges,
+not published. Signed operations rebase onto that protected parent givesf37a7492 G,
+ENTIREtree equal first signed4fed proof; original proof branch and postgate stash
+preserved. No source/behavior change and zero additional executions from rebase.
+Normal evidence-only signed amend follows, inspect actual cache/runtime status,
+then push focused PR/current Linux CI/protected delivery promptly. No approval
+pending. Product remains297line test +README38/changelog2, zero executableRust,
+API/migration/dependency/runtime/framework changes. Full diagnostics/capacity,
+recovery measurements and PG9/release/registry requirements stay required.

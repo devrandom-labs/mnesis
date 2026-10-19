@@ -427,3 +427,19 @@ not inferred API behavior. Existing native migration laws own checksum/future
 version rejection, restoration and runtime privileges. No proof claimed yet for
 the new allocation hypothesis; old count/checksum-error laws alone do not bound
 transfer or memory.
+
+### PG8 configured deadlines, accessed 2026-10-19
+
+- PostgreSQL18 client connection defaults:
+  https://www.postgresql.org/docs/18/runtime-config-client.html .
+  statement_timeout bounds a statement at the server; lock_timeout bounds each
+  lock acquisition. Set per owning session/role, not a new adapter timer policy.
+  Zero disables either. A client watchdog does not establish rollback.
+- Locked local SQLx0.9 source, sqlx-core/src/pool/options.rs:249–263:
+  acquire_timeout caps permit wait, connection checks/hooks and new handshakes.
+  sqlx-postgres/src/options/mod.rs:425–455: options supplies native startup GUCs.
+  Online docs.rs pages for these exact APIs returned internal errors; local
+  locked source is authoritative. Existing dependencies suffice, no new crate.
+- Existing adapters/postgres/tests/lifecycle_tests.rs and support/cluster.rs own
+  listener observation, pool-close and native-server lifetimes. Reuse these
+  established patterns; correctness timings here are not capacity measurements.
