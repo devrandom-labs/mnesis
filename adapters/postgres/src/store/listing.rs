@@ -26,7 +26,7 @@ pub(super) async fn page<'e>(
 ) -> Result<VecDeque<PageRow<Key>>, PostgresError> {
     sqlx::query_as(
         "WITH candidates AS ( \
-             SELECT k.number, 32 + octet_length(k.value)::bigint AS row_bytes \
+             SELECT k.number, 32 + pg_catalog.octet_length(k.value)::bigint AS row_bytes \
              FROM mnesis.keys k WHERE ($1::bigint IS NULL OR k.number > $1) \
              AND EXISTS (SELECT FROM mnesis.events e WHERE e.stream_id = k.number \
                  AND pg_catalog.pg_visible_in_snapshot(e.txid, $2::text::pg_catalog.pg_snapshot)) \

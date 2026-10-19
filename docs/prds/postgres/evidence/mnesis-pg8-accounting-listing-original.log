@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+────────────
+ Nextest run ID 54e9e9d2-0ee5-4da1-ae8b-fc1b6cc478e2 with nextest profile: default
+    Starting 1 test across 1 binary (8 tests skipped)
+        FAIL [   0.158s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_listing_byte_limits
+  stdout ───
+
+    running 1 test
+    test application_lengths_cannot_bypass_listing_byte_limits ... FAILED
+
+    failures:
+
+    failures:
+        application_lengths_cannot_bypass_listing_byte_limits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.15s
+
+  stderr ───
+
+    thread 'application_lengths_cannot_bypass_listing_byte_limits' (106227395) panicked at adapters/postgres/tests/names_tests.rs:322:5:
+    Ok([StreamKey(b"first"), StreamKey(b"second"), StreamKey(b"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")])
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.159s] 1 test run: 0 passed, 1 failed, 8 skipped
+        FAIL [   0.158s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_listing_byte_limits
+error: test run failed

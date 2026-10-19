@@ -63,9 +63,9 @@ impl SnapshotStore<Vec<u8>, Version> for PostgresStore {
         let limit = i64::from(self.inner.limits.bytes.get());
         let row = sqlx::query_as::<_, Row>(
             "SELECT s.schema_version, s.version::text AS version, \
-             octet_length(k.value)::bigint + octet_length(s.state)::bigint + 32 AS size, \
+             pg_catalog.octet_length(k.value)::bigint + pg_catalog.octet_length(s.state)::bigint + 32 AS size, \
              CASE WHEN s.schema_version = $2 AND \
-                 octet_length(k.value)::bigint + octet_length(s.state)::bigint + 32 <= $3 \
+                 pg_catalog.octet_length(k.value)::bigint + pg_catalog.octet_length(s.state)::bigint + 32 <= $3 \
                  THEN s.state END AS state \
              FROM mnesis.snapshots s JOIN mnesis.keys k ON k.number = s.key \
              WHERE k.value OPERATOR(pg_catalog.=) $1",

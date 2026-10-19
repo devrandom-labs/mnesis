@@ -1,3 +1,43 @@
+# Current accounting delivery — 2026-10-19 16:16 UTC
+
+Worktree /tmp/mnesis-postgres-accounting branchfix/postgres-accounting, protected
+parentf7d390d4 (PR395 merged16:08:47Z after40requiredgreen/0threads; exact reviewed
+source efa). Root userbranch/research/stashes/worktrees remain untouched.
+Canonical skill/fullprotocol read, existing immutablecontract retained.
+
+Current production diff ONLY13pg_catalog.octet_length qualifications over7SQLlines
+(14churn) plus checkpoint32→48Rustdoc(2churn); no API/dependency/runtime/framework.
+Existing names fixture gainslimitsentry and4actual native body/keyguard laws,
+571/650lines. Normal larger-limit writer accepts validdata; reader64 must reject
+exact300event/293snapshot/309checkpoint/160listing row sizes. Original4native reds
+retained. Failed wrongsnapshotmethod compilerattempt is ZERO runtimecredit.
+Probe cleanup/searchpathcheck BEFORE faultassertions prevents fixture poisoning.
+
+Current proofs: names9PASS0.390s0skip; FULLnative255PASS67.963s0skip; no-default
+names3PASS0.139s0skip; strictall/allClippy7.99s +no-default/all3.98s andfmtPASS.
+THREE reviews after EVERY actual run in research.md. Rebaseonto protectedparent
+used retained stash3ad94918b21e2f357f1fe8fc2bbbc158f1c32559; ENTIREpendingdiff
+before/after identical, not just source. Fullsignedgate next, maxjobs1/onebuild;
+freeze source/index until terminal. Then exactGPG/sourcehash/whitespace, actual
+logs3reviews, evidence-only cachedamend0fresh ifneeded, focusedPR/LinuxCI/artifact/
+review/CodSpeed/protectedmerge. Do NOTleave green focusedchanges waiting while
+expanding another investigation; user challenged the delivery delay.
+
+Durability PR395 evidence: artifact12165771927 ZIP verified
+c71439878264678b9d7565f50e536d80859a1b64e40bc2f2f09ced2e285770b4;
+6actualcatches/3compilerunviable/0survivors/timeouts, allfirstfailures/diffs reviewed,
+no42P06poison. FourLinux251PASS plusworkspace1585twice andallothercheckspassed.
+Originalcommittimeout uncertainty unchanged; preCOMMITknownphaseSqlx, both wrong
+mappers have real failingcontrols. TLS392 merged8f03ae85. Fullscope now19focusedmerges.
+
+Release378 regenerated0.5.0, lastobserved2475b90f all40requiredgreen/1scheduledskip,
+OPEN. Do NOTpublishbeforewholeacceptance. Goal saved externalBLOCKED, no budget;
+currentauthorizedworkcontinues without goalDB/safeguard bypass. Do NOTend after
+this slice or a localpass. Remaining mandatory: SUM/window/integer/catalog/
+unboundedmigrationmetadata actualwitnesses, PG7operatortimings, PG8 lifecycle/
+diagnostics/capacity10k100k1m×1/16/128+30minsoak, PG9 Python/cargo-hack/nativefeature/
+AFLzeroexit/advisories/Nixunusedoutputs/minimization/twoaudits/release/registryconsumer.
+Read-only preparedfollowups /tmp/mnesis-postgres-followups-20261019.md, not delivered.
 ## Current durability delivery — 2026-10-19 05:39 UTC
 
 Protected parent8f03ae85; signed64f325f6 GPGgood. Normal unchanged signedgate99009
@@ -589,3 +629,10 @@ usesno-tests=fail for newdurabilityowner. No nativefullgate/Linux credit yet.
 Stagingcurrentformattedsource/evidence then normalSIGNEDfullgate(maxjobs2), only
 onebuild/native suite atatime. No localjobs active now. TLS PR392f2currentCI39green/
 1Nixpending; mustprotectedmergebeforedependentDurabilitydelivery. Currentparentf2.
+
+LATEST currentaccounting: normalSIGNED f3b2a631 G fullgate75846 all12PASS;
+workspace1586PASS495.606s15slow4compilerexcluded/replay2/1/1each1s allTHREEreviewed.
+Exactfrozenproduct0d2e801d.../whitespacePASS, no gateorpolicychanges. Record-only
+signedamend next, identicaloutputs cachedZEROnewtests; focusedPR/currentLinuxCI/
+artifact/CodSpeed/thread review and normalprotectedmerge next. No localjobs now.
+Do notleave greenfocusedchanges waiting whilebroadening another investigation.

@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.55s
+────────────
+ Nextest run ID 5ba98c22-cb84-464d-acfe-fdfe67283fbf with nextest profile: default
+    Starting 1 test across 1 binary (8 tests skipped)
+        FAIL [   0.302s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_snapshot_byte_limits
+  stdout ───
+
+    running 1 test
+    test application_lengths_cannot_bypass_snapshot_byte_limits ... FAILED
+
+    failures:
+
+    failures:
+        application_lengths_cannot_bypass_snapshot_byte_limits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.28s
+
+  stderr ───
+
+    thread 'application_lengths_cannot_bypass_snapshot_byte_limits' (106220970) panicked at adapters/postgres/tests/names_tests.rs:201:5:
+    Ok(Found { position: Version(1), state: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120] })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.308s] 1 test run: 0 passed, 1 failed, 8 skipped
+        FAIL [   0.302s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_snapshot_byte_limits
+error: test run failed

@@ -1,0 +1,36 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-accounting/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-accounting/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.39s
+────────────
+ Nextest run ID dc675717-360a-43c5-b2fc-80d9f1ad4592 with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [   0.086s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_event_byte_limits
+  stdout ───
+
+    running 1 test
+    test application_lengths_cannot_bypass_event_byte_limits ... FAILED
+
+    failures:
+
+    failures:
+        application_lengths_cannot_bypass_event_byte_limits
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.06s
+
+  stderr ───
+
+    thread 'application_lengths_cannot_bypass_event_byte_limits' (106199443) panicked at adapters/postgres/tests/names_tests.rs:141:5:
+    Ok([PersistedEnvelope { version: Version(1), schema_version: SchemaVersion(1), value: b"\x02\x01\0\0\0\x07\0\xff\xff\xff\xffPrivate\0\0\0\0\0\0\0\0\0\0\0\0\0\0first-body", event_type_range: 11..18, payload_range: 32..42, metadata_range: None }, PersistedEnvelope { version: Version(2), schema_version: SchemaVersion(1), value: b"\x02\x01\0\0\0\x07\0\xff\xff\xff\xffPrivate\0\0\0\0\0\0\0\0\0\0\0\0\0\0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", event_type_range: 11..18, payload_range: 32..288, metadata_range: None }])
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.090s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [   0.086s] (1/1) mnesis-postgres::names_tests application_lengths_cannot_bypass_event_byte_limits
+error: test run failed

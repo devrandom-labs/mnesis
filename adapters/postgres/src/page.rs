@@ -8,8 +8,8 @@ use crate::{Limits, PostgresError};
 // Scalar accounting: version, schema version, transaction and sequence (8 each).
 // Widen lengths before addition; metadata NULL and empty remain distinct bodies.
 pub const START: &str = "WITH candidates AS (SELECT global_seq, version, txid, \
-    32 + octet_length(keys.value)::bigint + octet_length(event_type)::bigint + \
-    octet_length(payload)::bigint + COALESCE(octet_length(metadata)::bigint, 0) \
+    32 + pg_catalog.octet_length(keys.value)::bigint + pg_catalog.octet_length(event_type)::bigint + \
+    pg_catalog.octet_length(payload)::bigint + COALESCE(pg_catalog.octet_length(metadata)::bigint, 0) \
     AS row_bytes FROM mnesis.events JOIN mnesis.keys ON keys.number = events.stream_id WHERE ";
 
 #[derive(Clone, Copy)]

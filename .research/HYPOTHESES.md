@@ -902,3 +902,31 @@ Budget: production existing Rust stays<=35line churn (restore original unknown
 outcome docs, pre-COMMIT error Sqlx); existing outcome test/relay<=150line churn,
 no new fixture framework/runtime/API, no assertion/exclusion/workload relaxation.
 Rollback only this phase experiment, preserving every red and source snapshot.
+
+PG1/PG4/PG6/PG8 byte-accounting experiment, pre-edit (2026-10-19): bounded
+readers must enforce the native byte limit even when the caller explicitly puts
+pg_catalog after an application schema. Source has bare octet_length(bytea) in
+page/listing/snapshot/checkpoint readers; table qualification alone does not fix
+function resolution. SOURCE FINDING ONLY until actual original reds.
+Workload: existing native names fixture, reader64bytes, normal independent
+larger-limit writer accepts256byte payload/state or128byte key. Before probe,
+assert exact RowLimit sizes. Application exact-signature octet_length returning0
+must not change that result. Capture result and DROP probe BEFORE assertions to
+preserve independent fault tests, unlike the rejected prior poisoned fixture.
+Budget BEFORE expansion: existing names_tests314→<=650lines (prior360budget
+explicitly revised for four separate capability owners); reuse existing fixture,
+add one private limits entry point, no new test framework/API/runtime/dependency.
+Production budget<=20SQLline changes across current page/listing/snapshot/
+checkpoint owners ONLY after actual red per owner. No invented SUM/window/int
+coverage from octet_length witness; those need their own fault tests. One limits
+Rustdoc line correction allowed: current checkpoint accounting48, not stated32.
+Falsifier: any original reader delivers the oversized body/key under probe while
+healthy control rejects exact size. Reject changes if caller settings are reset,
+ordering/checkpoints/bounds weaken, or another function/operator remains able to
+violate the same claimed guard. Rollback only this experiment; preserve all reds.
+
+Accounting delivery documentation pre-edit budget: changelog<=5newlines naming
+only the actual octet_length collision defect, no blanket SQL-name safety claim.
+Update PRD/backlog/progress with protected durability delivery and current narrow
+accounting verification; do not expand into SUM/window/integer hypotheses before
+this proved slice is delivered. Full native255 is running; preserve product source.

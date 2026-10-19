@@ -1,0 +1,16 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.05s
+────────────
+ Nextest run ID f1200941-bca4-44bc-90f8-37b9269df62d with nextest profile: default
+    Starting 9 tests across 1 binary
+        PASS [   0.057s] (1/9) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_checkpoints_pair
+        PASS [   0.038s] (2/9) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_snapshots_state
+        PASS [   0.040s] (3/9) mnesis-postgres::names_tests application_byte_equality_cannot_redirect_a_snapshot_write
+        PASS [   0.039s] (4/9) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        PASS [   0.045s] (5/9) mnesis-postgres::names_tests application_lengths_cannot_bypass_checkpoint_byte_limits
+        PASS [   0.044s] (6/9) mnesis-postgres::names_tests application_lengths_cannot_bypass_event_byte_limits
+        PASS [   0.044s] (7/9) mnesis-postgres::names_tests application_lengths_cannot_bypass_listing_byte_limits
+        PASS [   0.044s] (8/9) mnesis-postgres::names_tests application_lengths_cannot_bypass_snapshot_byte_limits
+        PASS [   0.038s] (9/9) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+────────────
+     Summary [   0.390s] 9 tests run: 9 passed, 0 skipped

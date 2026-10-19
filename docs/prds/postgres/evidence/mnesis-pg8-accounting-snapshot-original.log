@@ -1,0 +1,13 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+error[E0599]: no method named `save_snapshot` found for struct `PostgresStore` in the current scope
+   --> adapters/postgres/tests/names_tests.rs:185:10
+    |
+184 | /     writer
+185 | |         .save_snapshot(&id, NonZeroU32::MIN, Version::INITIAL, &vec![b'x'; 256])
+    | |         -^^^^^^^^^^^^^ method not found in `PostgresStore`
+    | |_________|
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mnesis-postgres` (test "names_tests") due to 1 previous error
+error: command `/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/bin/cargo '--color=auto' test --no-run --message-format json-render-diagnostics --package mnesis-postgres --test names_tests --all-features` exited with code 101

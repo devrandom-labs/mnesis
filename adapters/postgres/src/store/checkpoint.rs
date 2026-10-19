@@ -124,9 +124,9 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
         let limit = i64::from(self.inner.limits.bytes.get());
         let row = sqlx::query_as::<_, Row>(
             "SELECT c.revision::text AS revision, c.schema_version, c.txid::text AS txid, c.global_seq::text AS global_seq, c.history, \
-             octet_length(k.value)::bigint + octet_length(c.state)::bigint + 48 AS size, \
+             pg_catalog.octet_length(k.value)::bigint + pg_catalog.octet_length(c.state)::bigint + 48 AS size, \
              CASE WHEN c.schema_version = $2 AND c.history = $4 AND \
-                 octet_length(k.value)::bigint + octet_length(c.state)::bigint + 48 <= $3 \
+                 pg_catalog.octet_length(k.value)::bigint + pg_catalog.octet_length(c.state)::bigint + 48 <= $3 \
                  THEN c.state END AS state \
              FROM mnesis.checkpoints c JOIN mnesis.keys k ON k.number = c.key \
              WHERE k.value OPERATOR(pg_catalog.=) $1",

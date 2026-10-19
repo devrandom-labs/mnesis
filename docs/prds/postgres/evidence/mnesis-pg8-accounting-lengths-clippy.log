@@ -1,0 +1,9 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.99s
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/postgres)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-accounting/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-accounting/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.98s

@@ -7247,3 +7247,167 @@ Original reported pipeline failure fixed, no final publication/acceptance claim;
 remaining adapter prerequisites still block merging release. Current checks
 snapshot /tmp/mnesis-release-2475-checks.json. Final release evidence must use
 its eventual reviewed head and actual registry consumer, not this intermediate.
+frozen8e21c659... PASS, whitespacePASS, clean beforepush.
+Focused PR395 https://github.com/devrandom-labs/mnesis/pull/395 OPEN at exactefa,
+normalpush (no force/admin). Required actual LinuxCI/artifact/review checks next.
+Scoped cache deletion89647 COMPLETE four exact unrooted/referrerfree oldnextest
+outputs, ~1GiB each; original build logs retained before removals. Rooted old
+proofgjks untouched; no broadGC/target/rawbaseline/worktree deletion. No localjobs.
+
+Next focused accounting branchfix/postgres-accounting starts at signedefaedc28,
+while prerequisiteDurabilityPR395 CI runs. No other local builds/native suites.
+Research append copied only after exact committed-prefix verification; user root
+branch/research/worktrees unchanged. Read-only source findings in next hypotheses
+entry are NOT acceptance. Scope/budgets and healthy→application-name falsifier
+recorded BEFORE test edits. Existing standard caller pool, SQLx and fixture are
+sufficient; no framework/runtime or projectPython. All runs THREEreviewed.
+
+Accounting original event witness8362 actual1FAIL0.090s,5nonselected. THREEreviews:
+1reader64 rejects healthy valid larger-writer row with exactRowLimit300/64;
+2native application octet_length returns0 vs qualified1 on same bytea, original
+reader instead delivers two valid envelopes including256byte body;3normal larger
+writer persisted it (no corrupt/native row rewriting), stream/all results captured
+before probeDROP, cleanup and path assertion precede failure, no poisoned schema
+left. First failing stream assertion proves this owner defect; all-result captured
+but its later assertion did not execute, so no separate original-all catch claimed.
+Original production unchanged. Raw /tmp/mnesis-pg8-accounting-event-original.log.
+Need original separate state/listing witnesses before those SQL edits. Testfile
+400/650lines, healthy fixture retains existing lifecycle readiness and callerpool.
+
+Snapshot witness command29632 compileFAIL101 E0599, ZERO runtime tests. Fixture
+mistakenly calledsave_snapshot; actual existing SnapshotStore method iscommit,
+confirmed intrait/adapter/existingnames law. THREEreview checks:1intended same
+native body/byte contract;2compiler failure is NOT original-defect catch;3no test
+assertion/exclusion/workload relaxed; correct only call name, preserve rawfailed
+command /tmp/mnesis-pg8-accounting-snapshot-original.log, retry separately named.
+Original production remains unchanged; sourceexisting4capability witnesses571/650lines.
+
+Snapshot original native87581 actual1FAIL0.308s,8nonselected. THREEreviews:
+1normal larger-limit writer stores validVersion1/256byte state, reader64 healthy
+exactRowLimit293/64;2real application0/qualified1 lengths verified, originalhydrate
+instead returnsFoundVersion1+all256bytes;3same typed exact limit oracle, cleanup
+and search_path assertion precede failure, no skip/compiler-failure credit or
+schema contamination. Raw snapshot-native-original.log, earlier compile failure
+kept separately. No production SQL edits yet. Next independent checkpoint owner.
+
+Checkpoint original native command actual1FAIL0.153s,8nonselected. THREEreviews:
+1valid larger-writer revision1/position/state256 has healthy reader64 exactlimit
+309/64;2native shadowlength0 vsqualified1 makes originalhydrate returnFound with
+same revision/position and all256bytes;3exact typed RowLimit oracle, application
+schema removed and callerpath asserted BEFORE failure, no compile/skip credit,
+state/position untouched. Raw checkpoint-original.log. No production fix yet.
+
+Listing original native actual1FAIL0.159s,8nonselected. THREEreviews:1normal
+larger-writer accepts128byte key, healthy reader64 exactRowLimit160/64;2real same
+length0/qualified1 probe makes original list_streams return allthree keys including
+128bytekey;3typed limit oracle, cleanup/path assertion BEFORE failure, no guard
+skip or fixture poisoning. Raw listing-original.log. Allfourcapability owners now
+have actual original native reds before any production edits. Snapshot wrongcall
+compile failure remains separate with ZERO runtimecredit. Initial added-test
+strictClippy8.19sPASS (before three extra capability cases), not final lintproof.
+
+PR395 final exactefa CI review: push39205684104/PR39205687726 terminalSUCCESS.
+THREE independent reviews for each actual run:1contract workspace1585PASS136.712/
+94.054s4/1slow4compilerexcluded, nativefour251PASS54.698/57.378 standalone and
+61.606/56.293Nix0skip; all10durability+two phase laws visibly run. Seven smokes
+pernativejob pass; installed-log echoes are not more executions.2execution/fault:
+real unsafe settings/replacement connections/deferred triggers/process restart,
+exact independent settled counts/state pairs and original lostack/timeout actual
+postserverCOMMIT remain;3assertion/selection sourceunchanged, no new exclusion or
+waiver. Compiler2/1/1PASS118.84/14.64/18.31s push and97.62/12.98/16.05s PR;
+unitfeature matrix each15/15/15kernel,1/1/1macros,217/217/217store,17/17/17wake,
+25/25/30inmemory,131/131/131Fjall,0/0/0nostd/store-testing.0harness compile-only,
+Postgres feature matrix stillPG9. Replay both2/1/1PASS1s, unchanged sources/corpus.
+
+Mutation39205687658 actual artifact12165771927 ZIP sha256
+c71439878264678b9d7565f50e536d80859a1b64e40bc2f2f09ced2e285770b4 verified equals
+GitHubdigest and exactefa metadata. Baseline251PASS55.985s0skip.9variants:
+6runtimecaught/3compilerunviable/0survivor/timeout. ALL9diffs inspected (exact
+one added replacementreturn each), all6first failures/source/selection reviewed:
+validateOk bypass commits nativecounts2/2 vs1/1; commitOk falselyacknowledges
+missingglobalrows; migrateOk fails fresh native initializationSchemaNotMigrated;
+atomicNone fails required conflictError; snapshotOk givesAbsent vsFoundVersion2;
+checkpointOk1 givesAbsent vsFoundrevision1/maxposition/state. Each matches own
+mutated contract and actual native failure, no42P06 fixturepoison. ThreeDefault
+History/PgAllPosE0277 are compilationonly, zero runtimecatches. Raw full logs/diffs
+retained /tmp/mnesis-durability-efa-mutants, originalZIP/artifactJSON retained.
+
+Fuzz39205687702 THREEreviews:1same four production input contracts;2actual61s
+libFuzzer wire8,281,696/header2,533,822/chunk1,286,315/value5,794,139; four60s
+AFL++CMPLOG campaigns;3savedcrashes0/timeouts0, discoverieswire0/header1/chunk11/
+value0. No new corpus/source/gate change; clean runs NOT AFLzeroexitcrashgate
+faultproof, stillPG9. CodSpeedcheck117909348385SUCCESS43untouched3baselinefallback
+skipped,17syscallwarnings retained; no PGwalltime/capacity proof claimed.
+
+Exactefa40requiredSUCCESS/1scheduledsweepSKIP,CLEAN,0reviewthreads. Raw
+/tmp/mnesis-durability-efa-{push-ci,pr-ci,fuzz}.log/performanceJSON/checksJSON/
+threadsJSON retained. Normal exact-head protected merge next, no admin/waiver.
+
+Length fix13210 nativePASS9/90.390s0skip, compiled2.05s. THREEreviews:
+1all five existing identity/head laws plus four separate byte-limit capability
+laws pass together;2actual original reds retained event0.090/snapshot0.308/
+checkpoint0.153/listing0.159s, normal accepted larger-writer data, exact healthy
+and shadowed RowLimit300/293/309/160 vs64, native/control length0/1;3cleanup before
+assertions and callerpath unchanged, no exclusions/guards, both stream/all exact
+limit assertions nowexecute/pass (no separate original-all catch invented).
+Productiononly7SQLline substitutions(14churn) plus one32→48checkpointRustdoc
+correction(2churn), total16/20allowedSQLchurn+docbudget; no new API/dependency.
+SUM/window/integer/catalog/metadata findings still unproven and unresolved.
+
+DurabilityPR395 protectedMERGED2026-10-19T16:08:47Z at
+f7d390d4c50936b2912207c2d417a8c24a899e0c, exactefa reviewedhead40requiredSUCCESS/
+1scheduledSKIP/0threads, no admin/waiver. Fetched ENTIRE protectedtree equals
+reviewedefa. User correctly challenged long delivery delay; do not leave green
+focused changes waiting while expanding another investigation. Finish current
+four proved byte-accounting repairs through full gate/CI/protected delivery.
+
+Accounting strictall/allClippy7.99s and no-default/allClippy3.98sPASS, formatPASS;
+no lint policy/allowance changes, compile-only not native proof. Source changes
+14SQLchurn+2Rustdoc, names571/650, no new APIs/dependencies/runtime/framework.
+
+Accounting full current native24832 PASS255/25567.963s0skip, compilation13.93s.
+THREEreviews:1all protected251 regressions plus four new body/key limit laws
+actually run together, preserving ordering/resume/recovery/atomicity/uncertainty/
+state pairs/migrations/backup/TLS/durability;2allfour original native reds and
+healthy exact-limit controls retained, new queries only13native length-call
+qualifications, actual new failures not simulated pureSQL-only tests;3all255
+selected/no ignored/guard exclusion, unchanged test assertions/workloads, no
+inferred siblings. No capacity, power-loss or all-SQL-names-safety claim. Source
+entire pending binarydiff compares identical before/after protectedparentrebase,
+retained stash in/tmp/mnesis-accounting-protected-parent-stash, not dropped.
+
+Accounting no-default names80116 PASS3/30.139s0skip, compilation6.53s.
+THREEreviews:1both existing unconditional identity/head laws and new event row
+limit law run with optional capabilities disabled;2actual native shadow/control
+and original red preserved, exacttyped300/64 checks forstream/all;3no filter or
+DBskip, cfg-disabled state/listing cases NOT counted. Focused3doesnotreplace full
+nativefeature matrix (stillPG9). Completeall255 and strictall/defaultClippy remain
+separate proofs. Preparing normalSIGNED fullgate; no new localtest/build jobs.
+
+Accounting fullgate replay actualfresh2/1/1PASS1s each, compilation4.05s.
+THREEreviews:1existing four production decoder/value contracts unchanged;2actual
+replay test bodies ran, no cached/echo executioncredit;3fuzz source/locks/corpus
+unchanged, no added exclusions/coverage/nativeDB/capacity claim. Current rawlog
+/tmp/mnesis-pg8-accounting-gate-replay.log, h871...derivation. Keep source/index
+frozen until complete signedgate75846; append this review to durable records only
+after terminal gate, explicitly preserving the prior frozen product snapshot.
+
+Accounting instrumented workspace actual1586PASS495.606s15slow4compilerexcluded,
+release compilation1m13s, coverage report emitted. THREEreviews:1all selected
+workspace invariants/old fault/property suites pass plus new unconditional event
+law;2actual runtime tests verified, while Postgres environment guards here are
+compilation/harness evidence ONLY, separate255native proof remains;3unchanged
+fourcompiler exclusions/feature union/workloads/assertions, cfg-disabled state/
+listing cases not falsely counted, no added skips or waivers. Raw sala...log at
+/tmp/mnesis-pg8-accounting-gate-nextest.log. Fullsignedgate75846 stillfinishing
+no_std/store-no_std/Wasm; no complete gate/commit claim untilterminal.
+
+Accounting normalSIGNEDfullgate75846PASS all12 at
+f3b2a6312087539661553f83072ea13406ec3cae GPGgood. Actualworkspace1586PASS495.606s
+15slow4compilerexcluded and replay2/1/1each1s reviewedTHREEtimes above; no nativeDB
+credit from guarded workspace. Full no_std/store-no_std/Wasm checks pass.
+ENTIRE committed productdiff matches frozen
+0d2e801dd8c9a626caaf8797133023a128988b4ed54c7318628bfc81e32f6230, whitespacePASS,
+clean worktree before recordupdates. Gate/workloads/assertions/filters/policies
+unchanged. Record-only signedamend next; unchanged cachedoutputs are ZERO new
+runtime tests. Then focusedPR and actualLinuxCI/artifact/protecteddelivery.
