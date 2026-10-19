@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 
 use mnesis::ErrorId;
 use sqlx::migrate::Migrator;
-use sqlx::{Connection, PgConnection, PgPool};
+use sqlx::{Connection, PgConnection, PgPool, Postgres, QueryBuilder};
 
 use crate::error::PostgresError;
 use crate::{History, durability, history};
@@ -58,12 +58,29 @@ async fn validate_current(connection: &mut PgConnection) -> Result<History, Post
             "schema is not migrated; run PostgresStore::migrate with the migration role",
         ));
     }
-    let applied: Vec<(i64, bool, Vec<u8>)> = sqlx::query_as(
-        "SELECT version, success, checksum FROM mnesis._sqlx_migrations ORDER BY version",
-    )
-    .fetch_all(&mut *connection)
-    .await
-    .map_err(PostgresError::Sqlx)?;
+    // One extra byte/row preserves rejection of overlong digests and unknown versions.
+    let checksum = MIGRATIONS
+        .iter()
+        .map(|migration| migration.checksum.len())
+        .max()
+        .and_then(|length| length.checked_add(1))
+        .ok_or_else(|| incompatible("embedded migration checksums have no finite bound"))?;
+    let rows = MIGRATIONS
+        .iter()
+        .count()
+        .checked_add(1)
+        .ok_or_else(|| incompatible("embedded migration count has no finite bound"))?;
+    let mut query =
+        QueryBuilder::<Postgres>::new("SELECT version, success, pg_catalog.substr(checksum, 1, ");
+    query
+        .push(checksum)
+        .push(") FROM mnesis._sqlx_migrations ORDER BY version LIMIT ")
+        .push(rows);
+    let applied: Vec<(i64, bool, Vec<u8>)> = query
+        .build_query_as()
+        .fetch_all(&mut *connection)
+        .await
+        .map_err(PostgresError::Sqlx)?;
     if applied.len() != MIGRATIONS.iter().count()
         || !applied
             .iter()

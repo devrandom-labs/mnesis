@@ -1,3 +1,80 @@
+# Current metadata focused delivery — 2026-10-19
+
+PR397 protected MERGED3313567f8714f655c7ed65f0fb9be62caa463b0a17:47:45Z,
+40SUCCESS/1scheduledSKIP/0threads, entiretreeexactreviewed205b01c4.21merges,
+not published. Operations worktree retains complete actualLinux3review records.
+Metadata normalSIGNEDgate18512 TERMINAL0,fe050eb2 G, all12PASS10built2cached.
+Actual1588workspacePASS566.907s15slow4compilerexclusions, replay2/1/1PASS
+1.00/1.00/1.01s, no_std/store/Wasm actualbuildPASS. EACHruntime THREEreviewed.
+257actualnative63.461s0skip separatelyproven. Root userbranch/edits untouched.
+Signedrebaseontoprotected331 givesc565230c G, ENTIREtreeexactfe050, product
+SHAda2c52f4 remainsbyteidentical. Proofbranchretained. Record-only normalSIGNED
+amend startingnext: freeze source/indexuntilterminal, inspectactualcache/runtime,
+sourcecmp/GPG/whitespace, push/openfocusedPRpromptly. PRbody/tmp/mnesis-pg4-metadata-pr.md
+must replacependinglocalgatewithactual12PASS1588, keepLinuxpending. No approvalneeded.
+
+Operations/tmp/mnesis-postgres-operations fivecorrect-config nativePASS plus4
+wrong-config catches, fullWIPunchanged; preserve/stash/integrateontoFINALmetadata
+reviewedheadafterthisamend, comparefrozenproduct5a4891d9 andparentJSONLprefix,
+fullcombined262native/strictchecks thenONEfullSIGNEDgate. Controlswrong, nevermerge.
+Diagnostics/tmp/mnesis-postgres-diagnostics newrequiredtracingcharacterization
+preparing, no productionRust changedyet, firstClippyfixturefailed (0tests),
+readthatworktree records. No newsecurityedgecases. RemainingPG8capacity/soak/
+diagnostics,PG7timings,PG9Python/features/AFL/docs/twoaudits/release/registry intact.
+
+## Earlier pointers — historical
+
+# Current signed metadata gate — 2026-10-19
+
+Combined reviewed dependency205b01c4 + unchanged metadata source passes
+257actualnative cases63.461s,0skips/12.81scompile; startup peaks2813/2814bytes.
+All THREE reviews recorded, eight raw-result copies retained in existing PRD
+evidence (trailing blanks stripped only; /tmp originals unchanged).
+Normal SIGNED full gate starting now, maxjobs1, source/index FROZEN until actual
+terminal. Log/tmp/mnesis-pg4-metadata-hook.log. No other full gate/native active.
+After terminal inspect actual runtime outputs and THREE reviews/sourcecmp/GPG/
+whitespace; focused PR against reviewed dependency then current Linux CI and
+protected merge after397. PR397 CI still running. No new security edge-case
+investigations; required operations/capacity/recovery/docs/delivery remain.
+
+## Earlier current pointer — superseded by the entry above
+
+# Current startup memory and delivery work — 2026-10-19
+
+Goal ACTIVE, no budget. User asked why security work dominated: restrict further
+security work to explicit required acceptance; prioritize operations/capacity and
+delivery. Root user branch8357c0c2/research edits remain untouched.
+
+PR397 dependency patch OPEN, signed205b01c4bbe6f022702c482d13e2f7f9d6a4ffcd G,
+all12 normal signed local checks PASS:1586workspace622.698s/4compilerexclusions,
+replay2/1/1, no_std/store/Wasm; separate native255PASS90.562s0skip. Evidence amend
+22428 terminal0 reused11checks/rebuiltTOML only, ZERO fresh test execution.
+Linux CI running. Current PRbody /tmp/mnesis-pg9-advisory-pr.md. Review actual
+Linux jobs/artifacts/threads, then exact-head protected merge promptly when green.
+
+Metadata worktree/tmp/mnesis-postgres-metadata branchfix/postgres-metadata is
+based on reviewed205b01c4. Entire WIP stash retained (pointer
+/tmp/mnesis-pg4-metadata-integration-stash);4research-only conflicts normalunion,
+parent JSONL prefix exact/valid. Product diff byte-identical SHA
+da2c52f4fdb1de272cfc09b5c052eb2c63269145b6536128c796394a3af1d103.
+Original2FAIL4.963s at11MB/134MB startupallocation. Fixed2PASS3.181s, fullnative
+257PASS74.826s0skip:2813/2814incrementalpeakbytes, unchanged2MiBcap. Wrongcount
+and wrongprefix controls independentlyFAIL at Schema oracle after restoration.
+Strictall/allClippy9.36s/no-default/all11.96s +fmtPASS. THREE reviews each.
+Combined257native session71025 nowRUNNING, log
+/tmp/mnesis-pg4-metadata-integrated-native.log. No other actual native suite.
+After terminal inspect every result/three reviews, capture retained evidence,
+normal SIGNED full Nix gate maxjobs1/source-indexfreeze, focused PR/CI/protected
+merge after397. One fullgate at a time; host Nix noDB uses private target and may
+coexist with independent native characterization, never concurrent native suites.
+
+Still required: PG7 operator timings/profile, PG8 lifecycle/deadline/diagnostics/
+capacity10k100k1m×1/16/128 and30minsoak, PG9 Python removal/isolatednativefeatures/
+AFLsavedcrashgate/docs/minimization/twofreshwholeaudits/publication/cleanregistry
+realDBconsumer. No security edge-case expansion or premature completion.
+
+## Historical pointers — superseded
+
 # Current dependency integration — 2026-10-19
 
 Active worktree /tmp/mnesis-postgres-advisory, fix/postgres-advisory. PR396 now

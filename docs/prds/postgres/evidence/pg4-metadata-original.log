@@ -1,0 +1,57 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-metadata/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-metadata/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-metadata/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-metadata/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-metadata/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-metadata/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-metadata/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-metadata/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 40.71s
+────────────
+ Nextest run ID 935406e5-bcc4-4a53-9263-8bcf6cdde47b with nextest profile: default
+    Starting 2 tests across 1 binary (15 tests and 20 binaries skipped)
+        FAIL [   4.706s] (1/2) mnesis-postgres::migration_tests excessive_migration_rows_reject_without_loading_the_backlog
+  stdout ───
+
+    running 1 test
+    test excessive_migration_rows_reject_without_loading_the_backlog ... FAILED
+
+    failures:
+
+    failures:
+        excessive_migration_rows_reject_without_loading_the_backlog
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 4.68s
+
+  stderr ───
+    migration rows=100005, startup peak=11028315
+
+    thread 'excessive_migration_rows_reject_without_loading_the_backlog' (109755231) panicked at adapters/postgres/tests/migration_tests.rs:140:5:
+    startup loaded the migration backlog: peak=11028315
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.241s] (2/2) mnesis-postgres::migration_tests oversized_migration_checksum_rejects_without_loading_its_body
+  stdout ───
+
+    running 1 test
+    test oversized_migration_checksum_rejects_without_loading_its_body ... FAILED
+
+    failures:
+
+    failures:
+        oversized_migration_checksum_rejects_without_loading_its_body
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.23s
+
+  stderr ───
+    checksum bytes=33554480, startup peak=134204367
+
+    thread 'oversized_migration_checksum_rejects_without_loading_its_body' (109755689) panicked at adapters/postgres/tests/migration_tests.rs:89:5:
+    startup loaded an oversized checksum: peak=134204367
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   4.963s] 2 tests run: 0 passed, 2 failed, 15 skipped
+        FAIL [   4.706s] (1/2) mnesis-postgres::migration_tests excessive_migration_rows_reject_without_loading_the_backlog
+        FAIL [   0.241s] (2/2) mnesis-postgres::migration_tests oversized_migration_checksum_rejects_without_loading_its_body
+error: test run failed

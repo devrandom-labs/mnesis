@@ -1,0 +1,37 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-metadata-controls.E8INXH/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.85s
+────────────
+ Nextest run ID 36f83274-38ba-44d6-a718-b3a19b1c5cf0 with nextest profile: default
+    Starting 1 test across 1 binary (16 tests and 20 binaries skipped)
+        FAIL [   1.122s] (1/1) mnesis-postgres::migration_tests excessive_migration_rows_reject_without_loading_the_backlog
+  stdout ───
+
+    running 1 test
+    test excessive_migration_rows_reject_without_loading_the_backlog ... FAILED
+
+    failures:
+
+    failures:
+        excessive_migration_rows_reject_without_loading_the_backlog
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 1.09s
+
+  stderr ───
+    migration rows=100005, startup peak=22115
+
+    thread 'excessive_migration_rows_reject_without_loading_the_backlog' (109877773) panicked at adapters/postgres/tests/migration_tests.rs:138:5:
+    assertion failed: matches!(opened, Err(PostgresError::Schema { .. }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.123s] 1 test run: 0 passed, 1 failed, 16 skipped
+        FAIL [   1.122s] (1/1) mnesis-postgres::migration_tests excessive_migration_rows_reject_without_loading_the_backlog
+error: test run failed

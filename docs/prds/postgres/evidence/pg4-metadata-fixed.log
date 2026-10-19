@@ -1,0 +1,9 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-metadata/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 28.99s
+────────────
+ Nextest run ID ce20aad7-3811-4376-9e8e-197989681223 with nextest profile: default
+    Starting 2 tests across 1 binary (15 tests and 20 binaries skipped)
+        PASS [   2.872s] (1/2) mnesis-postgres::migration_tests excessive_migration_rows_reject_without_loading_the_backlog
+        PASS [   0.303s] (2/2) mnesis-postgres::migration_tests oversized_migration_checksum_rejects_without_loading_its_body
+────────────
+     Summary [   3.181s] 2 tests run: 2 passed, 15 skipped
