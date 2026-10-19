@@ -69,6 +69,10 @@ impl PostgresStore {
 }
 
 impl AtomicAppend for PostgresStore {
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.atomic_append", level = "debug", skip_all)
+    )]
     async fn atomic_append_many(
         &self,
         writes: &[PlannedAppend],

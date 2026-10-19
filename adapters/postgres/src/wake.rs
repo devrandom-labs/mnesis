@@ -21,8 +21,14 @@ impl WakeRegistration for Registration {
         let wake = self.inner.arm();
         async move {
             tokio::select! {
-                () = wake => {},
-                () = tokio::time::sleep(RESCAN_INTERVAL) => {},
+                () = wake => {
+                    #[cfg(feature = "tracing")]
+                    tracing::debug!(name: "mnesis.postgres.rescan", outcome = "hint");
+                },
+                () = tokio::time::sleep(RESCAN_INTERVAL) => {
+                    #[cfg(feature = "tracing")]
+                    tracing::debug!(name: "mnesis.postgres.rescan", outcome = "deadline");
+                },
             }
         }
     }

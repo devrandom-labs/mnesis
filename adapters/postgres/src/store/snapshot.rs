@@ -82,6 +82,10 @@ impl SnapshotStore<Vec<u8>, Version> for PostgresStore {
         )
     }
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.snapshot", level = "debug", skip_all)
+    )]
     async fn commit(
         &self,
         id: &impl Id,

@@ -24,6 +24,10 @@ pub async fn validate(connection: &mut PgConnection) -> Result<(), PostgresError
     Ok(())
 }
 
+#[cfg_attr(
+    feature = "tracing",
+    tracing::instrument(name = "mnesis.postgres.commit", level = "debug", skip_all)
+)]
 pub async fn commit(mut transaction: Transaction<'_, Postgres>) -> Result<(), PostgresError> {
     // Deferred triggers can still change settings at COMMIT. Run them first.
     sqlx::query("SET CONSTRAINTS ALL IMMEDIATE")
@@ -33,5 +37,8 @@ pub async fn commit(mut transaction: Transaction<'_, Postgres>) -> Result<(), Po
     // Check after all writes and triggers that can change session settings.
     // A failed check drops this uncommitted transaction and schedules rollback.
     validate(&mut transaction).await?;
-    transaction.commit().await.map_err(PostgresError::commit)
+    transaction.commit().await.map_err(PostgresError::commit)?;
+    #[cfg(feature = "tracing")]
+    tracing::debug!(name: "mnesis.postgres.commit", outcome = "committed");
+    Ok(())
 }

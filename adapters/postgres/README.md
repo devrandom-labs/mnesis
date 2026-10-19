@@ -120,6 +120,46 @@ before calling `pool.close().await` when the application owns the pool.
 Dropping a store leaves that pool usable. SQLx pool closure waits for outstanding
 leases, so application tasks must release their own leases and export sessions.
 Native tests verify bounded close even while the server remains stopped.
+## Diagnostics
+
+Enable the optional `tracing` feature and install the application's existing
+tracing subscriber. `mnesis_postgres=debug` includes operation spans and page
+events; span-close events provide operation duration. No subscriber is installed
+by the adapter. Configure the subscriber's filters and output in the application.
+
+Listener events distinguish ready, automatic reconnect, failed retry and pool
+closure. Retry fields contain a fixed error kind and optional SQLSTATE, without
+raw error messages. Page events report stream/all, actual rows and elapsed time;
+watermark events report the finite transaction cutoff. Rescan events distinguish
+an arriving hint from the independent deadline. Commit events distinguish
+committed, explicit rejection and uncertain completion. An unknown outcome still
+requires reconciliation; logging does not make a timeout safe to retry.
+A missing terminal event does not prove rollback. Reconcile an interrupted write
+using durable state rather than inferring completion from logs.
+
+Event names, outcomes and error kinds form the bounded label set. Row counts,
+durations and transaction cutoffs are values, not metric labels. Adapter spans
+skip arguments; events omit keys, payloads, credentials and connection options.
+SQLx has separate pool acquisition timing/slow-wait settings on `PgPoolOptions`;
+use those supported settings with pool size/idle counts to distinguish pool wait
+from query work. Server lock/activity statistics identify the blocking owner.
+
+For a stalled projection, compare saved progress with the reported cutoff and
+inspect long transactions and blockers from an operator connection:
+
+```sql
+SELECT pid, application_name, state, wait_event_type, wait_event,
+       xact_start, backend_xmin, pg_blocking_pids(pid)
+FROM pg_stat_activity
+WHERE datname = current_database()
+ORDER BY xact_start NULLS LAST;
+```
+
+An old transaction can hold the global cutoff back after newer commits. Identify
+its owning application before ending that transaction. Ordinary roles see their
+own activity; use the operator's existing statistics permissions for other roles.
+Applications need no superuser grant. End unnecessary transactions through their
+owner; preserve the cutoff and projection checkpoint rules while investigating.
 
 ## Durability
 

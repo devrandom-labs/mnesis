@@ -8161,3 +8161,327 @@ then push focused PR/current Linux CI/protected delivery promptly. No approval
 pending. Product remains297line test +README38/changelog2, zero executableRust,
 API/migration/dependency/runtime/framework changes. Full diagnostics/capacity,
 recovery measurements and PG9/release/registry requirements stay required.
+
+## Required diagnostics slice started
+
+Previous goal turn was progress: five required native deadline laws and four
+wrong-config catches, not just a wait. Work is now isolated in
+/tmp/mnesis-postgres-diagnostics at reviewed205b01c4; metadata full gate18512 stays
+live/frozen and operations WIP remains untouched. Hypothesis/budget recorded
+before code. No additional security edge-case scope. Existing tracing owners and
+SQLx try_recv implementation inspected; collect original adapter absence before
+adding production instrumentation. Protected dependency397 has39SUCCESS, one
+Nixjob still live. Completed push Nix runtime reviewed separately in operations
+record; final CI/merge still pending.
+
+Original-production diagnostics fixture compiler preparation: cargo check12.81s
+warns unused PgPool; strict Clippy rejects that import, std::sync::Mutex and95line
+case. ZERO native tests execute. Three reviews: production unchanged and no
+original-defect credit; actual compiler exit101; repair fixture under unchanged
+80line/mutex/lint policy, not by allowances. Reuse existing parking_lot for the
+synchronous subscriber callback and extract native opening into the fourth
+planned collector/fixture helper. No new dependency package. Native observation
+oracles, timeout and key/payload probes stay unchanged before first execution.
+
+Original production diagnostics characterization executes1actual native case:
+1FAIL4.062s0skip, run9d60e674-9903-4ad0-a0bf-830127e79889, compile5.31s. Native
+append/conflict, both real reads, deadline arm and backend termination execute;
+the first required readiness observation times out. Later event observations
+are not reached and get no independent original-source catch credit. Three
+reviews: (1) PG8 requires observable adapter work without payload/key fields;
+(2) actual server operations pass their original value/conflict oracles before
+missing-event failure, not a compiler/no-DB failure; (3) collector filters only
+adapter target events/spans and exact event/outcome pairs, three-second bound,
+no changed assertions or selection. Prior fixture-only compiler failure remains
+zero runtime credit. Production instrumentation starts only after this red.
+
+First instrumented compiler checkPASS11.49s; supported Hakari --diff needs no
+manifest regeneration. Strict Clippy then fails on one redundant method closure
+and read_all82/80lines. ZERO instrumented native tests execute. Three reviews:
+existing feature/type/ordering contracts remain; actual compile pass versus lint
+failure classified separately without runtime credit; repair under unchanged
+lints. Remove the pre-existing redundant start=from alias and express the same
+optional typed history validation with map/transpose (no boolean/error erasure),
+so no helper/framework is needed. Replace the method closure by its owning trait
+method. Original event oracles and test file stay byte-identical.
+
+Instrumented strictall/allClippy passes (timing in fixed-native.log), then actual
+1FAIL4.055s0skip. A required event is still missing; the shared helper did not
+include its expected name/outcome, so do not guess which observation failed or
+claim instrumentation complete. Three reviews: native semantics remain checked;
+actual native failure is retained, not converted to compile/no-DB success; all
+seven original observation oracles and inputs unchanged. Improve diagnostic text
+only, then rerun the same event oracles before correcting any expected behavior.
+
+The newly supported tracing feature is opt-in. Register its test only when that
+feature is enabled; otherwise disabled instrumentation is not a promised output.
+All-features native runs still execute the same observation case. Off-feature
+empty diagnostics binaries get ZERO runtime credit; the preliminary original
+production characterization deliberately enabled its fixture before adding the
+feature. Preserve that exact186line fixture separately. This registration change
+is explicit feature ownership, not an exclusion from the supported tracing mode.
+
+Diagnostic-only rerun retains the same seven event expectations and fails
+1case4.073s0skip. Captured native evidence identifies the wrong expectation:
+ready, committed, conflict, both pages, deadline, and reconnected are present;
+retry is absent. SQLx eagerly reconnects and returns None as its supported API
+specifies. Three reviews: (1) distinguish successful automatic reconnection
+from a failed retry attempt; (2) actual captured fields prove the missing pair
+is listener/retry, not a missing readiness/page/fallback implementation; (3)
+no oracle/timeout/input changed in this diagnostic run, full snapshot retained.
+Correct that expectation specifically to reconnected, not arbitrary listener
+activity. Also observe caller-pool closure while the store remains alive, naming
+that terminal outcome closed rather than falsely calling it retry. Require the
+actual native termination boolean and keep all value/no-payload assertions.
+This adds explicit shutdown observation within the original test-line budget;
+original missing-readiness red and both wrong-retry expectation reds remain.
+
+Correct instrumented native casePASS1.615s0skip (compile3.07s), strictall/all
+ClippyPASS15.35s. Run30c21de6-24d6-410a-a52d-b9b8d5028d3e. Three reviews:
+1. Contract: real readiness, successful native reconnect, caller-pool terminal
+   close, commit success/conflict, both scans and independent rescan are visible;
+   native value/conflict/termination and no-key/payload checks still hold.
+2. Execution/falsifier: actual one-case native path executes all eight exact
+   observations; original missing-readiness red remains. The two wrong-retry
+   expectation failures are fixture errors, not fabricated product defects.
+3. Assertions/source/selection: same input/value/event oracles, except the
+   documented correction to SQLx's actual reconnected signal and added terminal
+   close oracle; enabled tracing mode executes the case, disabled feature gets
+   no trace-contract/test credit. Default store/query/commit semantics unchanged.
+
+Strengthen field assertions before the negative control: observed pages must
+report the actual single row and an elapsed field; emitted field names stay in
+the documented fixed set, with key/payload probe rejection retained. This tests
+PG8 output values, not just presence. Original event cap and native workload stay.
+Production102added/15removed lines within160/30, zero new helper/type/publicAPI,
+optional reuse of existing tracing; test193/260 before this field check. No new
+package. Hakari --diff0, no generated manifest mutation.
+
+Stronger field-check preparation fails strictClippy at88/80lines; ZERO native
+execution. Three reviews: exact row/elapsed/field-set contract preserved;
+actual compiler rejection gets no runtime credit; no lints or assertion removal.
+Have the existing observation helper return its actual captured field map, then
+assert values from the two observed page records. This removes duplicate lookup
+work and keeps the original four collector/fixture helpers and80line limit.
+
+Final field-owning native casePASS1.175s0skip, compile4.79s; strictall/allClippy
+PASS9.25s. Run328faa5a-d8b9-4b7c-9242-7b853c76923b. Three reviews:
+1. Contract: actual page row counts are1, elapsed fields exist, emitted field
+   names stay in the fixed documented set, and all eight exact observations plus
+   value/conflict/native termination/pool-close/no-key/payload oracles pass.
+2. Execution/falsifier: actual enabled-tracing native scenario executes; the
+   existing helper returns observed records rather than reconstructing outputs.
+   Original native absence red and wrong-expectation/compiler failures retained.
+3. Assertions/source/selection: no weakened event/time/input oracle, four fixture
+   helpers remain, disabled feature remains explicit0diagnostic runtime credit;
+   body bounded under existing80line lint. No new production helper/API/state.
+
+Next isolated negative control changes ONLY the all-page outcome label. The
+unchanged native observation must reject it after actual reads and reconnection,
+not from setup or compile failure. Candidate source and test copies retained;
+never merge the wrong label. Existing full-scope integration remains required.
+
+Isolated single-label control is a real runtime catch:1FAIL5.292s0skip at the
+unchanged mnesis.postgres.page/all observation. Exact sole source change:
+outcome all→missing; native stream/all data, commit/conflict, rescan and reconnect
+still execute and captured fields prove the incorrect label. Three reviews:
+(1) correct operational labels are part of PG8 output; (2) actual named native
+failure at intended oracle, not compile/setup; (3) same candidate test/oracles/
+workload, one-line control diff, no source mutation in the candidate worktree.
+Control/tmp/mnesis-diagnostics-control.c5Zloj intentionally stays wrong, never
+merge. Candidate original/corrected/field runs and all control files retained.
+No independent negative-control credit is claimed for later field/close checks
+that are not reached after this missing-page assertion.
+
+Metadata PR398 current mutation artifact12209477724 downloaded and digest-checked:
+36e3994e2285a64424ba4479ef3c826f495e5d3ec48dc2204fd413fd3b81f66c.
+Actual baseline257PASS56.193s0skip (build45.703s); sole generated mutant replaces
+validate_current by Ok(Default::default()). Reviewed its full diff and first
+failure: E0277 History has no Default.1compiler-unviable/0runtimecatches/
+0survivors/timeouts. This is not a scratch/build-baseline failure and earns ZERO
+runtime mutation credit. Direct native original-allocation reds and independent
+wrong-count/wrong-prefix controls remain the meaningful metadata guards. Three
+reviews: actual native baseline contract; actual compiler-only mutant and exact
+artifact/head; unchanged tests/selection/error/byte caps and no invented catches.
+Current CI38SUCCESS/1scheduledSKIP/twoNixjobs live; protected merge still pending.
+
+Complete candidate native suite on original205b parentPASS256cases124.100s,
+0skip/22binaries, compile16.25s. Strict no-default/all-targetClippyPASS8.84s;
+TOMLformat and Rustfmt pass. Three reviews after EACH actual run:
+1. Contract: tracing instrumentation composes with all existing ordered reads,
+   notification recovery, transaction outcomes, atomic writes, saved state,
+   backup/recovery and lifecycle laws; no change to uncertain commit policy.
+2. Execution/falsifier: all256 actual native cases run,0skip; original absence
+   red and wrong-label control retained. The off-feature diagnostics binary
+   earns0runtime credit. Compiler checks are not native executions.
+3. Assertions/source/selection: unchanged non-diagnostic test sources and full
+   selected feature suite, original native fault oracles preserved; fields/key/
+   payload checks apply to enabled tracing. This parent lacks the two pending
+   metadata and five deadline cases; integrated263 proof is still required.
+No capacity conclusion follows elapsed time under the concurrent host gate.
+
+PR398 is now protected-merged8df11b218d959622a26c743c31ca68e0b8782388,
+18:14:56Z after40requiredsuccess/1scheduledskip/zero review threads.22focused
+merges, not published. Its reviewedb60tree matches protected merge exactly.
+The operations parent is undergoing its final record-only normal signed amend;
+wait for that exact head before integrating this diagnostics candidate. No native
+or other diagnostic compiler jobs remain active. Source/fields/control evidence
+is ready for parent integration; full combined263 native and all delivery gates
+remain mandatory. Do not add more security hypotheses while waiting.
+
+Diagnostics integration onto final operations482de3c4 preserves the exact Rust/
+manifest/lock patch b931c6cdcec36c9068518c9425d0359b28518219579575e5596aa7f55edd739b
+and exact final test bytes. Four research conflicts and README/changelog use
+ordinary three-way union; native deadline and migration sections remain intact.
+A stricter added-lines comparison noticed the pre-existing separator blank is
+shared rather than newly added. Full actual Diagnostics section (including its
+final blank) compares byte-identical to the original, not just a text subset.
+This benign patch-context difference caused ZERO native execution. Parent JSONL
+prefix is exact/valid. Original entire-WIP stash and all conflict stages retained
+via /tmp/mnesis-pg8-diagnostics-integration-{stash,path} pointers. Next actual
+combined263native and strictchecks, then one normal signed full Nix gate.
+
+## PG8 diagnostics combined native proof
+
+Integrated onto operations482de3c4: strictall/allClippyPASS13.64s, native263PASS
+62.368s0skip/23binaries, compile9.21s. Three reviews after EACH actual run:
+1. Contract: all existing event order/checkpoint/atomicity/uncertain completion,
+   bounded startup, configured deadlines, recovery and diagnostics laws compose.
+2. Execution/falsifier: all263 selected native cases actually run,0skip; original
+   missing-event red and isolated wrong-label runtime catch remain retained.
+   This includes the two metadata and five deadline laws absent from the first
+   256-case candidate-base run, not a second echo or guarded-host substitute.
+3. Assertions/source/selection: exact Rust/manifest patch b931c6cd and final test
+   bytes unchanged after integration; no caps/assertions/workloads/filters/lints
+   relaxed. Parent JSONL prefix exact and full README section preserved. No
+   capacity/soak claim from this correctness timing.
+
+After integration proof, add two README lines clarifying missing terminal logs
+cannot prove rollback; no source/test change or extra runtime claim. Final added
+README40/45, changelog2/3, production102+/15- within160/30, test<=260, no helper/
+new package/runtime/framework/tool. Normal signed full Nix gate follows with
+source/index frozen until terminal. Parent399 must merge before delivery.
+
+## PR399 final CI review
+
+Exact482de3c4979d2dfb5ec05baca485d764289b89e6 G now40SUCCESS/1scheduledSKIP/
+0threads. Downloaded actual owner logs/tmp/mnesis-pg8-operations-job-<id>.log.
+Standalone push118227022658 actual262PASS65.667s0skip, PR118227999232
+262PASS64.412s0skip; each seven distinct native smokes. Push Nix118227022954
+1593workspacePASS140.742s4slow4compilerexclusions and262nativePASS67.239s0skip;
+PRNix118227998891 1593workspacePASS104.977s2slow4compilerexclusions and262native
+PASS58.575s0skip; each seven smokes and replay2/1/1PASS1s each. For EACH actual
+native/workspace/replay invocation, three reviews: owning selected contracts and
+five deadline laws; real executed counts/PG18database boundaries; unchanged
+caps/assertions/workloads/selection and explicit compiler/smoke omissions. Four
+native runs/28smokes are distinct; echoed run.log summaries earn zero new credit.
+Host guarded tests are not native evidence. All named Nix owners passed.
+
+Push/PR each default/no-default/all library modes: kernel15/15/15, macros1/1/1,
+store217/217/217, wake17/17/17, inmemory25/25/30, Fjall131/131/131,
+wake-nostd0/0/0/store-testing0/0/0. EACH of48invocations three-reviewed for owner
+feature contract, actual --lib counts (zero cases get0runtime), unchanged flags/
+assertions/selection. These do not prove isolated Postgres feature combinations.
+Compiler fixtures each2/1/1PASS: push121.76/14.94/18.98s, PR122.86/16.48/19.89s;
+EACH of six reviewed for diagnostics contract, actual compiler execution and
+unchanged expected messages/selection, not native credit.
+
+LibFuzzer wire/header/chunk/value each61s:9,841,073/2,082,531/1,568,423/5,675,868
+iterations. AFL/CMPLOG each60s:0/2/15/0new corpus items,0crashes/0timeouts.
+EACH of eight campaigns three-reviewed for unchanged target/corpus contract,
+actual locked runs/durations, unchanged failure pipeline/inputs/thresholds.
+Clean campaigns do not close the saved-crash-with-zero-exit gate. Mutation job
+118227999611 says No mutants to filter (only tests/docs changed), no baseline or
+runtime mutation is credited. CodSpeed118230145987 SUCCESS:43untouched,
+3skipped/baselinefallback,17syscallwarnings; actual four-suite job118227998061
+completed. Three reviews retain benchmark contract/execution/instrument limits;
+no Postgres capacity or soak proof. Owner cache/deprecation warnings remain raw.
+
+All four direct wrong-configuration catches and the corrected original fixture
+assumptions remain in the committed research record. Normal exact-head protected
+squash next, no admin/waivers/threshold changes; full PG7/8/9 acceptance remains.
+
+## Diagnostics signed gate and release-parent integration
+
+Normal signed commit eb2c73410985e2705af62b90a7f6cf12b97a6bc0 completed the
+unchanged twelve-check Nix gate successfully. Actual workspace nextest:1593PASS,
+532.590s,15slow,4 compiler-fixture exclusions,138 binaries. Replay2/1/1PASS,
+1s each; no_std/store-no_std/Wasm checks built successfully. Raw local gate,
+nextest and replay logs remain /tmp/mnesis-pg8-diagnostics-{hook,gate-nextest,
+gate-replay}.log. Three reviews for EACH executed suite: (1) owning workspace
+and replay contracts; (2) actual counts/exclusions and completed derivations;
+(3) unchanged flags/assertions/selection. The ordinary workspace gate does not
+enable Postgres tracing: its empty diagnostics binary earns zero tracing-runtime
+credit. The separate263-case real-database suite supplies that evidence. No
+capacity or soak credit follows from correctness-suite timing.
+
+The user merged PR399 as e7bb9f4560ddb05a3148a8d5841312ec2ef3afb0, then
+release PR378 as787d61c7a75d4b8b3e4a867fbe352751d4344469. Preserve the0.5.0
+versions, internal requirements, three locks and changelogs. Signed diagnostics
+rebased to f92f8abd; exact production Rust patch and diagnostics fixture compare
+identically against retained pre-rebase copies. This comparison is NOT a new
+execution; rerun native/strict/full checks for the changed0.5 graph.
+
+Release39305353720 job118240859105 SUCCESS published all nine crates and tags.
+Native release log explicitly confirms mnesis-postgres0.5.0. crates.io API403
+provided no registry proof; the primary sparse registry index independently lists
+0.5.0, not yanked, checksum
+00cd69105598a23f428b6bf02bf46476bd60e58551304d33efc9c78debbdfbbc.
+Release tag published2026-10-19T18:49:44Z. Raw /tmp/mnesis-release-0.5.0.log.
+This is verified publication of the delivered subset, not whole-PRD completion;
+remaining diagnostics/soak/capacity/recovery/feature/fuzz/docs acceptance and final
+clean registry consumer still apply.
+
+Current0.5 graph strict all-features/all-targets ClippyPASS7.39s, no-default/
+all-targets ClippyPASS4.89s; Rustfmt/Taplo/Hakari diffPASS. Three reviews for
+each compiler invocation: feature/target contract; completed real compiler
+execution, zero test-runtime credit; unchanged deny-level lints, selected targets
+and assertions. Exact pre-release production patch and diagnostics fixture still
+compare identically. Native0.5 suite is independently running; no aggregate
+pass is inferred from compiler or partial results.
+
+Current released-parent native run70753fdf-23cf-4148-a834-3994d8770883:
+263PASS147.944s,0skip,23binaries,17.17s compilation excluded. All features select
+real Postgres through DATABASE_URL. Three independent reviews:
+1. Contract: actual diagnostics eight outcomes/rows/timing and native reconnect/
+   close pass; ordering/resume, definite rejection versus unknown finalization,
+   atomic import, saved pairs, migration and recovery regressions remain selected.
+2. Execution/falsifier:263 actual executed cases, zero guard-only substitutions;
+   original readiness and isolated all-label runtime failures remain retained.
+   Slower147.944s (including one21.841s import-failure case) is recorded, not
+   called capacity, parity, or dismissed as measured noise. It supplies no SLO.
+3. Assertions/source/selection: production patch/test bytes identical across
+   release rebase; original deadlines/caps/expected outcomes and full suite
+   flags unchanged. No filter/exclusion/lint/threshold weakened. No uncertain
+   commit becomes retry-safe; no capacity/soak claim from correctness timings.
+Move the new changelog entry under Unreleased:0.5.0 is already published. No
+published release history is altered. Current Rust patch checksum625c798bf11891f8
+(full /tmp/mnesis-pg8-diagnostics-current-rust.patch). Normal SIGNED full Nix gate
+next; freeze source/index until its actual terminal outcome.
+Replay current0.5 gate: actual CBOR2PASS/header+chunk, value1PASS and wire1PASS,
+1.00s each. THREE reviews separately for each invocation: owning decoder/value
+contract; actual locked native test execution/counts/duration, no empty harness;
+unchanged target/fixtures/inputs/assertions/filter. No PG database, long fuzz
+campaign, AFL saved-crash gate or capacity credit from these replay executions.
+Raw /tmp/mnesis-pg8-diagnostics-release-gate-replay.log. Gate still running;
+records prepared outside frozen checkout and will be appended after terminal.
+
+Current0.5 workspace: actual1593PASS672.998s,18slow,4compiler exclusions;
+three reviews: (1) owning full workspace contracts, including unchanged long
+Fjall property law; (2) completed actual release/coverage native execution,
+no echo counted twice, guarded Postgres cases supply zero real-DB credit;
+(3) unchanged not-test(compile_fail) selector/source/assertions/deadlines/lints,
+no reduced property cases or workload. Empty tracing-disabled diagnostic binary
+gets zero trace-runtime credit. Separate263native suite supplies Postgres proof.
+No capacity/parity claim from the longer host regression runtime. Do not treat
+four excluded compiler fixtures as native Postgres skips; CI owns those fixtures.
+
+Signed4e7e636408d7a22d77d0c615dda0d6514cd6593a G completed the unchanged
+normal twelve-check Nix gate, terminal0. Both no_std owners and Wasm completed;
+those compile-target checks earn zero test-runtime credit. Current workspace
+and replay counts/reviews above are actual new0.5 executions, not old0.4 logs.
+Raw/tmp/mnesis-pg8-diagnostics-release-{hook,gate-nextest,gate-replay}.log.
+Exact Rust patch remains625c798bf11891f839fcb1b10f5c67c5968e367476921c2fa8551895ad918d88.
+Normal record-only signed amend next; inspect cache results and credit zero new
+runtime when outputs are reused. Then focused PR and Linux review/protected
+merge promptly. Capacity/soak/recovery/PG9/final registry acceptance remain open.

@@ -1897,10 +1897,13 @@ dependencies = [
  "mnesis-store-testing",
  "mnesis-test-domains",
  "mnesis-wake",
+ "parking_lot",
  "sqlx",
  "tempfile",
  "thiserror",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "workspace-hack",
 ]
 

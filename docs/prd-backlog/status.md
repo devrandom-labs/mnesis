@@ -19,6 +19,12 @@ or local pass does not establish whole-adapter delivery.
 | PG9 | Complete verification, minimization and delivery | blocked | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
 
+Delivery update2026-10-19: PR399 merged at e7bb9f45; release PR378 merged at
+787d61c7. Release39305353720 published mnesis-postgres0.5.0 and the sparse
+registry confirms it is not yanked. This publishes the delivered subset; optional
+diagnostics, full soak/capacity, operator recovery measurements, remaining feature
+and fuzz gates, final audits and registry-consumer acceptance remain open.
+
 Protected focused merges:
 
 - PR376 bounded reads and recovery: `7db7cf83f74d9ae53b45ca9aae6c548572c73e91`.
@@ -191,3 +197,10 @@ sole automated mutant was compiler-unviable, not a runtime catch. Operations
 now passes262combined native cases and all12host Nix checks, including1593
 workspace tests. Focused Linux/protected delivery follows. Required diagnostics,
 capacity/soak, recovery timings, PG9 and publication remain pending.
+
+Operational deadlines are under focused review in PR399 at signed482de3c4:
+262native cases/all12Nix checks, with four actual wrong-configuration catches and
+no production API change. Required diagnostics now passes256candidate-base
+native cases and a meaningful wrong-label control; parent integration is running
+before its first signed full gate. Optional tracing adds no package/runtime.
+Capacity/soak, recovery measurements and PG9 delivery still remain.

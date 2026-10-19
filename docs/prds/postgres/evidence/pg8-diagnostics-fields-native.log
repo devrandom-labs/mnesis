@@ -1,0 +1,12 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+error: this function has too many lines (88/80)
+   --> adapters/postgres/tests/diagnostics_tests.rs:124:7
+    |
+124 | async fn actual_listener_scan_and_commit_work_emit_bounded_operational_fields() {
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+    = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (test "diagnostics_tests") due to 1 previous error

@@ -49,6 +49,10 @@ impl PostgresStore {
     /// # Errors
     /// Returns [`PostgresError::PoolCapacity`] for an undersized pool, or
     /// a database or schema-validation error if the installed schema is unusable.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.open", level = "debug", skip_all)
+    )]
     pub async fn from_pool_with_limits(
         pool: PgPool,
         limits: Limits,

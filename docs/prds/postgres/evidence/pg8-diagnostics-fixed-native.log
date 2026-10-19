@@ -1,0 +1,36 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.37s
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-diagnostics/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-diagnostics/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.12s
+────────────
+ Nextest run ID 090f041f-6057-45b1-abe6-67b598901b10 with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [   4.050s] (1/1) mnesis-postgres::diagnostics_tests actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+  stdout ───
+
+    running 1 test
+    test actual_listener_scan_and_commit_work_emit_bounded_operational_fields ... FAILED
+
+    failures:
+
+    failures:
+        actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.04s
+
+  stderr ───
+
+    thread 'actual_listener_scan_and_commit_work_emit_bounded_operational_fields' (110338935) panicked at adapters/postgres/tests/diagnostics_tests.rs:81:6:
+    actual adapter work must emit the required event: Elapsed(())
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   4.055s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [   4.050s] (1/1) mnesis-postgres::diagnostics_tests actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+error: test run failed

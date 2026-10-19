@@ -1,0 +1,66 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-diagnostics/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-diagnostics/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+warning: unused import: `sqlx::PgPool`
+  --> adapters/postgres/tests/diagnostics_tests.rs:17:5
+   |
+17 | use sqlx::PgPool;
+   |     ^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mnesis-postgres` (test "diagnostics_tests") generated 1 warning (run `cargo fix --test "diagnostics_tests" -p mnesis-postgres` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.81s
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-diagnostics/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-diagnostics/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+error: unused import: `sqlx::PgPool`
+  --> adapters/postgres/tests/diagnostics_tests.rs:17:5
+   |
+17 | use sqlx::PgPool;
+   |     ^^^^^^^^^^^^
+   |
+   = note: `-D unused-imports` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: use of a disallowed type `std::sync::Mutex`
+ --> adapters/postgres/tests/diagnostics_tests.rs:9:22
+  |
+9 | use std::sync::{Arc, Mutex};
+  |                      ^^^^^
+  |
+  = note: Use `tokio::sync::Mutex` or `parking_lot::Mutex`.
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#disallowed_types
+  = note: requested on the command line with `-D clippy::disallowed-types`
+
+error: use of a disallowed type `std::sync::Mutex`
+  --> adapters/postgres/tests/diagnostics_tests.rs:28:20
+   |
+28 | struct Records(Arc<Mutex<Vec<BTreeMap<String, String>>>>);
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: Use `tokio::sync::Mutex` or `parking_lot::Mutex`.
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#disallowed_types
+
+error: this function has too many lines (95/80)
+  --> adapters/postgres/tests/diagnostics_tests.rs:84:7
+   |
+84 | async fn actual_listener_scan_and_commit_work_emit_bounded_operational_fields() {
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+   = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (test "diagnostics_tests") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...

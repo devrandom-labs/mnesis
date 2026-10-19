@@ -139,6 +139,10 @@ impl CheckpointStore<Vec<u8>, PgAllPos> for PostgresStore {
         )
     }
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.checkpoint", level = "debug", skip_all)
+    )]
     async fn commit_checkpoint(
         &self,
         id: &impl Id,

@@ -1046,3 +1046,32 @@ Rollback boundary: only this test/doc slice. Exact configs/numbers are test
 fixtures, not deployment SLOs. Native characterization may coexist with the
 independent host Nix gate, which has no database env and a private build target;
 only one actual native suite at a time, and no timing comparison as capacity.
+
+## PG8 bounded operational diagnostics — 2026-10-19
+
+Threatened invariant: operators must distinguish listener readiness/retry,
+notification-independent rescans, append conflicts, commit uncertainty and scan
+work without logging payloads/credentials or creating per-stream metric labels.
+Current listener discards session errors and recv hides supported reconnect
+signals; current page/wake owners have no adapter tracing. This is explicit PG8
+acceptance, not additional security investigation.
+
+Reuse workspace tracing0.1.44/tracing-subscriber0.3.23 and existing store spans.
+Add an optional adapter tracing feature (no new dependency package); fixed event
+names/status labels, numeric rows/cutoff values, skip_all instrumentation. Use
+SQLx0.9 try_recv's documented reconnect signal instead of duplicating its retry
+state. Preserve all timer/read/commit semantics, including unknown completion.
+Native characterization must first show the existing production emits no adapter
+readiness/page/fallback/commit evidence using the same collector. Falsifier:
+missing/misclassified event, changing error/outcome/ordering, or logging actual
+payload/key/password probe bytes. Controls remove a meaningful event and must
+fail its required observation, not poison the native fixture.
+
+Change budget before code: one new diagnostics_tests.rs <=260lines and <=four
+private collector/fixture helpers; existing production files store/wake/error/
+durability and optional write owners <=160added/30removed lines total, at most
+one private helper if existing function length requires it. Manifest/lock feature
+edges <=12lines; generated Hakari only if supported generation proves necessary.
+README <=45lines/changelog<=3. No public Rust type/API, migration, runtime,
+framework, tooling, lint/threshold/test-selection change. One independently
+reviewable diagnostics slice, isolated from frozen metadata and deadline WIP.
