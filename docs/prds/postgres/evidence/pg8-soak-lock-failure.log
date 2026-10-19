@@ -1,0 +1,36 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-soak/crates/workspace-hack)
+   Compiling mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-soak/crates/test-domains)
+   Compiling mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/store-testing)
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+   Compiling mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/fjall)
+    Finished `bench` profile [optimized] target(s) in 5.24s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-8d4fb32a58614f45)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+soak elapsed=1.032315292s rounds=1 events=17 faults=1 connections=44 live=1306282 peak=1647885 allocated_bytes=7984995
+soak elapsed=61.616556667s rounds=31234 events=140563 faults=2 connections=44 live=1386966 peak=1838960 allocated_bytes=66433748775
+soak elapsed=121.97470675s rounds=51982 events=233930 faults=3 connections=44 live=1383004 peak=1838979 allocated_bytes=110676075233
+soak elapsed=182.557225792s rounds=76734 events=345315 faults=4 connections=44 live=1383156 peak=1846142 allocated_bytes=163519414604
+soak elapsed=243.053983s rounds=99372 events=447187 faults=5 connections=44 live=1378061 peak=1846142 allocated_bytes=211947091143
+soak elapsed=303.752544042s rounds=122712 events=552218 faults=6 connections=44 live=1378061 peak=1846142 allocated_bytes=261965935449
+soak elapsed=364.142423292s rounds=144416 events=649887 faults=7 connections=44 live=1381632 peak=1846142 allocated_bytes=308587949291
+soak elapsed=424.65479975s rounds=166764 events=750454 faults=8 connections=44 live=1380905 peak=1846142 allocated_bytes=356658713004
+soak elapsed=485.075992458s rounds=188913 events=850129 faults=9 connections=44 live=1376841 peak=1846142 allocated_bytes=404384481984
+soak elapsed=545.46053425s rounds=213014 events=958581 faults=10 connections=44 live=1381209 peak=1846142 allocated_bytes=456347582536
+soak elapsed=605.975140083s rounds=237173 events=1067301 faults=11 connections=44 live=1380716 peak=1846142 allocated_bytes=508523019247
+soak elapsed=666.427127458s rounds=260478 events=1172171 faults=12 connections=44 live=1377145 peak=1846142 allocated_bytes=558970040178
+soak elapsed=726.804001542s rounds=283594 events=1276194 faults=13 connections=44 live=1372202 peak=1846142 allocated_bytes=609099133221
+soak elapsed=787.07107375s rounds=304911 events=1372125 faults=14 connections=44 live=1370678 peak=1846142 allocated_bytes=655486478359
+soak elapsed=847.289960542s rounds=327096 events=1471955 faults=15 connections=44 live=1370526 peak=1846142 allocated_bytes=703803044963
+soak elapsed=907.955765583s rounds=349389 events=1572278 faults=16 connections=44 live=1374097 peak=1846142 allocated_bytes=752431091286
+soak elapsed=968.387282625s rounds=370609 events=1667769 faults=17 connections=44 live=1370526 peak=1846142 allocated_bytes=798855795908
+soak elapsed=1028.567131042s rounds=390859 events=1758895 faults=18 connections=44 live=1365279 peak=1846142 allocated_bytes=843294919453
+soak elapsed=1089.014441958s rounds=409721 events=1843775 faults=19 connections=44 live=1368698 peak=1846142 allocated_bytes=884854770090
+soak elapsed=1149.402459s rounds=427459 events=1923597 faults=20 connections=44 live=1365279 peak=1846142 allocated_bytes=924091180043
+soak elapsed=1209.372255917s rounds=443844 events=1997327 faults=21 connections=44 live=1369002 peak=1846142 allocated_bytes=960515484542
+soak elapsed=1269.6655805s rounds=459808 events=2069166 faults=22 connections=44 live=1372725 peak=1846142 allocated_bytes=996101271459
+
+thread 'main' (111261792) panicked at adapters/postgres/benches/soak.rs:222:26:
+unexpected write result: Err(Store(Sqlx(Database(PgDatabaseError { severity: Error, code: "55P03", message: "canceling statement due to lock timeout", detail: None, hint: None, position: None, where: Some("while checking exclusion constraint on tuple (3065,41) in relation \"keys\""), schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("postgres.c"), line: Some(3439), routine: Some("ProcessInterrupts") }))))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: bench failed, to rerun pass `-p mnesis-postgres --bench soak`

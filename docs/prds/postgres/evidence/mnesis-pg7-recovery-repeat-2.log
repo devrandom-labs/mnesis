@@ -1,0 +1,25 @@
+warning: ignoring --test-threads because --no-capture is specified
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+────────────
+ Nextest run ID 53e16354-fbc9-4cab-b441-22e4203ca348 with nextest profile: default
+    Starting 2 tests across 2 binaries (18 tests skipped)
+       START [         ] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+
+running 1 test
+logical recovery fixture: events=2 streams=2 backup=2.092292ms, fresh-target-to-reloaded-projection=45.876ms, rebuilt=PgAllPos { history: History([118, 141, 187, 87, 99, 101, 79, 235, 128, 234, 114, 136, 191, 0, 120, 38]), txid: 190395, seq: 2 }, advanced=PgAllPos { history: History([118, 141, 187, 87, 99, 101, 79, 235, 128, 234, 114, 136, 191, 0, 120, 38]), txid: 190399, seq: 3 }
+test logical_restore_rebuilds_a_projection_then_restarts_and_advances_it ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 4.84s
+
+        PASS [   4.854s] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+       START [         ] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+
+running 1 test
+physical recovery fixture: backup=403.584208ms, stopped-primary-to-reloaded-projection=140.4845ms, checkpoint=PgAllPos { history: History([254, 2, 74, 226, 203, 74, 74, 154, 173, 231, 13, 188, 174, 91, 110, 250]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([254, 2, 74, 226, 203, 74, 74, 154, 173, 231, 13, 188, 174, 91, 110, 250]), txid: 770, seq: 3 }
+test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.64s
+
+        PASS [   1.648s] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+────────────
+     Summary [   6.504s] 2 tests run: 2 passed, 18 skipped

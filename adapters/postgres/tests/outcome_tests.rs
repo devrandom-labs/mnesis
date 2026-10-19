@@ -941,13 +941,13 @@ async fn stalled_hint_acknowledgement_cannot_hold_confirmed_success() {
 
 #[tokio::test]
 async fn deferred_rejections_before_commit_preserve_the_code_and_known_outcome() {
-    for code in ["23514", "40001", "40P01", "40003"] {
+    for code in ["23514", "40001", "40P01", "40003", "55P03"] {
         let Some((_proxy, store, control)) = fixture().await else {
             return;
         };
         // SET CONSTRAINTS runs these checks before the adapter sends COMMIT.
         // The known phase proves rollback even for a raised 40003 SQLSTATE.
-        // Only the four literal SQLSTATEs above enter this test DDL.
+        // Only the literal SQLSTATEs above enter this test DDL.
         sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
             "CREATE FUNCTION test_commit_reject() RETURNS trigger LANGUAGE plpgsql AS \
              $$ BEGIN RAISE EXCEPTION USING ERRCODE = '{code}', MESSAGE = 'commit rejection witness'; END $$; \
@@ -982,7 +982,7 @@ async fn deferred_rejections_before_commit_preserve_the_code_and_known_outcome()
 
 #[tokio::test]
 async fn server_errors_after_sending_commit_preserve_the_code_and_outcome() {
-    for code in ["23514", "40001", "40P01", "40003"] {
+    for code in ["23514", "40001", "40P01", "40003", "55P03"] {
         let Some((mut proxy, store, control)) = fixture().await else {
             return;
         };
@@ -998,7 +998,7 @@ async fn server_errors_after_sending_commit_preserve_the_code_and_outcome() {
         proxy.observed(Observation::CommitSent).await;
         assert_eq!(count(&control).await, 0);
         let source = match (code, result) {
-            ("40003", Err(AppendError::Store(PostgresError::CommitUnknown(source))))
+            ("40003" | "55P03", Err(AppendError::Store(PostgresError::CommitUnknown(source))))
             | ("23514" | "40001" | "40P01", Err(AppendError::Store(PostgresError::Sqlx(source)))) => {
                 source
             }

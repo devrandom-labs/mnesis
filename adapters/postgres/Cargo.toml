@@ -47,3 +47,8 @@ workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[bench]]
+name = "soak"
+harness = false
+required-features = ["projection"]

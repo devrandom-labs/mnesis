@@ -1,0 +1,19 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/adapters/postgres)
+    Finished `bench` profile [optimized] target(s) in 5.31s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-0aac1dbab54f01e3)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+
+thread 'tokio-rt-worker' (110899890) panicked at adapters/postgres/benches/soak.rs:262:9:
+assertion `left == right` failed
+  left: [0, 0, 0, 0, 0, 0, 0, 2]
+ right: [0, 0, 0, 0, 0, 0, 0, 1]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' (110899880) panicked at adapters/postgres/benches/soak.rs:308:20:
+called `Result::unwrap()` on an `Err` value: JoinError::Panic(Id(59), "assertion `left == right` failed\n  left: [0, 0, 0, 0, 0, 0, 0, 2]\n right: [0, 0, 0, 0, 0, 0, 0, 1]", ...)
+
+thread 'tokio-rt-worker' (110899890) panicked at adapters/postgres/benches/soak.rs:262:9:
+assertion `left == right` failed
+  left: [0, 0, 0, 0, 0, 0, 0, 2]
+ right: [0, 0, 0, 0, 0, 0, 0, 1]
+error: bench failed, to rerun pass `-p mnesis-postgres --bench soak`

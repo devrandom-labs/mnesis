@@ -1,0 +1,36 @@
+    Finished `bench` profile [optimized] target(s) in 0.13s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-7afec400488d3ade)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+soak elapsed=1.023563834s counts=Counters { rounds: 1, events: 17, faults: 1, rejections: 0 } connections=44 live=1327927 peak=1678814 allocated_bytes=7938258
+soak elapsed=61.666371917s counts=Counters { rounds: 30827, events: 138735, faults: 2, rejections: 0 } connections=44 live=1389745 peak=1843977 allocated_bytes=65566942278
+soak elapsed=122.13932525s counts=Counters { rounds: 56441, events: 253999, faults: 3, rejections: 0 } connections=44 live=1389252 peak=1850427 allocated_bytes=120165268529
+soak elapsed=182.645564292s counts=Counters { rounds: 80616, events: 362784, faults: 4, rejections: 0 } connections=44 live=1389252 peak=1850427 allocated_bytes=171795491225
+soak elapsed=243.235513375s counts=Counters { rounds: 104294, events: 469336, faults: 5, rejections: 0 } connections=44 live=1389404 peak=1853633 allocated_bytes=222458265968
+soak elapsed=303.686343209s counts=Counters { rounds: 123440, events: 555494, faults: 6, rejections: 0 } connections=44 live=1385985 peak=1853633 allocated_bytes=263571961460
+soak elapsed=364.281353s counts=Counters { rounds: 148497, events: 668255, faults: 7, rejections: 0 } connections=44 live=1384461 peak=1866199 allocated_bytes=317332023715
+soak elapsed=424.586864834s counts=Counters { rounds: 169902, events: 764575, faults: 8, rejections: 0 } connections=44 live=1380340 peak=1866199 allocated_bytes=363413693007
+soak elapsed=485.130260334s counts=Counters { rounds: 187090, events: 841922, faults: 9, rejections: 0 } connections=45 live=1396205 peak=1866199 allocated_bytes=400598017375
+soak elapsed=545.299883667s counts=Counters { rounds: 207215, events: 932489, faults: 10, rejections: 0 } connections=45 live=1398897 peak=1866199 allocated_bytes=444095897810
+soak elapsed=605.763154334s counts=Counters { rounds: 227099, events: 1021968, faults: 11, rejections: 0 } connections=45 live=1391785 peak=1866199 allocated_bytes=487154330190
+soak elapsed=666.256375959s counts=Counters { rounds: 251478, events: 1131671, faults: 12, rejections: 0 } connections=45 live=1392334 peak=1866199 allocated_bytes=539848213994
+soak elapsed=726.611766709s counts=Counters { rounds: 275526, events: 1239888, faults: 13, rejections: 0 } connections=45 live=1390843 peak=1866199 allocated_bytes=591927455190
+soak elapsed=787.114350167s counts=Counters { rounds: 299969, events: 1349886, faults: 14, rejections: 0 } connections=45 live=1393440 peak=1866199 allocated_bytes=644934781367
+soak elapsed=847.587637459s counts=Counters { rounds: 322441, events: 1451011, faults: 15, rejections: 0 } connections=45 live=1393592 peak=1866199 allocated_bytes=693844919721
+soak elapsed=908.113545292s counts=Counters { rounds: 346507, events: 1559309, faults: 16, rejections: 0 } connections=45 live=1390021 peak=1866199 allocated_bytes=746228274263
+soak elapsed=968.653251167s counts=Counters { rounds: 369920, events: 1664665, faults: 17, rejections: 0 } connections=45 live=1390021 peak=1866199 allocated_bytes=797311284360
+soak elapsed=1029.210613792s counts=Counters { rounds: 391265, events: 1760722, faults: 18, rejections: 0 } connections=45 live=1390021 peak=1866199 allocated_bytes=844078763717
+soak elapsed=1089.569822875s counts=Counters { rounds: 411901, events: 1853585, faults: 19, rejections: 0 } connections=45 live=1397703 peak=1866199 allocated_bytes=889416428209
+soak elapsed=1149.824703417s counts=Counters { rounds: 433829, events: 1952262, faults: 20, rejections: 0 } connections=45 live=1393744 peak=1866199 allocated_bytes=937577039607
+soak elapsed=1210.167715209s counts=Counters { rounds: 453597, events: 2041219, faults: 21, rejections: 0 } connections=45 live=1393592 peak=1866199 allocated_bytes=981220723203
+soak elapsed=1270.57948975s counts=Counters { rounds: 471590, events: 2122185, faults: 22, rejections: 0 } connections=45 live=1389869 peak=1866199 allocated_bytes=1021159455767
+soak elapsed=1330.94191825s counts=Counters { rounds: 489980, events: 2204941, faults: 23, rejections: 0 } connections=45 live=1393440 peak=1866199 allocated_bytes=1062010294416
+soak elapsed=1393.575682917s counts=Counters { rounds: 504484, events: 2270210, faults: 24, rejections: 0 } connections=45 live=1393592 peak=1866199 allocated_bytes=1094650278893
+soak elapsed=1451.475806292s counts=Counters { rounds: 520921, events: 2344181, faults: 25, rejections: 0 } connections=45 live=1405547 peak=1866199 allocated_bytes=1131465880901
+soak elapsed=1511.82856925s counts=Counters { rounds: 535824, events: 2411242, faults: 26, rejections: 0 } connections=45 live=1395639 peak=1879613 allocated_bytes=1165077976396
+soak elapsed=1571.68507825s counts=Counters { rounds: 551651, events: 2482468, faults: 27, rejections: 0 } connections=45 live=1395791 peak=1879613 allocated_bytes=1200710453697
+soak elapsed=1632.091589959s counts=Counters { rounds: 566313, events: 2548448, faults: 28, rejections: 0 } connections=45 live=1395943 peak=1879613 allocated_bytes=1233922576212
+soak elapsed=1722.031878459s counts=Counters { rounds: 578383, events: 2602764, faults: 29, rejections: 0 } connections=45 live=1392524 peak=1879613 allocated_bytes=1261650468560
+soak elapsed=1758.395986042s counts=Counters { rounds: 581038, events: 2614709, faults: 30, rejections: 0 } connections=46 live=1412649 peak=1879613 allocated_bytes=1269398588135
+soak elapsed=1812.763109s counts=Counters { rounds: 591768, events: 2662995, faults: 31, rejections: 0 } connections=32 live=1051060 peak=1879613 allocated_bytes=1294350382243
+soak elapsed=1812.797935834s counts=Counters { rounds: 591768, events: 2662995, faults: 31, rejections: 0 } connections=32 live=1051562 peak=1879613 allocated_bytes=1294350416187
+soak complete seconds=1800 elapsed=1814.44915625s counts=Counters { rounds: 591768, events: 2662995, faults: 31, rejections: 0 } baseline=1071253 peak=1879613 retained=103974 allocated_bytes=1294346952265

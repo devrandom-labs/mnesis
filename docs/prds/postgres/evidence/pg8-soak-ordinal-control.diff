@@ -1,0 +1,11 @@
+--- /tmp/mnesis-pg8-soak-candidate.rs	2026-10-19 14:50:51
++++ /tmp/mnesis-soak-control.fUvXGc/adapters/postgres/benches/soak.rs	2026-10-19 14:52:22
+@@ -191,7 +191,7 @@
+             .map(|offset| {
+                 pending_envelope(Version::new(offset).unwrap())
+                     .event_type("Soak")
+-                    .payload(count.checked_add(offset).unwrap().to_be_bytes().to_vec())
++                    .payload(count.checked_add(offset.checked_add(1).unwrap()).unwrap().to_be_bytes().to_vec())
+                     .build()
+                     .unwrap()
+             })

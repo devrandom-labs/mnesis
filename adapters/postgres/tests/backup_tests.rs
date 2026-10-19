@@ -15,11 +15,15 @@ mod projection;
 
 use std::collections::BTreeMap;
 use std::io::{self, ErrorKind, Read};
+#[cfg(feature = "projection")]
+use std::io::{Write, stderr};
 use std::num::NonZeroU32;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
+#[cfg(feature = "projection")]
+use std::time::Instant;
 
 use futures::{FutureExt, StreamExt, TryStreamExt, stream};
 use mnesis::Version;
@@ -572,10 +576,13 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
     let (old, state) = consumer::resume(&source).await;
     assert_eq!(state, 4);
     let directory = tempfile::tempdir().unwrap();
+    let started = Instant::now();
     let count = backup(&source, directory.path()).await;
+    let backup_time = started.elapsed();
     assert_eq!(count, 2);
     drop(source);
     pool.close().await;
+    let recovery = Instant::now();
     let (destination, target_pool) = fixture().await.unwrap();
     restore(&destination, directory.path(), count, Atomicity::WholeChunk)
         .await
@@ -603,6 +610,7 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
         .await
         .unwrap();
     assert_eq!(consumer::resume(&reopened).await, (rebuilt, 4));
+    let recovery_time = recovery.elapsed();
     let store = Store::new(reopened.clone());
     let repository = store.repository::<AggregateCounter>().json().build();
     let mut root = repository.load(TestId::new("first")).await.unwrap();
@@ -614,6 +622,7 @@ async fn logical_restore_rebuilds_a_projection_then_restarts_and_advances_it() {
     assert_eq!(advanced_state, 5);
     assert!(advanced > rebuilt);
     assert_eq!(advanced.history(), reopened.history());
+    writeln!(stderr().lock(), "logical recovery fixture: events=2 streams=2 backup={backup_time:?}, fresh-target-to-reloaded-projection={recovery_time:?}, rebuilt={rebuilt:?}, advanced={advanced:?}").unwrap();
     drop(repository);
     drop(store);
     drop(reopened);

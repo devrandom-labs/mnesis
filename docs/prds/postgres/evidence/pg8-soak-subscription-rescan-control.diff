@@ -1,0 +1,13 @@
+diff --git a/adapters/postgres/src/wake.rs b/adapters/postgres/src/wake.rs
+index 43111704..40ea838e 100644
+--- a/adapters/postgres/src/wake.rs
++++ b/adapters/postgres/src/wake.rs
+@@ -8,7 +8,7 @@ use mnesis_wake::{NotifyError, WakeReg};
+
+ use crate::store::PostgresStore;
+
+-const RESCAN_INTERVAL: Duration = Duration::from_secs(1);
++const RESCAN_INTERVAL: Duration = Duration::from_secs(3600);
+
+ /// A routed wake registration with an independent rescan deadline.
+ pub struct Registration {

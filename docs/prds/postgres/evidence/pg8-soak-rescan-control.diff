@@ -1,0 +1,11 @@
+--- /tmp/mnesis-pg8-soak-candidate-wake.rs	2026-10-19 14:50:51
++++ /tmp/mnesis-soak-control.fUvXGc/adapters/postgres/src/wake.rs	2026-10-19 14:50:51
+@@ -8,7 +8,7 @@
+
+ use crate::store::PostgresStore;
+
+-const RESCAN_INTERVAL: Duration = Duration::from_secs(1);
++const RESCAN_INTERVAL: Duration = Duration::from_secs(3600);
+
+ /// A routed wake registration with an independent rescan deadline.
+ pub struct Registration {

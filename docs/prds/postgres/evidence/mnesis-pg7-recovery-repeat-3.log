@@ -1,0 +1,25 @@
+warning: ignoring --test-threads because --no-capture is specified
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+────────────
+ Nextest run ID c8f9fd07-62ad-4918-bc46-144381ee970c with nextest profile: default
+    Starting 2 tests across 2 binaries (18 tests skipped)
+       START [         ] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+
+running 1 test
+logical recovery fixture: events=2 streams=2 backup=2.133125ms, fresh-target-to-reloaded-projection=41.92975ms, rebuilt=PgAllPos { history: History([201, 106, 210, 90, 164, 28, 69, 32, 146, 110, 17, 150, 158, 15, 165, 3]), txid: 190445, seq: 2 }, advanced=PgAllPos { history: History([201, 106, 210, 90, 164, 28, 69, 32, 146, 110, 17, 150, 158, 15, 165, 3]), txid: 190449, seq: 3 }
+test logical_restore_rebuilds_a_projection_then_restarts_and_advances_it ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 21.76s
+
+        PASS [  21.768s] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+       START [         ] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+
+running 1 test
+physical recovery fixture: backup=413.460084ms, stopped-primary-to-reloaded-projection=140.917959ms, checkpoint=PgAllPos { history: History([18, 114, 169, 237, 86, 83, 74, 6, 130, 134, 42, 150, 226, 35, 22, 206]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([18, 114, 169, 237, 86, 83, 74, 6, 130, 134, 42, 150, 226, 35, 22, 206]), txid: 770, seq: 3 }
+test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.64s
+
+        PASS [   1.652s] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+────────────
+     Summary [  23.422s] 2 tests run: 2 passed, 18 skipped

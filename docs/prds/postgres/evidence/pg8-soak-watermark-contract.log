@@ -1,0 +1,13 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-soak/crates/workspace-hack)
+   Compiling mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-soak/crates/test-domains)
+   Compiling mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/store-testing)
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+   Compiling mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.00s
+────────────
+ Nextest run ID 5881b853-8fff-403d-a093-d95a0d235d3b with nextest profile: default
+    Starting 1 test across 1 binary (2 tests skipped)
+        PASS [   1.166s] (1/1) mnesis-postgres::subscription_tests all_recovers_after_an_unrelated_transaction_releases_the_watermark
+────────────
+     Summary [   1.167s] 1 test run: 1 passed, 2 skipped

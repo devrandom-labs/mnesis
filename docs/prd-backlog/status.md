@@ -16,13 +16,13 @@ or local pass does not establish whole-adapter delivery.
 | PG6 | Aggregate snapshots and projection state | active | PG3, PG4 | PG7, PG9 |
 | PG7 | Export, backup and restore | active | PG1, PG4, PG5, PG6 | PG9 |
 | PG8 | Secure operation, lifecycle and capacity | active | PG1, PG2, PG3, PG4 | PG9 |
-| PG9 | Complete verification, minimization and delivery | blocked | PG5, PG6, PG7, PG8 | — |
+| PG9 | Complete verification, minimization and delivery | active | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
 
-Delivery update2026-10-19: PR399 merged at e7bb9f45; release PR378 merged at
-787d61c7. Release39305353720 published mnesis-postgres0.5.0 and the sparse
-registry confirms it is not yanked. This publishes the delivered subset; optional
-diagnostics, full soak/capacity, operator recovery measurements, remaining feature
+Delivery update2026-10-19: 24 focused changes are protected-merged through PR402
+at5b868028. Release39312731245 published mnesis-postgres0.5.1; the primary sparse
+registry confirms it is not yanked. This publishes a subset. Diagnostics are
+merged; full soak/capacity, operator recovery measurements, remaining feature
 and fuzz gates, final audits and registry-consumer acceptance remain open.
 
 Protected focused merges:
@@ -47,6 +47,10 @@ Protected focused merges:
 - PR392 verified TLS and restricted runtime permissions: `8f03ae8553ab6410fdfbe7660ab84ec0873efae0`.
 - PR395 native durability profile and phase-accurate transaction outcomes: `f7d390d4c50936b2912207c2d417a8c24a899e0c`.
 - PR396 native byte accounting across caller search paths: `766394cd508046dbce3ae6893a1b9c9da805c941`.
+- PR397 supported wake dependency without an advisory exception: `3313567f8714f655c7ed65f0fb9be62caa463b0a`.
+- PR398 bounded startup migration metadata: `8df11b218d959622a26c743c31ca68e0b8782388`.
+- PR399 operational deadlines and unavailable-server shutdown: `e7bb9f4560ddb05a3148a8d5841312ec2ef3afb0`.
+- PR402 bounded operational diagnostics: `5b8680280854c397c957140784ba7795bcb488a0`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;

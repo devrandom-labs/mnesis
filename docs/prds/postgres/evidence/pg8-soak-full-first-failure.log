@@ -1,0 +1,81 @@
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+    Finished `bench` profile [optimized] target(s) in 3.38s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-8d4fb32a58614f45)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+soak elapsed=1.020468125s rounds=1 events=17 faults=1 connections=44 live=1325464 peak=1699621 allocated_bytes=8957721
+soak elapsed=61.608546709s rounds=28913 events=130122 faults=2 connections=44 live=1392289 peak=1874217 allocated_bytes=70835107599
+
+thread 'tokio-rt-worker' (111229208) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tokio-rt-worker' (111229200) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229204) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229202) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229201) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229199) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229199) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'main' (111229170) panicked at adapters/postgres/benches/soak.rs:308:20:
+called `Result::unwrap()` on an `Err` value: JoinError::Panic(Id(5921890), "assertion `left == right` failed\n  left: 183745\n right: 183753", ...)
+
+thread 'tokio-rt-worker' (111229204) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229200) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229201) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229208) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229202) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229211) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+
+thread 'tokio-rt-worker' (111229208) panicked at adapters/postgres/benches/soak.rs:266:5:
+assertion `left == right` failed
+  left: 183745
+ right: 183753
+error: bench failed, to rerun pass `-p mnesis-postgres --bench soak`

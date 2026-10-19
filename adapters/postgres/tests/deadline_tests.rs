@@ -166,6 +166,48 @@ async fn lock_deadline_rejects_append_then_releases_its_transaction() {
 }
 
 #[tokio::test]
+async fn exclusion_lock_deadline_rejects_before_creating_an_event_or_key() {
+    let Some((store, pool, control)) = open(&[("lock_timeout", "100ms")]).await else {
+        return;
+    };
+    let key = StreamKey::from_bytes("exclusion-lock-deadline");
+    sqlx::query("DELETE FROM mnesis.keys WHERE value = $1")
+        .bind(key.as_bytes())
+        .execute(&control)
+        .await
+        .unwrap();
+    let before = inventory(&control, &key).await;
+    assert_eq!(before, (0, 0));
+    let mut held = control.begin().await.unwrap();
+    sqlx::query("INSERT INTO mnesis.keys(value) VALUES ($1)")
+        .bind(key.as_bytes())
+        .execute(&mut *held)
+        .await
+        .unwrap();
+    let event = event();
+    let result = timeout(
+        Duration::from_secs(3),
+        store.append(&key, None, PendingBatch::of(&event)),
+    )
+    .await;
+    held.rollback().await.unwrap();
+    assert_eq!(inventory(&control, &key).await, before);
+    assert!(
+        matches!(&result, Ok(Err(AppendError::Store(error)))
+        if code(error).as_deref() == Some("55P03")),
+        "{result:?}"
+    );
+    store
+        .append(&key, None, PendingBatch::of(&event))
+        .await
+        .unwrap();
+    assert_eq!(inventory(&control, &key).await, (1, 1));
+    drop(store);
+    timeout(Duration::from_secs(3), pool.close()).await.unwrap();
+    control.close().await;
+}
+
+#[tokio::test]
 async fn statement_deadline_rolls_back_an_already_staged_insert() {
     let Some((store, pool, control)) = open(&[("statement_timeout", "100ms")]).await else {
         return;
