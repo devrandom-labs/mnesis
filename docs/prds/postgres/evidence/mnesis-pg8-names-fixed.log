@@ -1,0 +1,52 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.60s
+────────────
+ Nextest run ID f0dd228c-ed48-429f-89e9-ec00e91bef6c with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.089s] (1/5) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_checkpoints_pair
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_read_another_checkpoints_pair ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.07s
+
+
+        PASS [   0.042s] (2/5) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_snapshots_state
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_read_another_snapshots_state ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.03s
+
+
+        PASS [   0.044s] (3/5) mnesis-postgres::names_tests application_byte_equality_cannot_redirect_a_snapshot_write
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_redirect_a_snapshot_write ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.04s
+
+
+        PASS [   0.048s] (4/5) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_return_another_streams_events ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.04s
+
+
+        PASS [   0.053s] (5/5) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+  stdout ───
+
+    running 1 test
+    test application_maximum_cannot_forge_a_committed_head ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.05s
+
+
+────────────
+     Summary [   0.281s] 5 tests run: 5 passed, 0 skipped

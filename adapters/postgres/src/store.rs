@@ -463,7 +463,7 @@ async fn read_key(
     conn: &mut sqlx::PgConnection,
     id: &impl Id,
 ) -> Result<Option<i64>, PostgresError> {
-    sqlx::query_scalar("SELECT number FROM mnesis.keys WHERE value = $1")
+    sqlx::query_scalar("SELECT number FROM mnesis.keys WHERE value OPERATOR(pg_catalog.=) $1")
         .bind(id.as_ref())
         .fetch_optional(conn)
         .await
@@ -476,8 +476,9 @@ async fn read_head(
     id: &StreamKey,
 ) -> Result<Option<(i64, Option<String>)>, PostgresError> {
     sqlx::query_as(
-        "SELECT number, (SELECT MAX(version)::text FROM mnesis.events WHERE stream_id = number) \
-         FROM mnesis.keys WHERE value = $1",
+        "SELECT number, (SELECT pg_catalog.max(version)::text FROM mnesis.events \
+         WHERE stream_id OPERATOR(pg_catalog.=) number) \
+         FROM mnesis.keys WHERE value OPERATOR(pg_catalog.=) $1",
     )
     .bind(id.as_bytes())
     .fetch_optional(conn)

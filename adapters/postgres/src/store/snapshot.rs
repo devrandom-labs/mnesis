@@ -65,7 +65,8 @@ impl SnapshotStore<Vec<u8>, Version> for PostgresStore {
              CASE WHEN s.schema_version = $2 AND \
                  octet_length(k.value)::bigint + octet_length(s.state)::bigint + 32 <= $3 \
                  THEN s.state END AS state \
-             FROM mnesis.snapshots s JOIN mnesis.keys k ON k.number = s.key WHERE k.value = $1",
+             FROM mnesis.snapshots s JOIN mnesis.keys k ON k.number = s.key \
+             WHERE k.value OPERATOR(pg_catalog.=) $1",
         )
         .bind(id.as_ref())
         .bind(i64::from(schema_version.get()))

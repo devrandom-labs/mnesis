@@ -188,11 +188,10 @@ async fn shadowed_ordering(statement: &'static str) {
                     PendingBatch::of(&event),
                 )
                 .await
-                .unwrap()
         })
     };
     barrier.wait().await;
-    let second = later.await.unwrap();
+    let result = later.await;
     let held = read_outcome(&reader, None).await;
     older.commit().await.unwrap();
     let all = read_outcome(&reader, None).await;
@@ -205,6 +204,7 @@ async fn shadowed_ordering(statement: &'static str) {
         .execute(&pool)
         .await
         .unwrap();
+    let second = result.unwrap().unwrap();
     let expected = vec![
         (first, "Earlier".to_owned(), b"earlier".to_vec()),
         (second, "Later".to_owned(), b"later".to_vec()),

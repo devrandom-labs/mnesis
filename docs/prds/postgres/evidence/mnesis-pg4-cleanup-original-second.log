@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+────────────
+ Nextest run ID c529e3ad-7110-4462-ba31-a3ad1c6809a1 with nextest profile: default
+    Starting 1 test across 1 binary (5 tests skipped)
+        FAIL [   0.042s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+  stdout ───
+
+    running 1 test
+    test all_ordering_ignores_shadowed_current_snapshot ... FAILED
+
+    failures:
+
+    failures:
+        all_ordering_ignores_shadowed_current_snapshot
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.03s
+
+  stderr ───
+
+    thread 'all_ordering_ignores_shadowed_current_snapshot' (104793559) panicked at adapters/postgres/tests/all_noskip_tests.rs:151:10:
+    called `Result::unwrap()` on an `Err` value: Database(PgDatabaseError { severity: Error, code: "42P06", message: "schema \"ordering\" already exists", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("pg_namespace.c"), line: Some(64), routine: Some("NamespaceCreate") })
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.045s] 1 test run: 0 passed, 1 failed, 5 skipped
+        FAIL [   0.042s] (1/1) mnesis-postgres::all_noskip_tests all_ordering_ignores_shadowed_current_snapshot
+error: test run failed

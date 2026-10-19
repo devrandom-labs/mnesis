@@ -1,0 +1,9 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.29s
+────────────
+ Nextest run ID c7cecd1b-3eed-47e5-96ab-965216d33c3a with nextest profile: default
+    Starting 2 tests across 1 binary
+        PASS [   0.049s] (1/2) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        PASS [   0.043s] (2/2) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+────────────
+     Summary [   0.097s] 2 tests run: 2 passed, 0 skipped

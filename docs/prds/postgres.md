@@ -1,9 +1,9 @@
 # Postgres adapter completion
 
-Status: active (PG7 listing/export/restore; PG8–PG9 remain). Updated: 2026-10-18.
+Status: active (PG4 stream isolation reopened; PG7–PG9 remain). Updated: 2026-10-18.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: `test/postgres-backups`.
+Planning branch: `docs/postgres-prd`. Current slice: `fix/postgres-queries`.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem

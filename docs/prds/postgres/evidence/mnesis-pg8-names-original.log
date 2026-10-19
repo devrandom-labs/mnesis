@@ -1,0 +1,38 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-queries/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-queries/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.41s
+────────────
+ Nextest run ID 638fe77f-29c0-45d0-b501-46e10a9cdfba with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [   0.083s] (1/1) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_return_another_streams_events ... FAILED
+
+    failures:
+
+    failures:
+        application_byte_equality_cannot_return_another_streams_events
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+  stderr ───
+
+    thread 'application_byte_equality_cannot_return_another_streams_events' (103583489) panicked at adapters/postgres/tests/names_tests.rs:97:5:
+    assertion `left == right` failed
+      left: [102, 105, 114, 115, 116, 45, 98, 111, 100, 121]
+     right: [115, 101, 99, 111, 110, 100, 45, 98, 111, 100, 121]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.088s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [   0.083s] (1/1) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+error: test run failed

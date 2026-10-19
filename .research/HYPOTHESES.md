@@ -569,3 +569,91 @@ named baselines; inspect native code size/bounds removal, reject slowdown beyond
 noise, CI x86/release proof still required. No hints, workload/metric/cache/gate
 changes. Rollback ONLY ownerfile. First_chunk is stable core facility on pinned
 Rust1.99; verify exact local primary docs/source, not an external new crate.
+
+# PG4/PG8 caller query names — original witness before edits
+
+Prior global-order repair qualified only its snapshot functions/operators.
+Current store read_key/read_head still use unqualified bytea equality/MAX;
+caller search_path may explicitly place application schemas before pg_catalog.
+Threat: a normal application operator can redirect raw stream identity/head and
+state lookups, despite schema-qualified tables. Source finding is not proof.
+First budget<=160 native test lines,0production/API/SQLschema/dependency/tooling
+changes. Real existing PostgreSQL, healthy migrated store, two different streams
+with exact bodies. Max2pool and native LISTEN readiness ensure one data slot;
+change ONLY its search_path after successful native controls. Native custom
+bytea equality returns true while explicit pg_catalog equality is false; actual
+read_stream(second) must still return ONLY second's exact event. Drop injected
+schema BEFORE assertions to prevent poisoned subsequent cases. Use default SQLx
+statement caching; no synthetic driver. Original source must fail in routing,
+not fixture setup/query syntax/arbitrary error, before any SQL changes.
+
+Follow-up only after actual red: pin all load-bearing function/operator/type
+names at owning SQL source, preserving caller settings/pool ownership/order/
+byte bounds/atomicity/outcomes. Do not impose session GUC mutation, wrap every
+cursor in long transactions, add stored-procedure framework or change runtime.
+Separate budget/native witnesses for head forgery, byte accounting and schema
+validation/deparser concerns. Reopen feature-complete acceptance only if actual
+contract defect is reproduced; original whole goal remains active regardless.
+
+Original native byte-equality witness is now RED at the exact second-body oracle:
+read_stream(second) returned first-body, one row, after healthy control and native
+operator selection controls. Before further edits expand test ceiling160->320
+for distinct head-forgery and state-write routing laws. Production remains ZERO
+until their original-source execution. A forged max(numeric) must not make an
+append expected999 accept event1000 over committed head1. A snapshot for second
+must not replace first's state even if application bytea equality is visible.
+Cleanup injected schemas before asserting captured results. Inspect actual native
+rows after cleanup; no synthetic read oracle. First repair budget<=35 changed
+existing Rust lines in read_key/read_head and state lookup SQL only, no API,
+schema, dependencies or caller session changes. Byte accounting, integer joins
+and catalog validation remain separate unresolved hypotheses with new witnesses
+before expanding this budget.
+
+Before checkpoint-read witness expand new-test ceiling320->360 for one independent
+projection pair lookup (owner separate from snapshot hydrate). Use actual read_all
+positions from the two acknowledged seed events; preserve exact revision/state/
+position oracle. No production fix until native original5laws run. Existing SQL
+repair ceiling35unchanged. No custom test framework/helper configuration needed.
+
+Before full gate add one missing observable to the same5 native laws: after each
+SUT query, caller search_path must still equal the configured path. Capture SHOW
+on the single data connection, drop the injected schema, then assert captured
+path and original exact product result. Small private cleanup helper removes
+repeated schema-drop SQL; same360test/35production budget. This rejects an
+incorrect session-reset workaround that could otherwise pass payload assertions.
+No new production change or test-only API; repeat native/full Linux on finaltest.
+
+# PG9 check-output cost — measured candidate, not implemented
+
+The concurrent query/TLS gates exhausted disk; original StorageFull and compiler
+failures remain recorded. Serial retry passed unchanged. Query nextest output
+archives4.28GiB of target into1.01GiB although its declared consumers require the
+check verdict/coverage, not its target archive. Locked Crane47b6b27 source
+cargoClippy.nix/cargoNextest.nix/mkCargoDerivation.nix supports the existing
+`doInstallCargoArtifacts = false` option; nextest partitions=1 here. Repository
+search finds all cargoArtifacts inputs owned by buildDepsOnly, not these checks.
+Candidate after focused query/TLS delivery: two check-local option lines, no
+product, dependencies, commands, filters, properties, coverage or native archive
+changes. Preserve buildDepsOnly and postgresTests outputs. Falsifier: any actual
+consumer needs either removed archive, test selection/command changes, coverage
+is absent, or unchanged full local/Linux gates fail. Measure actual output sizes,
+checks/coverage and repeat costs before retaining. This is standard Crane reuse,
+not a new tool or relaxed gate. No implementation or saved-space claim yet.
+
+# PR394 mutation evidence rejected — cleanup before failure (pre-edit)
+
+Actual downloaded CI artifact12161164145, digest68224bde5803893cd4183e9364e963ed98c3ee7b029355aef063fc1e51a7f0af,
+reports16mutants:14caught/2unviable. Independent log inspection finds EIGHT head
+variants actually stop at42P06 ordering-schema-already-exists after the first
+head(0,None) variant panics inside the overlapping append. These eight are NOT
+credible catches. Baseline235PASS49.299s; read_key four and first two read_head
+variants have real runtime failures, two hydrate variants fail Default compilation.
+Original reports/logs remain unchanged. Existing shadowed_ordering helper unwraps
+the spawned append before native cleanup. Candidate: capture append and join
+outcomes, drop native probe before unwrapping; <=8changed TEST lines, zero product,
+framework or policy changes. Preserve overlap and every order/resume assertion.
+Falsifier: repeated failing head controls still leave ordering schema, produce
+42P06 instead of their own SUT failure, or healthy native/full suite fails. Prove
+original repeated-control failure, then exact same controls with fixed cleanup;
+rerun actual mutation CI and inspect every first failure. Do not merge on current
+reported14caught; no waiver or fixture-failure credit.

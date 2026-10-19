@@ -1,0 +1,96 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.03s
+────────────
+ Nextest run ID 0dd4ce67-7721-48e6-86c5-f3792ba6553a with nextest profile: default
+    Starting 4 tests across 1 binary
+        FAIL [   0.590s] (1/4) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_snapshots_state
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_read_another_snapshots_state ... FAILED
+
+    failures:
+
+    failures:
+        application_byte_equality_cannot_read_another_snapshots_state
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.57s
+
+  stderr ───
+
+    thread 'application_byte_equality_cannot_read_another_snapshots_state' (103712829) panicked at adapters/postgres/tests/names_tests.rs:244:5:
+    assertion `left == right` failed
+      left: Found { position: Version(1), state: [102, 105, 114, 115, 116, 45, 115, 116, 97, 116, 101] }
+     right: Found { position: Version(1), state: [115, 101, 99, 111, 110, 100, 45, 115, 116, 97, 116, 101] }
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.146s] (2/4) mnesis-postgres::names_tests application_byte_equality_cannot_redirect_a_snapshot_write
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_redirect_a_snapshot_write ... FAILED
+
+    failures:
+
+    failures:
+        application_byte_equality_cannot_redirect_a_snapshot_write
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.13s
+
+  stderr ───
+
+    thread 'application_byte_equality_cannot_redirect_a_snapshot_write' (103712920) panicked at adapters/postgres/tests/names_tests.rs:201:5:
+    assertion `left == right` failed
+      left: [([102, 105, 114, 115, 116], [115, 101, 99, 111, 110, 100, 45, 115, 116, 97, 116, 101])]
+     right: [([102, 105, 114, 115, 116], [102, 105, 114, 115, 116, 45, 115, 116, 97, 116, 101]), ([115, 101, 99, 111, 110, 100], [115, 101, 99, 111, 110, 100, 45, 115, 116, 97, 116, 101])]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.166s] (3/4) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+  stdout ───
+
+    running 1 test
+    test application_byte_equality_cannot_return_another_streams_events ... FAILED
+
+    failures:
+
+    failures:
+        application_byte_equality_cannot_return_another_streams_events
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.15s
+
+  stderr ───
+
+    thread 'application_byte_equality_cannot_return_another_streams_events' (103712947) panicked at adapters/postgres/tests/names_tests.rs:102:5:
+    assertion `left == right` failed
+      left: [102, 105, 114, 115, 116, 45, 98, 111, 100, 121]
+     right: [115, 101, 99, 111, 110, 100, 45, 98, 111, 100, 121]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        FAIL [   0.095s] (4/4) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+  stdout ───
+
+    running 1 test
+    test application_maximum_cannot_forge_a_committed_head ... FAILED
+
+    failures:
+
+    failures:
+        application_maximum_cannot_forge_a_committed_head
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.08s
+
+  stderr ───
+
+    thread 'application_maximum_cannot_forge_a_committed_head' (103712980) panicked at adapters/postgres/tests/names_tests.rs:148:5:
+    assertion `left == right` failed
+      left: [("1", [102, 105, 114, 115, 116, 45, 98, 111, 100, 121]), ("1", [115, 101, 99, 111, 110, 100, 45, 98, 111, 100, 121]), ("1000", [109, 117, 115, 116, 45, 110, 111, 116, 45, 108, 97, 110, 100])]
+     right: [("1", [102, 105, 114, 115, 116, 45, 98, 111, 100, 121]), ("1", [115, 101, 99, 111, 110, 100, 45, 98, 111, 100, 121])]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+────────────
+     Summary [   1.032s] 4 tests run: 0 passed, 4 failed, 0 skipped
+        FAIL [   0.590s] (1/4) mnesis-postgres::names_tests application_byte_equality_cannot_read_another_snapshots_state
+        FAIL [   0.146s] (2/4) mnesis-postgres::names_tests application_byte_equality_cannot_redirect_a_snapshot_write
+        FAIL [   0.166s] (3/4) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        FAIL [   0.095s] (4/4) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+error: test run failed

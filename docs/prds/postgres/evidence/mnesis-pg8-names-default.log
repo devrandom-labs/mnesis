@@ -1,0 +1,13 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/postgres)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-queries/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-queries/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.52s
+────────────
+ Nextest run ID d5bcd08e-4630-486c-810d-985edd64b7da with nextest profile: default
+    Starting 2 tests across 1 binary
+        PASS [   0.065s] (1/2) mnesis-postgres::names_tests application_byte_equality_cannot_return_another_streams_events
+        PASS [   0.037s] (2/2) mnesis-postgres::names_tests application_maximum_cannot_forge_a_committed_head
+────────────
+     Summary [   0.102s] 2 tests run: 2 passed, 0 skipped
