@@ -1,0 +1,63 @@
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.14s
+    Blocking waiting for file lock on package cache
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.11s
+────────────
+ Nextest run ID 4503d83a-8de4-4172-b71e-cf7cb071902b with nextest profile: default
+    Starting 5 tests across 1 binary (6 tests skipped)
+        PASS [   0.720s] (1/5) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+  stdout ───
+
+    running 1 test
+    test completed_chunk_final_conflict_keeps_exact_policy_progress_and_report ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.71s
+
+
+        PASS [   0.463s] (2/5) mnesis-postgres::backup_tests completed_chunk_keeps_one_view_across_an_overlapping_atomic_commit
+  stdout ───
+
+    running 1 test
+    test completed_chunk_keeps_one_view_across_an_overlapping_atomic_commit ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.45s
+
+
+        PASS [   0.911s] (3/5) mnesis-postgres::backup_tests completed_chunk_late_duplicate_rejects_before_any_write_under_both_policies
+  stdout ───
+
+    running 1 test
+    test completed_chunk_late_duplicate_rejects_before_any_write_under_both_policies ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.90s
+
+
+        PASS [   0.666s] (4/5) mnesis-postgres::backup_tests completed_chunk_uses_each_binary_route_once_and_preserves_all_fields
+  stdout ───
+
+    running 1 test
+    test completed_chunk_uses_each_binary_route_once_and_preserves_all_fields ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.66s
+
+
+        PASS [   0.220s] (5/5) mnesis-postgres::backup_tests empty_backup_has_one_completed_chunk_and_no_sections
+  stdout ───
+
+    running 1 test
+    test empty_backup_has_one_completed_chunk_and_no_sections ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.21s
+
+
+────────────
+     Summary [   2.982s] 5 tests run: 5 passed, 6 skipped

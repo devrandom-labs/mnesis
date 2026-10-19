@@ -1,0 +1,38 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-backups/crates/workspace-hack)
+    Checking mnesis v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-backups/crates/test-domains)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+error: `expected` shadows a previous, unrelated binding
+   --> adapters/postgres/tests/backup_tests.rs:753:71
+    |
+753 |                     stream: conflict, reason: AbortReason::Mismatch { expected, got },
+    |                                                                       ^^^^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/backup_tests.rs:746:13
+    |
+746 |         let expected = contents(&target).await;
+    |             ^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_unrelated
+    = note: requested on the command line with `-D clippy::shadow-unrelated`
+
+error: `bytes` shadows a previous, unrelated binding
+   --> adapters/postgres/tests/backup_tests.rs:785:25
+    |
+785 |                     let bytes = key(index).as_bytes().to_vec();
+    |                         ^^^^^
+    |
+note: previous binding is here
+   --> adapters/postgres/tests/backup_tests.rs:731:9
+    |
+731 |     let bytes = packed(&source).await;
+    |         ^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#shadow_unrelated
+
+error: could not compile `mnesis-postgres` (test "backup_tests") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

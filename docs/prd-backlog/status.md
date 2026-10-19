@@ -34,6 +34,7 @@ Protected focused merges:
 - PR387 history-scoped positions and coherent recovery: `2b181b12d1040f1527d6a28375fd5db91a9d1129`.
 - PR388 global ordering across caller search paths: `651aabf35e94b7b0e98e9e87eff19f6964df95f3`.
 - PR389 completed bounded backups and logical projection recovery: `49b32374041843a87980fc6f74a945f51f0b9ea3`.
+- PR390 verified physical backups and restored projection consumer: `2247c739525f9d8765179b7d9f7f67c6b43bd32f`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -83,8 +84,16 @@ source failure/cancellation and actual logical projection rebuild/restart. They
 are protected-merged in PR389 after all40checks and zero unresolved threads.
 The physical operator drill passes224native/Linux laws, verifies manifest/WAL,
 checks old-primary shutdown and resumes the actual saved projection before a
-new append/advance; it is signed but not yet merged. Physical delivery and the
+new append/advance; it is protected-merged in PR390 after all40checks and no
+unresolved review threads. The
 remaining backup failure/route cases remain PG7 acceptance work.
+Six new completed-chunk laws now pass230 combined native cases, including binary
+caller routing, late duplicate/final-conflict policy reports, snapshot consistency
+across an overlapping atomic commit, missing/oversized final inventory files and
+explicit salvage with retained provenance. Two fresh native controls reject
+ordinary-view substitution and omitted inventory preflight. These changes await
+protected delivery after230/230Linux laws and the unchanged full signed Nix gate;
+PG7 is still active. Logical operator timing/profile evidence remains to record.
 Release lock synchronization is protected-merged in PR386. Its live workflow
 created a verified App commit on release PR378; all four original locked AFL
 builds and campaigns pass. The independent decoder performance check still

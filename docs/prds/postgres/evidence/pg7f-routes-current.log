@@ -1,0 +1,42 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.82s
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-backups/crates/workspace-hack)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-backups/crates/test-domains)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.45s
+────────────
+ Nextest run ID 4272c2af-53ac-4206-a3f1-e5e32671ac33 with nextest profile: default
+    Starting 5 tests across 1 binary (6 tests skipped)
+        FAIL [   0.159s] (1/5) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+  stdout ───
+
+    running 1 test
+    test completed_chunk_final_conflict_keeps_exact_policy_progress_and_report ... FAILED
+
+    failures:
+
+    failures:
+        completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.15s
+
+  stderr ───
+
+    thread 'completed_chunk_final_conflict_keeps_exact_policy_progress_and_report' (102231663) panicked at adapters/postgres/tests/backup_tests.rs:113:41:
+    called `Result::unwrap()` on an `Err` value: Migration(ExecuteMigration(Database(PgDatabaseError { severity: Error, code: "58P01", message: "could not access file \"$libdir/plpgsql\": No such file or directory", detail: None, hint: None, position: None, where: None, schema: None, table: None, column: None, data_type: None, constraint: None, file: Some("dfmgr.c"), line: Some(210), routine: Some("internal_load_library") }), 1))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.163s] 1/5 tests run: 0 passed, 1 failed, 6 skipped
+        FAIL [   0.159s] (1/5) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+warning: 4/5 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed

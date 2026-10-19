@@ -1,0 +1,17 @@
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-backups/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/fjall)
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+error: this function has too many lines (108/80)
+   --> adapters/postgres/tests/backup_tests.rs:940:7
+    |
+940 | async fn damaged_chunk_requires_explicit_salvage_and_retains_prefix_report_and_provenance() {
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+    = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (test "backup_tests") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

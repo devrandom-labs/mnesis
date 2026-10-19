@@ -1,0 +1,12 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-backups/adapters/postgres)
+error: this expression creates a reference which is immediately dereferenced by the compiler
+   --> adapters/postgres/tests/backup_tests.rs:942:22
+    |
+942 |         decode_chunk(&bytes).unwrap().first().unwrap().blocks.len(),
+    |                      ^^^^^^ help: change this to: `bytes`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#needless_borrow
+    = note: `-D clippy::needless-borrow` implied by `-D clippy::all`
+    = help: to override `-D clippy::all` add `#[allow(clippy::needless_borrow)]`
+
+error: could not compile `mnesis-postgres` (test "backup_tests") due to 1 previous error

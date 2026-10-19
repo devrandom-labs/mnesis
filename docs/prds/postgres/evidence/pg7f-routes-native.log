@@ -1,0 +1,31 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+────────────
+ Nextest run ID e1d38a31-74d8-4104-96a7-10359149b3b7 with nextest profile: default
+    Starting 5 tests across 1 binary (6 tests skipped)
+        FAIL [   0.536s] (1/5) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+  stdout ───
+
+    running 1 test
+    test completed_chunk_final_conflict_keeps_exact_policy_progress_and_report ... FAILED
+
+    failures:
+
+    failures:
+        completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.53s
+
+  stderr ───
+
+    thread 'completed_chunk_final_conflict_keeps_exact_policy_progress_and_report' (102277006) panicked at adapters/postgres/tests/backup_tests.rs:759:17:
+    assertion `left == right` failed
+      left: [StreamReport { stream: StreamKey(b"\x01\0\xff"), outcome: Complete { version: Version(2) } }, StreamReport { stream: StreamKey(b"\x02\0\xff"), outcome: Complete { version: Version(2) } }, StreamReport { stream: StreamKey(b"\x03\0\xff"), outcome: Mismatch { reached: None, got: Version(1) } }]
+     right: [StreamReport { stream: StreamKey(b"\x01\0\xff"), outcome: Complete { version: Version(2) } }, StreamReport { stream: StreamKey(b"\x02\0\xff"), outcome: Complete { version: Version(2) } }, StreamReport { stream: StreamKey(b"\x03\0\xff"), outcome: Mismatch { reached: Some(Version(1)), got: Version(1) } }]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.539s] 1/5 tests run: 0 passed, 1 failed, 6 skipped
+        FAIL [   0.536s] (1/5) mnesis-postgres::backup_tests completed_chunk_final_conflict_keeps_exact_policy_progress_and_report
+warning: 4/5 tests were not run due to test failure (run with --no-fail-fast to run all tests, or run with --max-fail)
+error: test run failed
