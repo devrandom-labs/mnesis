@@ -443,3 +443,14 @@ transfer or memory.
 - Existing adapters/postgres/tests/lifecycle_tests.rs and support/cluster.rs own
   listener observation, pool-close and native-server lifetimes. Reuse these
   established patterns; correctness timings here are not capacity measurements.
+
+### PG8 diagnostics owners, accessed 2026-10-19
+
+Locked tracing0.1.44 and subscriber0.3.23 are existing workspace dependencies;
+crates/store's execute/repository/snapshot owners use skip_all async instrument
+spans. Reuse those facilities, not a metrics/tracing framework. Locked
+sqlx-postgres0.9/src/listener.rs:226–307 implements recv as repeated try_recv;
+try_recv returns None on supported disconnects and eagerly reconnects by default.
+Observing None therefore preserves SQLx's own reconnection behavior while making
+it visible. Other errors still reach the existing bounded retry loop. Native
+query statistics remain Postgres' responsibility, not a new adapter registry.

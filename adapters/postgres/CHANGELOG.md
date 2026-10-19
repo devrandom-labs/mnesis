@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Optional tracing for listener recovery, bounded scans, fallback rescans and
+  transaction outcomes, with fixed labels and argument-free operation spans.
+
 ## [0.5.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-postgres-v0.4.0...mnesis-postgres-v0.5.0) - 2026-10-19
 
 ### Added

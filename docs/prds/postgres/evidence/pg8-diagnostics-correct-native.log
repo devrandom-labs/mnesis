@@ -1,0 +1,10 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 15.35s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.07s
+────────────
+ Nextest run ID 30c21de6-24d6-410a-a52d-b9b8d5028d3e with nextest profile: default
+    Starting 1 test across 1 binary
+        PASS [   1.609s] (1/1) mnesis-postgres::diagnostics_tests actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+────────────
+     Summary [   1.615s] 1 test run: 1 passed, 0 skipped

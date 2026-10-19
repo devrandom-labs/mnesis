@@ -1,0 +1,31 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.49s
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-diagnostics/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-diagnostics/crates/test-domains)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+error: redundant closure
+   --> adapters/postgres/src/store.rs:156:68
+    |
+156 |                     sqlstate = ?error.as_database_error().and_then(|source| source.code()));
+    |                                                                    ^^^^^^^^^^^^^^^^^^^^^^ help: replace the closure with the method itself: `sqlx::error::DatabaseError::code`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#redundant_closure_for_method_calls
+    = note: `-D clippy::redundant-closure-for-method-calls` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::redundant_closure_for_method_calls)]`
+
+error: this function has too many lines (82/80)
+   --> adapters/postgres/src/store.rs:727:5
+    |
+727 |     async fn read_all(&self, from: Option<PgAllPos>) -> Result<Self::AllStream, Self::Error> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+    = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `mnesis-postgres` (lib test) due to 2 previous errors

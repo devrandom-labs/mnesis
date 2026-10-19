@@ -1,0 +1,11 @@
+--- /tmp/mnesis-pg8-diagnostics-candidate-store.rs	2026-10-19 14:05:15
++++ /tmp/mnesis-diagnostics-control.c5Zloj/adapters/postgres/src/store.rs	2026-10-19 14:05:20
+@@ -782,7 +782,7 @@
+                         .map_err(PostgresError::Sqlx)?
+                         .into();
+                     #[cfg(feature = "tracing")]
+-                    tracing::debug!(name: "mnesis.postgres.page", outcome = "all",
++                    tracing::debug!(name: "mnesis.postgres.page", outcome = "missing",
+                         rows = rows.len(), elapsed = ?started.elapsed());
+                 }
+                 let Some(buffered) = rows.pop_front() else {

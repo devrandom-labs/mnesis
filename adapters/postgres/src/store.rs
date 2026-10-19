@@ -2,6 +2,8 @@ use std::collections::VecDeque;
 use std::num::NonZeroU32;
 use std::sync::Arc;
 use std::time::Duration;
+#[cfg(feature = "tracing")]
+use std::time::Instant;
 
 use bytes::Bytes;
 use futures::StreamExt;
@@ -15,6 +17,8 @@ use mnesis_store::value::{EventType, Metadata, Payload, SchemaVersion};
 use mnesis_store::wire;
 use mnesis_store::{PendingBatch, PendingEnvelope};
 use mnesis_wake::StreamNotifiers;
+#[cfg(feature = "tracing")]
+use sqlx::error::DatabaseError;
 use sqlx::postgres::PgListener;
 use sqlx::{Error as SqlxError, PgPool, Postgres, QueryBuilder};
 use tokio::task::JoinHandle;
@@ -141,7 +145,21 @@ fn spawn_listener(pool: PgPool, notifiers: Arc<StreamNotifiers>) -> JoinHandle<(
         loop {
             // Session failures are discharged by retry; pool closure terminates
             // ownership. Registration deadlines provide progress during recovery.
-            let _ = listen(&pool, &notifiers).await;
+            let _ = listen(&pool, &notifiers).await.inspect_err(|error| {
+                #[cfg(feature = "tracing")]
+                tracing::warn!(name: "mnesis.postgres.listener",
+                    outcome = if pool.is_closed() { "closed" } else { "retry" },
+                    kind = match error {
+                        SqlxError::PoolTimedOut => "pool_timeout",
+                        SqlxError::PoolClosed => "pool_closed",
+                        SqlxError::Io(_) => "connection",
+                        SqlxError::Database(_) => "database",
+                        _ => "other",
+                    },
+                    sqlstate = ?error.as_database_error().and_then(DatabaseError::code));
+                #[cfg(not(feature = "tracing"))]
+                let _ = error;
+            });
             if pool.is_closed() {
                 return;
             }
@@ -156,8 +174,14 @@ fn spawn_listener(pool: PgPool, notifiers: Arc<StreamNotifiers>) -> JoinHandle<(
 async fn listen(pool: &PgPool, notifiers: &StreamNotifiers) -> Result<(), SqlxError> {
     let mut listener = PgListener::connect_with(pool).await?;
     listener.listen(NOTIFY_CHANNEL).await?;
+    #[cfg(feature = "tracing")]
+    tracing::info!(name: "mnesis.postgres.listener", outcome = "ready");
     loop {
-        let notification = listener.recv().await?;
+        let Some(notification) = listener.try_recv().await? else {
+            #[cfg(feature = "tracing")]
+            tracing::info!(name: "mnesis.postgres.listener", outcome = "reconnected");
+            continue;
+        };
         if let Some(stream) = hex::decode(notification.payload()) {
             notifiers.wake(&stream);
         }
@@ -359,6 +383,8 @@ fn append_error(
     error: PostgresError,
 ) -> AppendError<PostgresError> {
     if matches!(&error, PostgresError::Sqlx(source) if is_stream_conflict(source)) {
+        #[cfg(feature = "tracing")]
+        tracing::debug!(name: "mnesis.postgres.append", outcome = "conflict");
         return AppendError::Conflict {
             stream_id: ErrorId::from_display(id),
             expected,
@@ -393,11 +419,15 @@ fn postgres_validation_err(
     match *e {
         AppendValidationError::Conflict {
             expected, actual, ..
-        } => AppendError::Conflict {
-            stream_id: ErrorId::from_display(id),
-            expected,
-            actual,
-        },
+        } => {
+            #[cfg(feature = "tracing")]
+            tracing::debug!(name: "mnesis.postgres.append", outcome = "conflict");
+            AppendError::Conflict {
+                stream_id: ErrorId::from_display(id),
+                expected,
+                actual,
+            }
+        }
         AppendValidationError::VersionOverflow => AppendError::Store(PostgresError::CorruptRow {
             stream_id: ErrorId::from_display(id),
             reason: ErrorId::from_display(&"version overflow"),
@@ -592,6 +622,10 @@ impl RawEventStore for PostgresStore {
     type AllPosition = PgAllPos;
     type AllStream = AllStream;
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.append", level = "debug", skip_all)
+    )]
     async fn append(
         &self,
         id: &StreamKey,
@@ -631,6 +665,10 @@ impl RawEventStore for PostgresStore {
         Ok(PgAllPos::new(self.history(), assigned.0, assigned.1))
     }
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.read_stream", level = "debug", skip_all)
+    )]
     async fn read_stream(
         &self,
         id: &StreamKey,
@@ -660,6 +698,8 @@ impl RawEventStore for PostgresStore {
             state,
             move |(pool, key, after, mut rows, floor, ceiling)| async move {
                 if rows.is_empty() {
+                    #[cfg(feature = "tracing")]
+                    let started = Instant::now();
                     let mut query = stream_query(key, &floor, &ceiling, after.as_deref(), limits);
                     rows = query
                         .build_query_as::<PageRow<EventRow>>()
@@ -667,6 +707,9 @@ impl RawEventStore for PostgresStore {
                         .await
                         .map_err(PostgresError::Sqlx)?
                         .into();
+                    #[cfg(feature = "tracing")]
+                    tracing::debug!(name: "mnesis.postgres.page", outcome = "stream",
+                        rows = rows.len(), elapsed = ?started.elapsed());
                 }
                 let Some(buffered) = rows.pop_front() else {
                     return Ok(None);
@@ -680,12 +723,14 @@ impl RawEventStore for PostgresStore {
         .boxed())
     }
 
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(name = "mnesis.postgres.read_all", level = "debug", skip_all)
+    )]
     async fn read_all(&self, from: Option<PgAllPos>) -> Result<Self::AllStream, Self::Error> {
         let history = self.history();
-        if let Some(position) = from {
-            history.check(position.history())?;
-        }
-        let start = from;
+        from.map(|position| history.check(position.history()))
+            .transpose()?;
 
         // Every transaction below this cutoff has already settled. Later
         // commits cannot extend this scan, and no old row can appear behind it.
@@ -695,16 +740,20 @@ impl RawEventStore for PostgresStore {
         .fetch_one(self.pool())
         .await
         .map_err(PostgresError::Sqlx)?;
+        #[cfg(feature = "tracing")]
+        tracing::debug!(name: "mnesis.postgres.watermark", cutoff = %upper);
         let limits = self.inner.limits;
         let state = (
             self.pool().clone(),
-            start,
+            from,
             VecDeque::<PageRow<AllEventRow>>::new(),
             upper,
         );
         Ok(
             try_unfold(state, move |(pool, after, mut rows, ceiling)| async move {
                 if rows.is_empty() {
+                    #[cfg(feature = "tracing")]
+                    let started = Instant::now();
                     let mut query = QueryBuilder::<Postgres>::new(page::START);
                     query
                         .push("txid OPERATOR(pg_catalog.<) ")
@@ -732,6 +781,9 @@ impl RawEventStore for PostgresStore {
                         .await
                         .map_err(PostgresError::Sqlx)?
                         .into();
+                    #[cfg(feature = "tracing")]
+                    tracing::debug!(name: "mnesis.postgres.page", outcome = "all",
+                        rows = rows.len(), elapsed = ?started.elapsed());
                 }
                 let Some(buffered) = rows.pop_front() else {
                     return Ok(None);

@@ -119,9 +119,15 @@ impl PostgresError {
                 .as_deref()
                 .is_some_and(|value| value.starts_with("23") || matches!(value, "40001" | "40P01"))
             {
+                #[cfg(feature = "tracing")]
+                tracing::debug!(name: "mnesis.postgres.commit", outcome = "rejected",
+                    sqlstate = ?code);
                 return Self::Sqlx(source);
             }
         }
+        #[cfg(feature = "tracing")]
+        tracing::warn!(name: "mnesis.postgres.commit", outcome = "unknown",
+            "reconcile durable state before deciding whether to retry");
         Self::CommitUnknown(source)
     }
 }

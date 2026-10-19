@@ -1,0 +1,17 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-diagnostics/crates/workspace-hack)
+    Checking mnesis v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/mnesis)
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Checking mnesis-store v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-diagnostics/crates/test-domains)
+    Checking mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+    Checking mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+    Checking mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.39s
+    Checking mnesis-store v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store)
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/postgres)
+    Checking mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/wake)
+    Checking mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/crates/store-testing)
+    Checking mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-diagnostics/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.89s
+ INFO taplo:format_files:load_config: found configuration file path="/private/tmp/mnesis-postgres-diagnostics/taplo.toml"
+ INFO taplo:format_files:collect_files: found files total=26 excluded=1 files=["/private/tmp/mnesis-postgres-diagnostics/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/adapters/fjall/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/adapters/inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/adapters/postgres/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/macros/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/macros/tests/cross_crate_test/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/mnesis/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/nostd-smoketest/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/store/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/store-testing/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/test-domains/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/wake/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/crates/wake-nostd/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/axum-todos/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/closing-the-books/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/fjall-end-to-end/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/projection-tokio/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/signed-events/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/store-and-kernel/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/examples/store-inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/fuzz/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/fuzz-afl/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/fuzz-common/Cargo.toml", "/private/tmp/mnesis-postgres-diagnostics/mutants-gate/Cargo.toml"] cwd="/private/tmp/mnesis-postgres-diagnostics"

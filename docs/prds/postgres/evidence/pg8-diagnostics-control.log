@@ -1,0 +1,36 @@
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-diagnostics-control.c5Zloj/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 26.02s
+────────────
+ Nextest run ID d4292a08-86ad-4e8e-b467-3d3bb933e3c4 with nextest profile: default
+    Starting 1 test across 1 binary
+        FAIL [   5.082s] (1/1) mnesis-postgres::diagnostics_tests actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+  stdout ───
+
+    running 1 test
+    test actual_listener_scan_and_commit_work_emit_bounded_operational_fields ... FAILED
+
+    failures:
+
+    failures:
+        actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.07s
+
+  stderr ───
+
+    thread 'actual_listener_scan_and_commit_work_emit_bounded_operational_fields' (110512130) panicked at adapters/postgres/tests/diagnostics_tests.rs:87:5:
+    missing mnesis.postgres.page/all: [{}, {"event": "mnesis.postgres.listener", "outcome": "\"ready\""}, {}, {}, {"event": "mnesis.postgres.commit", "outcome": "\"committed\""}, {}, {"event": "mnesis.postgres.append", "outcome": "\"conflict\""}, {}, {"elapsed": "949.667µs", "event": "mnesis.postgres.page", "outcome": "\"stream\"", "rows": "1"}, {}, {"cutoff": "176957", "event": "mnesis.postgres.watermark"}, {"elapsed": "520.625µs", "event": "mnesis.postgres.page", "outcome": "\"missing\"", "rows": "1"}, {"event": "mnesis.postgres.rescan", "outcome": "\"deadline\""}, {"event": "mnesis.postgres.listener", "outcome": "\"reconnected\""}]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   5.292s] 1 test run: 0 passed, 1 failed, 0 skipped
+        FAIL [   5.082s] (1/1) mnesis-postgres::diagnostics_tests actual_listener_scan_and_commit_work_emit_bounded_operational_fields
+error: test run failed
