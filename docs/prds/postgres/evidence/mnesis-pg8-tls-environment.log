@@ -1,0 +1,5 @@
+building '/nix/store/ydr7s1v48palkdmra4n9787f5v7r9x3s-nix-shell-env.drv'...
+/nix/store/2yj968dxlxwd4l11di72fbinv3z1pvsl-openssl-3.5.8-bin/bin/openssl
+OpenSSL 3.5.8 25 Aug 2026 (Library: OpenSSL 3.5.8 25 Aug 2026)
+rustc 1.99.0 (b940084d7 2026-09-28)
+postgres (PostgreSQL) 18.6

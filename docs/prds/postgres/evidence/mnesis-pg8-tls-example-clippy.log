@@ -1,0 +1,12 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+error: this pattern matching can be expressed using `matches!`
+  --> adapters/postgres/examples/secure.rs:52:8
+   |
+52 |     if let Ok(()) = read().await {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `matches!(read().await, Ok(()))`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#equatable_if_let
+   = note: `-D clippy::equatable-if-let` implied by `-D clippy::nursery`
+   = help: to override `-D clippy::nursery` add `#[allow(clippy::equatable_if_let)]`
+
+error: could not compile `mnesis-postgres` (example "secure") due to 1 previous error

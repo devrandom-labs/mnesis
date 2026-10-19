@@ -298,3 +298,44 @@ RustSec https://rustsec.org/advisories/RUSTSEC-2026-0221.html and upstream
 https://github.com/smol-rs/event-listener/releases/tag/v5.4.2 confirm the existing
 5.4.1 advisory is patched by5.4.2. Existing ignore is not production acceptance;
 compatibility/no_std/dependency/lockfile evidence is still required before update.
+
+# PG8 TLS pre-read — accessed2026-10-18
+
+https://docs.rs/sqlx/0.9.0/sqlx/#tls-support documents supported native-TLS and
+Rustls providers; current exact installed sqlx0.9/Cargo.toml and sqlx-core0.9/
+Cargo.toml own feature spellings: tls-rustls-ring-webpki,
+tls-rustls-ring-native-roots, tls-rustls-aws-lc-rs, tls-native-tls. Rustls optional
+requirement0.23.24 with std+tls12 and provider chosen separately. Current root
+lock contains no Rustls/ring/native-TLS; no backend selected yet. Exact installed
+sqlx-postgres0.9/src/options/{mod,ssl_mode,parse}.rs documents defaultPrefer and
+VerifyFull. Two docs.rs PgConnectOptions/PgSslMode URLs failed to open; local
+locked source is authoritative. Need real native VerifyFull witness and complete
+fitness/license/advisory/lock/build comparison before a provider selection.
+
+PG8 provider decision primary sources, accessed2026-10-18:
+https://github.com/rustls/rustls/security (maintenance/MSRV policy),
+https://docs.rs/rustls/0.23.45/rustls/ (provider/platform/feature description),
+https://github.com/rustls/rustls/releases/tag/v%2F0.23.45 (Sept handshake fix),
+https://rustsec.org/packages/rustls.html and advisories/RUSTSEC-2026-0346.html,
+0347.html,0348.html,0349.html (Oct14 patches>=0.23.46).
+Cached releases search incorrectly still calls0.23.45 latest. Live official
+GitHub API repos/rustls/rustls/releases/latest instead returnsv/0.23.46,
+published2026-10-14T09:51:22Z, fixing those four advisories. Do not choose stale45.
+https://rustsec.org/advisories/RUSTSEC-2025-0009.html requiresring>=0.17.12;
+https://rustsec.org/packages/ring.html marks only pre0.17 unmaintained.
+Exact SQLx0.9 src/net/tls/tls_rustls.rs imports built-in roots, appends configured
+root certs, and uses normal certificate+name verification for VerifyFull; no
+custom verifier selected. Alternatives/native trust and dependency costs in HYP.
+Runtime performance/build/license/audit facts still require actual resolved lock
+and commands, not extrapolation from upstream documentation.
+
+Resolved selection correction: webpki-roots1.0.9 exact Cargo.toml license is
+CDLA-Permissive-2.0 (not initial assumedMPL). Actual cargo-deny rejects it under
+existing policy. No policy changes; supported native-roots alternative resolves
+rustls-native-certs0.8.4 (Apache2/ISC/MIT), SecurityFramework3.7.0/sys2.17.0 and
+core-foundation0.10.1 (MIT/Apache2), plus platform support. Exact installed crate
+Cargo.tomls show MSRV<=1.85; Rustls0.23.46 MSRV1.71, ring0.17.14 MSRV1.66.
+Ring LICENSE explicitly refers current Apache2/ISC BoringSSL plus once_cell;
+existing deny policy passed without clarification changes. Native trust is
+OS-provided roots plus callerCA through SQLx; no CA-file-only guarantee. Actual
+TLS1.2/1.3/provider choice remains supported SQLx Rustls/ring; no custom verifier.

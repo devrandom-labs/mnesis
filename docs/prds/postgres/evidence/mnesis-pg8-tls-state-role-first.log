@@ -1,0 +1,12 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+error: this function has too many lines (83/80)
+   --> adapters/postgres/tests/security_tests.rs:473:7
+    |
+473 | async fn verified_tls_runtime_can_update_snapshots_and_checkpoints_then_reopen_exact_pairs() {
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_lines
+    = note: `-D clippy::too-many-lines` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::too_many_lines)]`
+
+error: could not compile `mnesis-postgres` (test "security_tests") due to 1 previous error

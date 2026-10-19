@@ -1,0 +1,58 @@
+     Removed 871 files, 180.7MiB total
+   Compiling shlex v2.0.1
+   Compiling zeroize v1.9.0
+   Compiling find-msvc-tools v0.1.9
+   Compiling core-foundation-sys v0.8.7
+   Compiling untrusted v0.9.0
+   Compiling rustls v0.23.46
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/adapters/postgres)
+   Compiling security-framework-sys v2.17.0
+   Compiling core-foundation v0.10.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling curve25519-dalek v4.1.3
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/store)
+   Compiling cc v1.3.0
+   Compiling security-framework v3.7.0
+   Compiling ed25519-dalek v2.2.0
+   Compiling ring v0.17.14
+   Compiling rustls-native-certs v0.8.4
+   Compiling rustls-webpki v0.103.15
+   Compiling sqlx-core v0.9.0
+   Compiling sqlx-postgres v0.9.0
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/workspace-hack)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/adapters/fjall)
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+   Compiling sqlx v0.9.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.66s
+────────────
+ Nextest run ID 75018006-820d-4f99-9080-cf7b08481c5e with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   1.161s] (1/1) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.15s
+
+  stderr ───
+
+    thread 'verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause' (102871432) panicked at adapters/postgres/tests/security_tests.rs:329:6:
+    wrong CA must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.165s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   1.161s] (1/1) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+error: test run failed

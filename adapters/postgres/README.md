@@ -20,6 +20,69 @@ mnesis-postgres = "0.1"
 
 Point it at a database via `DATABASE_URL`; integration tests boot a real PostgreSQL and skip cleanly when the variable is absent.
 
+## Verified connections
+
+The adapter enables SQLx's Rustls/ring TLS backend with native system trust roots.
+Build a caller-owned pool with `PgSslMode::VerifyFull` and the expected server
+hostname. A configured `ssl_root_cert` adds its CA to the system roots; it does
+not replace those roots. Verification rejects an untrusted certificate or a name
+missing from the certificate. Encryption alone does not verify server identity.
+The ordinary URL constructor follows SQLx's requested SSL mode; compiling TLS
+support does not change a caller's `Prefer` or `Disable` setting.
+
+The [secure example](examples/secure.rs) requires `DATABASE_URL` and
+`PGSSLROOTCERT`, explicitly selects `VerifyFull`, and reads an already migrated
+database. It never falls back to plaintext. Use the runtime role below rather
+than the migration account:
+
+```sh
+nix develop --command cargo run -p mnesis-postgres --example secure
+```
+
+Configure the server for SSL and restrict remote runtime access to `hostssl`
+entries with appropriate authentication, such as `scram-sha-256`. Keep migration
+access under the operator's separate policy. Use the matching hostname in the
+connection options; changing it to an IP requires that IP in the certificate.
+Provision certificates and passwords through the deployment's existing secret
+management. Never log connection URLs, passwords, or `PgConnectOptions`, including
+its `Debug` representation. The example emits a generic failure without printing
+those inputs; applications should record only selected safe error fields.
+
+Authentication retains the native SQLSTATE and cause; certificate/name failures
+retain their Rustls cause through SQLx. Native tests pin authentication `28P01`,
+plaintext rejection `28000`, and both certificate failures. They also check that
+returned error display/debug text omit the supplied test passwords; this does
+not establish redaction for arbitrary application logs or connection inputs.
+
+Create the login through your existing role/secret administration. For an
+already migrated database, this is the complete event runtime grant profile
+(replace `mnesis_runtime` with that login):
+
+```sql
+GRANT USAGE ON SCHEMA mnesis TO mnesis_runtime;
+GRANT SELECT ON mnesis._sqlx_migrations, mnesis.history,
+    mnesis.keys, mnesis.events TO mnesis_runtime;
+GRANT INSERT ON mnesis.keys, mnesis.events TO mnesis_runtime;
+GRANT USAGE ON SEQUENCE mnesis.keys_number_seq,
+    mnesis.events_global_seq_seq TO mnesis_runtime;
+```
+
+Snapshot writers additionally need `SELECT, INSERT, UPDATE` on
+`mnesis.snapshots`; projection writers need those rights on `mnesis.checkpoints`.
+All runtime opens validate the installed schema, including these tables, without
+DDL. Runtime users need no event `UPDATE`, `DELETE`, `TRUNCATE`, schema creation,
+table ownership, superuser or history metadata write rights. Native TLS tests
+verify denied event rewrites/schema changes, atomic competing appends, state
+replacement and saved checkpoint recovery. The role must not inherit broader
+rights from another membership or own the schema/tables.
+
+Caller pool acquisition timeouts bound waiting for a pool lease. They do not
+establish a statement/lock deadline or prove rollback after a write timeout.
+Keep at least two connections available for the shared listener and data work;
+the adapter rejects a pool configured with only one. Follow the transaction
+outcome rules below for any interrupted write. Durability, restart, capacity and
+other operational profiles remain under the completion PRD.
+
 ## MSRV & stability
 
 MSRV **1.99**. Ships in the **0.x tier** — the wire/schema surface iterates without forcing kernel major bumps. See [STABILITY.md](../../STABILITY.md).

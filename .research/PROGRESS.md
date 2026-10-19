@@ -1,3 +1,40 @@
+# Postgres delivery — current pointer
+
+Current user turn authorizes ongoing repository work. Saved goal remains BLOCKED
+by external policy flag; do not alter storage, forge status or bypass safeguards.
+No token budget. Canonical devrandom skill and full protocol on context recovery.
+Root docs/postgres-prd8357c0c2 and USER research.md edit remain untouched.
+
+Query PR394 protected-merged5ef3e742c63a2f4078ec28057559b5439af28234 from signed
+4ac45d46, all40CIgreen/0threads. Fullgate all12/fresh1573PASS498.736s;
+corrected native235PASS78.426s and fouractualLinux235suites0skip.
+Four test lines prevent stale-probe false mutation catches; raw original8 false
+catches rejected, repeated native controls now each reach own fault/leave0probes.
+Fresh mutation artifact12163146175 VERIFIED,14own runtimecatches/2unviable,
+0survivors/timeouts and0stale-schema errors; all16firstfailures independently
+reviewed. Entire protected merge tree equals4ac. All latest evidence restored here.
+
+TLS worktree is now rebased onto protected query5ef3e742 at signed
+f95f9451694e905ea2f85a58742823cd33d5c7e3, ENTIRE TREE equals tested0ac0c21c.
+Previous signed276bbdd2 source passedall12/fresh1575PASS536.315s, native235 and
+old276CI40success/1scheduledskip/0threads. Actual oldhead CodSpeedPASS,0eligiblemutants,
+real native Linux235PASS51.415/59.003s. None of those are combined240 proof.
+Preserve stash9a3d9449e8fc0a47356e00c19986570ba67fafea and oldae465010; exact
+pre-stack sources/records/postgate patch in /tmp/mnesis-tls-stack.jxcsdf.
+Four append records merged only after exact common-prefix comparisons. Complete
+prior query/TLS progress retained below. Combinednative240PASS87.470s0skip;
+normalSIGNED0ac0c21c fullgate all12/fresh1577PASS476.059s/replay2/1/1.
+Old postgate stash7f06e58bcb8d1212b1a9cf4d98a3d8393e32d55e retained; records
+restored by exact prefixes. Now normal cached signed evidence amendment, then
+exactleasedpush againstremote276/currentCI/review/protectedmerge. No new native
+execution credit for cached checks. Run ONE local full gate at a time.
+
+Durability worktree still owns deferred-trigger fix/focused10laws; complete
+current-parent proof/delivery remains. PG7 timings, PG8 operations/capacity/30min
+soak, PG9 matrix/Python removal/AFLgate/advisories/minimization/release/registry
+consumer remain. Do not declare complete or publish from an intermediate pass.
+
+## Preserved query progress before stacking
 # Decoder performance experiment
 
 Whole Postgres goal ACTIVE, no token budget. This is one release/performance
@@ -224,3 +261,191 @@ Itsserialfullgateall12fresh1575PASS536.315s15slow4compilerexcluded/replay2/1/1.
 Do NOTmergeoldquerysourceon misleading rawcatches or completewholegoal. Afternew
 querysignedhead available, stackTLS ontoquery to testcombinedsource once; retain
 all docs/suffixes/stashes. No otherown localnative/fullgate jobs nowactive.
+
+## Preserved TLS progress and post-gate updates before stacking
+# Postgres delivery progress
+
+Persistent goal ACTIVE, no token budget. Complete PG0–PG9 through protected
+merges, verified publication and clean registry real-Postgres consumer. No
+publication or whole-adapter completion claimed. Latest turn PROGRESS, not stall.
+After EVERY actual test/check/control run review three ways: contract; actual
+fault/execution; assertions/source/skips/coverage limits. Retain original reds.
+Do not treat unviable mutants, filtered cases or database-free runs as native proof.
+
+Read canonical ~/nix-config/modules/home/devrandom-research/skill/SKILL.md and
+FULL references/protocol.md after recovery, plus CLAUDE.md and ~/.claude/CLAUDE.md.
+No subagents authorized. No Python/custom tooling/frameworks/runtimes. Normal
+SIGNED commits with unchanged full nix flake check hook, no bypass. Protected
+exact-head squash only after all checks, actual evidence and review threads.
+
+## Delivered and release
+
+FIFTEEN focused PRs protected-merged; exact list in docs/prd-backlog/status.md.
+Latest PR390 physical recovery2247c739525f9d8765179b7d9f7f67c6b43bd32f;
+PR391 backup routing/failures49104117b87010206fb4b25be1b4d3d6e6635b22,
+merged2026-10-19T00:07:36Z from signed07c15a59faa3676db0dd2e9343857e24c6a7872a.
+All40checks success/one scheduled sweep skip, zero unresolved threads. Final
+CI actual native230/230 four executions43.132/49.667/51.006/47.704s,0skips;
+workspace1571/1571 twice86.727/121.603s,4compiler cases separately tested.
+Logs /tmp/mnesis-pr391-{ci,ci-call,fuzz,mutants}.log. Diff mutation job had NO
+mutants, NO upload files, artifacts total0: no catches claimed. Two local native
+backup controls fail exactly. Detailed per-run three reviews in research.md.
+PG7 still needs logical operator recovery-point/time profile measurement.
+
+Release lock repairPR386 delivered, live release workflow created App commit;
+original four locked AFL campaigns passed. Independent CodSpeed10.42% slowdown
+still fails releasePR378; no accepted fix, waiver, threshold/baseline reset or
+manual acknowledgement. Native A/B/A does not waive x86 metric; inline candidate
+regressed25–36% and was reverted. Performance worktree retains RECORDS ONLY.
+ReleasePR378 remains OPEN/unmerged; no publication verified.
+
+## Current slice: verified TLS
+
+/tmp/mnesis-postgres-security branchwork/postgres-security now based protected
+main49104117. Exact WIP preserved incl untracked in stash
+3b4e83faef631d3796700f2af1f8cc503f13909e, retained. Rebase zero own commits;
+research/hypothesis append conflicts resolved by verifying exact old-base byte
+prefix in BOTH parent and child, retaining parent then full child suffix.
+Root /Users/joel/orca/workspaces/nexus/main stays docs/postgres-prd8357c0c2.
+USER root docs/prds/postgres/research.md edit MUST stay untouched. Only mirror our
+PROGRESS.md into root. Preserve all other worktrees/stashes.
+
+SQLx0.9 supported tls-rustls-ring-native-roots selected. Original actual TLS test
+fails missing TLS feature despite healthy native verified SSL control. Rejected
+webpki-roots1.0.9 CDLA license candidate; unchanged deny policy, no older pin.
+Selected rustls0.23.46/ring0.17.14,22new transitive packages,208+/12lock lines,
+no old package version updates; managed Hakari4+/2-.0production Rust/API change.
+Five native TLS laws5/5PASS7.263s0skips: verified native/public URL, exact CA/name
+causes, auth/plaintext SQLSTATEs, secrets absent returned Display/Debug, runtime
+cannot UPDATE/DELETE/TRUNCATE/ALTER/CREATE events/schema, actual Barrier/spawn
+one-winner race, caller pool retained/reopen and exact snapshot/checkpoint CAS
+state pairs through2updates/reopen. Do not claim PgConnectOptions Debug redacts
+its password or CA-file-only trust: selected backend includes native system roots.
+
+Native controls freshly compile/run: VerifyFull->Require fails wrongCA1.165s;
+VerifyFull->VerifyCa fails hostname1.470s. Correct product unchanged. Control
+/tmp/mnesis-tls-controls.aLjhvT intentionally retains VerifyCa mutant, separate
+proof target package-clean before each. Logs /tmp/mnesis-pg8-tls-{require,name}-control.log.
+Original fixture errors retained (URL File prefix, actual IoInvalidData certificate
+source, legitimate unknown race head); corrections validated against source and
+established owner laws, no product mapping/oracle weakening. Shared error docs3
+lines explain optional actual head. New security538+sharedcluster66=604/650lines;
+restore helper extraction retains actual args/status. Seven owning restore laws
+PASS7.957s0skips; default TLS4/4PASS5.414s0skips, default Clippy3.67s.
+
+Combined current protected-parent+TLS native235/235PASS68.032s0skips. Original
+wrong-tool run194PASS/1FAIL/40UNRUN retained: bash -lc had reset NixPATH to host
+LibreSSL. Correct bash -c retains OpenSSL3.5.8/PG18.6/Rust1.99. No oracle change.
+Current audit/deny both0 but EXISTING event-listener warning/ignore remains;
+not an advisory-free workspace. Source /tmp/mnesis-pg8-tls-combined-current.log.
+Secure example62/70lines and README63/120lines added, strictall/all/default
+Clippy1.08/1.88s, format/HakariPASS, no lint allowances. Original compiler reds
+retained (typedlargeerror boxed on error path; fallible Write; result predicate).
+LIVE Linux64404 /tmp/mnesis-pg8-tls-combined-linux.log on aarch64 remote builder.
+LIVE normal SIGNED commit hook64030 /tmp/mnesis-pg8-tls-hook-first.log. Source/
+index frozen until terminal. Poll SAME handles, do not restart/bypass. No PR yet.
+Nix includes staged new security/cluster/example; TLS smoke added to old archive,
+OpenSSL in two existing tool lists. No new development machinery.
+
+Independent NEXT durability witness /tmp/mnesis-postgres-durability branch
+work/postgres-durability based protectedmain49104117, no production changes.
+Pre-edit<=70native lines/0API/lock changes in HYPOTHESES, primary sources recorded.
+New48line law uses healthy on nativeSHOW/open then actual off nativeSHOW and
+requires runtime rejection. Baseline currently appears schema-only. LIVE44324,
+/tmp/mnesis-pg8-durability-original.log. Must observe originalred before policy/
+fix, final exact typederror/no-write oracle still due. Futureconnection change,
+all4writeowners, actualrestart and honeststorage/replication scope remain required.
+
+## Remaining whole goal
+
+PG8 lifecycle/durability/query/acquire/lock deadlines, restart/unavailable/cancel/
+slow consumers, diagnostics/low-cardinality/no secrets/watermark/longtransactions;
+10k/100k/1m histories x1/16/128 consumers, payload/batch/writer profiles,
+percentiles/throughput/allocations/peak+retainedRSS/connections/plans/saturation;
+30minute mixed soak with reconnect/restart,0invariant violations and recovery
+bound. Set deployment targets from actual baselines at equal durability.
+Credible UNPROVEN findings include startup migration metadata unbounded fetch_all,
+constraint deparser/searchpath, caller pool future session settings, blocked
+session cancellation/socket intervals. Witness before fixes; no invented cause.
+PG9 remove existing Python feature script/fuzz heredoc via Nix/Cargo/jq, no new
+customsuite; native default/each/all/downstream feature CI currently missing,
+cargo-hack0.6.45 available lockedNix (--no-dev-deps mutates manifest: isolated
+worktree only); AFL zero-exit crash-gate proof, event-listener5.4.1 advisory/stale
+ignore/yank blindspots; final docs/example/changelog/minimization/two fresh whole
+audits, release performance investigation, protectedrelease/publication/registry.
+PG10 stays conditional; Labcast owns IDs/deduplication/stale-worker rejection.
+
+## Environment and preservation
+
+Shared local PostgreSQL17.10: /tmp/mnesis-postgres-pg0, Unix/tmp port55432 userjoel.
+DATABASE_URL=postgres:///mnesis_pg7b?host=/tmp&port=55432&user=joel.
+ControlDBmnesis_pg7c_controls SAME physical cluster; never concurrent native suites
+on it (xmin spans databases). Exact vanished running package restored without
+restart and rooted /tmp/mnesis-postgres-pg0-package. Private native restore/TLS
+clusters use NixPG18.6, separate sockets/dynamic TLS TCP ports.
+Shell profile /tmp/mnesis-postgres-security-shell (Rust1.99/OpenSSL3.5.8/PG18.6).
+Shared target /Users/joel/orca/workspaces/nexus/main/target; controls proof target
+/tmp/mnesis-pg6a-proof-target.z1jmzk. Linux builder ssh-ng://builder@linux-builder.
+No broadGC/rawcache rm; previous auto-review rejected rm, user informed. Supported
+cargo clean -p only inactive proof packages. Leave independent Labcast jobs alone.
+Preserve every stash including3b4e83fa above,5a7ca8a2,fd00ca76,b7a00486,85459c87,
+b51e18ce,fbcc7d91,65981423,f4fc89d0,219c6aaf,c5bc39b3. Never pop/drop them.
+
+UPDATE: TLS Linux64404 terminal0,235/235PASS96.943s0skips,6filtered smokes pass.
+Normal signed full hook64030 terminal0, commite065a0a4d52f8c2357b59cb94121fee7e98a7cde G.
+Actual workspace1575PASS613.939s15slow/4compilerexcluded; DB-free4TLS registrations
+get no native credit. Nix audit yanked-index missing-crate blindspot remains;
+separate live audit386deps scanned, only existing event-listener warning. No
+policy weakening. All12actual gate logs reviewed3ways and retained. Next normal
+signed evidence amendment (unchanged source), focusedPR/allCI/evidence/merge.
+Durability separate branch7native laws pass;3clean runtime controls fail exact,
+one earlier mixedsetup control excluded; unsafe server/restart extensioncurrently
+stopped by90/80line test Clippy,0new native cases yet. No sourcefreeze job active
+on TLS, no other own localnative suite running. Preserve rootuserresearch edit.
+
+## Current protected decoder parent
+
+Main now f207923a6131ea0270e0e8b22810d8cb3afb7adc: PR393 protectedmerged after
+40success/1scheduledskip/0threads, CodSpeed3sizes501.7->397.2ns. This resolves
+previous TLS parent's decoder gate at its own reviewed source, not yet combined
+TLS-head proof. TLS rebase ontof207: four append-only records preserve exact
+base+parent+childsuffixes; mutable progress keeps complete child snapshot with
+this current pointer, oldparentprogress preserved in Git and
+/tmp/mnesis-tls-parent-progress-before-rebase.md. Saved CI suffix26lines from
+stashae465010869acc9a6fe794e85564c199c0494d19 appended after exactprefix check,
+stash remains preserved. Finaladapter/manifests/locks/Nix equivalence to03052633
+must check before normal signed amendment/newcombined validation and leasedpush.
+Querybranch mergeddecoder parent b8531258, combinednative235suite41770running;
+sourcefrozen while tests, then fullsignedgate+focusedPR. No simultaneous localPG.
+Durabilitydeferredtrigger original settled2/2 red, fixed10native89.180s passes,
+needs currentparent delivery later. All remainingPG7/8/9 notcomplete.
+Goal BLOCKED because saved task_complete cyber_policy error01:42:16Z. No explicit
+update_goal call. User notified exactcause, no alteredgoalDB or bypass. Continue
+permitted repository integration thisturn; no unsupportedresumeAPI.
+
+TLS combinedprotecteddecoder native10940DONE0 actual235PASS68.239s0skips, all3
+reviews recorded. CurrentTLSsource3fa39a4d equals03052633 except exactprotected
+wire.rs. Normal signed amendment follows with current records/rawnativecopy;
+source/indexFROZENuntilterminal. RequirednewCI/CodSpeed actualcombinedsource
+beforePR392merge; leasedpushmustmatcholdremote03052633cfbf15553b8392034f4799b5e6836235.
+Queryotherworktree signedcombinedgate5226stillrunning, no nativeDB jobs now.
+Bothgates are existing independent Nix checks; daemon owns resource scheduling.
+ReleasePR378 verified0.5.0headc5ec958 current40SUCCESS (metadataonly, not final
+releaseacceptance/publication). FullgoalPG7/8/9acceptance remains.
+
+TLS serial retry34027DONE0 finalSIGNED276bbdd2c5530317a81f954052f895f9999a8136 G,
+all12checks; fresh1575PASS536.315s15slow4compilerexcluded,replay2/1/1each1s.
+Productsourceeq3faPASS; current native23568.239s staysdistinct/no query/durability.
+Push exactlease old03052633 then PR392 newheadCI/CodSpeed/native/artifact reviews.
+Query PR394 firstCI detected mutationfixturecontamination:8rawcatches42P06,
+REJECTED. Queryworktree owns4testlinecleanup correction; repeatednativecontrol
+now reaches23503 and leaves0probes twice, healthy235suite72223running. No merge
+of oldquery95a00bc1 on misleading mutation green. No TLS/fullgatejobs nowactive.
+
+CURRENT rebase signed59290a0e actualcombinednative240PASS87.470s0skip,
+all5names+5TLS execute, formatPASS and exactproductunioncmpPASS. THREEreviews
+recorded. Restored complete query postgate proof onlyafterexact4acprefixcheck.
+Nowstageownedproof then normalSIGNEDamend/fullgate; max-jobs2 per-run Nix scheduler
+only, unchangedfullhook and test workloads. Preserveindex/source untilterminal.
+Query4acfreshCI currently31SUCCESS/6running; independentmutationevidence pending.
+TLSremote276oldCI38SUCCESS/2Nixpending, do notmerge sibling source beforecombined.

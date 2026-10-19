@@ -47,7 +47,7 @@ serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
 slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_new", "serde"] }
-sqlx-core = { version = "0.9", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
+sqlx-core = { version = "0.9", features = ["_rt-tokio", "_tls-rustls-ring-native-roots", "any", "json", "migrate", "offline"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 tracing = { version = "0.1", features = ["log"] }
@@ -55,6 +55,7 @@ tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 typenum = { version = "1", default-features = false, features = ["const-generics"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
+zeroize = { version = "1" }
 
 [build-dependencies]
 aligned-vec = { version = "0.6", default-features = false, features = ["std"] }
@@ -93,7 +94,7 @@ serde_json = { version = "1", features = ["raw_value"] }
 sha2 = { version = "0.10" }
 slab = { version = "0.4", default-features = false, features = ["std"] }
 smallvec = { version = "1", default-features = false, features = ["const_new", "serde"] }
-sqlx-core = { version = "0.9", features = ["_rt-tokio", "any", "json", "migrate", "offline"] }
+sqlx-core = { version = "0.9", features = ["_rt-tokio", "_tls-rustls-ring-native-roots", "any", "json", "migrate", "offline"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
@@ -102,6 +103,7 @@ tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
 typenum = { version = "1", default-features = false, features = ["const-generics"] }
 zerocopy = { version = "0.8", default-features = false, features = ["derive", "simd"] }
+zeroize = { version = "1" }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }

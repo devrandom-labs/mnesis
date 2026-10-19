@@ -1,0 +1,61 @@
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/y0wrc0wdgd342a3a8yi05fngskbd4pzi-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+decompressing cargo artifacts from /nix/store/m7ss1wjzl90jqxxm42xfrf5ssi47ks1g-mnesis-deps-0.4.0/target.tar.zst to target
+patchPhase completed in 39 seconds
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+will append /nix/var/nix/builds/nix-52626-1515561465/source/.cargo-home/config.toml with contents of /nix/store/dq31qg1s6wbmpzdvrf3vwvbrmprpczwb-vendor-cargo-deps/config.toml
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo doc --release --locked --workspace --exclude mnesis-postgres --all-features --no-deps
+[1m[92m   Compiling[0m sqlx-core v0.9.0
+[1m[92m    Checking[0m bitflags v2.13.1
+[1m[92m Documenting[0m mutants-gate v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/mutants-gate)
+[1m[92m    Checking[0m security-framework v3.7.0
+[1m[92m    Checking[0m rustls-native-certs v0.8.4
+[1m[92m   Compiling[0m workspace-hack v0.1.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/workspace-hack)
+[1m[92m Documenting[0m workspace-hack v0.1.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/workspace-hack)
+[1m[92m Documenting[0m mnesis-macros v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/macros)
+[1m[92m   Compiling[0m mnesis-macros v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/macros)
+[1m[92m    Checking[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/mnesis)
+[1m[92m Documenting[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/mnesis)
+[1m[92m    Checking[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/store)
+[1m[92m Documenting[0m mnesis-example-inmemory v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/inmemory)
+[1m[92m Documenting[0m mnesis-nostd-smoketest v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/nostd-smoketest)
+[1m[92m Documenting[0m mnesis-example-closing-the-books v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/closing-the-books)
+[1m[92m Documenting[0m mnesis-cross-crate-test v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/macros/tests/cross_crate_test)
+[1m[92m Documenting[0m mnesis-test-domains v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/test-domains)
+[1m[92m Documenting[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/store)
+[1m[92m    Checking[0m mnesis-wake v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/wake)
+[1m[92m Documenting[0m mnesis-store-testing v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/store-testing)
+[1m[92m Documenting[0m mnesis-wake-nostd v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/wake-nostd)
+[1m[92m Documenting[0m mnesis-wake v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/crates/wake)
+[1m[92m    Checking[0m mnesis-fjall v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/adapters/fjall)
+[1m[92m    Checking[0m mnesis-inmemory v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/adapters/inmemory)
+[1m[92m Documenting[0m mnesis-inmemory v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/adapters/inmemory)
+[1m[92m Documenting[0m mnesis-fjall v0.4.0 (/nix/var/nix/builds/nix-52626-1515561465/source/adapters/fjall)
+[1m[92m Documenting[0m mnesis-example-store-inmemory v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/store-inmemory)
+[1m[92m Documenting[0m mnesis-example-projection-tokio v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/projection-tokio)
+[1m[92m Documenting[0m mnesis-example-store-and-kernel v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/store-and-kernel)
+[1m[92m Documenting[0m mnesis-example-axum-todos v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/axum-todos)
+[1m[92m Documenting[0m mnesis-example-signed-events v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/signed-events)
+[1m[92m Documenting[0m mnesis-example-fjall-end-to-end v0.0.0 (/nix/var/nix/builds/nix-52626-1515561465/source/examples/fjall-end-to-end)
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 1m 00s
+[1m[92m   Generated[0m /nix/var/nix/builds/nix-52626-1515561465/source/target/doc/mnesis/index.html and 20 other files
+buildPhase completed in 1 minutes 0 seconds
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-52626-1515561465/ in /nix/store/g2gqywx56qbi47f7x9g0z9a6fqp6yrg7-mnesis-doc-0.4.0...
+patching script interpreter paths in /nix/store/g2gqywx56qbi47f7x9g0z9a6fqp6yrg7-mnesis-doc-0.4.0

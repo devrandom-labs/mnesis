@@ -1,0 +1,120 @@
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/y0wrc0wdgd342a3a8yi05fngskbd4pzi-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+decompressing cargo artifacts from /nix/store/m7ss1wjzl90jqxxm42xfrf5ssi47ks1g-mnesis-deps-0.4.0/target.tar.zst to target
+patchPhase completed in 39 seconds
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+will append /nix/var/nix/builds/nix-52626-1515561468/source/.cargo-home/config.toml with contents of /nix/store/dq31qg1s6wbmpzdvrf3vwvbrmprpczwb-vendor-cargo-deps/config.toml
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo build -p mnesis-store --no-default-features
+[1m[92m   Compiling[0m proc-macro2 v1.0.107
+[1m[92m   Compiling[0m quote v1.0.47
+[1m[92m   Compiling[0m unicode-ident v1.0.24
+[1m[92m   Compiling[0m futures-sink v0.3.33
+[1m[92m   Compiling[0m futures-core v0.3.33
+[1m[92m   Compiling[0m thiserror v2.0.19
+[1m[92m   Compiling[0m futures-task v0.3.33
+[1m[92m   Compiling[0m slab v0.4.12
+[1m[92m   Compiling[0m pin-project-lite v0.2.17
+[1m[92m   Compiling[0m futures-io v0.3.33
+[1m[92m   Compiling[0m arrayvec v0.7.8
+[1m[92m   Compiling[0m bytes v1.12.1
+[1m[92m   Compiling[0m futures-channel v0.3.33
+[1m[92m   Compiling[0m futures-util v0.3.33
+[1m[92m   Compiling[0m syn v3.0.3
+[1m[92m   Compiling[0m syn v2.0.119
+[1m[92m   Compiling[0m futures v0.3.33
+[1m[92m   Compiling[0m thiserror-impl v2.0.19
+[1m[92m   Compiling[0m equator-macro v0.4.2
+[1m[92m   Compiling[0m equator v0.4.2
+[1m[92m   Compiling[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/mnesis)
+[1m[92m   Compiling[0m aligned-vec v0.6.4
+[1m[92m   Compiling[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/store)
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 7.90s
++++ command cargo build -p mnesis-store --target wasm32-unknown-unknown --no-default-features
+[1m[92m   Compiling[0m proc-macro2 v1.0.107
+[1m[92m   Compiling[0m quote v1.0.47
+[1m[92m   Compiling[0m unicode-ident v1.0.24
+[1m[92m   Compiling[0m futures-sink v0.3.33
+[1m[92m   Compiling[0m futures-core v0.3.33
+[1m[92m   Compiling[0m thiserror v2.0.19
+[1m[92m   Compiling[0m slab v0.4.12
+[1m[92m   Compiling[0m pin-project-lite v0.2.17
+[1m[92m   Compiling[0m futures-task v0.3.33
+[1m[92m   Compiling[0m arrayvec v0.7.8
+[1m[92m   Compiling[0m futures-io v0.3.33
+[1m[92m   Compiling[0m bytes v1.12.1
+[1m[92m   Compiling[0m futures-channel v0.3.33
+[1m[92m   Compiling[0m futures-util v0.3.33
+[1m[92m   Compiling[0m syn v3.0.3
+[1m[92m   Compiling[0m syn v2.0.119
+[1m[92m   Compiling[0m futures v0.3.33
+[1m[92m   Compiling[0m thiserror-impl v2.0.19
+[1m[92m   Compiling[0m equator-macro v0.4.2
+[1m[92m   Compiling[0m equator v0.4.2
+[1m[92m   Compiling[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/mnesis)
+[1m[92m   Compiling[0m aligned-vec v0.6.4
+[1m[92m   Compiling[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/store)
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 35.39s
++++ command cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features
+[1m[92m   Compiling[0m futures-sink v0.3.33
+[1m[92m   Compiling[0m futures-core v0.3.33
+[1m[92m   Compiling[0m pin-project-lite v0.2.17
+[1m[92m   Compiling[0m futures-task v0.3.33
+[1m[92m   Compiling[0m slab v0.4.12
+[1m[92m   Compiling[0m futures-io v0.3.33
+[1m[92m   Compiling[0m arrayvec v0.7.8
+[1m[92m   Compiling[0m bytes v1.12.1
+[1m[92m   Compiling[0m thiserror v2.0.19
+[1m[92m   Compiling[0m equator v0.4.2
+[1m[92m   Compiling[0m futures-channel v0.3.33
+[1m[92m   Compiling[0m futures-util v0.3.33
+[1m[92m   Compiling[0m aligned-vec v0.6.4
+[1m[92m   Compiling[0m mnesis v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/mnesis)
+[1m[92m   Compiling[0m futures v0.3.33
+[1m[92m   Compiling[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/store)
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 16.37s
++++ command cargo build -p mnesis-store --target thumbv7em-none-eabihf --no-default-features --features subscription,export,import,snapshot,projection,tracing
+[1m[92m   Compiling[0m tracing-core v0.1.36
+[1m[92m   Compiling[0m syn v2.0.119
+[1m[92m   Compiling[0m equator-macro v0.4.2
+[1m[92m   Compiling[0m tracing-attributes v0.1.31
+[1m[92m   Compiling[0m equator v0.4.2
+[1m[92m   Compiling[0m aligned-vec v0.6.4
+[1m[92m   Compiling[0m tracing v0.1.44
+[1m[92m   Compiling[0m mnesis-store v0.4.0 (/nix/var/nix/builds/nix-52626-1515561468/source/crates/store)
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 11.93s
+buildPhase completed in 1 minutes 13 seconds
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+doing a full archive install of target to /nix/store/v569dy9fpals80dgzgbma0fhfih64ff8-mnesis-store-nostd-0.4.0/target.tar.zst
+                                                                               Read:     0   B  ==>  0%                                                                               Read:     0   B  ==>  0%                                                                               Read:     0   B  ==>  0%                                                                               Read:  8.00 MiB  ==> 10%                                                                               Read:  32.0 MiB  ==> 20%                                                                               Read:  56.0 MiB  ==> 23%                                                                               Read:   120 MiB  ==> 25%                                                                               Read:   128 MiB  ==> 24%                                                                               Read:   152 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   160 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   168 MiB  ==> 24%                                                                               Read:   176 MiB  ==> 23%                                                                               Read:   176 MiB  ==> 23%                                                                               Read:   176 MiB  ==> 23%                                                                               Read:   184 MiB  ==> 23%                                                                               Read:   184 MiB  ==> 23%                                                                               Read:   192 MiB  ==> 22%                                                                               Read:   192 MiB  ==> 22%                                                                               Read:   192 MiB  ==> 22%                                                                               Read:   192 MiB  ==> 22%                                                                               Read:   200 MiB  ==> 21%                                                                               Read:   200 MiB  ==> 21%                                                                               Read:   208 MiB  ==> 20%                                                                               Read:   208 MiB  ==> 20%                                                                               Read:   208 MiB  ==> 20%                                                                               Read:   216 MiB  ==> 20%                                                                               Read:   224 MiB  ==> 20%                                                                               Read:   224 MiB  ==> 20%                                                                               Read:   224 MiB  ==> 20%                                                                               Read:   224 MiB  ==> 20%                                                                               Read:   232 MiB  ==> 19%                                                                               Read:   232 MiB  ==> 19%                                                                               Read:   232 MiB  ==> 19%                                                                               Read:   232 MiB  ==> 19%                                                                               Read:   232 MiB  ==> 19%                                                                               Read:   240 MiB  ==> 19%                                                                               Read:   240 MiB  ==> 19%                                                                               Read:   240 MiB  ==> 19%                                                                               Read:   240 MiB  ==> 19%                                                                               Read:   240 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   248 MiB  ==> 19%                                                                               Read:   256 MiB  ==> 19%                                                                               Read:   264 MiB  ==> 19%                                                                               Read:   272 MiB  ==> 20%                                                                               Read:   272 MiB  ==> 20%                                                                               Read:   272 MiB  ==> 20%                                                                               Read:   280 MiB  ==> 20%                                                                               Read:   280 MiB  ==> 20%                                                                               Read:   288 MiB  ==> 20%                                                                               Read:   296 MiB  ==> 20%                                                                               Read:   296 MiB  ==> 20%                                                                               Read:   296 MiB  ==> 20%                                                                               Read:   304 MiB  ==> 20%                                                                               Read:   312 MiB  ==> 20%                                                                               Read:   320 MiB  ==> 20%                                                                               Read:   328 MiB  ==> 20%                                                                               Read:   328 MiB  ==> 20%                                                                               Read:   336 MiB  ==> 20%                                                                               Read:   336 MiB  ==> 20%                                                                               Read:   344 MiB  ==> 20%                                                                               Read:   346 MiB  ==> 20%                                                                               Read:   352 MiB  ==> 20%                                                                               Read:   384 MiB  ==> 20%                                                                               Read:   422 MiB  ==> 21%                                                                               Read:   468 MiB  ==> 21%                                                                               Read:   504 MiB  ==> 21%                                                                               Read:   549 MiB  ==> 21%                                                                               Read:   568 MiB  ==> 21%                                                                               Read:   584 MiB  ==> 21%                                                                               Read:   608 MiB  ==> 22%                                                                               Read:   616 MiB  ==> 22%                                                                               Read:   632 MiB  ==> 22%                                                                               Read:   640 MiB  ==> 22%                                                                               Read:   648 MiB  ==> 22%                                                                               Read:   658 MiB  ==> 22%                                                                               Read:   688 MiB  ==> 22%                                                                               Read:   706 MiB  ==> 22%                                                                               Read:   720 MiB  ==> 22%                                                                               Read:   741 MiB  ==> 22%                                                                               Read:   760 MiB  ==> 23%                                                                               Read:   848 MiB  ==> 23%                                                                               Read:   874 MiB  ==> 24%                                                                               Read:   943 MiB  ==> 24%                                                                               Read:   983 MiB  ==> 24%                                                                               Read:  1.01 GiB  ==> 24%                                                                               Read:  1.05 GiB  ==> 24%                                                                               Read:  1.12 GiB  ==> 25%                                                                               Read:  1.18 GiB  ==> 25%                                                                               Read:  1.28 GiB  ==> 25%                                                                               Read:  1.32 GiB  ==> 25%                                                                               Read:  1.37 GiB  ==> 25%                                                                               Read:  1.45 GiB  ==> 25%                                                                               Read:  1.48 GiB  ==> 25%                                                                               Read:  1.52 GiB  ==> 24%                                                                               Read:  1.52 GiB  ==> 24%                                                                               Read:  1.52 GiB  ==> 24%                                                                               Read:  1.55 GiB  ==> 24%                                                                               /*stdin*\            : 24.29%   (  1.57 GiB =>    392 MiB, /nix/store/v569dy9fpals80dgzgbma0fhfih64ff8-mnesis-store-nostd-0.4.0/target.tar.zst)
+installPhase completed in 40 seconds
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-52626-1515561468/ in /nix/store/v569dy9fpals80dgzgbma0fhfih64ff8-mnesis-store-nostd-0.4.0...
+/nix/store/cv1d7p48379km6a85h4zp6kr86brh32q-audit-tmpdir.sh: line 39: 74185 Done                       find "$dir" -type f -not -path '*/.build-id/*' -print0
+     74186 Segmentation fault: 11     | while IFS= read -r -d '' file; do
+    if isELF "$file"; then
+        printf '%s\0' "$file" 1>&3;
+    else
+        if isScript "$file"; then
+            filename=${file##*/}; dir=${file%/*}; if [ -e "$dir/.$filename-wrapped" ]; then
+                printf '%s\0' "$file" 1>&4;
+            fi;
+        fi;
+    fi;
+done
+patching script interpreter paths in /nix/store/v569dy9fpals80dgzgbma0fhfih64ff8-mnesis-store-nostd-0.4.0

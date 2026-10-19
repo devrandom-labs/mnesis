@@ -5999,3 +5999,686 @@ Post-cleanup source is now frozen for normal signed gate; native failures and
 healthy235 proof copied below with whitespace-only presentation normalization,
 original /tmp logs unchanged. Exact mutation artifact digest and rejected first
 verdict remain available; fresh CI must establish independent catches.
+
+# PG8 verified TLS first witness — 2026-10-18
+
+First strictall/all fixture compile fails redundant-pub-crate inside private test
+module,84/80line preparation and shadowed rows binding. THREE reviews: verified
+TLS lifecycle/exact event/pool reopen oracles remain; compiler/linter only, zero
+native execution or TLS-defect credit; private enclosing module remains the
+visibility boundary, split certificate preparation from server boot, rename
+recovered result and retain all checks. No allow/lint policy/dependency change.
+Raw /tmp/mnesis-pg8-tls-first-clippy.log retained. SQLx0.9 SqlSafeStr supports
+AssertSqlSafe for owned strings; fixed test PASSWORD is interpolated only in a
+native role utility statement, never untrusted data. Other setup SQL is literal.
+
+Current extracted-fixture strictall/all ClippyPASS1.98s. THREE reviews: private
+module visibility and <=80line functions preserve shared native lifecycle;
+actual compiler/linter passes, zero native laws yet; no lint relaxation, new
+runtime or public adapter API. After that run the fixture gained an independent
+native psql VerifyFull positive control with exact ssl=t before SQLx connection.
+Nix environment21614terminal0 selects actual OpenSSL3.5.8 storebinary, Rust1.99.0,
+PostgreSQL18.6; this tool-version probe is not a passing TLS adapter test.
+
+Actual original-feature native TLS witness FAIL12.684s,1case/0skips; strictall/all
+ClippyPASS1.87s. THREE reviews: VerifyFull runtime lifecycle must work against a
+valid trusted native SSL server; independent OpenSSL chain/hostname check,
+Postgres ssl=on and native psql VerifyFull returns exactssl=t before SQLx; actual
+client then fails exact SQLxTls "TLS upgrade required by connect options but SQLx
+was built without TLS support enabled", before adapter writes, not bad server/
+certificate/credentials. Keep all lifecycle/content/reopen assertions unchanged;
+select supported SQLx TLS only after dependency review. Original raw
+/tmp/mnesis-pg8-tls-original-native.log retained; this is actual missing-capability
+proof, not a green test that accepts absence. No production Cargo feature changed.
+
+First supported Rustls/WebPKI candidate cargo-checkPASS12.69s (wall12.722s,
+user12.739/sys3.072) with actual new16packages,150+/12-locklines and no existing
+package version updates (Windows edges only gain disambiguating versions).
+THREE reviews: required TLS backend now compiles; actual Rustls0.23.46/ring0.17.14
+are patched, Rustls-webpki0.103.15/pki-types1.15.1 fit pinnedRust; compile proof
+only, no runtime/capacity claim. Raw /tmp/mnesis-pg8-tls-first-build.log kept.
+
+Actual cargo-deny licensesFAIL4: webpki-roots1.0.9 is CDLA-Permissive-2.0, absent
+from current allowlist. Initial MPL expectation was stale; exact resolved
+Cargo.toml is authoritative. THREE reviews: retain existing license policy;
+actual license gate rejects only this root-data dependency, no TLS runtime tests;
+do not allow a new license or pin an old trust bundle merely to pass. Use SQLx's
+supported Rustls/ring native-roots alternative with explicit custom CA in tested
+profile and same certificate/name verification. Native OS trust replaces bundled
+Mozilla roots; do not claim identical trust sets or CA-file-only trust. Both
+append configured root certs; app deployment owns its trust source. Ring LICENSE
+now refers Apache2/ISC BoringSSL and once_cell licenses, Cargo metadata Apache2
+ANDISC; license gate did not reject it. Leave deny policy/clarification unchanged.
+Raw /tmp/mnesis-pg8-tls-license-first.log retained; no native pass claimed yet.
+
+Supported Rustls/ring native-roots selection actualcargo-checkPASS6.80s
+(wall6.856,user7.414,sys1.639), licensesOK under unchanged deny policy, strict
+all-feature/all-target ClippyPASS3.89s. EACH THREE reviews: selected feature/
+license boundary; actual command executes against resolved lock; compilation/
+license approval is not native behavior proof. Actual totalnew22packages,
+207+/12-locklines, no existing package version updates, within revised24/350.
+Resolved Rustls0.23.46/ring0.17.14/webpki0.103.15/pki-types1.15.1/native-certs0.8.4;
+platform SecurityFramework3.7.0/sys2.17.0/core-foundation0.10.1 use permitted
+MIT/Apache terms and MSRV<=1.85, fit pinned1.99. Retain exact downloaded Cargo
+metadata as license authority; initial WebPKI-root MPL assumption was rejected,
+current native-roots eliminates that root-data crate without old-version pins.
+
+Actual unchanged positive TLS lifecycle native1/1PASS2.145s,0skips after original
+MissingTLS red. THREE reviews: same VerifyFull open/append/exact position-key-body/
+close/reopen contract; real private18.6SSL server+CA, native psql VerifyFull first,
+actual SQLx encrypted session and restricted runtime store execute; zero skips,
+no reduced cert/name verification, no alias for TLS capability absence. This
+single law does not establish wrongCA/hostname/auth/redaction, lifecycle races,
+Linux, full feature matrix or production readiness. Raw
+/tmp/mnesis-pg8-tls-native-roots.log retained. Shared cluster extraction still
+needs all original native restore laws after feature change.
+
+First four-law TLS run0pass/1fail/3unrun1.177s,0skips; strictall/all ClippyPASS
+24.21s. THREE reviews: healthy direct-options TLS control passed first; actual
+public-connect auth case fails wrong reason SqlxIoNotFound before authentication,
+so NO bad-password/CA/hostname credit; inspect exact dependency before changing
+oracles. SQLx0.9 PgConnectOptions::build_url serializes CertificateInput::File
+using Display "file: /tmp/...", while parse_from_url treats that value as a raw
+filename. Thus options.to_url_lossy is not a valid file-root roundtrip here.
+Keep the red/raw /tmp/mnesis-pg8-tls-four-first.log. Construct proper URL using
+supported URL query builder with raw certificate path, from common transport
+options without file cert; add a healthy public-URL adapter control BEFORE its
+negative cases. Keep exact28P01/28000 and native TLS cause assertions, do not
+accept NotFound, bypass verification, or drop publicconnect coverage. This
+upstream serialization finding does not authorize a SQLx fork or custom parser.
+
+Proper-URL fixture attempt stops at Clippy needless-pass-by-value for borrowed
+PgConnectOptions; native tests did not start. THREE reviews: preserve exact auth/
+issuer/name/error-redaction assertions; compile-only zero runtime proof; borrow
+options in the cold URL helper and keep supported builder/raw CA path, no new
+parser or lint allowance. Raw /tmp/mnesis-pg8-tls-four-current.log retained.
+
+Proper-URL native run1pass/1fail/2unrun2.488s,0skips; strictall/all ClippyPASS1.71s.
+THREE reviews: native auth28P01 and plaintext28000 with exact messages/redaction
+now pass; healthy public URL also passes before badCA, whose actual retained
+cause is SqlxIo(InvalidData,InvalidCertificate(UnknownIssuer)), not the assumed
+SqlxTls category. Locked SQLx0.9 tls_rustls.rs:192 performs complete_io().await?
+with From<Io>, preserving the native source. Require exact IoKindInvalidData AND
+present underlying certificate cause/message for CA/name failures; do not broaden
+to arbitrary errors or accept prior NotFound fixture. Bad hostname has not yet
+executed. Raw /tmp/mnesis-pg8-tls-four-verified.log kept. No production remapping,
+error erasure, TLS weakening or native-failure credit from the wrong error tag.
+
+Native TLS run3pass/1fail6.012s,0skips. THREE reviews: auth/plaintext exact
+SQLSTATE/messages, proper public-URL healthy control, both wrongCA/hostname
+exact IoInvalidData+present native certificate cause, secret redaction and normal
+lifecycle all pass; actual Barrier/spawn race has one success but conflict
+metadata assertion fails before permission probes; its assertion omitted error
+contents, so cause remains unproven. Keep the exact oracle, add diagnostic only,
+rerun only that case before deciding whether this is fixture assumption or product
+defect. Do not accept arbitrary failures or infer unseen actual metadata.
+Raw /tmp/mnesis-pg8-tls-four-causes.log retained.
+
+Diagnostic-only TLS race rerun actualFAIL1.796s,1case/3filtered, exact retained
+error Conflict{stream_id:"contended",expected:None,actual:None}. THREE reviews:
+one actual success/one definite conflict and exact durable event are required;
+real native UNIQUE collision yields unknown actual in established append mapping,
+not permission/network/unknown-commit failure; PR377 forced native collision laws
+and research:852 explicitly pin unknown actual, while earlier head observation
+can returnSome1. Correct the fixture's unjustified Some1-only assumption, retain
+exact stream/expected, restrict actual to unknown or observed1 and independent
+exact winner data. No broad is_err, production mapping change, artificial schedule
+or missing-error acceptance. Raw /tmp/mnesis-pg8-tls-race-diagnostic.log retained.
+Clarify the existing optional observation in shared error docs; None is no proof
+that target is empty. This is not a newly repaired adapter defect.
+
+Current verified TLS native4/4PASS5.918s,0skips. THREE reviews: normal directpool
+and proper publicURL, exact wrongCA/name source errors, auth28P01/plaintext28000,
+redaction, close/reopen and actual Barrier/spawn one-winner race remain required;
+all actual private18.6 SSL/native psql controls and SUT operations execute,
+UPDATE/DELETE/TRUNCATE/ALTER/CREATE each native42501 and exact winner bytes remain;
+zero skips/filters/relaxed cert policy, race permits only established unknown or
+observed1 metadata with exact callerID/expectedNone. No Store failure accepted.
+Readability docs now explain optional observation once at AppendError owner.
+Raw /tmp/mnesis-pg8-tls-four-established.log retained. Need explicit state-update
+permissions, native negative controls and owning full/Linux/feature/audit gates.
+
+State-role test compile stops at83/80lines, no native case executed. THREE
+reviews: two actual event/cache/CAS advances and exact reopened pairs remain;
+compile-only zero state-role proof; reuse one private open helper across three
+native consumers instead of repeating pool construction, no lint allowance.
+Complete runtime profile grants INSERT+UPDATE only to snapshot/checkpoint tables,
+while committed events remain INSERT-only. Initial TLS fixture role was an event
+publisher; required state permissions are explicit fixture/profile additions,
+not a production adapter bug or hidden test outcome. Same negative event/schema
+mutation assertions remain. Raw /tmp/mnesis-pg8-tls-state-role-first.log retained.
+
+Current five native TLS laws5/5PASS7.263s,0skips. THREE reviews: verified direct
+pool/publicURL operations, exact CA/name/auth/plaintext causes, redaction and
+forbidden event/schema mutation remain; actual native SSL/server/psql controls
+plus real two-writer race execute, snapshot cache and checkpoint CAS each update
+through two acknowledged event positions/revision1->2 and reopen exact state/
+position pairs using only explicit state-table grants; zero skips/filters or
+weaker verification, no whole-event/checkpoint transaction/fencing claim. Private
+open helper now serves three actual consumers, state test stays under80line
+policy. Raw /tmp/mnesis-pg8-tls-five-current.log retained. Need native weakened-
+verification controls, original seven restore laws after extraction, current
+combined source/full Linux/feature/audit gates and documentation before delivery.
+
+Fresh native weakened-verification control1 actuallyFAIL1.165s,1case/4filtered.
+THREE reviews: wrong CA must be rejected by verified client; ONLY change private
+connection default VerifyFull->Require, real server/native psql healthy control
+still pass and actual adapter accepts wrongCA, so expected rejection panics;
+compile succeeded and runtime failure is exactly wrongCA-must-reject, not setup,
+timeout or library absence. Correct branch stays VerifyFull; native cause and
+redaction assertions unchanged. Raw /tmp/mnesis-pg8-tls-require-control.log and
+exact source /tmp/mnesis-pg8-tls-require-control.rs retained. No mutator percentage.
+
+Existing cargo-hakari generate+verify bothPASS; THREE reviews: selected workspace
+feature ownership; actual supported generator/verification runs; no native proof
+or manual generated-policy edit. Managed file6changedlines within25 budget;
+Cargo.lock after generation208+/12-, total22newpackages, within24/350. Current
+Nix native check adds one existing-archive --no-tests=fail TLS smoke (5lines),
+retaining complete suite, plus OpenSSL in two tool lists. No custom tooling.
+
+Fresh independent hostname control actualFAIL1.470s,1case/4filtered. THREE
+reviews: hostname verification is independently required; ONLY change connection
+VerifyFull->VerifyCa, healthy native/public controls and wrongCA rejection pass,
+then actual adapter accepts the certificate lacking an IP SAN and exact hostname
+rejection expect fails; this is runtime falsification of name checking, not setup,
+compilation, timeout or broad-error acceptance. Correct source stays VerifyFull.
+Controlworktree /tmp/mnesis-tls-controls.aLjhvT intentionally retains this mutant;
+Require control exact source/log retained separately. Both control handles
+66360/64453 terminal100 expected; no production change or mutation score claimed.
+Current five-law strictall/all Clippy alsoPASS2.62s before managed manifest
+regeneration; compile-only, retained exact native5/5 proof scoped above.
+
+### TLS owning regressions and backup delivery review
+
+After Hakari generation, default-feature strict all-target Clippy PASS3.67s,
+rustfmt check PASS. THREE reviews: isolated adapter default capability must
+compile; actual supported checks execute at the selected lock; these are compile
+and format checks, not database or feature-matrix evidence.
+
+Extracted cluster owner restore run7/7PASS7.957s, zero skips. THREE reviews:
+history/foreign-copy rejection and coherent recovery must remain unchanged;
+all seven actual independent native clusters execute, including exact corrupt
+and missing PG_VERSION failures, repaired verification, waited primary shutdown,
+migration checksums and saved consumer restart/advance; source retains native
+argv/status oracles and no early-return credit, with fixture backup216.464ms and
+stopped-primary-to-projection132.697ms not deployment performance targets.
+Raw /tmp/mnesis-pg8-tls-restore-native.log.
+
+Default-feature native security4/4PASS5.414s, zero skips. THREE reviews: the
+unconditional verified transport and runtime event permissions must work without
+state features; all four actual SSL/psql/SUT cases execute with wrong CA/name,
+authentication/plaintext SQLSTATEs, redaction, overlap and reopen; all-feature
+state law is deliberately absent by cfg and receives no credit from this run,
+while both runtime verification-weakening controls remain failures. Raw
+/tmp/mnesis-pg8-tls-default-native.log. Combined parent+security suite still due.
+
+PR391 signed head07c15a59faa3676db0dd2e9343857e24c6a7872a has40SUCCESS,
+one scheduled mutation sweep skip, zero unresolved review threads and CLEAN
+protected merge state. Downloaded CI39177525744 and39177528258, fuzz39177528178,
+mutants39177528241; raw /tmp/mnesis-pr391-{ci,ci-call,fuzz,mutants}.log.
+For EACH actual run the following three reviews apply independently:
+
+| Actual run | Contract review | Execution/fault review | Oracle/coverage review |
+| --- | --- | --- | --- |
+| Workspace1571/1571 in86.727/121.603s | Existing workspace laws preserved | Actual full gate passes,1/4slow respectively | Four compiler tests excluded here and tested separately; DB-free adapter results are not native proof |
+| Native230/230 in43.132/49.667/51.006/47.704s | Full backup/restore/order/outcome suite retained | Real native database and independent restore tools execute each time | Zero skips; repeated printed47.704 summary is not a fifth execution; no TLS laws on this head |
+| Twenty one-case feature smokes across four native builds | Advertised capability registration required | Each actual filtered case passes | Nonselected cases remain filtered; these do not replace full feature matrix |
+| Compiler2/1/1 in92.47/3.54/10.28s and66.91/2.47/7.30s | Diagnostic contract preserved | Actual compiler cases execute outside excluded workspace group | Exact cases pass; no database evidence |
+| Feature jobs eachnone/default/all, both workflows | Existing isolation contracts retained | Observed mnesis15, macros1, store217, wake17; inmemory25/25/30; fjall131 per combination | nostd/store-testing zero-case unit harnesses give compile-only credit; existing CI still omits native Postgres matrix |
+| Replay2/1/1 in1s each in both workflows | Existing wire/chunk corpus remains valid | Actual replay entries pass | Finite corpus only, not deep fuzz or transport evidence |
+| LibFuzzer wire/header/chunk/value | Decoder/payload invariants retained | Each61s:6,664,578/1,948,617/1,670,254/8,485,201 executions, no reported crash | Finite budgets, no proof of exhaustiveness or native adapter behavior |
+| Four AFL++ campaigns | Existing production decoder targets retained | Each60s, CMPLOG observed; final native statistics0saved crashes/0timeouts | Calibration instability warnings retained; zero-exit crash-gate fault proof remains PG9 |
+| Mutation diff and gate | No executable production change in this slice | Actual log says No mutants to filter; upload says no files; artifacts API total0 | Zero runtime mutation catches/baseline executions, not a fabricated mutation score; two independent native controls documented above |
+
+This evidence permits protected backup-slice delivery, not full PG7–PG9 or
+publication. Runtime TLS source remains uncommitted on the separate branch.
+
+PR391 protected-squash merged49104117b87010206fb4b25be1b4d3d6e6635b22 at
+2026-10-19T00:07:36Z. Security branch rebased onto this exact parent, with full
+owned WIP including untracked files saved in retained stash3b4e83faef631d3796700f2af1f8cc503f13909e.
+Append-only document conflicts were resolved by byte-verifying the old common
+prefix in both parent and child and preserving parent plus the complete child
+suffix. No source conflict or existing user edit lost.
+
+Combined owning run194PASS/1FAIL/40UNRUN of235,34.971s; strictall/all Clippy
+PASS3.86s. THREE reviews: combined native suite must include original backup and
+new verified TLS laws; real earlier194cases execute, then TLS fixture fails before
+server setup because the invoking bash -lc resets Nix PATH to host LibreSSL
+without x509-copy_extensions; wrong-tool setup is zero TLS/whole-suite proof,
+not product/certificate failure. Preserve /tmp/mnesis-pg8-tls-combined-native.log
+and correct invocation to bash -c retaining Nix OpenSSL/PG/Rust paths. Do not
+change cert policy, fixture flags, production code or acceptance to pass.
+Audit/deny commands after failed nextest did not execute and get no credit.
+
+Corrected Nix-owned invocation proves current combined source235/235nativePASS
+68.032s, zero skips; all five TLS laws actually execute in1.093/1.386/1.896/
+1.797/1.429s alongside merged backup/recovery laws. THREE reviews: complete
+ordering/outcome/state/restore/security contract retained; actual shared17.10
+database and private18.6clusters execute with NixOpenSSL3.5.8 and Rust1.99.0;
+exact existing assertions unchanged, no early-return/filtered cases or weaker
+verification, first wrong-tool failure retained separately. Raw
+/tmp/mnesis-pg8-tls-combined-current.log. This precedes the new example, which
+needs its own all-target compilation and unchanged full gate.
+
+Actual cargo audit exits0 with1338advisories loaded and386lock dependencies
+scanned; selected TLS packages have no reported vulnerability. THREE reviews:
+selected versions must not introduce a known security defect; real advisory-db
+fetch/index/scan executes on currentlock; the EXISTING event-listener5.4.1
+RUSTSEC-2026-0221 unsound warning remains, so exit0 is not an advisory-free
+workspace or completion claim. Existing ignore/policy unchanged; fix belongs to
+separate PG9 dependency slice. /tmp/mnesis-pg8-tls-audit.log.
+
+Actual cargo deny check exits0: advisories/bans/licenses/sources all OK under
+UNCHANGED current policy. THREE reviews: compatible maintained TLS selection
+and existing source/license gates; actual full lock check executes including
+native root readers; existing event-listener ignore, unmatched MPL allowance
+and duplicate-version warnings remain, no clean-security/absence-of-warning claim
+and no policy relaxation. /tmp/mnesis-pg8-tls-deny.log. Rejected CDLA-root
+candidate remains rejected; selected22newpackages/208+/12lock lines within budget.
+
+Secure example first strict checkFAIL: large216-byte typed error, stdout/stderr
+macros and single-pattern match lints. FormattingPASS; default/Hakari commands
+not run. THREE reviews: normal verified connection example must compile under
+unchanged lints; actual Clippy reaches the new example and rejects four exact
+issues before any native execution; zero example runtime proof or adapter
+regression claim. Keep /tmp/mnesis-pg8-tls-final-clippy.log. Box the concrete
+PostgresError only on the error path, retaining its type/source; use supported
+fallible Write and if-let instead of lint allowances. No test/oracle change.
+
+Example second ClippyFAIL solely equatable_if_let; formatPASS, no subsequent
+default/Hakari/native execution. THREE reviews: unchanged lint contract; actual
+example compiles far enough to reject unit-pattern predicate style; change only
+to Result::is_ok, retain typed source/no-secret output and normal capability.
+/tmp/mnesis-pg8-tls-example-clippy.log retained. No allowance or test change.
+
+Current example62/70lines; public connection/grant docs63/120addedlines. Format
+PASS, strict adapter all-feature/all-target ClippyPASS1.08s, default/all-target
+PASS1.88s, Hakari verifyPASS. THREE reviews for EACH command: unchanged formatting,
+warning and generated-dependency contracts; actual example and all adapter target
+compilation executes on both configurations and generator verification confirms
+managed feature owner; no lint relaxation, native proof, feature-combination or
+example execution credit from compilation. All source types/causes retained;
+example emits only version or a generic failure, not DSNs/options/passwords.
+Raw /tmp/mnesis-pg8-tls-example-current-{format,clippy,default,hakari}.log.
+Locked SQLx stream.rs routes both TCP and Unix sockets through MaybeUpgradeTls;
+tls.rs Require/VerifyCa/VerifyFull reject native SSL refusal and VerifyFull checks
+certificate and hostname. The example uses that exact supported path without
+parsing its own URL or silently weakening verification.
+
+Evidence copies under evidence/mnesis-pg8-tls-*.log retain every original red and
+current result. Only trailing horizontal whitespace is removed from checked-in
+copies; originals in /tmp remain unchanged. Initial git diff whitespace check
+correctly rejected those raw copied spaces; normalized copies pass the same
+check. THREE reviews: evidence formatting contract only; actual diff checks
+execute; no result/exit code/assertion text is changed or test success inferred.
+Current Linux integration session64404 running on supported remote aarch64 builder;
+source frozen, with TLS smoke and new secure example staged in Nix source.
+
+### TLS signed gate and independent Linux result — 2026-10-19
+
+Signed implementation commit e065a0a4d52f8c2357b59cb94121fee7e98a7cde (G)
+passes normal unchanged pre-commit nix flake check, terminal0, no bypass.
+Independent aarch64 Linux native package
+/nix/store/s1216vcpnykcj10j04n5imj0a3qf6s63-mnesis-postgres-integration
+passes235/235 in96.943s, zero skips. THREE reviews: combined existing adapter,
+backup/restore and all5verified TLS laws required; actual native PostgreSQL18.6,
+OpenSSL and SQLx on Linux execute including exact causes/roles/state and physical
+restart; same assertions as Darwin, zero missing DB/early return credit, source
+archive includes current security tests. Six separate one-case smokes each pass
+in5.539/4.769/4.145/4.881/3.398/7.137s. EACH THREE-reviewed: required capability
+exists; actual corresponding native case executes; other tests deliberately
+filtered, not six full runs or isolated feature combinations. Source absence is
+an error through --no-tests=fail. No native count extrapolation.
+
+Hook nextest actual1575/1575PASS613.939s,15slow,4compiler cases excluded. THREE
+reviews: existing workspace contracts preserved; actual default workspace run
+executes; +4unconditional TLS registrations return early without DATABASE_URL
+and get NO TLS/database credit, fifth state law not in this configuration,
+compiler cases require separate CI. All-feature Linux235 is the native proof.
+Actual supported replay2/1/1cases PASS1s each. EACH THREE-reviewed: locked decoder
+corpus contract; actual replay runs; finite corpus only, no fuzz-exhaustiveness or
+native transport claim. All12Nixchecks retained: fmt/toml,Clippy,docs,Hakari,
+no_std/store-no_std/wasm,deny,audit,nextest,replay. For EACH compile/check:
+contract unchanged; actual selected derivation executes or exact cached output
+is reused; compilation/cached result does not mean a fresh native test execution.
+Gate derivation map /tmp/mnesis-pg8-tls-gate-derivations.json; actual logs
+/tmp/mnesis-pg8-tls-gate-*.log, hook raw /tmp/mnesis-pg8-tls-hook-first.log.
+
+Adversarial inspection retains a pre-existing Nix cargoAudit blind spot: its
+registry-index yanked checks print missing-crate errors despite derivation0.
+Existing event-listener warning/deny ignore also remains. No clean supply-chain
+claim follows Nix0. The separate current live cargo audit earlier actually updated
+its registry/advisory DB, scanned386dependencies and reported only that existing
+unsound warning; current deny passes unchanged policy. PG9 must repair the
+supported Nix index check, remove obsolete ignore and update the vulnerable
+existing dependency. These issues do not become waived by this focused TLS PR.
+No publication, capacity/durability profile or complete-adapter claim.
+
+### Final PR392 CI review (head03052633, performance failure retained)
+
+All checks terminal:39SUCCESS,1FAILURE(CodSpeed),1scheduledskip; zero unresolved
+review threads. No protected merge attempted. Current expected decoder failure
+501.7->560ns, all3sizes10.42%regression, actual report
+/tmp/mnesis-pr392-performance.json; separate decoder source experiment underway.
+CI39181438275/39181441862, fuzz39181441835, mutations39181441919 actual logs
+/tmp/mnesis-pr392-{ci,ci-call,fuzz,mutants}.log. For EACH actual run the three
+independent reviews below apply, not a generic green-check inference:
+
+| Actual run | Contract | Actual execution/fault | Oracle and limits |
+| --- | --- | --- | --- |
+| Workspace1575twice145.923/133.904s | Existing workspace laws intact | Actual suite passes,4slow each | Four compiler cases excluded here; DB-free adapter registrations not native evidence |
+| Native235fourtimes55.628/60.115/53.884/57.306s | All selected adapter/security/restore laws required | Real database and independent tools execute each time | Zero skips; two echoed integration summaries not additional executions; no unmerged durability laws |
+| Twenty-four one-case smokes | Capability binary/test must exist | Each actual atomic/snapshot/projection/list/session/TLS case passes | Other cases filtered; not full isolated-feature coverage |
+| Compiler2/1/1 in118.61/14.82/18.21 and110.71/14.45/17.61s | Existing diagnostics enforced | Actual compiler fixture executions | Separate from excluded workspace group, no database credit |
+| Each none/default/all feature job in both workflows | Advertised existing crate isolation | mnesis15,macros1,store217,wake17,inmemory25/25/30,fjall131 per config | nostd/store-testing zero-case unit harnesses compile-only; native Postgres feature matrix still PG9 |
+| Replay2/1/1each1s in both | Exact existing decoder corpus retained | Each actual replay executes | Finite corpus, no complete-fuzz claim |
+| LibFuzzer wire/header/chunk/value61s each | Real existing decoder/value targets |6,441,316/1,812,151/1,221,349/6,125,501iterations, no reported crash | Finite budgets; no native TLS/protocol/coverage exhaustiveness claim |
+| Four AFL++60s each | Same actual target bodies and locked builds | CMPLOG confirmed, final statistics0savedcrashes/0timeouts each | Calibration instability warnings retained; zero-exit crash-gate falsifier remains PG9 |
+| Mutation diff/gate | No executable production Rust change in TLS slice | Actual No mutants to filter, no upload files, artifacts API0 | ZERO runtime catches/baseline executions, not a fabricated score; independent two TLS runtime controls are separate proof |
+| CodSpeed | Original performance gate unchanged | Actual three failures, environment warning retained | No reset/waiver/acknowledgement; cannot count39green as merge readiness |
+
+All original failures and independent control artifacts stay preserved. Evidence
+review does not make PG8/PG9 complete or permit publishing an unmerged adapter.
+
+TLS signed rebase onto protected decoderparentf207923a completed at
+3fa39a4d0ff8d4b9d6eefac5993d8a6b74b03df0(G). Four record conflicts preserve exact
+oldbase plus fullparent+fullchildsuffixes. Mutable progress keeps complete child
+snapshot and current parent pointer; originalparent124lines preserved in Git and
+/tmp/mnesis-tls-parent-progress-before-rebase.md. Owned saved CI suffix26lines
+from stashae465010869acc9a6fe794e85564c199c0494d19 restored by exactprefix check,
+stash remains. Adapter/coredocs/manifests/locks/Nix/workflows compare byte-identical
+to03052633 EXCEPT protectedwire.rs; wire.rs separately compares EXACT origin/main.
+No original TLS implementation/test rewrite, no dependency policy weakening.
+Need actual combined native+normal signedfullgate+leasedpush/currentCI before
+claiming old CodSpeed failure cleared at this newTLS head.
+
+Combined protecteddecoder+TLS native235/235PASS68.239s,0skips. THREEreviews:
+1unchanged verifiedTLS/auth/role/callerpool/cache/checkpoint and previous230adapter
+contracts;2actual17.10 maincluster plus private18.6TLS/restore tools run against
+3fa39a4d with protecteddecoder source;3same5securityoracles and all old fault
+assertions/limits unchanged, no filters/skips, no query5/durability10 added to
+this coinciding235count. Prior Linux/TLS source was predecoder; current required
+CI must prove combined Linux and CodSpeed before protected delivery.
+
+ActualreleasePR378 now all40SUCCESS/1scheduledskip at
+c5ec958221a3f488af3258532e8c8ef2c4480d74, including CodSpeed. APIcompare to
+f207923a reports behind0/ahead2 with verified release0.5.0 commit2315ca3d and
+verified lock-sync c5ec958, only expected manifests/changelogs/locks16files.
+This clears reported releaseperformance failure at its actual head, not final
+PG0-PG9 acceptance/publication. Required remaining adapter work still gatesrelease.
+
+Combined normal signed TLS amendment28690 FAILED exit1 during concurrent local
+Nix gate disk exhaustion. nextest derivation fails COMPILATION with os28/no space
+writing rmeta and object files; ZERO workspace tests execute. Clippy actual strict
+compilation finishes45.65s but output archive install fails (derivationexit70).
+THREEreviews for each:1all contracts and warnings policy remain required;
+2actual compiler succeeds Clippy but build/archive/storage fails, nextest never
+reaches execution;3no fullgate or test success inferred, no native/newtestcredit,
+original logs retained (/tmp/mnesis-pg8-tls-decoder-{hook,nextest-diskfull,clippy-diskfull}.log).
+Prior235native68.239s remains distinct valid evidence, not substitute for gate.
+Signed head remains3fa39a4d, failed amendment not pushed. Nix cleared failed temp
+builds,22GiB free; serialize query gate before TLS retry, no broad cache deletion
+or weakened tests. Existing staging remains owned and preserved.
+
+Serial signed TLS retry34027 completed0, good GPG head
+276bbdd2c5530317a81f954052f895f9999a8136. All12 local Nix checks passed; cached
+audit explicitly identified. Actual fresh nextest1575/1575PASS536.315s,15slow,
+4compiler exclusions; short replay2/1/1PASS each1.00s. THREE reviews for the
+workspace and each replay run:1unchanged TLS/auth/role/cache/checkpoint and core
+contracts, no new product assertions or policy weakened;2actual nextest/replay
+commands execute to terminal, prior disk-full compile failure retained, database
+registrations can early-return and add NO native proof;3exact source equivalent
+to3fa39a4d across adapters/core/manifests/locks/Nix/workflows, exclusions retained,
+short replay not long campaign, combined native23568.239s remains separate. No
+query5/durability10 or Linux credit inferred. Logs /tmp/mnesis-pg8-tls-serial-
+{hook,nextest,replay}.log. Post-gate notes remain local for next necessary evidence
+commit, without another fresh-run claim. Normal exact-lease branch update follows.
+
+TLS actual276bbdd2 CodSpeedcheck117882169089 SUCCESS vs protectedf207923a.
+All3 decoder sizes426.4->368.1ns, reported+15.85% simulated efficiency;40untouched
+and3skipped-baselinefallback. Syscall/comparison-environment warnings remain in
+/tmp/mnesis-pr392-performance-276.md. Same source, inputs, benchmarks and gate;
+no threshold change or manual acknowledgement. This clears the old TLS-head
+performance failure at the actual new head, not a wall-clock capacity claim.
+Mutation job117881036476 run39196739506 SUCCESS has no eligible mutants and
+no mutants.out artifact; actual log /tmp/mnesis-pr392-mutants-276.log. THREEreviews:
+1TLS functionality still needs native certificate/auth/role laws;2actual tool
+finds no eligible production changes, runs no mutant baseline/cases;3ZERO runtime
+catches credited, missing artifact explicitly reported rather than invented.
+Current native/full CI still required before protected delivery. Postgate notes
+stay working-only and preserve current signed source/lease evidence.
+
+TLS current276bbdd2 real-Linux standalone CI jobs117881024861/117881036173
+complete235/235PASS51.415s/59.003s,0skips. Each also executes SIX one-case smokes
+(atomic/snapshot/projection/listing/session/verifiedTLS), not merely test discovery.
+Actual source combines protecteddecoder+TLS, NOT query5/durability10. Downloaded
+/tmp/mnesis-pr392-native-276-{push,pr}.log includes actual Pg18.6 init and all five
+security cases. Installed run.log repeats each summary; no duplicate-run credit.
+THREE reviews for each full suite and each of the twelve smoke commands:
+1 Contract: verified certificate+hostname/auth/plaintext/permission boundaries,
+caller-owned pools, exact conflict and reopened saved pairs remain alongside the
+previous230adapter laws; native tests retain original bad-CA/hostname falsifiers.
+2 Execution: real private server/certificates/restricted LOGIN and supported
+construction paths execute at this signed head; no guards/skips in full suite,
+smokes use no-tests=fail and actual TLS owner. Prior oldhead failure retained.
+3 Assertions/source/limits: unchanged five native laws, exact typed error causes,
+settled permissions/state assertions and real Barrier/spawn conflict retained;
+no Debug-password-redaction or CA-file-only-trust claim. No projected240/245total
+from sibling suites and no complete feature/native matrix claim. Current remaining
+Nix CI, fresh final integration parent and protected delivery remain required.
+
+TLS fuzz run39196739408 SUCCESS (raw /tmp/mnesis-pr392-fuzz-276.log). THREEreviews
+for each of eight campaigns:1same production wire/CBOR/value owners, no database
+coverage inferred;2actual four61s LibFuzzer counts wire14,156,536/header1,803,711/
+chunk1,203,945/value7,580,337, and four60s AFL campaigns each CMPLOG confirmed,
+0savedcrashes/0savedtimeouts; discoveries0/2/13/0 respectively;3unchanged target
+wrappers/input workload and preserved calibration/instrumentation/environment
+warnings, no runtime mutation credit and explicit AFL crash-gate falsifier still
+PG9. These campaign results do not certify TLS or final whole-adapter delivery.
+
+TLS stacking pre-verification: owned postgate notes saved in stash
+9a3d9449e8fc0a47356e00c19986570ba67fafea (retained, not popped), full originals
+and patch /tmp/mnesis-tls-stack.jxcsdf. Rebase old276bbdd2 from protectedf207923a
+onto query4ac45d46 has ONLY documentation conflicts. For experiments/hypotheses/
+sources/research, both child records compare exact common base byte prefixes;
+result retains complete query record followed by TLS-only suffix. Exact oldTLS
+prefix also verified before restoring its entire working postgate suffix.
+Progress records retained in full with an authoritative current pointer. PRD
+keeps reopened isolation acceptance and TLS progress; duplicate PR390/391 labels
+removed without dropping facts. No immutable contract or original evidence edits.
+Product diff from oldTLS276 equals EXACT query diff f207->4ac across all adapters,
+core, manifests/locks, Nix and workflows (cmpPASS). No guessed source union.
+Normal signed rebase then real combined native and normal signed full gate follow;
+old235/235 sibling counts are not a combined240 result. Saved goal remainsblocked,
+ordinary authorized work continues; no safeguard/goal-storage manipulation.
+
+Query post-gate evidence restored after exact4ac prefix verification:
+
+PR394 original95a00bc1 push native job117877643172 now downloaded successfully:
+complete235/235PASS55.220s,0skips; five one-case smokes0.185/0.061/0.144/0.151/
+0.071s. THREEreviews for each command:1same atomic/snapshot/projection/listing/
+session and235 original contracts;2native Pg18.6 hook actually executes each
+selected owner, required database present;3fullsuite0skips, smokes explicitly
+filtered and installed log echo is not a second run. Raw
+/tmp/mnesis-pr394-push-postgres.log. These are BEFORE the4linecleanup correction;
+no current-source mutation independence inferred. Full current-source native
+78.426s above remains separate. Original95a00bc1 CodSpeed actualcheck117879363243
+is SUCCESS vs protectedf207923a:43untouched/3skippedbaselinefallback,17syscall
+warnings retained. This simulation measures owning Fjall benchmarks and supplies
+no Postgres wall-clock/SQL capacity proof. Current amended head needs its own CI.
+
+Original95a00bc1 PR394 CI now terminal40SUCCESS/1scheduledSKIP, zero review
+threads. Both whole logs downloaded: /tmp/mnesis-pr394-ci-{push,pr}.log, runs
+39195623984/39195637612. This result is BEFORE cleanup correction and the raw
+mutation verdict remains rejected, so it does NOT authorize merging oldsource.
+THREE independent reviews of each additional completed command:
+1 Contract: same workspace, native database and per-feature owning laws remain;
+compiler fixtures retain exact diagnostics and valid/invalid literal controls.
+2 Execution: both Nix workspace suites execute1573 each; each workflow's full
+Nix gate additionally executes235 native tests beyond its standalone integration
+job. Actual PG starts/nextest summaries are visible, not inferred from green.
+PR compiler2/1/1PASS88.70/3.40/10.20s, no ignored cases. PR lib matrix repeats
+kernel15/15/15, macros1/1/1, store217/217/217, wake17/17/17, inmemory25/25/30,
+Fjall131/131/131, nostd0/0/0, store-testing0/0/0. Three replay suites per Nix gate
+are2/1/1, each1s. Full selected native suites have0skips.
+3 Assertions/source/limits: exact old95 source selected; four compiler exclusions
+remain in workspace suites and covered separately. Native log echoes are not
+extra executions; filtered one-case smokes are not full feature matrix. Zero-test
+harnesses remain compile-only, Postgres absent from feature job remains PG9, and
+none of this oldhead evidence proves corrected mutation independence. No waiver,
+fixture-poison credit, missing test count or benchmark threshold change accepted.
+
+Cleanup signed fullgate53526 completed0 at GOOD GPG
+4ac45d4676fda35cfd36ff7b6ca5929643df6ecc. All12local checks pass. Fresh workspace
+1573/1573PASS498.736s,14slow,4compiler exclusions; short replay2/1/1PASS each1s.
+THREE independent reviews of workspace and each replay command:1original storage,
+order/resume/atomicity/wire invariants unchanged, cleanup retains actual overlap
+and all final oracles;2actual complete nextest and replay commands execute, guards
+still add NO native credit, previous NoSpace and contaminated CI results retained;
+3executablesource diff against95 matches frozen pre-gate SHA256
+ede683bd9e62cb38441a43d53235b45f59c3ff87addaad6b91b65432e3b7de06 exactly.
+Only4testline cleanup beyond prior13production-line repair; no new counts,
+exclusions/filters/workload/policy/dependencies or framework. Compiler cases remain
+separate. Good signature and fullbase whitespace verified. Logs
+/tmp/mnesis-pg4-cleanup-{hook,nextest,replay}.log. Latest post-stage95CI notes and
+this gate review remain working-only for next necessary evidence commit. Normal
+leased push updates PR394; current-head independent native/mutation CI still due.
+
+Actual combined TLS+query native96829exit0 on signed59290a0e:240/240PASS87.470s,
+0skips. THREE independent reviews:1all previous230adapter laws plus actualfive
+names/fiveTLS cases execute together, preserving order/resume/atomicity/uncertainty
+and exact saved-pair semantics;2real Pg17.10 shared cluster and private18.6TLS/
+recovery tools execute all selected cases serially, corrected ordering fixture
+included, no source stub or no-DB early-return credit;3exact union cmp against
+oldTLS276 and queryf207->4ac PASS, original assertions/Barriers/faults unchanged,
+0skip/0filter and no durability10 count added. Formatting passes before run.
+This is the first actual240 combined proof, not sibling total arithmetic.
+Native validation timings are not capacity targets; earlier41.777s import fault
+case deserves PG8 latency/lifecycle investigation before deployment claims.
+
+Normal signed full gate follows with unchanged hook/checks/test workloads. Per-run
+Nix max-jobs2 bounds simultaneous derivation builds to preserve disk margin after
+the retained real NoSpace failures; no test concurrency/case count/filter/deadline
+is weakened. Current14GiBfree, no other local fullgate/native job active. Actual
+combined-source CI and independently reviewed mutation evidence remain required.
+
+TLS old276bbdd2 CI now terminal40SUCCESS/1scheduledSKIP,0reviewthreads. Actual
+whole logs /tmp/mnesis-pr392-ci-276-{push,pr}.log, workflows39196735894/39196739404.
+This is BEFORE stacking query4ac, not current59290 combined-source CI. THREEreviews
+for each actual command run:1unchanged owning kernel/store/wake/Fjall/inmemory and
+TLS/native order/atomicity/saved-pair contracts, compiler fixture diagnostics intact;
+2fresh workspace1575PASS112.033/133.373s (3/4slow), plus both Nix gates' native235
+PASS53.685/56.444s0skip in addition to standalone51.415/59.003s, each with SIX
+one-case capability/TLS smokes. Two compiler groups2/1/1PASS127.82/16.37/19.49s
+and103.11/13.34/15.85s. Replay2/1/1each1s in each gate. Feature lib commands in
+BOTH workflows execute default/no-default/all:kernel15/15/15,macros1/1/1,
+store217/217/217,wake17/17/17,inmemory25/25/30,Fjall131/131/131,nostd0/0/0,
+store-testing0/0/0;3zero test harnesses compile-only, four compiler exclusions
+retained in workspace and separately covered, filtered smokes not full feature
+matrix, echoed installed logs not extra executions, native235 has0skips and no
+query5/durability10. Current combined240native proof is separate; existing feature
+job omitsPostgres and remains PG9. No waiver, fixture-failure credit or publication
+inferred from old276 CI40green. Latest old-source review remains working-only
+while combined signed fullgate31558 has frozen index/source.
+
+PG8 timing clarification for later quiescent profile: native import_storage_error
+case measured12.373s(oldTLS decoder),15.282s(oldquery decoder),41.777s(cleanup235)
+and27.896s(combined240), while full suites pass. The41.777s run overlapped a local
+full gate; contention was observed, but its causal contribution is NOT established.
+Do not label this a proven adapter regression, dismiss it as infrastructure, tune
+a deadline, or turn these validation timings into capacity targets. Existing PG8
+lifecycle/latency evidence must identify the wait using supported database/pool
+statistics at equal durability. No source/test/budget change follows this note.
+
+Combined TLS+query signed fullgate31558 completed0 at GOOD GPG
+0ac0c21cfcc3f0f3e81b9a183131ad422b4b4ff6. All12checks pass; audit/tomlfmt cached
+explicitly. Fresh1577/1577PASS476.059s,14slow,4compiler exclusions; replay2/1/1
+PASS1.01/1.03/1.00s. THREE independent reviews of workspace and each replay:
+1same core/order/atomicity/identity/head/TLS/cache/checkpoint contracts, unchanged
+fault/oracle owners;2actual nextest/replay execute together on combined source,
+no DBguard nativecredit and no use of sibling totals;3all product/manifests/locks/
+Nix/workflows byteequal59290a0e, fullbasewhitespace and goodGPG pass. Four compiler
+exclusions remain separately covered by CI; replay short, not fuzz campaign.
+Actual240native87.470s above remains independent. Per-run Nixmaxjobs2 changes
+scheduler only; no test selection/concurrency/budgets relaxed. Original NoSpace
+and contaminated mutation evidence retained. Raw
+/tmp/mnesis-pg8-tls-queries-{hook,nextest,replay}.log. Query4ac protected-merged
+as5ef3e742 tree-identical4ac; now rebase only parent metadata onto that protected
+commit, verify entiretree equal before restoring postgate notes, then normal
+cached signed gate. No fresh-run credit for later cached checks.
+
+Additional query CI/mutation/protected delivery evidence, exact saved-prefix delta:
+
+PR394 corrected4ac mutation run39197816436 now provides artifact12163146175,
+SHA256edc92fc8eb44985e834ffc47bb6fab0adacabacec4e92a1c322205f43c8b9410;
+actual downloaded ZIP digest VERIFIED, files /tmp/mnesis-pr394-mutants-4ac-reviewed.
+Baseline235/235PASS50.084s,0skips.16mutants:14real runtime catches,2compiler
+unviable,0survivors/0timeouts. ALL16diffs and each actual FIRST failure reviewed;
+NO schema-already-exists error anywhere. Original contaminated artifact remains
+rejected, unchanged and separately retained.
+THREE independent reviews for baseline and EACH case:
+
+| Cases | 1 Contract | 2 Actual execution/falsifier | 3 Assertions/source/limits |
+| --- | --- | --- | --- |
+| Baseline235 | Complete native adapter contract. | Actual real-DB235 pass50.084s. | Zero skips; unchanged4acsource, not1573 guarded unit proof. |
+| read_key None | Active native drain cannot finish while blocked on its real view. | Runtime assertion rejects prematurely completed empty cursor at backup_tests543. | Actual production function replaced, no fixture/schema error. |
+| read_key Some0/Some-1 | Import must preserve final-conflict policy reports. | Each runtime test rejects fabricated empty successful ImportReport at backup_tests745. | Both cases independently reach their own wrong result; no poison credit. |
+| read_key Some1 | Restored stream bodies must match exact source bytes. | Runtime payload-pair equality fails at backup_tests779. | Exact differing byte payloads visible, not count-only validation. |
+| read_head None | Real optimistic conflict retains its typed classification. | Runtime atomic conformance rejects Store23505 instead of Conflict. | Actual owner at atomic.rs135, no fixture bootstrap failure. |
+| read_head (0,None)/(-1,None) | Overlapping valid append must succeed with its real key. | Both independently reach own FK23503, keys0/-1 absent. | Result unwrap at all_noskip207 occurs AFTER DROP; no42P06. |
+| read_head six Some(empty/xyzzy) variants across0/1/-1 | Valid append must preserve real stored head interpretation. | Each independently returns CorruptRow invalid stored version and fails after cleanup. | All SIX first failure logs inspected, same production fault/unchanged final oracle. |
+| read_head (1,None) | Global event order includes exact originating stream identity. | Runtime exact row equality fails at all_noskip212. | Real overlapping writes survive through cleanup; own payload/routing oracle, no timeout. |
+| snapshot hydrate Default / checkpoint hydrate Default | Concrete found/absent/stale contracts remain typed. | Both compile E0277 because Hydrated/CheckpointHydrated lack Default. | TWO UNVIABLE, ZERO runtime catch credit. |
+
+Fail-fast means later native cases do not execute in each failing mutant; no235
+passes per mutant are claimed. Mutation tool does not mutate SQL string names;
+original five native caller-name failures remain the direct qualifier regressions.
+Corrected cleanup only repairs case independence; no test/gate/filter/corpus/timeout
+or mutation exclusion change. Remaining exact-head full CI/CodSpeed/review and
+protected merge still required.
+
+PR394 final4ac45d46 CI40SUCCESS/1scheduledSKIP,0unresolvedthreads, CLEAN merge
+state. Complete current logs /tmp/mnesis-pr394-ci-4ac-{push,pr}.log, workflows
+39197812041/39197816451. Actual per-run THREEreviews:
+
+| Actual executions | 1 Contract | 2 Execution/falsifier | 3 Assertions/selection/limits |
+| --- | --- | --- | --- |
+| Workspace1573PASS120.934s/91.622s | All prior workspace laws retained. | Two fresh Nix suites,4/3slow; no failure/timeout. | Four compiler exclusions each, guarded PG tests NOT native credit. |
+| Native235PASS42.599/52.407 standalone,51.185/42.917 Nix | All adapter order/resume/identity/head/state/atomic/recovery laws. | FOUR actual Pg18.6 native suites, each five names+four ordering cases and0skips. | Source4ac includes cleanup; echoed run.log not another execution; noTLS/durability total. |
+| Twenty one-case capability smokes | Atomic/snapshot/projection/listing/session owners. | Five no-tests=fail selected commands in each of four native derivations. | Explicitly filtered smoke evidence, not isolated default/each-feature matrix. |
+| Compiler2/1/1PASS76.34/2.81/8.61s and85.45/3.14/9.66s | Invalid construction/schema/literal/borrow rejection unchanged. | Actual fixtures all ok, no snapshot blessing. | Registration counts separate from fixture counts,0ignored/filter. |
+| Feature lib default/no-default/all in BOTH workflows:kernel15/15/15,macros1/1/1,store217/217/217,wake17/17/17,inmemory25/25/30,Fjall131/131/131,nostd0/0/0,store-testing0/0/0 | Same concrete owner contracts under advertised library selections. | Every reported harness result verified in full logs. | Zero-test harnesses compile-only; PG absent here remainsPG9, no fake matrix completion. |
+| Replay2/1/1each1s in BOTH Nix gates | Wire/CBOR/value contracts. | Six actual short owner invocations execute. | Short replay, not eight long campaigns or DB proof. |
+
+Corrected4ac fuzz39197816495 SUCCESS; THREEreviews of each of eight campaigns:
+1unchanged production wire/CBOR/value targets;2actual61s LibFuzzer wire7,522,520/
+header2,343,907/chunk2,112,044/value5,784,943 runs; four60s AFL eachCMPLOG confirmed,
+0savedcrashes/timeouts, discoveries0/1/9/0;3calibration/instrumentation warnings
+retained in /tmp/mnesis-pr394-fuzz-4ac.log, no SQL/TLS/native claims, explicit
+zero-exit AFL crash-gate faultproof remainsPG9. CurrentCodSpeed117885258078
+SUCCESS at4ac vs protectedf207,43untouched/3skippedbaselinefallback; syscall/
+environment warnings preserved in -performance-4ac.md, no Postgres capacity claim.
+Mutation artifact12163146175 independently reviewed above, no fixture-failure
+credit. Exact protected squash with match-head4ac follows; wholePG0-PG9 delivery,
+publication and registry consumer still incomplete.
+
+PR394 protected delivery COMPLETE: normal squash --match-head-commit
+4ac45d4676fda35cfd36ff7b6ca5929643df6ecc merged2026-10-19T04:25:55Z as
+5ef3e742c63a2f4078ec28057559b5439af28234. Before action: exactsignedhead,
+40SUCCESS/1scheduledmutants-sweepSKIP, CLEAN state,0unresolvedthreads; actual
+current CI/fuzz/CodSpeed/artifact reviews above. No admin/waiver/baseline reset.
+Fetched protected merge compares ENTIRE TREE IDENTICAL to reviewed4ac (gitdiff0).
+Latest /tmp/mnesis-pr394-delivery.json and protected-checks/protected-threads
+snapshots retain exact evidence. This is17th focused protected merge, not full
+Postgres acceptance or publication. Remaining byte/integer/catalog hypotheses,
+TLS/durability/operations/capacity/recovery timing/PG9 delivery remain required.
+
+Protected-parent rebase completed GOOD GPGf95f9451694e905ea2f85a58742823cd33d5c7e3
+onto5ef3e742. ENTIRE repository tree compares equal to tested0ac0c21c before
+restoring records; only parent/signature metadata differs. Owned postgate stash
+7f06e58bcb8d1212b1a9cf4d98a3d8393e32d55e retained with snapshot/patch
+/tmp/mnesis-tls-delivery-rebase-path. Restored postgate TLS evidence and latest
+query mutation/CI/merge suffix only after exact prefix comparisons. Backlog now
+records protected PR394 without closing remaining query policy/PG8/PG9 acceptance.
+No product/manifests/locks/Nix/workflow change. Normal signed evidence amendment
+uses unchanged full hook; cached checks must be labelled0fresh executions.

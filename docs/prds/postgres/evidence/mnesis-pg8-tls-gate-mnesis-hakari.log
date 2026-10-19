@@ -1,0 +1,29 @@
+cargoArtifacts not set, will not reuse any cargo artifacts
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/y0wrc0wdgd342a3a8yi05fngskbd4pzi-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+will append /nix/var/nix/builds/nix-52626-1515561397/source/.cargo-home/config.toml with contents of /nix/store/dq31qg1s6wbmpzdvrf3vwvbrmprpczwb-vendor-cargo-deps/config.toml
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo hakari generate --diff
++++ command cargo hakari manage-deps --dry-run
+[1minfo:[0m no operations to perform
++++ command cargo hakari verify
+[1minfo:[0m [1mworkspace-hack[0m works correctly
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-52626-1515561397/ in /nix/store/p0z6chwvnnxasri7zhngs81l15fjd8l2-mnesis-hakari-0.4.0...
+patching script interpreter paths in /nix/store/p0z6chwvnnxasri7zhngs81l15fjd8l2-mnesis-hakari-0.4.0

@@ -1,0 +1,35 @@
+     Removed 797 files, 137.4MiB total
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/adapters/postgres)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/wake)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/test-domains)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-tls-controls.aLjhvT/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.51s
+────────────
+ Nextest run ID 3c5876af-b4bc-4d7f-9d46-c6053771fa5b with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   1.466s] (1/1) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.45s
+
+  stderr ───
+
+    thread 'verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause' (102878292) panicked at adapters/postgres/tests/security_tests.rs:344:6:
+    certificate without IP SAN must reject
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.470s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   1.466s] (1/1) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+error: test run failed

@@ -1,0 +1,13 @@
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1338 security advisories (from /Users/joel/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (386 crate dependencies)
+Crate:     event-listener
+Version:   5.4.1
+Warning:   unsound
+Title:     `event-listener` allows `!Send` tags to cross thread boundaries via `StackSlot`
+Date:      2026-07-13
+ID:        RUSTSEC-2026-0221
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0221
+
+warning: 1 allowed warning found

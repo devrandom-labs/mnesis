@@ -1,0 +1,30 @@
+cargoVendorDir not set, will not automatically configure vendored sources
+cargoArtifacts not set, will not reuse any cargo artifacts
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/y0wrc0wdgd342a3a8yi05fngskbd4pzi-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Executing configureCargoCommonVars
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: configurePhase
+@nix { "action": "setPhase", "phase": "configurePhase" }
+default configurePhase, nothing to do
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
++++ command cargo --version
+cargo 1.99.0 (5f94df478 2026-08-27)
++++ command cargo fmt -- --check
+Running phase: ensureTargetDir
+@nix { "action": "setPhase", "phase": "ensureTargetDir" }
+Running phase: installPhase
+@nix { "action": "setPhase", "phase": "installPhase" }
+incremental zstd compression not currently supported on Darwin: https://github.com/rust-lang/rust/issues/115982
+doing a full archive install of target to /nix/store/s93bjjzvik9ygnywlxx5g2hrh94adxsv-mnesis-fmt-0.4.0/target.tar.zst
+                                                                               Read:     0   B  ==>  0%                                                                               /*stdin*\            :  0.72%   (  10.0 KiB =>     74 B, /nix/store/s93bjjzvik9ygnywlxx5g2hrh94adxsv-mnesis-fmt-0.4.0/target.tar.zst)
+Running phase: fixupPhase
+@nix { "action": "setPhase", "phase": "fixupPhase" }
+checking for references to /nix/var/nix/builds/nix-52626-1515561159/ in /nix/store/s93bjjzvik9ygnywlxx5g2hrh94adxsv-mnesis-fmt-0.4.0...
+patching script interpreter paths in /nix/store/s93bjjzvik9ygnywlxx5g2hrh94adxsv-mnesis-fmt-0.4.0

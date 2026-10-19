@@ -1,0 +1,47 @@
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-security/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-security/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.30s
+────────────
+ Nextest run ID 61b31fab-4259-40b2-8248-83a072b7c0ac with nextest profile: default
+    Starting 4 tests across 1 binary
+        PASS [   1.065s] (1/4) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+  stdout ───
+
+    running 1 test
+    test verified_tls_preserves_authentication_errors_and_rejects_plaintext ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.05s
+
+
+        PASS [   1.188s] (2/4) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.18s
+
+
+        PASS [   1.730s] (3/4) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_open_append_read_close_and_reopen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.72s
+
+
+        PASS [   1.430s] (4/4) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.42s
+
+
+────────────
+     Summary [   5.414s] 4 tests run: 4 passed, 0 skipped

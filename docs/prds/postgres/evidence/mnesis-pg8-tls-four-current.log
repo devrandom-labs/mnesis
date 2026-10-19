@@ -1,0 +1,16 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+error: this argument is passed by value, but not consumed in the function body
+   --> adapters/postgres/tests/security_tests.rs:149:32
+    |
+149 |     fn address(&self, options: PgConnectOptions, certificate: &str) -> String {
+    |                                ^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#needless_pass_by_value
+    = note: `-D clippy::needless-pass-by-value` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::needless_pass_by_value)]`
+help: consider taking a reference instead
+    |
+149 |     fn address(&self, options: &PgConnectOptions, certificate: &str) -> String {
+    |                                +
+
+error: could not compile `mnesis-postgres` (test "security_tests") due to 1 previous error

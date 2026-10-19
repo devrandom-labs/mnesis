@@ -1,0 +1,54 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.62s
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+────────────
+ Nextest run ID baaa8d37-fb52-42f8-830f-35a1fe401381 with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   1.252s] (1/5) mnesis-postgres::security_tests verified_tls_preserves_authentication_errors_and_rejects_plaintext
+  stdout ───
+
+    running 1 test
+    test verified_tls_preserves_authentication_errors_and_rejects_plaintext ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.24s
+
+
+        PASS [   1.181s] (2/5) mnesis-postgres::security_tests verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause
+  stdout ───
+
+    running 1 test
+    test verified_tls_rejects_a_wrong_authority_and_hostname_without_losing_the_cause ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.17s
+
+
+        PASS [   1.733s] (3/5) mnesis-postgres::security_tests verified_tls_runtime_can_open_append_read_close_and_reopen
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_open_append_read_close_and_reopen ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.73s
+
+
+        PASS [   1.794s] (4/5) mnesis-postgres::security_tests verified_tls_runtime_can_update_snapshots_and_checkpoints_then_reopen_exact_pairs
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_can_update_snapshots_and_checkpoints_then_reopen_exact_pairs ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.79s
+
+
+        PASS [   1.300s] (5/5) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.29s
+
+
+────────────
+     Summary [   7.263s] 5 tests run: 5 passed, 0 skipped

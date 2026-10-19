@@ -1,0 +1,5 @@
+unpacking 'https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1' into the Git cache...
+/nix/store/2yj968dxlxwd4l11di72fbinv3z1pvsl-openssl-3.5.8-bin/bin/openssl
+OpenSSL 3.5.8 25 Aug 2026 (Library: OpenSSL 3.5.8 25 Aug 2026)
+postgres (PostgreSQL) 18.6
+rustc 1.99.0 (b940084d7 2026-09-28)

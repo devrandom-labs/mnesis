@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-security/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
+────────────
+ Nextest run ID e4b299a1-1370-4628-9dce-8f82cd7840f6 with nextest profile: default
+    Starting 1 test across 1 binary (3 tests skipped)
+        FAIL [   1.792s] (1/1) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+  stdout ───
+
+    running 1 test
+    test verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema ... FAILED
+
+    failures:
+
+    failures:
+        verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.77s
+
+  stderr ───
+
+    thread 'verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema' (102845633) panicked at adapters/postgres/tests/security_tests.rs:420:5:
+    [Conflict { stream_id: "contended", expected: None, actual: None }]
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   1.796s] 1 test run: 0 passed, 1 failed, 3 skipped
+        FAIL [   1.792s] (1/1) mnesis-postgres::security_tests verified_tls_runtime_competes_atomically_and_cannot_rewrite_events_or_schema
+error: test run failed
