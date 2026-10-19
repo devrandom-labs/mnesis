@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migration4 and native coverage for projection consumers, concurrent writers,
   cancellation, client termination, restricted roles, and upgrade repair.
 
+### Fixed
+
+- Application `octet_length` functions cannot bypass event, stream-ID, snapshot
+  or checkpoint row byte limits.
+
 ## [0.4.0](https://github.com/devrandom-labs/mnesis/compare/mnesis-postgres-v0.3.1...mnesis-postgres-v0.4.0) - 2026-10-03
 
 ### Fixed

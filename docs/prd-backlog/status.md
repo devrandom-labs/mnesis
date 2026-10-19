@@ -39,6 +39,7 @@ Protected focused merges:
 - PR393 decoder performance repair: `f207923a6131ea0270e0e8b22810d8cb3afb7adc`.
 - PR394 stream and saved-state identity, committed heads and independent mutation fixtures: `5ef3e742c63a2f4078ec28057559b5439af28234`.
 - PR392 verified TLS and restricted runtime permissions: `8f03ae8553ab6410fdfbe7660ab84ec0873efae0`.
+- PR395 native durability profile and phase-accurate transaction outcomes: `f7d390d4c50936b2912207c2d417a8c24a899e0c`.
 
 PG1/PG2 still need remaining capacity, lifecycle and recovery profiles. PG3 now
 has merged actual native SSI/deadlock and snapshot uncertainty witnesses;
@@ -140,5 +141,14 @@ client-COMMIT-boundary test preserves40003 uncertainty; both wrong mappers have
 native failing controls. Actual post-server-COMMIT lost-ack/timeout laws remain.
 The first signed gate failed before nextest execution from storage exhaustion;
 original failure retained, no bypass. The corrected signed gate passes all12
-checks with1585 instrumented workspace cases passing; required LinuxCI and
-protected delivery remain pending. No capacity or release acceptance is inferred.
+checks with1585 instrumented workspace cases passing. PR395 is protected-merged
+after all40requiredCIchecks, four actual251-case Linux native runs, verified
+mutation artifact6runtimecatches/3compilerunviable/0survivors and zero threads.
+No capacity or release acceptance is inferred.
+
+The next accounting slice reproduces four native byte-limit bypasses when a
+caller application supplies octet_length(bytea). Normal larger-limit writes stay
+valid; bounded readers must still return exact RowLimit errors. Minimal native
+function qualification passes all9names laws, including the original identity
+and head laws. Complete current-source checks and protected delivery are pending;
+SUM/window/integer/catalog and migration-metadata hypotheses remain open.

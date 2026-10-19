@@ -391,3 +391,12 @@ existing private Unix relay. SQLx0.9 adapter calls transaction.commit only
 AFTER drain+validation; source proves no own COMMIT on preceding error. Native
 SQLSTATE alone cannot replace that known phase. Injected DO error at client
 COMMIT boundary will not be claimed as actual server COMMIT/SSI/deadlock.
+
+2026-10-19 byte accounting: PostgreSQL18 function resolution
+https://www.postgresql.org/docs/18/typeconv-func.html says identical signature
+functions select the first visible schema, while qualified names constrain the
+schema. https://www.postgresql.org/docs/18/ddl-schemas.html documents explicit
+pg_catalog placement in search_path. Native locked17.10 original failures verify
+actual applicability here; ordinary trusted application functions suffice, not
+an assumed malicious-input or arbitrarycode-execution claim. Preserve caller
+settings and qualify the adapter's own required native accounting calls.
