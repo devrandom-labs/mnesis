@@ -1,3 +1,66 @@
+# Current operational deadline publication — 2026-10-19
+
+PR398 MERGED8df11b218d959622a26c743c31ca68e0b8782388 at18:14:56Z,
+40SUCCESS/1scheduledSKIP/0threads/entirereviewedb60treeexact.22focusedmerges,
+not published. Operations fullnormalSIGNEDgate28287 TERMINAL0,4fed1704 G,
+all12PASS10built2cached:1593workspace616.035s15slow4compilerexclusions,
+replay2/1/1each1s,no_std/store/Wasm. Allruntime THREEreviewed, 262native63.889s
+0skip separatelyretained. Signedparentrebasef37a7492 G, ENTIREtreeexact4fed.
+Proofbranchwork/postgres-operations-b60-proof and postgatestash retained.
+Normal record-onlySIGNEDamend startingnext; freeze source/indexuntilterminal,
+inspectactualcache/runtime/source/GPG then push/openfocusedPRPROMPTLY. No more
+sourceeditingneeded. Existing productonly297linetest/README38/changelog2;
+no executableRust/API/deps/migration/runtime/framework. Rootuserworkpreserved.
+
+Diagnostics/tmp/mnesis-postgres-diagnostics optionalexistingtracing candidate
+completebase256nativePASS124.100s0skip; no-default/allClippy8.84s/all9.25s,
+originalnativeabsence/controlfailures retained and3reviewed. Candidate102+/15-
+productionlines/test~206/README39/changelog2,0newpackage. Solewrongall-labelcontrol
+1FAIL5.292s atintendedobservation; testsvalidateeightoutcomes/row1/timing/known
+fields/no key/payload. Fullnativeincludesold255+1diag becausebase205b; integrate
+ontoFINALreviewedoperationshead AFTERthisamendterminal, preserveall WIP/source/
+JSONL/research histories; combined263native/strictprofiles/ONEfullSIGNEDgate,
+focusedPR/currentCI/protecteddelivery. Candidate actualcompiler/native handles
+allterminal; no active native now. Raw logs/evidence staged inthatworktree.
+
+ALLremaining capacity10k100k1m×1/16/128+30minsoak, PG7operator timings, PG9
+Python/nativefeatureisolation/AFLsavedcrash/docs/minimization/twoaudits/release/
+registryrealDBconsumer required. Usersecurityscope correction intact. GoalACTIVE
+no budget, no blocker/complete claim. Finish focused deliveries while progress
+continues; no unrelated security investigation or new framework/runtime/tools.
+
+## Earlier pointers — historical
+
+# Current operational deadline gate — 2026-10-19
+
+Operations branchfix/postgres-operations based reviewedmetadata b60fdf49 (PR398
+OPEN/CIrunning). Dependency397 protected3313567f,21focusedmerges/notpublished.
+Wholeactualnative262PASS63.889s0skip, compile10.77s; strictall/allClippy9.62s,
+priorno-defaultall15.70s/fmtPASS. All THREE reviews recorded. Source297linefixture
+byte-identical; ownedproducthunks exact after only Git index hashheader exclusion
+(new metadata parent changes doc basehashes), allcopies/rawcontrols retained.
+6research-onlyunionconflicts preserveparentJSONLprefix exactly. WIPstashretained
+/tmp/mnesis-pg8-deadline-integration-stash; no unrelatedworkremoved.
+
+NormalSIGNEDfullNixgate startingnow, maxjobs1; source/index FROZEN until actual
+terminal. Log/tmp/mnesis-pg8-operations-hook.log. Then inspectactualtests/3reviews/
+sourcecmp/GPG/whitespace, normal evidenceamend ifneeded0cachednewruncredit,
+push focusedPRpromptly, currentLinuxCI and protectedmerge AFTER398. No other
+fullgate ours live; hostNixhasnoDB/private target so maycoexist withone native
+characterization, never two actualnative suites simultaneously.
+
+Diagnostics worktree/tmp/mnesis-postgres-diagnostics isolatedbase205b nowhas
+originalactualnative1FAIL4.062s at firstrequired readiness observation, while
+append/conflict/read/arm/disconnect work executes. No laterobservationcatchcredit.
+Tracingslice productionimplementation started afterred, optionalexistingtracing
+feature/fixedlabels/noIDs orpayloads, preserved SQLx try_recv autoreconnect.
+Compilercheck95783 currentlyRUNNING, no diagnosticnative yet. Readthatworktree
+research/params beforecontinuing. Newtoolframework/runtime none. Keep user
+security-scopecorrection. RemainingPG8capacity/30minsoak, PG7timings, PG9Python/
+isolatedfeatures/AFLcrashgate/docs/minimization/twoaudits/release/registry intact.
+
+## Prior pointers — historical
+
 # Current metadata focused delivery — 2026-10-19
 
 PR397 protected MERGED3313567f8714f655c7ed65f0fb9be62caa463b0a17:47:45Z,
@@ -74,6 +137,53 @@ AFLsavedcrashgate/docs/minimization/twofreshwholeaudits/publication/cleanregistr
 realDBconsumer. No security edge-case expansion or premature completion.
 
 ## Historical pointers — superseded
+# Current operations and delivery work — 2026-10-19
+
+Previous goal turn made progress (dependency PR397 opened + combined metadata
+257native proof). This turn adds explicit required PG8 deadline coverage and
+four meaningful wrong-config catches. User limits security work to required
+acceptance; no further security edge-case investigation. Goal ACTIVE/no budget.
+
+Metadata worktree/tmp/mnesis-postgres-metadata normalSIGNEDgate18512 LIVE,
+source/index FROZEN, /tmp/mnesis-pg4-metadata-hook.log. Source da2c52f4 unchanged;
+257combinednativePASS63.461s0skip with2813/2814startup peakbytes. Waiting Nix
+workspace property tests actuallylive under32197build; no restart or weakened
+workload. PRbody/tmp/mnesis-pg4-metadata-pr.md prepared truthfully gatepending.
+Afterterminal actuallogs/3reviews/sourcecmp/GPG/whitespace, record-only normal
+signedamend/cacheverification, push focusedPR promptly. Parent dependency397
+head205b01c4 has38SUCCESS/1scheduledSKIP and two Nixflake jobs LIVE (118201438615,
+118201421591); actualAPI confirmed. Completed standalone native255 twice +14smokes,
+48libmatrices/sixcompiler/fuzz/CodSpeed/threads reviewed in feature record. No
+applicablemutants,0artifacts, ZERO catch credit. ActualCI rawlogs/tmp/mnesis-pg9-advisory-job-*.log.
+AfterbothgatesPASS inspectactualLinuxNixlogs (avoid run.log echo doublecredit),
+reviewthreads and merge exacthead397 through normalprotectedflow. Do not leavegreenwaiting.
+
+Operations worktree/tmp/mnesis-postgres-operations branchfix/postgres-operations,
+base reviewed205b01c4. ALL uncommitted work ours; product ONLYdeadline_tests.rs
+297/380lines +README38/45 +changelog2/3, ZERO productionRust/deps/API/runtime.
+Five actualnative casesPASS41.005s0skip; strictall/allClippy1.73s and no-default/
+all15.70s+fmtPASS. Native5first4PASS1FAIL12.178s and diagnostic1FAIL0.969s retained:
+fixture wrongly expectedPoolTimedOut; actualstoppedUnixsocket yieldsIo(NotFound),
+now exactoracle plus before/after socketexistence. No productbugcredit.
+Wrongnativeoptions.take(0)→3actualFAIL17.206s aftercleanup/healthyreuse;
+wrongacquisition200ms→5s→1actualFAIL6.396s aftercleanup/healthyreuse. Laterappend
+assertnotreached in thatcontrol, no independentcatchcredit. All THREE reviews
+immediately after EVERY run in feature research. Controls retained in
+/tmp/mnesis-deadline-controls.XRdWk1; currentlywrong5sacquire, NEVERmerge.
+Eight relevant logs/diffs copied to existingevidence (trailingblanksonlystripped),
+raw/tmp originals preserved. No active native/compiler ours now.
+
+NEXTops: preservefullWIP/stash and frozen3fileproductdiff, integrate onto final
+reviewedmetadatahead AFTER18512terminal (keep all research histories/appendonly
+prefix), verifyexactproductdiff; fullcombined262native/strictfeatures then ONE
+normalSIGNEDfullNixgate. No parallelfullgates or native suites. Parentmetadata
+mustprotectedmergebeforeopsdelivery. Keepfocusedchangesmoving; diagnosticswith
+existingtracing, required capacity10k100k1m×1/16/128/30minsoak, PG7timings, PG9
+Python/isolatednativefeatures/AFLsavedcrash/docs/minimization/twoaudits/release/
+cleanregistryrealDBconsumer remain. Prior aggregate/operator/catalog hypotheses
+are unproven, not permission to expand security scope endlessly.
+
+## Prior current pointer — historical
 
 # Current dependency integration — 2026-10-19
 

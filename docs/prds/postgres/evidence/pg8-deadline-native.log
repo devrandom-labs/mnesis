@@ -1,0 +1,73 @@
+    Checking mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.24s
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/mnesis)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-operations/crates/workspace-hack)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-operations/crates/test-domains)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store-testing)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/fjall)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.12s
+────────────
+ Nextest run ID 097e50d1-667a-4565-9f26-08ca7c93f62a with nextest profile: default
+    Starting 5 tests across 1 binary
+        PASS [   0.475s] (1/5) mnesis-postgres::deadline_tests exhausted_pool_bounds_reads_and_append_before_any_write
+  stdout ───
+
+    running 1 test
+    test exhausted_pool_bounds_reads_and_append_before_any_write ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.46s
+
+
+        PASS [   0.153s] (2/5) mnesis-postgres::deadline_tests lock_deadline_rejects_append_then_releases_its_transaction
+  stdout ───
+
+    running 1 test
+    test lock_deadline_rejects_append_then_releases_its_transaction ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.14s
+
+
+        FAIL [   0.890s] (3/5) mnesis-postgres::deadline_tests permanent_server_loss_bounds_operations_and_pool_shutdown
+  stdout ───
+
+    running 1 test
+    test permanent_server_loss_bounds_operations_and_pool_shutdown ... FAILED
+
+    failures:
+
+    failures:
+        permanent_server_loss_bounds_operations_and_pool_shutdown
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.87s
+
+  stderr ───
+
+    thread 'permanent_server_loss_bounds_operations_and_pool_shutdown' (110059169) panicked at adapters/postgres/tests/deadline_tests.rs:278:9:
+    assertion failed: matches!(result, Ok(Err(PostgresError::Sqlx(SqlxError::PoolTimedOut))))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+        PASS [   0.143s] (4/5) mnesis-postgres::deadline_tests startup_obeys_the_native_lock_deadline_without_changing_metadata
+  stdout ───
+
+    running 1 test
+    test startup_obeys_the_native_lock_deadline_without_changing_metadata ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.13s
+
+
+        PASS [  10.512s] (5/5) mnesis-postgres::deadline_tests statement_deadline_rolls_back_an_already_staged_insert
+  stdout ───
+
+    running 1 test
+    test statement_deadline_rolls_back_an_already_staged_insert ... ok
+
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 10.50s
+
+
+────────────
+     Summary [  12.178s] 5 tests run: 4 passed, 1 failed, 0 skipped
+        FAIL [   0.890s] (3/5) mnesis-postgres::deadline_tests permanent_server_loss_bounds_operations_and_pool_shutdown
+error: test run failed

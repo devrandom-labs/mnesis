@@ -1,0 +1,6 @@
+    Checking mnesis-store v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Checking mnesis-wake v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/wake)
+    Checking mnesis-store-testing v0.4.0 (/private/tmp/mnesis-postgres-operations/crates/store-testing)
+    Checking mnesis-fjall v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/fjall)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 15.70s

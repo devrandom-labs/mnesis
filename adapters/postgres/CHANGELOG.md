@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Native pool, statement and lock deadline coverage, including startup,
+  rollback of staged inserts, and shutdown during permanent server unavailability.
 - Native durability checks before opening, migration and write acknowledgement,
   preserving configured commit modes and uncertain transaction finalization.
 - Finite consistent export sessions with one native view across listing and

@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-postgres-operations/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.53s
+────────────
+ Nextest run ID e7a0beb5-4d88-4c7c-8ddf-2da889fc2524 with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   0.968s] (1/1) mnesis-postgres::deadline_tests permanent_server_loss_bounds_operations_and_pool_shutdown
+  stdout ───
+
+    running 1 test
+    test permanent_server_loss_bounds_operations_and_pool_shutdown ... FAILED
+
+    failures:
+
+    failures:
+        permanent_server_loss_bounds_operations_and_pool_shutdown
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.93s
+
+  stderr ───
+
+    thread 'permanent_server_loss_bounds_operations_and_pool_shutdown' (110067783) panicked at adapters/postgres/tests/deadline_tests.rs:282:9:
+    Sqlx(Io(Os { code: 2, kind: NotFound, message: "No such file or directory" }))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   0.969s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   0.968s] (1/1) mnesis-postgres::deadline_tests permanent_server_loss_bounds_operations_and_pool_shutdown
+error: test run failed

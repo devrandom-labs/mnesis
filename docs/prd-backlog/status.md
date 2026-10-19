@@ -177,3 +177,17 @@ Nix gates. Runtime migration metadata slice passes257native cases and all12host
 Nix checks (1588workspace tests); focused Linux/protected delivery follows.
 Publication, remaining operations/capacity and final whole-adapter acceptance
 are still pending. Security work remains limited to explicit required checks.
+PG8 deadline characterization now passes five actual native cases using supported
+caller SQLx/Postgres controls, including post-insert rollback and unavailable-server
+shutdown. Three native-setting control failures and one acquisition control
+failure reject disabled deadlines. No production API or runtime change. Current
+operations worktree is preparing combined-parent verification; this is not yet
+protected delivery and does not close diagnostics, capacity or soak acceptance.
+
+Runtime metadata PR398 protected-merged as8df11b218d959622a26c743c31ca68e0b8782388
+after40CIchecks/0threads/four257-case native Linux runs. Original two memory
+failures and two independent wrong-bound runtime controls remain retained;
+sole automated mutant was compiler-unviable, not a runtime catch. Operations
+now passes262combined native cases and all12host Nix checks, including1593
+workspace tests. Focused Linux/protected delivery follows. Required diagnostics,
+capacity/soak, recovery timings, PG9 and publication remain pending.

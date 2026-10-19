@@ -1,0 +1,29 @@
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-deadline-controls.XRdWk1/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.50s
+────────────
+ Nextest run ID 86f20573-e15d-4399-9b14-53a81d63f8d0 with nextest profile: default
+    Starting 1 test across 1 binary (4 tests skipped)
+        FAIL [   6.369s] (1/1) mnesis-postgres::deadline_tests exhausted_pool_bounds_reads_and_append_before_any_write
+  stdout ───
+
+    running 1 test
+    test exhausted_pool_bounds_reads_and_append_before_any_write ... FAILED
+
+    failures:
+
+    failures:
+        exhausted_pool_bounds_reads_and_append_before_any_write
+
+    test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 6.36s
+
+  stderr ───
+
+    thread 'exhausted_pool_bounds_reads_and_append_before_any_write' (110108975) panicked at adapters/postgres/tests/deadline_tests.rs:115:5:
+    assertion failed: matches!(read, Ok(Err(PostgresError::Sqlx(SqlxError::PoolTimedOut))))
+    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+  Cancelling due to test failure:
+────────────
+     Summary [   6.396s] 1 test run: 0 passed, 1 failed, 4 skipped
+        FAIL [   6.369s] (1/1) mnesis-postgres::deadline_tests exhausted_pool_bounds_reads_and_append_before_any_write
+error: test run failed

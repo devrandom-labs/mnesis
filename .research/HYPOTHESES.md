@@ -1019,3 +1019,30 @@ This supersedes the conservative all-builds wait above only for this independent
 characterization. Keep ONE full Nix gate and ONE actual native suite, never two
 native suites or shared-target builds. Do not infer comparable performance from
 timings under concurrent host load. Dependency source/index remain frozen.
+
+## PG8 supported operational deadlines — 2026-10-19
+
+Threatened invariant: a caller-configured SQLx acquisition deadline and native
+Postgres statement/lock deadlines must bound actual adapter work without turning
+an interrupted COMMIT into a safe retry. Existing cancellation tests do not prove
+these configured deadlines, and permanent server loss must permit bounded close.
+This is explicit PG8 operations work, not further security investigation.
+
+Workload: real blocked append/read/startup, post-insert sleeping trigger, exhausted
+two-connection pool with observed listener readiness, and private-server shutdown
+with repeated failed operations and bounded release. Use owning SQLx0.9 options,
+Postgres native timeouts, existing Tokio/cluster facilities; add no deadline API.
+Falsifier: exact expected native error absent, watchdog expires, any failed
+pre-COMMIT write/key lands, leases remain blocked after cleanup, or close hangs.
+Wrong-option controls disable the selected timeout and must fail the same oracle.
+These characterize supported controls: no assertion that original production must
+fail a newly invented timeout policy. Existing post-COMMIT uncertainty laws stay.
+
+Change budget BEFORE source/test edits: zero production Rust/dependency/migration
+changes; one adapter-owned deadline_tests.rs ≤380lines, at most five native laws
+and four private fixture helpers; existing README ≤45added lines and changelog
+≤3. Keep each function≤80lines/5args and all existing lints/selection unchanged.
+Rollback boundary: only this test/doc slice. Exact configs/numbers are test
+fixtures, not deployment SLOs. Native characterization may coexist with the
+independent host Nix gate, which has no database env and a private build target;
+only one actual native suite at a time, and no timing comparison as capacity.
