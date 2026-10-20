@@ -1216,3 +1216,29 @@ normal verdict. If engine exits nonzero/calibration fails/no real crash, record
 the control as invalid and fix the fixture before claiming proof. No constructed
 file can substitute for actual engine output. Budget temporaryworkflow<=30lines,
 zero production/API/dependency changes, no framework/runner/tool introduced.
+
+## PG9 actual AFL crash artifact repair — 2026-10-20
+
+Real controlled engine run39450659063/job118724284510 uses CMPLOG, calibratesA,
+runs10s, saves3real crashes and returns0. Candidate saved-crash verdict fails1
+as required. Existing unconditional actions/upload-artifact then rejects native
+AFL filenames containing colon; no artifact is retained. This is a real workflow
+failure, not a successful complete control. Preserve log/first red.
+Before editing: package existing out/*/crashes directories with standard tar/gzip
+under a portable archive filename, upload it through the existing always() rule.
+Keep original crash paths/bytes inside archive and worker identity, preserve all
+engines/durations/CMPLOG/tee/verdict/corpus behavior. No new runner/dependency/tool.
+Budget normalfuzz workflow<=28added/12removed total (previous20/10 omitted the
+newly demonstrated packaging requirement), one <=9line packaging step plus
+artifact path; no production/harness/API change. Repeat the same real10s
+controlled job and require engine0, actualsavedfiles, verdict1, uploaded archive,
+inspected original crash bytes and aggregatefailed. Clean campaign must still
+pass with no archive; absent data is not a catch. Normal signed hook unchanged.
+
+Local sequencing refinement: capacity native measurements and its1594case
+regression run are terminal/passing; only final cross-target compilation is
+active, with shared Nix database contention observed. Permit ordinary cached
+hooks for this workflow-only artifact repair while that tail finishes; no new
+native/performance workload or duplicate runtime suite. Both unchanged hooks
+still enforce every check. Source-filter/gate/assertion changes are prohibited.
+The previous one-full-runtime-gate limit remains for actual new test executions.

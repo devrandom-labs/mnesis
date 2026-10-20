@@ -504,3 +504,14 @@ Nix package: locked aflplusplus5.00c declares x86_64-linux/i686-linux only (not
 Darwin). Do not force unsupported builds or invent a local engine. Real bounded
 saved-crash control belongs on the existing Linux AFL workflow after the normal
 signed gate. No platform limitation is a reason to mark the goal blocked.
+
+2026-10-20 actual upload-artifact@v4 resolved commit
+ea165f8d65b6e75b540449e92b4886f43607fa02, actual controlled job rejects native
+AFL colon filenames. Selected action README recommends tar-before-upload to
+preserve paths/metadata:
+https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/README.md#permission-loss
+Applicability: standard tar/gzip packages original worker directories and exact
+crash bytes under portable artifact filename. No action version, framework,
+runner, harness dependency, compression threshold or crash verdict change.
+Current upstream default README is v7; selectedv4 pinned README, actual log and
+supported ordinary archive upload are the relevant evidence, not v7-only inputs.

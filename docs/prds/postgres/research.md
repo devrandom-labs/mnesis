@@ -9359,3 +9359,27 @@ logs and amend through the same normal signed hook. Product/configuration diff
 is unchanged; raw/document records cannot supply runtime credit. The final signed
 head will be verified before push. No project-owned Python remains in workflows
 or the removed scripts directory; Cargo metadata owns AFL version selection.
+
+PR406 real AFL control FIRST RED retained: dispatch39450659063,
+job118724284510 based signeda30c4b34, actual10s/CMPLOG,3savedcrashes/0timeouts,
+engine stepSUCCESS(0), verdictFAILURE(1). Upload then FAILS because
+/id:000000,sig:06,... contains colon rejected by actions/upload-artifact. No
+artifact proof claimed. THREEreviews: owning saved-crash/retained-evidence
+contract; actual initial A calibration, live engine10s/3files/zeroexit followed
+by exact verdict1 and failed artifact; unchanged normal verdict/timebox/CMPLOG/
+source outside isolated intentional injection. This catches a real evidence
+pipeline defect, not an adapter security issue. Standard archive packaging is
+the smallest supported repair; preregistered budget/falsifier inHYP.
+
+PR406 PR-event wake118722980838 compiler1/unit17/17/17 and macros118722981185
+compiler1/unit1/1/1: EACH compiler/unit invocation three-reviewed against
+owning feature or unit contract, actual counts/process, unchanged assertion/
+selection with supported Hakari/dev-free offline graph and exact restoration.
+PR compile-fail118722980848 actuallykernel2PASS81.44s/macros1PASS11.91s/
+store1PASS14.51s; EACH three-reviewed against exact misuse fixture, actual counts
+and diagnostics, unchanged source/flags/toolchain. No native runtime credit.
+
+Checked-in first real-crash job log removes trailing spaces only for repository
+whitespace checks; the exact original /tmp/mnesis-pg9-afl-real-crash-job.log is
+preserved. Initial whitespace check rejected raw runner blank-space fields;
+no test, workload, original raw file or gate was changed to hide that failure.
