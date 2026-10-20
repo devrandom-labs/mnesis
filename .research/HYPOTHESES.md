@@ -1134,6 +1134,115 @@ rates; no throughput guarantee is invented. Unknown/other causes remain fatal.
 One private counter product may replace the existing model/report scalars to
 keep one owning source for round/event/fault/rejection counts, within500benchlines.
 
+## PG9 supported feature verification — 2026-10-19
+
+Existing Python wrapper performs single-package library checks while retaining
+all dev dependencies; the known Cargo feature-unification problem means this is
+not isolated-library proof. It also omits Postgres from the CI matrix. Existing
+native archive enables all adapter features, so its seven smoke laws do not
+establish the individual-feature graphs. Remove the wrapper rather than porting
+its machinery to another project tool.
+
+Use locked Nixpkgs cargo-hack0.6.45 (MIT/Apache-2.0), supported --each-feature and
+--no-dev-deps, in disposable CI checkouts only: the tool temporarily rewrites
+manifests. Verify exact options/lock behavior before retaining. Keep original
+three library unit-test modes and add Postgres; unit harness feature unification
+is explicitly not isolated-library credit. Expand existing SQLx/nextest archive
+factory for default and each five adapter features; run each complete selected
+native suite through the existing Linux Postgres integration hook, preserving
+all-feature suite and mandatory smoke laws. No new runner/framework/custom tool.
+
+Budget before edits: delete45line scripts/check-features.py; flake.nix<=65added/
+10removed lines reusing archive/integration owners and existing devShell, checks.yml
+<=25added/3removed lines. No productionRust/publicAPI/lock/runtime/framework/new
+project scripts, lint or threshold changes. Existing fuzz Python parser will use
+Cargo's locked metadata+jq,<=8added/9removed lines; jq and cargo-hack Nix-owned.
+Falsifiers: dev-only dependency masks a required feature; Postgres lacks a listed
+feature's actual native suite; empty/guarded job passes; parser changes locked
+engine version; ignored library/unit/DB failure. Preserve input locks and public
+capabilities. Record every exact run and three reviews. Native local execution
+and full Nix gate wait for the active soak to finish.
+
+## PG9 AFL saved-crash verdict — 2026-10-19
+
+Threatened invariant: required fuzz-gate must reject saved AFL crashes even when
+the bounded engine exits zero, and a failing producer must survive tee. Existing
+AFL job uploads on always() but has no crash-file verdict or explicit pipefail.
+First characterize those shell verdicts against missing/README-only/crashing
+artifact directories and nonzero piped producer. Then add one inline workflow
+verdict, retain existing CMPLOG, duration, target set, seed/corpus and uploads.
+A real-engine saved-crash/zero-exit control is separately required before claiming
+that end-to-end boundary; constructed artifacts prove only the gate itself.
+
+Change budget: fuzz.yml <=20added/5removed lines, no production Rust, harness,
+dependencies, custom tool/test framework, runtime, lint or threshold changes.
+Use supported Bash glob/file predicates and pipefail, not a new script. Keep
+crashes uploaded on always(); don't mistake AFL's informational README for input.
+No other PG8 capacity or security work is bundled. Native-only checks wait for
+full soak; shell checks may run independently.
+
+PG9 public index correction budget before edits: rootREADME<=8added lines and
+adapterREADME<=4added/2removed lines, no Rust/runtime/tooling changes. List the
+already-implemented Postgres adapter beside Fjall, link its existing concise
+verified-connection example, and replace obsolete0.1 quickstart dependency with
+the independently published0.5 series. This is documentation of the current
+public surface, not a production-readiness claim before remaining acceptance.
+
+2026-10-20 integration budget clarification before final gate: fuzz.yml net
+16added/8removed includes deleting the eight-line project Python metadata reader;
+previous removal estimate5 omitted that deletion. Bound now20added/10removed,
+no new runner or production logic. Native factory58added/19removed remains
+within65/20; workflows retain every original target, timeout and artifact rule.
+PG9 real AFL saved-crash control, preregistered2026-10-20 before edits.
+Threatened invariant: AFL engine may save crashes and return success; required
+fuzz gate must fail and preserve the actual crash artifact.
+Use a never-merged proof branch based on the exact ordinary PG9 candidate.
+Only its existing fuzz workflow gets one temporary step before AFL build, for
+value_event_type: replace that job's checked-out harness with an intentional
+panic on every input except initial b"A", create a dedicated one-file A seed,
+and select that dedicated input for this one target. Other targets, engines,
+CMPLOG, time bound, tee/pipefail, saved-crash verdict and unconditional upload
+remain identical. No checked-in production or harness source modification.
+Dispatch existing fuzz.yml with duration10 through ordinary signed commit/hook.
+Expected result: initial seed calibrates; real mutation causes native panic;
+Fuzz with AFL++ step succeeds (zero engine exit) with actual saved file(s);
+Reject saved crashes fails; Upload crashes succeeds; aggregate fuzz-gate fails.
+Download artifact and inspect regular non-README crash content. Read exact step
+conclusions and engine counts/time/CMPLOG, not merely aggregate red. Apply three
+reviews: owning gate contract, actual engine/crash/zero-exit oracle, unchanged
+candidate verdict and thresholds/source outside isolated intentional injection.
+Rollback boundary: never merge proof branch; main candidate contains only the
+normal verdict. If engine exits nonzero/calibration fails/no real crash, record
+the control as invalid and fix the fixture before claiming proof. No constructed
+file can substitute for actual engine output. Budget temporaryworkflow<=30lines,
+zero production/API/dependency changes, no framework/runner/tool introduced.
+
+## PG9 actual AFL crash artifact repair — 2026-10-20
+
+Real controlled engine run39450659063/job118724284510 uses CMPLOG, calibratesA,
+runs10s, saves3real crashes and returns0. Candidate saved-crash verdict fails1
+as required. Existing unconditional actions/upload-artifact then rejects native
+AFL filenames containing colon; no artifact is retained. This is a real workflow
+failure, not a successful complete control. Preserve log/first red.
+Before editing: package existing out/*/crashes directories with standard tar/gzip
+under a portable archive filename, upload it through the existing always() rule.
+Keep original crash paths/bytes inside archive and worker identity, preserve all
+engines/durations/CMPLOG/tee/verdict/corpus behavior. No new runner/dependency/tool.
+Budget normalfuzz workflow<=28added/12removed total (previous20/10 omitted the
+newly demonstrated packaging requirement), one <=9line packaging step plus
+artifact path; no production/harness/API change. Repeat the same real10s
+controlled job and require engine0, actualsavedfiles, verdict1, uploaded archive,
+inspected original crash bytes and aggregatefailed. Clean campaign must still
+pass with no archive; absent data is not a catch. Normal signed hook unchanged.
+
+Local sequencing refinement: capacity native measurements and its1594case
+regression run are terminal/passing; only final cross-target compilation is
+active, with shared Nix database contention observed. Permit ordinary cached
+hooks for this workflow-only artifact repair while that tail finishes; no new
+native/performance workload or duplicate runtime suite. Both unchanged hooks
+still enforce every check. Source-filter/gate/assertion changes are prohibited.
+The previous one-full-runtime-gate limit remains for actual new test executions.
+
 ## PG8 measured capacity matrix — 2026-10-19
 
 Threatened invariant: bounded pages must stay bounded with larger histories and

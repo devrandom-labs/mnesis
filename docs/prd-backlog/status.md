@@ -208,3 +208,17 @@ no production API change. Required diagnostics now passes256candidate-base
 native cases and a meaningful wrong-label control; parent integration is running
 before its first signed full gate. Optional tracing adds no package/runtime.
 Capacity/soak, recovery measurements and PG9 delivery still remain.
+
+2026-10-20 current delivery: PR405 protected-merged at
+8b0ee9778e13d87dc3d45ff23f26c60d285fe6cc after40successful checks and0threads;
+ordinary merge tree verified, concurrent release403/.5.2 preserved. Sustained
+1800s soak passes2662995events/31recoveryfaults and exact cleanup; three logical/
+physical operator timing repeats and phase-specific55P03 laws are recorded.
+Capacity full matrix passes locally on .5.2:12fixtures/432read+432appendwindows/
+96auto-and-generic plans/12closes; analysis and focused protected delivery remain.
+PG9 current slice removes the Python feature wrapper, uses supported cargo-hack/
+Hakari, adds Postgres isolation, native default/each-feature suites and AFL saved-
+crash verdict. Normal gate, actual Linux feature execution, real AFL negative
+control and protected delivery remain. A clean registry .5.2 seven-profile build
+and private native checkpoint/reopen/resume consumer pass; final acceptance,
+publication revision and registry evidence must still match the final delivery.

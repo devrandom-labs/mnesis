@@ -1,0 +1,128 @@
+info: contents updated
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis-postgres (1/7)
+   Compiling proc-macro2 v1.0.107
+   Compiling libc v0.2.189
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.19
+   Compiling crossbeam-utils v0.8.22
+   Compiling num-traits v0.2.19
+    Checking futures-channel v0.3.33
+   Compiling futures-sink v0.3.33
+   Compiling foldhash v0.2.0
+   Compiling form_urlencoded v1.2.2
+   Compiling tracing-core v0.1.36
+   Compiling log v0.4.33
+    Checking crypto-common v0.1.7
+   Compiling futures-util v0.3.33
+    Checking digest v0.10.7
+   Compiling hashbrown v0.16.1
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-checks/crates/workspace-hack)
+   Compiling hashlink v0.11.1
+   Compiling atoi v2.0.0
+    Checking crossbeam-queue v0.3.13
+   Compiling quote v1.0.47
+    Checking errno v0.3.14
+    Checking mio v1.2.2
+    Checking socket2 v0.6.5
+    Checking getrandom v0.2.17
+    Checking security-framework-sys v2.17.0
+   Compiling core-foundation v0.10.1
+   Compiling cpufeatures v0.2.17
+   Compiling serde_json v1.0.151
+   Compiling cpufeatures v0.3.0
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+    Checking signal-hook-registry v1.4.8
+    Checking ring v0.17.14
+   Compiling getrandom v0.4.3
+   Compiling sha2 v0.10.9
+   Compiling security-framework v3.7.0
+   Compiling tokio v1.53.1
+   Compiling sha2 v0.11.1
+   Compiling rand v0.10.3
+    Checking rustls-webpki v0.103.15
+   Compiling rustls-native-certs v0.8.4
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.19
+    Checking rustls v0.23.46
+   Compiling synstructure v0.13.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling tracing-attributes v0.1.31
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+   Compiling equator-macro v0.4.2
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+    Checking equator v0.4.2
+   Compiling tokio-stream v0.1.19
+   Compiling tracing v0.1.44
+   Compiling zerofrom v0.1.8
+    Checking serde v1.0.229
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Checking aligned-vec v0.6.4
+    Checking futures-executor v0.3.33
+    Checking futures v0.3.33
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+   Compiling yoke v0.8.3
+    Checking smallvec v1.15.2
+    Checking either v1.16.0
+    Checking parking_lot_core v0.9.12
+    Checking parking_lot v0.12.5
+    Checking zerovec v0.11.6
+    Checking zerotrie v0.2.4
+    Checking futures-intrusive v0.5.0
+    Checking tinystr v0.8.3
+    Checking potential_utf v0.1.5
+    Checking icu_collections v2.2.0
+    Checking icu_locale_core v2.2.0
+    Checking icu_provider v2.2.0
+    Checking icu_properties v2.2.0
+    Checking icu_normalizer v2.2.0
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking idna_adapter v1.2.2
+    Checking idna v1.1.0
+    Checking url v2.5.8
+    Checking sqlx-core v0.9.0
+    Checking sqlx-postgres v0.9.0
+   Compiling sqlx-macros-core v0.9.0
+   Compiling sqlx-macros v0.9.0
+    Checking sqlx v0.9.0
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 35.42s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis-postgres (2/7)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.13s
+
+info: running `cargo check --lib --offline --no-default-features --features export` on mnesis-postgres (3/7)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.07s
+
+info: running `cargo check --lib --offline --no-default-features --features import` on mnesis-postgres (4/7)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.06s
+
+info: running `cargo check --lib --offline --no-default-features --features projection` on mnesis-postgres (5/7)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.03s
+
+info: running `cargo check --lib --offline --no-default-features --features snapshot` on mnesis-postgres (6/7)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.03s
+
+info: running `cargo check --lib --offline --no-default-features --features tracing` on mnesis-postgres (7/7)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+info: contents updated

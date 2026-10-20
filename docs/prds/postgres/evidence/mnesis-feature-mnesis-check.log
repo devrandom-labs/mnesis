@@ -1,0 +1,30 @@
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis (1/6)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-checks/crates/workspace-hack)
+   Compiling syn v2.0.119
+    Checking thiserror v2.0.19
+   Compiling mnesis-macros v0.5.1 (/private/tmp/mnesis-feature-checks/crates/macros)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.59s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis (2/6)
+   Compiling thiserror v2.0.19
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.23s
+
+info: running `cargo check --lib --offline --no-default-features --features default` on mnesis (3/6)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
+
+info: running `cargo check --lib --offline --no-default-features --features derive` on mnesis (4/6)
+    Checking thiserror v2.0.19
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
+
+info: running `cargo check --lib --offline --no-default-features --features std` on mnesis (5/6)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s
+
+info: running `cargo check --lib --offline --no-default-features --features testing` on mnesis (6/6)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-checks/crates/mnesis)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s

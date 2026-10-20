@@ -1,0 +1,45 @@
+info: contents updated
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis-postgres (1/7)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-control/crates/workspace-hack)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-control/crates/mnesis)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.93s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis-postgres (2/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.17s
+
+info: running `cargo check --lib --offline --no-default-features --features export` on mnesis-postgres (3/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.52s
+
+info: running `cargo check --lib --offline --no-default-features --features import` on mnesis-postgres (4/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.24s
+
+info: running `cargo check --lib --offline --no-default-features --features projection` on mnesis-postgres (5/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.23s
+
+info: running `cargo check --lib --offline --no-default-features --features snapshot` on mnesis-postgres (6/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.19s
+
+info: running `cargo check --lib --offline --no-default-features --features tracing` on mnesis-postgres (7/7)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.88s
+info: contents updated
+control compiler exit=0

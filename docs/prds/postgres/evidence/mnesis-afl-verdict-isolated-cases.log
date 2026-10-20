@@ -1,0 +1,6 @@
+isolated artifact mode=missing exit=0
+isolated artifact mode=readme exit=0
+::error::AFL saved a crash: out/default/crashes/id:000000,sig:06,case with spaces
+isolated artifact mode=crash exit=1
+::error::AFL saved a crash: out/worker/crashes/sample
+isolated artifact mode=worker exit=1

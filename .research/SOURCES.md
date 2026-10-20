@@ -470,6 +470,52 @@ native soak is not an isolated throughput or latency measurement. Actual DB
 settings/toolchain/source/elapsed will be recorded at execution; short smoke
 runs and concurrent-host timings cannot satisfy the full capacity matrix.
 
+PG9 feature facilities checked2026-10-19: locked Nixpkgs
+c59305bab2065cfecc4944690d9eedbb56f3a9fa cargo-hack0.6.45 MIT/Apache-2.0,
+https://github.com/taiki-e/cargo-hack documents --each-feature includes no/default/
+all cases and --no-dev-deps prevents Cargo dev-dependency feature leakage by
+modifying then restoring real manifests. Use disposable checkouts only.
+https://doc.rust-lang.org/cargo/commands/cargo-metadata.html documents explicit
+format-version1, resolved package versions, --locked; use Cargo's parser rather
+than another TOML parser for the AFL lock version. Existing workspace archive,
+Postgres test hook and checks workflow own execution and fail-closed verdicts.
+
+PG9 AFL verdict sources verified2026-10-19:
+https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/fuzzing_in_depth.md
+(native output/crash triage and bounded CI campaigns); existing pinned afl.rs
+harness/CI owns target versions and CMPLOG. GitHub workflow shell reference
+https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
+states unspecified Linux Bash uses bash-e, explicit Bash adds pipefail. Existing
+AFL run does not specify either shell or pipefail; preserve producer failure
+explicitly in the existing step. Bash arrays/glob syntax is already used in CI.
+Cargo metadata format-version1 supports locked resolved package versions and
+can later remove the inline Python parser; do not add a second TOML parser.
+https://doc.rust-lang.org/cargo/commands/cargo-metadata.html
+
+Locked nixpkgs c59305bab2065cfecc4944690d9eedbb56f3a9fa exposes actionlint1.7.12
+MIT and cargo-hack0.6.45 MIT/Apache-2.0. Actionlint used as a one-off supported
+workflow inspection tool via locked --inputs-from; no project wrapper/dependency
+or permanent check introduced. Its packaged ShellCheck/pyflakes dependencies are
+Nix-owned tooling, not project Python. Current fuzz.yml passes actionlint with
+zero diagnostics; this is workflow static analysis, zero engine execution.
+
+Native AFL control cannot run on this Darwin host through the selected supported
+Nix package: locked aflplusplus5.00c declares x86_64-linux/i686-linux only (not
+Darwin). Do not force unsupported builds or invent a local engine. Real bounded
+saved-crash control belongs on the existing Linux AFL workflow after the normal
+signed gate. No platform limitation is a reason to mark the goal blocked.
+
+2026-10-20 actual upload-artifact@v4 resolved commit
+ea165f8d65b6e75b540449e92b4886f43607fa02, actual controlled job rejects native
+AFL colon filenames. Selected action README recommends tar-before-upload to
+preserve paths/metadata:
+https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/README.md#permission-loss
+Applicability: standard tar/gzip packages original worker directories and exact
+crash bytes under portable artifact filename. No action version, framework,
+runner, harness dependency, compression threshold or crash verdict change.
+Current upstream default README is v7; selectedv4 pinned README, actual log and
+supported ordinary archive upload are the relevant evidence, not v7-only inputs.
+
 ### PG8 capacity measurement owners, accessed2026-10-19
 
 Reuse existing Cargo standalone reporting benchmark pattern, Rust std Vec sorting

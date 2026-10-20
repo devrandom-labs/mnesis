@@ -1,0 +1,19 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-control/crates/workspace-hack)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Checking mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+error[E0433]: cannot find `JsonCodec` in `mnesis_store`
+   --> adapters/postgres/src/lib.rs:39:27
+    |
+ 39 |     let _ = mnesis_store::JsonCodec::<()>::default();
+    |                           ^^^^^^^^^ could not find `JsonCodec` in `mnesis_store`
+    |
+note: found an item that was configured out
+   --> crates/store/src/lib.rs:148:36
+    |
+147 | #[cfg(feature = "json")]
+    |       ---------------- the item is gated behind the `json` feature
+148 | pub use codec::serde::json::{Json, JsonCodec};
+    |                                    ^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `mnesis-postgres` (lib) due to 1 previous error
