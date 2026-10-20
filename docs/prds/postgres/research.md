@@ -9359,3 +9359,24 @@ logs and amend through the same normal signed hook. Product/configuration diff
 is unchanged; raw/document records cannot supply runtime credit. The final signed
 head will be verified before push. No project-owned Python remains in workflows
 or the removed scripts directory; Cargo metadata owns AFL version selection.
+
+Never-merged controlled negative branch based exactPG9f3633983. Workflow-only
+injection before existing AFL build replaces value_event_type harness in the
+job checkout with deliberate panic for all non-A input, dedicated initial A
+seed. No checked-in harness/product source modified. Existing verdict byte-
+identical, all engines/targets/CMPLOG/duration/pipelines/uploads preserved.
+Preregistered HYP protocol requires actual zero engine exit plus saved crash,
+verdict red, unconditional artifact and aggregate red; a startup failure is NOT
+proof. Normal signed hook before existing duration10 workflow dispatch.
+
+Proof preparation actionlint attempt used the shell-profile symlink as a flake
+reference and exited127 because that resulting environment lacked actionlint.
+No test ran or evidence credit follows. Resolve the stored Nix environment path
+explicitly and use the repository locked actionlint package for workflow syntax.
+
+Locked actionlint1.7.12 whole-repository invocation finds existing invalid action
+inputs in update_deps/upgrade_deps (committer_name/email and GPG inputs). They are
+unchanged by this proof or candidate; no whole-repository actionlint pass is
+claimed. Changed checks.yml and fuzz.yml pass targeted actionlint, including the
+proof-only workflow injection; no lint suppression/configuration change. This is
+static workflow syntax evidence only, not execution of the actual crash control.

@@ -229,6 +229,20 @@ jobs:
             printf 'A' > "$seed_dir/seed0"
           fi
 
+      - name: Inject deliberate crash for the isolated verdict control
+        if: matrix.target == 'value_event_type'
+        run: |
+          cat > fuzz-afl/src/bin/value_event_type.rs <<'RS'
+          fn main() {
+              afl::fuzz!(|data: &[u8]| {
+                  assert_eq!(data, b"A", "intentional saved-crash verdict control");
+                  fuzz_common::value_event_type(data);
+              });
+          }
+          RS
+          mkdir -p afl-control-seed
+          printf 'A' > afl-control-seed/seed0
+
       - name: Build CMPLOG-instrumented target
         working-directory: fuzz-afl
         run: cargo afl build --release --locked --bin ${{ matrix.target }}
@@ -240,9 +254,13 @@ jobs:
         # Duration: dispatch input > PR smoke (60s) > nightly default (120s).
         run: |
           set -o pipefail
+          inputs=../seeds/${{ matrix.target }}
+          if [ "${{ matrix.target }}" = value_event_type ]; then
+            inputs=../afl-control-seed
+          fi
           cargo afl fuzz \
             -V ${{ github.event.inputs.duration || (github.event_name == 'pull_request' && '60') || '120' }} \
-            -i ../seeds/${{ matrix.target }} \
+            -i "$inputs" \
             -o out \
             target/release/${{ matrix.target }} 2>&1 | tee afl.log
 
