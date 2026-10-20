@@ -8995,3 +8995,367 @@ pass. The same full normal hook exits0. Raw
 /tmp/mnesis-pg8-soak-record-{hook,nextest,replay}.log. Final evidence-only amendment
 immediately afterward must still use the normal signed gate; inspect actual
 cache result before claiming zero additional runtime. Functional source stays.
+
+## PG9 feature checker characterization
+
+Supported cargo-hack0.6.45 help confirms each-feature includes no/default/all and
+individual cases. Initial Nix shell contained the tool but no Cargo; no checks
+ran. Pinned repository environment supplies Cargo1.99.0 correctly. First actual
+isolated-library attempt fails before compilation: --no-dev-deps removes manifest
+edges, so Cargo must prune Cargo.lock and correctly refuses --locked. Original
+manifest and lock restored exactly by the failed tool invocation.
+
+Three reviews: (1) actual intended dev-free library graph is necessary, ordinary
+unit dev-unification is not proof; (2) compiler/dependency-setup red, zero library
+or runtime passes; (3) no source/lock/assertion/lint changes hidden, original
+locked command retained as rejected approach. Use supported cargo fetch --locked
+first, then offline dev-free checks with an explicitly disposable lock copy and
+restoration before original locked unit modes. Inspect resulting lock changes for
+pruning/unchanged versions before retaining. This records the necessary graph
+change rather than pretending --locked works. Workflow budget40added lines
+(refined before edits), zero production/public API/tool-suite changes. An isolated
+downstream graph remains required independently. Existing real-DB suite adds
+individual adapter-feature archives through the same native hook and full tests.
+
+Offline Postgres dev-free compilation passes7 actual selections:all,no-default,
+export,import,projection,snapshot,tracing (10.67/1.11/1.73/1.69/1.29/1.26/1.12s;
+read exact raw/tmp/mnesis-feature-postgres-offline-check.log for all times).
+Cargo-hack itself restores BOTH manifests and Cargo.lock byte-exactly; the
+proposed manual backup/restore wrapper is unnecessary and will not be added.
+Review1: selected dev-free adapter graph compiles, but source audit finds existing
+workspace-hack explicitly enables Tokio full, so these passes alone do NOT prove
+published dependency isolation. Review2: seven compiler-only invocations, zero
+runtime/native tests; package has no default feature so cargo-hack deduplicates
+that equivalent selection, ordinary default unit mode remains explicit.
+Review3: all original manifests/lock restored exactly; no weakened lint/selection
+or production change. Refine using existing cargo hakari disable/generate owners
+around the check and require git diff --exit-code afterward. This matches the
+established publishing preparation; do not invent another dependency editor.
+Nix archive factory mechanical reindent is36added/15removed vs65/10budget; retain
+same commands/integration owner, revised removed-line budget20 before further
+edits. New advertised-feature names come from adapter Cargo.toml, not a second
+hand-maintained list. Real native archive executions still pending.
+
+Correction to the preceding first offline pass timing: no-default was2.00s
+(raw authoritative), not1.11s; all other six times match. No runtime credit.
+
+Published-shape Postgres compile with Hakari disabled and dev dependencies
+removed now passes7/7:35.42/1.13/1.07/1.06/1.03/1.03/.58s, all/no-default and
+five individual features. Three reviews for EACH compiler invocation:
+1 selected dependency/adapter-feature contract with no generated third-party
+unification and no dev edges;2 actual compiler completions in raw
+/tmp/mnesis-feature-postgres-unified-check.log, zero runtime/DB evidence;
+3 unchanged source/lints/feature list, Hakari generation and cargo-hack restore
+all manifests/Cargo.lock exactly (independent cmp passes). No manual lock editor.
+The earlier seven checks with Hakari enabled remain limited evidence, not reused.
+
+Cargo-metadata parser run through pinned Nix emits exact locked0.18.2; own metadata
+format-version1 and jq require exactly one AFL package. Three reviews: engine
+version owner remains fuzz-afl/Cargo.lock; actual Cargo/jq execution, not a Python
+translation; all manifests/locks unchanged and pipeline failure preserved.
+Native individual archives and downstream evidence are still pending.
+
+Feature-falsifier setup preserved in detached/tmp/mnesis-feature-control at5b86:
+private compile-only use of Tokio's multi-thread builder without declaring that
+library feature. First intended original-control invocation ran in the ordinary
+feature worktree instead (source path in log proves it);4.86s compiler pass gets
+ZERO falsifier credit. Three reviews catch the mismatch: correct compiler contract
+but wrong source; actual ordinary compile only; source/locks unchanged. Repeat
+against the explicit control cwd before any control conclusion. Control never
+merges; its source and logs remain retained.
+
+Actual original-check control now runs in detached feature-control: Cargo check
+all-features accepts the private unsupported Tokio multi-thread builder use.
+Three reviews: owning declared library graph should not need test-only/full
+Tokio; actual compiler pass in intended control cwd, not prior ordinary source;
+only the five-line private compile probe differs, original flags/lock/Hakari
+retained. This deliberately wrong source never merges. Correct dev-free/Hakari-
+disabled command must now reject the same source for the missing constructor.
+
+Workflow static check finds SC2016 on the single-quoted Bash-c body. Variables
+were intentionally deferred to the child, but replace it with the ordinary
+quoted here-document form rather than suppressing ShellCheck. Initial static
+red retained/tmp/mnesis-feature-actionlint.log. Nix devShell and Linux integration
+checkPhase evaluate; the initial devShell attribute omitted .default and was
+corrected, zero build/runtime credit. Nix checkPhase contains all seven complete
+native feature archives plus unchanged mandatory all-feature smokes, pipefail,
+DATABASE_URL and live server guard. Actual archive execution still pending.
+
+The Tokio compile probe SURVIVES all7 dev-free selections (2.93/1.17/1.52/1.24/
+1.23/1.19/.88s), wrapper exits1 because expected compiler101 was not observed.
+Three reviews: actual root workspace explicitly declares Tokio full, so the probe
+is LEGITIMATE published-shape code; it is NOT evidence of checker failure or an
+unreported dependency defect. Real compiler passes cannot be relabeled catches.
+Owning source invalidates the proposed falsifier; preserve rejected source diff
+/tmp/mnesis-feature-tokio-probe-rejected.diff and logs. Assertions/flags unchanged,
+no runtime/native credit. Select the actual mnesis-store JsonCodec seam instead:
+Postgres enables json/cbor only in dev dependencies, its declared production store
+edge enables subscription. Verify that source fact before the next control.
+
+JsonCodec control also rejects the proposed original-false-green claim: ordinary
+Cargo --lib --locked --all-features already fails E0433 at the undeclared json
+codec. Three reviews: declared production graph lacks json (exact intended
+boundary); actual original compiler rejects it, so ZERO new-checker catch credit;
+only private control differs and assertions/flags unchanged. The old Python
+wrapper's --lib check already excludes this dev-only seam. Do not manufacture
+another probe to obtain a claimed defect. Earlier general feature-leak concern
+is NOT a reproduced current Cargo1.99 bug. Retain replacement on its demonstrated
+maintenance value (delete custom Python, supported cargo-hack feature enumeration)
+and published-shape graph checks; describe coverage limits precisely, not as an
+existing compiler defect repair. Individual real-DB archives and final isolated
+registry consumer supply separate required evidence. Both rejected controls stay.
+
+Both JsonCodec checks reject the same intended compiler E0433. The cargo-hack
+wrapper returns1 although its child Cargo returns101; the ad-hoc expectation of
+wrapper101 was wrong and its outer command exits1. Three reviews distinguish
+actual compiler rejection from wrapper status, preserve exact source/flags and
+award no new-checker superiority or runtime/native credit. No rerun is needed to
+manufacture a green control summary; raw logs/source stay. Real production-shape
+7/7 valid-source compiles above remain separate positive evidence.
+
+Feature archives now require one exact owned native law before the full suite,
+with --no-tests=fail so a missing feature's test cannot silently pass. Default
+uses real append/read conformance; other selectors use existing atomic/listing/
+projection/snapshot/diagnostics cases. Reuse those selector facts in the existing
+all-feature smoke commands. Current48added/19removed Nixlines remains within
+revised65/20budget. Live database preflight and pipefail unchanged. No runtime
+coverage inferred from evaluated shell text.
+
+## PG9 AFL shell characterization and first gate
+
+Existing Bash-e pipeline actually returns0 with a failing producer; no explicit
+pipefail in the AFL step. Existing workflow uploads saved crashes but has no
+verdict, so successful bounded exit cannot establish a clean target. Add only
+explicit pipefail and regular crash-file rejection (README.txt excluded),12lines;
+keep original target/duration/CMPLOG/corpus/upload owners unchanged.
+
+Pinned Nix-shell direct extracted-workflow checks: missing and README-only pass,
+default saved input rejects; original false|tee exits0/fixed exits1. Raw
+/tmp/mnesis-afl-verdict-cases.log. Review1: exact file/pipeline policy, no engine
+or product correctness claim from constructed artifacts. Review2: inspection
+found the worker-directory case still had the prior default crash, so it does
+NOT independently prove worker-directory rejection; reject that coverage claim
+and rerun isolated directories. Review3: source diff confirms only verdict and
+pipefail, unchanged failing conditions/target set/uploads always()/CMPLOG.
+These are shell checks, not native fuzz campaigns or PG8 work. Original red and
+fixture limitation retained. Cargo metadata independently resolves locked afl
+0.18.2 with no Python parser; future tool-removal slice remains separate.
+
+Corrected isolated gate run: missing/README-only exit0; default crash with spaces
+and independent worker/sample crash each exit1. Raw
+/tmp/mnesis-afl-verdict-isolated-cases.log. Review1: exact supported artifact
+policy covers any regular saved input without treating informational README as
+failure. Review2: each case has its own fresh directory; worker failure now
+names out/worker/crashes/sample, no prior default file can mask coverage. These
+remain constructed artifacts, not real-engine crash evidence. Review3: extracted
+script equals workflow body,12added lines only, original CMPLOG/always-upload/
+targets/durations preserved; original failing producer proof retained. Full Nix
+signed gate must wait until native soak terminal, not run concurrently.
+
+Locked actionlint1.7.12 completes exit0, zero diagnostics for fuzz.yml. Static
+workflow analysis only; no test/fuzz execution credited. All artifact cases and
+producer pipeline checks above remain the separate shell-runtime evidence.
+
+Combine the two PG9 CI changes in one focused verification slice: feature archive/
+checker ownership and AFL verdict, no product implementation. Original isolated
+AFL worktree remains preserved. Actual combined Nix delta53added/19removed, not
+the earlier estimated48; within recorded65/20budget. Nix shell evaluation contains
+all-feature and six default/individual archives with exact mandatory selectors.
+Heredoc workflow passes pinned actionlint with no diagnostics. All still need
+normal signed full Nix gate and actual Linux CI; no native/compiler result is
+inferred from static evaluation. Goal remains active and native soak sole DB run.
+
+Owned devShell builds through the repository flake with cargo-hack0.6.45,
+cargo-hakari0.9.39 and jq1.8.2. Other eight library checks complete40 actual
+compiler invocations: mnesis6, macros1, store17, store-testing4, wake1,
+wake-nostd1, inmemory4, Fjall6. Together with Postgres7,47 complete successfully.
+For EACH invocation three distinct reviews: declared package/feature graph with
+Hakari disabled and no dev edges; actual matching running/completed child logs
+(no runtime/native credit); unchanged lints/source/selection and independent
+byte-exact lock/manifest restoration after supported generation. Exact individual
+feature flags/durations remain /tmp/mnesis-feature-<package>-check.log; whole
+serial driver/tmp/mnesis-feature-workspace-check.log. Zero library unit tests or
+native database cases are inferred from these compiler checks. Cross-target
+no_std checks remain owned by the normal full Nix gate.
+
+Combined actionlint passes with zero diagnostics. Nixfmt check requests ordinary
+formatting; apply the supported formatter rather than suppressing its verdict.
+No product assertions, test filters or budgets change. Current public README
+corrections list Postgres and existing verified-connection example; obsolete0.1
+quickstart becomes independently published0.5. Local missing-DATABASE_URL tests
+are explicitly not database evidence.
+
+After supported formatting, nixfmt and combined actionlint complete with zero
+diagnostics; static analysis only. Final measured Nix delta58added/19removed,
+within65/20. Existing native all-feature laws remain selected with shared
+selectors; six individual/default complete suites have their own required law.
+No new native workload has run while the frozen1800s soak is active. Latest
+observed1393.575682917s/504484rounds/2270210events/24faults/0knownrejections/
+45connections. This is progress, not completed30-minute acceptance.
+
+## Independent published dependency graph
+
+Temporary standalone/tmp/mnesis-pg9-registry-compile-052 has only the exact
+published mnesis-postgres0.5.2 dependency and five forwarded feature names. No
+workspace/path/patch/development dependency. Supported cargo-hack --locked
+compiles all/no-default/export/import/projection/snapshot/tracing7/7:
+45.74/1.94/2.01/1.86/1.79/1.85/1.74s. Cargo metadata independently confirms all
+four Mnesis crates are registry0.5.2, not local paths. Each compiler invocation
+three-reviewed: owning isolated published graph/API export; actual completed
+compiler execution (zero native/runtime credit); unchanged exact version/lock/
+feature flags and no unifying workspace/development graph. Cargo deduplicates
+equivalent default/no-default because adapter has no declared default features.
+No full registry consumer claim yet: separate ordinary test is prepared at
+/tmp/mnesis-pg9-registry-native-052, requires an actual private DATABASE_URL and
+will fail if absent. It checks binary-key appends, saved checkpoint reopen,
+stream reads and exclusive global resume. No runtime before active fullgate ends.
+Raw /tmp/mnesis-pg9-registry-compile-052{.log,-metadata.json}; both consumer
+projects remain outside the repository, no new project tool/framework/runtime.
+
+Standalone native consumer compiles against published0.5.2 in36.12s with
+cargo test --locked --no-run; Cargo metadata confirms every Mnesis package is
+registry0.5.2 (four packages), no path/workspace graph. Three reviews: actual
+public append/checkpoint/reopen/exclusive-resume API composition; completed
+compiler only, ZERO executed tests; exact pinned versions, no DATABASE_URL guard
+that can pass, no automatic retry or local overrides. Native runtime still
+required after active local gate. Raw/tmp/mnesis-pg9-registry-native-052-build.log
+and matching metadata.json. This is outside-repository consumer evidence, not
+another project runner or test framework.
+
+PR405 current177 head push CI feature logs obtained directly from completed jobs
+because gh run --log waits for the entire run. Push native unit modes(default/
+no-default/all): kernel15/15/15, macros1/1/1, store217/217/217, Fjall131/131/131,
+inmemory25/25/30, wake17/17/17, wake-nostd0/0/0, store-testing0/0/0. Each of these
+24actual invocations three-reviewed: selected owning library/mode contract;
+actual completed commands/counts with all zero-case binaries receiving ZERO
+runtime credit; unchanged source/assertions/feature selections/lints. Compiler
+checks in those jobs are separate, no Postgres-isolation proof from this old
+matrix (PG9 replacement still required). Raw direct-job logs under
+/tmp/mnesis-pg8-soak-direct-job-<id>.log, ids118699976514/563/621/783,
+118699977075/153/178/813. Mutants39443682812/118699853743 has NO mutants to filter
+and uploads no artifact; ZERO new runtime catch/baseline credit. This is expected
+for a test/benchmark/doc-only production diff; existing real wrong-rescan and
+wrong-ordinal controls remain the workload oracle evidence. Scheduled sweep skip
+is not a failed required check. Linux/native/PR-feature/fuzz logs still pending.
+
+Independent registry consumer .5.2 executes against a fresh privatePG18.6
+on/on/on:1PASS.057s/0skip, nextest1f608d24-caed-44db-a074-86521365fed0. Three
+reviews: (1) real binary-key append, checkpoint commit, all handles/pool close,
+fresh runtime open preserving exact revision/position/state/history, second
+append, inclusive stream reads and exclusive global resume; (2) actual one
+public-consumer test with no environment success guard, migrations from the
+registry archive and no workspace/path/patch graph, waited native server
+shutdown succeeds; (3) exact published versions/locks/unchanged assertions and
+5sclose deadlines, unknown writes fail rather than retry. This verifies released
+0.5.2, not every still-unmerged test/doc/CI change or a future version. Real native
+consumer source/lock/metadata and database directory are retained outsideproject;
+raw/tmp/mnesis-pg9-registry-native-052-run.log. Do not call whole goal complete.
+
+PR405 current177 fuzz logs: libFuzzer wire13266301/value5692739/header2407556/
+chunk2358227 actual runs,61s each. AFLwire/header/chunk/value60s each, CMPLOG
+confirmed,0saved crashes/0timeouts; new corpus items0/2/15/0. EACH of eight
+campaigns three-reviewed: selected parser/value invariant; actual engine output,
+counts/duration and no saved failures rather than job-green inference; unchanged
+source/targets/durations/assertions/CMPLOG/corpus handling. Clean campaigns supply
+ZERO saved-crash/zero-exit gate proof; required PG9 negative control remains.
+Raw direct-job logs ids118699853619,118699854124/183/252/295/348/371/425.
+
+PR405 exact177 standalone Linux integration actual264PASS66.868s(push) and
+264PASS67.369s(PR),0skips/23binaries each; second printed run.log is an ECHO,
+zero additional executions. Each preceded seven actual one-case feature smokes
+with explicit remaining cases unselected (14/15/2/7/10/4/9). EACH of these16
+invocations three-reviewed: exact native owner/order/state/commit/metadata/lifecycle
+law and complete-suite selection; actual process/count/duration/live database,
+not echoed or guarded substitute; unchanged original source/assertions/filter/
+deadlines, new55P03 phase preserved. Compile1m04s/1m02s excluded. Other default/
+individual advertised adapter features still require PG9 expansion, not these
+all-feature smokes. Raw direct-job118699976624/118700026089 logs retained.
+
+Compile-fail cases also actually run: push kernel2PASS122.70s/macros1PASS15.51s/
+store1PASS18.57s; PR2PASS81.54s/1PASS10.78s/1PASS13.95s. EACH of six invocations
+three-reviewed: exact owning compile-time misuse contract; actual fixture/pass
+counts and compiler subprocess success, not ordinary DB/runtime proof; unchanged
+source/expected stderr/toolchain/flags and four normal nextest exclusions still
+owned here. Raw direct-job118699976677/118700026522. Final Nix-host native and
+workspace logs plus CodSpeed still need independent review before protected merge.
+
+2026-10-20 PR405 final177 PR-event feature jobs reviewed individually: wake
+118700026341=17/17/17; Fjall118700026367=131/131/131; inmemory118700026529=25/25/30;
+kernel118700026618=15/15/15; store-testing118700026620=0/0/0;
+macros118700026789=1/1/1; store118700026999=217/217/217;
+wake-nostd118700027020=0/0/0. Each triplet is default/no-default/all-feature
+unit execution. EACH of the24 invocations received three reviews: (1) owning
+crate's exact unit laws and advertised selection; (2) actual log test counts,
+failures/ignored/filtered all0, with empty binaries receiving ZERO runtime
+coverage; (3) unchanged source/assertions/feature flags/deadlines at177 and no
+Postgres native isolation credit. All24 actual invocations pass. Raw direct-job
+logs retained, not a second credit for summaries. This finishes the PR-event
+counterpart of the previously reviewed24 push-event invocations.
+
+Push-event final177 Nix job118699976130:1594PASS135.887s/4slow/4compile-fixture
+exclusions; actual native264PASS66.991s/0skip plus seven separate one-law smokes
+(14/15/2/7/10/4/9unselected); replay2/1/1PASS each1.00s. EACH of these12 actual
+invocations three-reviewed: (1) workspace or selected native/parser owner
+contract, precise DB selection and held-watermark/outcome semantics; (2) real
+process/count/duration and live native database, not echoed run.log or compilation;
+(3) unchanged assertions/filters/statement deadlines/feature flags, with four
+compile fixtures separately exercised in owned jobs. Build times excluded. All
+other completed host checks are static/compile evidence, not new runtime tests.
+
+CodSpeed final177 job118700056095 actually completes four unchanged suites
+(kernel_bench, store_bench, fjall_benchmarks, all_index_layout), instrumented
+Simulation mode and uploaded data; analysis succeeds. Three reviews: exact
+existing owner/workload selection; actual measured entries and four-suite finish
+rather than green/cache inference; unchanged benchmark source/thresholds/tool
+configuration. Cache restore/save warnings are retained. No native Postgres
+capacity or deployment latency claim follows this instrumented non-Postgres run.
+
+PR405 final177 PR-event Nix118700026661 completes:1594PASS137.186s/4slow/
+4compile exclusions,264nativePASS66.414s/0skip,seven one-law smokes with
+14/15/2/7/10/4/9unselected, corpus replay2/1/1each1.00s. EACH of12actual
+invocations independently three-reviewed against source/owner contract, actual
+native process/count/falsifier and unchanged selection/assertions/deadlines. No
+compilation/echo/guard credit. Both push and PR Nix jobs therefore actually ran
+the complete current native suite. Exact177 all40SUCCESS/1scheduledSKIP and
+0review threads; expected ordinary merge treebd9d9ce3152aa4a6ccd12045961fe0dd31856ac8
+preserves concurrent0.5.2 release. Protected exact-head merge follows.
+
+Protected workload/recovery PR405 merged at8b0ee9778e13d87dc3d45ff23f26c60d285fe6cc,
+2026-10-20T15:19:38Z. Actual merge tree equals expected
+bd9d9ce3152aa4a6ccd12045961fe0dd31856ac8, including .5.2 release. Current PG9
+source integrated byte-identically onto this parent; four append-only records
+preserve HEAD prefix plus saved candidate suffix. All stashes retained. Public
+README fixes are already in protected parent and disappear from this diff.
+Final minimization:0productionRust/API/migrations/dependencylock changes,
+44linePython wrapper removed, no replacement project runner. Nix feature names
+come from manifest, selectors reused for existing mandatory smokes, native full
+suites require nonempty execution, all pipelines preserve exit status. Fuzz
+version is selected once from owning lock via supported Cargo metadata/jq;
+saved-crash negative verdict supplements clean campaigns. Real engine control
+and actual Linux selected suites remain required. Freeze source for normal
+signed commit/full gate; no threshold, lint or hook bypass.
+PG9 normal signed gate88620 actual corpus replay2/1/1PASS, each1.00s,0failed/
+ignored/filtered. Each of three invocations reviewed separately: (1) existing
+stable parser/CBOR fuzz owner and checked-in corpus; (2) actual test process and
+named tests in replay log, not compilation/cache output; (3) unchanged fuzz source,
+corpus, durations, assertions and selection relative protected8b0e. This proves
+stable replay only, not real AFL saved-crash verdict or Postgres native execution.
+Workspace nextest actual1594PASS557.312s/14slow/4compile-fixture exclusions,
+138binaries; compilation2m30s excluded. Three reviews: (1) current .5.2 kernel,
+store, wake and adapter contracts, including original property/ordering/batch
+and checkpoint law owners; (2) actual complete execution/pass counts and slow
+process completion, all unexecuted database-success guards provide ZERO native
+credit on this Darwin gate and compiler fixtures remain owned by CI; (3) source,
+assertions, property workloads, filters, limits and deadlines unchanged, only
+ordinary all-target build/gate selection. No reduction for long property tests.
+Native default/each/all and real AFL saved-crash control remain separately due.
+
+Normal signed commit1013b6a3 passes all12host Nix checks. Final intended staging
+command initially named the already-staged deleted Python file and returned a
+pathspec error before staging its other arguments; the shell then entered the
+normal unchanged hook with the implementation already staged. No source or gate
+was altered. Retain that first signed commit, stage remaining owned records/raw
+logs and amend through the same normal signed hook. Product/configuration diff
+is unchanged; raw/document records cannot supply runtime credit. The final signed
+head will be verified before push. No project-owned Python remains in workflows
+or the removed scripts directory; Cargo metadata owns AFL version selection.

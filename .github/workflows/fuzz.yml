@@ -196,14 +196,10 @@ jobs:
         env:
           EXACT_CACHE_HIT: ${{ steps.afl-cache.outputs.cache-hit }}
         run: |
-          afl_version="$(python3 - <<'PY'
-          from pathlib import Path
-          import tomllib
-          lock = tomllib.loads(Path("fuzz-afl/Cargo.lock").read_text())
-          [package] = [p for p in lock["package"] if p["name"] == "afl"]
-          print(package["version"])
-          PY
-          )"
+          set -o pipefail
+          afl_version="$(cargo metadata --manifest-path fuzz-afl/Cargo.toml --locked --format-version 1 |
+            jq -er '[.packages[] | select(.name == "afl") | .version] |
+              if length == 1 then .[0] else error("expected one locked afl package") end')"
           if [ "$EXACT_CACHE_HIT" != true ] \
             || [ "$(cargo afl --version 2>/dev/null)" != "cargo-afl $afl_version" ]; then
             cargo install cargo-afl --version "=$afl_version" --locked --force
@@ -243,11 +239,23 @@ jobs:
         # the limit. Tee output so the next step can confirm CMPLOG engaged.
         # Duration: dispatch input > PR smoke (60s) > nightly default (120s).
         run: |
+          set -o pipefail
           cargo afl fuzz \
             -V ${{ github.event.inputs.duration || (github.event_name == 'pull_request' && '60') || '120' }} \
             -i ../seeds/${{ matrix.target }} \
             -o out \
             target/release/${{ matrix.target }} 2>&1 | tee afl.log
+
+      - name: Reject saved crashes
+        working-directory: fuzz-afl
+        run: |
+          shopt -s nullglob
+          for crash in out/*/crashes/*; do
+            if [ -f "$crash" ] && [ "${crash##*/}" != README.txt ]; then
+              printf '::error::AFL saved a crash: %s\n' "$crash"
+              exit 1
+            fi
+          done
 
       - name: Confirm CMPLOG engaged
         working-directory: fuzz-afl

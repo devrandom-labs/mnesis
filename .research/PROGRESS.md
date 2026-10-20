@@ -1,101 +1,69 @@
-# Current Postgres delivery — 2026-10-19
+# Postgres delivery — 2026-10-20
 
-Persistent goal ACTIVE/no budget: all required PG0–PG9, protected merges,
-publication and clean registry real-DB consumer. PG10 conditional. Labcast owns
-command IDs/dedup/fencing. No delegation. User narrowed security to explicit PRD;
-finish workload/verification/delivery. Preserve every worktree/stash/raw record.
-Root docs/postgres-prd8357c0c2 USER research.md change remains untouched.
+Persistent goal ACTIVE/no budget, required PG0–PG9. PG10 conditional; Labcast owns
+command IDs/dedup/fencing. No delegation. Root user research edit untouched.
+25 focused changes protected-merged through PR405 at
+8b0ee9778e13d87dc3d45ff23f26c60d285fe6cc, all40SUCCESS/1scheduledSKIP/0threads;
+standard merge tree bd9d9ce3152aa4a6ccd12045961fe0dd31856ac8 verified exactly.
+Preserves user release403 .5.2 at9e5ceeb3, publication39342443941SUCCESS.
+Registry .5.2 not yanked checksum39f9288298e4c54847505db231f581b75979cc4c21da1757ff70243aed38ab45.
+Clean exact-registry feature compile7 and private PG18.6 native consumer1PASS.057s
+verify .5.2 only, not future unmerged changes. Exact records in research.md.
 
-24 focused changes protected-merged through diagnostics402:
-5b8680280854c397c957140784ba7795bcb488a0. All40SUCCESS/one scheduledSKIP/0threads;
-merge tree exact standard e1fd9b70203e80892480cfa38ee552fb27024a38, preserves
-user release4010525d517 and4009f7116c7.0.5.1 publication independently verified
-run39312731245; sparse registry not yanked, checksum
- aa483fa702ad0dd67a0ba941704bc7b196cfbc5925ac8088cc6bda40ea61e7cb.
-Release403 is OPEN v0.5.2. Published subsets are not whole-goal completion.
+Soak/recovery PR405 DONE:1800s minimum,1812.798s/2662995events/31faults,
+zero invariant failures, 0known lock rejections, full cleanup. Phase laws preserve
+pre-COMMIT55P03 known rejection vs after-COMMIT unknown. No product Rust/API edits.
+Four Linux264-case executions/0skip reviewed, both Nix1594cases and replay2/1/1;
+all actual tests three-reviewed. Prior two long reds retained. Three logical and
+physical TWO-event operator repeats recorded; RPO0 small quiesced fixture only.
+Do not rerun without material concern.
 
-CURRENT DELIVERY SLICE /tmp/mnesis-postgres-soak test/postgres-soak, base5b86.
-Full1800s soak71259 TERMINAL0:1812.797935834s final count/1814.44915625s through
-close,591768rounds/2662995events/31recovery faults/0known rejections. Peak1879613,
-baseline1071253/retained103974bytes,1294346952265allocated bytes (traffic, notRSS).
-Observed periodic backend high46/configured max52, final pool0/backend0 checks.
-Every ordering/ordinal/state/position/revision/native-count assertion reached.
-THREEreviews and retained failures recorded. Source61d3f493... remains exact.
-475/500benchlines,14/15functions; deadline339/380lines. No production/API/dependency
-or migration change. Native phase3PASS5.194s/36unselected verifies55P03 known
-beforeCOMMIT but Unknown after; every original code/assertion preserved. Known
-pre-COMMIT55P03 only separately counted, never Conflict/automatic retry; other
-errors fatal. Full suite264PASS73.287s/0skip/23binaries, compile21.25s excluded,
-THREEreviewed. Both prior full reds retained (finite-scan assumption and lock
-rejection at1269s); rescan/ordinal native controls retained. No more soak rerun
-unless a material source change/concern justifies it.
+CURRENT /tmp/mnesis-feature-checks fix/feature-checks now based protected8b0e.
+WIP stash recorded /tmp/mnesis-pg9-protected-parent-stash preserved; append conflicts
+unioned HEAD prefix plus exact saved suffix. No production Rust/API/dependency.
+Delete44linePython wrapper and inlinePython; supported Nix cargo-hack/jq/Hakari
+feature graphs, add Postgres matrix. Native archive factory default/each5/all
+with exact owning required law/no-tests=fail then full suite. Existing7all-feature
+smokes/psql/pipefail unchanged. AFL12line saved-crash verdict/explicitpipefail.
+47 local compiler profiles PASS on .5.1, no runtime credit. Tokio/JsonCodec
+false-green hypotheses rejected honestly; no invented product dependency defect.
+Constructed AFL gate controls pass but still need real Linux saved-crash +zero
+engine exit witness on never-merged signed proofbranch using existing workflow.
+Static actionlint/nixfmt/eval pass before parent integration. Next review/minimize,
+update PRD/backlog, normal signed full Nix gate max-jobs1, push focused PR, run actual
+Linux profiles and real AFL control, inspect all required logs and protected merge.
 
-PG7 observer-only backup_tests+9lines adds logical timing, no assertion changes.
-Current strictall/all PASS17.03s. Three native two-case operator runs PASS
-6.213/6.504/23.422s, each18unselected and THREEreviewed. Small TWO-event/TWO-stream
-fixture, state4→5; not four events. Logical backup/readiness ms
-2.680417/48.200084;2.092292/45.876;2.133125/41.92975. Physical verified backup/ready
-376.025125/141.374167;403.584208/140.4845;413.460084/140.917959. RPO0 applies only
-to quiesced fixture. Defined readiness omits other setup/source close and final
-cleanup/external provisioning/routing. Full third logical case21.768s is recorded,
-not hidden or diagnosed without evidence. docs/prds/postgres/recovery.md records
-all scopes/limits. Raw/tmp/mnesis-pg7-recovery-repeat-{1,2,3}.log. Native suite
-264 above predates observer9lines; changed owner's six runs and finalLinux cover
-new observation. README quickstart0.5/publicindex2lines carried here identically
-from PG9 WIP to avoid duplicate docs changes. Current README20added/4removed
-budget; final whitespace/minimization next then ordinary SIGNED commit/full Nix
-gate (max-jobs1), push/open focusedPR, actual Linux/artifacts/threads review and
-exact-head protected squash. Update /tmp/mnesis-pg8-soak-pr.md first. No gate
-bypass/admin/lint/threshold/source-filter change. No local native while gate runs.
+CAPACITY /tmp/mnesis-postgres-capacity bench/postgres-capacity WIP on .5.2/9e5c.
+Full corrected matrix76942 TERMINAL0:12fixtures/432read+432appendwindows/96plans/
+12closes, source582662e92362290754a5cf2f1a604a25a9b56f7cdb35fb4876bbaf05b90ed54a.
+361.55s real/159.03user/117.29sys,maxRSS57737216B/peakfootprint35291544B/0swaps.
+Three reviews recorded; full-drain validates count/key/payload/order, page probes
+also versions; independent SQL count deltas/winner assertions. No product tuning.
+Earlier .5.2 full baseline343.78s/48genericplans retained, auto/generic separated
+because generic initial1m SeqScan is not ordinary auto latency. Existing key
+creation already DO NOTHING, no proposed upsert fix. 690/700linebenchmark,
+manifest4/6, README17/18, allocatorCOUNT4churn. Smoke4fixtures/full12 passed.
+Next analyze dispersion/resources/plans, document limits and exact evidence,
+integrate WIP onto protected8b0e preserving stash/append union, minimized normal
+signed gate/focusedCI/protected delivery. No native process/fullgate active now.
 
-NEXT PG9 /tmp/mnesis-feature-checks fix/feature-checks base5b86, WIP combined
-verification change (original /tmp/mnesis-fuzz-verdict preserved, don't duplicatePR).
-Delete44linePython wrapper/inlineAFLPython; Nix cargo-hack0.6.45/jq1.8.2, supported
-Hakari disable/dev-free offline checks (fetch locked first) + exact restoration.
-47actual compiler invocations PASS: kernel6/macros1/store17/store-testing4/wake1/
-wake-nostd1/inmemory4/Fjall6/PG7. ZERO unit/native runtime credit. Both original
-false-green hypotheses rejected: Tokio probe valid due explicit rootfull;
-JsonCodec rejected by old+new compiler. Wrong initial cwd and wrapper101 vs1
-expectation retained/no invented catch. New native archives default/5features
-from manifest+all, required owned law/no-tests=fail before full suite. Existing
-all7smokes/psql/DATABASE_URL/pipefail unchanged. Nixfmt58+/19- within65/20budget.
-Combined actionlint/Nixfmt/devShell PASS (static/tool only). Public docs identical
-to parent changes above; preserve through source-identical stash/rebase union.
-AFL verdict12lines, explicitpipefail, any regular saved crash except README;
-constructed missing/README/default/worker checks +failed-producer boundary pass.
-First worker check contamination retained/corrected. Still needs real Linux AFL
-saved-crash with zero engine exit; no supported Darwin AFLpackage, don't force
-or invent engine/tool. No recent100artifacts supply old realcrash proof. Signed
-normal gate/actual Linux feature and fuzz CI/protected delivery remain. Integrate
-onto workload parent after it merges, preserve stashes and all append-only records.
-PRbody/tmp/mnesis-pg9-verification-pr.md needs actual delivery evidence.
+Final required: capacity/PG9 focused delivery; exact acceptance map and public
+operator docs current; final minimization/two fresh whole audits; release through
+existing process, verify publication and final clean registry native consumer.
+Every actual test run three reviews: contract, actual execution/falsifier/count,
+unchanged source/assertions/selection/deadlines. Empty/guarded/compilation/cached/
+echoed logs ZERO runtime credit. No new security campaigns beyond explicit PRD.
+Normal signed commits and unchanged pre-commit Nix flake gate; no admin/bypass.
+One local full gate and one native suite max, no interference during measurements.
+Nix shell /tmp/mnesis-postgres-security-shell; shared target root/target.
+Preserve worktrees/stashes/raw records, immutableCONTRACT/append-onlyJSONL.
 
-CAPACITY /tmp/mnesis-postgres-capacity bench/postgres-capacity base5b86 WIP.
-Preserved stash58c04f27; only research append conflict unioned/protectedprefixexact.
-685/700lines +manifest4/6 +README17/18 +existingallocatorCOUNT4churnlines.
-Strictall/all PASS13.42s after consthelper red, optimized build11.48s/no-run.
-ZERO native measurements so far. Artifact from CargoJSON
-root/target/release/deps/capacity-4117bc1a0d839cb6. Matrix10k/100k/1m,short/long,
-32/4096B random recorded template,1/16/128clients,1/8events independent/competing,
-3windows>=100samples, fixed128rows/1MiB/24pool, fullglobaldrain/native counts,
-quantiles/throughput/allocationcalls+bytes/allocator/RSS/pools and actual cached
-prepared-query EXPLAIN. Native seed eligibility awaited/setup excluded. Append
-native row growth explicit. Model overhead/RSS snapshot vswhole-command resource
-scope honest. Hardware/tmp/mnesis-pg8-capacity-hardware.txt M4Pro14cores/24GiB/
-macOS26.5.2/Rust1.99/PGtools18.6. Native10k smoke thenfullmatrix only after active
-localgate ends; source integration/current full evidence/minimization required.
-
-Remaining final acceptance: full capacity matrix/plans/noise/saturation/resources,
-PG9 exact real native feature/default/all/downstream and real AFLfailure proof,
-final acceptance map/current PRD/backlog/docs, minimization/two fresh whole audits,
-focused protected delivery, final existing release process and clean registry
-native consumer. No whole-goal completion until all pass with exact evidence.
-
-EVERY actual test run: three distinct reviews of owning contract; actual
-execution/falsifier/counts; unchanged source/assertions/selection/deadlines.
-Retain reds. Compilation/guards/empty binaries/cached or echoed logs are zero new
-runtime credit. Normal signed commits and unchanged .githooks/pre-commit Nix gate.
-One full local gate and one native DB suite at once; avoid sharing CPU/IO during
-native measurements. Nix profile/tmp/mnesis-postgres-security-shell, root/target.
-All PG17DBs share physicalcluster; fullsoak/privatePG18 has closed. No broadcleanup.
-No new framework/runtime/customdevelopmenttool/projectPython. Current free16GiB.
+PG9 first normal signed commit1013b6a3 TERMINAL0/all12hostchecks; actual1594PASS
+557.312s/14slow/4compile exclusions, compile2m30s/138binaries; replay2/1/1PASS.
+Each runtime invocation three-reviewed, no Darwin guarded native credit. Intended
+staging had a deleted-path pathspec error; next stage remaining owned records and
+normal signed amend, unchanged source. Real AFL protocol preregistered inHYP;
+never-merged existingworkflow-only injected harness/one A seed, duration10, exact
+zero-engine-exit/savedcrash/verdict failure/upload/aggregate failure required.
+No permanent harness source changes. Push focused verificationPR then proofbranch;
+capacity localgate follows only after these short normal cached hooks finish.

@@ -116,20 +116,43 @@
         # `cargo-nextest`. The tests skip (pass) when DATABASE_URL is unset, so
         # they are inert under Darwin's normal checks. Linux also gates the
         # native `postgres-integration` package through the flake checks.
-        postgresTests = craneLib.mkCargoDerivation (
-          commonArgs
-          // {
-            inherit cargoArtifacts;
-            pname = "mnesis-postgres-tests";
-            doInstallCargoArtifacts = false;
-            buildPhaseCargoCommand = ''
-              mkdir -p $out
-              cargo nextest archive --package mnesis-postgres --all-features \
-                --archive-file $out/mnesis-postgres.tar.zst
-            '';
-            nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ]) ++ [ pkgs.cargo-nextest ];
-          }
-        );
+        postgresArchive =
+          feature:
+          craneLib.mkCargoDerivation (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              pname = "mnesis-postgres-tests-${feature}";
+              doInstallCargoArtifacts = false;
+              buildPhaseCargoCommand = ''
+                mkdir -p $out
+                cargo nextest archive --package mnesis-postgres \
+                  ${
+                    if feature == "all" then
+                      "--all-features"
+                    else
+                      lib.optionalString (feature != "default") "--no-default-features --features ${feature}"
+                  } \
+                  --archive-file $out/mnesis-postgres.tar.zst
+              '';
+              nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ]) ++ [ pkgs.cargo-nextest ];
+            }
+          );
+        postgresTests = postgresArchive "all";
+        postgresFeatures = lib.genAttrs (
+          [ "default" ]
+          ++ lib.remove "default" (
+            builtins.attrNames (builtins.fromTOML (builtins.readFile ./adapters/postgres/Cargo.toml)).features
+          )
+        ) postgresArchive;
+        postgresLaws = {
+          default = "binary(conformance_tests) & test(check_append_then_read_round_trips)";
+          export = "binary(listing_tests) & test(binary_ids_list_once_across_pages_and_reopen)";
+          import = "binary(atomic_tests) & test(conformance_atomic::check_atomic_multi_stream_commits_all)";
+          projection = "binary(projection_tests) & test(real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position)";
+          snapshot = "binary(snapshot_tests) & test(conformance_snapshot::check_snapshot_absent_then_commit_then_found)";
+          tracing = "binary(diagnostics_tests) & test(actual_listener_scan_and_commit_work_emit_bounded_operational_fields)";
+        };
       in
       with pkgs;
       {
@@ -438,22 +461,22 @@
                 cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
-                  -E 'binary(atomic_tests) & test(conformance_atomic::check_atomic_multi_stream_commits_all)' \
+                  -E '${postgresLaws.import}' \
                   2>&1 | tee postgres-feature.log
                 cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
-                  -E 'binary(snapshot_tests) & test(conformance_snapshot::check_snapshot_absent_then_commit_then_found)' \
+                  -E '${postgresLaws.snapshot}' \
                   2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
-                  -E 'binary(projection_tests) & test(real_projection_reloads_the_exact_pair_and_resumes_after_its_native_position)' \
+                  -E '${postgresLaws.projection}' \
                   2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
-                  -E 'binary(listing_tests) & test(binary_ids_list_once_across_pages_and_reopen)' \
+                  -E '${postgresLaws.export}' \
                   2>&1 | tee -a postgres-feature.log
                 cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
@@ -470,16 +493,30 @@
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   -E 'binary(durability_tests) & test(asynchronous_connection_settings_reject_before_runtime_open)' \
                   2>&1 | tee -a postgres-feature.log
-                cargo-nextest nextest run --test-threads=1 \
+                cargo-nextest nextest run --no-tests=fail --test-threads=1 \
                   --workspace-remap "$PWD" \
                   --archive-file ${postgresTests}/mnesis-postgres.tar.zst \
                   2>&1 | tee postgres.log
+                ${lib.concatStringsSep "\n" (
+                  lib.mapAttrsToList (feature: archive: ''
+                    cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                      --workspace-remap "$PWD" \
+                      --archive-file ${archive}/mnesis-postgres.tar.zst \
+                      -E '${postgresLaws.${feature}}' \
+                      2>&1 | tee postgres-${feature}-required.log
+                    cargo-nextest nextest run --no-tests=fail --test-threads=1 \
+                      --workspace-remap "$PWD" \
+                      --archive-file ${archive}/mnesis-postgres.tar.zst \
+                      2>&1 | tee postgres-${feature}.log
+                  '') postgresFeatures
+                )}
                 runHook postCheck
               '';
               installPhase = ''
                 mkdir -p "$out"
                 cp postgres.log "$out/run.log"
                 cp postgres-feature.log "$out/feature.log"
+                cp postgres-*.log "$out/"
               '';
             };
           };
@@ -508,6 +545,8 @@
             cargo-hakari
             cargo-mutants
             cargo-nextest
+            cargo-hack
+            jq
             openssl
             postgresql
             tree

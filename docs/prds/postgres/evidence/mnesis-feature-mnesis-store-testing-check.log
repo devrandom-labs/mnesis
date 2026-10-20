@@ -1,0 +1,30 @@
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis-store-testing (1/4)
+    Checking smallvec v1.15.2
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-checks/crates/workspace-hack)
+   Compiling futures-macro v0.3.33
+   Compiling tokio-macros v2.7.1
+    Checking parking_lot_core v0.9.12
+    Checking parking_lot v0.12.5
+    Checking futures-util v0.3.33
+    Checking tokio v1.53.1
+    Checking futures-executor v0.3.33
+    Checking futures v0.3.33
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-store-testing v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store-testing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.98s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis-store-testing (2/4)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-store-testing v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store-testing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.06s
+
+info: running `cargo check --lib --offline --no-default-features --features atomic-append` on mnesis-store-testing (3/4)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-store-testing v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store-testing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.02s
+
+info: running `cargo check --lib --offline --no-default-features --features snapshot` on mnesis-store-testing (4/4)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-store-testing v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store-testing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.01s

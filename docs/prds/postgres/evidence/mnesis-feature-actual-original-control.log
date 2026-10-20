@@ -1,0 +1,6 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-control/crates/workspace-hack)
+    Checking mnesis v0.5.1 (/private/tmp/mnesis-feature-control/crates/mnesis)
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-feature-control/adapters/postgres)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-control/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-control/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.05s
