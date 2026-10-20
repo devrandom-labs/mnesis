@@ -1,8 +1,9 @@
 # Postgres acceptance evidence
 
-Final acceptance map under delivery verification. PG0–PG9 remain required; unmerged evidence and an earlier
-published version do not complete the whole adapter. PG10 is conditional on a
-selected consumer. The dependency/status owner remains [the backlog](../../prd-backlog/status.md).
+Required PG0–PG9 acceptance is fulfilled in published0.5.3; exact protected
+commits, checks, archive identity and clean registry consumer are in
+[delivery](delivery.md). PG10 remains conditional on a selected consumer.
+The dependency/status owner remains [the backlog](../../prd-backlog/status.md).
 
 | Requirement | Observable owners and retained evidence | Final delivery condition |
 | --- | --- | --- |
@@ -15,7 +16,7 @@ selected consumer. The dependency/status owner remains [the backlog](../../prd-b
 | PG6 | [snapshot_tests.rs](../../../adapters/postgres/tests/snapshot_tests.rs), [checkpoint_tests.rs](../../../adapters/postgres/tests/checkpoint_tests.rs), [projection_tests.rs](../../../adapters/postgres/tests/projection_tests.rs), [outcome_tests.rs](../../../adapters/postgres/tests/outcome_tests.rs); codec/aggregate/projection composition, old-or-new pair, CAS races/rebuild, stale metadata, restart/process death and uncertainty. | Snapshot and projection feature suites actually run; failed/cancelled checkpoint writes require reload. |
 | PG7 | [listing_tests.rs](../../../adapters/postgres/tests/listing_tests.rs), [session_tests.rs](../../../adapters/postgres/tests/session_tests.rs), [backup_tests.rs](../../../adapters/postgres/tests/backup_tests.rs), [restore_tests.rs](../../../adapters/postgres/tests/restore_tests.rs); completed format-2 Postgres/Fjall roundtrip, binary routes, damaged/incomplete files, duplicate routing/final conflicts, expiry/cancellation, logical rebuild and verified physical recovery. [recovery measurements](recovery.md) records three measured two-event operator repeats. | Exact source/destination histories and saved projection semantics; no logical checkpoint portability claim. |
 | PG8 | [security_tests.rs](../../../adapters/postgres/tests/security_tests.rs) (required TLS/runtime-role cases), [durability_tests.rs](../../../adapters/postgres/tests/durability_tests.rs) (logged/on/on/on and actual primary restart), lifecycle/deadline/diagnostics tests; PR405soak, [capacity measurements](capacity.md) complete matrix and resource/plan limits. | Protected capacity delivery, measured ordinary-auto writable-primary profile only. Remote failover, proxies/replicas, forced-generic performance and fleet SLOs excluded without selected evidence. |
-| PG9 | Normal signed Nix gates, actual Linux postgres-integration default/each/all suites, cargo-hack dev-free profiles, existing fuzz/mutation owners and real AFL saved-crash verdict proof; concise adapter README/operator instructions. | Final checks/review/protected merge, two fresh source/contract audits, publication of exact final version and clean registry-native consumer. Pending. |
+| PG9 | Normal signed Nix gates, actual Linux postgres-integration default/each/all suites, cargo-hack dev-free profiles, existing fuzz/mutation owners and real AFL saved-crash verdict proof; concise adapter README/operator instructions. | Final checks/review/protected merge, two fresh source/contract audits, exact0.5.3publication and clean registry-native consumer all pass; see [delivery](delivery.md). |
 
 Detailed original reds, rejected controls, three reviews after each actual test
 run, raw logs, measurements and exact protected commits remain in [research record](research.md).
@@ -30,4 +31,5 @@ ZIP digest are independently verified. Its intentional-crash branch is never
 merged. Capacity measurements and deployment limits live in [capacity measurements](capacity.md);
 the full30-minute soak and measured logical/physical drills are protected405.
 Two fresh owner/source audits and comment-only minimization are recorded in
-[research record](research.md). Final current-head protected delivery and publication remain open.
+[research record](research.md). Final protected delivery, publication and matching
+registry consumer pass; the [delivery record](delivery.md) retains exact identities.

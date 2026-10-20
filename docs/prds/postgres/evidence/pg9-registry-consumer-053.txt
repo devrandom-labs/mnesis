@@ -1,0 +1,127 @@
+Exact external registry consumer used for the published0.5.3acceptance run.
+Cargo.toml
+[package]
+name = "postgres-registry-consumer"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+mnesis = "=0.5.3"
+mnesis-store = { version = "=0.5.3", features = ["projection"] }
+mnesis-postgres = { version = "=0.5.3", features = ["export", "import", "projection", "snapshot", "tracing"] }
+sqlx = { version = "=0.9.0", default-features = false, features = ["postgres", "runtime-tokio", "tls-rustls-ring-native-roots"] }
+tokio = { version = "=1.52.1", features = ["macros", "rt-multi-thread", "time"] }
+futures = "=0.3.33"
+
+tests/consumer.rs
+use std::num::NonZeroU32;
+use std::time::Duration;
+
+use futures::TryStreamExt;
+use mnesis::Version;
+use mnesis_postgres::PostgresStore;
+use mnesis_store::checkpoint::{
+    CheckpointHydrated, CheckpointMode, CheckpointStore, CheckpointWrite,
+};
+use mnesis_store::{PendingBatch, RawEventStore, StreamKey, pending_envelope};
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
+use tokio::time::timeout;
+
+#[tokio::test]
+async fn published_store_preserves_events_and_saved_pairs_after_reopen() {
+    let options = std::env::var("DATABASE_URL")
+        .expect("a private real database is required; absence must fail")
+        .parse::<PgConnectOptions>()
+        .unwrap()
+        .ssl_mode(PgSslMode::Disable)
+        .options([("statement_timeout", "5s"), ("lock_timeout", "1s")]);
+    let pool = PgPoolOptions::new()
+        .max_connections(8)
+        .acquire_timeout(Duration::from_secs(5))
+        .connect_with(options.clone())
+        .await
+        .unwrap();
+    PostgresStore::migrate(&pool).await.unwrap();
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let key = StreamKey::from_slice(b"registry\0binary\xff");
+    let first = pending_envelope(Version::INITIAL)
+        .event_type("Consumer")
+        .payload(b"first".to_vec())
+        .build()
+        .unwrap();
+    let position = store
+        .append(&key, None, PendingBatch::of(&first))
+        .await
+        .unwrap();
+    let state = vec![1];
+    let revision = store
+        .commit_checkpoint(
+            &key,
+            CheckpointWrite {
+                expected: None,
+                schema_version: NonZeroU32::MIN,
+                position,
+                state: &state,
+                mode: CheckpointMode::Advance,
+            },
+        )
+        .await
+        .unwrap();
+    drop(store);
+    timeout(Duration::from_secs(5), pool.close()).await.unwrap();
+    let pool = PgPoolOptions::new()
+        .max_connections(8)
+        .connect_with(options)
+        .await
+        .unwrap();
+    let store = PostgresStore::from_pool(pool.clone()).await.unwrap();
+    let restored = store
+        .hydrate_checkpoint(&key, NonZeroU32::MIN)
+        .await
+        .unwrap();
+    assert_eq!(
+        restored,
+        CheckpointHydrated::Found {
+            revision,
+            position,
+            state
+        }
+    );
+    assert_eq!(store.history(), position.history());
+    let version = Version::new(2).unwrap();
+    let second = pending_envelope(version)
+        .event_type("Consumer")
+        .payload(b"second".to_vec())
+        .build()
+        .unwrap();
+    let next = store
+        .append(&key, Some(Version::INITIAL), PendingBatch::of(&second))
+        .await
+        .unwrap();
+    assert!(next > position);
+    {
+        let mut rows = store.read_stream(&key, Version::INITIAL).await.unwrap();
+        let first = rows.try_next().await.unwrap().unwrap();
+        let second = rows.try_next().await.unwrap().unwrap();
+        let end = rows.try_next().await.unwrap();
+        assert_eq!(first.payload(), b"first");
+        assert_eq!(second.payload(), b"second");
+        assert!(end.is_none());
+    }
+    {
+        let mut rows = store.read_all(Some(position)).await.unwrap();
+        let (actual, origin, event) = rows.try_next().await.unwrap().unwrap();
+        assert_eq!((actual, origin, event.version()), (next, key, version));
+        assert_eq!(event.payload(), b"second");
+        let end = rows.try_next().await.unwrap();
+        assert!(end.is_none());
+    }
+    drop(store);
+    timeout(Duration::from_secs(5), pool.close()).await.unwrap();
+}
+
+Identity of the retained external lock and sources
+3921fecfdf68a520ea29d17d6edf98e896a54ad795c77edf6983d56e136c0e08  /tmp/mnesis-pg9-registry-native-053/Cargo.toml
+9598e66552b8fdeb2fdce6b00be89f374faafd419e8c436b02edef8bdbb58569  /tmp/mnesis-pg9-registry-native-053/Cargo.lock
+38373adfbf228509e9431a74ea1a9afe3f7bd0b94dc168cab5814048f4c16036  /tmp/mnesis-pg9-registry-native-053/tests/consumer.rs

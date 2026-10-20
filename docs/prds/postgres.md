@@ -1,15 +1,15 @@
 # Postgres adapter completion
 
-Status: active (PG8 capacity delivery and PG9 verification/release remain). Updated: 2026-10-20.
+Status: complete for required PG0–PG9, published and registry-verified in0.5.3. Updated: 2026-10-20.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
-Planning branch: `docs/postgres-prd`. Current slice: final acceptance and minimization; workload/recovery PR405 and verification PR406 merged. Version0.5.2 published; whole-adapter acceptance remains open.
+Planning branch: `docs/postgres-prd`. Completion PR407 and release PR404 are protected-merged. Exact release, checks and clean consumer evidence: [delivery](postgres/delivery.md). PG10 remains conditional.
 Dependencies and delivery states: [backlog](../prd-backlog/status.md).
 
 ## Problem
 
 Mnesis needs a complete, supportable Postgres adapter for server applications.
-The current adapter validates the basic event-store interface, but its read
+At the baseline, the adapter validates the basic event-store interface, but its read
 paths load the entire matching history into memory, notification loss can leave
 a live subscriber asleep indefinitely, and write errors do not preserve whether
 the transaction outcome is known. Optional store capabilities, schema upgrades,
@@ -574,9 +574,9 @@ actual original failures, database profile, commands and selected first experime
 | Document verification | Local links resolve across the PRD, backlog, research records and adapter README; all 11 backlog rows have reciprocal dependency edges; whitespace checks pass. |
 | Locked Nix package evaluation | `nix eval --raw --expr 'let f = builtins.getFlake (toString ./.); p = import f.inputs.nixpkgs { system = builtins.currentSystem; }; in p.postgresql.version' --impure` returned `17.10`. |
 | Native defect reproduction | Existing 56 tests pass; new bounded-read, stream/global final-hint and watermark-release tests fail against original production source. See characterization. |
-| Broader baseline and dependency audit | PG0 defect baseline and complete PG8 capacity measurements recorded; protected capacity delivery remains. Read-memory and recovery timing samples retain their stated workload limits. |
-| Production implementation and acceptance gates | 26 protected changes through verification PR406 include read/wake/outcome/migration/value/atomic/snapshot/checkpoint/listing/session/history, backup/recovery failure, query identity, TLS/runtime roles, durability, byte accounting, startup bounds and the patched wake dependency. A full1800s native soak and264-case suite pass; Workload/recovery and verification gates are merged; capacity delivery and final publication remain. Exact acceptance is tracked in the backlog and research record. |
-| Merge and publication | Focused protected merges are recorded in the backlog. Version0.5.2 publication and exact registry consumer pass; final reviewed source publication and matching consumer remain required. |
+| Broader baseline and dependency audit | Original failures, complete capacity matrix and two fresh final source/contract audits recorded. Measurements retain their explicit workload and deployment limits. |
+| Production implementation and acceptance gates | 27 focused protected changes through PR407 complete required PG0–PG9. All seven complete native feature suites pass with zero skips, alongside the1800s soak, capacity and recovery evidence. Exact owners and acceptance remain linked from the backlog. |
+| Merge and publication | Release PR404 publishes0.5.3 from9c46ec7535f935154e4a70bd0b9fa72bcc54a21d. Registry archive/source identity, seven isolated compiler profiles and a fresh Postgres consumer pass; see [delivery](postgres/delivery.md). |
 
 ## Primary sources
 
@@ -595,4 +595,4 @@ upstream documents establish facility contracts, not passing adapter tests.
 Final acceptance map: [Postgres acceptance evidence](postgres/acceptance.md).
 It connects PG0–PG9 to the owned cases, actual native feature counts, sustained
 workload, capacity and recovery measurements. Final publication and matching
-registry consumer remain required; PG10 has no selected consumer.
+registry consumer pass; PG10 has no selected consumer.

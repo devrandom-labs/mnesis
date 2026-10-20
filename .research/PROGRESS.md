@@ -1,45 +1,43 @@
-# Postgres completion PR407 — 2026-10-20
+# Postgres final delivery record — 2026-10-20
 
-Required persistent goal PG0–PG9, no budget. PG10 conditional. Labcast owns
-command IDs/dedup/fencing. No delegation. Root user research edit preserved.
+Required PG0–PG9 product acceptance and publication pass; final documentation
+PR must pass normal protected checks and merge before marking the persistent
+goal complete. No token budget. PG10 conditional; Labcast owns command IDs,
+deduplication and stale-worker fencing. Root user research edit is preserved.
 
-Protected main c1ec43edf6ecad816b9e7c3eeaafa430ed7fdbdf includes26focused
-changes through406 verification.42successful checks/1scheduledskip/0threads,
-expected/actual tree c92a4e6399986474e46e6bad7d10e3a46782b09d.
+Source completion407 protected e8bbb109, release404 protected9c46ec75;
+42successful checks/1scheduled skip/0threads at each exact reviewed head.
+Expected/actual trees d8e66f8e... and8c1690dd... match. Two fresh whole-source
+contract audits DONE. Product fingerprintdc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2
+unchanged after audits. No new production/API/dependency/test/workflow changes.
 
-Current branch bench/postgres-capacity /tmp/mnesis-postgres-capacity includes
-signed46519531 capacity +signed27b04ae9 protected406 integration (all12normal
-Nix checks pass;1594PASS466.078s plus replay2/1/1 reviewed three ways).
-Final acceptance/audits/evidence and export/fuzz COMMENT-only corrections now
-applied to this samePR407, avoiding another source PR. Source bench582662...,
-production fingerprintdc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
-No executable/API/dependency change. Final normal signed gate before pushing
-combined407. Complete exactheadCI/threads/expectedtree then ordinary squashmerge.
-No local native/gate overlap; do not bypass hook/protection or weaken tests.
-Each actual test invocation reviewed three ways; compiler/cached/empty/guarded/
-echoed output gives no new DB runtime credit. Detailed counts/raw paths in
-research.md. Two fresh whole-source audits DONE; no further audit waves absent
-material executable/dependency change or actual failure.
+Publisher39473891856 succeeds, all9crates0.5.3present/not-yanked. Postgres
+archive64a900d42938d753ad332faf351dd2a0d5c75deb9b887798fc9ca2c791e233a4 matches
+primary registry;4runtime source trees and PGmigrations equal9c46, VCS records
+all9c46. Registry compile7/7PASS; native1PASS.076s/0skip on freshPG18.6/on/on/on,
+nextest06f08e59-2e2b-48ab-a316-efb8dd3fd036, backend0 and waited shutdown0.
+All actual invocations THREEreviewed; no guarded/compiler/cached/echo native credit.
+All12normal host0.5.3checks pass, workspace1594PASS549.723s/replay2/1/1.
 
-Soak405 protected:1800s/2,662,995events/31faults/zero invariants/fullcleanup.
-Capacity12fixtures/432read+432appendwindows/96plans/12zero-closepasses,361.55s,
-commandRSS57,737,216B. Ordinaryauto vs forcedgeneric separated, no tuning/SLO
-claim. Three logical/physical operator repeats protected. Native sevenfeature
-profiles264/149/168/176/173/174/150 all0skip, mandatorylaws, actualLinux1594/
-replay pass; histories and original reds retained. Do not rerun longbenchmarks.
+Current branch docs/postgres-publication /tmp/mnesis-postgres-release-053 is based
+protected9c46; docs/evidence-only record budget8owners/6artifacts/1400addedlines.
+Canonical exact receipt docs/prds/postgres/delivery.md and acceptance/backlog.
+Normal signed hook must run, then focused PR/current-head CI/0threads/expected
+merge tree/ordinary exact-head squash. Source unchanged outputs may cache, never
+count cached output as another runtime. After merge, record actual final PR/tree
+in root resume pointer and mark goal complete. Do not start new audit waves or
+rerun long capacity/soak without a material change or actual failure.
 
-Real AFL control5479 (NEVERMERGE) run39454205176:engine0/3savedcrashes/verdict1/
-packaging+uploadSUCCESS/expectedaggregateFAIL. Archive12279449876 exactZIP
-SHA430b23ffe2ffba2fe0a0b79edcd4dfff8928a735597bdaaeeb4182389ed92832 and3bytes/
-paths independently verified. Original uploadfailure retained and repaired406.
-Automatic sideCI actual runs reviewed; no cancelled-job wholepass credit.
+Preserve all worktrees/stashes/raw logs and the unrelated managed changelogPR408
+(six core/Fjall/inmemory changelogs only; no Postgres/store change). Pending raw
+review history /tmp/mnesis-postgres-publication-notes.md is appended to research.
+External clean consumers /tmp/mnesis-pg9-registry-{compile,native}-053 retain exact
+source/lock/metadata; database path /tmp/mnesis-pg9-registry-native-053-dbpath.
+No local gate/native workload is active before this record's normal signed hook.
 
-After407protectedmerge, existing release404 v0.5.3 refresh through normal App/
-release-plz process, exactheadCI/threads/tree/ordinarymerge, verify actualrelease/
-registrychecksum/notyanked and cleanexactnativeconsumer on freshPG. Templates
-/tmp/mnesis-pg9-registry-{compile,native}-053 prepared outside repository only;
-0.5.2consumer already passed but is not finalversionproof. Finalexact delivery
-records/statusPR asneeded, allprotected; markgoalcomplete only every acceptance
-and merged/publication/consumer evidence. Preserve allworktrees/stashes/rawlogs.
-Saved finaldocs branch /tmp/mnesis-postgres-delivery retained; original WIPstash
-/tmp/mnesis-postgres-delivery-406-stash. Rootresume pointer .research/PROGRESS.md.
+Final record PR409 is open. Its initial normal signed hook passed all12checks,
+workspace1594PASS596.223s/15slow/4existing compiler exclusions plus replay2/1/1;
+each actual invocation THREEreviewed. JSON receipt inclusion explains rebuild,
+no source/filter/gate changes. Follow-up records these results only, same filtered
+source; normal cached reuse gives no new runtime credit. Complete exact-head
+PR409CI/threads/tree/normal squash, then mark persistent goal complete.

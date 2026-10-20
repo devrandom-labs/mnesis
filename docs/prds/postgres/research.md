@@ -9991,3 +9991,297 @@ three-review record /tmp/mnesis-postgres-final-runtime-review.log. Capacity sour
 582662e92362290754a5cf2f1a604a25a9b56f7cdb35fb4876bbaf05b90ed54a unchanged.
 Evidence-only signed amend retains all source and checks; cached outputs receive
 zero new runtime credit. Current final-head Linux CI/protected delivery follows.
+
+## Final protected release and registry acceptance — 2026-10-20
+
+Historical real-control companion campaigns reviewed after execution (no reruns):
+first control libFuzzer wire1311721/header369382/chunk340421/value1133955runs,
+11s each; second wire1311110/header284588/chunk191691/value1160511runs,11s each.
+Six ordinary AFL wire/header/chunk campaigns each10s/CMPLOG/0savedcrashes/
+0timeouts; firstnewcorpus0/2/11, second0/2/12. EACH of14actual campaigns separately
+three-reviewed: owning unchanged real parser/value harness invariant, actual
+engine completion/count/saved-failure result in /tmp/mnesis-proof-fuzz-ID.log,
+unchanged corpus/assertions/timebox and no intentional value assertion outside
+its dedicated AFL control. The two intentionally crashing value campaigns were
+already independently three-reviewed with engine0/saved3/verdict1; firstarchive
+failure remains recorded, secondarchive actual upload verified. No clean campaign
+stands in for the required red verdict proof, and the proof branch never merges.
+
+Completion189 current CI first actual logs reviewed: libFuzzer wire8509242/
+header1860343/value5735380runs each61s, no saved failure. Each campaign three
+reviews: real selected owner/harness invariant; actual completed engine counts/
+duration in job118768009049/118768008952/118768009013; unchanged normal corpus/
+assertions/timebox/source. Features push wake17/17/17, macros1/1/1, nostd0/0/0,
+store-testing0/0/0 from jobs118767982127/118767982125/118767982192/118767982133.
+Each of12unit invocations separately reviewed against owned feature contract,
+actual unit command/count/result, unchanged assertions/features/source; all zero
+cases give zero runtime credit. Their supported compiler graphs are separate
+compiler-only evidence, never native database proof.
+Completion189 next actual jobs reviewed: push complete supported compiler47
+profiles, unit27invocations: kernel15/macros1/store217/testing0/wake17/nostd0/
+inmemory25,25,30/Fjall131/PG11 triples; PRwake17triple also completes. EACH compiler
+and unit invocation three-reviewed against owned published-shape feature contract,
+actual compiler process/profile or actual unit count, unchanged locks/Hakari
+restoration/assertions/flags. Zero unit cases and PGunits give no DB proof.
+Push compile-fail118767981364 actually2PASS101.69s/1PASS14.64s/1PASS16.23s; each
+three-reviewed against misuse/diagnostic contract, real result/count and identical
+fixtures/toolchain. AFL header118768008399/chunk118768008788/value118768009123
+60s/CMPLOG/0savedcrash/0timeout, newcorpus3/11/0; each three-reviewed against
+parser/value owner, actual engine outcome and unchanged harness/corpus/timebox.
+Mutants118768009595 reports No mutants to filter: ZERO runtime baseline or
+mutation-catch credit. Aggregate gate is not another test execution. Raw direct
+logs /tmp/mnesis-completion189-ID.log; earlier push unit reviews are included in
+these totals rather than counted as additional runs.
+Completion189 PRunit triples now store217/macros1/testing0/nostd0/Fjall131,
+plus priorwake17. EACH of15new unit and29new compiler invocations three-reviewed:
+owner advertised feature contract, actual logged compiler profile or unit result,
+unchanged assertions/Hakari restoration/features/lock/source. Zero cases remain
+zero runtime; compilation is not DB proof. AFLwire11876800911460s/CMPLOG/0crash/
+0timeout/newcorpus0 and libFuzzerchunk1187680091901213489runs61s each separately
+three-reviewed against real owned parser oracle, actual engine duration/counts/
+failure output, unchanged normal harness/corpus/timebox/source. All eight current
+normal fuzz campaigns are now inspected; aggregatefuzz-gate executes no new case.
+Completion189 PRremaining kernel15/inmemory25,25,30/PG11 unit triples and
+17compiler profiles complete: each of9unit/17compiler invocations three-reviewed
+against owned contract, actual logged execution and unchanged assertions/locks/
+features/Hakari restore. Both events total94compiler profiles,
+54unit invocations; each event is47/27, empty triples yield no runtime credit.
+PRcompile-fail118768012433 actual2PASS118.29s/1PASS15.52s/1PASS18.17s, each three
+reviews for intended misuse diagnostic, actual compiler result/count, unchanged
+fixture/toolchain/source. CodSpeed118768008900 uses unchanged Simulation mode,
+not native Postgres capacity. Its run receives three workload/execution/source
+reviews with no threshold change or Postgres SLO claim. Aggregate feature-
+isolation jobs only assert parent result and execute no additional test case.
+Completion189 push native118767982000 actually builds eight derivations and
+executes20invocations: seven mandatory all-feature one-laws, complete all264
+PASS68.381s, six individual required laws and default14939.663s/export16845.054s/
+import17645.838s/projection17341.822s/snapshot17441.854s/tracing15039.397s,
+all complete suites zero skips. EACH invocation three-reviewed after execution:
+owned read/wake/outcome/migration/value/atomic/state/backup/lifecycle contract;
+actual database execution/count/selection/terminal logs; unchanged test assertions,
+mandatory --no-tests=fail guards, source/flags/timeouts and pipefail. Final
+printed264 summary is echoed run.log, ZERO additional runtime. Selected one-law
+unselected cases are explicit14/15/2/7/10/4/9 and39/7/14/2/15/0; full suites no
+silent omissions. Independent current-head Nix/PR integration still pending.
+Completion189 PRnative118768012664 actual20invocations pass: seven all-feature
+mandatory one-laws, complete264PASS68.576s, six individual laws and complete
+default14938.895s/export16846.926s/import17647.484s/projection17343.312s/
+snapshot17440.952s/tracing15039.226s; each full suite zero skips. EACH invocation
+three-reviewed against owning contract/falsifier, actual required database
+execution/count/selection/result in direct raw job log, unchanged assertions/
+source/timeouts/mandatory guards/pipefail. The trailing264 summary is an echo,
+not an additional execution. Both current-head standalone native jobs are now
+terminalSUCCESS; two current-head Nix runs remain pending.
+Completion189 pushNix118767981830 terminalSUCCESS: actual workspace1594PASS
+97.789s/1slow/4compile exclusions, seven all-feature mandatory laws, complete
+264PASS58.547s, six individual laws, default14930.327s/export16839.319s/
+import17635.842s/projection17336.033s/snapshot17431.570s/tracing15034.643s,
+all full native suites0skip, replay2/1/1each1s. EACH of24actual invocations
+three-reviewed after execution: owning contract and real falsifier; actual
+process/count/selection/complete summary in raw direct job log; unchanged source/
+assertions/features/timebox/mandatory laws/pipefail. No DB credit from workspace
+guards or compiler/cached outputs. Independent Nix/native jobs count actual
+processes separately, printed run.log is never another execution. Only PRNix
+118768012032 remains pending; zero current failures.
+Completion189 final PRNix118768012032 terminalSUCCESS: workspace1594PASS120.373s/
+3slow/4existing compiler exclusions;13mandatory native laws and seven complete
+profiles26462.060s/default14935.501s/export16842.391s/import17637.625s/
+projection17337.182s/snapshot17436.649s/tracing15032.339s, all full native0skip;
+replay2/1/1each1s. EACH of24actual invocations independently three-reviewed:
+owned contract/original-defect falsifier; real selected process/count/result;
+unchanged source/assertions/timeboxes/features/mandatory guards/pipefail. No
+compiler/empty/guarded/cached/echo DB credit. Final42SUCCESS+1scheduledSKIP,
+exacthead189804de4a3eb3e9dfabc4ab065073a69455e15f. Protected merge follows.
+
+Completion PR407 protected-squashed 2026-10-20 at
+e8bbb1093e5dacbfe82d0cc43a900bc03a739146 after42successful checks,
+1scheduled skip and0review threads; exacthead189804de matched ordinary squash.
+Expected/actual merged tree d8e66f8e21619e8b2bd0bdb1aaaad2844c04958c matches.
+Source fingerprint dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2
+preserves both fresh audits and native performance/recovery evidence. Source-
+triggered normal Release39467727948 refreshes existing0.5.3release404; publication
+and exact final registry consumer are still pending, not presumed complete.
+
+Final publication record budget before editing: documentation/evidence only,
+no production/test/manifest/lock/workflow changes. At most eight documentation/
+research owners, delivery.md at most100lines, at most six evidence artifacts
+(selected raw compile/native/CI output and exact consumer identity), at most
+1000added record/evidence lines. Mutable backlog/PRD status updates reflect actual
+publication and consumer results only. Append-only research/JSONL remain intact.
+No new runner/tool/framework or mirror tests. Ordinary signed Nix hook/protected
+CI required; normal cached outputs get zero additional runtime credit.
+
+Release refresh39467727948 terminalSUCCESS on completion maine8bbb109. Existing
+release404 new final head79aefa351044497aaa5a816161c3a11e5eff256d includes
+App-synchronized isolated fuzz locks; GitHub verifies its signature valid.
+Only15version/changelog/lock files differ from protected main; production source
+fingerprint remains dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
+Third-party dependency versions and executable source are unchanged.0review
+threads. Ordinary local0.5.3Nix check runs in parallel with remoteCI, without
+another local native workload. Publication is still pending actual protected
+release merge and subsequent publisher, not inferred from this refresh success.
+
+Older release40463df Nix118714046035 naturally cancelled by fresh Apphead,
+not manually waived. It actually completed workspace1594PASS1011.745s/6slow/
+4compiler exclusions before cancellation; no native or whole-gate pass. This
+ONE actual invocation reviewed three ways: original owning workspace contracts/
+falsifiers, actual completion/count/cancellation log, unchanged owning assertions/
+selection/timeouts (old release graph before PG9). No guarded DB credit. Raw
+/tmp/mnesis-release404-superseded-nix.log. Its long duration is retained without
+claiming a diagnosed cause; only fresh final-head checks authorize delivery.
+Release79 first actual checks: nostdcompiler1 and unit0/0/0 each reviewed against
+owned feature contract, actual process/count and unchanged flags/lock/assertions;
+zero cases give zero runtime credit. LibFuzzer value7230051/chunk1257699runs each
+61s, AFLheader60s/CMPLOG/0savedcrashes/0timeouts/newcorpus2. EACH of3campaigns
+three-reviewed against unchanged actual parser/value owner, real engine duration/
+count/failure outcome, unchanged normal harness/corpus/timebox. Raw
+/tmp/mnesis-release053-ID.log. Mutation/aggregate jobs contribute no new runtime
+catch or baseline without actual mutant execution; no claim from a green badge.
+Release79 next checks: store217/kernel15/macros1 unit triples and24compiler
+profiles, each invocation independently three-reviewed against owning feature
+contract, actual logged unit/compiler execution/count and unchanged source/
+assertions/lock/flags/Hakari restoration. Compiler-only results give no native
+proof. Compile-fail118785276266 actually2PASS104.91s/1PASS14.08s/1PASS16.78s,
+each three-reviewed against intended misuse/diagnostic, actual process/count,
+unchanged fixture/toolchain. LibFuzzerwire8825316runs61s and AFLvalue60s/CMPLOG/
+0savedcrash/0timeout/newcorpus0 each separately reviewed against parser/value
+owner, real engine result and unchanged normal source/corpus/timebox. CodSpeed
+118784539223 actually four Simulation suites (kernel, all-index, Fjall, store)
+and uploaded results: each benchmark gets workload/execution/source reviews,
+unchanged thresholds, no native Postgres performance/SLO credit.
+Release79 local replay actually2/1/1PASS1s each. EACH of3invocations independently
+three-reviewed: owning replay/parser invariant and real corpus, completed process/
+count/result in /tmp/mnesis-postgres-release053-local-replay.log, identical
+assertions/corpus/timebox/source under version-only0.5.3graph. No DB/native credit.
+Push39468042881 and PR39468052112 both explicitly report head_sha79aefa351044497aaa5a816161c3a11e5eff256d,
+so final release CI evidence is not an older candidate or only a version label.
+Release79 next actual feature jobs: pushwake17/inmemory25,25,30/Fjall131/PG11
+unit triples and PRstore217/PG11 triples,18unit and42compiler invocations. EACH
+invocation three-reviewed against owned feature/API invariant, actual compiler
+profile or unit count/result in direct job log, unchanged source/assertions/
+flags/lock/Hakari restoration. PGunit11 remains helper coverage, not DB proof.
+LibFuzzerheader1892515runs61s and AFLwire/chunk60s/CMPLOG/0savedcrash/0timeout,
+newcorpus0/15: EACH of3campaigns three-reviewed against selected real parser
+owner, actual engine count/duration/result, unchanged normal harness/corpus/
+timebox/source. All8normal release fuzz campaigns now inspected; aggregate
+fuzz-gate contributes zero extra test execution.
+Release79 final feature jobs: PRmacro1/wake17/kernel15/testing0/nostd0/Fjall131/
+inmemory25,25,30 and pushtesting0 triples,24unit and27compiler invocations.
+EACH independently three-reviewed against owning advertised contract, actual
+compiler profile or unit count/result, unchanged assertions/source/lock/flags/
+Hakari restore. Combined current release events execute94compiler/54unit
+invocations (47/27 each); empty cases and PGhelper units receive no database
+proof. Pushcompile-fail118784653222 actual2PASS132.50s/1PASS16.59s/1PASS20.50s:
+each three-reviewed against intended diagnostic misuse, actual compiler execution/
+count/result, unchanged fixtures/toolchain/selection. Both aggregate feature-
+isolation jobs assert parent results and run no additional test case. Current
+38SUCCESS+4pending+1scheduledskip, zero failures. Native and Nix evidence pending.
+Release79 local workspace actually1594PASS549.723s/16slow/4existing compile
+exclusions; release compilation1m26s outside runtime. This ONE invocation
+three-reviewed after execution: owning workspace property/protocol/lifecycle/
+resilience oracles and original-defect falsifiers; actual completed nextest
+counts/result in /tmp/mnesis-postgres-release053-local-nextest.log; unchanged
+source/assertions/selection/deadlines under version-only0.5.3graph, production
+fingerprintdc45 unchanged. No native evidence from guarded database bodies.
+Local replay3actual invocations were separately reviewed above. Cross-target
+compiler outputs still pending; whole local gate not yet credited complete.
+Release79 normal local0.5.3Nix gate is terminal0, all12checks PASS including
+no_std/store-no_std/WebAssembly. Actual workspace1594PASS549.723s and replay
+2/1/1PASS already each three-reviewed above; cross compilers are not native
+runtime. No local fullgate or database workload remains active. This exact
+source/version output may be reused by the final documentation-only normal
+signed hook; any cached output receives zero extra runtime credit. Release
+protected CI, actual publication and exact registry-native consumer still pending.
+Release79 both standalone native jobs terminalSUCCESS. PR118785275803 actual
+all26467.689s/default14939.587s/export16845.243s/import17643.757s/projection173
+41.199s/snapshot17440.561s/tracing15039.815s. Push118784652695 actualall264
+67.372s/default14940.574s/export16844.583s/import17645.902s/projection17342.164s/
+snapshot17442.125s/tracing15040.218s. All complete suites zero skips; each job
+also executes13mandatory owning one-laws. EACH of40actual invocations reviewed
+three ways after execution: owned read/wake/outcome/migration/atomic/saved-state/
+backup/lifecycle invariant and real falsifier; actual non-guarded database
+process/count/selection/result in raw direct logs; unchanged source/assertions/
+feature flags/mandatory --no-tests=fail/timeboxes/pipefail. Trailing264 summaries
+are echoed run.log, ZERO extra runtime. Full laws intentionally select one case
+with explicit remaining14/15/2/7/10/4/9 and39/7/14/2/15/0; complete suites no
+omissions. Only2fullNixjobs remain, no current failures.
+Release79 PRNix118785276344 terminalSUCCESS: actual1594PASS130.689s/4slow/
+4existing compiler exclusions, seven all-feature mandatory laws, complete264
+67.857s, six profile owning laws and default14939.941s/export16844.275s/
+import17645.357s/projection17341.245s/snapshot17440.022s/tracing15039.805s,
+all full native0skip; replay2/1/1each1s. EACH of24actual invocations separately
+three-reviewed after execution: owning contract/falsifier; real process/count/
+selection/result from raw log; unchanged assertions/source/features/timeouts/
+mandatory guards/pipefail. Guarded/empty/compiler/cached/echo outputs give no new
+DB credit. OnlypushNix118784653363 remains pending; no current failures.
+Release79 final pushNix118784653363 terminalSUCCESS: actualworkspace1594PASS
+152.614s/4slow/4compiler exclusions,13mandatory native laws and seven complete
+profiles all26468.790s/default14940.301s/export16845.071s/import17645.259s/
+projection17342.170s/snapshot17441.273s/tracing15040.803s, every full native suite
+zero skips; replay2/1/1each1s. EACH of24actual invocations three-reviewed after
+execution: owned contract/falsifier; actual process/count/selection/result in raw
+job log; unchanged assertions/source/features/timeouts/mandatory guards/pipefail.
+Guarded/empty/compiler/cached/echo outputs give zero native credit. Final release
+head79 has42SUCCESS+1scheduledSKIP, local12PASS,0threads; normal protected merge
+follows. No passing local build or refresh workflow alone is publication proof.
+
+Release PR404 protected-squashed at9c46ec7535f935154e4a70bd0b9fa72bcc54a21d,
+42successful checks/1scheduled skip/0threads, exacthead79aefa matched. Expected
+and actual merged tree8c1690dddece3fac42eb8d9b088e157285506e3d agree. Normal
+publisher39473891856 triggered on that exact main. Publication still requires
+actual successful publisher/registry identity and clean final consumer, not just
+the version bump. Final record branch docs/postgres-publication in temporary
+release worktree starts from this protected main; product source remains frozen.
+
+Publisher39473891856 terminalSUCCESS, explicitly publishes all9crates0.5.3.
+Primary sparse registry independently confirms every version present/not-yanked.
+Postgres archiveSHA64a900d42938d753ad332faf351dd2a0d5c75deb9b887798fc9ca2c791e233a4
+matches actual downloaded Cargo archive. All4runtime Mnesis packages' archive
+source trees match protected9c46 exactly, PostgreSQL migration files also equal;
+each .cargo_vcs_info.json records9c46ec7535f935154e4a70bd0b9fa72bcc54a21d.
+GitHub mnesis-postgres-v0.5.3release is published18:22:53UTC, not draft/prerelease.
+Existing botPR408 only adds six unrelated core/Fjall/inmemory changelog entries;
+Postgres/store changelogs already published by404. Preserve that managed PR;
+final adapter delivery records use their own focused documentation branch.
+
+Exact clean registry compiler7/7PASS: all14.13s/no-default.66s/export.69s/import
+.64s/projection.61s/snapshot.65s/tracing.71s. EACH compiler invocation three-reviewed:
+owned isolated advertised profile/type, actual completed compiler execution/flags,
+exact0.5.3registry lock/metadata and unchanged source with no workspace/path/patch/
+development graph. All4Mnesis dependencies are registry0.5.3. Zero runtime/DB
+credit; actual fresh native consumer still required. Raw/tmp/mnesis-pg9-registry-
+compile-053.log and metadata.json, standalone project preserved outside repository.
+
+Clean exact registry0.5.3native compiler7.21s --no-run: ONE compiler invocation
+three-reviewed against actual public API composition, completed compilation with
+zero runtime credit, exact versions/lock/source and no local graph override.
+Native metadata independently confirms4Mnesis registry0.5.3packages.
+Fresh privatePG18.6(on/on/on), actualone consumerPASS.076s/0skip, nextestID
+06f08e59-2e2b-48ab-a316-efb8dd3fd036. THREE independent post-run reviews:
+1. Real published migrate/open/binary-key append, exact saved revision/position/
+state/history across all-handle pool close/reopen, second append, inclusive stream
+and exclusive global resume; unknown writes fail rather than retry.
+2. Actual one test/nonempty nextest/no environment success guard, registry archive
+migrations and no workspace/path/patch/dev override; final backend0 and waited
+server stop0. Source/test and real raw log agree, no compile-only/pass inflation.
+3. Exact0.5.3versions/lock/unchanged source/assertions and5sclose deadlines;
+public source identical to protected9c46. Source SHA38373adfbf228509e9431a74ea1a9afe3f7bd0b94dc168cab5814048f4c16036,
+manifestSHA3921fecfdf68a520ea29d17d6edf98e896a54ad795c77edf6983d56e136c0e08,
+lockSHA9598e66552b8fdeb2fdce6b00be89f374faafd419e8c436b02edef8bdbb58569.
+Raw/tmp/mnesis-pg9-registry-native-053-run.log; standalone source/lock/metadata and
+private cluster path/tmp/mnesis-pg9-registry-native-053-dbpath retained. No local
+test/database workload active. Required product release and consumer acceptance
+pass; final focused documentation/evidence protected merge remains before goal
+completion. Preserve unrelated managed changelogPR408 and all prior work.
+
+Final documentation normal hook result:
+Final record hook actual replay2/1/1PASS1s each; each invocation reviewed three ways: owned replay/parser corpus invariant, actual completed command/count in /tmp/mnesis-postgres-publication-record-replay.log and hook's building marker, unchanged source/corpus/assertions/timebox. No native Postgres credit. Normal source includes the new JSON receipt under the unchanged fileFilter, so the gate rebuild is retained; no rename/filter/gate bypass. Whole hook and workspace nextest still pending.
+Final record hook workspace1594PASS596.223s/15slow/4existing compile exclusions; release compilation1m44s excluded. ONE actual invocation received three independent reviews after execution: owned workspace protocol/property/lifecycle/resilience invariants and original-defect falsifiers; actual completed nextest count/result in /tmp/mnesis-postgres-publication-record-nextest.log, no native credit for guarded DB bodies; unchanged production/source/assertions/selection/deadlines, only documentation/evidence data added. Product fingerprintdc45 remains unchanged. Cross-target outputs still pending, whole hook not yet credited complete. Existing CI configuration explicitly ignores main pushes; no missing main-push CI run is inferred from the empty API listing.
+The complete normal hook then passes all12declared host checks, including
+no_std/store-no_std/WebAssembly. Its new JSON receipt is included by the
+unchanged fixture source filter; the resulting rebuild and actual596.223s
+workspace run are retained. No source/filter/assertion/deadline/gate is weakened.
+The evidence-only follow-up changes no filtered build input; cached results add
+zero runtime credit. PR409 must pass current-head protected CI and merge before
+the persistent goal is marked complete. CI explicitly ignores main pushes, so
+no nonexistent main-push test execution is credited or awaited.

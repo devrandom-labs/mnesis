@@ -7,17 +7,25 @@ or local pass does not establish whole-adapter delivery.
 
 | ID | Requirement | State | Blocked by | Unblocks |
 | --- | --- | --- | --- | --- |
-| PG0 | Real-database reproduction, baseline and contract decisions | feature-complete | — | PG1, PG2, PG3, PG4 |
-| PG1 | Bounded reads and stable positions | feature-complete | PG0 | PG5, PG7, PG8 |
-| PG2 | Recovery without notifications | feature-complete | PG0 | PG5, PG8 |
-| PG3 | Transaction outcomes and retry safety | feature-complete | PG0 | PG5, PG6, PG8 |
-| PG4 | Schema, migrations and representation | feature-complete | PG0 | PG5, PG6, PG7, PG8 |
-| PG5 | Atomic writes and import | feature-complete | PG1, PG2, PG3, PG4 | PG7, PG9 |
-| PG6 | Aggregate snapshots and projection state | feature-complete | PG3, PG4 | PG7, PG9 |
-| PG7 | Export, backup and restore | feature-complete | PG1, PG4, PG5, PG6 | PG9 |
-| PG8 | Secure operation, lifecycle and capacity | feature-complete | PG1, PG2, PG3, PG4 | PG9 |
-| PG9 | Complete verification, minimization and delivery | active | PG5, PG6, PG7, PG8 | — |
+| PG0 | Real-database reproduction, baseline and contract decisions | complete | — | PG1, PG2, PG3, PG4 |
+| PG1 | Bounded reads and stable positions | complete | PG0 | PG5, PG7, PG8 |
+| PG2 | Recovery without notifications | complete | PG0 | PG5, PG8 |
+| PG3 | Transaction outcomes and retry safety | complete | PG0 | PG5, PG6, PG8 |
+| PG4 | Schema, migrations and representation | complete | PG0 | PG5, PG6, PG7, PG8 |
+| PG5 | Atomic writes and import | complete | PG1, PG2, PG3, PG4 | PG7, PG9 |
+| PG6 | Aggregate snapshots and projection state | complete | PG3, PG4 | PG7, PG9 |
+| PG7 | Export, backup and restore | complete | PG1, PG4, PG5, PG6 | PG9 |
+| PG8 | Secure operation, lifecycle and capacity | complete | PG1, PG2, PG3, PG4 | PG9 |
+| PG9 | Complete verification, minimization and delivery | complete | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
+
+Final delivery2026-10-20: required PG0–PG9 are complete in published0.5.3.
+Completion PR407 and release PR404 are protected-merged,42checks pass at each
+reviewed head, and all12host checks pass. The clean registry consumer confirms
+real Postgres persistence/reopen/resume with zero skips and full cleanup.
+[Exact delivery evidence](../prds/postgres/delivery.md) records merge trees,
+publication, checksums, source equality and registry-only dependency graphs.
+PG10 remains conditional; Labcast retains command IDs, deduplication and fencing.
 
 Historical delivery update2026-10-19: 24 focused changes are protected-merged through PR402
 at5b868028. Release39312731245 published mnesis-postgres0.5.1; the primary sparse
@@ -209,7 +217,7 @@ native cases and a meaningful wrong-label control; parent integration is running
 before its first signed full gate. Optional tracing adds no package/runtime.
 Capacity/soak, recovery measurements and PG9 delivery still remain.
 
-2026-10-20 current delivery: PR405 protected-merged at
+2026-10-20 delivery update before final publication: PR405 protected-merged at
 8b0ee9778e13d87dc3d45ff23f26c60d285fe6cc after40successful checks and0threads;
 ordinary merge tree verified, concurrent release403/.5.2 preserved. Sustained
 1800s soak passes2662995events/31recoveryfaults and exact cleanup; three logical/
@@ -223,7 +231,7 @@ control and protected delivery remain. A clean registry .5.2 seven-profile build
 and private native checkpoint/reopen/resume consumer pass; final acceptance,
 publication revision and registry evidence must still match the final delivery.
 
-Current acceptance, 2026-10-20: [per-requirement evidence](../prds/postgres/acceptance.md)
+Historical acceptance update before final publication, 2026-10-20: [per-requirement evidence](../prds/postgres/acceptance.md)
 maps every PG0–PG9 item to its owner and actual verification. PG0–PG8 are
 feature-complete; PG8 capacity has all12native fixtures/864timed windows and
 96plan observations, with protected integration pending. PR406 is protected-

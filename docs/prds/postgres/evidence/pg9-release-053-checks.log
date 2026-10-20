@@ -1,0 +1,267 @@
+Release PR404 head79aefa351044497aaa5a816161c3a11e5eff256d; protected main9c46ec7535f935154e4a70bd0b9fa72bcc54a21d
+42successful checks,1scheduled skip,0review threads. Selected actual stdout lines below.
+Compiler/empty/guarded/cached outputs are not native runtime; trailing run.log summaries may be echoes.
+Raw full files /tmp/mnesis-release053-JOB.log and public Actions job URLs retain context.
+
+job 118785276285
+compiler profiles: 1
+2026-10-20T17:49:28.3643384Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:28.5094601Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:28.6524990Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118785276183
+compiler profiles: 1
+2026-10-20T17:49:25.7643463Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T17:49:26.0471884Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T17:49:26.3261385Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+job 118785276201
+compiler profiles: 6
+2026-10-20T17:49:09.5974474Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:09.7096224Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:10.1618223Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118785276570
+compiler profiles: 4
+2026-10-20T17:49:17.2562333Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:17.3755327Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:17.4959517Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118785276523
+compiler profiles: 1
+2026-10-20T17:49:13.3387072Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:13.4710859Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:49:13.6020467Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118785276082
+compiler profiles: 6
+2026-10-20T17:49:29.3827033Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.27s
+2026-10-20T17:49:34.5589704Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.05s
+2026-10-20T17:49:38.5867509Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.90s
+
+job 118785276358
+compiler profiles: 4
+2026-10-20T17:49:00.4115380Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+2026-10-20T17:49:00.5685703Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+2026-10-20T17:49:02.5154807Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+job 118784653363
+compiler profiles: 0
+2026-10-20T18:02:00.0016061Z mnesis-nextest>      Summary [ 152.614s] 1594 tests run: 1594 passed (4 slow), 4 skipped
+2026-10-20T18:11:13.9591712Z mnesis-postgres-integration>      Summary [   0.220s] 1 test run: 1 passed, 14 skipped
+2026-10-20T18:11:18.5421587Z mnesis-postgres-integration>      Summary [   0.180s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:11:24.7199836Z mnesis-postgres-integration>      Summary [   1.806s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:11:29.1789731Z mnesis-postgres-integration>      Summary [   0.128s] 1 test run: 1 passed, 7 skipped
+2026-10-20T18:11:34.8274323Z mnesis-postgres-integration>      Summary [   1.299s] 1 test run: 1 passed, 10 skipped
+2026-10-20T18:11:42.3703425Z mnesis-postgres-integration>      Summary [   2.938s] 1 test run: 1 passed, 4 skipped
+2026-10-20T18:11:46.7510071Z mnesis-postgres-integration>      Summary [   0.049s] 1 test run: 1 passed, 9 skipped
+2026-10-20T18:12:59.9650750Z mnesis-postgres-integration>      Summary [  68.790s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T18:13:02.9573511Z mnesis-postgres-integration>      Summary [   0.061s] 1 test run: 1 passed, 39 skipped
+2026-10-20T18:13:46.1564718Z mnesis-postgres-integration>      Summary [  40.301s] 149 tests run: 149 passed, 0 skipped
+2026-10-20T18:13:49.4852058Z mnesis-postgres-integration>      Summary [   0.186s] 1 test run: 1 passed, 7 skipped
+2026-10-20T18:14:37.7850661Z mnesis-postgres-integration>      Summary [  45.071s] 168 tests run: 168 passed, 0 skipped
+2026-10-20T18:14:40.8752885Z mnesis-postgres-integration>      Summary [   0.076s] 1 test run: 1 passed, 14 skipped
+2026-10-20T18:15:29.2548782Z mnesis-postgres-integration>      Summary [  45.259s] 176 tests run: 176 passed, 0 skipped
+2026-10-20T18:15:32.5490640Z mnesis-postgres-integration>      Summary [   0.159s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:16:17.9358268Z mnesis-postgres-integration>      Summary [  42.170s] 173 tests run: 173 passed, 0 skipped
+2026-10-20T18:16:21.0577024Z mnesis-postgres-integration>      Summary [   0.081s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:17:05.4194211Z mnesis-postgres-integration>      Summary [  41.273s] 174 tests run: 174 passed, 0 skipped
+2026-10-20T18:17:09.4874815Z mnesis-postgres-integration>      Summary [   1.068s] 1 test run: 1 passed, 0 skipped
+2026-10-20T18:17:53.4248282Z mnesis-postgres-integration>      Summary [  40.803s] 150 tests run: 150 passed, 0 skipped
+2026-10-20T18:18:54.9021328Z mnesis-fuzz-replay> test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+2026-10-20T18:18:55.9042306Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+2026-10-20T18:18:56.9064251Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+job 118784653383
+compiler profiles: 1
+2026-10-20T17:48:12.4727692Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T17:48:12.7532772Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T17:48:13.0289388Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+job 118784653422
+compiler profiles: 4
+2026-10-20T17:47:55.5049463Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+2026-10-20T17:47:55.6214439Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+2026-10-20T17:47:57.3069361Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+job 118784653301
+compiler profiles: 4
+2026-10-20T17:50:02.9844013Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:50:03.1074687Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:50:03.2288289Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118784653222
+compiler profiles: 0
+2026-10-20T17:48:22.7735014Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 132.50s
+2026-10-20T17:48:59.0886546Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.59s
+2026-10-20T17:49:28.1016213Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.50s
+
+job 118785276442
+compiler profiles: 7
+2026-10-20T17:47:43.4345222Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:47:43.5829828Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:47:46.4266924Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118784648617
+compiler profiles: 0
+2026-10-20T17:46:28.0381452Z Done 1892515 runs in 61 second(s)
+
+job 118784649322
+compiler profiles: 0
+2026-10-20T17:46:31.0227979Z [1;94m[*] [0mStatistics: 0 new corpus items found, 34.33% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec[0m
+
+job 118784653135
+compiler profiles: 6
+2026-10-20T17:46:44.7500255Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.52s
+2026-10-20T17:46:47.4565868Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.55s
+2026-10-20T17:46:50.0710294Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.46s
+
+job 118784649353
+compiler profiles: 0
+2026-10-20T17:46:43.4941086Z [1;94m[*] [0mStatistics: 15 new corpus items found, 43.39% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec[0m
+
+job 118785276591
+compiler profiles: 17
+2026-10-20T17:46:41.9876826Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.92s
+2026-10-20T17:46:45.1004620Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.96s
+2026-10-20T17:46:52.8475550Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.44s
+
+job 118784653242
+compiler profiles: 7
+2026-10-20T17:46:22.9703062Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:46:23.0964614Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:46:25.5251068Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118784653353
+compiler profiles: 17
+2026-10-20T17:46:03.7454456Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+2026-10-20T17:46:05.4173529Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.55s
+2026-10-20T17:46:11.7843216Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.77s
+
+job 118785276344
+compiler profiles: 0
+2026-10-20T17:57:41.0917570Z mnesis-nextest>      Summary [ 130.689s] 1594 tests run: 1594 passed (4 slow), 4 skipped
+2026-10-20T18:06:01.5409218Z mnesis-postgres-integration>      Summary [   1.295s] 1 test run: 1 passed, 14 skipped
+2026-10-20T18:06:06.3421338Z mnesis-postgres-integration>      Summary [   0.331s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:06:12.9039909Z mnesis-postgres-integration>      Summary [   2.174s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:06:17.3377672Z mnesis-postgres-integration>      Summary [   0.121s] 1 test run: 1 passed, 7 skipped
+2026-10-20T18:06:21.7980663Z mnesis-postgres-integration>      Summary [   0.087s] 1 test run: 1 passed, 10 skipped
+2026-10-20T18:06:28.2620314Z mnesis-postgres-integration>      Summary [   1.857s] 1 test run: 1 passed, 4 skipped
+2026-10-20T18:06:32.6382793Z mnesis-postgres-integration>      Summary [   0.047s] 1 test run: 1 passed, 9 skipped
+2026-10-20T18:07:45.1751673Z mnesis-postgres-integration>      Summary [  67.857s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T18:07:48.1949672Z mnesis-postgres-integration>      Summary [   0.059s] 1 test run: 1 passed, 39 skipped
+2026-10-20T18:08:31.0420194Z mnesis-postgres-integration>      Summary [  39.941s] 149 tests run: 149 passed, 0 skipped
+2026-10-20T18:08:34.4365136Z mnesis-postgres-integration>      Summary [   0.214s] 1 test run: 1 passed, 7 skipped
+2026-10-20T18:09:21.9666430Z mnesis-postgres-integration>      Summary [  44.275s] 168 tests run: 168 passed, 0 skipped
+2026-10-20T18:09:25.0362115Z mnesis-postgres-integration>      Summary [   0.071s] 1 test run: 1 passed, 14 skipped
+2026-10-20T18:10:13.4686621Z mnesis-postgres-integration>      Summary [  45.357s] 176 tests run: 176 passed, 0 skipped
+2026-10-20T18:10:16.8692633Z mnesis-postgres-integration>      Summary [   0.292s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:11:01.3489999Z mnesis-postgres-integration>      Summary [  41.245s] 173 tests run: 173 passed, 0 skipped
+2026-10-20T18:11:04.4051278Z mnesis-postgres-integration>      Summary [   0.075s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:11:47.5061556Z mnesis-postgres-integration>      Summary [  40.022s] 174 tests run: 174 passed, 0 skipped
+2026-10-20T18:11:51.6459867Z mnesis-postgres-integration>      Summary [   1.077s] 1 test run: 1 passed, 0 skipped
+2026-10-20T18:12:34.5671345Z mnesis-postgres-integration>      Summary [  39.805s] 150 tests run: 150 passed, 0 skipped
+2026-10-20T18:13:28.8919929Z mnesis-fuzz-replay> test result: ok(B. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+2026-10-20T18:13:29.8941291Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+2026-10-20T18:13:30.8964118Z mnesis-fuzz-replay> test result: ok(B. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+job 118784653338
+compiler profiles: 6
+2026-10-20T17:45:22.1116995Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:45:22.2487248Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:45:22.7606940Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118784649250
+compiler profiles: 0
+2026-10-20T17:45:04.0306963Z Done 8825316 runs in 61 second(s)
+
+job 118784653190
+compiler profiles: 1
+2026-10-20T17:45:16.0775331Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:45:16.2183349Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:45:16.3558081Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118785276266
+compiler profiles: 0
+2026-10-20T17:45:18.2951142Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 104.91s
+2026-10-20T17:45:48.1261866Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.08s
+2026-10-20T17:46:11.7227252Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.78s
+
+job 118785275803
+compiler profiles: 0
+2026-10-20T17:55:23.5544467Z mnesis-postgres-integration>      Summary [   0.094s] 1 test run: 1 passed, 14 skipped
+2026-10-20T17:55:28.3834766Z mnesis-postgres-integration>      Summary [   0.648s] 1 test run: 1 passed, 15 skipped
+2026-10-20T17:55:34.3506804Z mnesis-postgres-integration>      Summary [   1.759s] 1 test run: 1 passed, 2 skipped
+2026-10-20T17:55:39.2395843Z mnesis-postgres-integration>      Summary [   0.695s] 1 test run: 1 passed, 7 skipped
+2026-10-20T17:55:44.7562271Z mnesis-postgres-integration>      Summary [   1.218s] 1 test run: 1 passed, 10 skipped
+2026-10-20T17:55:51.4199312Z mnesis-postgres-integration>      Summary [   2.070s] 1 test run: 1 passed, 4 skipped
+2026-10-20T17:55:55.7461696Z mnesis-postgres-integration>      Summary [   0.053s] 1 test run: 1 passed, 9 skipped
+2026-10-20T17:57:08.2261729Z mnesis-postgres-integration>      Summary [  67.689s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T17:57:11.1058045Z mnesis-postgres-integration>      Summary [   0.061s] 1 test run: 1 passed, 39 skipped
+2026-10-20T17:57:53.4825149Z mnesis-postgres-integration>      Summary [  39.587s] 149 tests run: 149 passed, 0 skipped
+2026-10-20T17:57:56.7303134Z mnesis-postgres-integration>      Summary [   0.271s] 1 test run: 1 passed, 7 skipped
+2026-10-20T17:58:45.1025397Z mnesis-postgres-integration>      Summary [  45.243s] 168 tests run: 168 passed, 0 skipped
+2026-10-20T17:58:48.0415777Z mnesis-postgres-integration>      Summary [   0.071s] 1 test run: 1 passed, 14 skipped
+2026-10-20T17:59:34.7273215Z mnesis-postgres-integration>      Summary [  43.757s] 176 tests run: 176 passed, 0 skipped
+2026-10-20T17:59:37.8773256Z mnesis-postgres-integration>      Summary [   0.152s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:00:22.1794360Z mnesis-postgres-integration>      Summary [  41.199s] 173 tests run: 173 passed, 0 skipped
+2026-10-20T18:00:25.1157650Z mnesis-postgres-integration>      Summary [   0.076s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:01:08.6308053Z mnesis-postgres-integration>      Summary [  40.561s] 174 tests run: 174 passed, 0 skipped
+2026-10-20T18:01:12.5504349Z mnesis-postgres-integration>      Summary [   1.064s] 1 test run: 1 passed, 0 skipped
+2026-10-20T18:01:55.3316494Z mnesis-postgres-integration>      Summary [  39.815s] 150 tests run: 150 passed, 0 skipped
+2026-10-20T18:01:56.5544327Z      Summary [  67.689s] 264 tests run: 264 passed, 0 skipped
+
+job 118784652695
+compiler profiles: 0
+2026-10-20T17:55:52.4677740Z mnesis-postgres-integration>      Summary [   0.913s] 1 test run: 1 passed, 14 skipped
+2026-10-20T17:55:58.2577719Z mnesis-postgres-integration>      Summary [   1.516s] 1 test run: 1 passed, 15 skipped
+2026-10-20T17:56:03.1723418Z mnesis-postgres-integration>      Summary [   0.630s] 1 test run: 1 passed, 2 skipped
+2026-10-20T17:56:09.2329152Z mnesis-postgres-integration>      Summary [   1.761s] 1 test run: 1 passed, 7 skipped
+2026-10-20T17:56:13.5922173Z mnesis-postgres-integration>      Summary [   0.091s] 1 test run: 1 passed, 10 skipped
+2026-10-20T17:56:20.9433318Z mnesis-postgres-integration>      Summary [   3.011s] 1 test run: 1 passed, 4 skipped
+2026-10-20T17:56:25.2467644Z mnesis-postgres-integration>      Summary [   0.049s] 1 test run: 1 passed, 9 skipped
+2026-10-20T17:57:37.4834183Z mnesis-postgres-integration>      Summary [  67.372s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T17:57:40.4269980Z mnesis-postgres-integration>      Summary [   0.061s] 1 test run: 1 passed, 39 skipped
+2026-10-20T17:58:23.8705136Z mnesis-postgres-integration>      Summary [  40.574s] 149 tests run: 149 passed, 0 skipped
+2026-10-20T17:58:27.3526971Z mnesis-postgres-integration>      Summary [   0.393s] 1 test run: 1 passed, 7 skipped
+2026-10-20T17:59:15.1830688Z mnesis-postgres-integration>      Summary [  44.583s] 168 tests run: 168 passed, 0 skipped
+2026-10-20T17:59:18.2221057Z mnesis-postgres-integration>      Summary [   0.072s] 1 test run: 1 passed, 14 skipped
+2026-10-20T18:00:07.1594506Z mnesis-postgres-integration>      Summary [  45.902s] 176 tests run: 176 passed, 0 skipped
+2026-10-20T18:00:10.4251040Z mnesis-postgres-integration>      Summary [   0.192s] 1 test run: 1 passed, 2 skipped
+2026-10-20T18:00:55.7785181Z mnesis-postgres-integration>      Summary [  42.164s] 173 tests run: 173 passed, 0 skipped
+2026-10-20T18:00:58.8134162Z mnesis-postgres-integration>      Summary [   0.079s] 1 test run: 1 passed, 15 skipped
+2026-10-20T18:01:43.9799932Z mnesis-postgres-integration>      Summary [  42.125s] 174 tests run: 174 passed, 0 skipped
+2026-10-20T18:01:47.9960043Z mnesis-postgres-integration>      Summary [   1.066s] 1 test run: 1 passed, 0 skipped
+2026-10-20T18:02:31.2900194Z mnesis-postgres-integration>      Summary [  40.218s] 150 tests run: 150 passed, 0 skipped
+2026-10-20T18:02:32.5947161Z      Summary [  67.372s] 264 tests run: 264 passed, 0 skipped
+
+job 118784649239
+compiler profiles: 0
+2026-10-20T17:45:38.4712798Z [1;94m[*] [0mStatistics: 0 new corpus items found, 8.31% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec[0m
+
+job 118784653028
+compiler profiles: 1
+2026-10-20T17:43:49.6512781Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:43:49.7416894Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T17:43:49.8279931Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+job 118784649032
+compiler profiles: 0
+2026-10-20T17:43:46.4912758Z Done 7230051 runs in 61 second(s)
+
+job 118784649122
+compiler profiles: 0
+2026-10-20T17:43:35.7405732Z [1;94m[*] [0mStatistics: 2 new corpus items found, 47.61% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec[0m
+
+job 118784649159
+compiler profiles: 0
+2026-10-20T17:42:42.8410521Z Done 1257699 runs in 61 second(s)
+
+job 118784539223
+compiler profiles: 0
+2026-10-20T17:42:53.4755694Z Running mnesis kernel_bench
+2026-10-20T17:42:54.0472368Z Running mnesis-fjall all_index_layout
+2026-10-20T17:44:56.4824241Z Running mnesis-fjall fjall_benchmarks
+2026-10-20T17:45:14.2698488Z Running mnesis-store store_bench
+2026-10-20T17:45:15.3687047Z Finished running 4 benchmark suite(s)
+2026-10-20T17:45:18.4511742Z Performance data uploaded
