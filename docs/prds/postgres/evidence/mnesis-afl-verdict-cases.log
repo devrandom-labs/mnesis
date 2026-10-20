@@ -1,0 +1,7 @@
+artifact mode=missing exit=0
+artifact mode=readme exit=0
+::error::AFL saved a crash: out/default/crashes/id:000000,sig:06,case with spaces
+artifact mode=crash exit=1
+::error::AFL saved a crash: out/default/crashes/id:000000,sig:06,case with spaces
+artifact mode=nested exit=1
+producer failure: original=0 fixed=1

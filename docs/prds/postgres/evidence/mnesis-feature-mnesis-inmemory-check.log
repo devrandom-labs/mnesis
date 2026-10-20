@@ -1,0 +1,23 @@
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis-inmemory (1/4)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-checks/crates/workspace-hack)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-inmemory v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/inmemory)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.03s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis-inmemory (2/4)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-inmemory v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/inmemory)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+
+info: running `cargo check --lib --offline --no-default-features --features export` on mnesis-inmemory (3/4)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-inmemory v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/inmemory)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.93s
+
+info: running `cargo check --lib --offline --no-default-features --features import` on mnesis-inmemory (4/4)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Checking mnesis-inmemory v0.5.1 (/private/tmp/mnesis-feature-checks/adapters/inmemory)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s

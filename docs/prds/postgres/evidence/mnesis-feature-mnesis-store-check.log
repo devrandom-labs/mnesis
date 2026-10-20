@@ -1,0 +1,138 @@
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline --all-features` on mnesis-store (1/17)
+   Compiling serde_core v1.0.229
+    Checking futures-core v0.3.33
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+    Checking futures-io v0.3.33
+    Checking bytes v1.12.1
+   Compiling syn v2.0.119
+    Checking futures-channel v0.3.33
+    Checking futures-util v0.3.33
+    Checking futures v0.3.33
+   Compiling ptr_meta_derive v0.3.1
+   Compiling bytecheck_derive v0.8.2
+   Compiling munge_macro v0.4.7
+   Compiling equator-macro v0.4.2
+   Compiling minicbor-derive v0.19.5
+   Compiling rkyv_derive v0.8.17
+   Compiling bytemuck_derive v1.11.0
+   Compiling tracing-attributes v0.1.31
+    Checking ptr_meta v0.3.1
+    Checking munge v0.4.7
+    Checking equator v0.4.2
+    Checking tracing v0.1.44
+    Checking bytemuck v1.25.2
+    Checking minicbor v2.2.3
+    Checking rancor v0.1.2
+    Checking bytecheck v0.8.2
+    Checking aligned-vec v0.6.4
+    Checking rend v0.5.4
+    Checking rkyv v0.8.17
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.43s
+
+info: running `cargo check --lib --offline --no-default-features` on mnesis-store (2/17)
+    Checking futures-sink v0.3.33
+    Checking futures-core v0.3.33
+    Checking slab v0.4.12
+    Checking futures-task v0.3.33
+    Checking futures-io v0.3.33
+    Checking bytes v1.12.1
+   Compiling syn v2.0.119
+    Checking futures-channel v0.3.33
+    Checking futures-util v0.3.33
+   Compiling equator-macro v0.4.2
+    Checking futures v0.3.33
+    Checking equator v0.4.2
+    Checking aligned-vec v0.6.4
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.57s
+
+info: running `cargo check --lib --offline --no-default-features --features bytemuck` on mnesis-store (3/17)
+   Compiling bytemuck_derive v1.11.0
+    Checking bytemuck v1.25.2
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.73s
+
+info: running `cargo check --lib --offline --no-default-features --features cbor` on mnesis-store (4/17)
+   Compiling syn v2.0.119
+   Compiling equator-macro v0.4.2
+   Compiling minicbor-derive v0.19.5
+    Checking equator v0.4.2
+    Checking minicbor v2.2.3
+    Checking aligned-vec v0.6.4
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.09s
+
+info: running `cargo check --lib --offline --no-default-features --features default` on mnesis-store (5/17)
+    Checking aligned-vec v0.6.4
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
+
+info: running `cargo check --lib --offline --no-default-features --features export` on mnesis-store (6/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.62s
+
+info: running `cargo check --lib --offline --no-default-features --features import` on mnesis-store (7/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.63s
+
+info: running `cargo check --lib --offline --no-default-features --features json` on mnesis-store (8/17)
+    Checking memchr v2.8.3
+    Checking serde_json v1.0.151
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.62s
+
+info: running `cargo check --lib --offline --no-default-features --features projection` on mnesis-store (9/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.63s
+
+info: running `cargo check --lib --offline --no-default-features --features projection-json` on mnesis-store (10/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+
+info: running `cargo check --lib --offline --no-default-features --features rkyv` on mnesis-store (11/17)
+   Compiling ptr_meta_derive v0.3.1
+   Compiling bytecheck_derive v0.8.2
+   Compiling munge_macro v0.4.7
+   Compiling rkyv_derive v0.8.17
+    Checking ptr_meta v0.3.1
+    Checking munge v0.4.7
+    Checking rancor v0.1.2
+    Checking bytecheck v0.8.2
+    Checking rend v0.5.4
+    Checking rkyv v0.8.17
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.09s
+
+info: running `cargo check --lib --offline --no-default-features --features serde` on mnesis-store (12/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.46s
+
+info: running `cargo check --lib --offline --no-default-features --features snapshot` on mnesis-store (13/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+
+info: running `cargo check --lib --offline --no-default-features --features snapshot-json` on mnesis-store (14/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.49s
+
+info: running `cargo check --lib --offline --no-default-features --features std` on mnesis-store (15/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+
+info: running `cargo check --lib --offline --no-default-features --features subscription` on mnesis-store (16/17)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.46s
+
+info: running `cargo check --lib --offline --no-default-features --features tracing` on mnesis-store (17/17)
+    Checking tracing-core v0.1.36
+   Compiling syn v2.0.119
+   Compiling equator-macro v0.4.2
+   Compiling tracing-attributes v0.1.31
+    Checking equator v0.4.2
+    Checking tracing v0.1.44
+    Checking aligned-vec v0.6.4
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.92s

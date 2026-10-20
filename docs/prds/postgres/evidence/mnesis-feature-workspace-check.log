@@ -1,0 +1,10 @@
+info: contents updated
+checking package=mnesis
+checking package=mnesis-macros
+checking package=mnesis-store
+checking package=mnesis-store-testing
+checking package=mnesis-wake
+checking package=mnesis-wake-nostd
+checking package=mnesis-inmemory
+checking package=mnesis-fjall
+info: contents updated

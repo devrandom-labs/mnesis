@@ -1,0 +1,792 @@
+﻿2026-10-20T15:43:40.9083119Z Current runner version: '2.337.0'
+2026-10-20T15:43:40.9104172Z ##[group]Runner Image Provisioner
+2026-10-20T15:43:40.9105367Z Hosted Compute Agent
+2026-10-20T15:43:40.9105800Z Version: 20261015.610
+2026-10-20T15:43:40.9106258Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-20T15:43:40.9107092Z Build Date: 2026-10-14T17:06:54Z
+2026-10-20T15:43:40.9107579Z Worker ID: {4c4a1613-fa75-4725-8c66-636fdcdca12a}
+2026-10-20T15:43:40.9108221Z Region: westus2
+2026-10-20T15:43:40.9108624Z Cloud: Azure
+2026-10-20T15:43:40.9108977Z ##[endgroup]
+2026-10-20T15:43:40.9109975Z ##[group]Operating System
+2026-10-20T15:43:40.9110382Z Ubuntu
+2026-10-20T15:43:40.9110889Z 24.04.5
+2026-10-20T15:43:40.9111238Z LTS
+2026-10-20T15:43:40.9111564Z ##[endgroup]
+2026-10-20T15:43:40.9112012Z ##[group]Runner Image
+2026-10-20T15:43:40.9112469Z Image: ubuntu-24.04
+2026-10-20T15:43:40.9112936Z Version: 20261018.339.1
+2026-10-20T15:43:40.9113926Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-20T15:43:40.9115058Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261018.339
+2026-10-20T15:43:40.9115714Z ##[endgroup]
+2026-10-20T15:43:40.9116820Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T15:43:40.9118286Z Actions: read
+2026-10-20T15:43:40.9118756Z Contents: read
+2026-10-20T15:43:40.9119125Z Metadata: read
+2026-10-20T15:43:40.9119555Z ##[endgroup]
+2026-10-20T15:43:40.9121144Z Secret source: Actions
+2026-10-20T15:43:40.9121757Z Cache mode: write
+2026-10-20T15:43:40.9122357Z Prepare workflow directory
+2026-10-20T15:43:40.9582054Z Prepare all required actions
+2026-10-20T15:43:40.9613723Z Getting action download info
+2026-10-20T15:43:41.3496551Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-20T15:43:41.6852472Z Download action repository 'dtolnay/rust-toolchain@stable' (SHA:b725eda525362e7cf34af9a7243cac1e3f01a7ec)
+2026-10-20T15:43:42.0963847Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-20T15:43:42.5292900Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-20T15:43:43.0011787Z Complete job name: deep-fuzz-afl (value_event_type)
+2026-10-20T15:43:43.1814552Z ##[group]Run actions/checkout@v4
+2026-10-20T15:43:43.1815282Z with:
+2026-10-20T15:43:43.1815789Z   repository: devrandom-labs/mnesis
+2026-10-20T15:43:43.1820587Z   token: ***
+2026-10-20T15:43:43.1821081Z   ssh-strict: true
+2026-10-20T15:43:43.1821578Z   ssh-user: git
+2026-10-20T15:43:43.1822088Z   persist-credentials: true
+2026-10-20T15:43:43.1822627Z   clean: true
+2026-10-20T15:43:43.1823136Z   sparse-checkout-cone-mode: true
+2026-10-20T15:43:43.1823742Z   fetch-depth: 1
+2026-10-20T15:43:43.1824250Z   fetch-tags: false
+2026-10-20T15:43:43.1824751Z   show-progress: true
+2026-10-20T15:43:43.1825245Z   lfs: false
+2026-10-20T15:43:43.1825703Z   submodules: false
+2026-10-20T15:43:43.1826208Z   set-safe-directory: true
+2026-10-20T15:43:43.1826887Z   allow-unsafe-pr-checkout: false
+2026-10-20T15:43:43.1827577Z env:
+2026-10-20T15:43:43.1828048Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:43.1828642Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:43.1829237Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:43.1829846Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:43.1830329Z ##[endgroup]
+2026-10-20T15:43:43.2629053Z Syncing repository: devrandom-labs/mnesis
+2026-10-20T15:43:43.2631567Z ##[group]Getting Git version info
+2026-10-20T15:43:43.2632820Z Working directory is '/home/runner/work/mnesis/mnesis'
+2026-10-20T15:43:43.2634541Z [command]/usr/bin/git version
+2026-10-20T15:43:43.2635512Z git version 2.55.0
+2026-10-20T15:43:43.2638435Z ##[endgroup]
+2026-10-20T15:43:43.2643843Z Temporarily overriding HOME='/home/runner/work/_temp/dbb0a019-dfb7-48ac-9e3b-2458fbfab1c8' before making global git config changes
+2026-10-20T15:43:43.2646577Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T15:43:43.2648958Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/mnesis/mnesis
+2026-10-20T15:43:43.3028976Z Deleting the contents of '/home/runner/work/mnesis/mnesis'
+2026-10-20T15:43:43.3032924Z ##[group]Initializing the repository
+2026-10-20T15:43:43.3037145Z [command]/usr/bin/git init /home/runner/work/mnesis/mnesis
+2026-10-20T15:43:43.3140195Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T15:43:43.3141393Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T15:43:43.3142702Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T15:43:43.3143550Z hint: call:
+2026-10-20T15:43:43.3144018Z hint:
+2026-10-20T15:43:43.3144664Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T15:43:43.3145453Z hint:
+2026-10-20T15:43:43.3146609Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T15:43:43.3147653Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T15:43:43.3148637Z hint:
+2026-10-20T15:43:43.3149115Z hint: 	git branch -m <name>
+2026-10-20T15:43:43.3149665Z hint:
+2026-10-20T15:43:43.3150406Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T15:43:43.3152271Z Initialized empty Git repository in /home/runner/work/mnesis/mnesis/.git/
+2026-10-20T15:43:43.3154729Z [command]/usr/bin/git remote add origin https://github.com/devrandom-labs/mnesis
+2026-10-20T15:43:43.3207479Z ##[endgroup]
+2026-10-20T15:43:43.3208572Z ##[group]Disabling automatic garbage collection
+2026-10-20T15:43:43.3209622Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T15:43:43.3246345Z ##[endgroup]
+2026-10-20T15:43:43.3247330Z ##[group]Setting up auth
+2026-10-20T15:43:43.3250919Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T15:43:43.3287353Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T15:43:43.3593466Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T15:43:43.3634066Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T15:43:43.3829506Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T15:43:43.3867862Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T15:43:43.4066633Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T15:43:43.4110442Z ##[endgroup]
+2026-10-20T15:43:43.4111362Z ##[group]Fetching the repository
+2026-10-20T15:43:43.4117720Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a30c4b341810bcd8302f11b6139971cf0e18dee1:refs/remotes/origin/test/afl-crash-verdict
+2026-10-20T15:43:44.7953904Z From https://github.com/devrandom-labs/mnesis
+2026-10-20T15:43:44.7957722Z  * [new ref]         a30c4b341810bcd8302f11b6139971cf0e18dee1 -> origin/test/afl-crash-verdict
+2026-10-20T15:43:44.7959248Z ##[endgroup]
+2026-10-20T15:43:44.7959665Z ##[group]Determining the checkout info
+2026-10-20T15:43:44.7961392Z ##[endgroup]
+2026-10-20T15:43:44.7967163Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T15:43:44.8022112Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T15:43:44.8057694Z ##[group]Checking out the ref
+2026-10-20T15:43:44.8060283Z [command]/usr/bin/git checkout --progress --force -B test/afl-crash-verdict refs/remotes/origin/test/afl-crash-verdict
+2026-10-20T15:43:44.8781938Z Switched to a new branch 'test/afl-crash-verdict'
+2026-10-20T15:43:44.8785306Z branch 'test/afl-crash-verdict' set up to track 'origin/test/afl-crash-verdict'.
+2026-10-20T15:43:44.8794945Z ##[endgroup]
+2026-10-20T15:43:44.8842117Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T15:43:44.8872705Z a30c4b341810bcd8302f11b6139971cf0e18dee1
+2026-10-20T15:43:44.9115509Z ##[group]Run dtolnay/rust-toolchain@stable
+2026-10-20T15:43:44.9115747Z with:
+2026-10-20T15:43:44.9115903Z   toolchain: stable
+2026-10-20T15:43:44.9116057Z env:
+2026-10-20T15:43:44.9116211Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:44.9116610Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:44.9116801Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:44.9116994Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:44.9117154Z ##[endgroup]
+2026-10-20T15:43:44.9162558Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+2026-10-20T15:43:44.9193212Z ##[group]Run if [[ -z $toolchain ]]; then
+2026-10-20T15:43:44.9193507Z [36;1mif [[ -z $toolchain ]]; then[0m
+2026-10-20T15:43:44.9193860Z [36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070[0m
+2026-10-20T15:43:44.9194224Z [36;1m  echo "'toolchain' is a required input" >&2[0m
+2026-10-20T15:43:44.9194429Z [36;1m  exit 1[0m
+2026-10-20T15:43:44.9194690Z [36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then[0m
+2026-10-20T15:43:44.9194960Z [36;1m  if [[ Linux == macOS ]]; then[0m
+2026-10-20T15:43:44.9195292Z [36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:44.9195601Z [36;1m  else[0m
+2026-10-20T15:43:44.9195860Z [36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:44.9196142Z [36;1m  fi[0m
+2026-10-20T15:43:44.9196346Z [36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then[0m
+2026-10-20T15:43:44.9196944Z [36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:44.9197251Z [36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then[0m
+2026-10-20T15:43:44.9197577Z [36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:44.9197880Z [36;1melse[0m
+2026-10-20T15:43:44.9198029Z [36;1m  delimiter=EOF[0m
+2026-10-20T15:43:44.9198240Z [36;1m  while [[ $toolchain == *$delimiter* ]]; do delimiter+=_; done[0m
+2026-10-20T15:43:44.9198557Z [36;1m  printf 'toolchain<<%s\n%s\n%s\n' "$delimiter" "$toolchain" "$delimiter" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:44.9198818Z [36;1mfi[0m
+2026-10-20T15:43:44.9356214Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:44.9356644Z env:
+2026-10-20T15:43:44.9356820Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:44.9357005Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:44.9357177Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:44.9357380Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:44.9357542Z   toolchain: stable
+2026-10-20T15:43:44.9357699Z ##[endgroup]
+2026-10-20T15:43:44.9461303Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=29]
+2026-10-20T15:43:44.9466152Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+2026-10-20T15:43:44.9492422Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
+2026-10-20T15:43:44.9492749Z [36;1mecho CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV[0m
+2026-10-20T15:43:44.9534150Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:44.9534370Z env:
+2026-10-20T15:43:44.9534521Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:44.9534705Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:44.9534876Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:44.9535059Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:44.9535211Z ##[endgroup]
+2026-10-20T15:43:44.9598607Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=13]
+2026-10-20T15:43:44.9600501Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+2026-10-20T15:43:44.9620153Z ##[group]Run if ! command -v rustup &>/dev/null; then
+2026-10-20T15:43:44.9620403Z [36;1mif ! command -v rustup &>/dev/null; then[0m
+2026-10-20T15:43:44.9620863Z [36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y[0m
+2026-10-20T15:43:44.9621288Z [36;1m  echo "$CARGO_HOME/bin" >> $GITHUB_PATH[0m
+2026-10-20T15:43:44.9621476Z [36;1mfi[0m
+2026-10-20T15:43:44.9659523Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:44.9659738Z env:
+2026-10-20T15:43:44.9659889Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:44.9660073Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:44.9660238Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:44.9660429Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:44.9660586Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:44.9660756Z ##[endgroup]
+2026-10-20T15:43:44.9720397Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=success;conclusion=success;duration_ms=11]
+2026-10-20T15:43:44.9722070Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+2026-10-20T15:43:44.9728201Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-20T15:43:44.9733005Z ##[start-action display=rustup toolchain install stable;id=__dtolnay_rust-toolchain.__run_4]
+2026-10-20T15:43:44.9747382Z ##[group]Run set -f  # split targets and components on commas and whitespace, without glob expansion
+2026-10-20T15:43:44.9747784Z [36;1mset -f  # split targets and components on commas and whitespace, without glob expansion[0m
+2026-10-20T15:43:44.9748052Z [36;1mflags=()[0m
+2026-10-20T15:43:44.9748237Z [36;1mfor t in ${targets//,/ }; do flags+=(--target "$t"); done[0m
+2026-10-20T15:43:44.9748501Z [36;1mfor c in ${components//,/ }; do flags+=(--component "$c"); done[0m
+2026-10-20T15:43:44.9748806Z [36;1mif [[ $toolchain == nightly && -n $components ]]; then flags+=(--allow-downgrade); fi[0m
+2026-10-20T15:43:44.9749074Z [36;1mlog=$(mktemp)[0m
+2026-10-20T15:43:44.9749238Z [36;1mtrap 'rm -f "$log"' EXIT[0m
+2026-10-20T15:43:44.9749418Z [36;1mfor attempt in 1 2 3 4 5; do[0m
+2026-10-20T15:43:44.9749755Z [36;1m  if rustup toolchain install "$toolchain" "${flags[@]}" --profile minimal --no-self-update --force-non-host 2>&1 | tee "$log"; then[0m
+2026-10-20T15:43:44.9750083Z [36;1m    break[0m
+2026-10-20T15:43:44.9750225Z [36;1m  else[0m
+2026-10-20T15:43:44.9750366Z [36;1m    status=$?[0m
+2026-10-20T15:43:44.9750515Z [36;1m  fi[0m
+2026-10-20T15:43:44.9750710Z [36;1m  if [[ $attempt == 5 ]] || ! grep -Fq 'checksum failed for ' "$log" \[0m
+2026-10-20T15:43:44.9751045Z [36;1m      || ! grep -Fq 'this is likely due to an ongoing update of the official release server' "$log"; then[0m
+2026-10-20T15:43:44.9751332Z [36;1m    exit "$status"[0m
+2026-10-20T15:43:44.9751486Z [36;1m  fi[0m
+2026-10-20T15:43:44.9751715Z [36;1m  echo "Retrying rustup toolchain install in 30 seconds (retry $attempt of 4)" >&2[0m
+2026-10-20T15:43:44.9751970Z [36;1m  sleep 30[0m
+2026-10-20T15:43:44.9752113Z [36;1mdone[0m
+2026-10-20T15:43:44.9787895Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:44.9788130Z env:
+2026-10-20T15:43:44.9788284Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:44.9788461Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:44.9788627Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:44.9788809Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:44.9788966Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:44.9789135Z   toolchain: stable
+2026-10-20T15:43:44.9789277Z   targets:
+2026-10-20T15:43:44.9789415Z   components:
+2026-10-20T15:43:44.9789566Z   RUSTUP_PERMIT_COPY_RENAME: 1
+2026-10-20T15:43:44.9789732Z ##[endgroup]
+2026-10-20T15:43:45.1384191Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+2026-10-20T15:43:45.2282656Z
+2026-10-20T15:43:45.2357925Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+2026-10-20T15:43:45.2358639Z
+2026-10-20T15:43:45.2407383Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=267]
+2026-10-20T15:43:45.2412909Z ##[start-action display=rustup default stable;id=__dtolnay_rust-toolchain.__run_5]
+2026-10-20T15:43:45.2428733Z ##[group]Run rustup default "$toolchain" --force-non-host
+2026-10-20T15:43:45.2429023Z [36;1mrustup default "$toolchain" --force-non-host[0m
+2026-10-20T15:43:45.2473357Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.2473586Z env:
+2026-10-20T15:43:45.2473741Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.2473927Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.2474101Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.2474301Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.2474462Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.2474646Z   toolchain: stable
+2026-10-20T15:43:45.2474821Z ##[endgroup]
+2026-10-20T15:43:45.2600600Z info: using existing install for stable-x86_64-unknown-linux-gnu
+2026-10-20T15:43:45.2608997Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+2026-10-20T15:43:45.2609204Z
+2026-10-20T15:43:45.2679183Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+2026-10-20T15:43:45.2679505Z
+2026-10-20T15:43:45.2680101Z info: note that the toolchain '1.99.0-x86_64-unknown-linux-gnu' is currently in use (overridden by '/home/runner/work/mnesis/mnesis/rust-toolchain.toml')
+2026-10-20T15:43:45.2696916Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=28]
+2026-10-20T15:43:45.2700681Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+2026-10-20T15:43:45.2717187Z ##[group]Run DATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+2026-10-20T15:43:45.2717749Z [36;1mDATE=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')[0m
+2026-10-20T15:43:45.2718152Z [36;1mHASH=$(rustc +"$toolchain" --version --verbose | sed -ne 's/^commit-hash: //p')[0m
+2026-10-20T15:43:45.2718483Z [36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT[0m
+2026-10-20T15:43:45.2763095Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.2763319Z env:
+2026-10-20T15:43:45.2763476Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.2763667Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.2763839Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.2764028Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.2764198Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.2764378Z   toolchain: stable
+2026-10-20T15:43:45.2764526Z ##[endgroup]
+2026-10-20T15:43:45.3103271Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=40]
+2026-10-20T15:43:45.3105468Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+2026-10-20T15:43:45.3121959Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+2026-10-20T15:43:45.3122223Z [36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then[0m
+2026-10-20T15:43:45.3122439Z [36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV[0m
+2026-10-20T15:43:45.3122630Z [36;1mfi[0m
+2026-10-20T15:43:45.3166008Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.3166234Z env:
+2026-10-20T15:43:45.3166687Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.3166867Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.3167035Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.3167216Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.3167406Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.3167595Z ##[endgroup]
+2026-10-20T15:43:45.3232173Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=12]
+2026-10-20T15:43:45.3233916Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+2026-10-20T15:43:45.3248994Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+2026-10-20T15:43:45.3249247Z [36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then[0m
+2026-10-20T15:43:45.3249464Z [36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV[0m
+2026-10-20T15:43:45.3249657Z [36;1mfi[0m
+2026-10-20T15:43:45.3290066Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.3290289Z env:
+2026-10-20T15:43:45.3290440Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.3290620Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.3290784Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.3290963Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.3291122Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.3291305Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:45.3291467Z ##[endgroup]
+2026-10-20T15:43:45.3353120Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=11]
+2026-10-20T15:43:45.3355839Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+2026-10-20T15:43:45.3371335Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+2026-10-20T15:43:45.3371663Z [36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70[0m
+2026-10-20T15:43:45.3372076Z [36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol ]; then[0m
+2026-10-20T15:43:45.3372503Z [36;1m  if rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[89]\.'; then[0m
+2026-10-20T15:43:45.3372851Z [36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-10-20T15:43:45.3373174Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV[0m
+2026-10-20T15:43:45.3373496Z [36;1m  elif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.6[67]\.'; then[0m
+2026-10-20T15:43:45.3373837Z [36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-10-20T15:43:45.3374155Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV[0m
+2026-10-20T15:43:45.3374374Z [36;1m  fi[0m
+2026-10-20T15:43:45.3374511Z [36;1mfi[0m
+2026-10-20T15:43:45.3413173Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.3413383Z env:
+2026-10-20T15:43:45.3413535Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.3413713Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.3413879Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.3414059Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.3414215Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.3414386Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:45.3414544Z   CARGO_TERM_COLOR: always
+2026-10-20T15:43:45.3414701Z   toolchain: stable
+2026-10-20T15:43:45.3414858Z ##[endgroup]
+2026-10-20T15:43:45.3704273Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=34]
+2026-10-20T15:43:45.3708236Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+2026-10-20T15:43:45.3724125Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+2026-10-20T15:43:45.3724592Z [36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation[0m
+2026-10-20T15:43:45.3724983Z [36;1mif rustc +"$toolchain" --version --verbose | grep -q '^release: 1\.7[01]\.'; then[0m
+2026-10-20T15:43:45.3725277Z [36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV[0m
+2026-10-20T15:43:45.3725482Z [36;1mfi[0m
+2026-10-20T15:43:45.3769161Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.3769380Z env:
+2026-10-20T15:43:45.3769537Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.3769847Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.3770012Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.3770192Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.3770349Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.3770644Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:45.3770800Z   CARGO_TERM_COLOR: always
+2026-10-20T15:43:45.3770956Z   toolchain: stable
+2026-10-20T15:43:45.3771104Z ##[endgroup]
+2026-10-20T15:43:45.3956855Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=24]
+2026-10-20T15:43:45.3961539Z ##[start-action display=rustc +stable --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+2026-10-20T15:43:45.3978317Z ##[group]Run rustc +"$toolchain" --version --verbose
+2026-10-20T15:43:45.3978600Z [36;1mrustc +"$toolchain" --version --verbose[0m
+2026-10-20T15:43:45.4022804Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T15:43:45.4023050Z env:
+2026-10-20T15:43:45.4023213Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.4023424Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.4023600Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.4023797Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.4023970Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.4024177Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:45.4024344Z   CARGO_TERM_COLOR: always
+2026-10-20T15:43:45.4024511Z   toolchain: stable
+2026-10-20T15:43:45.4024668Z ##[endgroup]
+2026-10-20T15:43:45.4188533Z rustc 1.99.1 (58cf8f9c3 2026-10-13)
+2026-10-20T15:43:45.4189433Z binary: rustc
+2026-10-20T15:43:45.4190062Z commit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67
+2026-10-20T15:43:45.4190440Z commit-date: 2026-10-13
+2026-10-20T15:43:45.4190712Z host: x86_64-unknown-linux-gnu
+2026-10-20T15:43:45.4190969Z release: 1.99.1
+2026-10-20T15:43:45.4191194Z LLVM version: 23.1.1
+2026-10-20T15:43:45.4209436Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=24]
+2026-10-20T15:43:45.4673665Z ##[group]Run actions/cache@v4
+2026-10-20T15:43:45.4673878Z with:
+2026-10-20T15:43:45.4674074Z   path: ~/.cargo/bin
+~/.cargo/registry/src
+~/.local/share/afl.rs
+
+2026-10-20T15:43:45.4674415Z   key: cargo-afl-v2-Linux-7dd61539ba10b277ccedb80e84d41945d828268fb3654d1adbb312136952c80b
+2026-10-20T15:43:45.4674704Z   restore-keys: cargo-afl-Linux-
+2026-10-20T15:43:45.4674883Z   enableCrossOsArchive: false
+2026-10-20T15:43:45.4675053Z   fail-on-cache-miss: false
+2026-10-20T15:43:45.4675212Z   lookup-only: false
+2026-10-20T15:43:45.4675362Z   save-always: false
+2026-10-20T15:43:45.4675503Z env:
+2026-10-20T15:43:45.4675645Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:45.4675821Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:45.4675984Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:45.4676161Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:45.4676319Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:45.4676654Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:45.4676856Z   CARGO_TERM_COLOR: always
+2026-10-20T15:43:45.4677013Z ##[endgroup]
+2026-10-20T15:43:45.5415375Z (node:2180) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T15:43:45.5416078Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T15:43:45.7891180Z Cache hit for: cargo-afl-v2-Linux-7dd61539ba10b277ccedb80e84d41945d828268fb3654d1adbb312136952c80b
+2026-10-20T15:43:45.7968967Z (node:2180) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-20T15:43:47.0866197Z Received 7033696 of 23810912 (29.5%), 6.7 MBs/sec
+2026-10-20T15:43:47.3426290Z Received 23810912 of 23810912 (100.0%), 18.1 MBs/sec
+2026-10-20T15:43:47.3427264Z Cache Size: ~23 MB (23810912 B)
+2026-10-20T15:43:47.3442688Z [command]/usr/bin/tar -xf /home/runner/work/_temp/4e2cd060-1770-474c-a930-d7ee014bca43/cache.tzst -P -C /home/runner/work/mnesis/mnesis --use-compress-program unzstd
+2026-10-20T15:43:47.6107727Z Cache restored successfully
+2026-10-20T15:43:47.6169756Z Cache restored from key: cargo-afl-v2-Linux-7dd61539ba10b277ccedb80e84d41945d828268fb3654d1adbb312136952c80b
+2026-10-20T15:43:47.6299536Z ##[group]Run set -o pipefail
+2026-10-20T15:43:47.6299734Z [36;1mset -o pipefail[0m
+2026-10-20T15:43:47.6299996Z [36;1mafl_version="$(cargo metadata --manifest-path fuzz-afl/Cargo.toml --locked --format-version 1 |[0m
+2026-10-20T15:43:47.6300310Z [36;1m  jq -er '[.packages[] | select(.name == "afl") | .version] |[0m
+2026-10-20T15:43:47.6300579Z [36;1m    if length == 1 then .[0] else error("expected one locked afl package") end')"[0m
+2026-10-20T15:43:47.6300818Z [36;1mif [ "$EXACT_CACHE_HIT" != true ] \[0m
+2026-10-20T15:43:47.6301052Z [36;1m  || [ "$(cargo afl --version 2>/dev/null)" != "cargo-afl $afl_version" ]; then[0m
+2026-10-20T15:43:47.6301338Z [36;1m  cargo install cargo-afl --version "=$afl_version" --locked --force[0m
+2026-10-20T15:43:47.6301565Z [36;1mfi[0m
+2026-10-20T15:43:47.6345667Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:43:47.6345826Z env:
+2026-10-20T15:43:47.6345958Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:43:47.6346153Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:43:47.6346300Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:43:47.6346635Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:43:47.6346775Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:43:47.6346927Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:43:47.6347062Z   CARGO_TERM_COLOR: always
+2026-10-20T15:43:47.6347201Z   EXACT_CACHE_HIT: true
+2026-10-20T15:43:47.6347335Z ##[endgroup]
+2026-10-20T15:43:47.6444694Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-20T15:43:47.7736691Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+2026-10-20T15:43:47.7737108Z info: downloading 9 components
+2026-10-20T15:43:59.5516136Z warn: the missing active toolchain `1.99.0-x86_64-unknown-linux-gnu` has been auto-installed
+2026-10-20T15:43:59.5517092Z warn: this might cause rustup commands to take longer time to finish than expected
+2026-10-20T15:43:59.5517934Z info: you may opt out with `RUSTUP_AUTO_INSTALL=0` or `rustup set auto-install disable`
+2026-10-20T15:43:59.6001759Z [1m[92m    Updating[0m crates.io index
+2026-10-20T15:43:59.9224107Z [1m[92m Downloading[0m crates ...
+2026-10-20T15:43:59.9727588Z [1m[92m  Downloaded[0m crc32c v0.6.8
+2026-10-20T15:43:59.9739263Z [1m[92m  Downloaded[0m aligned-vec v0.6.4
+2026-10-20T15:43:59.9754419Z [1m[92m  Downloaded[0m arrayvec v0.7.8
+2026-10-20T15:43:59.9776045Z [1m[92m  Downloaded[0m bytes v1.12.1
+2026-10-20T15:43:59.9779931Z [1m[92m  Downloaded[0m afl v0.18.2
+2026-10-20T15:43:59.9788880Z [1m[92m  Downloaded[0m unicode-ident v1.0.24
+2026-10-20T15:43:59.9799107Z [1m[92m  Downloaded[0m rustc_version v0.4.1
+2026-10-20T15:43:59.9808174Z [1m[92m  Downloaded[0m equator-macro v0.4.2
+2026-10-20T15:43:59.9809086Z [1m[92m  Downloaded[0m quote v1.0.47
+2026-10-20T15:43:59.9835030Z [1m[92m  Downloaded[0m tracing-core v0.1.36
+2026-10-20T15:43:59.9850301Z [1m[92m  Downloaded[0m futures-sink v0.3.33
+2026-10-20T15:43:59.9851637Z [1m[92m  Downloaded[0m home v0.5.12
+2026-10-20T15:43:59.9857125Z [1m[92m  Downloaded[0m windows-link v0.2.1
+2026-10-20T15:43:59.9858947Z [1m[92m  Downloaded[0m equator v0.4.2
+2026-10-20T15:43:59.9878901Z [1m[92m  Downloaded[0m futures-task v0.3.33
+2026-10-20T15:43:59.9887777Z [1m[92m  Downloaded[0m once_cell v1.21.4
+2026-10-20T15:43:59.9903149Z [1m[92m  Downloaded[0m minicbor-derive v0.19.5
+2026-10-20T15:43:59.9904601Z [1m[92m  Downloaded[0m slab v0.4.12
+2026-10-20T15:43:59.9906283Z [1m[92m  Downloaded[0m futures-channel v0.3.33
+2026-10-20T15:43:59.9919542Z [1m[92m  Downloaded[0m thiserror v2.0.19
+2026-10-20T15:43:59.9921546Z [1m[92m  Downloaded[0m thiserror-impl v2.0.19
+2026-10-20T15:43:59.9922981Z [1m[92m  Downloaded[0m tracing-attributes v0.1.31
+2026-10-20T15:43:59.9925399Z [1m[92m  Downloaded[0m xdg v3.0.0
+2026-10-20T15:43:59.9926831Z [1m[92m  Downloaded[0m futures v0.3.33
+2026-10-20T15:43:59.9931397Z [1m[92m  Downloaded[0m futures-core v0.3.33
+2026-10-20T15:43:59.9937723Z [1m[92m  Downloaded[0m futures-io v0.3.33
+2026-10-20T15:43:59.9939018Z [1m[92m  Downloaded[0m minicbor v2.3.0
+2026-10-20T15:43:59.9940524Z [1m[92m  Downloaded[0m pin-project-lite v0.2.17
+2026-10-20T15:43:59.9943334Z [1m[92m  Downloaded[0m semver v1.0.28
+2026-10-20T15:43:59.9945415Z [1m[92m  Downloaded[0m proc-macro2 v1.0.107
+2026-10-20T15:43:59.9947896Z [1m[92m  Downloaded[0m memchr v2.8.3
+2026-10-20T15:43:59.9955889Z [1m[92m  Downloaded[0m syn v3.0.3
+2026-10-20T15:43:59.9969621Z [1m[92m  Downloaded[0m futures-util v0.3.33
+2026-10-20T15:43:59.9997036Z [1m[92m  Downloaded[0m syn v2.0.119
+2026-10-20T15:44:00.0023289Z [1m[92m  Downloaded[0m tracing v0.1.44
+2026-10-20T15:44:00.0041280Z [1m[92m  Downloaded[0m libc v0.2.189
+2026-10-20T15:44:00.0060011Z [1m[92m  Downloaded[0m windows-sys v0.61.2
+2026-10-20T15:44:02.3015248Z [1m[92m    Updating[0m crates.io index
+2026-10-20T15:44:02.3673839Z [1m[92m Downloading[0m crates ...
+2026-10-20T15:44:02.3996826Z [1m[92m  Downloaded[0m cargo-afl v0.18.2
+2026-10-20T15:44:02.4396116Z [1m[92m  Installing[0m cargo-afl v0.18.2
+2026-10-20T15:44:02.4397018Z [1m[33mwarning[0m: default toolchain implicitly overridden with `1.99.0-x86_64-unknown-linux-gnu` by rustup toolchain file
+2026-10-20T15:44:02.4397538Z   [1m[94m|[0m
+2026-10-20T15:44:02.4397964Z   [1m[94m= [0m[1mhelp[0m: use `cargo +stable install` if you meant to use the stable toolchain
+2026-10-20T15:44:02.4399159Z   [1m[94m= [0m[1mnote[0m: rustup selects the toolchain based on the parent environment and not the environment of the package being installed
+2026-10-20T15:44:02.4405314Z [1m[92m    Updating[0m crates.io index
+2026-10-20T15:44:02.8108379Z [1m[92m    Updating[0m crates.io index
+2026-10-20T15:44:02.8939229Z [1m[92m Downloading[0m crates ...
+2026-10-20T15:44:02.9095628Z [1m[92m  Downloaded[0m anstream v1.0.0
+2026-10-20T15:44:02.9129008Z [1m[92m  Downloaded[0m anstyle-query v1.1.5
+2026-10-20T15:44:02.9138494Z [1m[92m  Downloaded[0m anstyle-parse v1.0.0
+2026-10-20T15:44:02.9171949Z [1m[92m  Downloaded[0m anyhow v1.0.102
+2026-10-20T15:44:02.9177662Z [1m[92m  Downloaded[0m clap_derive v4.6.1
+2026-10-20T15:44:02.9198813Z [1m[92m  Downloaded[0m quote v1.0.45
+2026-10-20T15:44:02.9226972Z [1m[92m  Downloaded[0m anstyle v1.0.14
+2026-10-20T15:44:02.9236476Z [1m[92m  Downloaded[0m clap_builder v4.6.0
+2026-10-20T15:44:02.9241178Z [1m[92m  Downloaded[0m clap_lex v1.1.0
+2026-10-20T15:44:02.9243217Z [1m[92m  Downloaded[0m heck v0.5.0
+2026-10-20T15:44:02.9253960Z [1m[92m  Downloaded[0m errno v0.3.14
+2026-10-20T15:44:02.9255583Z [1m[92m  Downloaded[0m is_terminal_polyfill v1.70.2
+2026-10-20T15:44:02.9267906Z [1m[92m  Downloaded[0m colorchoice v1.0.5
+2026-10-20T15:44:02.9270134Z [1m[92m  Downloaded[0m strsim v0.11.1
+2026-10-20T15:44:02.9271642Z [1m[92m  Downloaded[0m cfg-if v1.0.4
+2026-10-20T15:44:02.9272643Z [1m[92m  Downloaded[0m utf8parse v0.2.2
+2026-10-20T15:44:02.9273950Z [1m[92m  Downloaded[0m fastrand v2.4.1
+2026-10-20T15:44:02.9285167Z [1m[92m  Downloaded[0m bitflags v2.11.1
+2026-10-20T15:44:02.9292808Z [1m[92m  Downloaded[0m proc-macro2 v1.0.106
+2026-10-20T15:44:02.9293104Z [1m[92m  Downloaded[0m clap v4.6.1
+2026-10-20T15:44:02.9318041Z [1m[92m  Downloaded[0m tempfile v3.27.0
+2026-10-20T15:44:02.9329956Z [1m[92m  Downloaded[0m getrandom v0.4.2
+2026-10-20T15:44:02.9366475Z [1m[92m  Downloaded[0m syn v2.0.117
+2026-10-20T15:44:02.9376868Z [1m[92m  Downloaded[0m rustix v1.1.4
+2026-10-20T15:44:02.9413359Z [1m[92m  Downloaded[0m libc v0.2.186
+2026-10-20T15:44:02.9489933Z [1m[92m  Downloaded[0m linux-raw-sys v0.12.1
+2026-10-20T15:44:02.9514384Z [1m[92m  Downloaded[0m cargo-afl-common v0.18.2
+2026-10-20T15:44:02.9677676Z [1m[92m   Compiling[0m proc-macro2 v1.0.106
+2026-10-20T15:44:02.9678357Z [1m[92m   Compiling[0m unicode-ident v1.0.24
+2026-10-20T15:44:02.9679048Z [1m[92m   Compiling[0m libc v0.2.186
+2026-10-20T15:44:02.9679570Z [1m[92m   Compiling[0m quote v1.0.45
+2026-10-20T15:44:03.0088376Z [1m[92m   Compiling[0m rustix v1.1.4
+2026-10-20T15:44:03.0798379Z [1m[92m   Compiling[0m getrandom v0.4.2
+2026-10-20T15:44:03.1158504Z [1m[92m   Compiling[0m anyhow v1.0.102
+2026-10-20T15:44:03.1316983Z [1m[92m   Compiling[0m heck v0.5.0
+2026-10-20T15:44:03.1492942Z [1m[92m   Compiling[0m utf8parse v0.2.2
+2026-10-20T15:44:03.1801120Z [1m[92m   Compiling[0m anstyle-parse v1.0.0
+2026-10-20T15:44:03.2098343Z [1m[92m   Compiling[0m is_terminal_polyfill v1.70.2
+2026-10-20T15:44:03.2218242Z [1m[92m   Compiling[0m colorchoice v1.0.5
+2026-10-20T15:44:03.2398019Z [1m[92m   Compiling[0m anstyle-query v1.1.5
+2026-10-20T15:44:03.2558202Z [1m[92m   Compiling[0m cargo-afl-common v0.18.2
+2026-10-20T15:44:03.2562866Z [1m[92m   Compiling[0m anstyle v1.0.14
+2026-10-20T15:44:03.3237697Z [1m[92m   Compiling[0m clap_lex v1.1.0
+2026-10-20T15:44:03.3408810Z [1m[92m   Compiling[0m strsim v0.11.1
+2026-10-20T15:44:03.4107998Z [1m[92m   Compiling[0m anstream v1.0.0
+2026-10-20T15:44:03.4783252Z [1m[92m   Compiling[0m syn v2.0.117
+2026-10-20T15:44:03.5487918Z [1m[92m   Compiling[0m clap_builder v4.6.0
+2026-10-20T15:44:03.6627656Z [1m[92m   Compiling[0m semver v1.0.28
+2026-10-20T15:44:03.8017737Z [1m[92m   Compiling[0m linux-raw-sys v0.12.1
+2026-10-20T15:44:04.0167703Z [1m[92m   Compiling[0m bitflags v2.11.1
+2026-10-20T15:44:04.1306812Z [1m[92m   Compiling[0m cfg-if v1.0.4
+2026-10-20T15:44:04.5923250Z [1m[92m   Compiling[0m rustc_version v0.4.1
+2026-10-20T15:44:05.1207987Z [1m[92m   Compiling[0m once_cell v1.21.4
+2026-10-20T15:44:05.2117865Z [1m[92m   Compiling[0m fastrand v2.4.1
+2026-10-20T15:44:05.3048474Z [1m[92m   Compiling[0m xdg v3.0.0
+2026-10-20T15:44:05.4697902Z [1m[92m   Compiling[0m tempfile v3.27.0
+2026-10-20T15:44:05.7867968Z [1m[92m   Compiling[0m clap_derive v4.6.1
+2026-10-20T15:44:06.5607905Z [1m[92m   Compiling[0m home v0.5.12
+2026-10-20T15:44:06.8708135Z [1m[92m   Compiling[0m clap v4.6.1
+2026-10-20T15:44:07.1107889Z [1m[92m   Compiling[0m cargo-afl v0.18.2
+2026-10-20T15:44:36.4509105Z [1m[92m    Finished[0m `release` profile [optimized] target(s) in 34.15s
+2026-10-20T15:44:36.4545246Z [1m[92m   Replacing[0m /home/runner/.cargo/bin/cargo-afl
+2026-10-20T15:44:36.4557886Z [1m[92m    Replaced[0m package `unknown` with `cargo-afl v0.18.2` (executable `cargo-afl`)
+2026-10-20T15:44:36.5037872Z ##[group]Run cargo afl config --build --force
+2026-10-20T15:44:36.5038119Z [36;1mcargo afl config --build --force[0m
+2026-10-20T15:44:36.5080277Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:44:36.5080436Z env:
+2026-10-20T15:44:36.5080570Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:44:36.5080733Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:44:36.5080877Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:44:36.5081038Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:44:36.5081189Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:44:36.5081341Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:44:36.5081473Z   CARGO_TERM_COLOR: always
+2026-10-20T15:44:36.5081612Z ##[endgroup]
+2026-10-20T15:44:53.2354224Z Artifacts written to /home/runner/.local/share/afl.rs/rustc-1.99.0-b940084/afl.rs-0.18.2
+2026-10-20T15:44:53.2384180Z ##[group]Run seed_dir="seeds/value_event_type"
+2026-10-20T15:44:53.2384417Z [36;1mseed_dir="seeds/value_event_type"[0m
+2026-10-20T15:44:53.2384588Z [36;1mmkdir -p "$seed_dir"[0m
+2026-10-20T15:44:53.2384930Z [36;1mrun_id="$(gh run list --workflow fuzz.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty' 2>/dev/null || true)"[0m
+2026-10-20T15:44:53.2385273Z [36;1mif [ -n "$run_id" ]; then[0m
+2026-10-20T15:44:53.2385527Z [36;1m  gh run download "$run_id" --name "corpus-libfuzzer-value_event_type" --dir "$seed_dir" || true[0m
+2026-10-20T15:44:53.2385867Z [36;1m  gh run download "$run_id" --name "corpus-afl-value_event_type" --dir "$seed_dir" || true[0m
+2026-10-20T15:44:53.2386228Z [36;1mfi[0m
+2026-10-20T15:44:53.2386629Z [36;1m# AFL requires a non-empty input dir; plant a 1-byte seed if none restored.[0m
+2026-10-20T15:44:53.2386882Z [36;1mif [ -z "$(ls -A "$seed_dir" 2>/dev/null)" ]; then[0m
+2026-10-20T15:44:53.2387098Z [36;1m  printf 'A' > "$seed_dir/seed0"[0m
+2026-10-20T15:44:53.2387249Z [36;1mfi[0m
+2026-10-20T15:44:53.2428217Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:44:53.2428365Z env:
+2026-10-20T15:44:53.2428494Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:44:53.2428651Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:44:53.2428795Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:44:53.2428952Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:44:53.2429086Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:44:53.2429236Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:44:53.2429368Z   CARGO_TERM_COLOR: always
+2026-10-20T15:44:53.2430935Z   GH_TOKEN: ***
+2026-10-20T15:44:53.2431060Z ##[endgroup]
+2026-10-20T15:44:55.2363184Z no artifact matches any of the names or patterns provided
+2026-10-20T15:44:55.2450094Z ##[group]Run cat > fuzz-afl/src/bin/value_event_type.rs <<'RS'
+2026-10-20T15:44:55.2450535Z [36;1mcat > fuzz-afl/src/bin/value_event_type.rs <<'RS'[0m
+2026-10-20T15:44:55.2450810Z [36;1mfn main() {[0m
+2026-10-20T15:44:55.2451020Z [36;1m    afl::fuzz!(|data: &[u8]| {[0m
+2026-10-20T15:44:55.2451361Z [36;1m        assert_eq!(data, b"A", "intentional saved-crash verdict control");[0m
+2026-10-20T15:44:55.2451731Z [36;1m        fuzz_common::value_event_type(data);[0m
+2026-10-20T15:44:55.2451990Z [36;1m    });[0m
+2026-10-20T15:44:55.2452174Z [36;1m}[0m
+2026-10-20T15:44:55.2452349Z [36;1mRS[0m
+2026-10-20T15:44:55.2452557Z [36;1mmkdir -p afl-control-seed[0m
+2026-10-20T15:44:55.2452826Z [36;1mprintf 'A' > afl-control-seed/seed0[0m
+2026-10-20T15:44:55.2510910Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:44:55.2511161Z env:
+2026-10-20T15:44:55.2511368Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:44:55.2511635Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:44:55.2511931Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:44:55.2512192Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:44:55.2512409Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:44:55.2512645Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:44:55.2512859Z   CARGO_TERM_COLOR: always
+2026-10-20T15:44:55.2513077Z ##[endgroup]
+2026-10-20T15:44:55.2627766Z ##[group]Run cargo afl build --release --locked --bin value_event_type
+2026-10-20T15:44:55.2628050Z [36;1mcargo afl build --release --locked --bin value_event_type[0m
+2026-10-20T15:44:55.2663743Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:44:55.2663892Z env:
+2026-10-20T15:44:55.2664019Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:44:55.2664204Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:44:55.2664351Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:44:55.2664511Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:44:55.2664652Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:44:55.2664803Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:44:55.2664940Z   CARGO_TERM_COLOR: always
+2026-10-20T15:44:55.2665088Z ##[endgroup]
+2026-10-20T15:44:57.4010529Z [1m[92m   Compiling[0m proc-macro2 v1.0.107
+2026-10-20T15:44:57.4011067Z [1m[92m   Compiling[0m unicode-ident v1.0.24
+2026-10-20T15:44:57.4067708Z [1m[92m   Compiling[0m quote v1.0.47
+2026-10-20T15:44:57.4075805Z [1m[92m   Compiling[0m semver v1.0.28
+2026-10-20T15:44:57.4527891Z [1m[92m   Compiling[0m futures-sink v0.3.33
+2026-10-20T15:44:57.4835941Z [1m[92m   Compiling[0m futures-core v0.3.33
+2026-10-20T15:44:57.5467233Z [1m[92m   Compiling[0m rustc_version v0.4.1
+2026-10-20T15:44:57.6529256Z [1m[92m   Compiling[0m thiserror v2.0.19
+2026-10-20T15:44:57.7899039Z [1m[92m   Compiling[0m futures-channel v0.3.33
+2026-10-20T15:44:57.9254347Z [1m[92m   Compiling[0m pin-project-lite v0.2.17
+2026-10-20T15:44:57.9516175Z [1m[92m   Compiling[0m futures-io v0.3.33
+2026-10-20T15:44:58.0398409Z [1m[92m   Compiling[0m futures-task v0.3.33
+2026-10-20T15:44:58.0441097Z [1m[92m   Compiling[0m crc32c v0.6.8
+2026-10-20T15:44:58.1026306Z [1m[92m   Compiling[0m memchr v2.8.3
+2026-10-20T15:44:58.2947907Z [1m[92m   Compiling[0m syn v2.0.119
+2026-10-20T15:44:58.5399406Z [1m[92m   Compiling[0m syn v3.0.3
+2026-10-20T15:44:59.0511585Z [1m[92m   Compiling[0m slab v0.4.12
+2026-10-20T15:44:59.1438350Z [1m[92m   Compiling[0m futures-util v0.3.33
+2026-10-20T15:44:59.3798789Z [1m[92m   Compiling[0m libc v0.2.189
+2026-10-20T15:44:59.9227905Z [1m[92m   Compiling[0m arrayvec v0.7.8
+2026-10-20T15:45:00.0363127Z [1m[92m   Compiling[0m home v0.5.12
+2026-10-20T15:45:00.0978512Z [1m[92m   Compiling[0m afl v0.18.2
+2026-10-20T15:45:00.3497698Z [1m[92m   Compiling[0m bytes v1.12.1
+2026-10-20T15:45:01.2547983Z [1m[92m   Compiling[0m futures v0.3.33
+2026-10-20T15:45:01.7622748Z [1m[92m   Compiling[0m xdg v3.0.0
+2026-10-20T15:45:03.9892338Z [1m[92m   Compiling[0m thiserror-impl v2.0.19
+2026-10-20T15:45:07.0799924Z [1m[92m   Compiling[0m mnesis v0.5.2 (/home/runner/work/mnesis/mnesis/crates/mnesis)
+2026-10-20T15:45:10.2475776Z [1m[92m   Compiling[0m equator-macro v0.4.2
+2026-10-20T15:45:10.2476080Z [1m[92m   Compiling[0m minicbor-derive v0.19.5
+2026-10-20T15:45:11.4686067Z [1m[92m   Compiling[0m equator v0.4.2
+2026-10-20T15:45:11.5411255Z [1m[92m   Compiling[0m aligned-vec v0.6.4
+2026-10-20T15:45:16.9607192Z [1m[92m   Compiling[0m minicbor v2.3.0
+2026-10-20T15:45:17.4384640Z [1m[92m   Compiling[0m mnesis-store v0.5.2 (/home/runner/work/mnesis/mnesis/crates/store)
+2026-10-20T15:45:17.9033397Z [1m[92m   Compiling[0m fuzz-common v0.0.0 (/home/runner/work/mnesis/mnesis/fuzz-common)
+2026-10-20T15:45:18.4013190Z [1m[92m   Compiling[0m mnesis-fuzz-afl v0.0.0 (/home/runner/work/mnesis/mnesis/fuzz-afl)
+2026-10-20T15:45:18.4850840Z [1m[92m    Finished[0m `release` profile [optimized] target(s) in 21.11s
+2026-10-20T15:45:18.4926775Z ##[group]Run set -o pipefail
+2026-10-20T15:45:18.4926992Z [36;1mset -o pipefail[0m
+2026-10-20T15:45:18.4927150Z [36;1minputs=../seeds/value_event_type[0m
+2026-10-20T15:45:18.4927363Z [36;1mif [ "value_event_type" = value_event_type ]; then[0m
+2026-10-20T15:45:18.4927561Z [36;1m  inputs=../afl-control-seed[0m
+2026-10-20T15:45:18.4927717Z [36;1mfi[0m
+2026-10-20T15:45:18.4927842Z [36;1mcargo afl fuzz \[0m
+2026-10-20T15:45:18.4927982Z [36;1m  -V 10 \[0m
+2026-10-20T15:45:18.4928116Z [36;1m  -i "$inputs" \[0m
+2026-10-20T15:45:18.4928259Z [36;1m  -o out \[0m
+2026-10-20T15:45:18.4928425Z [36;1m  target/release/value_event_type 2>&1 | tee afl.log[0m
+2026-10-20T15:45:18.4969994Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:45:18.4970147Z env:
+2026-10-20T15:45:18.4970283Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:45:18.4970447Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:45:18.4970594Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:45:18.4970774Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:45:18.4970916Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:45:18.4971065Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:45:18.4971202Z   CARGO_TERM_COLOR: always
+2026-10-20T15:45:18.4971351Z ##[endgroup]
+2026-10-20T15:45:20.5707453Z [1;92m[+] [0mEnabled environment variable AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES with value 1[0m
+2026-10-20T15:45:20.5707876Z [1;92m[+] [0mEnabled environment variable AFL_NO_AFFINITY with value 1[0m
+2026-10-20T15:45:20.5708173Z [1;92m[+] [0mEnabled environment variable AFL_SKIP_CPUFREQ with value 1[0m
+2026-10-20T15:45:22.5726107Z [1;94m[*] [0mSpinning up the fork server...[0m
+2026-10-20T15:45:22.5738104Z [1;92m[+] [0mAll right - new fork server model v1 is up.[0m
+2026-10-20T15:45:22.5738468Z [1;94m[*] [0mTarget map size: 385[0m
+2026-10-20T15:45:22.5738767Z [1;94m[*] [0mUsing SHARED MEMORY FUZZING feature.[0m
+2026-10-20T15:45:22.5738991Z [1;94m[*] [0mSpinning up the fork server...[0m
+2026-10-20T15:45:22.5748645Z [1;92m[+] [0mAll right - new fork server model v1 is up.[0m
+2026-10-20T15:45:22.5749026Z [1;94m[*] [0mTarget map size: 385[0m
+2026-10-20T15:45:22.5749347Z [1;94m[*] [0mUsing SHARED MEMORY FUZZING feature.[0m
+2026-10-20T15:45:22.5845796Z [1;93m[!] [1;97mWARNING: [0mPotentially mistyped AFL environment variable: USE_BAZEL_FALLBACK_VERSION=silent:, did you mean AFL_USE_BAZEL_FALLBACK_VERSION=silent:?[0m
+2026-10-20T15:45:22.5846692Z [0;36mafl-fuzz++4.40c[0m based on afl by Michal Zalewski and a large online community
+2026-10-20T15:45:22.5847371Z [1;92m[+] [0mAFL++ is maintained by Marc "van Hauser" Heuse, Dominik Maier, Andrea Fioraldi and Heiko "hexcoder" Eißfeldt[0m
+2026-10-20T15:45:22.5848029Z [1;92m[+] [0mAFL++ is open source, get it at https://github.com/AFLplusplus/AFLplusplus[0m
+2026-10-20T15:45:22.5848544Z [1;92m[+] [0mNOTE: AFL++ >= v3 has changed defaults and behaviours - see README.md[0m
+2026-10-20T15:45:22.5849017Z [1;92m[+] [0mNo -M/-S set, autoconfiguring for "-S default"[0m
+2026-10-20T15:45:22.5849382Z [1;94m[*] [0mGetting to work...[0m
+2026-10-20T15:45:22.5849758Z [1;92m[+] [0mUsing exploration-based constant power schedule (EXPLORE)[0m
+2026-10-20T15:45:22.5850126Z [1;92m[+] [0mCmpLog level: 2[0m
+2026-10-20T15:45:22.5850428Z [1;92m[+] [0mEnabled testcache with 50 MB[0m
+2026-10-20T15:45:22.5850805Z [1;92m[+] [0mGenerating fuzz data with a length of min=1 max=1048576[0m
+2026-10-20T15:45:22.5851228Z [1;92m[+] [0mFrameShift status: enabled (10% overhead configured)[0m
+2026-10-20T15:45:22.5851583Z [1;94m[*] [0mChecking core_pattern...[0m
+2026-10-20T15:45:22.5851749Z
+2026-10-20T15:45:22.5851971Z [1;91m[-] [0mYour system is configured to send core dump notifications to an
+2026-10-20T15:45:22.5852388Z     external utility. This will cause issues: there will be an extended delay
+2026-10-20T15:45:22.5852806Z     between stumbling upon a crash and having this information relayed to the
+2026-10-20T15:45:22.5853155Z     fuzzer via the standard waitpid() API.
+2026-10-20T15:45:22.5853690Z     If you're just experimenting, set 'AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1'.
+2026-10-20T15:45:22.5853856Z
+2026-10-20T15:45:22.5853951Z     To avoid having crashes misinterpreted as timeouts, please
+2026-10-20T15:45:22.5854196Z     temporarily modify /proc/sys/kernel/core_pattern, like so:
+2026-10-20T15:45:22.5854337Z
+2026-10-20T15:45:22.5854423Z     echo core | sudo tee /proc/sys/kernel/core_pattern
+2026-10-20T15:45:22.5854732Z [1;92m[+] [0mLooks like we're not running on a tty, so I'll be a bit less verbose.[0m
+2026-10-20T15:45:22.5855043Z [1;92m[+] [0mYou have 4 CPU cores and 1 runnable tasks (utilization: 25%).[0m
+2026-10-20T15:45:22.5855368Z [1;92m[+] [0mTry parallel jobs - see docs/fuzzing_in_depth.md#c-using-multiple-cores[0m
+2026-10-20T15:45:22.5855642Z [1;94m[*] [0mSetting up output directories...[0m
+2026-10-20T15:45:22.5855907Z [1;93m[!] [1;97mWARNING: [0mNot binding to a CPU core (AFL_NO_AFFINITY set).[0m
+2026-10-20T15:45:22.5856160Z [1;94m[*] [0mValidating target binary...[0m
+2026-10-20T15:45:22.5856519Z [1;92m[+] [0m[1;95mPersistent mode binary detected.[0m
+2026-10-20T15:45:22.5856807Z [1;92m[+] [0m[1;95mDeferred forkserver binary detected.[0m
+2026-10-20T15:45:22.5857037Z [1;94m[*] [0mScanning '../afl-control-seed'...[0m
+2026-10-20T15:45:22.5857262Z [1;94m[*] [0mCreating hard links for all input files...[0m
+2026-10-20T15:45:22.5857482Z [1;92m[+] [0mLoaded a total of 1 seeds.[0m
+2026-10-20T15:45:22.5857677Z [1;94m[*] [0mValidating target binary...[0m
+2026-10-20T15:45:22.5857890Z [1;92m[+] [0m[1;95mPersistent mode binary detected.[0m
+2026-10-20T15:45:22.5858118Z [1;92m[+] [0m[1;95mDeferred forkserver binary detected.[0m
+2026-10-20T15:45:22.5858336Z [1;94m[*] [0mSpawning cmplog forkserver[0m
+2026-10-20T15:45:22.5858549Z [1;92m[+] [0mCMPLOG forkserver successfully started[0m
+2026-10-20T15:45:22.5858786Z [1;94m[*] [0mNo auto-generated dictionary tokens to reuse.[0m
+2026-10-20T15:45:22.5859069Z [1;94m[*] [0mAttempting dry run with 'id:000000,time:0,execs:0,orig:seed0'...[0m
+2026-10-20T15:45:22.5859485Z [1;93m[!] [1;97mWARNING: [0minstability detected during calibration: out/default/queue/id:000000,time:0,execs:0,orig:seed0[0m
+2026-10-20T15:45:22.5860041Z [1;90m    len = 1, map size = 28, exec speed = 48 us, hash = 68dc535ad8e8d1aa
+2026-10-20T15:45:22.5860294Z [0m[1;92m[+] [0mAll test cases processed.[0m
+2026-10-20T15:45:22.5860496Z [1;92m[+] [0mHere are some useful stats:
+2026-10-20T15:45:22.5860605Z
+2026-10-20T15:45:22.5860740Z [1;90m    Test case count : [0m1 favored, 1 variable, 0 ignored, 1 total
+2026-10-20T15:45:22.5861011Z [1;90m       Bitmap range : [0m28 to 28 bits (average: 28.00 bits)
+2026-10-20T15:45:22.5861258Z [1;90m        Exec timing : [0m48 to 48 us (average: 48 us)
+2026-10-20T15:45:22.5861443Z [0m
+2026-10-20T15:45:22.5861653Z [1;94m[*] [0mNo -t option specified, so I'll use an exec timeout of 20 ms.[0m
+2026-10-20T15:45:22.5861900Z [1;92m[+] [0mAll set and ready to roll![0m
+2026-10-20T15:45:22.5862547Z [1;94m[*] [0mFuzzing test case #0 (1 total, 0 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=0, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:00, cvg=7.53%) FS (t=0:00:00:00 (0.00%), st=0, avg=0 ms, found=0/0)...[0m
+2026-10-20T15:45:23.7132974Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:01, cvg=7.53%) FS (t=0:00:00:00 (10.28%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:24.5876004Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:02, cvg=7.53%) FS (t=0:00:00:00 (5.80%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:25.4384460Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:02, cvg=7.53%) FS (t=0:00:00:00 (4.07%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:25.9266902Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:03, cvg=7.53%) FS (t=0:00:00:00 (3.47%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:27.2581566Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:04, cvg=7.53%) FS (t=0:00:00:00 (2.48%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:28.5365903Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:05, cvg=7.53%) FS (t=0:00:00:00 (1.95%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:29.1703242Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:06, cvg=7.53%) FS (t=0:00:00:00 (1.76%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:30.2610033Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:07, cvg=7.53%) FS (t=0:00:00:00 (1.51%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:31.1568239Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:08, cvg=7.53%) FS (t=0:00:00:00 (1.35%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:32.5701587Z [1;94m[*] [0mFuzzing test case #0 (1 total, [0;31m3 crashes saved[0m, state: started :-), mode=explore, perf_score=100, weight=1, favorite=1, was_fuzzed=1, exec_us=48, hits=0, map=28, ascii=0, run_time=0:00:00:09, cvg=7.53%) FS (t=0:00:00:00 (1.16%), st=2, avg=116 ms, found=0/1)...[0m
+2026-10-20T15:45:32.6147096Z [?25h[1;91m
+2026-10-20T15:45:32.6166784Z
+2026-10-20T15:45:32.6175586Z +++ Testing aborted programmatically +++
+2026-10-20T15:45:32.6177944Z [0m[1;93m[!] [0mTime limit was reached
+2026-10-20T15:45:32.6194162Z [1;94m[*] [0mStatistics: 0 new corpus items found, 7.53% coverage achieved, 3 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 0 min, 10 sec[0m
+2026-10-20T15:45:32.6195029Z [1;94m[*] [0mWriting out/default/fastresume.bin ...[0m
+2026-10-20T15:45:32.6195896Z [1;92m[+] [0mfastresume.bin successfully written with 1953 bytes.[0m
+2026-10-20T15:45:32.6196545Z [1;92m[+] [0mWe're done here. Have a nice day!
+2026-10-20T15:45:32.6196939Z [0m
+2026-10-20T15:45:32.6226555Z ##[group]Run shopt -s nullglob
+2026-10-20T15:45:32.6226840Z [36;1mshopt -s nullglob[0m
+2026-10-20T15:45:32.6227080Z [36;1mfor crash in out/*/crashes/*; do[0m
+2026-10-20T15:45:32.6227369Z [36;1m  if [ -f "$crash" ] && [ "${crash##*/}" != README.txt ]; then[0m
+2026-10-20T15:45:32.6227701Z [36;1m    printf '::error::AFL saved a crash: %s\n' "$crash"[0m
+2026-10-20T15:45:32.6227977Z [36;1m    exit 1[0m
+2026-10-20T15:45:32.6228158Z [36;1m  fi[0m
+2026-10-20T15:45:32.6228329Z [36;1mdone[0m
+2026-10-20T15:45:32.6281839Z shell: /usr/bin/bash -e {0}
+2026-10-20T15:45:32.6282069Z env:
+2026-10-20T15:45:32.6282266Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:45:32.6282507Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:45:32.6282719Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:45:32.6282962Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:45:32.6283170Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:45:32.6283395Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:45:32.6283634Z   CARGO_TERM_COLOR: always
+2026-10-20T15:45:32.6283834Z ##[endgroup]
+2026-10-20T15:45:32.6381554Z ##[error]AFL saved a crash: out/default/crashes/id:000000,sig:06,src:000000,time:116,execs:15,op:(null),pos:0
+2026-10-20T15:45:32.6391983Z ##[error]Process completed with exit code 1.
+2026-10-20T15:45:32.6464736Z ##[group]Run actions/upload-artifact@v4
+2026-10-20T15:45:32.6464974Z with:
+2026-10-20T15:45:32.6465153Z   name: crashes-afl-value_event_type
+2026-10-20T15:45:32.6465387Z   path: fuzz-afl/out/default/crashes/
+2026-10-20T15:45:32.6465618Z   if-no-files-found: ignore
+2026-10-20T15:45:32.6465825Z   compression-level: 6
+2026-10-20T15:45:32.6466011Z   overwrite: false
+2026-10-20T15:45:32.6466198Z   include-hidden-files: false
+2026-10-20T15:45:32.6467029Z env:
+2026-10-20T15:45:32.6467209Z   FUZZ_TOOLCHAIN: nightly-2026-10-02
+2026-10-20T15:45:32.6467436Z   AFL_SKIP_CPUFREQ: 1
+2026-10-20T15:45:32.6467637Z   AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: 1
+2026-10-20T15:45:32.6467864Z   AFL_NO_AFFINITY: 1
+2026-10-20T15:45:32.6468082Z   CARGO_HOME: /home/runner/.cargo
+2026-10-20T15:45:32.6468292Z   CARGO_INCREMENTAL: 0
+2026-10-20T15:45:32.6468482Z   CARGO_TERM_COLOR: always
+2026-10-20T15:45:32.6468687Z ##[endgroup]
+2026-10-20T15:45:32.8347529Z (node:9758) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T15:45:32.8378061Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T15:45:32.8887136Z With the provided path, there will be 4 files uploaded
+2026-10-20T15:45:32.8967128Z Artifact name is valid!
+2026-10-20T15:45:32.9027002Z Root directory input is valid!
+2026-10-20T15:45:32.9051192Z ##[error]The path for one of the files in artifact is not valid: /id:000000,sig:06,src:000000,time:116,execs:15,op:(null),pos:0. Contains the following character:  Colon :
+
+Invalid characters include:  Double quote ", Colon :, Less than <, Greater than >, Vertical bar |, Asterisk *, Question mark ?, Carriage return \r, Line feed \n
+
+The following characters are not allowed in files that are uploaded due to limitations with certain file systems such as NTFS. To maintain file system agnostic behavior, these characters are intentionally not allowed to prevent potential problems with downloads on different file systems.
+
+2026-10-20T15:45:32.9250426Z Post job cleanup.
+2026-10-20T15:45:33.0194911Z [command]/usr/bin/git version
+2026-10-20T15:45:33.0268570Z git version 2.55.0
+2026-10-20T15:45:33.0341391Z Temporarily overriding HOME='/home/runner/work/_temp/d9163505-dfcd-4e41-9966-1b44ada97d3e' before making global git config changes
+2026-10-20T15:45:33.0387469Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T15:45:33.0407285Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/mnesis/mnesis
+2026-10-20T15:45:33.0422834Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T15:45:33.1088083Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T15:45:33.2057971Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T15:45:33.2072777Z http.https://github.com/.extraheader
+2026-10-20T15:45:33.2110708Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-20T15:45:33.2178904Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T15:45:33.2796762Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T15:45:33.2881476Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T15:45:33.3454283Z Cleaning up orphan processes
+2026-10-20T15:45:33.3866619Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4, actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

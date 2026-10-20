@@ -1,0 +1,6 @@
+info: --no-dev-deps modifies real `Cargo.toml` while cargo-hack is running and restores it when finished
+info: running `cargo check --lib --offline` on mnesis-wake (1/1)
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-feature-checks/crates/workspace-hack)
+    Checking mnesis-store v0.5.1 (/private/tmp/mnesis-feature-checks/crates/store)
+    Checking mnesis-wake v0.5.1 (/private/tmp/mnesis-feature-checks/crates/wake)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s

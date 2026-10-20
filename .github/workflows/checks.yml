@@ -53,6 +53,7 @@ jobs:
           - mnesis-wake-nostd
           - mnesis-inmemory
           - mnesis-fjall
+          - mnesis-postgres
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -60,8 +61,27 @@ jobs:
       - name: Install repository toolchain
         run: rustup show active-toolchain
 
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
       - name: Check isolated libraries and unit harnesses
-        run: python3 scripts/check-features.py "${{ matrix.package }}"
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          nix develop --command bash -euo pipefail <<'SH'
+            cargo fetch --locked
+            cargo hakari disable
+            cargo hack check -p "$PACKAGE" --lib --offline --each-feature --no-dev-deps
+            cargo hakari generate
+            git diff --exit-code
+            cargo test -p "$PACKAGE" --lib --locked
+            cargo test -p "$PACKAGE" --lib --locked --no-default-features
+            cargo test -p "$PACKAGE" --lib --locked --all-features
+          SH
 
   feature-isolation-gate:
     name: Feature isolation
