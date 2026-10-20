@@ -10273,3 +10273,15 @@ private cluster path/tmp/mnesis-pg9-registry-native-053-dbpath retained. No loca
 test/database workload active. Required product release and consumer acceptance
 pass; final focused documentation/evidence protected merge remains before goal
 completion. Preserve unrelated managed changelogPR408 and all prior work.
+
+Final documentation normal hook result:
+Final record hook actual replay2/1/1PASS1s each; each invocation reviewed three ways: owned replay/parser corpus invariant, actual completed command/count in /tmp/mnesis-postgres-publication-record-replay.log and hook's building marker, unchanged source/corpus/assertions/timebox. No native Postgres credit. Normal source includes the new JSON receipt under the unchanged fileFilter, so the gate rebuild is retained; no rename/filter/gate bypass. Whole hook and workspace nextest still pending.
+Final record hook workspace1594PASS596.223s/15slow/4existing compile exclusions; release compilation1m44s excluded. ONE actual invocation received three independent reviews after execution: owned workspace protocol/property/lifecycle/resilience invariants and original-defect falsifiers; actual completed nextest count/result in /tmp/mnesis-postgres-publication-record-nextest.log, no native credit for guarded DB bodies; unchanged production/source/assertions/selection/deadlines, only documentation/evidence data added. Product fingerprintdc45 remains unchanged. Cross-target outputs still pending, whole hook not yet credited complete. Existing CI configuration explicitly ignores main pushes; no missing main-push CI run is inferred from the empty API listing.
+The complete normal hook then passes all12declared host checks, including
+no_std/store-no_std/WebAssembly. Its new JSON receipt is included by the
+unchanged fixture source filter; the resulting rebuild and actual596.223s
+workspace run are retained. No source/filter/assertion/deadline/gate is weakened.
+The evidence-only follow-up changes no filtered build input; cached results add
+zero runtime credit. PR409 must pass current-head protected CI and merge before
+the persistent goal is marked complete. CI explicitly ignores main pushes, so
+no nonexistent main-push test execution is credited or awaited.

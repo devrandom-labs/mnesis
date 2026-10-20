@@ -34,3 +34,10 @@ review history /tmp/mnesis-postgres-publication-notes.md is appended to research
 External clean consumers /tmp/mnesis-pg9-registry-{compile,native}-053 retain exact
 source/lock/metadata; database path /tmp/mnesis-pg9-registry-native-053-dbpath.
 No local gate/native workload is active before this record's normal signed hook.
+
+Final record PR409 is open. Its initial normal signed hook passed all12checks,
+workspace1594PASS596.223s/15slow/4existing compiler exclusions plus replay2/1/1;
+each actual invocation THREEreviewed. JSON receipt inclusion explains rebuild,
+no source/filter/gate changes. Follow-up records these results only, same filtered
+source; normal cached reuse gives no new runtime credit. Complete exact-head
+PR409CI/threads/tree/normal squash, then mark persistent goal complete.
