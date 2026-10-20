@@ -1312,3 +1312,34 @@ Retain every raw measurement, differentiate generic diagnostics from ordinary
 latency and record variation/saturation. No production optimization is supported
 by these same-product baseline/observer results; final gate checks benchmark
 compilation and original allocator owners. Actual model runs already passed.
+
+Final documentation minimization,2026-10-20: fresh owner-contract read finds
+EventExporter blanket documentation incorrectly claims every adapter stream is
+concrete/unboxed, while Postgres intentionally uses bounded BoxStream. An adjacent
+StreamLister implementation example still says Postgres SELECT DISTINCT, whereas
+its retained implementation pages native keys with EXISTS. Correct/remove these
+two implementation claims in their existing owner, not behavior or interface.
+Budget BEFORE edit: crates/store/src/export.rs<=4added/7removed comment-only lines;
+zero executable Rust/public API/dependency/schema/test changes. Falsifier: doc
+diff changes behavior, weakens bounded-memory/view guarantees, or leaves a false
+universal allocation promise. No new mirror test for prose; normal doc/format/
+full signed gate remains. First source-audit pass found these minor doc issues,
+so it is not counted as one of the two final clean audits.
+
+Final report accuracy also removes the legacy AFL upload comment that its crash
+directory exists only after a crash. The real corrected control's other clean
+jobs produce empty-directory archives, so artifact presence alone is not a crash.
+Budget before comment edit: existing fuzz.yml<=2added/4removed comment-only lines,
+no change to archive/verdict/always()/inputs/engines. Existing live clean/control
+evidence already establishes behavior; no new mirror test or runtime rerun.
+
+Final delivery grouping refinement (2026-10-20): retain the reviewed capacity
+benchmark budget unchanged (690/700 lines; manifest4/6; README19/20), and include
+the already preregistered comment-only minimization plus final acceptance/status
+records in the same completion PR407. This avoids a separate source-comment PR
+without combining executable behavior changes. Additional production budget is
+export.rs2added/4removed comments; workflow2added/4removed comments. No new API,
+dependency, runtime or test assertion. Existing complete source audits remain
+valid only while the production fingerprint stays dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
+Normal signed gate/current-head protected CI still required; publication and
+exact registry consumer remain separate observable delivery requirements.

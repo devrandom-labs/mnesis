@@ -1,6 +1,6 @@
 # Postgres status and dependencies
 
-Updated: 2026-10-19. Requirements and observable acceptance live in the
+Updated: 2026-10-20. Requirements and observable acceptance live in the
 [Postgres PRD](../prds/postgres.md); detailed checks and three reviews after every
 run live in the [research record](../prds/postgres/research.md). A focused merge
 or local pass does not establish whole-adapter delivery.
@@ -8,18 +8,18 @@ or local pass does not establish whole-adapter delivery.
 | ID | Requirement | State | Blocked by | Unblocks |
 | --- | --- | --- | --- | --- |
 | PG0 | Real-database reproduction, baseline and contract decisions | feature-complete | — | PG1, PG2, PG3, PG4 |
-| PG1 | Bounded reads and stable positions | active | PG0 | PG5, PG7, PG8 |
-| PG2 | Recovery without notifications | active | PG0 | PG5, PG8 |
-| PG3 | Transaction outcomes and retry safety | active | PG0 | PG5, PG6, PG8 |
-| PG4 | Schema, migrations and representation | active | PG0 | PG5, PG6, PG7, PG8 |
-| PG5 | Atomic writes and import | active | PG1, PG2, PG3, PG4 | PG7, PG9 |
-| PG6 | Aggregate snapshots and projection state | active | PG3, PG4 | PG7, PG9 |
-| PG7 | Export, backup and restore | active | PG1, PG4, PG5, PG6 | PG9 |
-| PG8 | Secure operation, lifecycle and capacity | active | PG1, PG2, PG3, PG4 | PG9 |
+| PG1 | Bounded reads and stable positions | feature-complete | PG0 | PG5, PG7, PG8 |
+| PG2 | Recovery without notifications | feature-complete | PG0 | PG5, PG8 |
+| PG3 | Transaction outcomes and retry safety | feature-complete | PG0 | PG5, PG6, PG8 |
+| PG4 | Schema, migrations and representation | feature-complete | PG0 | PG5, PG6, PG7, PG8 |
+| PG5 | Atomic writes and import | feature-complete | PG1, PG2, PG3, PG4 | PG7, PG9 |
+| PG6 | Aggregate snapshots and projection state | feature-complete | PG3, PG4 | PG7, PG9 |
+| PG7 | Export, backup and restore | feature-complete | PG1, PG4, PG5, PG6 | PG9 |
+| PG8 | Secure operation, lifecycle and capacity | feature-complete | PG1, PG2, PG3, PG4 | PG9 |
 | PG9 | Complete verification, minimization and delivery | active | PG5, PG6, PG7, PG8 | — |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
 
-Delivery update2026-10-19: 24 focused changes are protected-merged through PR402
+Historical delivery update2026-10-19: 24 focused changes are protected-merged through PR402
 at5b868028. Release39312731245 published mnesis-postgres0.5.1; the primary sparse
 registry confirms it is not yanked. This publishes a subset. Diagnostics are
 merged; full soak/capacity, operator recovery measurements, remaining feature
@@ -222,3 +222,18 @@ crash verdict. Normal gate, actual Linux feature execution, real AFL negative
 control and protected delivery remain. A clean registry .5.2 seven-profile build
 and private native checkpoint/reopen/resume consumer pass; final acceptance,
 publication revision and registry evidence must still match the final delivery.
+
+Current acceptance, 2026-10-20: [per-requirement evidence](../prds/postgres/acceptance.md)
+maps every PG0–PG9 item to its owner and actual verification. PG0–PG8 are
+feature-complete; PG8 capacity has all12native fixtures/864timed windows and
+96plan observations, with protected integration pending. PR406 is protected-
+merged at c1ec43ed (expected/actual tree c92a4e6399986474e46e6bad7d10e3a46782b09d):
+42successful checks, zero unresolved review threads, complete actual native
+all/default/export/import/projection/snapshot/tracing suites264/149/168/176/
+173/174/150, each zero skips and owning mandatory-law checks. Real AFL saved-
+crash control proves a zero engine exit still fails the verdict and retains all
+three crash files in uploaded artifact12279449876; intentional-crash source is
+never merged. Two fresh complete source/contract audits found no outstanding
+high-value hypothesis; final changes correct two inaccurate owner comments.
+PG9 remains active until final protected merge, publication and exact clean
+registry-native consumer. Earlier published0.5.2 evidence does not complete it.

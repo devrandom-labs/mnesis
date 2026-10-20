@@ -133,8 +133,6 @@ impl<S: ConsistentExporter> ConsistentExporter for Store<S> {
 /// Lazy and async, mirroring [`RawEventStore::read_all`]: a store with many
 /// streams streams its ids rather than materializing them all.
 ///
-/// Adapters back this with whatever index already tracks streams (fjall: its
-/// `streams` partition; in-memory: its map; postgres: `SELECT DISTINCT`).
 pub trait StreamLister: RawEventStore {
     /// The stream of stream ids.
     type StreamList: Stream<Item = Result<StreamKey, Self::Error>> + Send + 'static;
@@ -183,8 +181,8 @@ pub trait EventExporter: RawEventStore {
 ///
 /// `export_stream` forwards to [`RawEventStore::read_stream`] unchanged, so the
 /// associated [`ExportStream`](EventExporter::ExportStream) is the adapter's
-/// own [`Stream`](RawEventStore::Stream) type: a concrete, monomorphized
-/// cursor with no boxing, no dynamic dispatch, and no per-event transform.
+/// own [`Stream`](RawEventStore::Stream), with its allocation and dispatch choices.
+/// Forwarding adds no per-event transform.
 impl<S: RawEventStore> EventExporter for S {
     type ExportStream = S::Stream;
 
