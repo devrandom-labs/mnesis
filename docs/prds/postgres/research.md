@@ -9380,3 +9380,12 @@ unchanged by this proof or candidate; no whole-repository actionlint pass is
 claimed. Changed checks.yml and fuzz.yml pass targeted actionlint, including the
 proof-only workflow injection; no lint suppression/configuration change. This is
 static workflow syntax evidence only, not execution of the actual crash control.
+
+First real control engine0/verdict1 proves rejection but native-colon names break
+upload, so it is incomplete. Second proof uses byte-identical normal packaging
+step: standard tar/gzip retains out/*/crashes paths and original bytes under
+portable archive filename. Removing only registered harness/seed injection yields
+exact normal candidate workflow, independently compared before dispatch. No
+threshold, time limit, assertion, engine, seed/corpus handling or artifact rule
+outside this explicit packaging repair changes. Keep first red and repeat actual
+10s engine/control after normal signed hook; archive content inspection required.
