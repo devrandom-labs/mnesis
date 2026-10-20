@@ -1343,3 +1343,13 @@ dependency, runtime or test assertion. Existing complete source audits remain
 valid only while the production fingerprint stays dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
 Normal signed gate/current-head protected CI still required; publication and
 exact registry consumer remain separate observable delivery requirements.
+
+Final publication record budget (2026-10-20): eight documentation/research owners
+and at most six evidence artifacts; no production, test, manifest, lock or
+workflow change. Revise the initial 1000-line estimate to 1400 added record and
+evidence lines before editing: the actual selected CI transcript is267lines,
+registry compile207lines, native39lines, and the independently executed consumer
+source105lines, before identity/publication receipts and required three-review
+records. Preserve these receipts rather than reduce verification. Delivery.md
+remains at most100lines. Normal signed hook and protected CI remain required;
+cached output gives no additional runtime credit.

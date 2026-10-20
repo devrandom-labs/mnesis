@@ -1,0 +1,93 @@
+{
+  "published_commit": "9c46ec7535f935154e4a70bd0b9fa72bcc54a21d",
+  "tag_object": "2e30e4d4b154ddbbe3182b33dcfcc271d638d53d",
+  "primary_registry": [
+    {
+      "name": "mnesis-fjall",
+      "vers": "0.5.3",
+      "cksum": "f2f91d9f7e08d6e5c8b34455e0d6ad678c05075eadc193c384777db7ae7743da",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-inmemory",
+      "vers": "0.5.3",
+      "cksum": "c896fac20b8ad2ab1dc5d2d1b872b648b56b117bc43aaf36bcefef450d8fa85f",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-macros",
+      "vers": "0.5.3",
+      "cksum": "bd466044edc94561827dd0d810e663dca373b1efbc9546c9c7fdb0511fc9e4af",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-postgres",
+      "vers": "0.5.3",
+      "cksum": "64a900d42938d753ad332faf351dd2a0d5c75deb9b887798fc9ca2c791e233a4",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-store-testing",
+      "vers": "0.5.3",
+      "cksum": "5ec731bb5f56d6a3ca7972ab6561ea7f34bd99c58927d87e6ce515c1e6880e14",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-store",
+      "vers": "0.5.3",
+      "cksum": "90f1398a6e961fe1629c87eb9189dd6cda13f72bdb2f88f3c38067ea453609ea",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-wake-nostd",
+      "vers": "0.5.3",
+      "cksum": "12221ee7299d8d4779f3ed12f76e89d895ee9b6cf349cbba62a93d7d29d0fc19",
+      "yanked": false
+    },
+    {
+      "name": "mnesis-wake",
+      "vers": "0.5.3",
+      "cksum": "d3ca92fd36d72074ee5e84045a5da60042a2bcbb8b4bad11810767312f150588",
+      "yanked": false
+    },
+    {
+      "name": "mnesis",
+      "vers": "0.5.3",
+      "cksum": "efb0f66cc6897588bb330a544b09f33594ffa0205206f6780aef2ef86aa619d4",
+      "yanked": false
+    }
+  ],
+  "runtime_graph": [
+    {
+      "name": "mnesis",
+      "version": "0.5.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index"
+    },
+    {
+      "name": "mnesis-postgres",
+      "version": "0.5.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index"
+    },
+    {
+      "name": "mnesis-store",
+      "version": "0.5.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index"
+    },
+    {
+      "name": "mnesis-wake",
+      "version": "0.5.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index"
+    }
+  ],
+  "source_comparison": "All four runtime source trees and PostgreSQL migrations equal the protected publication commit; all four cargo_vcs_info commits match.",
+  "consumer": {
+    "nextest_run": "06f08e59-2e2b-48ab-a316-efb8dd3fd036",
+    "result": "1PASS0.076s0skip",
+    "server": "PostgreSQL18.6/fsync=on/full_page_writes=on/synchronous_commit=on",
+    "backends_after_exit": 0,
+    "waited_shutdown": "success",
+    "manifest_sha256": "3921fecfdf68a520ea29d17d6edf98e896a54ad795c77edf6983d56e136c0e08",
+    "lock_sha256": "9598e66552b8fdeb2fdce6b00be89f374faafd419e8c436b02edef8bdbb58569",
+    "source_sha256": "38373adfbf228509e9431a74ea1a9afe3f7bd0b94dc168cab5814048f4c16036"
+  }
+}
