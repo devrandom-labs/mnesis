@@ -8995,3 +8995,216 @@ pass. The same full normal hook exits0. Raw
 /tmp/mnesis-pg8-soak-record-{hook,nextest,replay}.log. Final evidence-only amendment
 immediately afterward must still use the normal signed gate; inspect actual
 cache result before claiming zero additional runtime. Functional source stays.
+## Capacity preparation compiler baseline
+
+First strict all/all check exits101: actual E0308 BatchSize expectsusize, and
+SQLx0.9 requires its supported dynamic-query builder instead of an ordinary
+String argument. No native benchmark ran. Three reviews: owning selected API/
+target contracts; actual compiler-only failures with zero runtime evidence;
+unchanged lints/selection/assertions. Rustfmt643lines remains within700budget.
+Original shell creation command initially lacked the benches directory and wrote
+no file; directory creation corrected before source addition, zero test credit.
+Defer native capacity until the failed soak's finite-visibility assumption is
+resolved and the full soak succeeds. Original reds remain raw, not suppressed.
+
+Second capacity strict check reaches linting and fails writes96/80lines and one
+missing statement semicolon. Three reviews: selected strict shape/ownership;
+actual compiler-only red/zero benchmark runtime; no lint/assertion/selection
+relaxation. Extract the real concurrent writer cohort for reuse in warmup and
+measurements, retaining unknown-error rejection and exact winner counts. The
+soak's visibility finding also requires seed quiescence before finite-history
+measurements: wait for the native cutoff to exceed the newest seeded transaction,
+record the wait separately, never assume acknowledgement implies eligibility.
+This is setup only, not a stronger production visibility or latency guarantee.
+
+Capacity third strict all-feature/all-target checkPASS2.88s,693/700Rustlines.
+Three reviews: exact advertised compilation/target contract; actual compiler
+execution only, zero native capacity runtime; unchanged strict lint levels and
+all assertions/inputs. Shared writer cohort now validates exact winners and
+rejects every non-conflict error, and is reused for untimed warmup. Seed setup
+waits for native eligibility, separately from measurements. Still prepare docs,
+source integration, current native smoke/falsifiers/full matrix and delivery.
+
+Capacity WIP preserved in retained stash58c04f27bc49e8ba7872534c9c816ed9a2f41f31
+before integration onto protected5b868028 (.5.1). Only append/append research
+conflict: retain complete protected prefix byte-identically, followed by all
+capacity compiler evidence; no production source changes. Current bench685/700
+lines after sharing nearest-rank percentile authority, reporting operations/sec
+and actual native row growth per append window. README16/18lines documents
+matrix and measurement limits. No new capacity test/benchmark run yet; full
+native soak remains the sole active local database workload. Stash retained.
+
+Current protected capacity strict check fails only missing_const_for_fn on the
+new shared percentile helper. Three reviews: selected strict target/API contract;
+actual compiler-only red with zero native measurement; original lints and all
+workloads/assertions preserved. Mark that pure helper const as requested by
+pinned Clippy; no suppression or threshold change. Raw
+/tmp/mnesis-pg8-capacity-protected-check.log. No capacity benchmark has run yet.
+
+Current protected capacity compilation nowPASS13.42s with shared const percentile
+helper. Three reviews: actual selected .5.1 all-feature/all-target contract;
+completed compiler execution only, zero native measurement/capacity credit;
+unchanged strict lints, matrix inputs/sample thresholds/model/memory bounds and
+no production/API/dependency change.685/700source, README17/18lines, existing
+allocator4churnlines. Native10k smoke then full matrix must follow sole active
+soak. Rejected compiler red remains retained. Raw
+/tmp/mnesis-pg8-capacity-const-check.log.
+
+Capacity optimized benchmark compiles11.48s with --no-run on protected.5.1,
+no benchmark execution. Three reviews: actual default adapter benchmark target
+and selected APIs; real optimized compilation/artifact only (zero capacity or
+runtime credit); source6ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55,
+unchanged assertions/limits/profile. Artifact reported by Cargo JSON:
+/Users/joel/orca/workspaces/nexus/main/target/release/deps/capacity-4117bc1a0d839cb6.
+Compile output/tmp/mnesis-pg8-capacity-{artifacts.jsonl,release-build.log}.
+Read actual page/store SQL before measurement: initial stream text matches
+observer's WHERE stream_id prefix; native global-resume tuple matches observer;
+continuation-only stream shape is explicitly excluded. Plans still require all
+three real prepared shapes at runtime. RSS snapshots/model overhead labeled;
+external OS time scope is whole-command resources, not isolated client peak.
+
+Capacity preserved in retained stash before moving from5b86 to concurrent user
+release4039e5ceeb3af789cff282136e635f6e295f3bf9e58 (.5.2). Rebase/stash apply
+succeed without conflicts. Existing benchmark SHA2566ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55
+still compares exactly; production Rust matches protected main. New version/lock/
+changelog work preserved. Old .5.1 optimized artifact is NOT current .5.2 build
+or runtime evidence; compile current graph after workload full gate terminal,
+then native smoke/full matrix. Still ZERO native capacity measurements.
+
+Current .5.2 capacity source passes fmt/strict all-feature/all-targets20.19s and
+optimized --no-run5.71s. Three reviews for EACH compiler command: current selected
+version/target graph; actual compiler completion only (zero benchmark/native
+credit); unchanged source6ea3..., lints/inputs/assertions/limits and preserved
+.5.2 release metadata. Cargo artifact reports capacity-d4d8b8efa57b1ad6. Begin
+MNESIS_CAPACITY_EVENTS=10000 native smoke after local gate terminal; all other
+axes/windows/sample counts stay. This is not the full10k/100k/1m matrix.
+
+## First native capacity smoke completes
+
+Current protected.5.2 process31754 TERMINAL0. Four10k-event fixtures cover100/
+10000-event streams and32/4096-byte noncompressible templates, PG18.6 on/on/on,
+fixed128rows/1MiB/24pool.144read windows/144append windows/16actual EXPLAIN
+outputs, all3repeated windows with>=100samples. Four full-global drains return
+exactly10000events:27.160833/25.121708/73.800458/73.272291ms. Each close reaches
+pool0; retained allocator bytes107022/103822/105166/103822. Native append before/
+after counts include growth; no assertion/error/unknown retry observed.
+
+Three reviews after actual terminal:
+1 Contract: native seed eligibility precedes finite scans; every read validates
+   full payload/version/key/position; concurrent writers validate exact winners
+   and independent committed-row deltas; client peak/retained bounds and pool
+   close are reached. All three actual cached query shapes pass diagnostic replay.
+2 Execution: four real private clusters,144+144completed windows and16plans,
+   not compiler/guard/empty binary. Only10k history is exercised, so100k/1m and
+   full capacity acceptance remain unproven. RSS snapshots and allocation stats
+   retain their defined scopes; no deployment SLO from this smoke.
+3 Source/assertions/profile: frozen6ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55
+   still matches; rows/bytes/pool/deadlines/input axes/sample counts/model and
+   unknown-error rejection unchanged. No optimization/noise threshold introduced.
+Raw /tmp/mnesis-pg8-capacity-052-smoke.log and matchingstart/checksum. Begin full
+unchanged12-fixture matrix next; no other local native suite/fullgate during
+measurement. OS time wraps the compiled benchmark, not Cargo or Nix startup;
+its whole-command resource scope can include native child tools, not client-only
+peak RSS. Current program remains685/700lines, no production/API change.
+
+## Full native capacity matrix completes
+
+Session45723 TERMINAL0, unchanged .5.2 source6ea3...verified. All12fixtures
+(10k/100k/1m ×100/history-length streams ×32/4096B),432read windows,432append
+windows and48real native EXPLAIN outputs complete;12pool closes succeed. Every
+window preserves3repetitions and>=100response/success denominators. Full command
+343.78s real/153.81user/115.91sys; OS whole-command maximumRSS56885248bytes,
+peak memory footprint32702896bytes,0swaps (scope includes launch/child tools;
+not client-only peak). No error, invariant failure or unknown-write retry.
+
+Three reviews after terminal:
+1 Contract: exact seed/native count and eligibility precede scans; full drains
+   validate every payload/key/position, and page probes also validate versions;
+   all page/read/writer cohorts
+   retain real overlap, exact winners and independent persisted deltas. Fixed
+   rows/bytes/pools/deadlines, bounded peak/retained allocations and12close
+   assertions are reached. Every actual prepared shape is observed and replayed.
+2 Execution: actual12native fixtures/432+432windows/48plans, including both
+   million-event4KiB histories; no smoke/compile substitution. Million-event
+  4KiB full drains8.987108541s(short)/8.326797875s(long) with client allocation
+   peaks840990/810003bytes (baseline223421/196037), showing the tested page-bound
+   retention; allocation TRAFFIC remains~9.11GB per drain, not retained memory.
+3 Source/selection: pre-run SHA still matches exactly; all input axes, rows128/
+   bytes1MiB/pool24,30sstatement/acquisition and5slock deadlines, model assertions
+   and sample/window counts unchanged. No algorithm/dependency/API/production
+   change. Append fixtures report native row growth rather than pretend a fixed
+   writer history; timed reads include validation overhead. No deployment SLO or
+   small-difference optimization accepted from these measurements. Analyze the
+   repeated-window spread, query plans and saturation before retaining delivery.
+Raw/tmp/mnesis-pg8-capacity-052-full.log/start/checksum. No localfullgate/native
+suite overlapped. Existing OS-time scope is recorded, not compiler/Nix RSS.
+
+Plan observer refinement: actual timed million-row initial reads remain roughly
+0.4–0.7ms at one client, while forced-generic diagnostics include~80ms scans.
+That is a mode mismatch, not evidence that auto-mode timings regress by80ms.
+Record native auto plans alongside generic stress plans and selected session's
+prior generic/custom counts; preserve original baseline output and do not tune
+library SQL from the forced-mode number. Current source690/700lines, existing
+plan function remains within strict80line limit; no new helper/API/production
+code. Rustfmt/strictall/all PASS6.42s. Three reviews: observed supported native
+plan/counter APIs; actual compiler-only pass/zero new runtime; unchanged workload,
+model, sample/windows, quotas and all deadline/resource/error assertions. Full
+unchanged matrix rerun is justified by the observer-mode correction, not by a
+weakened passing condition. New output must distinguish auto/generic labels.
+
+Corrected observer optimized compilePASS3.56s (--no-run), no new runtime credit.
+Three reviews: current .5.2 benchmark/auto+generic observer APIs; actual optimized
+compiler completion only; unchanged measurements/model/bounds/inputs and
+690/700source with no production/API changes. Run the full same12fixture matrix,
+now expecting96distinct mode-tagged EXPLAIN outputs. Original343.78s baseline
+remains retained; this rerun corrects observer evidence, not a performance claim.
+
+2026-10-20 corrected observer full capacity matrix76942 TERMINAL0. Native PG18.6
+on/on/on, published0.5.2 code; capacity.rs source SHA256
+582662e92362290754a5cf2f1a604a25a9b56f7cdb35fb4876bbaf05b90ed54a exact before/after.
+Three independent reviews: (1) source/model validates full drain count, key,
+payload ordinal/tail and increasing global positions; timed page probes also
+validate each version, and native count deltas validate all measured appends;
+(2) all12fixtures,432read/432append windows,96 actual auto/generic query plans and
+12pool-zero closes must be counted from retained raw log below before merge;
+terminal0 reaches final fixture's quiescent cleanup, all128-client shared cohorts
+have exactly one winner, no swallowed non-conflict/unknown errors; (3) original
+matrix/sample counts,128row/1MiB bounds,30s/5s deadlines, allocator assertions and
+seed/measurement separation unchanged by observer refinement. No source tuning.
+Actual compiled-binary command time361.55real/159.03user/117.29sys seconds,
+maximumRSS57737216B/peakfootprint35291544B/0swaps. This command-level OS scope is
+not an isolated allocator peak or production target. Source log and measurement
+analysis follow; prior343.78s generic-only full baseline remains, not overwritten.
+
+Full corrected matrix actual counts independently parsed:12profiles/432reads/
+432appends/96plans/12closes,12full drains. Source remains582662e9... after
+protected405 integration; production .5.2 unchanged. capacity.md records exact
+scope, short-window dispersion (median7.35%,p95 66.21%,max624.20%), all retained
+outliers and same-product baseline, not a manufactured tiny improvement. Native
+plan review distinguishes one-row keys scans from event scans: ordinary auto
+1m initial global .170–.238ms/0prior generic, versus forced68.997–78.303ms with
+outer body scan1m despite indexed candidates. This selected profile never forces
+generic; no unsupported auto regression or performance guarantee. One-off local
+Ruby2.6 analysis initially called unavailable filter_map; corrected to supported map/grouping,
+no native rerun/catch credit and no project tool added. Table entries derive from
+actual three-window rows; raw copies retained for every other matrix cell.
+
+Capacity source minimized after protected405 union:690/700benchmark lines,
+manifest4/6added,README19/20added, existing allocator3added/1removed. No new
+public adapter API, production Rust, migration or dependency. Borrowed prepared
+statement inspection reuses owning SQL rather than duplicating query policy;
+fixed enums and one shared percentile function report the existing workload.
+Full original/source-corrected matrices already passed; final normal gate needs
+compilation/original allocator-owner regression only, without repeating the
+native matrix absent a material source change. Selected full source SHA remains
+582662e9. Large log artifacts are raw evidence, not a custom validation tool.
+
+PG9 final candidate f3633983953a53488ae323f91498d0af911ab5e5 signedG, PR406
+open. Normal final record-only amend passes all12previously-built checks, ZERO
+new runtime (1594actual cases remain first gate evidence, not recounted). Proof
+branch a30c4b341810bcd8302f11b6139971cf0e18dee1 signedG has normal unchanged
+cached12check hook, ZEROnewruntime, only temporaryworkflow/doc diff. Candidate
+assertions/verdict/source remain unchanged; actual Linux proof dispatch follows.
+Targeted locked actionlint for changed checks/fuzz passes; broader legacy action
+input findings in unchanged dependency-update workflows are retained in proof
+record, no whole-repository actionlint success claimed. Not a native test.

@@ -1133,3 +1133,73 @@ Conflict or that known rejection; exact consumer/global counts and every origina
 rates; no throughput guarantee is invented. Unknown/other causes remain fatal.
 One private counter product may replace the existing model/report scalars to
 keep one owning source for round/event/fault/rejection counts, within500benchlines.
+
+## PG8 measured capacity matrix — 2026-10-19
+
+Threatened invariant: bounded pages must stay bounded with larger histories and
+many consumers, while read/append service and resource saturation are measured
+at the same durable database settings. Existing correctness timings and the
+mixed soak do not supply latency distributions, noise or a capacity matrix.
+
+Before implementation: reuse native Cargo reporting-benchmark pattern and the
+unchanged Postgres cluster/allocation fixtures. No framework, dependency package,
+public API, production SQL or runtime change. Prepare actual adapter histories
+10k/100k/1m, short100-event streams and one long stream,32/4096-byte payloads
+matching prior read baselines. Fixed128row/1MiB pages, fixed pool cap; record actual
+native settings/hardware/toolchain and fixture sizes. Seed/warmup outside timing.
+
+Measure1/16/128 simultaneous consumers at early and late resume positions, both
+stream/global paths. Report construction-to-first-page service distributions,
+p50/p95/p99, operation/event throughput, sample count, repeated-window dispersion,
+client allocated bytes/peak/retained allocator memory, process RSS, pool/backend
+counts and query plans. Also measure complete-history drain explicitly; distinguish
+full rebuild from bounded page service. Append profiles cover one/eight-event
+batches and competing versus independent writers, recording exact conflicts,
+commits and unknown results. No retry of uncertain writes. Repeat unchanged
+profiles to establish a noise floor before tuning or comparison. No invented
+throughput/latency SLO: publish measured local deployment limits and limitations.
+
+Falsifier: payload/order/count/resume mismatch, growing retained cursor memory
+at fixed pages, resource bound exceeded, missing workload axis, unexecuted or
+insufficient samples misreported as quantiles, or repeatable regression dismissed
+without an equal-durability comparison. Retain raw results and source/version;
+measurement is not a green correctness assertion or a production fleet guarantee.
+
+Budget before code: one native Cargo reporting benchmark<=700Rust lines,
+manifest<=6lines, README<=18lines; no production Rust/API/schema/dependency/tool
+changes. Reuse support/{cluster,memory}.rs unchanged; standard Rust statistics,
+SQLx/Tokio and native Postgres/OS statistics only. If full target workloads exceed
+this host's storage/time capacity, record actual boundaries and continue to the
+required adequate execution environment rather than dropping or relabeling cases.
+Only ONE native workload at once; full capacity measurements wait for the full
+soak and local Nix gates to finish. Preparation can proceed without running it.
+
+Capacity accounting clarification before edits: allocation traffic bytes and
+allocation call count are different measured facts. Extend the existing shared
+memory fixture by<=4lines with one successful-allocation counter, preserving
+all original LIVE/PEAK/TOTAL semantics. Do not add a second allocator. Report
+its defined counting boundary and measurement overhead; this is a native
+measurement fixture, not a new production state or testing framework.
+
+## Capacity plan-mode evidence correction — 2026-10-20
+
+Actual full-matrix diagnostics force generic plans. Million-row initial scans
+show native sequential scans (~80ms for one32B diagnostic), while the timed
+ordinary auto-mode read windows are~0.4–0.7ms at one consumer. These are different
+plan modes and must not be conflated or called a timed-path regression.
+Before retaining evidence, record native auto plans as well as the separate
+forced-generic stress plans, plus selected session's actual generic/custom plan
+use counters before replay. Keep every timed workload/validation/timeout/row/
+byte/pool/sample/window setting unchanged. No library optimization justified by
+this forced-mode diagnostic alone; preserve the original full baseline.
+Budget remains700benchmark lines/strict80function lines; one additional native
+mode loop and counters in existing plan observer, no new helper/API/tool/frame-
+work/runtime or production change. Falsifier: absent/mislabeled ordinary plans,
+wrong sample selection or source settings/assertions change to make a result pass.
+
+Capacity documentation budget before final record: add one feature-local
+capacity.md<=190lines; README<=20added (two links beyond original18estimate).
+Retain every raw measurement, differentiate generic diagnostics from ordinary
+latency and record variation/saturation. No production optimization is supported
+by these same-product baseline/observer results; final gate checks benchmark
+compilation and original allocator owners. Actual model runs already passed.

@@ -469,3 +469,35 @@ Host baseline: Mac16,7;24GiB RAM;14 logical CPUs, observed via sysctl. This priv
 native soak is not an isolated throughput or latency measurement. Actual DB
 settings/toolchain/source/elapsed will be recorded at execution; short smoke
 runs and concurrent-host timings cannot satisfy the full capacity matrix.
+
+### PG8 capacity measurement owners, accessed2026-10-19
+
+Reuse existing Cargo standalone reporting benchmark pattern, Rust std Vec sorting
+and Duration/Instant, Tokio Barrier/JoinSet, SQLx0.9 and native cluster/memory
+fixtures. No new package or generic harness. Read actual store/page SQL and
+position source for exact bounds; inspect server-owned prepared statements for
+EXPLAIN instead of maintaining a copied page-query implementation. Supported
+Postgres EXPLAIN EXECUTE and force_generic_plan expose actual bound plans.
+Capture native version/durability settings, sample denominators and raw output.
+
+Use the Unix OS entropy device once per fixture to create32/4096-byte templates,
+recording exact template bytes in the raw evidence. Reuse each template unchanged
+within all repeated windows; per-row ordinals replace only the first8bytes.
+Random-looking bodies avoid a zero-filled, trivially TOAST-compressible large
+payload profile. No new RNG dependency or handwritten generator. This is synthetic
+local capacity, not a production payload-distribution or cross-node guarantee.
+Successful allocation calls extend the existing counter owner by2lines; byte
+traffic and live/peak/retained bytes remain separately reported. OS ps RSS reports
+process residency, not Rust allocator bytes; external native time can record
+whole-run peak RSS. Report these boundaries and counter/validation overhead.
+
+Primary facilities verified2026-10-19:
+- https://www.postgresql.org/docs/18/sql-explain.html: ANALYZE executes the
+  prepared statement; BUFFERS reports actual buffer work. Instrumentation and
+  discarded result transfer mean EXPLAIN is diagnostic, not client throughput.
+- https://www.postgresql.org/docs/18/view-pg-prepared-statements.html: prepared
+  statements are visible only in their creating session. Inspect each leased
+  pool connection, quote names with native quote_ident and reuse actual SQLx SQL.
+- https://www.postgresql.org/docs/18/sql-prepare.html: force_generic_plan selects
+  a parameter-independent plan; EXPLAIN EXECUTE displays it. Reset the setting
+  after diagnostic replay so measured application operations retain defaults.

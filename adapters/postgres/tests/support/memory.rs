@@ -8,13 +8,15 @@ struct Allocator;
 pub static LIVE: AtomicUsize = AtomicUsize::new(0);
 pub static PEAK: AtomicUsize = AtomicUsize::new(0);
 pub static TOTAL: AtomicUsize = AtomicUsize::new(0);
+pub static COUNT: AtomicUsize = AtomicUsize::new(0);
 
-// Counters publish no object ownership or contents; only allocation sizes.
+// Counters publish no object ownership or contents; only allocation statistics.
 unsafe impl GlobalAlloc for Allocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         // SAFETY: System receives the unchanged allocator layout contract.
         let ptr = unsafe { System.alloc(layout) };
         if !ptr.is_null() {
+            COUNT.fetch_add(1, Ordering::Relaxed);
             let before = LIVE.fetch_add(layout.size(), Ordering::Relaxed);
             PEAK.fetch_max(before.saturating_add(layout.size()), Ordering::Relaxed);
             TOTAL.fetch_add(layout.size(), Ordering::Relaxed);
