@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3](https://github.com/devrandom-labs/mnesis/compare/mnesis-postgres-v0.5.2...mnesis-postgres-v0.5.3) - 2026-10-20
+
+### Other
+
+- *(postgres)* complete capacity and acceptance evidence ([#407](https://github.com/devrandom-labs/mnesis/pull/407))
+- *(postgres)* measure sustained work and operator recovery ([#405](https://github.com/devrandom-labs/mnesis/pull/405))
+
 ## [0.5.2](https://github.com/devrandom-labs/mnesis/compare/mnesis-postgres-v0.5.1...mnesis-postgres-v0.5.2) - 2026-10-19
 
 ### Added
