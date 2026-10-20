@@ -1,0 +1,27 @@
+17.10|on|on|on
+warning: ignoring --test-threads because --no-capture is specified
+   Compiling mnesis-postgres v0.5.1 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.81s
+────────────
+ Nextest run ID 1296e319-ca25-43ab-bf06-76044385b2bf with nextest profile: default
+    Starting 2 tests across 2 binaries (18 tests skipped)
+       START [         ] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+
+running 1 test
+logical recovery fixture: events=2 streams=2 backup=2.680417ms, fresh-target-to-reloaded-projection=48.200084ms, rebuilt=PgAllPos { history: History([171, 141, 175, 85, 167, 209, 67, 244, 146, 75, 206, 1, 154, 22, 157, 176]), txid: 190348, seq: 2 }, advanced=PgAllPos { history: History([171, 141, 175, 85, 167, 209, 67, 244, 146, 75, 206, 1, 154, 22, 157, 176]), txid: 190352, seq: 3 }
+test logical_restore_rebuilds_a_projection_then_restarts_and_advances_it ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 4.66s
+
+        PASS [   4.671s] (1/2) mnesis-postgres::backup_tests logical_restore_rebuilds_a_projection_then_restarts_and_advances_it
+       START [         ] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+
+running 1 test
+physical recovery fixture: backup=376.025125ms, stopped-primary-to-reloaded-projection=141.374167ms, checkpoint=PgAllPos { history: History([78, 197, 148, 195, 197, 143, 75, 228, 163, 8, 7, 101, 77, 254, 44, 203]), txid: 766, seq: 2 }, advanced=PgAllPos { history: History([78, 197, 148, 195, 197, 143, 75, 228, 163, 8, 7, 101, 77, 254, 44, 203]), txid: 770, seq: 3 }
+test physical_operator_drill_restarts_the_saved_projection_and_advances ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.53s
+
+        PASS [   1.540s] (2/2) mnesis-postgres::restore_tests physical_operator_drill_restarts_the_saved_projection_and_advances
+────────────
+     Summary [   6.213s] 2 tests run: 2 passed, 18 skipped

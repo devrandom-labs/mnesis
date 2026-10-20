@@ -8485,3 +8485,513 @@ Exact Rust patch remains625c798bf11891f839fcb1b10f5c67c5968e367476921c2fa8551895
 Normal record-only signed amend next; inspect cache results and credit zero new
 runtime when outputs are reused. Then focused PR and Linux review/protected
 merge promptly. Capacity/soak/recovery/PG9/final registry acceptance remain open.
+## PG8 soak benchmark preparation
+
+Standalone benchmark follows existing Fjall Cargo reporting targets, reusing
+Postgres cluster/allocation owners unchanged. Private database, no caller URL
+or data is used. First strictall/allClippyPASS11.71s, Rustfmt/TOMLformatPASS,
+436/500Rust lines and manifest6lines, zero production/dependency changes.
+Three reviews: declared workload/ownership contract; actual compiler-only pass
+with ZERO soak runtime credit; unchanged lints and no hidden skipped native test.
+The first explicit10s native run is a smoke test only. Full1800s acceptance waits
+for final diagnostics source integration and local gate quiescence. Native
+failure control will disable only the rescan interval and must hit the original
+3s no-notification oracle; an incorrect ordinal must fail the actual fold.
+
+First actual native soak smokePASS: requested10s,10.002s steady workload/
+10.268s including close,4,458rounds/20,070events/one fault-restart cycle,
+44connections<=52. Baseline1,085,359allocator bytes, peak1,871,689,
+retained103,910after pool/server-session quiescence;10,904,246,495 allocated
+bytes during measurement (NOT allocation count or RSS). Native PG18.6 settings
+fsync/full_page_writes/synchronous_commit allon, fixed128rows/1MiB pages.
+Optimized benchmark compilation20.14s, excluded from steady-work timing.
+
+Three independent reviews after this actual run:
+1. Contract: each real competing round has one winner/15conflicts; all16native
+   state/position pairs, strict event ordinals/positions, global count and cleanup
+   assertions pass. Native unnotified final event resumes within3s with no later
+   write; fresh reader and actual terminated/reconnected listener are exercised.
+2. Execution/falsifier: actual private Postgres cluster and release executable,
+   no URL guard or skipped test. Declared10s earns smoke-only credit; zero30min,
+   full capacity/quantile/RSS or deployment-SLO credit.
+3. Assertions/source/selection: all preregistered deadlines/resource caps and
+   native error classification intact; no unknown write is retried. Original
+   source/control copies will be retained before each independent falsifier.
+
+First isolated native falsifier exits101 at the intended3s unnotified-final-
+commit oracle. Sole library change RESCAN_INTERVAL1s→3600s; release build5.67s.
+The private server/real competing warmup and saved consumers initialize, then
+missing-notification recovery times out rather than relying on another write.
+Three reviews: (1) independent rescans are necessary for the stated recovery
+bound; (2) actual native runtime timeout, not compile/setup/empty execution;
+(3) original benchmark,3s deadline/caps/workload unchanged, exact one-line diff.
+Candidate worktree/source untouched. Restore only that interval in the control
+and change only the produced ordinal; actual folded values must reject it.
+
+Second isolated native falsifier restores the correct rescan source, then shifts
+only the produced ordinal by+1. Actual benchmark exits101 at the real consumer
+fold: byte-encoded2received versus1expected, before any recovery-phase credit.
+Release compilation5.31s. Three reviews: exact payload/state sequence contract;
+actual native read/validation failure (not compile/setup/timeout); unchanged
+benchmark assertions/caps/deadlines and sole ordinal-expression diff. The main
+JoinError faithfully propagates the worker assertion. Candidate source remains
+unchanged, controls stay isolated/wrong and are never merged. Neither short
+control supplies30-minute or capacity acceptance. Raw logs/diffs retained.
+
+Upstream main advanced concurrently beyond operational merge399 to a0.5.0
+release version change. Preserve that work; inspect exact release/publication
+state and rebase diagnostics, then this benchmark onto the resulting reviewed
+source. Prior0.4checks remain evidence for those revisions, not an invented
+0.5rerun. Full1800s execution still waits for current-source integration.
+
+Soak source integrated onto signed diagnostics f92f8abd and released0.5.0
+requirements. Three research-file append conflicts resolved by standard
+three-way union, retaining both independent sections; no conflict in production
+or fixture code. Benchmark compares byte-for-byte against the pre-integration
+copy. Manifest retains0.5requirements/optional tracing and adds only the five
+Cargo reporting-target lines. Earlier smoke/controls stay exact evidence for
+the earlier source; fresh current-source smoke and full1800s follow. Original
+WIP stash and all conflict stages retained under /tmp/mnesis-soak-union-*.
+README adds the ordinary native command and distinguishes short smoke credit
+from the default full30min. No native execution follows from this integration.
+
+Released-parent0.5 current-source smokePASS: strict all-features/all-targets
+Clippy11.64s (compiler only), formatting/TOML pass, optimized build5.29s excluded.
+Actual private PG18.6/on/on/on,10.002514s steady work/10.382710s through close,
+3,659rounds/16,478events/one real fault cycle,44connections<=52. Baseline
+1,083,422/peak1,858,314/retained104,102 allocator bytes;8,950,005,035 allocated
+bytes measured, not count or RSS. This run overlaps the independent host Nix
+gate and makes no throughput comparison, noise-floor or capacity claim.
+
+Three reviews after this actual run: (1) exact competing winner/conflict counts,
+16reloaded state/position/revision pairs, ordinals/global order/count and real
+listener/restart/no-hint recovery/cleanup assertions; (2) actual private database
+and release executable ran10s with zero guard/skip substitution, so smoke-only
+credit and ZERO30min/full-capacity credit; (3) exact benchmark bytes unchanged
+from preregistered smoke/control source, original3s bounds/resource caps/input
+workload/uncertainty policy unchanged. Compiler-only checks receive zero native
+credit. Earlier isolated rescan/ordinal controls remain meaningful failures.
+
+Full1800s waits only for active normal diagnostics Nix gate32709 to finish.
+Do not broaden this slice into unrelated security work. Standard Cargo bench
+runs the existing adapter under a recorded profile; it is not a new test/tool
+framework. Fourteen README lines and five manifest lines stay within budgets.
+
+Full soak preregistered execution: integrate onto final signed diagnostics
+ca88dbb6c15fa6d7b0ee8611a3ed1e1cb20ff54f(PR402). Only two research append
+conflicts resolved by standard union; parent JSONL prefix exact and valid. Exact
+benchmark/support bytes compare to prior0.5 smoke; no production Rust/lock change.
+Normal diagnostics full gate and record-only cached amend are terminal; no native
+suite/build gate remains active. Begin the default1800s native benchmark with
+projection enabled. Source/support checksum manifest and UTC start are retained
+under /tmp/mnesis-pg8-soak-full-*. No full-soak credit before terminal assertions.
+
+Diagnostics PR402 opened at signedca88dbb6. The record-only signed amend passed
+all twelve checks from cache: no build entries and ZERO new runtime executions.
+Full1800s soak session13029 is now actively executing the optimized benchmark;
+actual PG18.6 settingson/on/on, first real fault cycle passed at1.020468s,
+44connections. This is partial progress only, not acceptance. Native compilation
+3.38s excluded. Do not change benchmark/support/product source or start another
+native suite/full build gate until terminal. Raw/tmp/mnesis-pg8-soak-full.log,
+source hashes/tmp/mnesis-pg8-soak-full-source.sha256 and UTC start retained.
+
+## Full soak failure, retained before any fixture correction
+
+Session13029 TERMINAL101 before1800s. Last progress61.608546s/28,913rounds/
+130,122events/two faults/44connections; later actual consumers assert183,745
+versus183,753 at original advance count check. More than one consumer fails at
+the same eight-event boundary; main propagates JoinError. All raw output and
+exact pre-correction source retained under/tmp/mnesis-pg8-soak-{full-first-failure.log,
+first-failure.rs}; checked-in log copy strips trailing blanks only. No full-soak
+or capacity acceptance. Private cluster cleaned after panic, so the cause of this
+specific delayed boundary is not independently settled from its database state.
+
+Three reviews after this actual failed run:
+1. Contract: exact payload/position/CAS laws remain; finite read_all captures a
+   safe cutoff and can legitimately exclude acknowledged events while an older
+   transaction holds visibility. Append returns a token that a consumer awaits,
+   not a promise every finite scan includes it immediately (store trait source).
+2. Execution/falsifier: real optimized native benchmark, not compiler/setup/guard;
+   actual model-count assertion fails, no new checkpoint from those failed
+   consumers. Two completed minute faults do not supply30-minute acceptance.
+3. Assertions/source/selection: exact frozen436line source and original3s recovery,
+   10s cohort/resource assertions; no bound or workload was relaxed. The finite
+   scan assumption is stronger than the owning contract. Pending conflict rollback
+   is a candidate cause, not proven from the cleaned failed database. Reproduce
+   the owning watermark case natively before selecting a consumer correction.
+
+Actual owning-contract reproduction: existing native subscription test1PASS
+1.167s,2explicitly unselected cases, compile10.00s excluded. It holds an older
+real transaction, obtains a successful append token while no event is eligible,
+releases the transaction without a Mnesis hint, and receives the exact event/
+position through the real subscription within3s. Three reviews: exact owner
+visibility/barrier and no-later-write contract; actual one native execution,
+not guards or all3cases; unchanged assertions/deadlines/selection and source.
+
+Select the existing Subscription consumer for soak advance, rather than a
+single finite read_all. Await the exact known event count under the EXISTING3s
+recovery deadline; retain strict ordinals/positions, exact expected count before
+checkpoint, full saved-pair/CAS assertions, original10s cohort watchdog, final
+native count,30min/fault/resource caps. No production change, timeout increase,
+unknown retry or new runner. A permanently missing event must still time out;
+duplicates/reordering fail ordinals or final native count. This corrects the
+proven stronger-than-contract finite-scan assumption; it does not assert the
+specific first failed database's pending-rollback cause was proven. Budget stays
+500benchmark lines/15helpers; code/control copies and red run remain preserved.
+
+First subscription-fixture strict check fails at drop(Pin<&mut Stream>), which
+releases only the reference, not the pinned future. No smoke runtime occurred.
+Three reviews: owned cursor lifetime contract; actual compiler-only red/zero
+runtime; unchanged lint policy/assertions. Use a lexical scope so the actual
+pinned future drops before checkpoint writes, without another allocation or lint
+allowance.450/500lines before the scope formatting; no production change.
+
+Subscription consumer current10s smokePASS:10.002456s steady/10.168734s through
+close,4,886rounds/21,996events/one actual fault,44connections. Baseline1,075,292,
+peak1,845,649,retained104,102 allocator bytes;10,373,383,414allocated bytes,
+not count/RSS. Optimized compile2.81s excluded. Strict all/all check and format
+pass with original lints; native PG18.6 settingson/on/on.450-ish/500source lines.
+Three reviews: (1) exact event/position/state/CAS/count and recovery/quiescence
+contracts; (2) actual10s private native executable/zero guards, no30-minute or
+capacity credit; (3) original3s deadlines,10s cohort watchdog, resource/fault
+caps/count/ordinal assertions retained. Live consumption now follows the owning
+contract rather than equating finite cutoff with completed writes. Rerun the
+rescan/ordinal falsifiers against this exact new fixture before the full1800s.
+
+Current subscription-fixture rescan control: actual native TERMINAL101, optimized
+build5.39s, expected3s unnotified-final-commit timeout. Warmup winner/conflicts/
+all16subscription checkpoint consumers initialize successfully; the deliberate
+one-line1s→3600s rescan change blocks the no-later-write recovery. Three reviews:
+original3s recovery contract; actual native intended timeout rather than compiler/
+setup/empty run; exact new subscription fixture, unchanged assertions/inputs/caps
+and sole library interval diff. Candidate product untouched. Restore that one
+control source and shift only the producer ordinal for a second native falsifier.
+
+Updated ordinal control native TERMINAL101 at real subscription fold: byte-
+encoded2received versus1expected, optimized compile5.50s. Correct rescan source
+restored byte-exact; only produced ordinal shifts by+1. Three reviews: strict
+state/event sequence contract; actual native assertion and propagated JoinError,
+not compile/setup/timeout; exact new fixture assertions/inputs/caps/deadlines,
+sole ordinal-expression diff and no candidate production mutation. Recovery
+later in this control remains unexecuted/zero credit. Both new controls remain
+isolated and intentionally wrong; never merge. Candidate451/500lines, existing
+3s/10s bounds unchanged. Strict compiler-only check2.84s had zero runtime credit.
+
+Restart full1800s using the corrected real subscription consumers, source frozen.
+The earlier terminal101/log/source and contract reproduction remain explicit.
+New raw/tmp/mnesis-pg8-soak-subscription-full.log, source hash manifest and UTC
+start under the same subscription-full prefix. No full acceptance until actual
+terminal invariants, resource release and thirty-minute/fault counts pass.
+
+## Diagnostics PR402 completed CI review
+
+Reviewed signedca88dbb6c15fa6d7b0ee8611a3ed1e1cb20ff54f:40SUCCESS, one
+scheduled mutation sweepSKIP, zero review threads and no further thread page.
+Actual logs retained /tmp/mnesis-pg8-diagnostics-job-<id>.log. Standalone native
+push118259623506263PASS58.814s and PR118259647311263PASS73.385s, both0skip.
+Nix push118259623480:1593workspace105.016s2slow/4compiler exclusions and
+263native60.242s0skip. Nix PR118259647624:1593workspace143.854s4slow/4excluded
+and263native69.203s0skip. Each of four native executions also passes seven
+one-case smokes; each Nix owner runs replay2/1/1PASS1s each. Echoed run.log is
+not another native execution. For EACH actual native/workspace/replay/smoke,
+three reviews: owning selected contracts including actual tracing case; real
+counts/database or explicit guard/compiler boundaries; unchanged source/flags/
+assertions/caps/selection, no omitted enabled case. No capacity timing claim.
+
+Six compiler fixtures2/1/1 each:push117.06/14.35/17.84s,PR125.50/15.94/19.20s.
+Each three-reviewed for intended diagnostics, actual compiler execution/counts,
+unchanged expected output and selection.16 library jobs each default/no-default/
+all: kernel15/15/15,macros1/1/1,store217/217/217,wake17/17/17,inmemory25/25/30,
+Fjall131/131/131,wake-nostd0/0/0,store-testing0/0/0. EACH of48invocations reviewed
+for owner feature contract, actual --lib execution/counts (zero gets0runtime),
+and unchanged flags/assertions/selection. These do not close PG9's missing
+Postgres isolated native feature matrix or dev-unification proof.
+
+LibFuzzer wire/value/chunk/header each61s:11,127,830/8,370,834/1,286,392/
+2,437,707iterations. AFL/CMPLOG wire/header/chunk/value each60s:0/2/13/0new
+items,0crashes/0timeouts. EACH campaign three-reviewed: actual selected target/
+corpus contract; executed locked campaign/duration/counts; unchanged failure
+pipeline/inputs/thresholds. A clean campaign does not prove the saved-crash/
+zero-exit gate. CodSpeed actual four-suite job118259646872 SUCCESS; analysis
+43untouched/3baseline-fallback skips/17syscall warnings. Three reviews preserve
+source/benchmark contract, actual simulation run and declared instrument limits;
+zero Postgres capacity or native walltime credit.
+
+Mutation artifact12215538740 ZIP checksum47361bcba42dd00166df5bdf9dc14c15b26b412eaedc5dec344de52946ac94fa
+matches metadata. Retained ZIP/extraction /tmp/mnesis-pg8-diagnostics-mutants*.
+Actual native baseline263PASS66.668s0skip.17mutants:2runtime caught,15compiler
+unviable,0missed/timeouts. commit→Ok fails real returned history1vs2 at14/263:
+13PASS1FAIL0.254s, remainder canceled. listen→Ok fails real listener acquisition
+at100/263:99PASS1FAIL14.931s, remainder canceled; new tracing case105notreached,
+so do not attribute those catches to it. Each baseline/mutated runtime three-
+reviewed for exact storage/readiness invariant, actual native failure/counts,
+unchanged source/oracle/selection. All15unviable logs inspected: unsupported
+Default/new/from_iter/from bodies are compiler failures, ZERO runtime catches.
+Direct wrong all-label tracing control remains its independent oracle evidence.
+
+Main advanced through user release PR4010525d517 after PR4009f7116c7. These
+change versions/locks/changelogs, not Rust implementation. Preserve all of that
+work. PR402 tests the recorded0.5.0 graph; no invented0.5.1 rerun. Protected
+ruleset does not require latest-base checks; use ordinary exact-head squash,
+verify the resulting tree against the standard three-way merge and retain final
+current-graph verification/registry consumer as whole-goal requirements.
+
+## Second long-soak red — configured lock rejection
+
+Interrupted session88724 now confirmed TERMINAL101. Last actual progress
+1269.6655805s/459,808rounds/2,069,166events/22faults/44connections; subsequent
+append returns Sqlx SQLSTATE55P03 while checking keys exclusion constraint under
+unchanged1s lock_timeout. No full1800s/final-quiescence acceptance. Raw/source
+preserved before edits under/tmp/mnesis-pg8-soak-{subscription-full-lock-failure.log,
+lock-failure.rs}; checked-in log copy strips trailing blanks only.
+
+Three reviews: (1) no ordering/state/CAS violation was reported, but original
+benchmark rejects this configured definite pre-COMMIT failure rather than a
+Conflict; (2) actual native1269+s run and exact error, not compile/guard; later
+assertions unexecuted get zero credit; (3) original deadlines/workload/unknown-
+error rejection unchanged. Verify native exclusion-lock rollback and the owning
+phase mapping before accepting a separate known-rejection counter. Never relabel
+it Conflict, increase timeouts, retry uncertainty, or erase the red to pass a run.
+
+Native exclusion characterization2PASS8.732s (37explicitly unselected), compile
+10.21s excluded: exact55P03/zero keys+events after independent blocker rollback,
+healthy subsequent append and inventory(1,1), plus existing four-code COMMIT
+boundary test. Three reviews: exact pre-COMMIT exclusion/settlement contract;
+actual two native tests and explicit omissions; unchanged deadlines/assertions/
+classification and zero uncertain retries. Source review shows current COMMIT
+code set did NOT include55P03; do not claim that code's runtime coverage yet.
+
+Extend the two existing phase tests by55P03 (<=5existing test lines), retaining
+all original codes/outcomes: before COMMIT known Sqlx, after COMMIT Unknown.
+No production mapper change. Reproduce this exact phase difference before the
+soak permits a separately reported pre-COMMIT lock rejection.500benchmark/
+380deadline-file budgets unchanged; no timeout or acceptance bound increase.
+
+Diagnostics PR402 merged2026-10-19T23:05:15Z through ordinary exact-head protected
+squash:5b8680280854c397c957140784ba7795bcb488a0. All40checksSUCCESS/one scheduled
+SKIP/no threads. Entire resulting tree equals standard merge-tree
+e1fd9b70203e80892480cfa38ee552fb27024a38, preserving user0.5.1 release401
+0525d517 and prior400changelog work alongside the reviewed diagnostics. This is
+the24th focused adapter fix; full PG0–PG9 acceptance remains incomplete.
+
+Exact phase characterization now3PASS11.783s (36explicitly unselected), compile
+6.61s excluded. Both five-code loops execute55P03: deferred rejection before
+COMMIT remains Sqlx with zero rows; after COMMIT submission remains CommitUnknown.
+Native exclusion blocking separately returns exact55P03 before creating event/key,
+then independent rollback inventory is zero and a healthy append creates(1,1).
+Three reviews: exact phase/error/settled-data contract; three real native cases
+and explicit omissions, not only the previously four-code test; unchanged original
+cases/assertions/deadlines/unknown outcome and no automatic retry. All reds stay.
+
+Retain1s lock and5s statement/3s recovery/10s cohort/1800s soak limits. Count only
+typed Sqlx/database55P03 as a separate known rejection; never label it Conflict.
+One exact winner remains required; all other requests must be Conflict or that
+verified pre-COMMIT rejection. Every other error, especially CommitUnknown with
+any SQLSTATE, remains fatal. Native consumer/global counts still require exactly
+the one winning batch, so a falsely rejected committed write cannot disappear.
+Report rejection counts with workload counters rather than claiming zero failures.
+This addresses a configured deadline under load, not a storage correctness change
+or an increased timeout. Preregistered original zero-invariant requirement stays.
+
+## Current protected parent and release verification
+
+Soak WIP preserved in a retained stash before integration onto protected
+5b8680280854c397c957140784ba7795bcb488a0 (.5.1); stash applied without conflicts.
+Only benchmark counters/error reporting change; production Rust stays exact.
+Initial current-source format check failed on import order/wrapping before any
+lint/runtime execution. Formatting corrected through pinned rustfmt; strict
+all-feature/all-target Clippy passes15.64s. Zero runtime evidence from those checks.
+
+Release39312731245 independently reports published mnesis-postgres0.5.1. Primary
+sparse registry confirms not yanked with checksum
+ aa483fa702ad0dd67a0ba941704bc7b196cfbc5925ac8088cc6bda40ea61e7cb.
+Raw/tmp/mnesis-release-0.5.1.log. Publication covers that revision, not remaining
+PG8/PG9 or the later diagnostics merge; final registry consumer still required.
+
+Current protected .5.1 phase rerun:3PASS5.194s/36explicitly unselected, compile
+6.79s excluded, nextest a48e9a2b-cf8c-4f9f-b0eb-4426d436e866. Raw
+/tmp/mnesis-pg8-soak-current-lock-phases.log. Review1: independent inventory after
+real exclusion-blocker rollback proves zero keys/events, healthy append proves
+continued availability; exact phase tests keep55P03 known before COMMIT and
+unknown after submission. Review2: all three native cases actually execute,
+.152/4.882/.158s with DATABASE_URL set; five literal codes each phase, native
+observation CommitSent and row counts, not empty/guarded binaries. Review3:
+compared owning source/diff, original four SQLSTATEs/assertions/deadlines remain;
+production Rust unchanged,36unselected cases earn no rerun credit. No unknown
+retry introduced. Counter-only fixture475/500lines; every prior stress red retained.
+
+Current .5.1 counter-policy smoke completed exit0:10.003503542s steady,
+10.160068458s through close;4818rounds/21690events/1fault/0known lock rejections,
+44connections, baseline1104546/peak1843444/retained103974bytes,
+10228637897allocated bytes; release compile5.70s excluded. Raw
+/tmp/mnesis-pg8-soak-known-rejections-smoke.log. Review1: exact ordinal fold,
+strict positions, revision/state/position readback, native final count and cleanup
+assertions all reached. Review2: real privatePG18.6 on/on/on,16producers/16consumers,
+actual listener replacement/kill/reconnect/no-hint event; smoke is NOT1800s
+acceptance and no lock rejection occurred, so that branch relies on separately
+executed native phase laws, not this smoke. Review3: source diff retains all
+1s/5s/3s/10s/1800s and resource bounds, no unknown error acceptance/retry, production
+source unchanged. Counter-source SHA256
+61d3f49305c17c97d6baa616aaa616c7c3abd4a54318dc27f19420ca11197206.
+Start full default1800s on this frozen source; every prior red remains retained.
+
+Backlog delivery pointer updated to24 protected changes through402 and verified
+published0.5.1, preserving all existing dependency edges and historical evidence.
+PG9 active reflects the verified, preregistered CI implementation now underway;
+its required PG5–PG8 delivery prerequisites remain visible and unsatisfied until
+final acceptance. No whole-adapter release or clean registry consumer claimed.
+
+## Full current-parent native soak passes
+
+Session71259 TERMINAL0. Actual steady work exceeds1800s: final cohort/fault
+report1812.763109s; independent native final-count report1812.797935834s;
+through complete client/backend/private-cluster close1814.44915625s. Native
+PG18.6, fsync/full_page_writes/synchronous_commit on/on/on.591768rounds,
+2662995events including8warmup/31unnotified fault events,31actual reader-store
+replacements/listener kills/reconnections/fallback recoveries/rebuilds;0known
+lock rejections this run. Observed periodic backend high46 (configured max52).
+Baseline1071253/peak1879613/retained103974bytes,1294346952265allocated bytes
+of client traffic. Allocation traffic is not retained memory or process RSS.
+No deployment throughput/latency SLO is claimed from this correctness soak.
+
+Three independent reviews AFTER the actual terminal:
+1. Contract: each round has exactly one winner and15conflicts/rejections; every
+   consumer validates strictly increasing positions and exact ordinal payloads,
+   saves revision+1/state/position and independently reads that exact pair. Every
+   fault arms before the final no-NOTIFY commit and must recover within3s with
+   no later write. Exact native event count, >=30faults, >=1800s, pool size0 and
+   zero owned backend sessions within original3s are reached before completion.
+2. Execution/falsifier: real optimized native process exits0 and reaches final
+   close/retained assertions, not a smoke/compile/guard/echo. Model arithmetic is
+   295884*(1+8)+8+31=2662995, matching the native assertion. Both prior long reds,
+   finite-watermark law and real rescan-disabled/ordinal failures remain. This
+   successful run has0lock rejections, so the new typed rejection branch gets
+   phase-law evidence, not fabricated stress execution credit.
+3. Source/assertions/selection: benchmark SHA256 still
+   61d3f49305c17c97d6baa616aaa616c7c3abd4a54318dc27f19420ca11197206, verified by
+   recorded pre-run checksum.475/500lines and14/15helpers; deadline file339/380.
+   Production Rust unchanged; all1s/5s/3s/10s/1800s/fault/resource bounds and
+   unknown-error rejection remain. CommitUnknown is always fatal; no retry.
+
+Raw full output/start/end/checksum under/tmp/mnesis-pg8-soak-known-rejections-full*;
+checked-in full log retained. This establishes this native soak workload only;
+complete current regression/native CI, signed normal gate, capacity/recovery,
+final acceptance/minimization/publication/registry consumer remain required.
+
+Delivery minimization decision before edits: carry the two public index lines and
+quickstart correction in this workload parent rather than making a second docs
+patch. Revised adapterREADME budget20added/4removed (14workload +4quickstart,
+plus wording for reported lock rejection); rootREADME<=2added. These describe the
+same verified adapter/workload, zero production/interface/runtime changes.
+Keep their identical copies in the PG9 WIP; three-way parent integration should
+retain the single source fact without duplication. One focused workload PR first,
+then combined PG9 CI; no extra full-gate rerun just for duplicate doc edits.
+
+Complete current-parent native regression run finishes264PASS73.287s/0skip across
+23binaries, compile21.25s excluded. Raw/tmp/mnesis-pg8-soak-full-native.log,
+nextest invocation includes --all-features --no-tests=fail --test-threads=1 and
+actual DATABASE_URL. Three reviews after terminal: (1) original ordering/resume,
+missing final hints, commit/timeout uncertainty, migrations, atomic import,
+snapshots/checkpoints, backup/restore and lifecycle laws all remain selected;
+new exclusion law and both five-code phases pass; (2) actual264 completed native
+suite cases, not compile/guard/echo, no new correctness or timing claim from the
+separate1800s result; (3) production source unchanged, old four SQLSTATE cases and
+all assertions/deadlines preserved, new typed55P03 never becomes Conflict or a
+retry of CommitUnknown. Original rescan/ordinal/finite-scan/lock-timeout reds stay.
+
+PG7 measurement refinement before edits: existing physical drill already reports
+backup and stopped-primary-to-reloaded-projection time; existing logical drill
+asserts restore/rebuild/reopen/advance but emits no timing. Add observation only
+(backup_tests.rs<=12added lines, no assertion/selection/timeout change), then
+measure both unchanged scenarios three times. Explicit profile: two events in
+two streams, projection state4, then one increment→5; do NOT call that four events
+or a large deployment recovery benchmark. RPO0 applies only to this quiesced
+source fixture; measured readiness excludes external routing/provisioning and
+controller drain. No target SLO is invented. Existing native fixtures and test
+owners suffice; no new harness/framework/tool/runtime/production change.
+
+Logical timing observation adds9lines within12budget, no existing assertion or
+branch changes. Current strict all-feature/all-target ClippyPASS17.03s/Rustfmt
+PASS. Three reviews: selected test/feature compilation; actual compiler-only
+completion with zero runtime/measurement credit; unchanged lint levels,
+assertions/deadlines and nine observation-only lines. Full264-case result above
+precedes this test-only observation; current modified owner is measured next and
+complete current Linux suite remains a delivery requirement.
+
+Recovery measurement1:2PASS6.213s/18explicitly unselected; compile3.81s excluded.
+Logical PG17.10 on/on/on: backup2.680417ms, fresh-target-to-reloaded-pair48.200084ms;
+physical nativePG18.6: verified backup376.025125ms, stopped-primary-to-ready
+141.374167ms. Full per-test durations4.671s/1.540s are distinct from those defined
+windows (setup, original-source close, final append and cleanup excluded).
+Three reviews:1 logical gets new history/rebuild and resumes pair4 before5,
+physical preserves history/metadata/pair then advances;2 actual both native cases
+run in printed START/PASS order, --no-capture forces serial and reports that the
+redundant --test-threads flag is ignored, not hidden overlap;18unselected get no
+credit;3 exact9observation lines only, no old assertions/limits/selection changed.
+Raw/tmp/mnesis-pg7-recovery-repeat-1.log. RPO0 only for quiesced2-event fixture;
+no deployment SLO or large-data recovery claim.
+
+Recovery measurement2:2PASS6.504s/18unselected, compile.29s excluded. Logical
+backup2.092292ms/readiness45.876ms; physical verified backup403.584208ms/readiness
+140.4845ms. Three reviews: same exact logical new-history/state4→5 and physical
+preserved-metadata/checkpoint invariants; actual two serial native cases with
+fresh physical cluster/new logical history and no guard/compile substitutions;
+unchanged9observational lines, all previous assertions/selection/deadlines.
+Raw/tmp/mnesis-pg7-recovery-repeat-2.log. Defined readiness windows are not total
+outage or test elapsed; initial setup/source close/external routing remain outside.
+
+Recovery measurement3:2PASS23.422s/18unselected, compile.30s excluded. Logical
+backup2.133125ms/readiness41.92975ms; physical backup413.460084ms/readiness
+140.917959ms. Three reviews: same exact data/history/metadata/pair/advance
+invariants; actual two serial native cases and separate real timings, recording
+the larger23.422s full invocation rather than calling it46ms or noise; unchanged
+source/assertions/selection/deadlines and observation-only9lines. Defined
+readiness windows omit other setup/source-close/final-cleanup work; these results
+must not be presented as total downtime or deployment recovery targets. Raw
+/tmp/mnesis-pg7-recovery-repeat-3.log. Three complete measured runs/6cases now
+retained, each independently three-reviewed. Current full signed gate next.
+
+## Workload normal signed gate
+
+Signed d231769bf044730e4998a3fe1437b005690be0aa (G) completes the unchanged
+pre-commit Nix gate, exit0. Actual workspace1594PASS476.417s/16slow/4compiler
+exclusions across138binaries, compile7m47s excluded; coverage output retained.
+Three reviews: full selected workspace contracts including original long Fjall
+law;1594 actual completions with four compiler cases explicitly owned by CI and
+no DB credit for guarded host tests; unchanged source/assertions/property inputs/
+not-test(compile_fail) selector and strict lints/thresholds. Independent264real
+Postgres cases and six operator cases above supply actual database evidence.
+
+Three actual replay invocations pass CBOR2/header+chunk, value1 and wire1, each
+1.00s. EACH reviewed three times: owning parser/value contract; actual completed
+locked corpus/replay execution/counts with no empty harness or echoed credit;
+unchanged source/inputs/assertions/selection. No long AFL/capacity/native-DB proof
+from replay. Cross-target Wasm/no_std owners compile successfully, zero runtime
+credit. Raw/tmp/mnesis-pg8-soak-{hook,gate-nextest,gate-replay}.log. Determinate
+Nix reports76 evaluated flake checks; host build owners remain the existing gate.
+
+Concurrent user release403 merged9e5ceeb3af789cff282136e635f6e295f3bf9e58:
+versions/internal requirements/three locks/Postgres changelog only, no Rust
+implementation changes. Release39342443941 explicitly publishes0.5.2; primary
+registry confirms not yanked, checksum
+39f9288298e4c54847505db231f581b75979cc4c21da1757ff70243aed38ab45.
+Preserve this work. This workload tested the recorded0.5.1 graph, not an invented
+0.5.2 rerun. Existing protected rules allow ordinary exact-head merge against
+concurrent release; verify resulting standard merge tree. Current graph/final
+registry consumer remain later requirements. Record-only signed amendment next;
+credit no new runtime if cached. Open focused PR promptly after terminal.
+
+The record-only amendment actually reran the required gate after the interrupted
+session; it was NOT cached runtime. Actual workspace1594PASS531.789s/15slow/
+4compiler exclusions, release compilation2m20s excluded. Three reviews: full
+unchanged owning workspace contracts and original long property laws;1594 actual
+new completions rather than echoed first-run476.417s, no guarded DB/runtime
+credit; identical source/assertions/property cases/not-test(compile_fail)
+selector/lints. Longer elapsed is recorded, not labeled a measured noise floor.
+Replay again executes2/1/1 cases,1.00s each; EACH three-reviewed for exact parser/
+value owner, actual completed invocation, unchanged inputs/assertions/selection.
+No new capacity/native/AFL proof from those replays. Cross-target compile owners
+pass. The same full normal hook exits0. Raw
+/tmp/mnesis-pg8-soak-record-{hook,nextest,replay}.log. Final evidence-only amendment
+immediately afterward must still use the normal signed gate; inspect actual
+cache result before claiming zero additional runtime. Functional source stays.

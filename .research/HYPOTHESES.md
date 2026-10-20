@@ -1075,3 +1075,61 @@ edges <=12lines; generated Hakari only if supported generation proves necessary.
 README <=45lines/changelog<=3. No public Rust type/API, migration, runtime,
 framework, tooling, lint/threshold/test-selection change. One independently
 reviewable diagnostics slice, isolated from frozen metadata and deadline WIP.
+## PG8 sustained native workload — 2026-10-19
+
+Threatened invariant: sustained mixed writes, projection restarts and listener
+reconnects must not lose/duplicate events, mix saved state/position, accumulate
+client memory/connections, or need a later notification to advance. This is the
+explicit 30-minute PG8 soak, not a substitute for the separate capacity matrix.
+
+Workload before implementation: private real Postgres cluster, existing SQLx/
+Tokio/cluster/allocation facilities; 16 competing producers per round, alternating
+one/eight-event batches, and16 saved-state consumers reconstructed from native
+checkpoints each round. Each minute replace the reader, terminate its listener,
+observe actual reconnection, commit one native event without NOTIFY, require
+first-event recovery within the established3s test bound with no later writes,
+then rebuild a full-history reader. Hold page limits128rows/1MiB and pool limits
+24+24+4. Zero unknown write results may be retried; any unexpected error fails.
+
+Acceptance: exact one winner/15conflicts per round, strictly increasing global
+positions/payload ordinals, exact persisted consumer pairs and final event count,
+minimum1800s actual steady work, >=30fault/restart cycles; peak incremental
+allocation <=4*16*1MiB+8MiB, retained <=baseline+8MiB after closing pools,
+zero remaining producer/consumer backend sessions within3s. Report actual warmup,
+elapsed, counters, allocated bytes, resident allocator bytes and connections.
+RSS and tail latency remain separate capacity evidence. Short explicit runs get
+smoke credit only, never30-minute acceptance. Run the full1800s after integrating
+the final diagnostics parent and after other local full gates finish.
+
+Falsifiers/controls: disable the one-second rescan in an isolated source control;
+the native no-notification phase must time out. Corrupt an event ordinal control
+must fail actual fold validation. No assertion/budget/timeout relaxations.
+
+Change budget before code: one standalone Cargo benchmark<=500lines/15private
+helpers using the existing Fjall reporting-benchmark pattern; manifest<=6lines,
+README<=14lines; zero production Rust/API/migration/dependency/tool/framework/
+runtime changes. Reuse tests/support/{cluster,memory}.rs unchanged. Rollback only
+this reporting benchmark/doc slice; preserve all source and native evidence.
+
+## Soak configured exclusion-lock rejection — 2026-10-19
+
+Second native long run fails after22faults at exact SQLx55P03 during key exclusion
+checking, under the preregistered1s lock_timeout. A lock deadline is an explicit
+pre-COMMIT rejection, not an optimistic Conflict or successful commit. Preserve
+that distinction and all unknown outcomes. Do not increase deadlines or retry.
+
+Before fixture policy changes, characterize a real uncommitted competing key
+under the existing deadline owner: exact Sqlx55P03, independent zero event/key
+inventory after blocker rollback, and healthy append after settled rejection.
+Pair with existing after-COMMIT SQLSTATE tests:55P03 there must stay Unknown.
+This is native operational contract evidence, not a new security investigation.
+
+Budget: existing deadline_tests.rs <=380total lines (current297), add one <=75line
+law using existing four helpers; zero production/API/dependency changes. Then
+allow only the exact typed pre-COMMIT rejection as a separately reported soak
+counter, never Conflict. Keep one exact winner and all remaining requests either
+Conflict or that known rejection; exact consumer/global counts and every original
+3s/5s/1s/10s/1800s/resource/fault bound unchanged. Keep all reds and record failure
+rates; no throughput guarantee is invented. Unknown/other causes remain fatal.
+One private counter product may replace the existing model/report scalars to
+keep one owning source for round/event/fault/rejection counts, within500benchlines.

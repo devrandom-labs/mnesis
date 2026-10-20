@@ -1,0 +1,16 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/workspace-hack)
+   Compiling mnesis v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/mnesis)
+   Compiling mnesis-postgres v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/adapters/postgres)
+   Compiling mnesis-store v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/store)
+   Compiling mnesis-wake v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/wake)
+   Compiling mnesis-store-testing v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/store-testing)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-soak-control.fUvXGc/crates/test-domains)
+   Compiling mnesis-fjall v0.4.0 (/private/tmp/mnesis-soak-control.fUvXGc/adapters/fjall)
+    Finished `bench` profile [optimized] target(s) in 5.67s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-0aac1dbab54f01e3)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+
+thread 'main' (110894890) panicked at adapters/postgres/benches/soak.rs:364:14:
+unnotified final commit must recover without another write: Elapsed(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: bench failed, to rerun pass `-p mnesis-postgres --bench soak`

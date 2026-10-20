@@ -1,0 +1,13 @@
+diff --git a/tmp/mnesis-postgres-soak/adapters/postgres/benches/soak.rs b/adapters/postgres/benches/soak.rs
+index cb4038ae..166e13b5 100644
+--- a/tmp/mnesis-postgres-soak/adapters/postgres/benches/soak.rs
++++ b/adapters/postgres/benches/soak.rs
+@@ -192,7 +192,7 @@ async fn writers(store: &PostgresStore, round: u64, count: u64, length: u64) ->
+             .map(|offset| {
+                 pending_envelope(Version::new(offset).unwrap())
+                     .event_type("Soak")
+-                    .payload(count.checked_add(offset).unwrap().to_be_bytes().to_vec())
++                    .payload(count.checked_add(offset.checked_add(1).unwrap()).unwrap().to_be_bytes().to_vec())
+                     .build()
+                     .unwrap()
+             })

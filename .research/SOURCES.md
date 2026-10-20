@@ -454,3 +454,18 @@ try_recv returns None on supported disconnects and eagerly reconnects by default
 Observing None therefore preserves SQLx's own reconnection behavior while making
 it visible. Other errors still reach the existing bounded retry loop. Native
 query statistics remain Postgres' responsibility, not a new adapter registry.
+### PG8 soak facility selection, accessed2026-10-19
+
+Existing adapters/fjall/benches/projection_storage.rs and its [[bench]] demonstrate
+standalone Cargo reporting benchmarks. .github/workflows/codspeed.yml explicitly
+selects four existing Criterion targets; a native reporting benchmark is not
+silently substituted into CPU simulation. Reuse standard Cargo/Tokio/SQLx; no new
+benchmark framework or custom development tool. Existing Postgres cluster.rs
+owns initdb/pg_ctl lifecycle; memory.rs already exposes LIVE/PEAK/TOTAL allocated
+bytes. Existing native projection consumers verify the checkpoint API, and
+crates/store/src/checkpoint.rs owns revision CAS/state-position pairing.
+
+Host baseline: Mac16,7;24GiB RAM;14 logical CPUs, observed via sysctl. This private
+native soak is not an isolated throughput or latency measurement. Actual DB
+settings/toolchain/source/elapsed will be recorded at execution; short smoke
+runs and concurrent-host timings cannot satisfy the full capacity matrix.

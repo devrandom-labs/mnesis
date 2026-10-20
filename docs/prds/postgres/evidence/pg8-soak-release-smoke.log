@@ -1,0 +1,30 @@
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-soak/crates/workspace-hack)
+    Checking mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/wake)
+    Checking mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/store-testing)
+    Checking mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-soak/crates/test-domains)
+    Checking mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/fjall)
+    Checking mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.64s
+ INFO taplo:format_files:load_config: found configuration file path="/private/tmp/mnesis-postgres-soak/taplo.toml"
+ INFO taplo:format_files:collect_files: found files total=26 excluded=1 files=["/private/tmp/mnesis-postgres-soak/Cargo.toml", "/private/tmp/mnesis-postgres-soak/adapters/fjall/Cargo.toml", "/private/tmp/mnesis-postgres-soak/adapters/inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-soak/adapters/postgres/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/macros/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/macros/tests/cross_crate_test/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/mnesis/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/nostd-smoketest/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/store/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/store-testing/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/test-domains/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/wake/Cargo.toml", "/private/tmp/mnesis-postgres-soak/crates/wake-nostd/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/axum-todos/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/closing-the-books/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/fjall-end-to-end/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/projection-tokio/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/signed-events/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/store-and-kernel/Cargo.toml", "/private/tmp/mnesis-postgres-soak/examples/store-inmemory/Cargo.toml", "/private/tmp/mnesis-postgres-soak/fuzz/Cargo.toml", "/private/tmp/mnesis-postgres-soak/fuzz-afl/Cargo.toml", "/private/tmp/mnesis-postgres-soak/fuzz-common/Cargo.toml", "/private/tmp/mnesis-postgres-soak/mutants-gate/Cargo.toml"] cwd="/private/tmp/mnesis-postgres-soak"
+   Compiling workspace-hack v0.1.0 (/private/tmp/mnesis-postgres-soak/crates/workspace-hack)
+   Compiling mnesis v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/mnesis)
+   Compiling lazy_static v1.5.0
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+   Compiling matchers v0.2.0
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.10
+   Compiling nu-ansi-term v0.50.3
+   Compiling sharded-slab v0.1.7
+   Compiling mnesis-store v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/store)
+   Compiling mnesis-test-domains v0.0.0 (/private/tmp/mnesis-postgres-soak/crates/test-domains)
+   Compiling tracing-subscriber v0.3.23
+   Compiling mnesis-wake v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/wake)
+   Compiling mnesis-store-testing v0.5.0 (/private/tmp/mnesis-postgres-soak/crates/store-testing)
+   Compiling mnesis-fjall v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/fjall)
+    Finished `bench` profile [optimized] target(s) in 5.29s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-8d4fb32a58614f45)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+soak elapsed=1.048260125s rounds=1 events=17 faults=1 connections=44 live=1328325 peak=1659593 allocated_bytes=8939310
+soak elapsed=10.002514375s rounds=3659 events=16478 faults=1 connections=44 live=1390432 peak=1858314 allocated_bytes=8953813742
+soak complete seconds=10 elapsed=10.382710125s events=16478 rounds=3659 faults=1 baseline=1083422 peak=1858314 retained=104102 allocated_bytes=8950005035

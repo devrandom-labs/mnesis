@@ -1,0 +1,9 @@
+    Checking mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.84s
+   Compiling mnesis-postgres v0.5.0 (/private/tmp/mnesis-postgres-soak/adapters/postgres)
+    Finished `bench` profile [optimized] target(s) in 2.81s
+     Running benches/soak.rs (/Users/joel/orca/workspaces/nexus/main/target/release/deps/soak-8d4fb32a58614f45)
+soak server/settings=("18.6", "on", "on", "on"), clients=16, pool=24, pages=Limits { rows: BatchSize(128), bytes: 1048576 }
+soak elapsed=1.041040792s rounds=1 events=17 faults=1 connections=44 live=1323845 peak=1655608 allocated_bytes=7987733
+soak elapsed=10.002455625s rounds=4886 events=21996 faults=1 connections=44 live=1396528 peak=1845649 allocated_bytes=10376850438
+soak complete seconds=10 elapsed=10.168733584s events=21996 rounds=4886 faults=1 baseline=1075292 peak=1845649 retained=104102 allocated_bytes=10373383414

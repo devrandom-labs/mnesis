@@ -15,10 +15,12 @@ search paths that put application schemas before `pg_catalog`.
 
 ```toml
 [dependencies]
-mnesis-postgres = "0.1"
+mnesis-postgres = "0.5"
 ```
 
-Point it at a database via `DATABASE_URL`; integration tests boot a real PostgreSQL and skip cleanly when the variable is absent.
+Use the verified connection example below with an explicitly migrated database.
+The [native checks](../../docs/prds/postgres.md#pg9-verification-and-delivery)
+require real Postgres; local tests without `DATABASE_URL` are not database proof.
 
 ## Verified connections
 
@@ -423,8 +425,8 @@ reimport events into a fresh history instead.
 Choose the deployment's recovery point and recovery time objectives before
 running this procedure. Record PostgreSQL/tool versions, storage, database
 settings, backup start/end, the source cutoff and the time the recovered consumer
-becomes ready. The native test below measures a small local fixture; its timings
-are not production targets. Replication, cross-node failover and storage power
+becomes ready. The [local measurements](../../docs/prds/postgres/recovery.md)
+cover a small fixture. Replication, cross-node failover and storage power
 loss require their own tested profiles.
 
 For a physical drill, use the matching PostgreSQL tools and a compatible adapter
@@ -498,3 +500,17 @@ Import reports describe progress committed by that request. A mismatch with
 contain events. Inspect its history before reconciling. Partial salvage requires
 an explicit choice, retention of producer/completion evidence, and examination
 of corrupt blocks and the resulting per-stream report.
+
+## Sustained workload
+
+Run the native mixed-workload benchmark through the development shell:
+
+```sh
+nix develop --command cargo bench -p mnesis-postgres --bench soak --features projection
+```
+
+It creates a private local database and runs for 30 minutes. Sixteen writers and
+sixteen consumers exercise listener reconnection, missed hints and restarts.
+Each round checks order/state and reports known lock rejections; unknown outcomes
+fail. Shutdown checks memory/backend release. `MNESIS_SOAK_SECONDS=10` is smoke
+only. Allocation bytes measure client traffic, separately from memory/latency.

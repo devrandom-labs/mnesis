@@ -65,6 +65,7 @@ impl Handle<Deposit> for BankAccount {
 | [`mnesis-store`](crates/store) | Persistence edge — codecs, event streams, upcasters, repositories | ✅ + `alloc` |
 | [`mnesis-wake-nostd`](crates/wake-nostd) | On-device wake source for live subscriptions (embassy) | ✅ + `alloc` |
 | [`mnesis-fjall`](adapters/fjall) | Embedded LSM-tree event store adapter (fjall) | `std` |
+| [`mnesis-postgres`](adapters/postgres) | PostgreSQL event store, atomic import, snapshots, projections and consistent export | `std` |
 
 Projection is provided as primitives (`Projector`, `PersistTrigger`, `Subscription`, `CheckpointStore`); mnesis ships no event-loop runner — the loop is the consumer's. See `examples/projection-tokio`.
 
@@ -102,6 +103,7 @@ See the [examples](examples/) for complete working code:
 - [`inmemory`](examples/inmemory) — pure in-memory event sourcing (bank account domain)
 - [`store-inmemory`](examples/store-inmemory) — all store traits with `InMemoryStore`, including codec and upcasting
 - [`store-and-kernel`](examples/store-and-kernel) — full lifecycle: create, decide, encode, persist, read, decode, rehydrate
+- [`Postgres`](adapters/postgres/examples/secure.rs) — caller-owned pool and verified connection; see the [adapter guide](adapters/postgres/README.md) for migrations, limits, retry rules and recovery
 
 ## Status
 

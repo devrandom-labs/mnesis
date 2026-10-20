@@ -1,6 +1,6 @@
 # Postgres adapter completion
 
-Status: active (PG4 startup bounds; PG7 measurements; PG8 operations/capacity; PG9 remain). Updated: 2026-10-19.
+Status: active (PG7 measurements under review; PG8 capacity and PG9 delivery remain). Updated: 2026-10-19.
 Owner: Mnesis Postgres adapter maintainers.
 Baseline: `747aea2881938d6a7f10a85aec1475bc8b8289e3`.
 Planning branch: `docs/postgres-prd`. Current slice: `fix/postgres-diagnostics`; operational deadlines PR399 merged. Version0.5.0 published; whole-adapter acceptance remains open.
@@ -574,8 +574,8 @@ actual original failures, database profile, commands and selected first experime
 | Document verification | Local links resolve across the PRD, backlog, research records and adapter README; all 11 backlog rows have reciprocal dependency edges; whitespace checks pass. |
 | Locked Nix package evaluation | `nix eval --raw --expr 'let f = builtins.getFlake (toString ./.); p = import f.inputs.nixpkgs { system = builtins.currentSystem; }; in p.postgresql.version' --impure` returned `17.10`. |
 | Native defect reproduction | Existing 56 tests pass; new bounded-read, stream/global final-hint and watermark-release tests fail against original production source. See characterization. |
-| Broader baseline and dependency audit | Pending PG0/PG8; individual read-memory and timing samples are characterization, not capacity evidence. |
-| Production implementation and acceptance gates | Read/wake/outcome/migration/value/atomic/snapshot/checkpoint/listing/session/history, backup/recovery failure, query identity, TLS/runtime roles, native durability and byte-accounting slices merged. PG7 operator measurements and PG8–PG9 remain; the patched wake dependency is under verification. Exact acceptance is tracked in the backlog and research record. |
+| Broader baseline and dependency audit | PG0 defect baseline recorded; full PG8 capacity measurements remain. Read-memory and recovery timing samples retain their stated workload limits. |
+| Production implementation and acceptance gates | 24 protected changes through diagnostics PR402 include read/wake/outcome/migration/value/atomic/snapshot/checkpoint/listing/session/history, backup/recovery failure, query identity, TLS/runtime roles, durability, byte accounting, startup bounds and the patched wake dependency. A full1800s native soak and264-case suite pass; workload/recovery delivery, capacity and PG9 remain. Exact acceptance is tracked in the backlog and research record. |
 | Merge and publication | Focused protected merges are recorded in the backlog. No whole-adapter release or registry-consumer verification yet. |
 
 ## Primary sources
