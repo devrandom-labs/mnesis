@@ -9383,3 +9383,611 @@ Checked-in first real-crash job log removes trailing spaces only for repository
 whitespace checks; the exact original /tmp/mnesis-pg9-afl-real-crash-job.log is
 preserved. Initial whitespace check rejected raw runner blank-space fields;
 no test, workload, original raw file or gate was changed to hide that failure.
+## Capacity preparation compiler baseline
+
+First strict all/all check exits101: actual E0308 BatchSize expectsusize, and
+SQLx0.9 requires its supported dynamic-query builder instead of an ordinary
+String argument. No native benchmark ran. Three reviews: owning selected API/
+target contracts; actual compiler-only failures with zero runtime evidence;
+unchanged lints/selection/assertions. Rustfmt643lines remains within700budget.
+Original shell creation command initially lacked the benches directory and wrote
+no file; directory creation corrected before source addition, zero test credit.
+Defer native capacity until the failed soak's finite-visibility assumption is
+resolved and the full soak succeeds. Original reds remain raw, not suppressed.
+
+Second capacity strict check reaches linting and fails writes96/80lines and one
+missing statement semicolon. Three reviews: selected strict shape/ownership;
+actual compiler-only red/zero benchmark runtime; no lint/assertion/selection
+relaxation. Extract the real concurrent writer cohort for reuse in warmup and
+measurements, retaining unknown-error rejection and exact winner counts. The
+soak's visibility finding also requires seed quiescence before finite-history
+measurements: wait for the native cutoff to exceed the newest seeded transaction,
+record the wait separately, never assume acknowledgement implies eligibility.
+This is setup only, not a stronger production visibility or latency guarantee.
+
+Capacity third strict all-feature/all-target checkPASS2.88s,693/700Rustlines.
+Three reviews: exact advertised compilation/target contract; actual compiler
+execution only, zero native capacity runtime; unchanged strict lint levels and
+all assertions/inputs. Shared writer cohort now validates exact winners and
+rejects every non-conflict error, and is reused for untimed warmup. Seed setup
+waits for native eligibility, separately from measurements. Still prepare docs,
+source integration, current native smoke/falsifiers/full matrix and delivery.
+
+Capacity WIP preserved in retained stash58c04f27bc49e8ba7872534c9c816ed9a2f41f31
+before integration onto protected5b868028 (.5.1). Only append/append research
+conflict: retain complete protected prefix byte-identically, followed by all
+capacity compiler evidence; no production source changes. Current bench685/700
+lines after sharing nearest-rank percentile authority, reporting operations/sec
+and actual native row growth per append window. README16/18lines documents
+matrix and measurement limits. No new capacity test/benchmark run yet; full
+native soak remains the sole active local database workload. Stash retained.
+
+Current protected capacity strict check fails only missing_const_for_fn on the
+new shared percentile helper. Three reviews: selected strict target/API contract;
+actual compiler-only red with zero native measurement; original lints and all
+workloads/assertions preserved. Mark that pure helper const as requested by
+pinned Clippy; no suppression or threshold change. Raw
+/tmp/mnesis-pg8-capacity-protected-check.log. No capacity benchmark has run yet.
+
+Current protected capacity compilation nowPASS13.42s with shared const percentile
+helper. Three reviews: actual selected .5.1 all-feature/all-target contract;
+completed compiler execution only, zero native measurement/capacity credit;
+unchanged strict lints, matrix inputs/sample thresholds/model/memory bounds and
+no production/API/dependency change.685/700source, README17/18lines, existing
+allocator4churnlines. Native10k smoke then full matrix must follow sole active
+soak. Rejected compiler red remains retained. Raw
+/tmp/mnesis-pg8-capacity-const-check.log.
+
+Capacity optimized benchmark compiles11.48s with --no-run on protected.5.1,
+no benchmark execution. Three reviews: actual default adapter benchmark target
+and selected APIs; real optimized compilation/artifact only (zero capacity or
+runtime credit); source6ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55,
+unchanged assertions/limits/profile. Artifact reported by Cargo JSON:
+/Users/joel/orca/workspaces/nexus/main/target/release/deps/capacity-4117bc1a0d839cb6.
+Compile output/tmp/mnesis-pg8-capacity-{artifacts.jsonl,release-build.log}.
+Read actual page/store SQL before measurement: initial stream text matches
+observer's WHERE stream_id prefix; native global-resume tuple matches observer;
+continuation-only stream shape is explicitly excluded. Plans still require all
+three real prepared shapes at runtime. RSS snapshots/model overhead labeled;
+external OS time scope is whole-command resources, not isolated client peak.
+
+Capacity preserved in retained stash before moving from5b86 to concurrent user
+release4039e5ceeb3af789cff282136e635f6e295f3bf9e58 (.5.2). Rebase/stash apply
+succeed without conflicts. Existing benchmark SHA2566ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55
+still compares exactly; production Rust matches protected main. New version/lock/
+changelog work preserved. Old .5.1 optimized artifact is NOT current .5.2 build
+or runtime evidence; compile current graph after workload full gate terminal,
+then native smoke/full matrix. Still ZERO native capacity measurements.
+
+Current .5.2 capacity source passes fmt/strict all-feature/all-targets20.19s and
+optimized --no-run5.71s. Three reviews for EACH compiler command: current selected
+version/target graph; actual compiler completion only (zero benchmark/native
+credit); unchanged source6ea3..., lints/inputs/assertions/limits and preserved
+.5.2 release metadata. Cargo artifact reports capacity-d4d8b8efa57b1ad6. Begin
+MNESIS_CAPACITY_EVENTS=10000 native smoke after local gate terminal; all other
+axes/windows/sample counts stay. This is not the full10k/100k/1m matrix.
+
+## First native capacity smoke completes
+
+Current protected.5.2 process31754 TERMINAL0. Four10k-event fixtures cover100/
+10000-event streams and32/4096-byte noncompressible templates, PG18.6 on/on/on,
+fixed128rows/1MiB/24pool.144read windows/144append windows/16actual EXPLAIN
+outputs, all3repeated windows with>=100samples. Four full-global drains return
+exactly10000events:27.160833/25.121708/73.800458/73.272291ms. Each close reaches
+pool0; retained allocator bytes107022/103822/105166/103822. Native append before/
+after counts include growth; no assertion/error/unknown retry observed.
+
+Three reviews after actual terminal:
+1 Contract: native seed eligibility precedes finite scans; every read validates
+   full payload/version/key/position; concurrent writers validate exact winners
+   and independent committed-row deltas; client peak/retained bounds and pool
+   close are reached. All three actual cached query shapes pass diagnostic replay.
+2 Execution: four real private clusters,144+144completed windows and16plans,
+   not compiler/guard/empty binary. Only10k history is exercised, so100k/1m and
+   full capacity acceptance remain unproven. RSS snapshots and allocation stats
+   retain their defined scopes; no deployment SLO from this smoke.
+3 Source/assertions/profile: frozen6ea3e0da5bc6c90b82f40c9bca0866dcfcb79d744ddbdc46df7d3ba823815a55
+   still matches; rows/bytes/pool/deadlines/input axes/sample counts/model and
+   unknown-error rejection unchanged. No optimization/noise threshold introduced.
+Raw /tmp/mnesis-pg8-capacity-052-smoke.log and matchingstart/checksum. Begin full
+unchanged12-fixture matrix next; no other local native suite/fullgate during
+measurement. OS time wraps the compiled benchmark, not Cargo or Nix startup;
+its whole-command resource scope can include native child tools, not client-only
+peak RSS. Current program remains685/700lines, no production/API change.
+
+## Full native capacity matrix completes
+
+Session45723 TERMINAL0, unchanged .5.2 source6ea3...verified. All12fixtures
+(10k/100k/1m ×100/history-length streams ×32/4096B),432read windows,432append
+windows and48real native EXPLAIN outputs complete;12pool closes succeed. Every
+window preserves3repetitions and>=100response/success denominators. Full command
+343.78s real/153.81user/115.91sys; OS whole-command maximumRSS56885248bytes,
+peak memory footprint32702896bytes,0swaps (scope includes launch/child tools;
+not client-only peak). No error, invariant failure or unknown-write retry.
+
+Three reviews after terminal:
+1 Contract: exact seed/native count and eligibility precede scans; full drains
+   validate every payload/key/position, and page probes also validate versions;
+   all page/read/writer cohorts
+   retain real overlap, exact winners and independent persisted deltas. Fixed
+   rows/bytes/pools/deadlines, bounded peak/retained allocations and12close
+   assertions are reached. Every actual prepared shape is observed and replayed.
+2 Execution: actual12native fixtures/432+432windows/48plans, including both
+   million-event4KiB histories; no smoke/compile substitution. Million-event
+  4KiB full drains8.987108541s(short)/8.326797875s(long) with client allocation
+   peaks840990/810003bytes (baseline223421/196037), showing the tested page-bound
+   retention; allocation TRAFFIC remains~9.11GB per drain, not retained memory.
+3 Source/selection: pre-run SHA still matches exactly; all input axes, rows128/
+   bytes1MiB/pool24,30sstatement/acquisition and5slock deadlines, model assertions
+   and sample/window counts unchanged. No algorithm/dependency/API/production
+   change. Append fixtures report native row growth rather than pretend a fixed
+   writer history; timed reads include validation overhead. No deployment SLO or
+   small-difference optimization accepted from these measurements. Analyze the
+   repeated-window spread, query plans and saturation before retaining delivery.
+Raw/tmp/mnesis-pg8-capacity-052-full.log/start/checksum. No localfullgate/native
+suite overlapped. Existing OS-time scope is recorded, not compiler/Nix RSS.
+
+Plan observer refinement: actual timed million-row initial reads remain roughly
+0.4–0.7ms at one client, while forced-generic diagnostics include~80ms scans.
+That is a mode mismatch, not evidence that auto-mode timings regress by80ms.
+Record native auto plans alongside generic stress plans and selected session's
+prior generic/custom counts; preserve original baseline output and do not tune
+library SQL from the forced-mode number. Current source690/700lines, existing
+plan function remains within strict80line limit; no new helper/API/production
+code. Rustfmt/strictall/all PASS6.42s. Three reviews: observed supported native
+plan/counter APIs; actual compiler-only pass/zero new runtime; unchanged workload,
+model, sample/windows, quotas and all deadline/resource/error assertions. Full
+unchanged matrix rerun is justified by the observer-mode correction, not by a
+weakened passing condition. New output must distinguish auto/generic labels.
+
+Corrected observer optimized compilePASS3.56s (--no-run), no new runtime credit.
+Three reviews: current .5.2 benchmark/auto+generic observer APIs; actual optimized
+compiler completion only; unchanged measurements/model/bounds/inputs and
+690/700source with no production/API changes. Run the full same12fixture matrix,
+now expecting96distinct mode-tagged EXPLAIN outputs. Original343.78s baseline
+remains retained; this rerun corrects observer evidence, not a performance claim.
+
+2026-10-20 corrected observer full capacity matrix76942 TERMINAL0. Native PG18.6
+on/on/on, published0.5.2 code; capacity.rs source SHA256
+582662e92362290754a5cf2f1a604a25a9b56f7cdb35fb4876bbaf05b90ed54a exact before/after.
+Three independent reviews: (1) source/model validates full drain count, key,
+payload ordinal/tail and increasing global positions; timed page probes also
+validate each version, and native count deltas validate all measured appends;
+(2) all12fixtures,432read/432append windows,96 actual auto/generic query plans and
+12pool-zero closes must be counted from retained raw log below before merge;
+terminal0 reaches final fixture's quiescent cleanup, all128-client shared cohorts
+have exactly one winner, no swallowed non-conflict/unknown errors; (3) original
+matrix/sample counts,128row/1MiB bounds,30s/5s deadlines, allocator assertions and
+seed/measurement separation unchanged by observer refinement. No source tuning.
+Actual compiled-binary command time361.55real/159.03user/117.29sys seconds,
+maximumRSS57737216B/peakfootprint35291544B/0swaps. This command-level OS scope is
+not an isolated allocator peak or production target. Source log and measurement
+analysis follow; prior343.78s generic-only full baseline remains, not overwritten.
+
+Full corrected matrix actual counts independently parsed:12profiles/432reads/
+432appends/96plans/12closes,12full drains. Source remains582662e9... after
+protected405 integration; production .5.2 unchanged. capacity.md records exact
+scope, short-window dispersion (median7.35%,p95 66.21%,max624.20%), all retained
+outliers and same-product baseline, not a manufactured tiny improvement. Native
+plan review distinguishes one-row keys scans from event scans: ordinary auto
+1m initial global .170–.238ms/0prior generic, versus forced68.997–78.303ms with
+outer body scan1m despite indexed candidates. This selected profile never forces
+generic; no unsupported auto regression or performance guarantee. One-off local
+Ruby2.6 analysis initially called unavailable filter_map; corrected to supported map/grouping,
+no native rerun/catch credit and no project tool added. Table entries derive from
+actual three-window rows; raw copies retained for every other matrix cell.
+
+Capacity source minimized after protected405 union:690/700benchmark lines,
+manifest4/6added,README19/20added, existing allocator3added/1removed. No new
+public adapter API, production Rust, migration or dependency. Borrowed prepared
+statement inspection reuses owning SQL rather than duplicating query policy;
+fixed enums and one shared percentile function report the existing workload.
+Full original/source-corrected matrices already passed; final normal gate needs
+compilation/original allocator-owner regression only, without repeating the
+native matrix absent a material source change. Selected full source SHA remains
+582662e9. Large log artifacts are raw evidence, not a custom validation tool.
+
+PG9 final candidate f3633983953a53488ae323f91498d0af911ab5e5 signedG, PR406
+open. Normal final record-only amend passes all12previously-built checks, ZERO
+new runtime (1594actual cases remain first gate evidence, not recounted). Proof
+branch a30c4b341810bcd8302f11b6139971cf0e18dee1 signedG has normal unchanged
+cached12check hook, ZEROnewruntime, only temporaryworkflow/doc diff. Candidate
+assertions/verdict/source remain unchanged; actual Linux proof dispatch follows.
+Targeted locked actionlint for changed checks/fuzz passes; broader legacy action
+input findings in unchanged dependency-update workflows are retained in proof
+record, no whole-repository actionlint success claimed. Not a native test.
+
+2026-10-20 PR406 exactf363 push-feature actual logs: wake-nostd118722945717
+compiler1/unit0/0/0; macros118722945536 compiler1/unit1/1/1;
+inmemory118722945349 compiler4/unit25/25/30; wake118722945590 compiler1/unit17/17/17;
+Fjall118722945243 compiler6/unit131/131/131; kernel118722945825 compiler6/unit15/15/15;
+Postgres118722945055 compiler7/unit11/11/11; store-testing118722945050 compiler4/
+unit0/0/0. Unit triples are default/no-default/all. EACH of30actual compiler
+invocations and24unit invocations three-reviewed: (1) exact library feature
+contract or named owning unit laws; (2) actual compiler/unit process, flags and
+count, not job-green/empty inference; (3) locked fetch, Hakari disabled dev-free
+offline graph and exact git-diff restoration, unchanged source/assertions/unit
+flags. Empty binaries ZERO runtime. Postgres11unit cases exercise values/errors,
+not DB; real native default/each/all coverage remains due. Source .5.2 matches
+candidate; no fabricated old-gate false-green claim. Store17profiles still due.
+Raw /tmp/mnesis-pg9-verification-job-ID.log retained for each listed job.
+
+PR406 AFLheader118722978274 and value118722978365 both actually60s/CMPLOG,
+0savedcrashes/0timeouts,2/0newcorpus items. EACH three-reviewed: actual parser
+owner; actual engine duration/statistics and zero saved files rather than an
+exit-only inference; unchanged normal harness/targets/seedhandling/limit/verdict
+and always-upload. These clean runs give ZERO real saved-crash control proof.
+The separately dispatched intentional-crash branch still supplies that witness.
+Mutants118722978390 explicitly reports no source changes/nothing to mutate,
+no artifact. Three scope reviews confirm no production Rust in PR406, original
+normal workload/source and unchanged gate; ZERO runtime mutation/baseline credit.
+
+PR406 pushstore118722945433 completes actual17compiler profiles and217/217/217
+unit cases (2.13/1.78/2.23s). EACH of20invocations three-reviewed: actual owning
+public feature/compiler or store unit laws; real17commands and exact three unit
+counts; source/assertions unchanged and supported offline dev-free/Hakari graph
+restored exactly. This completes all47push published-shape compiler invocations
+and27unit invocations across all9libraries. Empty-unit cases still ZERO runtime,
+no hidden native credit. Kernel compile-fail118722944354 actually2PASS114.53s,
+macros1PASS14.79s/store1PASS18.26s; EACH three-reviewed against owning misuse
+fixtures/expected diagnostics, actual fixture execution/count, and unchanged
+source/flags/toolchain. Compile time outside test durations is excluded.
+
+PR406 remaining normal AFLwire118722978372/chunk118722977911 each60s/CMPLOG,
+0savedcrashes/0timeouts,0/13newcorpus items. EACH three-reviewed: unchanged parser
+contract; actual engine counts/duration/native verdict and no artifacts; unchanged
+targets/harness/timebox/seed pipeline. Normal clean AFL coverage is complete,
+but still ZERO real saved-crash proof. That proof remains the isolated dispatch.
+
+PR406 libFuzzerwire118722978594=14125343runs/61s,header118722978497=1938888/61s,
+value118722978485=5788347/61s actually complete. EACH campaign three-reviewed:
+exact shared parser/value owner; actual engine count/61s completion and no crash
+rather than compile/exit inference; unchanged normal harness/seed handling,
+timebox/ASan/engine source. No Postgres native or saved-AFL-crash proof credit.
+Chunk campaign and remaining CI still need actual-log review.
+
+Capacity local gate actual1594PASS576.579s/15slow/4compile exclusions,
+release compile1m48s excluded,138binaries. Three reviews: original workspace/
+allocator owner contracts; actual process/count and completion rather than
+Darwin DB guards (ZERO database credit); unchanged property/assertion/filter/
+deadline source and LIVE/PEAK/TOTAL accounting. New successful-allocation COUNT
+instrumentation is fixture-only. Hook cross-target completion still pending.
+Normal archive packaging change is source/config-minimal11added/1removed on
+f363, targeted locked actionlint passes. All previous real crash evidence remains
+red/incomplete until actual artifact retention succeeds; no fabricated pass.
+Capacity normal gate67193 stable corpus replay2/1/1PASS each1s, actual execution,
+0failed/ignored/filtered. EACH invocation three-reviewed against unchanged parser/
+corpus owner, exact named test process/count and original source/assertions/time
+limits/selection. No native Postgres or AFL saved-crash proof inferred. Compilation
+excluded; raw replay log retained. Workspace actual execution still pending.
+Capacity normal gate actual1594PASS576.579s/15slow/4compile-fixture exclusions,
+138binaries; release compile1m48s excluded. Three reviews: (1) current workspace
+contracts and unchanged original allocator laws, including all-target compilation
+of the690linebenchmark/shared counter; (2) actual1594case process/count completion,
+not native guard/compile/cache output, all Darwin DB guard successes ZERO native
+credit; (3) unchanged source/assertions/property samples/filters/deadlines. New
+COUNT adds instrumentation only; all original LIVE/PEAK/TOTAL semantics remain.
+No repeat capacity model run needed without material source change; two full
+native matrices and smoke remain actual earlier evidence. Cross-target checks
+still finishing, do not claim whole hook success before terminal.
+
+Capacity normal signed gate completes all12host checks;465195311bf3ef988de3867a08d3d934a21b2dd0
+signedG,690line source hash582662e9 unchanged, no product/API/migration/dependency
+change. Raw full matrices/134line limits report and explicit actual tests already
+in commit; no evidence-only amend/extra runtime run. Focused PR opening.
+PG9 artifact fix3d83ce1bc3f8907d5038c5618ad1d01fa92d0693 signedG pushed to406;
+normal unchanged hook all12cached/0newruntime. Proof follow-up5479b31ced355b9363f01e1a6f5f58dec2f66ce9
+signedG also all12cached/0newruntime; second dispatch39454205176 duration10,
+original deliberate crash injection unchanged, normal workflow equals proof after
+removing only that preregistered injection. First failed artifact retained.
+No additional native/CPU measurement ran concurrently; capacity actual1594run
+was terminal before cached-only workflow hooks while cross-target tail finished.
+
+PR406 f363 standalone push native118722945167 actually completes20invocations:
+original seven mandatory all-feature laws each1PASS(remaining14/15/2/7/10/4/9
+unselected), fullall264PASS71.388s/0skip; then native default149PASS40.704s,
+export168PASS52.579s,import176PASS44.401s,projection173PASS43.893s,
+snapshot174PASS41.403s,tracing150PASS40.643s, every suite0skips. Each individual
+profile is preceded by its required owned1PASS law with respectively39/7/14/2/
+15/0remaining cases unselected. EACH of20actual invocations three-reviewed:
+(1) exact append/listing/atomic/checkpoint/cache/diagnostic or complete native
+owner contract and advertised selected graph; (2) actual native process/count,
+required nonempty law, live explicit psql DATABASE_URL and zero full-suite skips;
+(3) unchanged source/assertions/timeouts, each-profile archive flags and inherited
+mandatory filters. The later printed264-case run.log is an ECHO, ZERO additional
+execution. No default/individual feature claim based on all-feature unification.
+Raw /tmp/mnesis-pg9-verification-job-118722945167.log retained. Archive fix changes
+workflow packaging only; future exact-head checks must still pass before merge.
+
+Supersededf363 Nix push118722945180 actually1594PASS145.101s/4slow/4compile
+exclusions; PR1187229806081594PASS135.925s/same exclusions. EACH completed
+workspace invocation three-reviewed: original kernel/store/wake/adapter owner
+contracts; actual full counts/completion rather than cancellation/job conclusion;
+unchanged source/assertions/workloads/filters/deadlines. Push also completed7
+mandatory native one-law smokes, each1PASS/remaining14/15/2/7/10/4/9unselected;
+EACH three-reviewed against exact native owner, real process/nonempty selection
+and original source/deadline flags. No complete native-suite credit in either
+cancelled Nix job: superseding artifact-fix push triggers normal concurrency
+cancellation while building/running the remaining integration output. Full
+standalone native runs supply separate actual evidence; final current head still
+must pass its required checks. No cancelled run called an overall gate pass.
+
+F363 PR-event standalone native118722980132 completes the same20native
+invocations: mandatory7one-laws, all264PASS62.667s,default149PASS35.839s,
+export168PASS42.752s,import176PASS43.323s,projection173PASS39.020s,
+snapshot174PASS38.581s,tracing150PASS37.869s; each fullsuite0skips, each individual
+profile preceded exact owned one-law/nonempty selector. EACH of20invocations
+three-reviewed against exact owner/model/selection, actual native process/count
+and visible database/deadline fault evidence, unchanged source/assertions/archive
+feature flags/timeouts. Printed run.log264 is an ECHO, no second execution.
+Current artifact-fix head still requires successful checks before merge.
+
+Remaining f363 PR feature logs: store-testing118722981102 compiler4/unit0/0/0;
+inmemory118722981104 compiler4/unit25/25/30; wake-nostd118722981122 compiler1/
+unit0/0/0; kernel118722981123 compiler6/unit15/15/15; store118722981270 compiler17/
+unit217/217/217; Fjall118722981276 compiler6/unit131/131/131;
+Postgres118722981683 compiler7/unit11/11/11. EACH of45compiler and21unit
+invocations three-reviewed against exact owning graph/unit law, actual command
+counts/finished result rather than job/empty inference, unchanged source/flags/
+assertions plus supported dev-free/Hakari/offline graph and exact restoration.
+Together with previously reviewed wake/macros this completes PR47compiler/
+27unit invocations. Empty binaries and Postgres value-only units give ZERO DB
+credit; actual native suites are separately recorded above.
+
+Never-merged a30 control branch's automatic CI also ran unchanged normal source
+outside the dedicated fuzz job: wake118724270589 compiler1/unit17/17/17;
+wake-nostd118724270762 compiler1/unit0/0/0; store118724270804 compiler17/unit217/217/217;
+kernel118724270826 compiler6/unit15/15/15; macros118724270886 compiler1/unit1/1/1;
+inmemory118724271001 compiler4/unit25/25/30; Fjall118724271020 compiler6/unit131/131/131;
+store-testing118724271059 compiler4/unit0/0/0; Postgres118724271100 compiler7/
+unit11/11/11. EACH of47compiler/27unit invocations three-reviewed: unchanged
+owning library graph or unit law; actual command/test counts; exact source,
+assertions/offline/Hakari restoration and feature flags. Empty binaries ZERO
+runtime, all units ZERO DB credit. Compile-fail118724270427 actually2PASS106.11s/
+1PASS14.07s/1PASS16.56s; EACH three-reviewed against owning misuse fixtures,
+actual compiler diagnostics/count and unchanged flags/source. This control branch
+is never delivery or protected merge evidence. Old side CI is superseded by5479
+normally; any canceled partial run remains incomplete, not a green release gate.
+
+Final owner-doc review found two stale statements: blanket exports claimed no
+boxing for every adapter, although Postgres retains bounded BoxStream; stream
+listing's example still named SELECT DISTINCT rather than actual keyset/EXISTS.
+Minimal comment-only correction removes the stale SQL example and attributes
+allocation/dispatch to the native adapter stream. No executable/interface/test
+change and no new test framework/mirror assertion. This finding reopens the
+final doc pass, not adapter behavior; two fresh clean audits remain required.
+
+Final clean source audit1 (after two comment corrections),2026-10-20:
+production snapshot protected8b0e/.5.2, trees cratesd55aca5af28d37c871322bcd2151b1552bca4015,
+PGsrc96fd859d2543eae2a379760ae1d535be72b71a52,
+Fjallsrce7ff8e08dd3fd7f94b76ff8c6584a4283f5cc1a0,
+inmemorysrc80ac34c7babddf83dcda6718ba2612964ae40270. Candidate406/407 add no
+executable production Rust; final export.rs edit is2added/4removed comments.
+Fresh owner-contract → implementation review covers RawEventStore/CheckpointStore/
+AtomicAppend/import/export and adapter store/page/schema/migrations/history/
+position/error/wake/atomic/cache/checkpoint/listing/session/durability owners.
+No credible untested high-value finding remains in this pass. This is source
+review, not a new runtime test or final delivery claim.
+
+Specific falsification lenses: duplicate authority—core next_revision and run
+validation remain authoritative, page builder reused by live/session reads;
+invalid states—nonempty PendingBatch, nonzero versions/schema/revisions, explicit
+Advance/Rebuild and PageRow variants, cache separate from checkpoint CAS;
+misuse—history-scoped positions checked before foreign scan, explicit migration,
+private helper modules and native associated streams, five named public exports
+with actual config/consumer/persistence use; concurrency—held xmin and finite
+head/visibility capture, one shared listener, independent wake deadline, one
+finite-view owner, no data lease between normal pages; errors—one durability
+commit owner, SQLSTATE+phase mapping, no unknown retries or post-hint reversal;
+cost—measured bounded BoxStream pages/byte/body selection and fixed-pool cleanup,
+forced generic diagnostic is a documented separate profile limit; replacement—
+SQLx migrations/pools/transactions and futures try_unfold/Tokio primitives already
+replace custom engines, no evidence warrants a new dependency/framework;
+reversal workload—full1m/4KiB/128client cells, held watermarks and real reconnects
+are retained, not narrowed; Rust/Nix—checked size arithmetic, shared locks/pins,
+owned feature manifests and native hook, Python wrapper removed without a new
+runner. Interface reduction cannot erase required history or outcome information.
+Baseline/publication/mutation/native evidence stays separately attributed; no
+new security campaign, speculative optimization, or unrelated user-source edit.
+
+PG9 real saved-crash negative control COMPLETE: second dispatch39454205176,
+job118736660383 at signed5479b31c, actual10s/CMPLOG,3savedcrashes/0timeouts,
+engineSUCCESS(exit0), verdictFAILURE(exit1), Package saved crashesSUCCESS,
+Upload crashesSUCCESS; aggregate/workflowFAILURE as intended. Artifact
+12279449876 crashes-afl-value_event_type,895B ZIP, SHA256
+430b23ffe2ffba2fe0a0b79edcd4dfff8928a735597bdaaeeb4182389ed92832 agrees
+job output/API metadata. Downloaded innerafl-crashes.tar.gz SHA256
+96bd493532553c4e567ced7245032bc55f614e606db5bef4d5de68c1be2e7a72.
+Extracted archive contains README plus3regular sig06crashes with original colon
+paths; exact contents1byte61,2bytes6141,1byte57hex, each differs from calibrated
+initial41hex(A). No constructed file replaces a real engine failure. Clean
+other AFL jobs can upload empty crash-directory archives; that is not a crash,
+and the verdict inspects actual saved regular files, excluding README.
+THREEindependent reviews: (1) existing required gate and evidence-retention
+contract, not product parser correctness; (2) actual initial calibration/live
+engine10s/3savedfiles/zeroexit→verdict1, successful upload and inspected original
+bytes/paths/digests plus actual aggregate failure; (3) normal candidate workflow
+matches after removing only preregistered harness/seed injection, unchanged
+engines/CMPLOG/limits/tee/assertions/verdict/corpus handling. No threshold or
+required candidate check bypass; proof branch is NEVER merged. First upload
+failure remains red and retained. Normal candidate406 still requires green CI.
+
+Final clean source audit2,2026-10-20, independently starts from observed failure
+oracles and owning core contracts, then checks retained mechanisms and CI:
+original no-NOTIFY parked stream/global laws and read-memory assertions still
+exercise the real adapter; native phase laws distinguish errors before COMMIT
+from observed COMMIT submission and retain unknown40003/55P03; actual state-pair,
+projection/execute propagation and completed CBOR writer/decoder paths preserve
+rejection/cancellation/uncertainty. ChunkWriter stays poisoned across suspended
+source reads, finish validates completion, ordinary import rejects corrupt or
+incomplete chunks and explicit salvage retains provenance. No new controller
+identity/dedup/fencing semantics are introduced. Kernel poisoned roots, typed
+execution errors, store neutral wake/cursor contracts, both other adapters and
+macro/compile-feature owners remain within the existing workspace contracts;
+no executable change is proposed in final minimization.
+
+Recheck alternative/failure lenses separately from audit1: retained allocations
+are page/fixed-pool bounded; capacity includes the full severe cells and native
+count/winner checks, ordinary/generic plan limits and window variation; no
+unmeasured optimizer change or maintained-crate substitution is justified.
+History/position/revision facts retain distinct types; shared validation and
+SQLx migrator/transaction/pool mechanisms are reused rather than wrapped in a
+new runner. Nix native hook owns DATABASE_URL/psql/pipefail and nonempty laws,
+manifest-derived feature archives and full selected suites; cargo-hack checks
+the supported dev-free graph and exact restoration. Source filters, lint levels,
+mutation thresholds, original property workload and all existing test deadlines
+are unchanged. Stable corpus replay is separate from actual AFL/libFuzzer;
+real engine0→verdict1 and retained artifact bytes prove the new failure gate.
+Expected red control is never a green product check or a merge candidate.
+
+Only an already-observed, tested prose discrepancy needed correction: legacy
+AFL upload comment claimed its crash directory exists only after a crash;
+clean live jobs demonstrate empty-directory archives. Comment now states actual
+always-retention/archive behavior without changing executable workflow logic.
+Together with the export/listing doc correction, final code-file diff is only
+4added/8removed comment lines across two owners. No behavioral/API/interface
+reduction is justified; no credible untested high-value hypothesis remains in
+this second pass. Runtime gates/merge/publication remain separately pending.
+Whole production-source content fingerprint (tracked crates/*/src and
+adapters/*/src, ordered sha256sum including paths) with final export comments:
+dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
+Verify this exact content across final protected integration/publication; any
+new executable/dependency change reopens the affected verification. This is
+source-review evidence, not an additional test run or release completion.
+
+Current-head complete job review transcript is evidence/pg9-current-ci-review.log:
+62completed jobs at4063d83 and407465, each actual compiler/unit/native/fuzz/
+benchmark invocation independently three-reviewed against owner contract, actual
+execution/count/oracle and unchanged assertions/source/selection/deadlines.
+406each event has47supported published-shape compiler/27unit invocations; actual
+unit triples remain kernel15/macros1/store217/testing0/wake17/nostd0/inmemory25,
+25,30/Fjall131/PG11. Empty binaries ZERO runtime; PGvalue units ZERO DB credit.
+The two standalone current406native jobs reuse exact f363-built seven-profile
+packages and only print oldrun.log; ZERO new runtime, explicitly attributed to
+prior actual20-invocation/six-feature+all proof. 407standalonepush264PASS66.147s/
+PR264PASS60.363s,0skips plus7one-law smokes each; final printedrun.log is ECHO.
+Its current parent still uses the old eight-library wrapper, not the nine-library
+supported PG9 graph; integration onto protected406 retains the newer matrix.
+
+Four current compile-fail jobs each actually2/1/1cases:406PR122.53/15.64/18.66s,
+push130.61/17.37/20.85s;407PR138.63/17.39/21.29s,push105.07/14.52/16.50s.
+EACH of12invocations three-reviewed against actual misuse fixture/diagnostic
+owner, actual compiler test/count and unchanged source/flags/toolchain. Four
+CodSpeed suites run/upload in each PR, unchanged source/thresholds, instrumented
+non-Postgres evidence; no native capacity or fleet latency credit. EACH benchmark
+run receives the same three workload/execution/source reviews. No-source mutation
+jobs give ZERO runtime catch/baseline credit. Current406libFuzzer wire13303025/
+header1820500/chunk1575697/value5652576runs, each61s; AFLwire/header/chunk/value
+60s/CMPLOG/0savedcrashes/0timeouts with0/2/14/0newcorpus. Current407libFuzzer
+wire8280966/header3202484/chunk1297688/value8396008runs each61s; AFL60s/CMPLOG/
+0savedcrashes/0timeouts,0/4/14/0newcorpus. EACH of16campaigns three-reviewed
+against actual parser/value owner, real engine counts/duration/saved-file result,
+unchanged normal harness/timebox/assertions/corpus. Clean runs are not the saved-
+crash control; that actual expected-red archive proof is independently recorded.
+Two Nix jobs per PR are still in progress, not a whole-gate pass yet.
+
+407 old wrapper compiler counts independently read from actual '+ cargo check'
+commands, each event: kernel6/macros3/store17/testing5/wake3/nostd3/inmemory5/
+Fjall7 =49. EACH of98compiler and48unit invocations across the16jobs in the
+transcript three-reviewed: owning advertised library/unit contract, exact real
+compiler/unit process/count, unchanged old wrapper/source/flags/assertions.
+These are the old wrapper's library graph, not cargo-hack dev-free/Hakari proof,
+and do not replace required PG9/Postgres isolation. The literal transcript field
+cargo_hack_profiles=0 correctly describes absence of that tool in this parent.
+No original gates or evidence are relabeled to manufacture a new-gate catch.
+
+Final current-head Linux Nix verification, actual completed logs reviewed after
+execution (2026-10-20): verification406 push118736437962 and PR118736462702
+PASS; capacity407 push118736781176 and PR118736812023 PASS. For EACH actual
+invocation three separate reviews: (1) owning store/kernel/replay contract and
+original-defect falsifier, (2) actual process, counts, selection and terminal
+result in raw job log, (3) unchanged source/assertions/deadlines and required
+smokes/full-suite flags. No cached, compiler-only, printed-run.log or excluded
+case receives fresh runtime credit. Verification each executes workspace1594,
+seven mandatory native laws, all264, six individual required laws and complete
+default/export/import/projection/snapshot/tracing149/168/176/173/174/150 suites,
+all complete native suites zero skips, replay2/1/1. Push workspace122.451s,
+all71.762s; PR workspace92.725s, all56.943s, individual29.148/40.137/34.881/
+35.540/33.615/32.999s. Four workspace exclusions are existing compile fixtures,
+not silently passing native tests. Capacity each executes workspace1594, seven
+mandatory native laws, all264 zero skips and replay2/1/1: push155.061/69.042s,
+PR112.483/69.750s. These are 24+24+12+12 actual invocations, each three-reviewed.
+406 all42 successful checks plus one scheduled skip, zero review threads;
+protected normal exact-head squash merged c1ec43ed with actual tree
+c92a4e6399986474e46e6bad7d10e3a46782b09d equal precomputed expected tree.
+
+Historical automatic proof-branch CI review completed while the normal local
+integration gate runs (no extra test invocation). Superseded a30 side Nix job
+118724270183 actually completed workspace1594PASS99.433s, seven mandatory native
+laws, all264PASS58.883s, default149/export168/import176/projection173/snapshot174
+complete suites and all six required individual laws; tracing full suite was
+interrupted by natural supersession. Native118724270745 completed all seven
+native profiles264/149/168/176/173/174/150 zero skips plus13required laws; its last
+printed264 summary is only an echo. Neither cancelled job is a whole-gate pass.
+For EACH completed or interrupted invocation, three reviews: owned law and
+original-failure oracle; actual completed counts versus partial execution in raw
+logs; identical product/assertion/selection/deadline sources, with no cancellation
+hidden or partial suite credited as complete. SQL ERROR lines are deliberate
+negative fixtures, not an invented green result. Raw/tmp/mnesis-old-control-ID.log.
+
+The second proof head5479 automatic side CI has actual completed compiler47 and
+unit27 invocations, all inspected in /tmp/mnesis-proof-side-ID.log. Unit triples:
+kernel15/macros1/store217/testing0/wake17/nostd0/inmemory25,25,30/Fjall131/PG11.
+Each invocation independently reviewed three ways: owner and feature contract,
+real compiler/unit execution and count, unchanged assertions/features/lock and
+supported dev-free graph. Empty triples give zero runtime credit; PG11 are unit
+cases, not database cases. Compile-fail118736787251 actually2PASS119.42s,
+1PASS15.57s,1PASS18.72s: each three-reviewed against diagnostic owner, actual
+compiler execution/count, unchanged fixtures/toolchain. Native118736787363 runs
+seven full profiles264/149/168/176/173/174/150 zero skips plus13required one-laws;
+all26458.742s, default29.955/export39.792/import38.979/projection37.859/
+snapshot34.539/tracing33.055s. Each of20invocations three-reviewed against owner,
+actual non-guarded DB execution and unchanged source/selection/deadlines. Echoed
+run.log gives no additional execution. Side Nix118736787203 still running;
+intentional crash proof branch is never merged and never overall green.
+
+Second proof-side Nix118736787203 is now terminalSUCCESS: actual workspace
+1594PASS140.687s/4slow/4compile exclusions, seven required native laws, complete
+all264PASS68.337s, six profile laws and default14938.294s/export16846.069s/
+import17641.813s/projection17342.377s/snapshot17442.936s/tracing15036.938s,
+all complete native suites zero skips; replay2/1/1each1s. EACH of24actual
+invocations three-reviewed after execution: owning contract/falsifier; actual
+counts/process/selection/terminal summary in /tmp/mnesis-proof-side-118736787203.log;
+unchanged product/assertion/timebox/feature/lock sources. Workspace PostgreSQL
+guards and compile-only exclusions receive no database evidence. Proof branch
+still intentionally overallFAIL from the independent real saved-crash control;
+this normal side-gate success does not erase or relabel that expected red.
+
+Protected406-to-capacity integration normal hook actual runtime completes:
+workspace1594PASS466.078s/14slow/4existing compiler exclusions, compile1m20s
+outside runtime; replay2/1/1each1s. EACH of four actual invocations three-reviewed:
+(1) owned workspace property/protocol/resilience/replay invariants and retained
+original defect falsifiers, (2) real completed counts and summaries, including
+no native credit for no-DATABASE_URL guarded cases, (3) unchanged product/test
+assertions/selection/deadlines, fixed capacity benchmark582662 source. Native
+feature proofs are the separate actual Linux jobs. The hook still awaits its
+final cross-target compiler output; no whole-gate or signed-commit success claimed
+yet. Raw /tmp/mnesis-pg8-capacity-integration-{nextest,replay,hook}.log.
+
+Integration commit27b04ae9084d9b664843cca5307888aeaf48e7f3 signedG; all12normal
+Nix checks PASS. Seven cached outputs receive no new runtime credit. Last
+cross-target compiler succeeded after the actual1594/replay execution reviewed
+above. Final acceptance/comment patch is now applied to this same capacity PR,
+using exact protected406 record prefixes plus capacity and delivery suffixes;
+benchmark source582662 remains byte-identical. Final normal signed gate follows.
+
+Final combined completion signed gate passes all12Nix checks. Actual workspace
+1594PASS534.945s/15slow/4existing compile exclusions; release compile1m31s excluded.
+Actual replay2/1/1PASS1s each. Each of these FOUR invocations three-reviewed after
+execution: (1) owning protocol/property/lifecycle/resilience/replay invariants and
+real original-defect falsifiers, including unchanged256-case random-version
+oracle; (2) actual process/count/terminal summaries, zero failures, no DB credit
+for no-DATABASE_URL workspace guards; (3) unchanged test/source/feature/deadline
+selection except the preregistered comment-only corrections, production source
+fingerprint dc45f0ac1d4420a4eca4cfcb17f5e2e2bd7000e3857dca8b6ebacf2a40954ae2.
+Cross-target compiler gates pass; they give no native runtime credit. Raw
+/tmp/mnesis-postgres-final-{gate,nextest,replay}.log and separate individual
+three-review record /tmp/mnesis-postgres-final-runtime-review.log. Capacity source
+582662e92362290754a5cf2f1a604a25a9b56f7cdb35fb4876bbaf05b90ed54a unchanged.
+Evidence-only signed amend retains all source and checks; cached outputs receive
+zero new runtime credit. Current final-head Linux CI/protected delivery follows.

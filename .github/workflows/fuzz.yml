@@ -303,10 +303,8 @@ jobs:
           fi
 
       - name: Upload crashes
-        # AFL++ does not exit on crash (unlike libFuzzer): it logs to
-        # out/default/crashes/ and keeps fuzzing to the -V bound, exiting 0. So
-        # if: failure() would never fire — upload on always(). The dir only exists
-        # after a real crash; if-no-files-found: ignore covers the clean case.
+        # AFL++ can save crashes and still exit 0; retain evidence on always().
+        # An archive preserves native filenames, including colons.
         if: always()
         uses: actions/upload-artifact@v4
         with:

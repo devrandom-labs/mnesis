@@ -1,0 +1,349 @@
+Current-head completed CI logs reviewed, 2026-10-20.
+PR406 head 3d83ce1bc3f8907d5038c5618ad1d01fa92d0693; PR407 head 465195311bf3ef988de3867a08d3d934a21b2dd0.
+Every actual compiler/unit/native/fuzz/benchmark invocation below received three distinct reviews:
+1. Its existing owner contract and observable assertions/workload.
+2. Actual process/count/duration/failure oracle, with empty/cached/echoed/compile-only output receiving zero new native runtime credit.
+3. Unchanged source/assertions/selection/feature flags/deadlines and supported restore/exit handling.
+Native caveats: PR406 standalone jobs reuse the exact cached native package, then print its prior run.log; zero new executions. Prior f363 actual seven-profile suites remain separately recorded. PR407 has eight actual native invocations per job (seven mandatory laws plus 264-case suite); the final plain run.log is an echo. Its parent still uses the old feature wrapper; cargo_hack_profiles=0 is not a total compiler count. No Postgres isolation credit follows those old wrapper checks. Benchmarks are four unchanged instrumented non-Postgres suites, not capacity measurements. Clean fuzz campaigns are not saved-crash controls; the separate actual control is recorded in research.md. No-source mutation jobs provide zero catch/baseline credit.
+
+PR406 Features (mnesis-wake) job118736463065
+cargo_hack_profiles=1
+2026-10-20T16:18:02.5740208Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:18:02.8528004Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:18:03.1282979Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+PR406 Compile-fail tests job118736462686
+cargo_hack_profiles=0
+2026-10-20T16:18:01.4099147Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 122.53s
+2026-10-20T16:18:35.2983932Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.64s
+2026-10-20T16:19:01.9152469Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.66s
+
+PR406 Features (mnesis-store) job118736462721
+cargo_hack_profiles=17
+2026-10-20T16:17:07.6992234Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.71s
+2026-10-20T16:17:09.4659553Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+2026-10-20T16:17:14.6717748Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.42s
+
+PR406 Features (mnesis-macros) job118736462864
+cargo_hack_profiles=1
+2026-10-20T16:16:45.7785048Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:16:45.9238323Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:16:46.0684738Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Postgres Integration job118736462552
+cargo_hack_profiles=0
+2026-10-20T16:14:26.0604861Z      Summary [  62.667s] 264 tests run: 264 passed, 0 skipped
+
+PR406 Features (mnesis-postgres) job118736462940
+cargo_hack_profiles=7
+2026-10-20T16:15:58.3816226Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:15:58.5363000Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:16:01.5735319Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis-inmemory) job118736462855
+cargo_hack_profiles=4
+2026-10-20T16:14:55.7186819Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+2026-10-20T16:14:55.9108300Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+2026-10-20T16:14:58.3454001Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+PR406 Features (mnesis) job118736462782
+cargo_hack_profiles=6
+2026-10-20T16:14:05.9285830Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:14:06.0793557Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:14:06.6742988Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis-store-testing) job118736462903
+cargo_hack_profiles=4
+2026-10-20T16:12:18.3557262Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:12:18.4774178Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:12:18.6000484Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis-fjall) job118736462848
+cargo_hack_profiles=6
+2026-10-20T16:12:22.5762204Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.55s
+2026-10-20T16:12:25.2228702Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.49s
+2026-10-20T16:12:27.9367107Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.56s
+
+PR406 Features (mnesis-wake-nostd) job118736462032
+cargo_hack_profiles=1
+2026-10-20T16:10:22.8638972Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:10:22.9751062Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:10:23.0881874Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Postgres Integration job118736439070
+cargo_hack_profiles=0
+2026-10-20T16:08:47.7460158Z      Summary [  71.388s] 264 tests run: 264 passed, 0 skipped
+
+PR406 Features (mnesis-store-testing) job118736439341
+cargo_hack_profiles=4
+2026-10-20T16:09:50.2056065Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:50.3230766Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:50.4374982Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Compile-fail tests job118736438921
+cargo_hack_profiles=0
+2026-10-20T16:10:15.1324457Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 130.61s
+2026-10-20T16:10:52.0182003Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.37s
+2026-10-20T16:11:21.3169282Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.85s
+
+PR406 Features (mnesis-wake) job118736439105
+cargo_hack_profiles=1
+2026-10-20T16:09:32.6623928Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:09:32.9377120Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:09:33.2137189Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+PR406 Features (mnesis-postgres) job118736439023
+cargo_hack_profiles=7
+2026-10-20T16:10:16.5522571Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:10:16.6802453Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:10:19.2145235Z test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis-store) job118736438933
+cargo_hack_profiles=17
+2026-10-20T16:07:24.4785361Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s
+2026-10-20T16:07:26.1312660Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.54s
+2026-10-20T16:07:31.1195175Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.48s
+
+PR406 Features (mnesis-macros) job118736438582
+cargo_hack_profiles=1
+2026-10-20T16:06:51.1910905Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:06:51.3368989Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:06:51.4804072Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis) job118736438655
+cargo_hack_profiles=6
+2026-10-20T16:07:02.9658420Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:07:03.0928820Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:07:03.5885123Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 Features (mnesis-fjall) job118736438608
+cargo_hack_profiles=6
+2026-10-20T16:07:21.0888066Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.53s
+2026-10-20T16:07:23.7195302Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+2026-10-20T16:07:26.3453668Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+
+PR406 Features (mnesis-inmemory) job118736439005
+cargo_hack_profiles=4
+2026-10-20T16:06:41.4563257Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+2026-10-20T16:06:41.5821386Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+2026-10-20T16:06:43.4082771Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+PR406 Features (mnesis-wake-nostd) job118736438551
+cargo_hack_profiles=1
+2026-10-20T16:06:43.6584902Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:06:43.7854735Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:06:43.9126906Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR406 deep-fuzz-afl (cbor_decode_chunk) job118736307556
+cargo_hack_profiles=0
+2026-10-20T16:06:50.4934783Z [*] Statistics: 14 new corpus items found, 43.39% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR406 deep-fuzz-afl (wire_decode_frame) job118736307713
+cargo_hack_profiles=0
+2026-10-20T16:07:05.9603915Z [*] Statistics: 0 new corpus items found, 34.33% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR406 deep-fuzz-afl (cbor_decode_header) job118736307737
+cargo_hack_profiles=0
+2026-10-20T16:06:34.4776687Z [*] Statistics: 2 new corpus items found, 47.61% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR406 deep-fuzz (value_event_type) job118736307689
+cargo_hack_profiles=0
+2026-10-20T16:06:15.6926962Z Done 5652576 runs in 61 second(s)
+
+PR406 deep-fuzz (cbor_decode_chunk) job118736307177
+cargo_hack_profiles=0
+2026-10-20T16:06:19.1962560Z Done 1575697 runs in 61 second(s)
+
+PR406 deep-fuzz (cbor_decode_header) job118736307988
+cargo_hack_profiles=0
+2026-10-20T16:06:18.6314416Z Done 1820500 runs in 61 second(s)
+
+PR406 mutants-in-diff job118736305503
+cargo_hack_profiles=0
+2026-10-20T16:04:00.9101473Z   echo "No source changes in this PR — nothing to mutate."
+2026-10-20T16:04:01.3176669Z No source changes in this PR — nothing to mutate.
+
+PR406 deep-fuzz (wire_decode_frame) job118736307937
+cargo_hack_profiles=0
+2026-10-20T16:06:04.3648215Z Done 13303025 runs in 61 second(s)
+
+PR406 deep-fuzz-afl (value_event_type) job118736308038
+cargo_hack_profiles=0
+2026-10-20T16:07:02.4557667Z [*] Statistics: 0 new corpus items found, 8.31% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR406 Run benchmarks job118736306145
+cargo_hack_profiles=0
+2026-10-20T16:06:50.0303534Z Finished running 4 benchmark suite(s)
+
+PR407 Features (mnesis-macros) job118736813507
+cargo_hack_profiles=0
+2026-10-20T16:18:12.9375242Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:18:13.0814372Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:18:13.2242989Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 Features (mnesis-store) job118736812297
+cargo_hack_profiles=0
+2026-10-20T16:18:37.4120058Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.59s
+2026-10-20T16:18:39.2187684Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+2026-10-20T16:18:44.7321084Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.78s
+
+PR407 Features (mnesis-wake) job118736812183
+cargo_hack_profiles=0
+2026-10-20T16:18:20.1680263Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:18:20.4781990Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:18:20.7872147Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+PR407 Features (mnesis-fjall) job118736812159
+cargo_hack_profiles=0
+2026-10-20T16:18:52.1078014Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s
+2026-10-20T16:18:54.8268665Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.52s
+2026-10-20T16:18:57.4775945Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+
+PR407 deep-fuzz (value_event_type) job118736808769
+cargo_hack_profiles=0
+2026-10-20T16:17:13.6220152Z Done 8396008 runs in 61 second(s)
+
+PR407 deep-fuzz (cbor_decode_header) job118736808730
+cargo_hack_profiles=0
+2026-10-20T16:16:22.0508943Z Done 3202484 runs in 61 second(s)
+
+PR407 deep-fuzz-afl (cbor_decode_header) job118736808577
+cargo_hack_profiles=0
+2026-10-20T16:16:52.9957435Z [*] Statistics: 4 new corpus items found, 47.61% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR407 Features (mnesis-inmemory) job118736781604
+cargo_hack_profiles=0
+2026-10-20T16:15:07.0374768Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+2026-10-20T16:15:07.2599421Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+2026-10-20T16:15:09.7559057Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+PR407 Features (mnesis-store-testing) job118736812181
+cargo_hack_profiles=0
+2026-10-20T16:14:10.4999059Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:14:10.6554765Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:14:10.8076028Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 Features (mnesis-wake) job118736781425
+cargo_hack_profiles=0
+2026-10-20T16:13:42.6347353Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:13:42.9413029Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+2026-10-20T16:13:43.2442589Z test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+PR407 Features (mnesis-store) job118736781475
+cargo_hack_profiles=0
+2026-10-20T16:14:08.8955690Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.09s
+2026-10-20T16:14:12.3871952Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.30s
+2026-10-20T16:14:20.6050053Z test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.95s
+
+PR407 deep-fuzz-afl (wire_decode_frame) job118736808545
+cargo_hack_profiles=0
+2026-10-20T16:15:16.3485326Z [*] Statistics: 0 new corpus items found, 34.33% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR407 Features (mnesis) job118736812055
+cargo_hack_profiles=0
+2026-10-20T16:13:36.4069733Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:13:36.5343061Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:13:36.9913395Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 deep-fuzz-afl (cbor_decode_chunk) job118736808516
+cargo_hack_profiles=0
+2026-10-20T16:15:25.0432365Z [*] Statistics: 14 new corpus items found, 43.39% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR407 Features (mnesis-wake-nostd) job118736781471
+cargo_hack_profiles=0
+2026-10-20T16:12:19.9725656Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:12:20.1365221Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:12:20.2935335Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 deep-fuzz-afl (value_event_type) job118736808527
+cargo_hack_profiles=0
+2026-10-20T16:13:23.4169185Z [*] Statistics: 0 new corpus items found, 8.31% coverage achieved, 0 crashes saved, 0 timeouts saved, total runtime 0 days, 0 hrs, 1 min, 0 sec
+
+PR407 Features (mnesis-fjall) job118736781502
+cargo_hack_profiles=0
+2026-10-20T16:11:51.5454888Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
+2026-10-20T16:11:54.1257832Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.45s
+2026-10-20T16:11:57.2512345Z test result: ok. 131 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.99s
+
+PR407 Features (mnesis) job118736781228
+cargo_hack_profiles=0
+2026-10-20T16:11:43.5131601Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:11:43.7246551Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:11:44.3707004Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 Postgres Integration job118736781242
+cargo_hack_profiles=0
+2026-10-20T16:16:49.4963720Z mnesis-postgres-integration>      Summary [   0.088s] 1 test run: 1 passed, 14 skipped
+2026-10-20T16:16:54.1733246Z mnesis-postgres-integration>      Summary [   0.615s] 1 test run: 1 passed, 15 skipped
+2026-10-20T16:17:00.4235575Z mnesis-postgres-integration>      Summary [   2.188s] 1 test run: 1 passed, 2 skipped
+2026-10-20T16:17:04.5990686Z mnesis-postgres-integration>      Summary [   0.140s] 1 test run: 1 passed, 7 skipped
+2026-10-20T16:17:08.7659213Z mnesis-postgres-integration>      Summary [   0.198s] 1 test run: 1 passed, 10 skipped
+2026-10-20T16:17:14.4368544Z mnesis-postgres-integration>      Summary [   1.677s] 1 test run: 1 passed, 4 skipped
+2026-10-20T16:17:18.5161620Z mnesis-postgres-integration>      Summary [   0.049s] 1 test run: 1 passed, 9 skipped
+2026-10-20T16:18:29.2225642Z mnesis-postgres-integration>      Summary [  66.147s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T16:18:30.0855248Z      Summary [  66.147s] 264 tests run: 264 passed, 0 skipped
+
+PR407 deep-fuzz (cbor_decode_chunk) job118736808162
+cargo_hack_profiles=0
+2026-10-20T16:11:47.3532706Z Done 1297688 runs in 61 second(s)
+
+PR407 Features (mnesis-wake-nostd) job118736811983
+cargo_hack_profiles=0
+2026-10-20T16:09:41.2455179Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:41.3868851Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:41.5241102Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 Features (mnesis-macros) job118736781170
+cargo_hack_profiles=0
+2026-10-20T16:09:30.5752321Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:30.7479054Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:09:30.9155662Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 Compile-fail tests job118736811659
+cargo_hack_profiles=0
+2026-10-20T16:10:56.6831481Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 138.63s
+2026-10-20T16:11:34.3097382Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.39s
+2026-10-20T16:12:04.4389251Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.29s
+
+PR407 Features (mnesis-store-testing) job118736781284
+cargo_hack_profiles=0
+2026-10-20T16:08:50.1298664Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:08:50.2797419Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-20T16:08:50.4297186Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+PR407 deep-fuzz (wire_decode_frame) job118736808514
+cargo_hack_profiles=0
+2026-10-20T16:09:45.4109742Z Done 8280966 runs in 61 second(s)
+
+PR407 Postgres Integration job118736811857
+cargo_hack_profiles=0
+2026-10-20T16:12:50.0009368Z mnesis-postgres-integration>      Summary [   0.081s] 1 test run: 1 passed, 14 skipped
+2026-10-20T16:12:53.8559400Z mnesis-postgres-integration>      Summary [   0.574s] 1 test run: 1 passed, 15 skipped
+2026-10-20T16:12:57.7353040Z mnesis-postgres-integration>      Summary [   0.605s] 1 test run: 1 passed, 2 skipped
+2026-10-20T16:13:01.5941663Z mnesis-postgres-integration>      Summary [   0.618s] 1 test run: 1 passed, 7 skipped
+2026-10-20T16:13:05.2282153Z mnesis-postgres-integration>      Summary [   0.387s] 1 test run: 1 passed, 10 skipped
+2026-10-20T16:13:10.0098970Z mnesis-postgres-integration>      Summary [   1.571s] 1 test run: 1 passed, 4 skipped
+2026-10-20T16:13:13.3351573Z mnesis-postgres-integration>      Summary [   0.041s] 1 test run: 1 passed, 9 skipped
+2026-10-20T16:14:18.4602653Z mnesis-postgres-integration>      Summary [  60.363s] 264 tests run: 264 passed, 0 skipped
+2026-10-20T16:14:19.0285086Z      Summary [  60.363s] 264 tests run: 264 passed, 0 skipped
+
+PR407 mutants-in-diff job118736809826
+cargo_hack_profiles=0
+2026-10-20T16:06:26.8669019Z   echo "No source changes in this PR — nothing to mutate."
+2026-10-20T16:08:03.4777510Z  INFO No mutants to filter
+
+PR407 Features (mnesis-inmemory) job118736811878
+cargo_hack_profiles=0
+2026-10-20T16:08:03.9870707Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+2026-10-20T16:08:04.2097699Z test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+2026-10-20T16:08:06.7636227Z test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+PR407 Run benchmarks job118736808042
+cargo_hack_profiles=0
+2026-10-20T16:08:59.6614777Z Finished running 4 benchmark suite(s)
+
+PR407 Compile-fail tests job118736780831
+cargo_hack_profiles=0
+2026-10-20T16:07:31.0335728Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 105.07s
+2026-10-20T16:08:01.2589892Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.52s
+2026-10-20T16:08:24.5594090Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.50s

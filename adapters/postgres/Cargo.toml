@@ -52,3 +52,7 @@ all-features = true
 name = "soak"
 harness = false
 required-features = ["projection"]
+
+[[bench]]
+name = "capacity"
+harness = false

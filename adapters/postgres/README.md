@@ -514,3 +514,22 @@ sixteen consumers exercise listener reconnection, missed hints and restarts.
 Each round checks order/state and reports known lock rejections; unknown outcomes
 fail. Shutdown checks memory/backend release. `MNESIS_SOAK_SECONDS=10` is smoke
 only. Allocation bytes measure client traffic, separately from memory/latency.
+
+## Capacity measurements
+
+Run the native matrix through the development shell:
+
+```sh
+nix develop --command cargo bench -p mnesis-postgres --bench capacity
+```
+
+Private databases cover 10k/100k/1m histories, 32/4096-byte payloads, short/long
+streams, 1/16/128 clients, and independent/competing 1/8-event writes. Each case
+has warmup and three windows with at least 100 samples. Latency includes model
+checks; output also reports throughput, allocations, RSS, pools and query plans.
+Read histories stay fixed; append reports include native row growth. Allocator
+bytes and RSS are separate measurements. `MNESIS_CAPACITY_EVENTS=10000` limits
+history sizes for a smoke run; it does not establish the full matrix or an SLO.
+Run the compiled binary under the OS time tool for whole-command resource use.
+See the [measured capacity profile](../../docs/prds/postgres/capacity.md) for
+results, workload boundaries, ordinary/forced plan differences and saturation.
