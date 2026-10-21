@@ -18,13 +18,13 @@ use tokio::task::JoinHandle;
 
 #[path = "operation.rs"]
 mod operation;
-pub use operation::Operation;
 #[path = "finish.rs"]
-mod shutdown;
+pub mod shutdown;
 use shutdown::finish;
 #[path = "../faults/mod.rs"]
-mod faults;
+pub mod faults;
 use faults::{Fault, FaultStore};
+pub use operation::Operation;
 
 type Backend = FaultStore<InMemoryStore>;
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

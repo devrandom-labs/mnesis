@@ -1520,6 +1520,64 @@ For failed-completion custody, compare supported Tokio join/abort facilities;
 a typed completion owner over the original join and one shared authoritative
 pending request may be necessary. Do not copy pending state or discard native
 terminal causes. Any public-surface budget extension needs this concrete proof.
+
+## CP3: force both acceptance contenders past the same head — pre-edit budget
+
+Threatened invariant: join! alone can pass when one host finishes before the other
+loads, so it does not prove CAS arbitration or duplicate/mismatch behavior after
+both handlers ran. Extend the existing FaultStore with one optional append gate,
+captured before invoking the actual inner append. Share one canonical race helper
+between recovery and generated histories; one isolated aggregate counts handler
+calls, without adding observer data to commands/persisted facts. Force both append
+entries before any release, observe zero rows/two handler calls and both replies
+pending. Release a selected first arrival then its loser; check exact whole stored
+record, original receipt, state, duplicate/conflict/mismatch and no redecision on
+retries. Exercise both winner orders and ID/body boundaries including1/u64MAX and
+0/u8MAX; preserve existing256 serial histories and add256 controlled schedules.
+Budget: faults/recovery/properties plus one support/races.rs (four test owners),
+<=350 net test lines, zero product/API/dependency/runtime/config/format changes,
+plus required records. No competing store/runtime. Falsifier: either contender
+has not reached real append, any row lands before both are held, duplicate rows,
+changed original identity/receipt, mismatched handler accounting or incomplete
+observed worker teardown. First demonstrate the old join-only case has no such
+barrier assertions, then replace it rather than add a redundant concurrency law.
+CP3 fixture ownership refinement before edits: include history.rs as a fifth
+small test owner so properties/history/races share the existing faults and shutdown
+modules once at the integration-target root. This removes duplicate compilation
+of the fixture without exporting any product interface. Same350-net-test ceiling.
+CP3 negative-control selection before run: use existing cargo-mutants to delete
+Engine::submit's Err(Conflict) reconciliation arm and replace State::receipt's
+original==request guard with true. Run the real canonical concurrent case only.
+Both mutations should reach successful controlled append, then fail original
+receipt/mismatch assertions, rather than fail fixture setup. Do not count a
+build failure or gate-entry timeout as proof of this concurrency law. This is a
+targeted falsifier; full current-head CI mutation coverage remains separate.
+The maintained generator does not offer deleting that conflict arm (list produced
+only the identity guard, zero tests). Before execution, select its equivalent
+reachable falsifier: change Engine::write's confirmed-conflict classifier guard
+to false. The real CAS then returns an unknown outcome instead of reconciling the
+original receipt after both contenders append. Keep the identity guard=true
+control. Both must fail actual response assertions after real append, not setup.
+CP4 audit reminder before implementation: a stateless acceptance codec can validate
+one record's metadata but cannot prove cross-record command-ID uniqueness or order.
+The current adapted replay owner checks those stream laws. Keep that distinction
+explicit when exposing the public reader and writing its projection witness;
+do not claim row decoding alone validates a whole history, and do not duplicate
+the private schema or invent per-fact physical positions/checkpoints.
+CP3 observed gate prerequisite before edit: an unchanged macro diagnostic test's
+nested rustc aborts134 because dyld resolves its hard-linked executable under
+/nix/store/.links and cannot find @rpath/librustc_driver. The actual driver exists
+under the selected toolchain/lib, same inode compiler; forced direct alias probe
+fails134 without fallback and passes0 with that exact toolchain/lib. Budget
+extension: one supported Darwin-only nextest environment fact in flake.nix (<=7
+lines) plus required evidence. Use lib.makeLibraryPath [rustToolchain] with Cargo's
+supported DYLD_FALLBACK_LIBRARY_PATH, no new derivation/tool/wrapper/runtime and
+no test/filter/lint/workload change. Scope it to the failing nested-compiler check;
+Linux evaluation/behavior stays unchanged. Retry the entire original1629 suite.
+Falsifier: alias still fails, Cargo discards fallback, another platform changes,
+any tests skipped/softened, or full normal gate fails. The initial gate was already
+failing and was agent-interrupted when free space reached581MiB; preserve that
+failure and exact completed/unfinished counts, not partial green credit.
 ## CI blocker: current rustls-webpki patch — 2026-10-21
 
 PR411's live cargo-deny job fails RUSTSEC-2026-0382 on rustls-webpki0.103.15.
@@ -1558,3 +1616,27 @@ Budget extension: one Nix owner (five lines) beyond eight source/test owners;
 zero additional product/API/dependency/format changes. Same supported setting,
 same owner, no duplicated configuration definition, wrapper or framework.
 Keep it identical across the pending branches so protected integration converges.
+CP3 parent integration preregistered in primary before the merge: preserve every
+forced race and imported stronger parent assertion, exact private Debug policy
+and both research histories. Product source must remain identical to CP2.
+No new product owner/API/package/format/workload/gate change; final combined full
+gate and normal signed hook are required. Following protected main integration
+must preserve the exact reviewed source and uses ordinary Git/protected workflow.
+CP3 current-head CI repair before edits: run39649396688/job119393433782 fails the
+canonical forced race at first winning receipt with Uncertain after2s. Gate::wait
+notifies entered BEFORE polling the shared release semaphore; entered-first need
+not enqueue-first on the two-thread runtime. Prove this permitted ordering using
+a disposable test-only hook: pause the first gate waiter until the second has
+actually polled its semaphore acquire; use poll_fn and a registration signal,
+not sleeps or longer deadlines. Run the actual canonical race. Preserve its red.
+Then use independent append gates per contender over two FaultStore wrappers
+sharing the SAME actual InMemoryStore; explicitly release the selected host's
+gate. Keep all192fixed/256concurrent/256serial schedules, both winner orders,
+response/raw-row/state/handler/teardown assertions and2s bounds unchanged. Reuse
+FaultStore with a shared-Arc constructor, no competing store/framework/runtime.
+Budget: existing faults and races test owners, <=100 net test lines (cumulative
+<=350), <=35 disposable probe lines, zero product/API/format/dependency/config
+change plus records. Falsifier: forced original ordering does not reproduce,
+candidate still times out, stores differ, any contender can steal another's
+release, reduced workload/deadline or wrong first-failure assertion. Remove the
+probe after red/green evidence; normal final gates and current-head CI required.

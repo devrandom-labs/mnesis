@@ -26,6 +26,8 @@ use tower::{Service, ServiceExt};
 
 use faults::{Fault, FaultStore, Gate};
 
+#[path = "support/races.rs"]
+mod races;
 #[path = "support/finish.rs"]
 mod shutdown;
 use shutdown::finish;
@@ -345,40 +347,26 @@ fn startup_without_a_runtime_returns_a_typed_error() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn concurrent_hosts_preserve_one_original_receipt_and_one_cas_winner() {
-    let store = Store::new(InMemoryStore::new());
-    let (one, first_task) = Host::start(&store, String::from("counter"), limits()).unwrap();
-    let (two, second_task) = Host::start(&store, String::from("counter"), limits()).unwrap();
-    let (first, duplicate) =
-        tokio::join!(one.submit(request(1, 0, 7)), two.submit(request(1, 0, 7)));
-    assert_eq!(first.unwrap(), duplicate.unwrap());
-    let (left, right) = tokio::join!(one.submit(request(2, 1, 9)), two.submit(request(3, 1, 13)));
-    let expected = match (left, right) {
-        (Ok(receipt), Err(Error::Conflict)) => {
-            assert_eq!(receipt.id.get(), 2);
-            16
+    for kind in [
+        races::Kind::Duplicate,
+        races::Kind::Conflict,
+        races::Kind::Mismatch,
+    ] {
+        for winner in [races::Winner::First, races::Winner::Second] {
+            for id in [
+                NonZeroU64::MIN,
+                NonZeroU64::new(2).unwrap(),
+                NonZeroU64::new(u64::MAX - 1).unwrap(),
+                NonZeroU64::MAX,
+            ] {
+                for amount in [0, 1, u8::MAX - 1, u8::MAX] {
+                    for prefix in [None, Some(7)] {
+                        races::run(kind, winner, id, amount, prefix).await;
+                    }
+                }
+            }
         }
-        (Err(Error::Conflict), Ok(receipt)) => {
-            assert_eq!(receipt.id.get(), 3);
-            20
-        }
-        other => {
-            assert!(
-                matches!(
-                    other,
-                    (Ok(_), Err(Error::Conflict)) | (Err(Error::Conflict), Ok(_))
-                ),
-                "unexpected CAS outcomes: {other:?}"
-            );
-            return;
-        }
-    };
-    let current = one.read().await.unwrap();
-    assert_eq!(current, (Version::new(2), Total(expected)));
-    assert_eq!(records(store.raw()).await.len(), 2);
-    one.stop();
-    two.stop();
-    assert_eq!(finish(first_task).await.uncertain(), None);
-    assert_eq!(finish(second_task).await.uncertain(), None);
+    }
 }
 
 #[tokio::test]
