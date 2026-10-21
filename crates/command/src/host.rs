@@ -1,3 +1,4 @@
+use std::convert::Infallible;
 use std::fmt::Debug;
 use std::future::Future;
 use std::num::{NonZeroU64, NonZeroUsize};
@@ -19,8 +20,14 @@ use tower_service::Service;
 use crate::engine::Engine;
 use crate::{Error, Receipt, Request};
 
-type Reply<T, D, I> = oneshot::Sender<Result<T, Error<D, I>>>;
-type Started<T, C, D, I> = Result<(T, JoinHandle<Shutdown<C, I>>), Error<D, I>>;
+type Reply<T, A, I, E> = oneshot::Sender<Result<T, Error<<A as Aggregate>::Error, I, E>>>;
+type Started<S, A, C, I, const N: usize> = Result<
+    (
+        CommandProcessor<A, C, I, N, <S as RawEventStore>::Error>,
+        JoinHandle<Shutdown<C, I>>,
+    ),
+    Error<<A as Aggregate>::Error, I, <S as RawEventStore>::Error>,
+>;
 
 /// Explicit resource limits; no product release capacity is implied.
 #[derive(Clone, Copy, Debug)]
@@ -46,24 +53,24 @@ impl<C, I> Shutdown<C, I> {
     }
 }
 
-enum Call<A: Aggregate, C, I> {
+enum Call<A: Aggregate, C, I, E> {
     Retry {
         id: I,
-        reply: Reply<Option<Receipt<I>>, A::Error, I>,
+        reply: Reply<Option<Receipt<I>>, A, I, E>,
     },
     Submit {
         request: Request<C, I>,
-        reply: Reply<Receipt<I>, A::Error, I>,
+        reply: Reply<Receipt<I>, A, I, E>,
     },
     Read {
-        reply: Reply<(Option<Version>, A::State), A::Error, I>,
+        reply: Reply<(Option<Version>, A::State), A, I, E>,
     },
     Original {
         id: I,
-        reply: Reply<Option<Request<C, I>>, A::Error, I>,
+        reply: Reply<Option<Request<C, I>>, A, I, E>,
     },
 }
-impl<A: Aggregate, C, I> Call<A, C, I> {
+impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
     fn reject(self) {
         match self {
             Self::Retry { reply, .. } => {
@@ -81,17 +88,18 @@ impl<A: Aggregate, C, I> Call<A, C, I> {
         }
     }
 }
-impl<A, C, I> Call<A, C, I>
+impl<A, C, I, E> Call<A, C, I, E>
 where
     A: Aggregate + 'static,
     A::State: Clone,
     C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
     I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
     EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+    E: std::error::Error + Send + Sync + 'static,
 {
     async fn execute<S, const N: usize>(self, engine: &mut Engine<S, A, C, I, N>)
     where
-        S: RawEventStore + 'static,
+        S: RawEventStore<Error = E> + 'static,
         A: Handle<C, N>,
     {
         match self {
@@ -122,11 +130,11 @@ impl Admission {
         self.0.lock()
     }
 }
-struct Worker<A: Aggregate, C, I> {
-    receiver: mpsc::Receiver<Call<A, C, I>>,
+struct Worker<A: Aggregate, C, I, E> {
+    receiver: mpsc::Receiver<Call<A, C, I, E>>,
     admission: Arc<Admission>,
 }
-impl<A: Aggregate, C, I> Drop for Worker<A, C, I> {
+impl<A: Aggregate, C, I, E> Drop for Worker<A, C, I, E> {
     fn drop(&mut self) {
         self.admission.lock().send_replace(Lifecycle::Stopping);
         self.receiver.close();
@@ -142,13 +150,13 @@ impl<A: Aggregate, C, I> Drop for Worker<A, C, I> {
 /// Application code must check current authorization before every call that
 /// can disclose state or receipts. This handle executes no external effects.
 /// Keep and await the task returned by `start` or `resume`.
-pub struct CommandProcessor<A: Aggregate, C, I = NonZeroU64, const N: usize = 0> {
+pub struct CommandProcessor<A: Aggregate, C, I = NonZeroU64, const N: usize = 0, E = Infallible> {
     id: A::Id,
-    sender: mpsc::Sender<Call<A, C, I>>,
-    service: PollSender<Call<A, C, I>>,
+    sender: mpsc::Sender<Call<A, C, I, E>>,
+    service: PollSender<Call<A, C, I, E>>,
     admission: Arc<Admission>,
 }
-impl<A: Aggregate, C, I, const N: usize> Clone for CommandProcessor<A, C, I, N> {
+impl<A: Aggregate, C, I, const N: usize, E> Clone for CommandProcessor<A, C, I, N, E> {
     fn clone(&self) -> Self {
         Self {
             id: self.id.clone(),
@@ -174,8 +182,8 @@ where
         store: &Store<S>,
         id: A::Id,
         limits: Limits,
-    ) -> Started<Self, C, A::Error, I> {
-        Self::launch(store, id, limits, None)
+    ) -> Started<S, A, C, I, N> {
+        CommandProcessor::<A, C, I, N, S::Error>::launch(store, id, limits, None)
     }
 
     /// Resume after observed shutdown, preserving an unresolved request's base.
@@ -188,24 +196,45 @@ where
         id: A::Id,
         limits: Limits,
         shutdown: &Shutdown<C, I>,
-    ) -> Started<Self, C, A::Error, I> {
+    ) -> Started<S, A, C, I, N> {
         if shutdown.stream.as_bytes() != id.as_ref() {
             return Err(Error::Scope);
         }
         if let Some(request) = &shutdown.uncertain {
-            request.validate().map_err(Error::Json)?;
+            request.validate().map_err(Error::Request)?;
         }
-        Self::launch(store, id, limits, shutdown.uncertain.clone())
+        CommandProcessor::<A, C, I, N, S::Error>::launch(
+            store,
+            id,
+            limits,
+            shutdown.uncertain.clone(),
+        )
     }
+}
 
-    fn launch<S: RawEventStore + 'static>(
+impl<A, C, I, const N: usize, E> CommandProcessor<A, C, I, N, E>
+where
+    A: Handle<C, N> + 'static,
+    A::State: Clone,
+    C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
+    EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+    E: std::error::Error + Send + Sync + 'static,
+{
+    fn launch<S: RawEventStore<Error = E> + 'static>(
         store: &Store<S>,
         id: A::Id,
         limits: Limits,
         pending: Option<Request<C, I>>,
-    ) -> Started<Self, C, A::Error, I> {
-        if limits.operation.is_zero() || limits.queue.get() > tokio::sync::Semaphore::MAX_PERMITS {
-            return Err(Error::Capacity);
+    ) -> Started<S, A, C, I, N> {
+        if limits.operation.is_zero() {
+            return Err(Error::DeadlineZero);
+        }
+        if limits.queue.get() > tokio::sync::Semaphore::MAX_PERMITS {
+            return Err(Error::QueueLimit {
+                requested: limits.queue.get(),
+                maximum: tokio::sync::Semaphore::MAX_PERMITS,
+            });
         }
         let runtime = tokio::runtime::Handle::try_current().map_err(Error::Runtime)?;
         let (sender, receiver) = mpsc::channel(limits.queue.get());
@@ -246,7 +275,7 @@ where
     ///
     /// # Errors
     /// Preserves unknown outcomes and rejects unavailable/closed admission.
-    pub async fn retry(&self, id: I) -> Result<Option<Receipt<I>>, Error<A::Error, I>> {
+    pub async fn retry(&self, id: I) -> Result<Option<Receipt<I>>, Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
         self.send(Call::Retry {
             id: id.clone(),
@@ -265,8 +294,11 @@ where
     ///
     /// # Errors
     /// Preserves mismatch, conflict, domain rejection and uncertain writes.
-    pub async fn submit(&self, request: Request<C, I>) -> Result<Receipt<I>, Error<A::Error, I>> {
-        request.validate().map_err(Error::Json)?;
+    pub async fn submit(
+        &self,
+        request: Request<C, I>,
+    ) -> Result<Receipt<I>, Error<A::Error, I, E>> {
+        request.validate().map_err(Error::Request)?;
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
         self.send(Call::Submit { request, reply })?;
@@ -280,7 +312,7 @@ where
     ///
     /// # Errors
     /// Rejects unavailable/corrupt reads and preserves unresolved-write barriers.
-    pub async fn read(&self) -> Result<(Option<Version>, A::State), Error<A::Error, I>> {
+    pub async fn read(&self) -> Result<(Option<Version>, A::State), Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
         self.send(Call::Read { reply })?;
         response.await.map_err(|_| Error::Closed)?
@@ -291,7 +323,7 @@ where
     /// # Errors
     /// An absent original cannot resolve an uncertain write. Known originals
     /// remain readable while an unrelated write is unsettled.
-    pub async fn original(&self, id: I) -> Result<Option<Request<C, I>>, Error<A::Error, I>> {
+    pub async fn original(&self, id: I) -> Result<Option<Request<C, I>>, Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
         self.send(Call::Original { id, reply })?;
         response.await.map_err(|_| Error::Closed)?
@@ -302,28 +334,29 @@ where
         self.admission.lock().send_replace(Lifecycle::Stopping);
     }
 
-    fn send(&self, call: Call<A, C, I>) -> Result<(), Error<A::Error, I>> {
+    fn send(&self, call: Call<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
             return Err(Error::Closed);
         }
         self.sender.try_send(call).map_err(|error| match error {
-            mpsc::error::TrySendError::Full(_) => Error::Capacity,
+            mpsc::error::TrySendError::Full(_) => Error::QueueFull,
             mpsc::error::TrySendError::Closed(_) => Error::Closed,
         })
     }
 }
 
-impl<A, C, I, const N: usize> Service<Request<C, I>> for CommandProcessor<A, C, I, N>
+impl<A, C, I, const N: usize, E> Service<Request<C, I>> for CommandProcessor<A, C, I, N, E>
 where
     A: Handle<C, N> + 'static,
     A::State: Clone,
     C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
     I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
     EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+    E: std::error::Error + Send + Sync + 'static,
 {
     type Response = Receipt<I>;
-    type Error = Error<A::Error, I>;
+    type Error = Error<A::Error, I, E>;
     type Future = Pin<Box<dyn Future<Output = Result<Receipt<I>, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -338,7 +371,7 @@ where
     fn call(&mut self, request: Request<C, I>) -> Self::Future {
         if let Err(error) = request.validate() {
             self.service.abort_send();
-            return Box::pin(async { Err(Error::Json(error)) });
+            return Box::pin(async { Err(Error::Request(error)) });
         }
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
@@ -365,7 +398,7 @@ where
 
 async fn run<S, A, C, I, const N: usize>(
     mut engine: Engine<S, A, C, I, N>,
-    mut worker: Worker<A, C, I>,
+    mut worker: Worker<A, C, I, S::Error>,
     mut stopping: watch::Receiver<Lifecycle>,
 ) -> Shutdown<C, I>
 where

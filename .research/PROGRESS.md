@@ -1,35 +1,31 @@
-# Command processor delivery — extraction repair, 2026-10-21
+# Command processor delivery — CP2 parent integration, 2026-10-21
 
-Persistent CP0–CP9 goal remains active without a budget. Required delivery still
-includes native processor integration, telemetry/performance, publication and
-server registry consumption. PRD/backlog and feature research own acceptance.
+Persistent CP0–CP9 goal active without budget. Full merged/published/native registry
+and server consumption criteria remain required. This isolated worktree is
+/tmp/mnesis-command-errors on feat/command-errors/PR414. It integrates signed CP1
+repair6d0d8adc into signed typed-error commit02c8ac86. Source product modules remain
+exactly CP2; only the two canonical test owners and the exact existing-policy
+private Debug registration arrive from CP1. Research conflicts retain both parents.
+Primary feat/command-races work and all unrelated user/archive/mobile work remain.
 
-FoundationPR411 protected-merged ca62b557ed870ec7ceb336ea9d08f21df0e664d5,
-actual/expected tree3ee54613c61226c317c63347c6bde81c7c04711e. CI repairPR412
-protected-merged efec41a. No unrelated releasePR410/main-user/mobile work changed.
+CP0 PR411 protected-merged ca62b557, CI repairPR412 merged efec41a. CP1 PR413 current
+full mutation168 succeeds91caught77unviable0missed/timeout; required CI remains
+pending before exact-head protected merge. CP2 previously passes all12 host checks
+and normal signed hook,1628tests; updated integration source requires its gate.
+Preserve the extra capacity assertion/bounded worker-exit waits from the parent.
+Do not drop typed causes, pending custody or the actual4095→4096 capacity witness.
 
-This /tmp/mnesis-command-extract worktree is feat/command-extract/PR413, integrating
-protected foundation/main and the targeted mutation repair. Original b711855 passes
-32 owner tests and1626 workspace tests, but CI169mutants fails3missed/1timeout.
-Actual first-failure review separates88 runtime catches/77 unviable. New negative
-controls catch capacity0/1 and stopped-call predicate within test deadlines;
-baseline32PASS, all3caught, no timeout. Three reviews after every actual run are
-in docs/prds/command/research.md; source/log receipts in cp1-mutation.tar.gz.
-Only canonical test assertions/wait bounds and one exact existing-policy private
-Debug registration change. No production/API/dependency/format change. Named
-stash and raw patch preserve pre-integration repair until signed commit verified.
+Primary /Users/joel/orca/workspaces/nexus/command-prd is uncommitted CP3,35debug/
+release owner tests,192fixed and256generated concurrent schedules plus unchanged
+256serial cases. Negative controls catch both actual response defects. Its first
+full gate failed nested Rust dyld resolution in an unchanged macro test and was
+interrupted when disk was low; partial654PASS1FAIL is not a green suite. A supported
+Darwin nextest fallback now points at the selected toolchain/lib; exact alias probe
+fails134 before and passes0 after. Full retry live session96766, log
+/tmp/mnesis-command-start-20261021/cp3-full-gate-driver.log. All1629 cases unchanged.
 
-All12 current host outputs pass (1626PASS479.112s); replay2/1/1PASS, all three-reviewed.
-Next: normal signed commit hook, push and
-review every current-head CI result; protected merge only after clean checks and
-resolved threads. No bypass. Serialize full gates (--max-jobs1); root outputs under
-/tmp/mnesis-command-start-20261021/cp1-repair-check*. Preserve raw failure evidence.
-
-Primary /Users/joel/orca/workspaces/nexus/command-prd is feat/command-errors, signed
-02c8ac8645da731db6af05aad93ebc9e28a55852 (CP2 typed errors/custody). All12 local
-outputs and normal hook pass,1628tests; post-test Nix classifier crash on the sole
-LCOV text output is retained as a tooling limitation, not a completed scan.
-CP2 protected delivery is pending. Continue CP3 forced races, CP4 public accepted
-fact reader/format/projection, CP5 lifecycle/custody/telemetry, CP6 real stores/
-performance/soak, CP7 docs/features/fuzz, CP8release, CP9server consumption.
-CP5 reentrant-wake and stop/dequeue falsifiers are recorded, not yet resolved.
+Next here: finish integration review; serialize updated CP2 all12 host outputs
+and normal signed hook after the primary full gate. Push updated PR414, then
+integrate protected main/retarget and review all actual current-head CI. Never
+claim old-head checks for a changed source. Continue CP4–CP9 after current delivery
+steps. All actual test invocations need three distinct reviews.
