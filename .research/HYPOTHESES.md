@@ -1889,3 +1889,13 @@ Before instrumentation, add the actual recording-subscriber witness and preserve
 its red. Budget<=200net trace production lines, <=300test/helper lines; may reuse
 neutral archived fixtures through existing test owners, no public root or runtime.
 Metrics remains required as its own subsequent slice; no acceptance removed.
+
+CP5 core protected-parent integration before mutation: origin/main8fc562836ce5
+has exactly the24680399552aca8b52f383bcc3c79862669401b3 tree of already-imported
+CP4786dce7130, which is an ancestor of signeda8f66b7a. There are no unique incoming
+source or record facts. Preserve current clean core and registered three-review
+full gate; merge main with --no-commit, resolve six history/export conflicts to
+our tested complete owners, and require the entire staged tree to equal a8f66b7a
+before adding only this receipt. Normal signed git commit must execute the
+established all12-check hook. No compiler/test/runtime change, no new API or
+workload, no telemetry mixed into this focused PR. New head requires fresh CI.
