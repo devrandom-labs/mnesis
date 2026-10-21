@@ -32,3 +32,17 @@ standalone subscriber checkpoints conditional on a selected consumer.
 - Use `thiserror` unless an evidenced constraint prevents it.
 - Minimize public API and redundant type specification without erasing domain types.
 - Preserve or improve representative performance.
+
+## Command processor delivery contract — 2026-10-21
+
+The Postgres objective above is completed history. The user now authorizes the
+entire CP0–CP9 command processor delivery in docs/prds/command.md, including
+protected PRs, publication and labcast-server consumption, without a token budget.
+The PRD owns current command identity, persistence, error, lifecycle and telemetry
+contracts. Generic acceptance/retry machinery moves into mnesis-command; Labcast
+retains business policy, authorization, worker fencing and effects. Preserve the
+source archive and all existing staged/unstaged/untracked work. Mobile stays out
+of scope. Every actual test run receives the three required distinct reviews.
+Completion requires merged code, verified registry publication and clean registry
+and server consumers, not merely local acceptance. No new framework/runtime,
+custom tooling, project Python or bypass of protected delivery is authorized.

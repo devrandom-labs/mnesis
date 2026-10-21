@@ -1,9 +1,12 @@
-# Postgres status and dependencies
+# Mnesis status and dependencies
 
-Updated: 2026-10-20. Requirements and observable acceptance live in the
+Updated: 2026-10-21. Command extraction requirements live in the
+[command processor PRD](../prds/command.md). Postgres requirements and acceptance live in the
 [Postgres PRD](../prds/postgres.md); detailed checks and three reviews after every
 run live in the [research record](../prds/postgres/research.md). A focused merge
 or local pass does not establish whole-adapter delivery.
+
+## Postgres adapter
 
 | ID | Requirement | State | Blocked by | Unblocks |
 | --- | --- | --- | --- | --- |
@@ -16,8 +19,45 @@ or local pass does not establish whole-adapter delivery.
 | PG6 | Aggregate snapshots and projection state | complete | PG3, PG4 | PG7, PG9 |
 | PG7 | Export, backup and restore | complete | PG1, PG4, PG5, PG6 | PG9 |
 | PG8 | Secure operation, lifecycle and capacity | complete | PG1, PG2, PG3, PG4 | PG9 |
-| PG9 | Complete verification, minimization and delivery | complete | PG5, PG6, PG7, PG8 | — |
+| PG9 | Complete verification, minimization and delivery | complete | PG5, PG6, PG7, PG8 | CP0 |
 | PG10 | Standalone subscriber checkpoints, if a selected consumer requires them | candidate | — | — |
+
+## Command processor
+
+CP0–CP9 are required for the new feature. The planning branch is
+`docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
+The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
+CP0 is locally qualified; its protected merge is pending. Later requirements
+retain their unverified status until their own acceptance evidence exists.
+[Source audit and actual baseline](../prds/command/research.md) record 27 passing
+source tests and one separately executed in-memory measurement. No current
+processor/Postgres, migration or new-package registry consumer is certified.
+
+| ID | Requirement | State | Blocked by | Unblocks |
+| --- | --- | --- | --- | --- |
+| CP0 | Source provenance, contracts, compatibility prototypes and baseline | feature-complete | PG9 | CP1 |
+| CP1 | Extract `mnesis-command`, expose Tower Service and align dependencies | candidate | CP0 | CP2, CP3, CP4, CP5 |
+| CP2 | Typed outcomes and uncertain-write custody | candidate | CP1 | CP6, CP7 |
+| CP3 | Identity, ordering and deterministic concurrent acceptance | candidate | CP1 | CP6 |
+| CP4 | Stored format compatibility and public accepted-fact consumption | candidate | CP1 | CP6, CP7 |
+| CP5 | Tower admission, observed shutdown, tracing and telemetry | candidate | CP1 | CP6, CP7 |
+| CP6 | Real adapter recovery, capacity and instrumentation overhead | candidate | CP2, CP3, CP4, CP5 | CP8 |
+| CP7 | Public consumers, documentation, packaging and existing CI | candidate | CP2, CP4, CP5 | CP8 |
+| CP8 | Final audits, protected merges and verified publication | candidate | CP6, CP7 | CP9 |
+| CP9 | Server registry consumption, archive retirement and final delivery | candidate | CP8 | — |
+
+Source is `controller-archive`; `labcast-server` is the future consumer and
+`labcast` is mobile, outside this feature.
+Publication is a prerequisite for final registry adoption; the server change
+can be prepared earlier. Generic command identity/deduplication move under this
+new feature. Labcast retains its domain rules, authorization and effect fencing.
+The Postgres feature is not reopened and PG10 is not activated.
+
+## Postgres delivery history
+
+The final delivery statement below is authoritative for PG0–PG9. Earlier
+pending/ownership statements are historical records of that feature's scope;
+the command processor table above owns the new extraction proposal.
 
 Final delivery2026-10-20: required PG0–PG9 are complete in published0.5.3.
 Completion PR407 and release PR404 are protected-merged,42checks pass at each

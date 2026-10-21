@@ -1354,6 +1354,75 @@ records. Preserve these receipts rather than reduce verification. Delivery.md
 remains at most100lines. Normal signed hook and protected CI remain required;
 cached output gives no additional runtime credit.
 
+## CP planning — 2026-10-21
+
+User-authorized scope: write a researched PRD on a new branch for moving Labcast's
+controller into Mnesis as `mnesis-command::CommandProcessor`. No product code,
+Labcast files, dependencies, workflows, publication or persistent goal changes.
+Branch `docs/command-prd`, base `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
+Planning budget before edits: at most 16 documentation/evidence files, 1,200 new
+handwritten lines, plus unchanged-source test logs and input fingerprints.
+Owners: docs/prds/command.md, docs/prds/command/research.md and evidence/, existing
+backlog README/status and research HYPOTHESES/SOURCES/EXPERIMENTS/PROGRESS.
+Hypothesis: existing generic processing can move without Labcast policy or a new
+framework, while closing actual compatibility, outcome, consumption and test gaps.
+Falsifiers: copied private persistence rules in consumers; lost retry identity or
+uncertainty; runtime dependency leakage into core; historical tests reported as
+current integration; arbitrary capacity/latency claims; omitted source provenance.
+Validation: current source/locked-owner review, primary-source terminology and
+lifecycle research, unchanged Labcast tests and existing optimized measurement,
+three post-run reviews, two fresh PRD acceptance/dependency/scope audits and diff/
+local-link checks. Whole-product delivery remains future CP acceptance work.
+
+Source-location correction, 2026-10-21: the user moved the source to
+`/Users/joel/Code/labcast/controller-archive`, not `labcast-server`. All 30
+baseline input hashes match there. Future consumption belongs in the empty
+server workspace; mobile is excluded. Preserve historical execution paths and
+the archive. No downstream mutation or workflow redesign follows from the move.
+
+## Tower actor fit experiment — 2026-10-21
+
+User requests executable qualification of tower-actor. Scope: disposable Cargo
+consumer under /tmp, existing Nix environment, original archived engine/model
+copied byte-for-byte, no production or dependency changes in either repository.
+Budget: two probe source files plus unchanged engine/model, <=500 authored Rust
+lines, <=150 research lines and one compressed evidence bundle. Preserve the
+existing PRD draft. Contract: bounded admission, serial execution, post-admission
+caller cancellation does not cancel work, original receipt survives worker loss,
+typed causes and observable shutdown. Falsifiers: lost admitted request, reordered
+writes, erased worker cause, or missing task-completion evidence. Compare published
+tower-actor 0.2.0 against existing host behavior; record gaps without weakening tests.
+Three distinct case/source/execution reviews follow every actual test run. No
+performance improvement or full Postgres integration claim from this experiment.
+
+## Tower service and observability requirements — 2026-10-21
+
+User now requires Tower Service, tracing and telemetry in the PRD. Documentation
+only. Amend planning budget to <=16 files and <=1,450 handwritten added lines
+(earlier 1,200) for explicit interface/lifecycle and observable instrumentation
+acceptance; existing evidence bundles remain separate. No dependency/code changes.
+Use existing Tower 0.5.3 and tracing 0.1.44 conventions; qualify one optional metrics
+facade and application-owned OpenTelemetry bridge. Falsifiers: changed retry or
+admission semantics, lost request context, miscounted committed commands, unbounded
+metric labels, exporter ownership inside the library, or a second work queue.
+
+## CP0 implementation authorization and budget — 2026-10-21
+
+The user now authorizes CP0–CP9 implementation, protected PRs, publication and
+server consumption. Persistent goal active, no token budget. Preserve original
+planning patches and untracked records in /tmp/mnesis-command-start-20261021.
+CP0 budget: eight record owners (CONTRACT/HYPOTHESES/PROGRESS/EXPERIMENTS/SOURCES,
+command PRD/research and backlog status), frozen source archive/manifest, and a
+disposable Cargo prototype of <=500 authored Rust lines. No production edits.
+The archive now contains 2,490 files including generated fuzz corpus; all 30
+original baseline hashes still match. Freeze all current files and retain only
+qualified canonical seeds in the future product; do not delete source inputs.
+Prototype Tower reservations/termination, typed adapter causes and acceptance
+reading. Reuse earlier actual baseline runs when source/dependencies match;
+repeat only newly introduced or changed boundaries. Source preservation and
+permission: the user expressly instructs extraction and publication of their
+Labcast source under this project's process; record this authorization and
+preserve provenance/attribution. No third-party source claim is inferred.
 ## CI blocker: current rustls-webpki patch — 2026-10-21
 
 PR411's live cargo-deny job fails RUSTSEC-2026-0382 on rustls-webpki0.103.15.
