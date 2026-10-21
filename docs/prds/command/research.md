@@ -1065,3 +1065,11 @@ checks use support/history.rs, byte-identical CP2 flake and actual derivation en
 No source discrepancy is concealed. The original OS28 failure remains retained;
 current source/assertions/filter and full workload did not change for retry.
 Normal signed hook and exact current-head protected delivery remain required.
+CP3 parent integration is signed6998d7fa12df40b6e6a36bda631c75f57edb49a4,
+normal full hook passes using all12 already qualified outputs, zero fresh runtime
+invocations. Protected-main integration10d1b3b3 creates historical-record conflicts
+because CP2 was squash-merged. Its complete tree is exactly the imported26c5a334
+tree9291a882; all incoming facts are already present in6998d7fa. Keep the tested
+combined records/status and stronger source, after proving tree equality and zero
+automatic product/test/Nix diff. No unique incoming content is discarded. Normal
+signed hook runs again; unchanged cached outputs earn no new execution credit.

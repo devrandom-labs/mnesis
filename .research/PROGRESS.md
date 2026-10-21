@@ -25,8 +25,10 @@ All actual invocations get three reviews; source cmp and actual drv env verified
 Raw cp3-integration.tar.gz retains original failure, successful retry, source hashes,
 all output receipts and driver env. Common Cargo cache also rooted to avoid rebuilds.
 
-Next: normal signed merge commit with full hook. Then merge protected main10d1b3b3;
-its tree equals imported26c5a334, preserve combined tests/records, normal hook again
+Parent integration signed6998d7fa with successful normal full hook; zero fresh
+runtime calls from cached outputs. Current pending merge adds protected main10d1b3b3;
+its tree equals imported26c5a334, all content already present. Preserve combined
+tested records/source; automatic product/test/Nix diff is empty. Normal hook again
 (cached outputs get zero fresh runtime credit). Push/update PR415 base main, inspect
 actual current-head CI and protected exact-head delivery. Do not use old0dc checks.
 
