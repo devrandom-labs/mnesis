@@ -346,8 +346,8 @@ Selected production direction:
   owned by its handle until consumed/released/dropped. The PRD now states this
   actual contract; owning oneshot cancellation drops the handle. Clones do not
   duplicate a reserved permit. Reuse Tokio's maintained PollSender helper instead
-  of implementing a custom polled reservation future. Its tokio-util0.7.20 is
-  already locked; it adds a normal edge, not a new package family in the lock.
+  of implementing a custom polled reservation future. Its tokio-util0.7.20 was
+  qualified in the disposable lock; CP1's actual workspace diff adds this package.
 - Public read boundary: validated `Acceptance` with borrowed request/receipt/facts
   and `AcceptanceCodec`, reusing one codec validation owner. Names/shape proved
   by an external integration consumer; no public access to mutable record fields.
@@ -376,3 +376,38 @@ limits. This is existing workspace evidence; no processor or real-Postgres claim
 All twelve Darwin flake checks passed. [Raw gate logs and reviews](evidence/cp0-foundation.tar.gz)
 also preserve verification of all2,490 frozen files. The normal hook may reuse
 these unchanged product outputs; that is not another runtime execution.
+CP0 delivery update: CI repairPR412 protected-merged efec41afeab8138801fe034be1a60cbf4055848a,
+reviewed head24317917801f093f3b3843d98b8fee51bd3d2224 and exact expected/actual
+tree3ab79ecda4af32faf7d8f016af4b02392df73729. Current required push/PR checks pass,
+zero unresolved threads. Integrate that protected baseline into PR411; four root
+research conflicts preserve both append-only parent records. Product source and
+frozen inputs unchanged. Correct the prototype/root-lock distinction for tokio-util;
+its selected compatibility proof stands, while actual root addition belongs to CP1.
+Normal signed hook/current-head CI still required; cached outputs earn no new
+runtime credit. This update does not claim CP1–CP9 merged or published.
+CP0 integration signed hook was interrupted at the disk limit before completion;
+its rebuilds were required because prior unrooted Nix outputs had been reclaimed.
+The selected nextest derivation4ng212... is exactly the already qualified CI-fix
+one, and Crane's locked commonCargoSources keeps only Cargo/Rust/TOML sources;
+no product source changed in the documentation merge. Fresh hook replay2/1/1
+received three reviews: unchanged decoder contracts; actual four selected cases,
+zero ignored/filtered and no native credit; identical assertions/corpus/source,
+not another processor proof. Nextest had not emitted a completed result; no
+workspace/gate pass is claimed for the interruption. Remove only this task's
+regenerated Cargo target cache and retry serially. Retain requested check outputs
+with supported Nix --out-link and shell --profile roots under the task evidence
+root so unchanged checks can be reused; no global GC/configuration or new tool.
+CP0 rooted retry nextest passes1594/1594 in441.986s(15slow), run
+348a6b31-eac6-468a-a006-08a0417911da/138binaries/four established compiler exclusions.
+Three reviews: (1) unchanged baseline store/kernel/lifecycle assertions, no command
+processor claim; (2) one actual workspace invocation, no native DB credit from
+Darwin guards, no fresh fuzz invocation in this retry because its previous output
+was reused; (3) same qualified source/selection/assertions/workloads/deadlines as
+CI412. Exact source derivation identity confirms cache reclamation caused the
+rebuild, not a documentation-driven product change. Final non-test checks and
+normal signed hook remain pending; twelve result links will retain the outputs.
+All twelve baseline check outputs now pass and are retained by standard Nix
+result links. The successful rooted retry's1594-test execution was separately
+three-reviewed above; no extra replay was executed. The final normal signed hook
+uses the same source/results, with max-jobs1 supplied only to this command's Nix
+configuration. This changes no repository check, workload or global setting.

@@ -1,3 +1,22 @@
+# Current command delivery — foundation integration, 2026-10-21
+
+Persistent CP0–CP9 goal is active. This docs/command-prd worktree updates PR411
+with protected main efec41afeab8138801fe034be1a60cbf4055848a (CI repairPR412).
+Actual merge tree3ab79ecda4af32faf7d8f016af4b02392df73729 matches reviewed24317917.
+All current required push/PR jobs pass, zero unresolved threads; historical canceled
+bootstrap gate is not a current required failure. Main CI uses the fixed compatible
+webpki patch and supported nextest output minimization without reduced tests.
+Four append/header research conflicts retain both parents through union resolution;
+all source/provenance/PRD inputs remain intact. Filtered product source matches main.
+Normal signed hook and current-head protected checks remain before PR411 merge.
+
+Primary worktree command-prd is now feat/command-errors, based on signed CP1
+b71185568914f76fb06aff195c0d4268c239f186/PR413. CP1 all12 host checks pass,
+1626 workspace tests/32 owner debug+release; CP2 typed-cause work is uncommitted
+and has34 owner tests passing. Protected CP1 delivery and CP2–CP9 remain pending.
+Do not reopen completed PG0–PG9, merge unrelated releasePR410 or modify mobile.
+The following merged parent records are history; current actions above supersede them.
+
 # Active goal — command processor CP0–CP9 delivery, 2026-10-21
 
 Persistent goal created, no token budget. User authorizes implementation,
@@ -58,6 +77,25 @@ release, source migration or downstream mutation is authorized by this task.
 
 The following Postgres progress is retained history. Its old next actions are
 superseded by completed PR409 delivery and do not reopen that work.
+# Active CI repair — command delivery, 2026-10-21
+
+User's CP0–CP9 persistent goal is active in the command-prd worktree. This isolated
+fix/command-ci branch starts at main27de3b4a, preserving all command and unrelated
+release work. Live PR411 dependency gate fails rustls-webpki0.103.15 advisory
+RUSTSEC-2026-0382; precise patch0.103.16 passes current cargo-deny advisories.
+Normal full gate initially ran1594 passing tests and replay2/1/1 but failed unused
+nextest archive installation ENOSPC. Supported Crane output flag now disables
+only that unused archive, retaining coverage/test commands/native PG archives.
+First retry failed dependency extraction before tests (zero new execution credit).
+Serial retry --max-jobs1 passes all12 host checks:1594PASS489.678s14slow,
+four existing compiler exclusions, fresh fuzz2/1/1. Each actual run received three
+reviews. Raw /tmp/mnesis-command-start-20261021/ci-fix-gate-serial.log. Only this goal's generated
+CP1 target cache was removed, with source/logs preserved. No global GC or gate
+weakening. Next: normal signed hook (cached output gives no new runtime credit), focused
+PR/current-head CI/protected merge; then integrate with pending CP0/CP1 branches.
+No publication or command acceptance is claimed by this baseline CI repair.
+
+The following completed Postgres material is retained history.
 
 # Postgres final delivery record — 2026-10-20
 
