@@ -537,3 +537,113 @@ logs and the audited CI repair results. SHA-256:
 731e8a8d1c42eeebe44473fa0eefa08596a408373fb9bbbeaaaed962128654c4.
 The earlier test bundle is unchanged. Normal signed hook/current-head protected
 checks still determine delivery; cached reuse gives no additional runtime credit.
+CP0 delivery update: CI repairPR412 protected-merged efec41afeab8138801fe034be1a60cbf4055848a,
+reviewed head24317917801f093f3b3843d98b8fee51bd3d2224 and exact expected/actual
+tree3ab79ecda4af32faf7d8f016af4b02392df73729. Current required push/PR checks pass,
+zero unresolved threads. Integrate that protected baseline into PR411; four root
+research conflicts preserve both append-only parent records. Product source and
+frozen inputs unchanged. Correct the prototype/root-lock distinction for tokio-util;
+its selected compatibility proof stands, while actual root addition belongs to CP1.
+Normal signed hook/current-head CI still required; cached outputs earn no new
+runtime credit. This update does not claim CP1–CP9 merged or published.
+CP0 integration signed hook was interrupted at the disk limit before completion;
+its rebuilds were required because prior unrooted Nix outputs had been reclaimed.
+The selected nextest derivation4ng212... is exactly the already qualified CI-fix
+one, and Crane's locked commonCargoSources keeps only Cargo/Rust/TOML sources;
+no product source changed in the documentation merge. Fresh hook replay2/1/1
+received three reviews: unchanged decoder contracts; actual four selected cases,
+zero ignored/filtered and no native credit; identical assertions/corpus/source,
+not another processor proof. Nextest had not emitted a completed result; no
+workspace/gate pass is claimed for the interruption. Remove only this task's
+regenerated Cargo target cache and retry serially. Retain requested check outputs
+with supported Nix --out-link and shell --profile roots under the task evidence
+root so unchanged checks can be reused; no global GC/configuration or new tool.
+CP0 rooted retry nextest passes1594/1594 in441.986s(15slow), run
+348a6b31-eac6-468a-a006-08a0417911da/138binaries/four established compiler exclusions.
+Three reviews: (1) unchanged baseline store/kernel/lifecycle assertions, no command
+processor claim; (2) one actual workspace invocation, no native DB credit from
+Darwin guards, no fresh fuzz invocation in this retry because its previous output
+was reused; (3) same qualified source/selection/assertions/workloads/deadlines as
+CI412. Exact source derivation identity confirms cache reclamation caused the
+rebuild, not a documentation-driven product change. Final non-test checks and
+normal signed hook remain pending; twelve result links will retain the outputs.
+All twelve baseline check outputs now pass and are retained by standard Nix
+result links. The successful rooted retry's1594-test execution was separately
+three-reviewed above; no extra replay was executed. The final normal signed hook
+uses the same source/results, with max-jobs1 supplied only to this command's Nix
+configuration. This changes no repository check, workload or global setting.
+
+## CP1 mutation review and bounded negative controls
+
+PR413 mutation run39609659694 at signed b711855 fails honestly:169 mutants,
+88 runtime catches,77 compile-unviable,3 missed,1 timeout. Evidence artifact
+12351030394 was inspected at its actual outcomes/log/diff files. Three reviews
+for each of its93 actual runtime invocations (baseline plus92 viable mutants):
+(1) existing model/adaptation/history/recovery assertions reject changed identity,
+reconciliation, acceptance, bounds and lifecycle behavior; the two public capacity
+returns were genuinely untested. A stopped Service::call predicate strands its
+reserved reply, exposing an unbounded wait in the test. Private State's human
+Debug output is incidental under the existing diagnostic policy, not a persistence
+contract. (2) baseline and three missed candidates run32 cases with one original
+ignored measurement; caught candidates stop at their first failing owner. The
+hung candidate runs27 passes then receives runner SIGTERM in test28, four not run.
+All93 exact summaries are in cp1-actual-invocations.json. No real processor DB
+integration runs.77 build failures have no runtime coverage credit: they fail
+syntax/type/required generic obligations, including invalid let-chain || syntax.
+(3) each of88 actual first failures was inspected from logs; they are product
+result/state/boundary/join assertions, not failed fixture setup or poisoned shared
+globals. One changed fact-count subtraction panics at the production overflow,
+which is a valid killed boundary mutant, not a helper failure. The retained
+first-failure table names original mutant identity and failure owner; compiler
+rejection is kept separate. No count is promoted to unexecuted laws.
+
+Repair changes only canonical tests and one exact diagnostic registration under
+the existing policy. The4096-exhaustion law now checks the advertised public
+capacity against its actual boundary. Existing worker-exit calls/response/join
+waits are bounded2s; successful response/error assertions remain unchanged.
+No production code, interface, dependency, format, behavioral mutation filter or
+lint level changes. Selecting only capacity0/1 and stopped-call ==→!= for local
+negative controls yields baseline32PASS, then all3 caught,0missed/timeout/unviable.
+Three reviews for each of these four invocations: (1) baseline preserves all
+identity/lifecycle laws; wrong capacities fail exact0/1 versus4096, wrong predicate
+fails the actual stopped reply deadline. (2) baseline32PASS/1ignored; each capacity
+mutant2PASS/1FAIL then stops, predicate27PASS/1FAIL in actual test28 (2.010s,
+Elapsed), not a killed runner. All use real SUT/Tokio/in-memory stores and original
+256 property cases. (3) first failures are exactly the strengthened assertions,
+not setup/compiler failures; no source behavior was patched to fit tests.
+The full current-head CI sweep remains required after push; this three-mutant
+selection is targeted repair evidence, not full mutation qualification.
+
+Protected foundation/main ca62b557 (PR411) is integrated without product changes;
+research conflicts retain both parents' facts, and the test repair remains in a
+named stash plus raw patch until its signed commit is verified. Existing unrelated
+stash entries and user work are untouched.
+Mutation evidence bundle cp1-mutation.tar.gz SHA256:
+1b0c1b470c35297e1bd4e7ff95979f329f803d4efcf2cee195aae37234c26404.
+CP1 repair full gate has executed three fresh replay invocations: CBOR2PASS,
+value1PASS,wire1PASS,1.00s each. Three reviews after each invocation: (1) unchanged
+fuzz-common foundation decoder/validator oracles, no command-processor coverage;
+(2) all selected bodies run, zero ignored/filtered, no database; these are bounded
+replay/smoke checks, not sustained campaigns. (3) test sources/workload/selection
+are unchanged; only canonical command capacity/lifecycle assertions and the exact
+private diagnostic policy entry differ. Raw cp1-repair-full-gate.log retained.
+Full nextest and remaining checks are still running and receive no early credit.
+CP1 repaired workspace nextest efecacc0-8c3b-4a25-bdab-f319af130f08 passes1626
+cases in479.112s(15slow),142binaries,five existing exclusions. Three reviews:
+(1) all32 command-owner laws execute with strengthened advertised-capacity and
+bounded response/join assertions; original identity/uncertainty/compatibility
+laws remain intact. This extraction does not qualify CP2 typed errors or CP5
+failed-completion handoff. (2) release/LLVM-instrumented workspace selection is
+visible; four compiler cases remain in checkout CI and one original measurement
+remains explicitly ignored. No native processor service is claimed. (3) cmp
+verifies all four command product modules, both changed test owners and exact
+mutation policy file against Nix source2hfz6rsrbbbjcb7ymfngjqljfcqz8b4z-source.
+Zero product-code change from b711855; only strictly stronger behavioral tests.
+The intentional private-Debug policy classification remains disclosed separately.
+Post-test coverage installs without the earlier classifier-crash diagnostic in
+this run. Remaining output builds still determine complete gate success.
+CP1 repaired all12 host outputs now pass and are rooted as cp1-repair-check*.
+Raw full-gate log and exact source hashes: evidence/cp1-repair-gate.tar.gz. Normal
+signed hook follows, using the same source; cached outputs earn zero fresh test
+credit. Merge includes protected main ca62b557 plus two canonical test owners and
+four exact diagnostic policy lines, without production/dependency/API/format changes.
