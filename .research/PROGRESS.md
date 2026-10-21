@@ -1,3 +1,23 @@
+# Active CI repair — command delivery, 2026-10-21
+
+User's CP0–CP9 persistent goal is active in the command-prd worktree. This isolated
+fix/command-ci branch starts at main27de3b4a, preserving all command and unrelated
+release work. Live PR411 dependency gate fails rustls-webpki0.103.15 advisory
+RUSTSEC-2026-0382; precise patch0.103.16 passes current cargo-deny advisories.
+Normal full gate initially ran1594 passing tests and replay2/1/1 but failed unused
+nextest archive installation ENOSPC. Supported Crane output flag now disables
+only that unused archive, retaining coverage/test commands/native PG archives.
+First retry failed dependency extraction before tests (zero new execution credit).
+Serial retry --max-jobs1 passes all12 host checks:1594PASS489.678s14slow,
+four existing compiler exclusions, fresh fuzz2/1/1. Each actual run received three
+reviews. Raw /tmp/mnesis-command-start-20261021/ci-fix-gate-serial.log. Only this goal's generated
+CP1 target cache was removed, with source/logs preserved. No global GC or gate
+weakening. Next: normal signed hook (cached output gives no new runtime credit), focused
+PR/current-head CI/protected merge; then integrate with pending CP0/CP1 branches.
+No publication or command acceptance is claimed by this baseline CI repair.
+
+The following completed Postgres material is retained history.
+
 # Postgres final delivery record — 2026-10-20
 
 Required PG0–PG9 product acceptance and publication pass; final documentation
