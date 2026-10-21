@@ -1,6 +1,6 @@
 # Command processor extraction and delivery
 
-Status: CP0 protected-merged; CP1 mutation repair and CP2 protected delivery pending.
+Status: CP0 protected-merged; CP1 full mutation passes. CP1/CP2 protected delivery pending.
 Updated: 2026-10-21. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.

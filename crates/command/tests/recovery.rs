@@ -759,7 +759,9 @@ async fn tower_clones_do_not_duplicate_readiness_or_block_shutdown() {
     other.stop();
     finish(task).await;
     assert!(matches!(
-        other.call(request(1, 0, 7)).await,
+        tokio::time::timeout(Duration::from_secs(2), other.call(request(1, 0, 7)))
+            .await
+            .unwrap(),
         Err(Error::Closed)
     ));
 }
@@ -772,7 +774,9 @@ async fn tower_abort_before_first_worker_poll_closes_reserved_admission() {
     task.abort();
     assert!(task.await.unwrap_err().is_cancelled());
     assert!(matches!(
-        processor.call(request(1, 0, 7)).await,
+        tokio::time::timeout(Duration::from_secs(2), processor.call(request(1, 0, 7)))
+            .await
+            .unwrap(),
         Err(Error::Closed)
     ));
 }
@@ -783,10 +787,14 @@ async fn tower_worker_terminal_cause_remains_observable_through_its_join() {
     let (mut processor, task) =
         CommandProcessor::<Panics, u8>::start(&store, "counter".into(), limits()).unwrap();
     let response = processor.ready().await.unwrap().call(request(1, 0, 7));
-    assert!(
-        matches!(response.await, Err(Error::Uncertain { command, .. }) if command == NonZeroU64::MIN)
-    );
-    let failure = task.await.unwrap_err();
+    let result = tokio::time::timeout(Duration::from_secs(2), response)
+        .await
+        .unwrap();
+    assert!(matches!(result, Err(Error::Uncertain { command, .. }) if command == NonZeroU64::MIN));
+    let failure = tokio::time::timeout(Duration::from_secs(2), task)
+        .await
+        .unwrap()
+        .unwrap_err();
     assert!(failure.is_panic());
     assert_eq!(*failure.into_panic().downcast::<u32>().unwrap(), 73);
     assert_eq!(records(store.raw()).await.len(), 0);

@@ -38,6 +38,10 @@ exclude_re = [
     'Debug for Reaction',
     'Debug for ProjectedIntent',
     'Debug for Subscription',
+    # DIAGNOSTIC: command's private wrapper State never escapes its public API.
+    # Its derive-shaped Debug is incidental, under the same policy as above.
+    # Keep capacity, reply completion and every behavioral mutation enabled.
+    'crates/command/src/model\.rs:.*Debug for State<A, C, I, N>>::fmt',
     # UNREACHABLE BOUNDARY: the length caps are `u32::MAX` / `u32::MAX - 1`, so
     # distinguishing `>` from `>=`/`==` (or `-` from `/` in the const) needs a
     # ~4 GB allocation in a test — infeasible. The wire format's u32 length field

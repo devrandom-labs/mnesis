@@ -140,6 +140,7 @@ fn replay_rejects_excess_facts_and_duplicate_id_without_changing_domain_state() 
 
 #[test]
 fn full_receipt_history_preserves_old_ids_including_noops() {
+    assert_eq!(crate::CommandProcessor::<Fixture, u8>::capacity(), 4096);
     let mut root = AggregateRoot::<Adapted<Fixture, u8, NonZeroU64, 0>>::new(String::from("full"));
     for ordinal in 1..=4096 {
         let record = Record {

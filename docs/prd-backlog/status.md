@@ -27,7 +27,8 @@ or local pass does not establish whole-adapter delivery.
 CP0–CP9 are required for the new feature. The planning branch is
 `docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
 The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
-CP0 is protected-merged (PR411); CP1 mutation repair and protected delivery remain.
+CP0 is protected-merged (PR411). CP1 mutation repair passes its full current-head
+sweep; required CI and protected delivery remain pending.
 CP2 is locally qualified, with protected delivery pending. Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing
