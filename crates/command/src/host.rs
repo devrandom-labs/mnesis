@@ -13,18 +13,18 @@ use parking_lot::{Mutex, MutexGuard};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tokio::sync::{mpsc, oneshot, watch};
-use tokio::task::JoinHandle;
+use tokio::task::{JoinError, JoinHandle};
 use tokio_util::sync::PollSender;
 use tower_service::Service;
 
-use crate::engine::Engine;
+use crate::engine::{Engine, Handoff};
 use crate::{Error, Receipt, Request};
 
 type Reply<T, A, I, E> = oneshot::Sender<Result<T, Error<<A as Aggregate>::Error, I, E>>>;
 type Started<S, A, C, I, const N: usize> = Result<
     (
         CommandProcessor<A, C, I, N, <S as RawEventStore>::Error>,
-        JoinHandle<Shutdown<C, I>>,
+        Worker<C, I>,
     ),
     Error<<A as Aggregate>::Error, I, <S as RawEventStore>::Error>,
 >;
@@ -34,15 +34,17 @@ type Started<S, A, C, I, const N: usize> = Result<
 pub struct Limits {
     /// Number of waiting calls; one additional call may be in flight.
     pub queue: NonZeroUsize,
-    /// Nonzero deadline for each store operation.
+    /// Nonzero deadline for each store operation, excluding queue waiting.
+    /// Requires Tokio time; it cannot preempt application work that does not yield.
     pub operation: Duration,
 }
 
 /// Observed shutdown preserves the exact unresolved write for the next host.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct Shutdown<C, I = NonZeroU64> {
     stream: StreamKey,
     uncertain: Option<Request<C, I>>,
+    cause: Option<JoinError>,
 }
 impl<C, I> Shutdown<C, I> {
     /// Original unresolved request, including its CAS base. Absence does not
@@ -50,6 +52,48 @@ impl<C, I> Shutdown<C, I> {
     /// before passing it to `CommandProcessor::resume`.
     pub const fn uncertain(&self) -> Option<&Request<C, I>> {
         self.uncertain.as_ref()
+    }
+
+    /// Remaining original task cancellation or panic. None means normal
+    /// completion or that the cause has already been taken.
+    pub const fn cause(&self) -> Option<&JoinError> {
+        self.cause.as_ref()
+    }
+
+    /// Take the original task error, including its panic payload, while retaining
+    /// the unresolved request and stream for resumption.
+    pub const fn take_cause(&mut self) -> Option<JoinError> {
+        self.cause.take()
+    }
+}
+
+/// Owned task completion, retaining both its cause and unresolved original.
+///
+/// Await this after stopping or aborting the processor. Dropping it detaches the
+/// task, as with Tokio's join handle, and loses the final report. Dropping a
+/// temporary mutable borrow while waiting preserves the owned worker.
+#[must_use = "await worker completion to retain unresolved requests and failures"]
+pub struct Worker<C, I = NonZeroU64> {
+    task: JoinHandle<()>,
+    stream: StreamKey,
+    handoff: Handoff<C, I>,
+}
+impl<C, I> Worker<C, I> {
+    /// Request task cancellation. Await this worker to observe completion.
+    pub fn abort(&self) {
+        self.task.abort();
+    }
+}
+impl<C, I> Future for Worker<C, I> {
+    type Output = Shutdown<C, I>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let worker = self.get_mut();
+        Pin::new(&mut worker.task).poll(cx).map(|result| Shutdown {
+            stream: worker.stream.clone(),
+            uncertain: worker.handoff.lock().take(),
+            cause: result.err(),
+        })
     }
 }
 
@@ -130,11 +174,11 @@ impl Admission {
         self.0.lock()
     }
 }
-struct Worker<A: Aggregate, C, I, E> {
+struct Inbox<A: Aggregate, C, I, E> {
     receiver: mpsc::Receiver<Call<A, C, I, E>>,
     admission: Arc<Admission>,
 }
-impl<A: Aggregate, C, I, E> Drop for Worker<A, C, I, E> {
+impl<A: Aggregate, C, I, E> Drop for Inbox<A, C, I, E> {
     fn drop(&mut self) {
         self.admission.lock().send_replace(Lifecycle::Stopping);
         self.receiver.close();
@@ -175,6 +219,8 @@ where
     EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
 {
     /// Start one aggregate host without executing application effects.
+    /// The application's Tokio runtime must enable time and outlive the worker.
+    /// Startup does not probe its timer driver, stored history or database health.
     ///
     /// # Errors
     /// Rejects invalid limits or startup outside a Tokio runtime.
@@ -240,12 +286,24 @@ where
         let (sender, receiver) = mpsc::channel(limits.queue.get());
         let (stop, stopping) = watch::channel(Lifecycle::Running);
         let admission = Arc::new(Admission(Mutex::new(stop)));
-        let worker = Worker {
+        let worker = Inbox {
             receiver,
             admission: Arc::clone(&admission),
         };
-        let engine = Engine::new(store, id.clone(), limits.operation, pending);
-        let task = runtime.spawn(run(engine, worker, stopping));
+        let handoff = Arc::new(Mutex::new(None));
+        let engine = Engine::new(
+            store,
+            id.clone(),
+            limits.operation,
+            pending,
+            Arc::clone(&handoff),
+        );
+        let stream = StreamKey::from_slice(id.as_ref());
+        let task = Worker {
+            task: runtime.spawn(run(engine, worker, stopping)),
+            stream,
+            handoff,
+        };
         let service = PollSender::new(sender.clone());
         Ok((
             Self {
@@ -337,9 +395,12 @@ where
     fn send(&self, call: Call<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
+            drop(admission);
             return Err(Error::Closed);
         }
-        self.sender.try_send(call).map_err(|error| match error {
+        let sent = self.sender.try_send(call);
+        drop(admission);
+        sent.map_err(|error| match error {
             mpsc::error::TrySendError::Full(_) => Error::QueueFull,
             mpsc::error::TrySendError::Closed(_) => Error::Closed,
         })
@@ -360,9 +421,10 @@ where
     type Future = Pin<Box<dyn Future<Output = Result<Receipt<I>, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        let admission = self.admission.lock();
-        if *admission.borrow() == Lifecycle::Stopping {
+        let lifecycle = *self.admission.lock().borrow();
+        if lifecycle == Lifecycle::Stopping {
             self.service.close();
+            self.service.abort_send();
             return Poll::Ready(Err(Error::Closed));
         }
         self.service.poll_reserve(cx).map_err(|_| Error::Closed)
@@ -373,18 +435,18 @@ where
             self.service.abort_send();
             return Box::pin(async { Err(Error::Request(error)) });
         }
-        let admission = self.admission.lock();
-        if *admission.borrow() == Lifecycle::Stopping {
-            self.service.close();
-            return Box::pin(async { Err(Error::Closed) });
-        }
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
-        if self
-            .service
-            .send_item(Call::Submit { request, reply })
-            .is_err()
-        {
+        let admission = self.admission.lock();
+        if *admission.borrow() == Lifecycle::Stopping {
+            drop(admission);
+            self.service.close();
+            self.service.abort_send();
+            return Box::pin(async { Err(Error::Closed) });
+        }
+        let sent = self.service.send_item(Call::Submit { request, reply });
+        drop(admission);
+        if sent.is_err() {
             return Box::pin(async { Err(Error::Closed) });
         }
         Box::pin(async move {
@@ -398,10 +460,9 @@ where
 
 async fn run<S, A, C, I, const N: usize>(
     mut engine: Engine<S, A, C, I, N>,
-    mut worker: Worker<A, C, I, S::Error>,
+    mut worker: Inbox<A, C, I, S::Error>,
     mut stopping: watch::Receiver<Lifecycle>,
-) -> Shutdown<C, I>
-where
+) where
     S: RawEventStore + 'static,
     A: Handle<C, N> + 'static,
     A::State: Clone,
@@ -421,11 +482,11 @@ where
                 call
             }
         };
+        let lifecycle = *stopping.borrow();
+        if lifecycle == Lifecycle::Stopping {
+            call.reject();
+            break;
+        }
         call.execute(&mut engine).await;
-    }
-    let (id, uncertain) = engine.unresolved();
-    Shutdown {
-        stream: StreamKey::from_slice(id.as_ref()),
-        uncertain,
     }
 }

@@ -421,31 +421,37 @@ fn lossy_request_and_fact_serialization_cannot_be_accepted() {
 
 #[test]
 fn bounded_request_bytes_accept_the_limit_and_reject_the_next_byte() {
-    let empty = Request {
-        id: NonZeroU64::MIN,
-        expected: None,
-        command: String::new(),
-    };
-    let overhead = empty.encode().unwrap().len();
-    let edge = Request {
-        command: "x".repeat(4096 - overhead),
-        ..empty
-    };
-    let encoded = edge.encode().unwrap();
-    assert_eq!(encoded.len(), 4096);
-    let decoded = Request::<String>::decode(&encoded).unwrap();
-    assert_eq!(decoded, edge);
-    let too_big = Request {
-        command: format!("{}x", edge.command),
-        ..edge
-    };
-    assert!(
-        matches!(too_big.encode(), Err(CodecError::Bytes { source: Some(error) }) if error.io_error_kind() == Some(std::io::ErrorKind::WriteZero))
-    );
-    let mut oversized = encoded;
-    oversized.push(b' ');
-    assert!(matches!(
-        Request::<String>::decode(&oversized),
-        Err(CodecError::Bytes { source: None })
-    ));
+    for prefix in ["", "é", "🦀", "\0\n\\\""] {
+        let empty = Request {
+            id: NonZeroU64::MIN,
+            expected: None,
+            command: prefix.to_owned(),
+        };
+        let overhead = empty.encode().unwrap().len();
+        let edge = Request {
+            command: format!("{prefix}{}", "x".repeat(4096 - overhead)),
+            ..empty
+        };
+        let mut below = edge.clone();
+        assert_eq!(below.command.pop(), Some('x'));
+        assert_eq!(below.encode().unwrap().len(), 4095);
+        let encoded = edge.encode().unwrap();
+        assert_eq!(encoded.len(), 4096);
+        assert_eq!(encoded, serde_json::to_vec(&edge).unwrap());
+        let decoded = Request::<String>::decode(&encoded).unwrap();
+        assert_eq!(decoded, edge);
+        let too_big = Request {
+            command: format!("{}x", edge.command),
+            ..edge
+        };
+        assert!(
+            matches!(too_big.encode(), Err(CodecError::Bytes { source: Some(error) }) if error.io_error_kind() == Some(std::io::ErrorKind::WriteZero))
+        );
+        let mut oversized = encoded;
+        oversized.push(b' ');
+        assert!(matches!(
+            Request::<String>::decode(&oversized),
+            Err(CodecError::Bytes { source: None })
+        ));
+    }
 }

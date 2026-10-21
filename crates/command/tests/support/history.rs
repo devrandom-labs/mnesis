@@ -14,7 +14,6 @@ use mnesis_command::{Cause, CommandProcessor, Error, Limits, Request};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::{RawEventStore, Store};
 use serde::{Deserialize, Serialize};
-use tokio::task::JoinHandle;
 
 #[path = "operation.rs"]
 mod operation;
@@ -116,7 +115,7 @@ impl Model {
 }
 type Factory = CommandProcessor<Counter, Operation>;
 type Host = CommandProcessor<Counter, Operation, NonZeroU64, 0, <Backend as RawEventStore>::Error>;
-type Task = JoinHandle<mnesis_command::Shutdown<Operation>>;
+type Task = mnesis_command::Worker<Operation>;
 fn start(store: &Store<Backend>) -> (Host, Task) {
     Factory::start(store, String::from("history"), limits()).unwrap()
 }

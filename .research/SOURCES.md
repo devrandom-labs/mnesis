@@ -636,3 +636,65 @@ failed subprocess stderr/status were not retained by that owner; exact CP4
 compiler cause remains unknown. Ten concurrent StorageFull failures are observed,
 not proof of this eleventh cause. No framework/source/dependency change selected;
 unchanged full retry with adequate space and current-source checks required.
+2026-10-21 CP5 readiness source: tokio-util0.7.20 locked local mpsc.rs137–287
+and https://github.com/tokio-rs/tokio/blob/tokio-util-0.7.20/tokio-util/src/sync/mpsc.rs
+confirm close retains ReadyToSend but cancels Acquiring; abort_send explicitly
+releases a reservation. Assigned-but-unpolled acquiring cancellation is the
+selected runtime witness, not hypothetical ReadyToSend release. Version-specific
+docs.rs URL was inaccessible through web; upstream tagged source was accessible.
+No dependency change. Actual red/green laws are in command/research.md/evidence.
+2026-10-21 completion ownership check: locked Tokio1.53.1 join.rs and tagged
+https://github.com/tokio-rs/tokio/blob/tokio-1.53.1/tokio/src/runtime/task/join.rs
+return Result<T,JoinError>; observed await guarantees the spawned future has
+finished dropping. Dropping the native join detaches and loses its return value.
+Existing tokio-util0.7.20 AbortOnDropHandle source at
+https://github.com/tokio-rs/tokio/blob/tokio-util-0.7.20/tokio-util/src/task/abort_on_drop.rs
+still returns Result<T,JoinError>: it changes drop policy but does not return a
+processor's unresolved request on failure. Neither alone meets CP5 report custody.
+Candidate: retain the original native join and one shared authoritative pending
+request; assemble scoped shutdown plus original terminal cause only AFTER observed
+join. No detached monitor, duplicated pending ledger or actor runtime. API and
+allocation budget must be recorded and counterexample tested before this edit.
+Alternative to compare before selection: keep the active original solely in
+Engine, then move it on Engine Drop to a private per-worker shared handoff slot.
+The completion owner reads that slot only after native join. This may avoid a
+per-request Arc/lock and preserve const request access; no prototype/performance
+claim yet. Kernel id.rs already requires stable AsRef bytes, so a mutable-key
+example would violate the input contract; no unrelated identity wrapper is selected.
+Selected after actual abort/report-loss red: per-worker final handoff. Engine
+retains its existing owned pending request throughout execution and moves it to
+one private Arc<parking_lot::Mutex<Option<Request>>> only in Drop. Worker owns
+the original JoinHandle<()> and reads the handoff only after observing native
+completion, using Tokio's documented completed-destruction guarantee above.
+No detached monitor or per-request Arc/lock is added. Replaced slot values drop
+outside the lock. Public Worker Future returns scoped Shutdown even for native
+failure, with borrowed/take access to the original JoinError. Native join alone
+and AbortOnDropHandle cannot carry both outputs; shared active-request custody
+would add hot-path locks/allocations without this proven need. Runtime/allocation
+overhead remains unmeasured until CP6; no performance improvement is claimed.
+2026-10-21 timer resource audit: exact locked Tokio1.53.1 time/timeout.rs
+https://github.com/tokio-rs/tokio/blob/tokio-1.53.1/tokio/src/time/timeout.rs
+states timeout creation panics without an enabled timer. It uses checked_add and
+Sleep::far_future on overflow, so Duration::MAX is not itself an arithmetic panic
+claim. A Tokio handle alone proves neither timer enablement nor database health.
+No new runtime probe/catch-unwind/global-hook mechanism is selected. Actual
+supported/unsupported runtime witnesses and documentation remain pending.
+2026-10-21 observability testing candidates: metrics0.24.6 current official docs
+https://docs.rs/metrics/latest/metrics/ and metrics-util0.20.4 official metadata
+https://docs.rs/crate/metrics-util/0.20.4 pair ^0.24.6. Published source archive
+https://static.crates.io/crates/metrics-util/metrics-util-0.20.4.crate inspected
+locally; normalized manifest MIT/Rust1.71.1. debugging feature implies registry
+and storage (indexmap/ordered-float/hashbrown/crossbeam/rand/ddsketch), test-only.
+DebuggingRecorder::snapshot swaps counters AND gauges to zero and drains
+histograms. It cannot support non-destructive intermediate gauge assertions;
+using it mid-workload would create false negative balances. Its Registry with
+AtomicStorage exposes non-destructive handles; compare a small Recorder adapter
+over that maintained storage with standalone test atomics before dependency edit.
+No collector/exporter enters normal dependencies. Docs source pages inaccessible
+through web open; search metadata and exact published source used, not assumed.
+Tracing0.1.44 locked instrument.rs WithSubscriber docs explicitly distinguish
+per-poll dispatcher propagation from entering a Span. Capture Span+Dispatch at
+admission and use supported Instrument/WithSubscriber wrappers if confirmed by
+actual recording tests. Source
+https://github.com/tokio-rs/tracing/blob/tracing-0.1.44/tracing/src/instrument.rs .
+No entered guard across await; no caller payload/ID/error string metric labels.

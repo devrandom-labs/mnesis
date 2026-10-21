@@ -7,21 +7,24 @@
 mod faults;
 
 use std::convert::Infallible;
+use std::io::{ErrorKind, Write};
 use std::num::{NonZeroU64, NonZeroUsize};
+use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::task::{Context, Poll};
-use std::time::Duration;
+use std::task::{Context, Poll, Wake, Waker};
+use std::time::{Duration, Instant};
 
-use futures::TryStreamExt;
+use futures::{TryStreamExt, poll};
 use mnesis::{
     Aggregate, AggregateState, DomainEvent, Events, Handle, KernelError, Message, Version, events,
 };
-use mnesis_command::{Cause, CodecError, CommandProcessor, Error, Limits, Request, Shutdown};
+use mnesis_command::{
+    Cause, CodecError, CommandProcessor, Error, Limits, Request, Shutdown, Worker,
+};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::{PendingBatch, RawEventStore, Store, StoreError, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
-use tokio::task::JoinHandle;
 use tower::{Service, ServiceExt};
 
 use faults::{Fault, FaultStore, Gate};
@@ -63,6 +66,261 @@ impl Handle<u8> for Counter {
     }
 }
 type Host = CommandProcessor<Counter, u8>;
+
+struct Text;
+static TEXT_DECISIONS: AtomicUsize = AtomicUsize::new(0);
+impl Aggregate for Text {
+    type State = Total;
+    type Error = Infallible;
+    type Id = String;
+}
+impl Handle<String> for Text {
+    fn handle(_: &Total, _: String) -> Result<Option<Events<Fact>>, Infallible> {
+        TEXT_DECISIONS.fetch_add(1, Ordering::SeqCst);
+        Ok(Some(events![Fact(7)]))
+    }
+}
+
+#[tokio::test]
+async fn record_byte_failure_does_not_spend_a_valid_request_identity() {
+    TEXT_DECISIONS.store(0, Ordering::SeqCst);
+    let store = Store::new(InMemoryStore::new());
+    let (processor, worker) =
+        CommandProcessor::<Text, String>::start(&store, "counter".into(), limits()).unwrap();
+    let empty = Request {
+        id: NonZeroU64::MIN,
+        expected: None,
+        command: String::new(),
+    };
+    let overhead = empty.encode().unwrap().len();
+    let input = Request {
+        command: format!("{}{}", "é".repeat(1024), "x".repeat(4096 - overhead - 2048)),
+        ..empty
+    };
+    assert_eq!(input.encode().unwrap().len(), 4096);
+    let exceeded = processor.submit(input.clone()).await;
+    assert!(
+        matches!(exceeded, Err(Error::Failed(cause)) if matches!(&*cause,
+        Cause::Store(StoreError::Encode(CodecError::Bytes { source: Some(error) }))
+            if error.io_error_kind() == Some(ErrorKind::WriteZero)))
+    );
+    assert_eq!(records(store.raw()).await, Vec::<serde_json::Value>::new());
+    assert_eq!(TEXT_DECISIONS.load(Ordering::SeqCst), 1);
+
+    let valid = Request {
+        command: "é🦀\0\n".into(),
+        ..input
+    };
+    let receipt = processor.submit(valid.clone()).await.unwrap();
+    assert_eq!(
+        (receipt.id, receipt.version, receipt.events),
+        (valid.id, Version::INITIAL, 1)
+    );
+    assert_eq!(processor.submit(valid.clone()).await.unwrap(), receipt);
+    assert_eq!(
+        processor.original(valid.id).await.unwrap(),
+        Some(valid.clone())
+    );
+    assert_eq!(
+        processor.read().await.unwrap(),
+        (Some(Version::INITIAL), Total(7))
+    );
+    assert_eq!(TEXT_DECISIONS.load(Ordering::SeqCst), 2);
+    let committed = vec![serde_json::json!({
+        "schema":2,"request":valid,"receipt":receipt,"facts":[7]
+    })];
+    assert_eq!(records(store.raw()).await, committed);
+
+    let oversized = Request {
+        id: NonZeroU64::MAX,
+        expected: Some(Version::INITIAL),
+        command: "x".repeat(4097),
+    };
+    assert!(matches!(
+        processor.submit(oversized).await,
+        Err(Error::Request(CodecError::Bytes { source: Some(_) }))
+    ));
+    assert_eq!(TEXT_DECISIONS.load(Ordering::SeqCst), 2);
+    assert_eq!(records(store.raw()).await, committed);
+    processor.stop();
+    assert_eq!(finish(worker).await.uncertain(), None);
+}
+
+struct Callback<F>(F);
+impl<F: Fn() + Send + Sync> Wake for Callback<F> {
+    fn wake(self: Arc<Self>) {
+        (self.0)();
+    }
+}
+
+#[test]
+fn timer_disabled_runtime_retains_the_native_failure() {
+    if std::env::var_os("MNESIS_TIMER_CHILD").is_some() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let store = Store::new(InMemoryStore::new());
+        return runtime.block_on(async {
+            let (processor, worker) = Host::start(&store, "counter".into(), limits()).unwrap();
+            assert!(matches!(processor.submit(request(1, 0, 7)).await,
+                Err(Error::Uncertain { command, source: None }) if command == NonZeroU64::MIN));
+            let mut report = worker.await;
+            assert_eq!(report.uncertain(), None);
+            let cause = report.take_cause().unwrap();
+            assert!(cause.is_panic());
+            let payload = cause.into_panic();
+            let message = payload.downcast_ref::<&str>().copied().or_else(|| {
+                payload.downcast_ref::<String>().map(String::as_str)
+            });
+            assert_eq!(message, Some("A Tokio 1.x context was found, but timers are disabled. Call `enable_time` on the runtime builder to enable timers."));
+            assert_eq!(records(store.raw()).await, Vec::<serde_json::Value>::new());
+            assert!(matches!(processor.read().await, Err(Error::Closed)));
+        });
+    }
+    observe_child(
+        "timer_disabled_runtime_retains_the_native_failure",
+        "MNESIS_TIMER_CHILD",
+    );
+}
+
+#[test]
+fn readiness_release_allows_a_reentrant_stop_callback() {
+    if std::env::var_os("MNESIS_REENTRANT_STOP_CHILD").is_some() {
+        return tokio::runtime::Builder::new_current_thread()
+            .enable_time()
+            .build()
+            .unwrap()
+            .block_on(async {
+                assert_eq!(finish(reentrant_stop()).await.uncertain(), None);
+            });
+    }
+    observe_child(
+        "readiness_release_allows_a_reentrant_stop_callback",
+        "MNESIS_REENTRANT_STOP_CHILD",
+    );
+}
+
+fn observe_child(test: &str, flag: &str) {
+    let mut child = Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", test, "--nocapture"])
+        .env(flag, "1")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let started = Instant::now();
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break Some(status);
+        }
+        if started.elapsed() >= Duration::from_secs(2) {
+            child.kill().unwrap();
+            break None;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    };
+    let output = child.wait_with_output().unwrap();
+    assert!(
+        status.is_some(),
+        "child did not complete: {} {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        output.status.success(),
+        "child failed: {} {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let summary = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("test result: ")?.split(';').next());
+    assert_eq!(summary, Some("ok. 1 passed"));
+}
+
+fn reentrant_stop() -> Worker<u8> {
+    let store = Store::new(InMemoryStore::new());
+    let (mut processor, task) = Host::start(&store, "counter".into(), limits()).unwrap();
+    let mut assigned = processor.clone();
+    let mut waiting = processor.clone();
+    let mut context = Context::from_waker(futures::task::noop_waker_ref());
+    assert!(matches!(
+        processor.poll_ready(&mut context),
+        Poll::Ready(Ok(()))
+    ));
+    assert!(matches!(assigned.poll_ready(&mut context), Poll::Pending));
+    let stopped = processor.clone();
+    let notifications = Arc::new(AtomicUsize::new(0));
+    let observed = Arc::clone(&notifications);
+    let waker = Waker::from(Arc::new(Callback(move || {
+        observed.fetch_add(1, Ordering::SeqCst);
+        std::io::stdout()
+            .write_all(b"entered stop callback\n")
+            .unwrap();
+        stopped.stop();
+    })));
+    assert!(matches!(
+        waiting.poll_ready(&mut Context::from_waker(&waker)),
+        Poll::Pending
+    ));
+    drop(processor);
+    assigned.stop();
+    std::io::stdout()
+        .write_all(b"releasing reserved capacity\n")
+        .unwrap();
+    assert!(matches!(
+        assigned.poll_ready(&mut context),
+        Poll::Ready(Err(Error::Closed))
+    ));
+    assert_eq!(notifications.load(Ordering::SeqCst), 1);
+    task
+}
+
+#[tokio::test]
+async fn stop_during_dequeue_rejects_the_queued_command_without_running_it() {
+    let store = Store::new(FaultStore::new(InMemoryStore::new()));
+    let gate = Gate::new();
+    store.raw().arm(Fault::Delayed(Arc::clone(&gate)));
+    let mut profile = limits();
+    profile.operation = Duration::from_secs(2);
+    let (mut processor, task) = Host::start(&store, "counter".into(), profile).unwrap();
+    let first = processor.ready().await.unwrap().call(request(1, 0, 1));
+    gate.entered().await;
+    let second = processor.ready().await.unwrap().call(request(2, 1, 2));
+    let mut waiting = processor.clone();
+    let stopped = processor.clone();
+    let notifications = Arc::new(AtomicUsize::new(0));
+    let observed = Arc::clone(&notifications);
+    let waker = Waker::from(Arc::new(Callback(move || {
+        observed.fetch_add(1, Ordering::SeqCst);
+        stopped.stop();
+    })));
+    assert!(matches!(
+        waiting.poll_ready(&mut Context::from_waker(&waker)),
+        Poll::Pending
+    ));
+    gate.release();
+    let accepted = tokio::time::timeout(Duration::from_secs(2), first)
+        .await
+        .unwrap()
+        .unwrap();
+    let queued = tokio::time::timeout(Duration::from_secs(2), second)
+        .await
+        .unwrap();
+    gate.done().await;
+    processor.stop();
+    assert_eq!(finish(task).await.uncertain(), None);
+    assert_eq!(accepted.version, Version::INITIAL);
+    assert_eq!(notifications.load(Ordering::SeqCst), 1);
+    assert!(
+        matches!(queued, Err(Error::Closed)),
+        "queued request ran: {queued:?}"
+    );
+    let rows = records(&store.raw().inner).await;
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0]["request"]["command"], serde_json::json!(1));
+}
 
 struct Panics;
 impl Aggregate for Panics {
@@ -122,6 +380,58 @@ async fn a_confirmed_conflict_reloads_the_original_receipt() {
     assert_eq!(current, (Some(Version::INITIAL), Total(7)));
     controller.stop();
     assert_eq!(finish(task).await.uncertain(), None);
+}
+
+#[tokio::test]
+async fn an_aborted_worker_returns_the_exact_unresolved_request_for_resumption() {
+    let store = Store::new(FaultStore::new(InMemoryStore::new()));
+    let gate = Gate::new();
+    store.raw().arm(Fault::Delayed(Arc::clone(&gate)));
+    let (mut processor, mut task) = Host::start(&store, "counter".into(), limits()).unwrap();
+    let original = request(1, 0, 7);
+    let response = processor.ready().await.unwrap().call(original.clone());
+    gate.entered().await;
+    assert!(poll!(&mut task).is_pending());
+    task.abort();
+    let joined = tokio::time::timeout(Duration::from_secs(2), task)
+        .await
+        .unwrap();
+    let observed = tokio::time::timeout(Duration::from_secs(2), response).await;
+    gate.release();
+    gate.done().await;
+    assert!(
+        matches!(observed.unwrap(), Err(Error::Uncertain { command, .. }) if command == original.id)
+    );
+    let committed = records(&store.raw().inner).await;
+    assert_eq!(committed.len(), 1);
+    assert_eq!(
+        committed[0]["request"],
+        serde_json::to_value(&original).unwrap()
+    );
+    let mut report = joined;
+    assert!(report.cause().unwrap().is_cancelled());
+    assert!(report.take_cause().unwrap().is_cancelled());
+    assert!(report.cause().is_none());
+    assert_eq!(report.uncertain(), Some(&original));
+    let (unstarted, resumption) =
+        Host::resume(&store, "counter".into(), limits(), &report).unwrap();
+    resumption.abort();
+    let resumed_report = tokio::time::timeout(Duration::from_secs(2), resumption)
+        .await
+        .unwrap();
+    assert!(resumed_report.cause().unwrap().is_cancelled());
+    assert_eq!(resumed_report.uncertain(), Some(&original));
+    assert!(matches!(unstarted.read().await, Err(Error::Closed)));
+    let (resumed, worker) =
+        Host::resume(&store, "counter".into(), limits(), &resumed_report).unwrap();
+    let accepted = resumed.submit(original.clone()).await.unwrap();
+    assert_eq!(
+        (accepted.id, accepted.version, accepted.events),
+        (original.id, Version::INITIAL, 1)
+    );
+    assert_eq!(records(&store.raw().inner).await, committed);
+    resumed.stop();
+    assert_eq!(finish(worker).await.uncertain(), None);
 }
 
 #[tokio::test]
@@ -376,8 +686,8 @@ async fn dropping_all_handles_stops_the_observed_host_without_an_explicit_stop()
     drop(controller);
     let shutdown = tokio::time::timeout(Duration::from_secs(2), task)
         .await
-        .expect("closed admission did not stop the host")
-        .unwrap();
+        .expect("closed admission did not stop the host");
+    assert!(shutdown.cause().is_none());
     assert_eq!(shutdown.uncertain(), None);
 }
 
@@ -408,18 +718,45 @@ fn invalid_limits_reject_before_creating_a_host() {
 
 #[tokio::test]
 async fn the_largest_supported_queue_is_valid_and_can_stop() {
-    let store = Store::new(InMemoryStore::new());
-    let (controller, task) = Host::start(
-        &store,
-        String::from("counter"),
-        Limits {
-            queue: NonZeroUsize::new(tokio::sync::Semaphore::MAX_PERMITS).unwrap(),
+    for capacity in [
+        tokio::sync::Semaphore::MAX_PERMITS - 1,
+        tokio::sync::Semaphore::MAX_PERMITS,
+    ] {
+        let store = Store::new(InMemoryStore::new());
+        let (controller, task) = Host::start(
+            &store,
+            String::from("counter"),
+            Limits {
+                queue: NonZeroUsize::new(capacity).unwrap(),
+                ..limits()
+            },
+        )
+        .unwrap();
+        controller.stop();
+        assert_eq!(finish(task).await.uncertain(), None);
+    }
+}
+
+#[tokio::test]
+async fn deadline_extremes_preserve_immediately_ready_store_operations() {
+    let minimum = Duration::from_nanos(1);
+    let below = Duration::MAX.checked_sub(minimum).unwrap();
+    for operation in [minimum, below, Duration::MAX] {
+        let store = Store::new(InMemoryStore::new());
+        let profile = Limits {
+            operation,
             ..limits()
-        },
-    )
-    .unwrap();
-    controller.stop();
-    assert_eq!(finish(task).await.uncertain(), None);
+        };
+        let (processor, worker) = Host::start(&store, "counter".into(), profile).unwrap();
+        let receipt = processor.submit(request(1, 0, 7)).await.unwrap();
+        let expected = (NonZeroU64::MIN, Version::INITIAL, 1);
+        assert_eq!((receipt.id, receipt.version, receipt.events), expected);
+        let current = processor.read().await.unwrap();
+        assert_eq!(current, (Some(Version::INITIAL), Total(7)));
+        assert_eq!(records(store.raw()).await.len(), 1);
+        processor.stop();
+        assert_eq!(finish(worker).await.uncertain(), None);
+    }
 }
 
 #[tokio::test]
@@ -474,8 +811,10 @@ async fn abrupt_host_loss_keeps_the_caller_unknown_and_exact_retry_arbitrates_th
     let waiting = tokio::spawn(async move { controller.submit(retained).await });
     server.entered().await;
     task.abort();
-    let lost_host = task.await.unwrap_err();
-    assert!(lost_host.is_cancelled());
+    let lost_report = task.await;
+    assert!(lost_report.cause().unwrap().is_cancelled());
+    assert_eq!(lost_report.uncertain(), Some(&original));
+    drop(lost_report);
     let reply = waiting.await.unwrap();
     assert!(
         matches!(reply, Err(Error::Uncertain { command, source:None }) if command == NonZeroU64::MIN)
@@ -760,7 +1099,9 @@ async fn tower_abort_before_first_worker_poll_closes_reserved_admission() {
     let (mut processor, task) = Host::start(&store, "counter".into(), limits()).unwrap();
     processor.ready().await.unwrap();
     task.abort();
-    assert!(task.await.unwrap_err().is_cancelled());
+    let report = task.await;
+    assert!(report.cause().unwrap().is_cancelled());
+    assert_eq!(report.uncertain(), None);
     assert!(matches!(
         tokio::time::timeout(Duration::from_secs(2), processor.call(request(1, 0, 7)))
             .await
@@ -779,10 +1120,11 @@ async fn tower_worker_terminal_cause_remains_observable_through_its_join() {
         .await
         .unwrap();
     assert!(matches!(result, Err(Error::Uncertain { command, .. }) if command == NonZeroU64::MIN));
-    let failure = tokio::time::timeout(Duration::from_secs(2), task)
+    let mut report = tokio::time::timeout(Duration::from_secs(2), task)
         .await
-        .unwrap()
-        .unwrap_err();
+        .unwrap();
+    assert_eq!(report.uncertain(), Some(&request(1, 0, 7)));
+    let failure = report.take_cause().unwrap();
     assert!(failure.is_panic());
     assert_eq!(*failure.into_panic().downcast::<u32>().unwrap(), 73);
     assert_eq!(records(store.raw()).await.len(), 0);
@@ -879,16 +1221,17 @@ impl Handle<u8> for Recovered {
         Ok(Some(events![Fact(command)]))
     }
 }
-async fn assert_fold_failure(task: JoinHandle<Shutdown<u8>>) {
-    let failure = tokio::time::timeout(Duration::from_secs(2), task)
+async fn assert_fold_failure(task: Worker<u8>) -> Shutdown<u8> {
+    let mut report = tokio::time::timeout(Duration::from_secs(2), task)
         .await
-        .unwrap()
-        .unwrap_err();
+        .unwrap();
+    let failure = report.take_cause().unwrap();
     assert!(failure.is_panic());
     assert_eq!(
         *failure.into_panic().downcast::<FoldFailure>().unwrap(),
         FoldFailure(7)
     );
+    report
 }
 
 #[tokio::test]
@@ -901,7 +1244,8 @@ async fn committed_acceptance_survives_fold_panic_and_failed_reconstruction() {
     assert!(
         matches!(response, Err(Error::Uncertain { command, source: None }) if command == NonZeroU64::MIN)
     );
-    assert_fold_failure(task).await;
+    let report = assert_fold_failure(task).await;
+    assert_eq!(report.uncertain(), Some(&original));
     assert_eq!(FOLD_DECISIONS.load(Ordering::SeqCst), 1);
     let committed = vec![serde_json::json!({
         "schema":2,
@@ -912,14 +1256,21 @@ async fn committed_acceptance_survives_fold_panic_and_failed_reconstruction() {
     assert_eq!(records(store.raw()).await, committed);
 
     let (rebuilding, observed) =
-        CommandProcessor::<Fragile, u8>::start(&store, "counter".into(), limits()).unwrap();
+        CommandProcessor::<Fragile, u8>::resume(&store, "counter".into(), limits(), &report)
+            .unwrap();
     assert!(matches!(rebuilding.read().await, Err(Error::Closed)));
-    assert_fold_failure(observed).await;
+    let reconstructed = assert_fold_failure(observed).await;
+    assert_eq!(reconstructed.uncertain(), Some(&original));
     assert_eq!(records(store.raw()).await, committed);
     assert_eq!(FOLD_DECISIONS.load(Ordering::SeqCst), 1);
 
-    let (healthy, completed) =
-        CommandProcessor::<Recovered, u8>::start(&store, "counter".into(), limits()).unwrap();
+    let (healthy, completed) = CommandProcessor::<Recovered, u8>::resume(
+        &store,
+        "counter".into(),
+        limits(),
+        &reconstructed,
+    )
+    .unwrap();
     let receipt = healthy.submit(original.clone()).await.unwrap();
     assert_eq!(receipt.id, original.id);
     assert_eq!((receipt.version, receipt.events), (Version::INITIAL, 1));

@@ -1,10 +1,12 @@
 use std::fmt::Debug;
+use std::sync::Arc;
 use std::time::Duration;
 
 use mnesis::{AggregateRoot, EventOf, Handle, KernelError, Version};
 use mnesis_store::{
     CommandRepository, EventStore, ExecuteError, RawEventStore, Repository, Store, StoreError,
 };
+use parking_lot::Mutex;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tokio::time::timeout;
@@ -13,6 +15,7 @@ use crate::model::{Adapted, Codec, Decision, Mismatch};
 use crate::{Cause, CodecError, Error, Receipt, Request};
 
 type Root<A, C, I, const N: usize> = AggregateRoot<Adapted<A, C, I, N>>;
+pub type Handoff<C, I> = Arc<Mutex<Option<Request<C, I>>>>;
 
 pub struct Engine<S, A, C, I, const N: usize>
 where
@@ -25,6 +28,20 @@ where
     id: A::Id,
     timeout: Duration,
     pending: Option<Request<C, I>>,
+    handoff: Handoff<C, I>,
+}
+
+impl<S, A, C, I, const N: usize> Drop for Engine<S, A, C, I, N>
+where
+    A: Handle<C, N> + 'static,
+    C: Clone + Debug + Eq + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Send + Sync + 'static,
+    EventOf<A>: Clone,
+{
+    fn drop(&mut self) {
+        let previous = std::mem::replace(&mut *self.handoff.lock(), self.pending.take());
+        drop(previous);
+    }
 }
 
 impl<S, A, C, I, const N: usize> Engine<S, A, C, I, N>
@@ -41,17 +58,15 @@ where
         id: A::Id,
         timeout: Duration,
         pending: Option<Request<C, I>>,
+        handoff: Handoff<C, I>,
     ) -> Self {
         Self {
             repository: store.repository().codec(Codec).build(),
             id,
             timeout,
             pending,
+            handoff,
         }
-    }
-
-    pub(super) fn unresolved(self) -> (A::Id, Option<Request<C, I>>) {
-        (self.id, self.pending)
     }
 
     async fn load(&self) -> Result<Root<A, C, I, N>, Error<A::Error, I, S::Error>> {

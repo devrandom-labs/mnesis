@@ -1734,3 +1734,158 @@ inherited faults/races; no additional CP4 product/API/format/dependency changes.
 Requalify all12 host checks on combined source; previous1633 pass predates this
 known parent defect and cannot qualify final delivery. Abort on lost source,
 removed stronger assertions, changed workloads or unrelated work mutation.
+
+## CP5 first lifecycle repair — pre-edit budget
+
+Two actual red laws are retained in cp5-lifecycle-before-strengthened.log:
+stop from a queue-capacity wake during dequeue still accepts the queued command;
+canceling an assigned-but-unpolled readiness future wakes a callback reentering
+stop and deadlocks while Admission is held. Initial close-only probe was weak:
+ReadyToSend.close retains its permit, so that passing child never ran its callback.
+Use the strengthened actual PollSender boundary, not that false-positive claim.
+
+Budget: host.rs and existing recovery.rs plus required records; <=50 net product
+lines, <=200 test lines, no new public type/dependency/runtime/tool/schema. Poll
+readiness outside Admission; it reserves capacity only, while call/send still
+serialize actual admission with stop. Release stopped reservations outside the
+gate. Clone caller IDs before locking, retain failed send values until the guard
+is released, and reject dequeued work if stop occurred before startup. Reuse the
+existing watch lifecycle value; no second flag/counter/linearization authority.
+Startup is the final lifecycle check immediately before execution, allowing only
+work that started before stop to settle. No caller Clone/Drop/Waker callback may
+run under the admission lock. Keep active work sequential and original acceptance,
+uncertainty and exact retry unchanged. Falsifiers: either original red stays red,
+successful admission after stop, callback not exercised, stranded response/join,
+extra rows, removed cause or changed ordering. Run targeted laws then all owner
+debug/release/lint and full source gates; CP5 remains incomplete until task-failure
+custody, all resource/cancellation/runtime cases and required telemetry qualify.
+
+## CP5 completion custody — characterization budget before edits
+
+Native JoinHandle<Shutdown> returns Err on observed abort/panic, losing the
+report's original request even though the engine held uncertainty. Add one
+existing recovery-owner law: hold an actual delayed append, abort and observe
+completion, observe the caller's Uncertain result, then release/join the delayed
+server operation before asserting report custody. Original source must fail at
+the missing report, not setup or unobserved server work. Retry after resumption
+must return the single original acceptance. Budget this characterization <=60
+test lines in recovery.rs; no product change before the red evidence.
+Then compare shared active pending versus a final per-worker Drop handoff. Prefer
+moving the one owned original on Engine Drop, read only after native join, if it
+preserves every cause/report and needs fewer hot-path clones/locks. No detached
+monitor or new framework/runtime. Implementation budget: engine/host/lib plus
+owning recovery/common finish consumers (<=8 owners), <=200 net product and
+<=250 test lines for this slice, one justified new public completion owner
+(cumulative target11 roots instead of10). Concrete native Err excludes Shutdown;
+existing AbortOnDropHandle has the same result and cannot fix custody alone.
+Retain native JoinError/panic payload, exact request and borrowed report on failed
+resume. No None report may become rollback proof. Measure runtime/allocations in
+CP6 before claiming an improvement. More types/state require another counterexample.
+CP5 custody controls before execution: use the repository Nix cargo-mutants binary
+explicitly (cargo's external-plugin lookup selected a stale host installation and
+failed before metadata/tests; do not repair/install host tooling). Select generated
+Engine::drop removal and Shutdown::cause returning None. Run the four real custody
+owners, including the new exact original/abort law. The baseline must pass; each
+control must fail at lost original or native cause, not compilation/setup/timeout.
+Retain raw counts/first assertions and three reviews for every actual invocation.
+No permanent production mutation, test filter reduction or additional framework.
+
+## CP5 resource coverage — before edits
+
+Threat: request bytes and accepted-record bytes are independent; a valid4KiB
+request plus receipt/facts can exceed the record bound. A definite encode failure
+must append nothing and leave that ID usable, unlike any uncertain append. The
+canonical request-byte owner also lacks UTF8/JSON-escape witnesses at4095/4096/
+4097. Extend that owner; add one public processor sequence using existing actual
+InMemoryStore and a small text-command aggregate, complete raw rows/receipt/state/
+handler-count assertions, exact retry and observed normal shutdown. No product
+change is justified without an actual counterexample. Reuse existing codecs.
+Budget: existing unit/model.rs and recovery.rs plus README/records, <=150 net
+additional test lines, no public/API/format/dependency/runtime change. Retain the
+original ASCII4096/4097/write-zero assertions and every existing workload/gate.
+Falsifiers: new writer computes chars rather than actual JSON bytes; record
+failure is uncertain or writes data; failed ID is spent; same ID success/retry
+executes twice; handler runs for an oversized input. New tests remain unexecuted
+until the independent CP4 full gate completes; no concurrent local compilation.
+Timer-disabled runtime remains a separate witness: Tokio1.53.1 timeout source
+explicitly panics without enable_time; try_current alone cannot prove support.
+Use observed native task cause and a bounded child if needed, not an unbounded
+join or detached blocking test task. Select/doc behavior after actual execution.
+Resource budget refinement before edits: within the same150 net test-line ceiling,
+extend the canonical largest-queue witness to MAX_PERMITS-1 and MAX_PERMITS (the
+existing +1 and zero-duration rejection stay intact), and verify actual acceptance
+and observed shutdown at1ns/Duration::MAX-1ns/Duration::MAX. Locked Tokio timeout
+polls an immediately-ready future first and uses checked deadline addition; real
+InMemoryStore should settle these immediate operations. Any failure stays visible;
+do not replace the tiny bound, relax an assertion or change processor policy to
+obtain a pass. Run only after CP4 compilation/gate is no longer active.
+
+## CP5 observability — research before edits
+
+Required features remain tracing0.1.44 and metrics0.24.6; no exporter/global
+collector/runtime/framework in normal dependencies. Existing CP0 metadata owns
+license/maintenance/compatibility choice. Before product instrumentation, write
+one canonical recording-subscriber/recorder workload over actual public processor
+calls, expected counts/labels/stages, independent caller contexts, cancellation,
+uncertainty/reconciliation and observed shutdown/panic. Compare maintained
+metrics-util DebuggingRecorder with a test-only Recorder implementation; prefer
+supported facilities when they reduce total code/dependencies. Applications own
+OpenTelemetry SDK/export. Preserve all four feature combinations/no collector.
+
+Falsifiers include leaked caller span, wrong dispatcher after queue transfer,
+duplicate counted as new acceptance, leaked/negative gauges, missing terminal
+cause/original, payload/ID/error-string labels, changed receipt/admission, or any
+collector/user callback while Admission/handoff locks are held. Capture tracing
+Span AND Dispatch at admission if needed: async Instrument enters a span, while
+WithSubscriber supplies its dispatcher per poll. Verify pinned source before
+selection; do not retain entered guards across await.
+
+Gauge causality needs proof. Queued capacity is bounded by native permits;
+callbacks after enqueue may reorder decrement before increment. Compare supported
+Tokio try_reserve with pre-enqueue counted guards to preserve order and existing
+stop/enqueue linearization; readiness reservations and queued/in-flight calls
+must remain distinct. No parallel protocol authority/boolean mode or observer
+framework. Each lifecycle/permit owns its balanced guard; clone/drop/abort paths
+must reject the original counterexamples. Metrics are observations, not a ledger.
+Pending request stays authoritative in Engine; count host transitions from its
+Option values, without a second unresolved flag. Exact native Worker completion
+owns observed failure accounting. Shutdown timing must name its actual start/end;
+do not substitute host lifetime or fabricated zero samples for unknown timing.
+
+Initial implementation budget (amend before further scope): root manifest/lock,
+command manifest and engine/host/model/lib plus one private observe owner (eight
+product/config owners), <=300 net production lines and no public root addition;
+canonical telemetry integration owner <=300 lines plus required records/docs.
+Reconsider if the complete contract cannot fit; never omit a required instrument
+or weaken assertions to fit a line budget. First qualify dependency/testing
+facilities and write explicit workload/count oracle. Performance/allocations and
+no-op/enabled-uncollected/collected overhead remain CP6, no proxy-only claims.
+
+CP5 parent integration before mutation: preserve every staged/unstaged/untracked
+lifecycle/custody/resource record and all older/user stashes. Save full binary
+patch/status/source hashes, create a named retained stash, fast-forward26c5a334
+to signed CP4 integration786dce713004cf90e8e3c943c0f7ee6eb3d38425, then apply
+that exact stash. Union unique append-only records and preserve current status.
+Retain public Acceptance/AcceptanceCodec and new Worker, both independent race
+gates/shared backend, stronger capacity/teardown assertions and all golden/
+projection/evolution/corruption laws. No unique source/evidence may be lost.
+Budget: existing source/test owners and incoming parent files plus required
+records, no additional product/API/dependency/format change. Any required typed
+Worker test-helper adjustment belongs with its existing owner, <=20lines. Run
+combined owner/lint/release then all12 source gates before a focused lifecycle PR;
+required tracing/metrics stays a separate CP5 slice, not removed from acceptance.
+
+CP5 observability workspace preparation before mutation: while core fullgate1166
+runs, use standard Git worktree feat/command-observe at the same786dce7130 parent,
+apply an exact saved binary copy of current core work, and preserve core/stashes.
+Only this separate candidate gains tracing/metric edits; source used by the core
+gate stays frozen. Save source/status/hash receipts. After core signed commit,
+merge that parent into the candidate while preserving every novel observation
+change. No compilation overlaps core gate. Source/metadata inspection is allowed.
+This is ordinary isolated source work, not a new project tool or workflow.
+Tracing slice first: optional existing tracing/std dependency and private context,
+caller Span+Dispatch across mailbox, typed stage/outcome events and no payloads.
+Before instrumentation, add the actual recording-subscriber witness and preserve
+its red. Budget<=200net trace production lines, <=300test/helper lines; may reuse
+neutral archived fixtures through existing test owners, no public root or runtime.
+Metrics remains required as its own subsequent slice; no acceptance removed.
