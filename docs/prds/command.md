@@ -1,6 +1,6 @@
 # Command processor extraction and delivery
 
-Status: CP0 locally qualified; CP1 extraction next. Protected delivery pending.
+Status: CP0 and CP1 locally qualified; CP2 next. Protected delivery pending.
 Updated: 2026-10-21. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.

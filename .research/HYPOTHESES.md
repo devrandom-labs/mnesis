@@ -1423,3 +1423,49 @@ repeat only newly introduced or changed boundaries. Source preservation and
 permission: the user expressly instructs extraction and publication of their
 Labcast source under this project's process; record this authorization and
 preserve provenance/attribution. No third-party source claim is inferred.
+
+## CP1a mechanical extraction — 2026-10-21
+
+CP0 qualified; implementation branch feat/command-extract starts from the signed
+CP0 specification commit21afe896. Initial source copy/rename is separate from
+behavior changes. Budget: original four production modules (937 lines), original
+canonical tests/helpers/fixture (1,891 lines), new manifest/README; root workspace
+manifest/lock, Hakari owner, release-plz disable entry and architecture docs.
+At most150 net production lines beyond baseline across CP1. No normal third-party
+package added in this mechanical pass; dependencies align with existing workspace.
+Keep package publish=false/release=false until CP8. Do not import the archived
+nightly harness or generated corpus into product ownership; frozen source retains
+all inputs. Run owning original tests then three distinct reviews; compiler,
+format/Clippy and full gate before commit. The following CP1b adds required Tower
+Service within the same budget and preserves the failure probes' requirements.
+CP1 ownership adjustment before edits: repository clippy.toml prohibits std Mutex.
+Use existing workspace parking_lot0.12.5 for short synchronous admission sections
+and copied fault fixtures, without holding a guard across awaits. No lint waiver.
+Actual root lock diff adds tokio-util0.7.20: CP0 incorrectly called it already
+locked (it was in the disposable prototype, not the workspace lock). Correct that
+record. One new helper package is qualified for supported PollSender; parking_lot
+is already locked. No custom polling framework or new synchronization primitive.
+
+CP1 record correction before edit: update the existing BASELINE and INVENTORY
+resume pointers (two documentation owners, <=24 added lines). The command PRD's
+feature-local research remains authoritative for measured results and sources;
+these root records currently end in historical Postgres work. Reuse links rather
+than duplicate acceptance tables. No code/test/configuration change or new tool.
+
+Follow-up contract audit for CP2/CP5 (not a completion claim): current native join
+preserves panic payload but cannot return Shutdown on panic/abort. The new CP1
+panic test proves cause73 plus uncertain reply identity, not unresolved-request
+handoff through failed completion. CP5 must reconcile the full completion/custody
+requirement with abrupt-loss caller obligations and test panic during post-append
+fold plus failed reconstruction. Do not treat a handler panic before append as
+proof of the post-commit path. Also review delayed fault tasks: Gate::done observes
+append completion but is not a native task join. Qualify teardown at its actual
+boundary before asserting zero live task resources. No source changes in CP1.
+
+CP5 follow-up: admission currently holds its parking_lot gate while PollSender
+poll_reserve/close or a failed try_send can wake/drop caller-owned objects. Prove
+that a caller Waker or command destructor reentering stop cannot deadlock. These
+are distinct from the Tokio-owned worker wake. Readiness itself does not enqueue,
+so its check/poll may be separable from the enqueue/stop linearization gate.
+Use a bounded real-SUT witness before any change; no custom queue/waker runtime
+or gate weakening. This remains a hypothesis, not a reproduced defect.

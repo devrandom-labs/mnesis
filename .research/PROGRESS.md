@@ -1,3 +1,25 @@
+# Active command goal — CP1 locally qualified, 2026-10-21
+
+Persistent CP0–CP9 goal remains active, no budget. CP0 signed21afe896/PR411 is
+pending protected merge. CP1 extraction now passes all12 host Nix checks:
+1626PASS451.591s14slow/142binaries, five established exclusions (four compiler
+cases and the original measurement). New package has32 debug/release owner laws;
+each actual run received the required three reviews. Production1030 lines (+93),
+six public responsibilities, no new framework. Archive/source remain preserved.
+The feature research owns actual evidence, including failed storage/format/
+visibility attempts and their corrections. Bundles cp1-tests and cp1-gates retain
+raw results. No real processor adapters, typed-error completion or publication.
+
+Current feat/command-extract is ready for its normal signed hook/commit and
+focused PR. CI repair24317917/PR412 passes local twelve checks and live dependency,
+feature/compiler/fuzz/nativePG gates; two Linux Nix jobs remain active. Main27de
+is unchanged. Finish protected CI repair and CP0 delivery, preserve unrelated
+releasePR410. Then implement CP2 typed causes/custody on a new focused branch.
+Known CP5 completion-handoff and caller-waker/destructor questions are in HYPOTHESES;
+do not claim those contracts completed by the initial Tower witnesses.
+
+The following initial and earlier progress records are retained history.
+
 # Active goal — command processor CP0–CP9 delivery, 2026-10-21
 
 Persistent goal created, no token budget. User authorizes implementation,
@@ -11,8 +33,12 @@ each three-reviewed, exact sources/locks/logs in evidence/cp0.tar.gz. Package
 name index404; selected metrics0.24.6 MIT/Rust1.71.1 plus rapidhash, and existing
 Tokio PollSender for readiness. Native owned JoinHandle retains terminal causes.
 Borrowed ready() cancellation cannot be detected; PRD now states handle ownership.
-Next: finish existing full gate, commit/open CP0 documentation PR, then extract
-with separate budgets. Existing PR410 is
+CP0 signed commit21afe896 passed normal hook and is pushed as docs/command-prd.
+Current branch feat/command-extract starts there. CP1a copies/renames original
+modules/tests with aligned workspace dependencies; package remains unpublished
+and release-disabled. CP1b supplies required Tower Service before CP1 acceptance.
+Next: owning original tests, three reviews, then service integration and checks.
+Existing PR410 is
 unrelated release-plz 0.5.4; preserve it. Main requires Nix Flake Check,
 Compile-fail tests and Feature isolation, resolved threads and squash PR merge.
 No direct main push or admin bypass. Existing Linux Nix builders are configured.
@@ -102,3 +128,29 @@ each actual invocation THREEreviewed. JSON receipt inclusion explains rebuild,
 no source/filter/gate changes. Follow-up records these results only, same filtered
 source; normal cached reuse gives no new runtime credit. Complete exact-head
 PR409CI/threads/tree/normal squash, then mark persistent goal complete.
+
+CP1 current: copied source+five Tower lifecycle cases pass32 owner tests in both
+debug/release; one original ignored measurement. Clippy passes with parking_lot,
+normal signed/full gate still pending. Full gate attempt agent-interrupted during
+fuzz startup to serialize disk use; no passing partial credit. Root index contains
+reviewed CP1 changes; later research paragraphs may be unstaged. CP0 PR411 has
+required compiler/features checks green, Nix pending, live deny blocked by newly
+issued RUSTSEC-2026-0382. Isolated /tmp/mnesis-command-ci fix/command-ci updates only
+rustls-webpki0.103.15->0.103.16 and evidence; live deny passes, full gate running
+(session96662, raw ci-fix-gate.log). Preserve unrelated releasePR410. Next: finish
+CI patch gate/PR, complete CP1 gate, commit/open extraction PR, then CP2 typed
+outcomes. Do not claim CP1/goal complete. Evidence root /tmp/mnesis-command-start-20261021.
+CI patch gate update: all1594 tests passed601.259s, but archive installation failed
+ENOSPC. Root cause is unused4.85GiB target cache installed by cargoNextest default.
+Confirmed no project consumer reads that archive and coverage is separate. Added
+supported doInstallCargoArtifacts=false only for nextest in CI fix and extraction;
+commands/filters/native Postgres archive unchanged. Retry CI fix running session
+in ci-fix-gate-noarchive.log; all original full tests remain required. Live deny
+passes. Do not rerun CP1 gate concurrently. About7GiB freed by failed-build cleanup.
+
+Resume2026-10-21: CI first1594-pass gate failed unused target archive installation;
+no-archive retry failed dependency extraction before tests. Each received three
+reviews and no green gate claim. Only goal-owned CP1 target cache removed; source,
+source archive and test logs preserved. Serial full CI-fix gate now running as
+session62127; raw ci-fix-gate-serial.log. About15GiB free after cleanup. Nextest
+output archive disabled through supported Crane flag; tests/filter/coverage intact.

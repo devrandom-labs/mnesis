@@ -1,8 +1,8 @@
 # Command processor research and evidence
 
 Updated: 2026-10-21. Contract owner: [command PRD](../command.md).
-This records planning and CP0 qualification. Protected delivery and CP1–CP9
-implementation remain outstanding; the latest CP0 section owns its local status.
+This records planning and CP0/CP1 local qualification. Protected delivery and
+CP2–CP9 remain outstanding; the latest owning sections record actual results.
 
 ## Input identity and method
 
@@ -346,8 +346,9 @@ Selected production direction:
   owned by its handle until consumed/released/dropped. The PRD now states this
   actual contract; owning oneshot cancellation drops the handle. Clones do not
   duplicate a reserved permit. Reuse Tokio's maintained PollSender helper instead
-  of implementing a custom polled reservation future. Its tokio-util0.7.20 is
-  already locked; it adds a normal edge, not a new package family in the lock.
+  of implementing a custom polled reservation future. Its tokio-util0.7.20 was
+  qualified in the disposable lock; CP1's actual workspace diff adds this package.
+  The earlier "already locked" statement confused the two graphs and is corrected.
 - Public read boundary: validated `Acceptance` with borrowed request/receipt/facts
   and `AcceptanceCodec`, reusing one codec validation owner. Names/shape proved
   by an external integration consumer; no public access to mutable record fields.
@@ -376,3 +377,163 @@ limits. This is existing workspace evidence; no processor or real-Postgres claim
 All twelve Darwin flake checks passed. [Raw gate logs and reviews](evidence/cp0-foundation.tar.gz)
 also preserve verification of all2,490 frozen files. The normal hook may reuse
 these unchanged product outputs; that is not another runtime execution.
+
+## CP1a mechanical extraction
+
+Original four production files copied into crates/command and renamed only at
+Rust Controller/import references. All937 production and1,891 test/helper lines
+are retained; workspace manifests align sibling0.5.3 types and existing locked
+Serde/test dependencies. Publish/release disabled until CP8. No archived nightly
+harness or generated corpus is installed into product test ownership.
+Owning all-targets run:27 passed (6model+1adaptation+1property+19recovery), one
+existing ignored measurement. Three reviews: (1) unchanged acceptance/no-op/retry/
+late-write and raw-record assertions preserve source invariants; (2) original
+suite ran, property still256 cases, no Postgres or omitted measurement credit;
+(3) names/imports/dependencies change only, so original unforced concurrent race
+remains CP3 work. No assertion/filter/timeout/property-range weakening. Tower
+implementation and owning regression tests follow before CP1 acceptance.
+CP1 Tower pre-change attempt initially stopped at Cargo's --locked guard after
+adding the existing Tower dev dependency. Zero tests/compilation executed; this
+is not a defect witness. Reviewed dependency selection, zero execution and test
+sources; corrected new tests to inspect the same physical stream they submit to.
+The next offline resolution updates only the new member's lock entry before
+checking the missing service interface. No assertion was weakened.
+Resolved pre-change Tower check fails with E0599: CommandProcessor does not
+implement Service, so ready/call are unavailable. Zero test bodies executed.
+Three reviews: the failing boundary is the required public trait, offline lock
+resolution adds only the existing Tower dependency to the new member, and all
+three new cases target actual processor/task/store objects with no fake interface.
+The implementation follows without changing their assertions or deadlines.
+CP1b focused Tower cases now pass3/3 (20 recovery cases filtered). Three reviews:
+(1) real service reservations/worker exit, clone capacity and abort-before-first-
+poll reproduce required lifecycle boundaries; (2) only the three new cases ran,
+not the complete original suite or real database; (3) assertions/deadlines stayed
+unchanged after E0599, and the same raw stream is inspected. Owned Worker Drop
+sets closed admission before receiver destruction, preventing stale-permit enqueue;
+queued rejections drain without waiting for unconsumed reservations. Add actual
+persisted cancellation/order and terminal-cause cases before broader owner checks.
+CP1b full owning suite passes32 tests (6model+1adaptation+1property+24recovery),
+one original ignored measurement, no filter. Three reviews: (1) raw acceptance
+records retain exact[1,2,3] order after dropped unpolled replies and exact retry
+adds no record; original panic73 is observed through the native join, while the
+admitted reply retains its unknown command identity; (2) owning suite and new
+five Tower cases ran, no native database/performance claim; (3) original assertions,
+fault gates, deadlines and256-case serial property unchanged. Explicit delayed-
+append entry forces cancellation overlap. The original multi-host race remains
+unforced and is still owned by CP3. No suppressed failures or new ignored tests.
+CP1 final optimized owning run passes32 tests, one original ignored measurement.
+Three reviews: (1) same real-order/no-extra-append, pending-write and original
+panic-cause assertions pass after the parking_lot synchronization change; (2)
+release binaries actually ran all owner targets, without native database or
+benchmark credit; (3) all original deadlines/case counts and newly added assertions
+are intact. Clippy passes all command targets with repository lint policy; the
+only new narrow allow is deliberate panic in the test-only worker-failure fixture.
+The real CI blocker is tracked separately: precise rustls-webpki0.103.16 patch,
+no waiver, live cargo-deny now passes in its isolated worktree. Extraction carries
+that same patch until the baseline fix merges; ordinary dependency resolution is
+otherwise unchanged. No telemetry feature or typed-error completion is claimed.
+CP1 full gate was started concurrently with the isolated CI-repair gate, then
+agent-interrupted to serialize their disk use (about3.3GiB free). Raw log retained
+locally as cp1-gate.log. Fuzz cbor target had started two cases but no completed
+result was observed. Three reviews: (1) unchanged decoder bodies, no new processor
+invariant exercised; (2) interrupted invocation earns no passing execution credit;
+(3) no source/assertion/filter/deadline changed to obtain green. Resume the identical
+gate after the baseline patch gate finishes, rather than deleting other work or
+weakening checks. CP1 local debug/release owner results remain separately recorded.
+CP1 dependency inspection through the repository Nix shell: normal-edge Cargo
+tree contains no Labcast or Mnesis adapter package. Workspace-hack still expands
+build-only unification dependencies (including SQLx core); this is not an isolated
+published-dependency cost measurement. CP7 must disable Hakari and verify the
+actual packaged graph. Original model.rs and engine.rs compare byte-for-byte to
+the archive; host changes alone provide the required service boundary. Root
+baseline/inventory pointers now identify current command evidence instead of
+leaving a fresh context with only historical Postgres material.
+The [CP1 test evidence bundle](evidence/cp1-tests.tar.gz) retains extraction,
+pre-Service compile failures, focused/full debug and release results, Clippy
+failures and fixes, the dependency tree and interrupted gate. SHA-256:
+4b6a2e209de239b112f9ef0a86e39ad70a7396ae8f887dd11863efb26b28dc96.
+A separate complete host gate is required before the signed extraction commit;
+the interrupted attempt and cached results do not supply that acceptance.
+CP1 serial gate first fails the ordinary TOML formatter on the root and command
+manifests. Nextest never ran. Correct with repository taplo format; no manifest
+values, test selection or assertions change. Fresh corpus replay2/1/1,1s each,
+received three reviews after execution: (1) unchanged wire/CBOR panic-freedom and
+existing corpus laws only, no command persistence coverage; (2) four cases ran,
+zero filtered/ignored, not real-DB or nextest credit; (3) original bodies/seed
+workload and assertions unchanged. The gate remains failed until a complete retry.
+Nix cargo-audit reports missing-index yank lookup errors under its existing
+sandbox mode despite a successful advisory verdict. This is not verified current
+yank status; retain raw output and qualify the actual package graph in CP7.
+Formatted-gate replay again executes2/1/1 cases,1s each. Three reviews for each
+invocation: (1) unchanged wire/CBOR decoder invariants and existing corpus only;
+(2) all selected cases execute, zero ignored/filtered, no processor/native service
+credit; (3) formatting reorders two manifest keys only, with identical dependency
+values and fuzz bodies. This is fresh execution, not reused replay output. The
+full extraction gate remains running; no acceptance follows from replay alone.
+Final CP1 source review found inherited unrestricted pub declarations inside
+private modules. Tighten Engine/model helpers and Serde hooks to pub(super),
+as CP1 requires; the six root responsibility types stay public. No persistence,
+branch, assertion or capacity change. The formatted gate was stopped before
+nextest execution to qualify this reviewed source instead; prior replay's three
+reviews remain recorded, and no interrupted workspace pass is claimed. The
+archive comparison is therefore now exact model/engine behavior with intentional
+visibility changes, rather than literal file equality. Production stays within
+the150-net-line budget. Repeat the entire gate after normal rustfmt.
+The visibility attempt failed Clippy's redundant_pub_crate rule at seven private
+module type/constant declarations before any tests ran. The private module plus
+selective root exports already bounds their external surface; the earlier finding
+was too broad. Retain that established pattern without a lint waiver. Narrow
+member methods/fields and nested Serde hooks remain valid. This records a rejected
+scope change, not a processor defect or passing verification. Repeat full checks.
+Private-member gate's three fresh decoder replay invocations pass2/1/1 cases,
+each1s. Reviews after each: (1) unchanged decoder/corpus invariants, no command
+recovery law; (2) exact four cases, no ignored/filtered/native DB credit; (3)
+production changes since the last replay are member visibility only, with
+unchanged fuzz bodies/assertions/workload. Clippy now passes the complete workspace
+without a new waiver. Nextest is compiling and its result remains pending.
+CI repairPR412 at signed24317917801f093f3b3843d98b8fee51bd3d2224:
+live dependency job39605915582 passes with rustls-webpki0.103.16. Existing fuzz
+run39605915714 completes four libFuzzer campaigns (61s each; wire8,416,063,
+header1,760,737, chunk2,276,676, value10,027,803 executions) and four AFL campaigns
+(60s each, zero saved crashes/timeouts). Three reviews after each campaign:
+(1) actual unchanged decoder bodies/corpus, panic-freedom/format checks rather
+than processor acceptance; (2) all eight jobs execute their selected targets,
+with bounded campaign durations and no native service claim; (3) source/filter/
+workload unchanged, no new processor fuzz law inferred, empty-directory crash
+artifacts are not crash evidence. Mutation run39605915628 reports no Rust source
+changes and tests zero mutants; its green gate is not mutation coverage. Raw
+ci412-fuzz.log/ci412-mutants.log/ci412-deny.log retained in the local evidence root.
+PR412 native job119241934337 passes on fresh PostgreSQL18.6/x86_64-linux and
+observes server shutdown. Three reviews after each of its20 actual invocations:
+(1) unchanged real-adapter assertions cover migration, atomicity, uncertainty,
+checkpoint, backup, TLS/durability and cleanup; no processor composition claim.
+(2) seven complete profiles264/149/168/176/173/174/150, each zero skips, plus13
+one-law selections with their other tests explicitly filtered. Database startup
+and successful native operations are visible; required selections use
+--no-tests=fail. (3) exact CI repair source changes only webpki patch and unused
+nextest output; assertions/filters/deadlines unchanged. The final echoed264-test
+receipt is not another execution. Raw ci412-postgres-pr.log retains all20 run IDs.
+The canceled bootstrap CI run39605893052 has jobs ending0–1s after start and an
+unavailable log119241857970; it earns no test credit. Current PR workflow's Feature
+isolation passes; its old cancellation-derived failure is retained in rollup history.
+
+CP1 final host gate passes all12 checks on the reviewed source. Workspace nextest
+754ea754-e9a7-42f3-a719-1d5ffcf7f8a2:1626PASS451.591s14slow/142binaries.
+Three reviews after this invocation: (1) all32 processor owner laws run alongside
+the original1594, including real bounded reservations, unpolled cancellation,
+raw[1,2,3] acceptance order and original panic73; deterministic cross-host races,
+typed causes, post-commit panic custody and real processor adapters remain CP2–CP6.
+(2) five exclusions are four established compile-fail tests plus the original
+ignored measurement; no tests newly disabled. Darwin database guards provide no
+native processor credit. Fresh fuzz2/1/1 invocations were separately reviewed.
+(3) only intended host/visibility/import/dependency changes; original assertions,
+256 property cases, timeouts and workloads stay intact. Original unforced race
+could still pass sequentially and is explicitly not CP3 evidence. Production1030
+lines is +93 over937, within the150-line budget; six root types retained. Full
+Nix gate/owner debug+release/Clippy/no_std/Wasm all pass. Protected PR/merge pending.
+The [CP1 gate bundle](evidence/cp1-gates.tar.gz) retains all three subsequent
+gate attempts and the successful reviewed run, final source hashes, formatter
+logs and the audited CI repair results. SHA-256:
+731e8a8d1c42eeebe44473fa0eefa08596a408373fb9bbbeaaaed962128654c4.
+The earlier test bundle is unchanged. Normal signed hook/current-head protected
+checks still determine delivery; cached reuse gives no additional runtime credit.

@@ -1,0 +1,398 @@
+use std::fmt::Debug;
+use std::future::Future;
+use std::num::{NonZeroU64, NonZeroUsize};
+use std::pin::Pin;
+use std::sync::Arc;
+use std::task::{Context, Poll};
+use std::time::Duration;
+
+use mnesis::{Aggregate, EventOf, Handle, Version};
+use mnesis_store::{RawEventStore, Store, StreamKey};
+use parking_lot::{Mutex, MutexGuard};
+use serde::Serialize;
+use serde::de::DeserializeOwned;
+use tokio::sync::{mpsc, oneshot, watch};
+use tokio::task::JoinHandle;
+use tokio_util::sync::PollSender;
+use tower_service::Service;
+
+use crate::engine::Engine;
+use crate::{Error, Receipt, Request};
+
+type Reply<T, D, I> = oneshot::Sender<Result<T, Error<D, I>>>;
+type Started<T, C, D, I> = Result<(T, JoinHandle<Shutdown<C, I>>), Error<D, I>>;
+
+/// Explicit resource limits; no product release capacity is implied.
+#[derive(Clone, Copy, Debug)]
+pub struct Limits {
+    /// Number of waiting calls; one additional call may be in flight.
+    pub queue: NonZeroUsize,
+    /// Nonzero deadline for each store operation.
+    pub operation: Duration,
+}
+
+/// Observed shutdown preserves the exact unresolved write for the next host.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Shutdown<C, I = NonZeroU64> {
+    stream: StreamKey,
+    uncertain: Option<Request<C, I>>,
+}
+impl<C, I> Shutdown<C, I> {
+    /// Original unresolved request, including its CAS base. Absence does not
+    /// mean application work has completed. The report cannot be rewritten
+    /// before passing it to `CommandProcessor::resume`.
+    pub const fn uncertain(&self) -> Option<&Request<C, I>> {
+        self.uncertain.as_ref()
+    }
+}
+
+enum Call<A: Aggregate, C, I> {
+    Retry {
+        id: I,
+        reply: Reply<Option<Receipt<I>>, A::Error, I>,
+    },
+    Submit {
+        request: Request<C, I>,
+        reply: Reply<Receipt<I>, A::Error, I>,
+    },
+    Read {
+        reply: Reply<(Option<Version>, A::State), A::Error, I>,
+    },
+    Original {
+        id: I,
+        reply: Reply<Option<Request<C, I>>, A::Error, I>,
+    },
+}
+impl<A: Aggregate, C, I> Call<A, C, I> {
+    fn reject(self) {
+        match self {
+            Self::Retry { reply, .. } => {
+                let _ = reply.send(Err(Error::Closed));
+            }
+            Self::Submit { reply, .. } => {
+                let _ = reply.send(Err(Error::Closed));
+            }
+            Self::Read { reply } => {
+                let _ = reply.send(Err(Error::Closed));
+            }
+            Self::Original { reply, .. } => {
+                let _ = reply.send(Err(Error::Closed));
+            }
+        }
+    }
+}
+impl<A, C, I> Call<A, C, I>
+where
+    A: Aggregate + 'static,
+    A::State: Clone,
+    C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
+    EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+{
+    async fn execute<S, const N: usize>(self, engine: &mut Engine<S, A, C, I, N>)
+    where
+        S: RawEventStore + 'static,
+        A: Handle<C, N>,
+    {
+        match self {
+            Self::Retry { id, reply } => {
+                let _ = reply.send(engine.retry(&id).await);
+            }
+            Self::Submit { request, reply } => {
+                let _ = reply.send(engine.submit(request).await);
+            }
+            Self::Read { reply } => {
+                let _ = reply.send(engine.read().await);
+            }
+            Self::Original { id, reply } => {
+                let _ = reply.send(engine.original(&id).await);
+            }
+        }
+    }
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Lifecycle {
+    Running,
+    Stopping,
+}
+
+struct Admission(Mutex<watch::Sender<Lifecycle>>);
+impl Admission {
+    fn lock(&self) -> MutexGuard<'_, watch::Sender<Lifecycle>> {
+        self.0.lock()
+    }
+}
+struct Worker<A: Aggregate, C, I> {
+    receiver: mpsc::Receiver<Call<A, C, I>>,
+    admission: Arc<Admission>,
+}
+impl<A: Aggregate, C, I> Drop for Worker<A, C, I> {
+    fn drop(&mut self) {
+        self.admission.lock().send_replace(Lifecycle::Stopping);
+        self.receiver.close();
+        // Ready permits may outlive the worker. Never wait for them to be used.
+        while let Ok(call) = self.receiver.try_recv() {
+            call.reject();
+        }
+    }
+}
+
+/// Bounded generic command admission over the aggregate's existing Mnesis rules.
+///
+/// Application code must check current authorization before every call that
+/// can disclose state or receipts. This handle executes no external effects.
+/// Keep and await the task returned by `start` or `resume`.
+pub struct CommandProcessor<A: Aggregate, C, I = NonZeroU64, const N: usize = 0> {
+    id: A::Id,
+    sender: mpsc::Sender<Call<A, C, I>>,
+    service: PollSender<Call<A, C, I>>,
+    admission: Arc<Admission>,
+}
+impl<A: Aggregate, C, I, const N: usize> Clone for CommandProcessor<A, C, I, N> {
+    fn clone(&self) -> Self {
+        Self {
+            id: self.id.clone(),
+            sender: self.sender.clone(),
+            service: self.service.clone(),
+            admission: Arc::clone(&self.admission),
+        }
+    }
+}
+impl<A, C, I, const N: usize> CommandProcessor<A, C, I, N>
+where
+    A: Handle<C, N> + 'static,
+    A::State: Clone,
+    C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
+    EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+{
+    /// Start one aggregate host without executing application effects.
+    ///
+    /// # Errors
+    /// Rejects invalid limits or startup outside a Tokio runtime.
+    pub fn start<S: RawEventStore + 'static>(
+        store: &Store<S>,
+        id: A::Id,
+        limits: Limits,
+    ) -> Started<Self, C, A::Error, I> {
+        Self::launch(store, id, limits, None)
+    }
+
+    /// Resume after observed shutdown, preserving an unresolved request's base.
+    ///
+    /// # Errors
+    /// Rejects another stream, invalid limits, unavailable runtime and unresolved
+    /// requests that cannot be encoded. Failure leaves the report available.
+    pub fn resume<S: RawEventStore + 'static>(
+        store: &Store<S>,
+        id: A::Id,
+        limits: Limits,
+        shutdown: &Shutdown<C, I>,
+    ) -> Started<Self, C, A::Error, I> {
+        if shutdown.stream.as_bytes() != id.as_ref() {
+            return Err(Error::Scope);
+        }
+        if let Some(request) = &shutdown.uncertain {
+            request.validate().map_err(Error::Json)?;
+        }
+        Self::launch(store, id, limits, shutdown.uncertain.clone())
+    }
+
+    fn launch<S: RawEventStore + 'static>(
+        store: &Store<S>,
+        id: A::Id,
+        limits: Limits,
+        pending: Option<Request<C, I>>,
+    ) -> Started<Self, C, A::Error, I> {
+        if limits.operation.is_zero() || limits.queue.get() > tokio::sync::Semaphore::MAX_PERMITS {
+            return Err(Error::Capacity);
+        }
+        let runtime = tokio::runtime::Handle::try_current().map_err(Error::Runtime)?;
+        let (sender, receiver) = mpsc::channel(limits.queue.get());
+        let (stop, stopping) = watch::channel(Lifecycle::Running);
+        let admission = Arc::new(Admission(Mutex::new(stop)));
+        let worker = Worker {
+            receiver,
+            admission: Arc::clone(&admission),
+        };
+        let engine = Engine::new(store, id.clone(), limits.operation, pending);
+        let task = runtime.spawn(run(engine, worker, stopping));
+        let service = PollSender::new(sender.clone());
+        Ok((
+            Self {
+                id,
+                sender,
+                service,
+                admission,
+            },
+            task,
+        ))
+    }
+
+    /// Aggregate identity bound at startup; application effects use this scope.
+    pub const fn id(&self) -> &A::Id {
+        &self.id
+    }
+
+    /// Physical accepted-record limit. Aggregate fact limits may be lower.
+    #[must_use]
+    pub const fn capacity() -> usize {
+        crate::model::MAX_ACCEPTED
+    }
+
+    /// Retry the locally retained original or return an accepted original's receipt.
+    /// None is no known request, not evidence that another handler rolled back.
+    /// Application authorization must precede this call.
+    ///
+    /// # Errors
+    /// Preserves unknown outcomes and rejects unavailable/closed admission.
+    pub async fn retry(&self, id: I) -> Result<Option<Receipt<I>>, Error<A::Error, I>> {
+        let (reply, response) = oneshot::channel();
+        self.send(Call::Retry {
+            id: id.clone(),
+            reply,
+        })?;
+        response.await.map_err(|_| Error::Uncertain {
+            command: id,
+            source: None,
+        })?
+    }
+
+    /// Submit the exact original request. Once admitted it survives cancellation
+    /// of its waiting caller. Overload rejects before admission.
+    /// An unknown request may retry only its original conditional append;
+    /// unchanged reads do not establish rollback.
+    ///
+    /// # Errors
+    /// Preserves mismatch, conflict, domain rejection and uncertain writes.
+    pub async fn submit(&self, request: Request<C, I>) -> Result<Receipt<I>, Error<A::Error, I>> {
+        request.validate().map_err(Error::Json)?;
+        let id = request.id.clone();
+        let (reply, response) = oneshot::channel();
+        self.send(Call::Submit { request, reply })?;
+        response.await.map_err(|_| Error::Uncertain {
+            command: id,
+            source: None,
+        })?
+    }
+
+    /// Read reconstructed domain state, without invoking its command handler.
+    ///
+    /// # Errors
+    /// Rejects unavailable/corrupt reads and preserves unresolved-write barriers.
+    pub async fn read(&self) -> Result<(Option<Version>, A::State), Error<A::Error, I>> {
+        let (reply, response) = oneshot::channel();
+        self.send(Call::Read { reply })?;
+        response.await.map_err(|_| Error::Closed)?
+    }
+
+    /// Recover the exact persisted original for a retry identity.
+    ///
+    /// # Errors
+    /// An absent original cannot resolve an uncertain write. Known originals
+    /// remain readable while an unrelated write is unsettled.
+    pub async fn original(&self, id: I) -> Result<Option<Request<C, I>>, Error<A::Error, I>> {
+        let (reply, response) = oneshot::channel();
+        self.send(Call::Original { id, reply })?;
+        response.await.map_err(|_| Error::Closed)?
+    }
+
+    /// Stop admission; await the observed task to retain unresolved work.
+    pub fn stop(&self) {
+        self.admission.lock().send_replace(Lifecycle::Stopping);
+    }
+
+    fn send(&self, call: Call<A, C, I>) -> Result<(), Error<A::Error, I>> {
+        let admission = self.admission.lock();
+        if *admission.borrow() == Lifecycle::Stopping {
+            return Err(Error::Closed);
+        }
+        self.sender.try_send(call).map_err(|error| match error {
+            mpsc::error::TrySendError::Full(_) => Error::Capacity,
+            mpsc::error::TrySendError::Closed(_) => Error::Closed,
+        })
+    }
+}
+
+impl<A, C, I, const N: usize> Service<Request<C, I>> for CommandProcessor<A, C, I, N>
+where
+    A: Handle<C, N> + 'static,
+    A::State: Clone,
+    C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
+    EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+{
+    type Response = Receipt<I>;
+    type Error = Error<A::Error, I>;
+    type Future = Pin<Box<dyn Future<Output = Result<Receipt<I>, Self::Error>> + Send>>;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        let admission = self.admission.lock();
+        if *admission.borrow() == Lifecycle::Stopping {
+            self.service.close();
+            return Poll::Ready(Err(Error::Closed));
+        }
+        self.service.poll_reserve(cx).map_err(|_| Error::Closed)
+    }
+
+    fn call(&mut self, request: Request<C, I>) -> Self::Future {
+        if let Err(error) = request.validate() {
+            self.service.abort_send();
+            return Box::pin(async { Err(Error::Json(error)) });
+        }
+        let admission = self.admission.lock();
+        if *admission.borrow() == Lifecycle::Stopping {
+            self.service.close();
+            return Box::pin(async { Err(Error::Closed) });
+        }
+        let id = request.id.clone();
+        let (reply, response) = oneshot::channel();
+        if self
+            .service
+            .send_item(Call::Submit { request, reply })
+            .is_err()
+        {
+            return Box::pin(async { Err(Error::Closed) });
+        }
+        Box::pin(async move {
+            response.await.map_err(|_| Error::Uncertain {
+                command: id,
+                source: None,
+            })?
+        })
+    }
+}
+
+async fn run<S, A, C, I, const N: usize>(
+    mut engine: Engine<S, A, C, I, N>,
+    mut worker: Worker<A, C, I>,
+    mut stopping: watch::Receiver<Lifecycle>,
+) -> Shutdown<C, I>
+where
+    S: RawEventStore + 'static,
+    A: Handle<C, N> + 'static,
+    A::State: Clone,
+    C: Clone + Debug + Eq + Serialize + DeserializeOwned + Send + Sync + 'static,
+    I: Clone + Debug + Ord + Serialize + DeserializeOwned + Send + Sync + 'static,
+    EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
+{
+    loop {
+        if *stopping.borrow() == Lifecycle::Stopping {
+            break;
+        }
+        let call = tokio::select! {
+            biased;
+            _ = stopping.changed() => break,
+            message = worker.receiver.recv() => {
+                let Some(call) = message else { break };
+                call
+            }
+        };
+        call.execute(&mut engine).await;
+    }
+    let (id, uncertain) = engine.unresolved();
+    Shutdown {
+        stream: StreamKey::from_slice(id.as_ref()),
+        uncertain,
+    }
+}

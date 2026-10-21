@@ -27,6 +27,7 @@ cargo fmt --all
 
 ```
 mnesis-store         --> mnesis (kernel)
+mnesis-command       --> mnesis-store, mnesis (Tokio command consumer; no reverse edge)
 mnesis-store-testing --> mnesis-store             (executable store-contract spec; every adapter's dev-dep; #281)
 mnesis-wake          --> mnesis-store             (in-process wake registry; owns tokio/foldhash/parking_lot)
 mnesis-wake-nostd    --> mnesis-store             (no_std global-eventcount wake; owns event-listener; #302)
@@ -50,6 +51,10 @@ adapters/          # infrastructure impls of the store seams
 ```
 
 The wake crates live in `crates/` (core), not `adapters/`, **by dependency direction**: `mnesis-wake` is a lib dependency of all three store adapters (their `WakeSource` impls delegate to `StreamNotifiers`), so it is something adapters build on — and `mnesis-wake-nostd` stays beside its sibling. Decided explicitly per #309's classification call.
+
+`crates/command` is an optional Tokio consumer of these foundations. It owns
+command admission, accepted request/receipt reconciliation and worker lifecycle.
+It does not own application authorization, business decisions or external effects.
 
 `mnesis-store` itself has **no** tokio/foldhash/parking_lot dependency (#300): the
 subscription loop is generic over the `WakeSource` trait, and the tokio-backed

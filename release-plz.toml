@@ -4,6 +4,12 @@ git_tag_enable = true
 # workspace-hack is disabled before publishing, which dirties the tree
 allow_dirty = true
 
+# Keep the extracted consumer private until CP8 verifies the entire release.
+[[package]]
+name = "mnesis-command"
+publish = false
+release = false
+
 # workspace-hack must not be published
 [[package]]
 name = "workspace-hack"
