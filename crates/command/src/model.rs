@@ -250,6 +250,68 @@ where
     }
 }
 
+/// One decoded acceptance with its original request, receipt and ordered facts.
+///
+/// [`AcceptanceCodec`] validates each record. Aggregate replay validates stream
+/// ordering, repeated identities and cumulative limits across records. Consumers
+/// checkpoint after folding all facts at the record's original physical position.
+#[derive(Debug)]
+pub struct Acceptance<C, E, I = NonZeroU64>(Record<C, I, E>);
+
+impl<C, E, I> Acceptance<C, E, I> {
+    /// Borrow the exact original request, including its expected version.
+    #[must_use]
+    pub const fn request(&self) -> &Request<C, I> {
+        &self.0.request
+    }
+
+    /// Borrow the original receipt; its version counts acceptance records.
+    #[must_use]
+    pub const fn receipt(&self) -> &Receipt<I> {
+        &self.0.receipt
+    }
+
+    /// Borrow the ordered facts; an accepted no-op has an empty slice.
+    #[must_use]
+    pub const fn facts(&self) -> &[E] {
+        self.0.facts.as_slice()
+    }
+}
+
+impl<C, E, I> Message for Acceptance<C, E, I>
+where
+    C: Debug + Send + Sync + 'static,
+    I: Debug + Send + Sync + 'static,
+    E: DomainEvent,
+{
+}
+
+impl<C, E, I> DomainEvent for Acceptance<C, E, I>
+where
+    C: Debug + Send + Sync + 'static,
+    I: Debug + Send + Sync + 'static,
+    E: DomainEvent,
+{
+    fn name(&self) -> &'static str {
+        self.0.name()
+    }
+}
+
+/// Decode acceptance records through the same validation used by the processor.
+#[derive(Debug)]
+pub struct AcceptanceCodec;
+
+impl<C: DeserializeOwned + Eq, E: DeserializeOwned, I: DeserializeOwned + Eq>
+    Decode<Acceptance<C, E, I>> for AcceptanceCodec
+{
+    type Output<'a> = Acceptance<C, E, I>;
+    type Error = CodecError;
+
+    fn decode(&self, envelope: &PersistedEnvelope) -> Result<Acceptance<C, E, I>, Self::Error> {
+        Codec.decode(envelope).map(Acceptance)
+    }
+}
+
 pub struct State<A: Aggregate, C, I, const N: usize> {
     pub(super) domain: A::State,
     receipts: BTreeMap<I, (Request<C, I>, Receipt<I>)>,

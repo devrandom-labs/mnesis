@@ -1,6 +1,6 @@
 # Command processor extraction and delivery
 
-Status: CP0–CP2 protected-merged; CP3 fixture repair locally verified, CI pending.
+Status: CP0–CP3 protected-merged; CP4 locally verified, delivery pending; CP5 lifecycle/resource work in progress.
 Updated: 2026-10-21. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.

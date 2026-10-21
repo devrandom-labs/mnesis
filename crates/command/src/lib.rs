@@ -10,4 +10,4 @@ mod host;
 mod model;
 
 pub use host::{CommandProcessor, Limits, Shutdown};
-pub use model::{Cause, CodecError, Error, Receipt, Request};
+pub use model::{Acceptance, AcceptanceCodec, Cause, CodecError, Error, Receipt, Request};
