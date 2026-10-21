@@ -18,6 +18,7 @@ use tokio_util::sync::PollSender;
 use tower_service::Service;
 
 use crate::engine::{Engine, Handoff};
+use crate::trace::{self, Trace};
 use crate::{Error, Receipt, Request};
 
 type Reply<T, A, I, E> = oneshot::Sender<Result<T, Error<<A as Aggregate>::Error, I, E>>>;
@@ -97,7 +98,13 @@ impl<C, I> Future for Worker<C, I> {
     }
 }
 
-enum Call<A: Aggregate, C, I, E> {
+struct Call<A: Aggregate, C, I, E> {
+    message: Message<A, C, I, E>,
+    trace: Trace,
+    #[cfg(feature = "tracing")]
+    queue: Option<Trace>,
+}
+enum Message<A: Aggregate, C, I, E> {
     Retry {
         id: I,
         reply: Reply<Option<Receipt<I>>, A, I, E>,
@@ -114,7 +121,15 @@ enum Call<A: Aggregate, C, I, E> {
         reply: Reply<Option<Request<C, I>>, A, I, E>,
     },
 }
-impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
+impl<A: Aggregate, C, I, E> Message<A, C, I, E> {
+    const fn operation(&self) -> &'static str {
+        match self {
+            Self::Retry { .. } => "retry",
+            Self::Submit { .. } => "submit",
+            Self::Read { .. } => "read",
+            Self::Original { .. } => "original",
+        }
+    }
     fn reject(self) {
         match self {
             Self::Retry { reply, .. } => {
@@ -132,6 +147,53 @@ impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
         }
     }
 }
+impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
+    #[cfg(not(feature = "tracing"))]
+    const fn new(message: Message<A, C, I, E>) -> Self {
+        Self {
+            trace: Trace::request(message.operation()),
+            message,
+        }
+    }
+    #[cfg(feature = "tracing")]
+    fn new(message: Message<A, C, I, E>) -> Self {
+        Self {
+            trace: Trace::request(message.operation()),
+            message,
+            queue: None,
+        }
+    }
+    #[cfg(not(feature = "tracing"))]
+    fn admission(&self) -> Trace {
+        self.trace.child("admission")
+    }
+    #[cfg(feature = "tracing")]
+    fn admission(&mut self) -> Trace {
+        self.queue = Some(self.trace.child("queue"));
+        self.trace.child("admission")
+    }
+    const fn finish(&mut self, outcome: &'static str) {
+        self.trace.finish(outcome);
+        #[cfg(feature = "tracing")]
+        if let Some(queue) = &mut self.queue {
+            queue.finish(outcome);
+        }
+    }
+    fn reject(mut self) {
+        self.finish("closed");
+        self.message.reject();
+    }
+}
+fn respond<T, D, I, E>(
+    trace: &mut Trace,
+    reply: oneshot::Sender<Result<T, Error<D, I, E>>>,
+    result: Result<T, Error<D, I, E>>,
+) {
+    trace.finish(trace::outcome(&result));
+    if reply.send(result).is_err() {
+        trace::reply_dropped();
+    }
+}
 impl<A, C, I, E> Call<A, C, I, E>
 where
     A: Aggregate + 'static,
@@ -141,25 +203,32 @@ where
     EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
     E: std::error::Error + Send + Sync + 'static,
 {
-    async fn execute<S, const N: usize>(self, engine: &mut Engine<S, A, C, I, N>)
+    async fn execute<S, const N: usize>(mut self, engine: &mut Engine<S, A, C, I, N>)
     where
         S: RawEventStore<Error = E> + 'static,
         A: Handle<C, N>,
     {
-        match self {
-            Self::Retry { id, reply } => {
-                let _ = reply.send(engine.retry(&id).await);
-            }
-            Self::Submit { request, reply } => {
-                let _ = reply.send(engine.submit(request).await);
-            }
-            Self::Read { reply } => {
-                let _ = reply.send(engine.read().await);
-            }
-            Self::Original { id, reply } => {
-                let _ = reply.send(engine.original(&id).await);
-            }
-        }
+        self.trace
+            .scope()
+            .run(async move {
+                #[cfg(feature = "tracing")]
+                if let Some(mut queue) = self.queue.take() {
+                    queue.finish("ok");
+                }
+                match self.message {
+                    Message::Retry { id, reply } => {
+                        respond(&mut self.trace, reply, engine.retry(&id).await);
+                    }
+                    Message::Submit { request, reply } => {
+                        respond(&mut self.trace, reply, engine.submit(request).await);
+                    }
+                    Message::Read { reply } => respond(&mut self.trace, reply, engine.read().await),
+                    Message::Original { id, reply } => {
+                        respond(&mut self.trace, reply, engine.original(&id).await);
+                    }
+                }
+            })
+            .await;
     }
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -177,15 +246,20 @@ impl Admission {
 struct Inbox<A: Aggregate, C, I, E> {
     receiver: mpsc::Receiver<Call<A, C, I, E>>,
     admission: Arc<Admission>,
+    trace: Trace,
 }
 impl<A: Aggregate, C, I, E> Drop for Inbox<A, C, I, E> {
     fn drop(&mut self) {
-        self.admission.lock().send_replace(Lifecycle::Stopping);
-        self.receiver.close();
-        // Ready permits may outlive the worker. Never wait for them to be used.
-        while let Ok(call) = self.receiver.try_recv() {
-            call.reject();
-        }
+        self.trace.scope().sync(|| {
+            let mut cleanup = Trace::stage("shutdown");
+            self.admission.lock().send_replace(Lifecycle::Stopping);
+            self.receiver.close();
+            // Ready permits may outlive the worker. Never wait for them to be used.
+            while let Ok(call) = self.receiver.try_recv() {
+                call.reject();
+            }
+            cleanup.finish("ok");
+        });
     }
 }
 
@@ -289,6 +363,7 @@ where
         let worker = Inbox {
             receiver,
             admission: Arc::clone(&admission),
+            trace: Trace::worker(),
         };
         let handoff = Arc::new(Mutex::new(None));
         let engine = Engine::new(
@@ -299,8 +374,9 @@ where
             Arc::clone(&handoff),
         );
         let stream = StreamKey::from_slice(id.as_ref());
+        let scope = worker.trace.scope();
         let task = Worker {
-            task: runtime.spawn(run(engine, worker, stopping)),
+            task: runtime.spawn(scope.run(run(engine, worker, stopping))),
             stream,
             handoff,
         };
@@ -335,7 +411,7 @@ where
     /// Preserves unknown outcomes and rejects unavailable/closed admission.
     pub async fn retry(&self, id: I) -> Result<Option<Receipt<I>>, Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
-        self.send(Call::Retry {
+        self.send(Message::Retry {
             id: id.clone(),
             reply,
         })?;
@@ -356,10 +432,13 @@ where
         &self,
         request: Request<C, I>,
     ) -> Result<Receipt<I>, Error<A::Error, I, E>> {
-        request.validate().map_err(Error::Request)?;
+        request.validate().map_err(|error| {
+            trace::invalid_request();
+            Error::Request(error)
+        })?;
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
-        self.send(Call::Submit { request, reply })?;
+        self.send(Message::Submit { request, reply })?;
         response.await.map_err(|_| Error::Uncertain {
             command: id,
             source: None,
@@ -372,7 +451,7 @@ where
     /// Rejects unavailable/corrupt reads and preserves unresolved-write barriers.
     pub async fn read(&self) -> Result<(Option<Version>, A::State), Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
-        self.send(Call::Read { reply })?;
+        self.send(Message::Read { reply })?;
         response.await.map_err(|_| Error::Closed)?
     }
 
@@ -383,7 +462,7 @@ where
     /// remain readable while an unrelated write is unsettled.
     pub async fn original(&self, id: I) -> Result<Option<Request<C, I>>, Error<A::Error, I, E>> {
         let (reply, response) = oneshot::channel();
-        self.send(Call::Original { id, reply })?;
+        self.send(Message::Original { id, reply })?;
         response.await.map_err(|_| Error::Closed)?
     }
 
@@ -392,18 +471,30 @@ where
         self.admission.lock().send_replace(Lifecycle::Stopping);
     }
 
-    fn send(&self, call: Call<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
+    fn send(&self, message: Message<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
+        let mut call = Call::new(message);
+        let mut stage = call.admission();
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
             drop(admission);
+            call.finish("closed");
+            stage.finish("closed");
             return Err(Error::Closed);
         }
         let sent = self.sender.try_send(call);
         drop(admission);
-        sent.map_err(|error| match error {
-            mpsc::error::TrySendError::Full(_) => Error::QueueFull,
-            mpsc::error::TrySendError::Closed(_) => Error::Closed,
-        })
+        let result = sent.map_err(|error| match error {
+            mpsc::error::TrySendError::Full(mut queued) => {
+                queued.finish("queue_full");
+                Error::QueueFull
+            }
+            mpsc::error::TrySendError::Closed(mut stopped) => {
+                stopped.finish("closed");
+                Error::Closed
+            }
+        });
+        stage.finish(trace::outcome(&result));
+        result
     }
 }
 
@@ -432,23 +523,33 @@ where
 
     fn call(&mut self, request: Request<C, I>) -> Self::Future {
         if let Err(error) = request.validate() {
+            trace::invalid_request();
             self.service.abort_send();
             return Box::pin(async { Err(Error::Request(error)) });
         }
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
+        let mut call = Call::new(Message::Submit { request, reply });
+        let mut stage = call.admission();
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
             drop(admission);
+            call.finish("closed");
+            stage.finish("closed");
             self.service.close();
             self.service.abort_send();
             return Box::pin(async { Err(Error::Closed) });
         }
-        let sent = self.service.send_item(Call::Submit { request, reply });
+        let sent = self.service.send_item(call);
         drop(admission);
-        if sent.is_err() {
+        if let Err(error) = sent {
+            if let Some(mut closed) = error.into_inner() {
+                closed.finish("closed");
+            }
+            stage.finish("closed");
             return Box::pin(async { Err(Error::Closed) });
         }
+        stage.finish("ok");
         Box::pin(async move {
             response.await.map_err(|_| Error::Uncertain {
                 command: id,
@@ -489,4 +590,5 @@ async fn run<S, A, C, I, const N: usize>(
         }
         call.execute(&mut engine).await;
     }
+    worker.trace.finish("ok");
 }

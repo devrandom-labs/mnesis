@@ -48,14 +48,19 @@ required before whole-adapter completion.
 ## Command processor — 2026-10-21
 
 Current consumer layer: crates/command depends on kernel/store; adapters do not
-depend on it. Three private modules/four source files retain model/codec, engine
-and host ownership. Eleven roots include source responsibilities, typed causes/
+depend on it. Four private modules/five source files retain model/codec, engine,
+host and captured trace-context ownership. Eleven roots include source responsibilities, typed causes/
 codec failures, validated public acceptance reading and owned Worker completion.
 Tower admission uses Tokio PollSender plus the worker's short parking_lot gate.
 Engine owns the active pending original; its Drop transfers it to a per-worker
 handoff, read only after native completion. Shutdown retains typed JoinError and
 the original together. Caller callbacks/failed values run outside admission.
-Current core is locally qualified/unpublished/release-disabled; CP5 telemetry,
+Core lifecycle/resource PR417 is protected-merged with verified exact tree;
+the trace candidate is not yet merged. Current candidate has1643 physical product
+lines (+324net against signed1539509a) and597net new test/helper lines, within
+amended trace387/649 and1750whole-product budgets. Trace adds no root export,
+collector, exporter or runtime; feature-off queue/span fields remain omitted.
+Current core is unpublished/release-disabled; CP5 telemetry,
 native/performance qualification, documentation and delivery remain required.
 [Feature research](../docs/prds/command/research.md#cp1a-mechanical-extraction)
 records extraction provenance; later sections own typed outcome, forced-race,

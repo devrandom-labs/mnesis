@@ -16,6 +16,8 @@ use mnesis_store::{Decode, Encode, PersistedEnvelope, StoreError};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
+use crate::trace;
+
 pub const MAX_ACCEPTED: usize = 4096;
 const MAX_BYTES: usize = 4096;
 const EVENT_TYPE: &str = "controller.accepted.v2";
@@ -417,32 +419,34 @@ where
         state: &Self::State,
         decision: Decision<C, I>,
     ) -> Result<Option<Events<EventOf<Self>>>, Self::Error> {
-        // Engine has already checked integrity, retry identity and expected
-        // version on this exclusively owned root; no await can mutate it.
-        if state.receipts.len() >= MAX_ACCEPTED {
-            return Err(DecisionError::HistoryFull);
-        }
-        let facts = A::handle(&state.domain, decision.request.command.clone())
-            .map_err(DecisionError::Rejected)?
-            .into_iter()
-            .flatten()
-            .collect::<Vec<_>>();
-        if state.total(facts.len()).is_none() {
-            return Err(DecisionError::ReplayLimit {
-                maximum: A::MAX_REHYDRATION_EVENTS.get(),
-            });
-        }
-        let receipt = Receipt {
-            id: decision.request.id.clone(),
-            version: decision.version,
-            events: facts.len(),
-        };
-        Ok(Some(events![Record {
-            schema: 2,
-            request: decision.request,
-            receipt,
-            facts
-        }]))
+        trace::sync("decision", || {
+            // Engine has already checked integrity, retry identity and expected
+            // version on this exclusively owned root; no await can mutate it.
+            if state.receipts.len() >= MAX_ACCEPTED {
+                return Err(DecisionError::HistoryFull);
+            }
+            let facts = A::handle(&state.domain, decision.request.command.clone())
+                .map_err(DecisionError::Rejected)?
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
+            if state.total(facts.len()).is_none() {
+                return Err(DecisionError::ReplayLimit {
+                    maximum: A::MAX_REHYDRATION_EVENTS.get(),
+                });
+            }
+            let receipt = Receipt {
+                id: decision.request.id.clone(),
+                version: decision.version,
+                events: facts.len(),
+            };
+            Ok(Some(events![Record {
+                schema: 2,
+                request: decision.request,
+                receipt,
+                facts
+            }]))
+        })
     }
 }
 

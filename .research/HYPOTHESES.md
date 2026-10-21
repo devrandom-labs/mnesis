@@ -1899,3 +1899,166 @@ our tested complete owners, and require the entire staged tree to equal a8f66b7a
 before adding only this receipt. Normal signed git commit must execute the
 established all12-check hook. No compiler/test/runtime change, no new API or
 workload, no telemetry mixed into this focused PR. New head requires fresh CI.
+Tracing characterization fixture before edits: two callers with distinct local
+subscribers submit through one real processor while a delayed append holds the
+worker and the second call waits in its bounded queue. Drop the second response
+future; it must still commit once. A subsequent observed read/exact retry proves
+state/order and no new acceptance on replay. Capture library span parents,
+stages, typed outcomes and fields independently in both subscribers; worker span
+must not become request parent. Inspect complete library field/key sets, no
+payload/ID/error-string fields. All tasks/server work observed before assertions.
+Reuse the neutral Counter/Operation/Sum fixture by extracting its existing test
+owner into support/counter.rs; history/property workloads and record bytes stay
+unchanged. This adds two fixture/test owners under the existing300test-line
+budget; no product export or new runtime/framework. First feature-on run must
+fail for missing library observations after SUT behavior assertions, not setup.
+Tracing production budget refined BEFORE instrumentation: <=250 net lines (the
+PRD per-slice ceiling), five private Rust owners plus command manifest/lock.
+The actual characterization requires dispatcher propagation as well as Span
+ownership, a terminal outcome on interrupted call drop, worker lifetime separate
+from caller parents, and typed load/write/reconcile/decision stages. Those are
+proven distinctions, not a generic observer API. Preserve the300 test/helper
+budget and public root count11; no additional runtime, exporter or global setup.
+
+CP5 tracing parent integration before mutation: preserve the complete tracked
+binary diff, staged diff, status, all product/test hashes, untracked trace owner
+and existing stash list in cp5-observe-before-core-parent*. Create one named
+retained stash including untracked source, fast-forward786dce7130 to signed core
+a8f66b7af8c8e82a04d9de9f42b43e58d5660025, then apply that exact stash. Union
+append-only records; retain the incoming current inventory/PRD/gate evidence
+while preserving all novel tracing records and code. No added product behavior
+in this integration; prove every saved product/test hash identical afterwards.
+Do not remove the stash or touch older/user stashes. CP4 merge receipts belong
+in this next branch, leaving its reviewed/published head unchanged.
+
+Tracing cleanup qualification before edits: extend the test/helper ceiling from
+300 to450 lines, still below the PRD500-line per-slice limit. The real prior
+cross-subscriber panic requires separate observed abort/unwind/unpolled cleanup
+witnesses, not just successful requests. Capture span close callbacks and finite
+field VALUES as well as keys. Abort while a second subscriber's load is blocked,
+retain the native cancellation, observe all queued replies and span cleanup.
+Force a domain-handler panic under another subscriber and retain its exact73
+payload. No dropped native cause may be hidden by another registry panic.
+All selected stages/parents/outcomes and exact rows remain asserted; no global
+subscriber, arbitrary sleep, extra production API or gate waiver. Product stays
+within250net lines until a further justified pre-edit amendment.
+
+Tracing cleanup production control before mutation: save the exact private
+trace.rs and source hash; temporarily omit ONLY Scope's dispatcher-bound Drop,
+leaving its own span reference, two independent recording subscribers, bounded
+queue, server completion and all acceptance assertions unchanged. Run the
+original caller-context law once; require actual intended native registry panic/
+closed worker failure, not compilation or fixture setup. Restore the exact
+source regardless of outcome and verify its hash. Keep raw failed log and
+three distinct reviews. This control adds no retained product/test owner or API.
+
+Next telemetry slice must first characterize missing admission/queue/shutdown
+trace stages and stage outcomes; existing load includes replay, append includes
+decision/encode/persist/fold, not just adapter IO. Invalid requests currently
+validate before tracing and must be observed without adding another admission
+path. Metrics remain required; this partial tracing candidate is not complete.
+
+Metrics design constraints for the next experiment: use only the qualified
+optional metrics facade and supported dev-only registry storage after actual
+lock/dependency cost verification. A recording workload must force active,
+queued and reserved states and inspect NONRESETTING counters/gauges before and
+after cancellation/stop/abort. Native permits remain the authority; prepare
+queue observations outside Admission while owning capacity, before enqueue,
+so the worker cannot decrement a gauge that has not been incremented. Repeated
+readiness and clones must not duplicate reservation meters; a retained native
+permit stays counted until used/released even after worker exit. Recording
+callbacks and dropped send values remain outside the admission mutex.
+
+Engine.pending is the only unresolved-write authority. Derive gauge transitions
+from its existing Option changes and cleanup, not a second protocol flag. Count
+worker-reported outcomes and dropped reply sends as distinct observations;
+do not create a new response future wrapper or pretend a canceled caller proves
+rollback. A late commit observed while reconciling the retained exact pending
+request is a newly observed acceptance once, while ordinary replay must not
+emit acceptance. Advancing competitors without the original receipt are not
+acceptances. Existing earlier receipts must not clear unrelated pending writes.
+Test all these distinctions before instrumenting their owner.
+
+Shutdown duration needs the actual first stop time and observed completion,
+not a fabricated zero or just a successful join timestamp. If necessary extend
+the existing Lifecycle::Stopping variant with its first timestamp; do not add
+a parallel boolean/clock authority. Abort/panic have typed native completion
+causes; unknown timing is omitted with documented scope. Trace cleanup remains
+bound to its captured dispatcher on successful, unpolled, aborted and panic paths.
+No entered/default-dispatch guard may cross an await.
+
+CP5 trace-stage extension before edits: the saved237net-line tracing candidate
+qualifies context and terminal cleanup but lacks required admission/queue/shutdown
+and stage outcomes. Use that exact cp5-trace source patch as this experiment's
+rollback boundary. First extend the owning subscriber tests and preserve their
+red for missing required spans/outcomes. Extension budget<=150net production
+lines in trace/host/engine/model and<=120net test/helper lines; no new dependency,
+public root, runtime or framework. Combined tracing ceiling becomes387net product
+and569net tests, with whole-crate1750physical product-line checkpoint. This
+amends the underestimated initial250/450 before edits: the real cross-dispatch
+normal/abort/panic defect requires retained context/drop machinery, while the
+required operational stages still need implementation. Prefer supported tracing
+scope/instrumentation and existing Inbox Drop over custom Future or monitor.
+
+Admission spans end after actual native transfer/result outside Admission mutex;
+queue spans cover the prepared handoff through dequeue, with failed transfers
+explicitly classified rather than called admitted waits. Metrics later reserve
+native capacity before counting queue admission. Invalid requests get a definite
+request-outcome trace without reordering validation before ID clone or changing
+its typed failure. Existing shared request identity/data bytes stay untouched.
+Inbox owns worker trace; run explicitly marks normal completion, and Inbox Drop
+records actual shutdown cleanup on normal/abort/panic paths under the captured
+worker scope. The application still owns task observation; shutdown-span duration
+must not be claimed as stop-to-join duration. No arbitrary successful-zero timing.
+
+Invalid-request trace falsifier before adding its law: use the existing Counter
+with an application String identity, a4097-byte identity that must fail exact
+typed Bytes/WriteZero validation through BOTH submit and Tower, then a valid
+small identity accepted once. The latter also proves invalid Tower calls release
+their readiness permit. Assert actual decoded record/request/receipt/fact and
+all request/admission outcome fields without exposing IDs/payloads. Temporarily
+omit only invalid_request's trace body, require the owning law to fail for the
+missing two request observations after successful SUT checks, restore exact
+source/hash. Test/helper extension ceiling amended BEFORE edits from120to200
+net lines (combined trace649), still<=500for this focused extension; no extra
+production or dependency budget. Keep the earlier stage red and all other laws.
+
+Stage minimization before edits: Call.queue stores only trace lifetime and must
+not remain an Option flag when tracing is disabled. Gate that field and its
+four accesses with the same tracing feature; retain the existing default const
+constructor, all real native admission/worker state and all outcome semantics.
+No new behavior/budget/API/fixture. Feature-off contract/performance cannot be
+inferred from ZST Trace alone; measure actual disabled overhead in CP6.
+
+Subscriber-oracle minimization before edits: span IDs identify graph nodes; their
+numeric sorting must not supply creation order under task migration/reuse. Keep
+the existing ID lookup table but record callback creation order once in Capture,
+then assert ordered request operations from that fact. Keep all exact parent,
+stage/outcome/count/closure checks. This corrects the observation owner rather
+than relaxing order or sorting by expected operation. Same test budget/owner,
+no production API/runtime. Simplify admission's cfg body to return its phase
+directly while creating queue observation before native transfer; no linearization
+or typed result changes.
+
+Trace delivery preparation before mutation: save all tracked/index binary patches,
+status, source hashes and goal untracked evidence; retain one named stash, then
+fast-forward a8f66b7a to signed1539509a (upstream diff ONLY10HYPOTHESIS lines).
+Apply exact stash, union that one append conflict, prove all code/manifests/test
+hashes unchanged and retain all prior stashes. Source gate freezes this trace
+branch. Preserve current candidate source/raw logs in cp5-stages evidence before
+cleaning only this goal-owned Cargo target for full-gate headroom. No other
+project/user cache cleanup, source/API/workload change or gate bypass. Metrics
+work can proceed in a separate ordinary worktree while compilation stays serial.
+
+Trace PR base integration before mutation: PR417 has merged972d2a69 with tree
+exactly equal to signed1539509a (29d5408e), independently verified after fetch.
+The unpublished observe branch has no trace commit yet. After gate91717 is
+terminal, preserve all binary/index patches, status, ten source hashes, every
+untracked evidence file and the existing stash list. Retain a named full stash;
+rebase the zero-commit trace branch from HEAD1539509a onto origin/main972d2a69,
+then apply that exact retained stash. No published branch rewrite or archive
+mutation; original1539509a remains on the clean lifecycle branch. Verify all ten
+source hashes and all evidence/status, union only append-only record conflicts
+if any. Full Nix source must remain byte-identical to the qualified candidate.
+This updates the focused PR's ancestry without changing product behavior or
+inventing a parent-only commit. Normal signed hook and protected CI still apply.
