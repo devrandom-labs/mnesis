@@ -1,0 +1,1 @@
+{"schema":"1","fact":{"Accepted":{"command":{"id":1,"expected":null,"generation":1,"expires_at":18446744073709551615,"change":"Claim"},"receipt":{"id":1,"version":1,"acceptance":"Claimed"},"at":1}}}

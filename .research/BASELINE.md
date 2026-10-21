@@ -28,3 +28,14 @@ At baseline there were no production, dependency or public API changes.
 Postgres exported
 `PostgresStore`, `PostgresError` and `PgAllPos`; their existing capabilities and
 gaps are listed in the PRD. Per-slice and cumulative budgets belong there.
+
+## Command processor — 2026-10-21
+
+The Postgres material above is historical. Current source identity, dependency
+inventory, 27-test archived baseline and optimized duplicate measurements are
+owned by [command research](../docs/prds/command/research.md#executed-baseline).
+CP0's frozen source and executable consumers are recorded in its qualification
+section and evidence bundles. CP1's 32-test debug/release results are separate
+from the archived baseline; no real-database or new performance claim follows.
+The [command PRD](../docs/prds/command.md#cp6-qualify-adapters-recovery-and-performance)
+owns required backend/capacity measurements; these remain pending.

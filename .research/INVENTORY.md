@@ -44,3 +44,15 @@ caller stricter check interval; session outliving original store; connection-los
 profiles hidden from server socket check. No claims these were proven by initial
 native11 or mutation percentages. Two final fresh whole-repository audits still
 required before whole-adapter completion.
+
+## Command processor — 2026-10-21
+
+Current consumer layer: crates/command depends on kernel/store; adapters do not
+depend on it. Four private modules retain model/codec, engine and host ownership;
+six root responsibility types expose the public contract. Tower admission uses
+Tokio PollSender plus the worker's short parking_lot admission gate. The native
+JoinHandle preserves observed task completion. CP1 is unpublished/release-disabled.
+[Feature research](../docs/prds/command/research.md#cp1a-mechanical-extraction)
+records intentional source changes and actual verification. Erased errors,
+resource distinctions, forced races, accepted-fact decoding, instrumentation,
+real adapters and publication remain explicit CP2–CP9 work, not completed audits.

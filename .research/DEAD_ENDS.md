@@ -51,3 +51,12 @@ phase-specific native test FAIL26.422s despite earlier250green. Correct source
 maps drain errorsSqlx, preserves literalCOMMIT mapper. New clientCOMMIT fault
 observes actual frontend boundary and uses native server error, not fakeSSI or
 an executed serverCOMMIT. Prior250green remains historical, not finalproof.
+
+CP1 visibility2026-10-21: restricting private top-level module types/constants
+with pub(super) triggers the repository's denied redundant_pub_crate lint (seven
+actual diagnostics). The private module plus selective root pub use already
+restricts external visibility. Retain that supported pattern; restrict member
+methods/fields and nested Serde hooks where meaningful. No lint exemption or
+module exposure. The earlier visibility finding was too broad; no external API
+leak existed at those seven declarations. Raw cp1-gate-reviewed.log retained;
+zero test bodies executed in that failed gate.

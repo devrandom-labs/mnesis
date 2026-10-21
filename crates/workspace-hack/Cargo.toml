@@ -25,9 +25,9 @@ form_urlencoded = { version = "1" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", features = ["sink"] }
 futures-io = { version = "0.3" }
-futures-sink = { version = "0.3", default-features = false, features = ["std"] }
+futures-sink = { version = "0.3" }
 futures-task = { version = "0.3", default-features = false, features = ["std"] }
-futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
+futures-util = { version = "0.3", features = ["channel", "io", "sink"] }
 getrandom = { version = "0.4", default-features = false, features = ["std", "sys_rng"] }
 hashbrown = { version = "0.16" }
 hyper = { version = "1", features = ["client", "http1", "server"] }
@@ -49,6 +49,7 @@ smallvec = { version = "1", default-features = false, features = ["const_new", "
 sqlx-core = { version = "0.9", features = ["_rt-tokio", "_tls-rustls-ring-native-roots", "any", "json", "migrate", "offline"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
+tower = { version = "0.5", default-features = false, features = ["log", "make", "timeout", "util"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
@@ -70,9 +71,9 @@ form_urlencoded = { version = "1" }
 futures = { version = "0.3", default-features = false, features = ["async-await", "executor"] }
 futures-channel = { version = "0.3", features = ["sink"] }
 futures-io = { version = "0.3" }
-futures-sink = { version = "0.3", default-features = false, features = ["std"] }
+futures-sink = { version = "0.3" }
 futures-task = { version = "0.3", default-features = false, features = ["std"] }
-futures-util = { version = "0.3", default-features = false, features = ["async-await-macro", "channel", "io", "sink"] }
+futures-util = { version = "0.3", features = ["channel", "io", "sink"] }
 getrandom = { version = "0.4", default-features = false, features = ["std", "sys_rng"] }
 hashbrown = { version = "0.16" }
 hyper = { version = "1", features = ["client", "http1", "server"] }
@@ -96,6 +97,7 @@ sqlx-core = { version = "0.9", features = ["_rt-tokio", "_tls-rustls-ring-native
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
+tower = { version = "0.5", default-features = false, features = ["log", "make", "timeout", "util"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-core = { version = "0.1" }
 trybuild = { version = "1", default-features = false, features = ["diff"] }
