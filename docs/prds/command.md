@@ -230,6 +230,14 @@ Do not classify every kernel error as proof that nothing was persisted.
   settle or become uncertain. Await the task and retain its shutdown report.
   Dropping a task handle, aborting a task and stopping normally have different
   consequences; document and test them with Tokio's supported primitives.
+
+  The selected completion owner is `Worker`, whose future always returns a
+  `Shutdown` report after observing the native Tokio task. The report retains
+  both its original `JoinError` and any unresolved original request. Taking the
+  task cause leaves request/stream custody intact for borrowed `resume`. Native
+  `JoinHandle<Shutdown>` lost the report on abort/panic; the recorded late-commit
+  regression justifies this additional public type. Dropping `Worker` detaches,
+  so applications keep and await it; a canceled borrowed wait preserves ownership.
 - Resume validates stream scope and preserves the borrowed report on failure.
   Its scope does not prove database identity. Selecting the same authoritative
   store/history is a caller obligation unless a concrete supported capability
@@ -604,7 +612,7 @@ per slice, including untracked files. Explain a required extension before edits.
 | CP7 | README/rustdoc/examples, existing CI/fuzz/package/stability owners | At most 14 files and 500 authored lines, plus moved corpus/fixtures. Generated lock changes measured separately. |
 | CP8–CP9 | Delivery records, release-generated files, server consumer and archive status | Focused PRs; server at most 10 files and 350 new consumer/config lines. No mobile changes or destruction of the archive. |
 
-Cumulative checkpoint: target at most 1,600 production lines and ten root-exported
+Cumulative checkpoint: target at most 1,600 production lines and eleven root-exported
 types in the new crate. Approved dependency scope adds the existing Tower service
 contract and optional workspace tracing, plus one qualified optional metrics
 facade and the existing Tokio `PollSender` helper (`tokio-util`) to the source's

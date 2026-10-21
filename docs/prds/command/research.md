@@ -1648,3 +1648,274 @@ there is no unique incoming fact/source to discard. Keep the testedb9 records
 and verify whole-tree diff0 before this merge receipt. No product/test/Nix change.
 Normal signed commit hook is required again; protected integration is not a
 substitute for final current-head PR/CI. All original red/unknown evidence retained.
+CP5 first lifecycle characterization run1600d4e7-1539-4bef-9f99-e861096c6634:
+1PASS1FAIL,27skipped (26filtered/one original ignored),0.058s,build30.01s. Three reviews: (1) controlled first
+append is held while a second request queues and a third readiness waiter installs
+a synchronous stop callback. Dequeue invokes stop, but the queued command still
+returns success/receipt2: an actual stop/dequeue contract defect. All server work
+and the worker join finish before the failing assertion. The proposed ready-permit
+close deadlock did not reproduce: its bounded same-binary child passes. (2) two
+selected real recovery tests run through Nix; no database. Child is explicitly
+selected, waited and its status checked; no detached process. Raw cp5-lifecycle-
+before.log. (3) the failing oracle is actual Ok(Receipt{id:2,version:2,events:1})
+where Closed is required, after exact wake accounting and successful first write;
+no setup/compiler failure. The passing close probe is evidence against that
+specific hypothesis, not proof that all readiness callbacks are safe. Inspect
+PollSender's actual close/reserve behavior before retaining or changing locking.
+Correction after source review: that initial passing close probe never executed
+its callback. PollSender::close deliberately retains a ReadyToSend permit; the
+probe did not assert callback entry and cannot disprove the locking hypothesis.
+Strengthen the witness before rerun: first waiter is Acquiring with capacity
+already assigned but not polled again; a second waiter has the stop callback.
+Canceling the first acquired future on closed readiness releases capacity and
+must synchronously wake the second. Assert exactly one callback in the child,
+retain boundary markers, finite parent deadline and kill+wait. No product change.
+CP5 strengthened characterization runs2FAIL/27skipped (26filtered/one original
+ignored) in2.060s. Three reviews:
+(1) stop/dequeue again returns durable receipt2 after stop; the ready cancellation
+child reaches both `releasing reserved capacity` and `entered stop callback`, then
+fails to finish within2s. Both violate required lifecycle contracts. (2) actual
+Nix recovery binary executes both selected tests with no fail-fast, no database;
+parent kills and waits the deadlocked child. All delayed append work and worker
+join complete in the dequeue witness before its assertion fails. Raw cp5-lifecycle-
+before-strengthened.log. (3) assigned-but-unpolled first waiter and second callback
+waiter force the real PollSender cancellation boundary. Exact receipt/wake count
+reject the dequeue defect; captured markers distinguish callback deadlock from
+setup/compile delay. The initial passing probe is explicitly retracted as weak
+evidence. No product code or assertion was weakened; fixes remain unimplemented.
+CP5 first repair targeted runb53c473f-2c7c-4cf2-92fa-3641625a2d2d passes2/2,
+27skipped (26filtered/one original ignored),in0.096s,build18.41s. Three reviews: (1) both original red boundaries
+now pass: assigned readiness cancellation executes exactly one reentrant stop
+callback and child completes; stop at dequeue rejects the queued request, retains
+only original receipt/row1 and observes the delayed operation/worker completion.
+(2) actual Nix recovery binary, same strengthened laws/selection and bounded child
+cleanup; in-memory only. Raw cp5-lifecycle-after.log. (3) no test/timeout was
+weakened. Readiness polling/closed-reservation release and user-value drops occur
+outside Admission; enqueue remains serialized with stop, and a final watch-value
+startup check rejects the dequeued call. Copy that value before rejecting the
+call so no watch borrow can span a user response wake. Product delta remains
+under50lines; full owner/lint/optimized and final gates remain required. Failed
+task custody and telemetry are not implemented or implied by these two fixes.
+CP5 first repair full debug owner run passes36 cases, one original ignored,
+in1.464s. Three reviews: (1) both forced lifecycle regressions and every baseline
+typed outcome, exact identity, late append, fold-after-commit and history boundary
+law pass. (2) all four package binaries run without filter via Nix, original256
+serial generated histories unchanged; this branch is based on CP2 and has not
+yet integrated CP3's stronger races or CP4's public reader. No native database.
+Raw cp5-lifecycle-debug.log. (3) both prior actual failures remain retained, and
+the child asserts exactly one callback, bounded completion and observed cleanup;
+dequeue asserts Closed plus original durable row/receipt and one wake. Enqueue
+still shares the stop gate. No source/error/acceptance format changes outside
+host.rs. Optimization/lint/full gate and remaining CP5 acceptance still required.
+CP5 strict Clippy initially rejects test-only similar binding names, Context held
+across the child join and explicit writeln(stdout). Preserve every assertion:
+make readiness setup synchronous, return the original task to the async child
+join, use descriptive notification names and write boundary-marker bytes through
+Write. No lint waiver/level change. All-target/all-feature Clippy passes1.20s.
+CP5 optimized full owner suite then passes36/36,one original ignored,in0.487s.
+Three reviews: (1) the same callback/dequeue regressions and all retained outcome,
+identity/uncertainty/fold/capacity laws pass under optimized execution; (2) all
+four owner binaries run without filter through Nix, unchanged256 serial generated
+histories, no database; raw cp5-lifecycle-release.log. (3) pure synchronous setup
+preserves assigned reservation ordering and exact one-callback assertion before
+the observed join; marker wording is diagnostic only. No timeout/workload/oracle
+was removed. This remains a focused CP5 repair, not full CP5 or delivery completion.
+Focused red/green/source evidence cp5-lifecycle.tar.gz SHA256:
+7a7470a31ee631e09b1aa8a03f036d396b41dc04f1a980828ffb309b24d6b9d5.
+Completion-owner source comparison in SOURCES confirms native JoinHandle and
+AbortOnDropHandle preserve JoinError but return no Shutdown on failure. The
+existing engine-only pending request would be dropped. A shared custody candidate
+remains unimplemented; do not claim observed terminal cause alone solves handoff.
+CP5 abort-custody characterization actually fails1/1 in0.023s (29excluded),
+cp5-custody-before.log. Three reviews: (1) actual delayed append is entered,
+worker abort and bounded native join observed, caller receives Uncertain for the
+original ID, delayed server work is released/observed, and exactly one complete
+original request is committed before the missing-report assertion fails on
+JoinError::Cancelled. (2) actual single recovery test through Nix, two-second
+bounds and real InMemoryStore with controlled delayed operation, no database;
+no unrelated suite credit. (3) source still native JoinHandle<Shutdown> plus the
+previous independent lifecycle repair. The red is specifically report loss,
+not setup, timeout, unknown commit or a stranded server task. No product change
+to custody yet; original request/report must survive alongside typed task cause.
+First custody candidate selection fails compilation before any test executes:
+one closed-admission test still unwraps the old nested native result. Three
+reviews: (1) the new Worker must return Shutdown on every observed outcome, with
+typed task cause inside it; (2) zero actual test bodies, no green/runtime credit;
+(3) update that consumer to assert cause absence explicitly, preserving its
+bounded completion and unresolved-request assertion. No product workaround or
+weakened test. Raw cp5-custody-after.log retains the exact compiler diagnostic.
+Custody selection9b9327ec-81c6-4679-9370-2a4b17c78f5b passes4/4 in0.022s,
+26excluded. Three reviews: (1) abort returns the exact original plus Cancelled;
+reserved admission closes on pre-poll abort; panic retains payload73; committed
+fold panic retains payload FoldFailure(7), original request and single durable
+record across failed reconstruction/resume. (2) four actual recovery cases in
+Nix, no database, unchanged bounded observations and delayed operation cleanup.
+(3) native causes are asserted, not synthesized Closed; helpers now explicitly
+reject unexpected task causes. Engine moves its one owned pending request on
+Drop, and Worker reads the slot only after native join. No per-request shared
+allocation/lock or detached monitor. Full owners/lint and two more custody edges
+(canceled borrowed wait and resumed pre-poll abort) remain before retention.
+Full custody debug owner suite passes37/37, one original ignored, in1.487s.
+Three reviews: (1) all previous lifecycle/typed-outcome/late-commit/identity laws
+plus exact abort custody pass; polling and abandoning a mutable Worker wait
+retains the report, and a resumed worker aborted before first poll retains the
+same original. (2) actual four package targets through Nix, no filter, existing
+256 generated serial histories, no database. CP3/CP4 are not yet integrated here.
+(3) normal completion helper explicitly asserts cause absence; abort/panic cases
+assert native cancellation or exact panic payload and full original request,
+single stored record, state, unchanged receipt and handler count on resumption.
+No weaker workload, deadline or assertion. Raw cp5-custody-debug.log.
+Strict Clippy rejects only missing const on take_cause; make the getter const,
+without a waiver. Lint retry and optimized owner suite remain required.
+Strict all-target/all-feature Clippy passes0.61s with the const correction and no
+waiver. Optimized owner suite passes37/37,one original ignored,in0.489s. Three
+reviews: (1) all lifecycle/custody/cause/reconciliation/capacity laws pass under
+optimization, including both original reentrant/dequeue reds and the new abort
+red with canceled borrowed wait/resumed pre-poll abort; (2) all four package
+binaries in Nix, no filter, original256 serial histories, no database service.
+(3) exact original request, native cancellation/panic payloads, full stored
+acceptance, receipts, state and observed server/task completion remain asserted.
+No removed workload, timeout or cause. Raw cp5-custody-release.log. This source
+still lacks CP3/CP4 integration, remaining CP5 acceptance and full delivery gates.
+Custody controls complete: baseline4PASS/34excluded0.028s, two generated mutants
+caught,0missed/timeout/unviable,23s campaign. Three distinct reviews for EACH of
+the three actual test invocations: (1) baseline exercises four abort/panic/fold
+owners; Engine Drop removal fails exact original equality (None versus request
+id1/expectedNone/command7), while cause getter removal fails native cancellation
+observation. (2) all-feature Nix cargo-mutants/nextest, one test thread, baseline
+four cases; each fail-fast mutant executes1FAIL/4selected,three not run,34excluded,
+0.009s. No native database or fabricated credit for unexecuted cases. (3) inspect
+actual source diffs and first failures: both fail at custody/cause oracles after
+observed delayed operation cleanup, not compilation, setup or timeout. No source
+mutations retained; full original assertion/workload/deadline preserved. Exact
+commands, diffs and raw results in cp5-custody-controls/mutants.out.
+Tooling limitation: initial cargo external-plugin lookup selected a stale host
+binary and failed loading its removed libiconv before any metadata or tests.
+The repository Nix cargo-mutants27.1.0 binary ran directly instead, without any
+host install or tooling change. That failed lookup earns no test credit.
+Focused custody red/green/controls and exact source evidence is retained in
+cp5-custody.tar.gz SHA256
+9e94a8b4a954d1d288ee52c0d96fd5ed524282c1c5f0c10b8e0e8598587b55d8.
+No full gate, merged delivery, telemetry or performance completion is claimed.
+CP5 resource selection first fails compilation before any test executes: nested
+matches guard attempts to move serde_json::Error out of the borrowed outer guard.
+Three reviews: (1) retain the exact definite StoreError::Encode/Bytes/WriteZero
+oracle and no-row/ID-reuse obligations; (2) six selected owners,zero actual test
+bodies,no database and no green credit; (3) borrow the typed inner cause in the
+assertion rather than moving it. No SUT, workload, timeout or assertion weakening.
+Raw cp5-resources-first.log retained. All new resource laws remain unqualified.
+CP5 resource selectionfa11f08a-8225-4473-a68e-8a11364a9653 passes6/6 in0.024s,
+35excluded. Three reviews for the parent invocation and EACH child execution:
+(1) actual bounded request encoding checks4095/4096/4097 for ASCII/UTF8/JSON escapes;
+public processing distinguishes valid4KiB request from oversized whole acceptance,
+asserts definite typed Encode/Bytes/WriteZero,zero rows, reusable ID, original
+receipt, exact retry, state, complete raw acceptance and handler count; oversized
+input invokes no handler. QueueMAX-1/MAX and1ns/MAX-1ns/MAX deadlines execute
+actual immediate store work/observed shutdown. Timer-disabled runtime preserves
+exact native Tokio panic/Uncertain/zero rows/closed admission; original reentrant
+callback law still asserts one callback. (2) six selected cases/four binaries
+through Nix; both child harnesses independently assert exactly one passed case
+and bounded2s kill+wait cleanup. No database/no unselected-law credit. (3) compiler
+borrow-only assertion correction preserved exact typed source; all SUT source,
+workloads, deadlines and original assertions unchanged. Resource addition149net
+test lines within150 budget; no product/API/dependency change for this slice.
+Raw cp5-resources-first/fixed.log retained. Full owners/lint/optimized qualification,
+CP3+CP4 integration, telemetry and overall delivery remain open.
+CP5 complete debug owner suite now40PASS/one original ignored,in1.528s. Three
+reviews for this invocation and both child executions: (1) all new byte/runtime/
+queue/deadline laws and every prior identity/uncertainty/lifecycle/fold/capacity
+law pass, including the original actual reds; (2) four package binaries,no filter,
+existing256 serial generated histories and exactly one passed test per bounded
+child,no database. (3) raw cp5-resources-debug.log; assertions retain exact typed
+causes, full persisted records/state/receipts/originals and handler counts; no
+reduced workload/limit/timeout. CP3/CP4 still not integrated here. Strict lint
+rejects unchecked Duration::MAX subtraction in the new boundary fixture. Use
+checked_sub().unwrap() on the known positive test boundary, without changing its
+value or adding a waiver. Current resource delta150net lines stays within budget.
+CP5 current all-target/all-feature strict Clippy passes0.60s after checked test
+Duration arithmetic; no waiver or case/value change. Timer-disabled behavior is
+now observed/documented: start only checks a Tokio handle, while the first store
+operation preserves the exact native disabled-timer panic in Shutdown and leaves
+caller uncertainty conservative. Applications must enable time and own runtime
+lifetime. No catch-unwind/probe/global-hook/runtime wrapper is added.
+All targeted and full owner laws remain in-memory qualification, not native
+persistence or performance evidence. Optimized current-owner run is pending.
+CP5 current optimized owner suite passes40/40,one original ignored,in0.476s.
+Three reviews for the invocation and both bounded children: (1) all resource,
+custody, exact-identity/reconciliation/ordering/cancellation/fold/capacity laws
+remain, including exact native disabled-timer payload and reentrant callback;
+(2) all four package binaries through Nix,no filter,256 serial histories and one
+actual passing child case each,no database service; (3) checked Duration boundary
+has the same value, no changed SUT behavior or weaker assertion/workload/deadline.
+Raw cp5-resources-release.log. Resource150net test lines within budget. Runtime
+precondition docs reflect the observed behavior; remaining CP5 telemetry and
+CP3+CP4 integration/full gates/merged delivery are not claimed.
+Resource evidence cp5-resources.tar.gz SHA256:
+9ef5dfac00207c9bd7e4a50d550baa5fc7839bcd3fc3778fe0c358773206dfb6.
+After retained raw/source evidence, only this goal-owned Cargo target was cleaned
+(2GiB) so primary C4 can retry its unchanged full gate with adequate headroom.
+CP5 now fast-forwards to signed CP4 integration786dce713004cf90e8e3c943c0f7ee6eb3d38425
+(draft PR416). Named retained stash/binary patch/status/hashes preserve all CP5
+work and older/user stashes. Union four append-only histories, current progress
+snapshot, and export BOTH Acceptance/AcceptanceCodec and Worker. Engine/host/
+README exactly equal saved CP5; incoming model/manifest/reader/fixtures unchanged.
+Recovery/history/unit differences are reviewed incoming CP3/CP4 laws, including
+correct independent gates and golden/corruption/physical checkpoint contracts.
+No behavior/workload/source loss or new product addition. Combined source still
+needs actual owner/lint/optimized/full gates before focused lifecycle delivery.
+CP5 integrated full debug owner suite passes45/45,one original ignored,in1.409s.
+Three reviews for the invocation and both bounded child executions:
+(1) CP4 golden/reverse bytes/public projection/checkpoint/evolution/corruption
+laws and CP3 corrected192fixed/256concurrent/256serial workloads now coexist
+with all CP5 typed custody/cancellation/reentrancy/limits/runtime laws; original
+panic payloads and unresolved originals remain checked through reconstruction.
+(2) all five package binaries through Nix,no filter; each child verifies exactly
+one passing case and bounded observed cleanup,no database service. (3) core
+engine/host/README match saved pre-integration CP5; parent model/reader/manifest/
+fixtures remain unchanged; lib preserves both public read roots and Worker.
+Only parent laws arrived; no weakened source assertion, workload, limit, filter
+or deadline. Raw cp5-integrated-debug.log. Lint/optimized/full gates and current
+focused delivery remain; CP5 telemetry is required and not implemented yet.
+Integrated CP5 strict all-target/all-feature Clippy passes7.82s without a waiver.
+This compiles the combined reader/lifecycle/resource targets, not native DB or
+runtime coverage. The matching optimized owner suite is now running; no green
+credit before its actual verdict. Full source gates and required telemetry remain.
+Integrated CP5 optimized full owner suite passes45/45,one original ignored,
+in0.502s. Three reviews for this invocation and both bounded child executions:
+(1) all combined public-reader/format/projection, deterministic concurrency,
+typed uncertainty/failure custody, reentrancy, cancellation and resource/runtime
+laws pass with original payloads/receipts/state/count/teardown assertions;
+(2) all five package binaries in Nix,no filter,192fixed/256concurrent/256serial
+workloads; each child exactly one actual passed case,no database. (3) incoming
+parent laws and saved core changes coexist without weakened selection, limits,
+deadlines, assertions or dropped causes. Raw cp5-integrated-release.log. No
+feature telemetry/native/full-source/protected-delivery claim; those remain.
+Final integrated owner evidence cp5-integration.tar.gz SHA256:
+45fe643488fde25e60ecfcc9c2cc464109de9e3b85faa3c93f346e74a2eb3d13.
+Only this goal-owned Cargo target cleaned after evidence(2GiB) to keep adequate
+space for the full source gate; other/user caches untouched. All45 laws and
+original negative-control evidence stay retained. Package publication disabled.
+CP5 core full nextest2a80b609-3d61-4332-85ae-af46978998c2 passes1639/1639,
+15slow/five original exclusions/143binaries,in458.854s. Three reviews for this
+invocation and each bounded child: (1) all45 command laws, original reader/
+checkpoint/format/typed uncertainty/custody/lifecycle/resource cases, and complete
+192fixed/256concurrent/256serial workloads remain; original failure assertions
+and native payloads/whole records/receipts/state/cleanup unchanged. (2) actual
+full Nix workspace invocation,no database service/no native command credit.
+(3) ten relevant source/test owners byte-match actual1pmd3kfbay8my774k4j31yy2iy8q9ak8-source;
+no source, workload, filter, deadline, count or error weakening. Crate README is
+filtered out of that source, so no compiled/packaged README claim; its separate
+saved-work equality is already verified. Packaging remains CP7. All12 current
+host outputs pass/rooted cp5-core-check-*. Normal signed hook/current PR/CI still
+required; telemetry is NOT in this core source.
+Each of three fresh foundation replays in the gate also receives three reviews:
+(1) unchanged CBOR/value/wire decoder oracles,not command fuzz qualification;
+(2)2/1/1PASS,1.00s each,zero ignored/filtered,no database; (3) actual same corpus/
+source/selectors, no new fuzz runtime campaign or unexecuted credit. Complete
+raw cp5-core-full-gate.log retained. No failed gate or old limitation erased.
+Core gate evidence cp5-gates.tar.gz SHA256:
+6c06675547b52701561d282971a44c7f04e075ba9f7668792d4a651ed976c60e.
+Public inventory/PRD now records the already-preregistered eleventh root, Worker,
+from the actual abort/panic report-loss counterexample. Native join preserved
+its cause but could not return the unresolved report simultaneously; no claim
+that the native error itself was lost. Source/data/runtime scope is unchanged.

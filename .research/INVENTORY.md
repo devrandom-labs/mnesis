@@ -48,11 +48,16 @@ required before whole-adapter completion.
 ## Command processor — 2026-10-21
 
 Current consumer layer: crates/command depends on kernel/store; adapters do not
-depend on it. Four private modules retain model/codec, engine and host ownership;
-six root responsibility types expose the public contract. Tower admission uses
-Tokio PollSender plus the worker's short parking_lot admission gate. The native
-JoinHandle preserves observed task completion. CP1 is unpublished/release-disabled.
+depend on it. Three private modules/four source files retain model/codec, engine
+and host ownership. Eleven roots include source responsibilities, typed causes/
+codec failures, validated public acceptance reading and owned Worker completion.
+Tower admission uses Tokio PollSender plus the worker's short parking_lot gate.
+Engine owns the active pending original; its Drop transfers it to a per-worker
+handoff, read only after native completion. Shutdown retains typed JoinError and
+the original together. Caller callbacks/failed values run outside admission.
+Current core is locally qualified/unpublished/release-disabled; CP5 telemetry,
+native/performance qualification, documentation and delivery remain required.
 [Feature research](../docs/prds/command/research.md#cp1a-mechanical-extraction)
-records intentional source changes and actual verification. Erased errors,
-resource distinctions, forced races, accepted-fact decoding, instrumentation,
-real adapters and publication remain explicit CP2–CP9 work, not completed audits.
+records extraction provenance; later sections own typed outcome, forced-race,
+format/reader and lifecycle/resource evidence. Local qualification is not merged,
+native or published delivery. No normal exporter SDK or new runtime is selected.

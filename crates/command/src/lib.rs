@@ -9,5 +9,5 @@ mod engine;
 mod host;
 mod model;
 
-pub use host::{CommandProcessor, Limits, Shutdown};
+pub use host::{CommandProcessor, Limits, Shutdown, Worker};
 pub use model::{Acceptance, AcceptanceCodec, Cause, CodecError, Error, Receipt, Request};
