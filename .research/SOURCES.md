@@ -547,3 +547,29 @@ Primary facilities verified2026-10-19:
 - https://www.postgresql.org/docs/18/sql-prepare.html: force_generic_plan selects
   a parameter-independent plan; EXPLAIN EXECUTE displays it. Reset the setting
   after diagnostic replay so measured application operations retain defaults.
+
+## Command processor planning — 2026-10-21
+
+Canonical source assessment, exact locks, alternatives and source limitations:
+[command research](../docs/prds/command/research.md#primary-sources-and-alternatives).
+Inputs: untracked Labcast controller fingerprint manifest SHA-256
+1e4be80cc62b9c814793456cea53baf5fae1d583d060dfb787ef3adac5fdff6a;
+Mnesis27de3b4a4aad59909ffaccdf6fa83e8b256ccca6. Primary references include Axon
+command dispatching, Brighter's implementation repository, Rust cqrs-es0.5.0,
+Tokio1.53.1 docs/locked source, and Stripe's explicit idempotency contract.
+They establish terminology/alternative semantics, not imported dependencies.
+The existing Mnesis contracts remain the implementation authority. Detailed
+findings, source paths and fresh baseline logs live once in the feature record.
+
+Tower follow-up, accessed 2026-10-21: published tower-actor 0.2.0 and its recorded
+commit 6416fa4b1165356cf06ffb4d75851725734b2a21; source, actual dependency graph,
+Mnesis 0.4/0.5.3 executions and limitations in docs/prds/command/tower.md.
+Tower Service/tracing/metrics/OpenTelemetry selection: exact existing pins,
+primary documentation and remaining qualification in the command research record,
+section "Required Tower interface and observability". Accessed 2026-10-21.
+CP0 primary source checks 2026-10-21: registry mnesis-command sparse-index404;
+metrics0.24.6 downloaded manifest MIT/Rust1.71.1, actual optional graph includes
+rapidhash4.5.1; upstream commit043577f9914223e3e2d7165d5361e7e78ad75ed2 dated
+2026-10-16. Tokio-util0.7.20 PollSender's locked source and Tower0.5.3 contract
+establish handle-owned readiness reservations. Detailed decisions/evidence in
+command/research.md, CP0 seams. No ownership reservation or advisory claim.
