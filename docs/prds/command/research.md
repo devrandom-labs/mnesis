@@ -1639,3 +1639,12 @@ Final CP4 full-gate evidence cp4-gates.tar.gz SHA256:
 cafc8497f1efbe785012a9df649b3b696bc0b8a8e7745868555cd50dc42140eb.
 Includes exact original red, unchanged green retry, source hashes and specific
 artifact-retirement receipts. Nextest runb938c04e-b0da-4195-996c-674959d70f4e.
+CP4 feature commitb9b89ab80329a79b2844527cb6e9a598c1e39803 is signedG, tree
+42280d43374fefa192c33c3536738659dff4ecde; normal pre-commit flake gate passes
+all12 cached outputs (no new runtime credit). Integrating protected98abf662
+produces six record conflicts because the C3 commit was squashed. Prove incoming
+98abf662 tree equals already-importedc3a16f3c ENTIRELY and c3 is a parent ofb9;
+there is no unique incoming fact/source to discard. Keep the testedb9 records
+and verify whole-tree diff0 before this merge receipt. No product/test/Nix change.
+Normal signed commit hook is required again; protected integration is not a
+substitute for final current-head PR/CI. All original red/unknown evidence retained.
