@@ -12,7 +12,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use super::{
-    Adapted, Codec, CodecError, Decision, DecisionError, Mismatch, Record, Request, State,
+    Acceptance, AcceptanceCodec, Adapted, Codec, CodecError, Decision, DecisionError, Mismatch,
+    Record, Request, State,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -48,6 +49,7 @@ impl Handle<u8> for Fixture {
 }
 type TestState = State<Fixture, u8, NonZeroU64, 0>;
 type TestRecord = Record<u8, NonZeroU64, Fact>;
+type ReadAcceptance = Acceptance<u8, Fact>;
 
 fn accepted() -> Value {
     json!({"schema":2,"request":{"id":1,"expected":null,"command":7},
@@ -61,12 +63,20 @@ fn envelope(kind: &str, value: &Value) -> PersistedEnvelope {
     )
 }
 fn raw_envelope(kind: &str, payload: &[u8], schema: SchemaVersion) -> PersistedEnvelope {
+    versioned_envelope(Version::INITIAL, kind, payload, schema)
+}
+fn versioned_envelope(
+    version: Version,
+    kind: &str,
+    payload: &[u8],
+    schema: SchemaVersion,
+) -> PersistedEnvelope {
     let mut bytes = kind.as_bytes().to_vec();
     let boundary = u32::try_from(bytes.len()).unwrap();
     bytes.extend_from_slice(payload);
     let end = u32::try_from(bytes.len()).unwrap();
     PersistedEnvelope::try_new(
-        Version::INITIAL,
+        version,
         bytes.into(),
         schema,
         0..boundary,
@@ -77,17 +87,80 @@ fn raw_envelope(kind: &str, payload: &[u8], schema: SchemaVersion) -> PersistedE
 }
 
 #[test]
+fn original_writer_records_replay_and_new_writes_preserve_rollback_bytes() {
+    let mut root = AggregateRoot::<Adapted<Fixture, u8, NonZeroU64, 0>>::new("golden".into());
+    for (number, command, count, bytes) in [
+        (
+            1,
+            7,
+            1,
+            include_bytes!("../fixtures/counter-v2.json").as_slice(),
+        ),
+        (
+            2,
+            0,
+            0,
+            include_bytes!("../fixtures/noop-v2.json").as_slice(),
+        ),
+    ] {
+        let version = Version::new(number).unwrap();
+        let decoded: ReadAcceptance = AcceptanceCodec
+            .decode(&versioned_envelope(
+                version,
+                "controller.accepted.v2",
+                bytes,
+                SchemaVersion::INITIAL,
+            ))
+            .unwrap();
+        let original = Request {
+            id: NonZeroU64::new(number).unwrap(),
+            expected: Version::new(number - 1),
+            command,
+        };
+        let receipt = super::Receipt {
+            id: original.id,
+            version,
+            events: count,
+        };
+        assert_eq!(decoded.request(), &original);
+        assert_eq!(decoded.receipt(), &receipt);
+        assert_eq!(
+            decoded.facts(),
+            if count == 0 { &[][..] } else { &[Fact(7)][..] }
+        );
+        assert_eq!(decoded.name(), "controller.accepted.v2");
+        let decision = Decision {
+            request: original.clone(),
+            version,
+        };
+        let written =
+            Adapted::<Fixture, u8, NonZeroU64, 0>::handle(root.state().unwrap(), decision)
+                .unwrap()
+                .unwrap();
+        let record = written.first();
+        assert_eq!(Codec.encode(record).unwrap().as_ref(), bytes);
+        root.replay(version, &decoded.0).unwrap();
+        assert_eq!(root.version(), Some(version));
+        assert_eq!(
+            root.state().unwrap().receipt(&original).unwrap(),
+            Some(receipt)
+        );
+        assert_eq!(root.state().unwrap().domain, ValueState(7));
+        assert!(root.state().unwrap().integrity.is_ok());
+    }
+}
+
+#[test]
 fn invalid_acceptance_metadata_is_rejected_at_the_codec_boundary() {
     let original = accepted();
-    let decoded: TestRecord = Codec
+    let decoded: ReadAcceptance = AcceptanceCodec
         .decode(&envelope("controller.accepted.v2", &original))
         .unwrap();
-    let replayed = TestState::initial().apply(&decoded);
+    let replayed = TestState::initial().apply(&decoded.0);
     assert_eq!(replayed.domain, ValueState(7));
     for (path, replacement) in [
         (vec!["schema"], json!(1)),
-        (vec!["request", "id"], json!(0)),
-        (vec!["request", "expected"], json!(0)),
+        (vec!["schema"], json!(3)),
         (vec!["request", "expected"], json!(1)),
         (vec!["receipt", "id"], json!(2)),
         (vec!["receipt", "version"], json!(2)),
@@ -99,13 +172,92 @@ fn invalid_acceptance_metadata_is_rejected_at_the_codec_boundary() {
             target = &mut target[key];
         }
         *target = replacement;
-        let result: Result<TestRecord, _> =
-            Codec.decode(&envelope("controller.accepted.v2", &changed));
-        assert!(result.is_err(), "accepted invalid record: {changed}");
+        let result: Result<ReadAcceptance, _> =
+            AcceptanceCodec.decode(&envelope("controller.accepted.v2", &changed));
+        assert!(
+            matches!(result, Err(CodecError::Acceptance)),
+            "wrong result: {changed}"
+        );
     }
-    let legacy: Result<TestRecord, _> =
-        Codec.decode(&envelope("controller.accepted.v1", &original));
-    assert!(legacy.is_err());
+    for kind in ["controller.accepted.v1", "controller.accepted.v3", "other"] {
+        let unsupported: Result<ReadAcceptance, _> =
+            AcceptanceCodec.decode(&envelope(kind, &original));
+        assert!(matches!(unsupported, Err(CodecError::Envelope)));
+    }
+}
+
+#[test]
+fn duplicate_unknown_truncated_and_invalid_json_never_create_public_acceptance() {
+    let original = std::str::from_utf8(include_bytes!("../fixtures/counter-v2.json")).unwrap();
+    for payload in [
+        original.replace("\"schema\":2,", "\"schema\":2,\"schema\":2,"),
+        original.replace("\"request\":{\"id\":1,", "\"request\":{\"id\":1,\"id\":1,"),
+        original.replace("\"receipt\":{\"id\":1,", "\"receipt\":{\"id\":1,\"id\":1,"),
+        original.replace("\"schema\":2,", "\"schema\":2,\"extra\":0,"),
+        original.replace("\"command\":7", "\"command\":7,\"extra\":0"),
+        original.replace("\"events\":1", "\"events\":1,\"extra\":0"),
+        original.replace("\"request\":{\"id\":1", "\"request\":{\"id\":0"),
+        original.replace("\"expected\":null", "\"expected\":0"),
+        original.replace("\"command\":7", "\"command\":\"bad\""),
+        original[..original.len() - 1].into(),
+    ] {
+        assert_ne!(payload, original);
+        let result: Result<ReadAcceptance, _> = AcceptanceCodec.decode(&raw_envelope(
+            "controller.accepted.v2",
+            payload.as_bytes(),
+            SchemaVersion::INITIAL,
+        ));
+        assert!(
+            matches!(result, Err(CodecError::Json(_))),
+            "wrong result: {payload}"
+        );
+    }
+}
+
+#[test]
+fn ordered_replay_rejects_a_gap_and_cumulative_facts_without_applying_them() {
+    let mut root = AggregateRoot::<Adapted<Fixture, u8, NonZeroU64, 0>>::new("cumulative".into());
+    for number in 1..=9 {
+        let mut value = accepted();
+        value["request"]["id"] = json!(number);
+        value["request"]["expected"] = json!(Version::new(number - 1).map(Version::as_u64));
+        value["receipt"]["id"] = json!(number);
+        value["receipt"]["version"] = json!(number);
+        value["facts"] = json!([1]);
+        let version = Version::new(number).unwrap();
+        let record: ReadAcceptance = AcceptanceCodec
+            .decode(&versioned_envelope(
+                version,
+                "controller.accepted.v2",
+                &serde_json::to_vec(&value).unwrap(),
+                SchemaVersion::INITIAL,
+            ))
+            .unwrap();
+        if number == 2 {
+            let mut empty = AggregateRoot::<Adapted<Fixture, u8, NonZeroU64, 0>>::new("gap".into());
+            assert!(
+                matches!(empty.replay(version, &record.0), Err(KernelError::VersionMismatch {
+                expected: Version::INITIAL, actual
+            }) if actual == version)
+            );
+            assert_eq!(empty.version(), None);
+            assert_eq!(empty.state().unwrap().domain, ValueState(0));
+        }
+        root.replay(version, &record.0).unwrap();
+        let state = root.state().unwrap();
+        assert_eq!(state.domain, ValueState(number.min(8)));
+        assert_eq!(state.facts, usize::try_from(number.min(8)).unwrap());
+        if number <= 8 {
+            assert!(state.integrity.is_ok());
+            assert_eq!(
+                state.receipt(record.request()).unwrap(),
+                Some(record.receipt().clone())
+            );
+        } else {
+            assert!(state.integrity.is_err());
+            assert_eq!(state.receipt(record.request()).unwrap(), None);
+        }
+    }
 }
 
 #[test]
@@ -212,20 +364,20 @@ fn replay_overflow(mut root: AggregateRoot<Adapted<Fixture, u8, NonZeroU64, 0>>)
 fn envelope_schema_and_exact_payload_limit_are_enforced_independently() {
     let mut payload = serde_json::to_vec(&accepted()).unwrap();
     payload.resize(4096, b' ');
-    let edge: Result<TestRecord, _> = Codec.decode(&raw_envelope(
+    let edge: Result<ReadAcceptance, _> = AcceptanceCodec.decode(&raw_envelope(
         "controller.accepted.v2",
         &payload,
         SchemaVersion::INITIAL,
     ));
     assert!(edge.is_ok());
     payload.push(b' ');
-    let exceeded: Result<TestRecord, _> = Codec.decode(&raw_envelope(
+    let exceeded: Result<ReadAcceptance, _> = AcceptanceCodec.decode(&raw_envelope(
         "controller.accepted.v2",
         &payload,
         SchemaVersion::INITIAL,
     ));
     assert!(matches!(exceeded, Err(CodecError::Bytes { source: None })));
-    let wrong_schema: Result<TestRecord, _> = Codec.decode(&raw_envelope(
+    let wrong_schema: Result<ReadAcceptance, _> = AcceptanceCodec.decode(&raw_envelope(
         "controller.accepted.v2",
         &serde_json::to_vec(&accepted()).unwrap(),
         SchemaVersion::from_u32(2).unwrap(),

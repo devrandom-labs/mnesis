@@ -27,9 +27,14 @@ or local pass does not establish whole-adapter delivery.
 CP0–CP9 are required for the new feature. The planning branch is
 `docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
 The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
-CP0–CP2 are protected-merged (PR411/PR413/PR414).
-CP3's repaired race fixture passes all12 local gates and192 forced registration
-inversions; repaired-head CI and protected delivery remain. Later requirements
+CP0–CP3 are protected-merged (PR411/PR413/PR414/PR415).
+CP3's repaired race fixture passes all12 local gates,192 forced registration
+inversions and full current-head CI. CP4 inherits that repair and passes all12
+host gates/1633tests on an unchanged retry; original failures remain recorded.
+Current-head PR/CI/protected delivery remain. Two CP5
+lifecycle defects and abort-custody loss are repaired in a separate branch;
+remaining resource/tracing/metrics acceptance remains open.
+Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing
 source tests and one separately executed in-memory measurement. No current
@@ -41,7 +46,7 @@ processor/Postgres, migration or new-package registry consumer is certified.
 | CP1 | Extract `mnesis-command`, expose Tower Service and align dependencies | feature-complete | CP0 | CP2, CP3, CP4, CP5 |
 | CP2 | Typed outcomes and uncertain-write custody | feature-complete | CP1 | CP6, CP7 |
 | CP3 | Identity, ordering and deterministic concurrent acceptance | feature-complete | CP1 | CP6 |
-| CP4 | Stored format compatibility and public accepted-fact consumption | candidate | CP1 | CP6, CP7 |
+| CP4 | Stored format compatibility and public accepted-fact consumption | feature-complete | CP1 | CP6, CP7 |
 | CP5 | Tower admission, observed shutdown, tracing and telemetry | candidate | CP1 | CP6, CP7 |
 | CP6 | Real adapter recovery, capacity and instrumentation overhead | candidate | CP2, CP3, CP4, CP5 | CP8 |
 | CP7 | Public consumers, documentation, packaging and existing CI | candidate | CP2, CP4, CP5 | CP8 |

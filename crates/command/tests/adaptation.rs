@@ -14,7 +14,7 @@ use futures::TryStreamExt;
 use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
 use mnesis_command::{Cause, CodecError, CommandProcessor, Error, Limits, Request};
 use mnesis_inmemory::InMemoryStore;
-use mnesis_store::{RawEventStore, Store, StoreError, StreamKey};
+use mnesis_store::{PendingBatch, RawEventStore, Store, StoreError, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
 
 #[path = "support/finish.rs"]
@@ -156,6 +156,220 @@ async fn unrelated_aggregates_use_the_same_controller_without_domain_policy() {
     domain_limit(&store).await;
     encoding_failures(&store).await;
     lossy_admission(&store).await;
+    evolution(&store).await;
+    corrupt_history(&store).await;
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+enum EvolvedCommand {
+    Original(Count),
+    Increase { amount: u8 },
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+enum EvolvedFact {
+    Original(Added),
+    Increased { amount: u8 },
+}
+impl Message for EvolvedFact {}
+impl DomainEvent for EvolvedFact {
+    fn name(&self) -> &'static str {
+        "added"
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct EvolvedState(u64);
+impl AggregateState for EvolvedState {
+    type Event = EvolvedFact;
+    fn initial() -> Self {
+        Self(0)
+    }
+    fn apply(self, fact: &EvolvedFact) -> Self {
+        let amount = match fact {
+            EvolvedFact::Original(Added(value)) | EvolvedFact::Increased { amount: value } => {
+                *value
+            }
+        };
+        Self(self.0 + u64::from(amount))
+    }
+}
+struct Evolved;
+impl Aggregate for Evolved {
+    type State = EvolvedState;
+    type Error = Rejected;
+    type Id = String;
+}
+impl Handle<EvolvedCommand, 1> for Evolved {
+    fn handle(
+        state: &EvolvedState,
+        command: EvolvedCommand,
+    ) -> Result<Option<Events<EvolvedFact, 1>>, Rejected> {
+        match command {
+            EvolvedCommand::Original(original) => {
+                Counter::handle(&Total(state.0), original).map(|batch| {
+                    batch.map(|facts| {
+                        let mut mapped = Events::new(EvolvedFact::Original(facts.first().clone()));
+                        for fact in facts.rest() {
+                            mapped.add(EvolvedFact::Original(fact.clone()));
+                        }
+                        mapped
+                    })
+                })
+            }
+            EvolvedCommand::Increase { amount } => {
+                DECISIONS.fetch_add(1, Ordering::SeqCst);
+                Ok(Some(events![EvolvedFact::Increased { amount }]))
+            }
+        }
+    }
+}
+
+async fn evolution(store: &Store<InMemoryStore>) {
+    let (old, task) = CommandProcessor::<Counter, Count, NonZeroU64, 1>::start(
+        store,
+        "evolution".into(),
+        limits(),
+    )
+    .unwrap();
+    let original = request(1, 0, Count::Pair(2, 5));
+    let receipt = old.submit(original.clone()).await.unwrap();
+    old.stop();
+    assert_eq!(finish(task).await.uncertain(), None);
+    let prefix = raw(store.raw(), b"evolution").await;
+    let (new, worker) = CommandProcessor::<Evolved, EvolvedCommand, NonZeroU64, 1>::start(
+        store,
+        "evolution".into(),
+        limits(),
+    )
+    .unwrap();
+    let compatible = request(1, 0, EvolvedCommand::Original(Count::Pair(2, 5)));
+    assert_eq!(compatible.encode().unwrap(), original.encode().unwrap());
+    let before = DECISIONS.load(Ordering::SeqCst);
+    assert_eq!(
+        new.read().await.unwrap(),
+        (Version::new(1), EvolvedState(7))
+    );
+    assert_eq!(
+        new.original(NonZeroU64::MIN).await.unwrap(),
+        Some(compatible.clone())
+    );
+    assert_eq!(new.submit(compatible).await.unwrap(), receipt);
+    assert_eq!(DECISIONS.load(Ordering::SeqCst), before);
+    assert_eq!(raw(store.raw(), b"evolution").await, prefix);
+    let changed = new
+        .submit(request(1, 0, EvolvedCommand::Increase { amount: 7 }))
+        .await;
+    assert!(matches!(changed, Err(Error::Mismatch)));
+    let next = new
+        .submit(request(2, 1, EvolvedCommand::Increase { amount: 9 }))
+        .await
+        .unwrap();
+    assert_eq!((next.version, next.events), (Version::new(2).unwrap(), 1));
+    assert_eq!(
+        new.read().await.unwrap(),
+        (Version::new(2), EvolvedState(16))
+    );
+    assert_eq!(DECISIONS.load(Ordering::SeqCst), before + 1);
+    let records = raw(store.raw(), b"evolution").await;
+    assert_eq!(&records[..1], prefix);
+    assert_eq!(records[1]["facts"], serde_json::json!([{"amount":9}]));
+    new.stop();
+    assert_eq!(finish(worker).await.uncertain(), None);
+}
+
+async fn corrupt_history(store: &Store<InMemoryStore>) {
+    let first = serde_json::json!({"schema":2,"request":{"id":1,"expected":null,"command":{"One":1}},
+        "receipt":{"id":1,"version":1,"events":1},"facts":[1]});
+    let mut second = serde_json::json!({"schema":2,"request":{"id":2,"expected":1,"command":{"One":1}},
+        "receipt":{"id":2,"version":2,"events":1},"facts":[1]});
+    let cumulative = second.clone();
+    second["request"]["id"] = serde_json::json!(1);
+    second["receipt"]["id"] = serde_json::json!(1);
+    second["request"]["command"] = serde_json::json!("Ignore");
+    second["receipt"]["events"] = serde_json::json!(0);
+    second["facts"] = serde_json::json!([]);
+    for (name, later) in [("duplicate", second), ("cumulative", cumulative)] {
+        let key = StreamKey::from_slice(name.as_bytes());
+        let batch = [first.clone(), later]
+            .into_iter()
+            .enumerate()
+            .map(|(index, value)| {
+                pending_envelope(Version::new(u64::try_from(index).unwrap() + 1).unwrap())
+                    .event_type("controller.accepted.v2")
+                    .payload(serde_json::to_vec(&value).unwrap())
+                    .build()
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        store
+            .raw()
+            .append(&key, None, PendingBatch::new(&batch).unwrap())
+            .await
+            .unwrap();
+        let before = raw(store.raw(), name.as_bytes()).await;
+        let decisions = DECISIONS.load(Ordering::SeqCst);
+        let (processor, task) =
+            CommandProcessor::<Limited, Count, NonZeroU64, 1>::start(store, name.into(), limits())
+                .unwrap();
+        assert!(matches!(processor.read().await, Err(Error::Corrupt)));
+        assert!(matches!(
+            processor.original(NonZeroU64::MIN).await,
+            Err(Error::Corrupt)
+        ));
+        assert!(matches!(
+            processor.submit(request(1, 0, Count::One(1))).await,
+            Err(Error::Corrupt)
+        ));
+        assert!(matches!(
+            processor.submit(request(3, 2, Count::Ignore)).await,
+            Err(Error::Corrupt)
+        ));
+        assert_eq!(DECISIONS.load(Ordering::SeqCst), decisions);
+        assert_eq!(raw(store.raw(), name.as_bytes()).await, before);
+        processor.stop();
+        assert_eq!(finish(task).await.uncertain(), None);
+    }
+    corrupt_metadata(store, first).await;
+}
+
+async fn corrupt_metadata(store: &Store<InMemoryStore>, mut value: serde_json::Value) {
+    value["receipt"]["id"] = serde_json::json!(2);
+    let key = StreamKey::from_slice(b"metadata");
+    let record = pending_envelope(Version::INITIAL)
+        .event_type("controller.accepted.v2")
+        .payload(serde_json::to_vec(&value).unwrap())
+        .build()
+        .unwrap();
+    store
+        .raw()
+        .append(&key, None, PendingBatch::new(&[record]).unwrap())
+        .await
+        .unwrap();
+    let before = raw(store.raw(), b"metadata").await;
+    let decisions = DECISIONS.load(Ordering::SeqCst);
+    let (processor, task) = CommandProcessor::<Limited, Count, NonZeroU64, 1>::start(
+        store,
+        "metadata".into(),
+        limits(),
+    )
+    .unwrap();
+    for failure in [
+        processor.read().await.map(|_| ()),
+        processor.original(NonZeroU64::MIN).await.map(|_| ()),
+        processor
+            .submit(request(1, 0, Count::One(1)))
+            .await
+            .map(|_| ()),
+    ] {
+        assert!(
+            matches!(failure, Err(Error::Failed(cause)) if matches!(*cause, Cause::Store(StoreError::Decode(CodecError::Acceptance))))
+        );
+    }
+    assert_eq!(DECISIONS.load(Ordering::SeqCst), decisions);
+    assert_eq!(raw(store.raw(), b"metadata").await, before);
+    processor.stop();
+    assert_eq!(finish(task).await.uncertain(), None);
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

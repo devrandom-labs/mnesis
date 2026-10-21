@@ -1640,3 +1640,97 @@ change plus records. Falsifier: forced original ordering does not reproduce,
 candidate still times out, stores differ, any contender can steal another's
 release, reduced workload/deadline or wrong first-failure assertion. Remove the
 probe after red/green evidence; normal final gates and current-head CI required.
+
+## CP4: validated public records and checkpointed fact consumption — pre-edit budget
+
+Threatened invariant: callers currently cannot read accepted facts through the
+single codec owner; copying private JSON or flattening facts into fabricated
+positions would break validation/checkpoint semantics. Retain private Serde Record
+and Codec; expose opaque Acceptance plus read-only AcceptanceCodec, delegating to
+that same validation. Implement within model.rs to borrow existing fields without
+extra forwarding getters or widened construction rights. Public generic order
+C,E,I=NonZeroU64 lets ordinary consumers name command/fact only; CP0's disposable
+C,I,E prototype was never a published contract. DomainEvent/Message delegation
+lets existing decoded streams/Projection checkpoint a whole record; no new runner.
+Do not derive Serde on the public opaque result or require fact Serialize/Clone
+for reading. Document per-record checks versus cross-record replay validation.
+
+Budget: model/lib, manifest/lock as needed for existing store projection dev
+feature, owning model/adaptation/reader tests and at most two fixtures (<=8 code/
+fixture owners; <=250 net product lines, <=500 test lines; two root types, total10).
+No new normal package, framework/runtime/development tool/Python/schema. Existing
+store projection feature belongs in the dev dependency so isolated consumer tests
+cannot borrow workspace feature unification. Preserve source archive untouched.
+Verify old-source v2 golden records and reverse old-reader compatibility in a
+disposable source copy; retain app command/fact evolution example without changing
+old request identities/encoding. Strengthen existing corruption owners rather
+than add duplicated parser tests. A real public consumer must write a multi-fact
+record and no-op, checkpoint state/physical position together, reload and resume
+with neither lost nor repeated facts. Falsifiers: forging unvalidated public
+records through Serde, copied parser/schema, changed bytes/name/schema, missing
+corruption detection/implicit repair, fact-level positions, skipped/no-op progress,
+new Clone/Serialize read requirements or weakened prior laws. Native persistence/
+migration and final package consumer qualification remain CP6/CP7/CP9 owners.
+CP4 test-budget refinement before stream/evolution edits: increase test ceiling
+from500 to650 net lines, keep <=8 code/fixture owners, <=250 product lines and
+two new root types. Public projection uses260 lines; the strengthened canonical
+unit laws add164. Remaining acceptance needs actual processor reads/retries over
+corrupt stored history (showing no repair writes), plus an application retaining
+both old command and fact representations through a new variant. Neither a
+stateless parser law nor a fact-only upcast proves these requirements. Put both
+in existing adaptation.rs and its serial handler-count owner, not another runner,
+store or duplicated parser. No production behavior/config/package change.
+CP4 falsifiers before running: use cargo-mutants to replace the public Acceptance
+DomainEvent name with an empty string, selecting the real public reader test.
+Its first failure must be exact event-name validation after real committed writes.
+The generator's empty-facts candidate uses Vec::leak inside a const getter and is
+compiler-unviable, so it cannot qualify fact consumption. Separately replace only
+the new getter's `self.0.facts.as_slice()` with `&[]` during a bounded one-off test
+command, retaining an exact source backup and restoring it immediately via a shell
+trap. This const-valid control must fail the real projection's exact persisted
+model, not compilation/setup. No mutant is retained; no gate/filter is weakened.
+CP3 parent integration before merge: use a separate worktree of existing signed
+feat/command-races and merge exact26c5a334 CP2 parent without committing. Preserve
+all tests/records from both sides, including parent readiness capacity assertion,
+bounded shutdown helper and diagnostic-only mutation policy. Product source must
+remain byte-identical to CP2; forced races remain unchanged. No new code owner,
+API/dependency/workload/gate change. Reconcile required records explicitly; normal
+full gate and signed protected delivery still apply after ancestry is resolved.
+CP4 adversarial review found a masked stream witness before finalization: duplicate
+second ID also exceeded the selected aggregate's one-fact cumulative limit, so
+that stream could stay red if duplicate detection disappeared. Make that duplicate
+an otherwise valid no-op (zero facts/events, Ignore command); keep the separate
+unique-ID cumulative overflow stream unchanged. Same owners/budget, strictly
+stronger defect isolation; rerun the actual adaptation owner after the edit.
+CP5 lifecycle characterization before edits: separate feat/command-lifecycle
+worktree from signed26c5a334 (same host/engine as CP3/CP4). Start with <=200 test
+lines in existing recovery.rs plus records; no product change. Reproduce a
+ready-permit release waking a caller callback that reenters stop while Admission
+is locked. Isolate this synchronous deadlock witness in the same test executable
+as an explicitly selected child, using std::process, a finite parent deadline,
+kill+wait and captured stage markers; no runner/framework/helper binary. Also
+force stop synchronously from the queue-capacity waker during receiver dequeue;
+queued work must reject without running after stop. Existing FaultStore/Gate and
+actual InMemoryStore supply the append boundary. Falsifiers: setup timeout instead
+of selected boundary, missing callback entry, no forced overlap, additional rows,
+unobserved task/child completion. Keep red evidence before selecting a locking fix.
+CP4 parent integration before edits: preserve a complete binary patch/index and
+named stash of this goal's current reader work, leaving all older/user stashes
+untouched. Fast-forward feat/command-reader from0dc087f8 to signed7534d590 (current
+CP3 source passes all12 checks/1629 tests and normal hooks, PR415 CI pending), then
+apply the exact saved stash. Retain all stronger parent tests and every CP4 source,
+fixture/evidence/record. Resolve overlapping histories without discarding unique
+facts; current PROGRESS/PRD/backlog must reflect actual merged versus local status.
+No new product/format/API/package change beyond the registered CP4 slice. Final
+combined full gate still required; keep the stash and receipt until delivery.
+
+CP4 repaired-parent integration, before mutation: preserve the complete staged
+reader work and all older/user stashes. Save exact binary diff and status, create
+one named retained stash, fast-forward7534d590 to corrected CP3c3a16f3c, then apply
+that exact stash without dropping it. Union append-only records, retain newer
+current status, and prove all CP4 code/fixtures equal the saved work. Inherit only
+the two repaired race fixture owners. Budget: existing six record owners plus
+inherited faults/races; no additional CP4 product/API/format/dependency changes.
+Requalify all12 host checks on combined source; previous1633 pass predates this
+known parent defect and cannot qualify final delivery. Abort on lost source,
+removed stronger assertions, changed workloads or unrelated work mutation.

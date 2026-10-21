@@ -1239,3 +1239,403 @@ cp3-final-gates.tar.gz, SHA256
 3fb393c55e4bc1359e3fc10512b8db4e166b5dc5fee07fc953677ccbfafd3b7a.
 Old CI is retained as historical evidence of the red/green discrepancy; only
 fresh repaired-head checks can establish protected delivery.
+CP1 current-head PR CI39630929335 also completes at6d0d8adc. All74 actual runtime
+invocations receive three reviews: (1) compiler/feature/decoder/native adapter laws
+and32command cases remain unchanged after the intended assertion repairs;
+(2) three compiler2/1/1,27 library-feature,40 real nativePG invocations, workspace
+1626PASS160.073s/five original exclusions and replay2/1/1. Each native group has
+seven zero-skip profiles264/149/168/176/173/174/150 plus13 selected laws; both
+PG18.6 services start and shut down. The75th summary is an echoed receipt.
+(3) actual source/head, assertions, filters and workloads match reviewed6d0d8adc;
+zero-test libs and guarded non-native harnesses earn no conformance credit.
+Full push and PR checks are green, with no unresolved review threads.
+
+Each of current deep-fuzz39630929501's eight bounded campaigns receives three
+reviews: (1) existing actual wire/header/chunk/value decoder oracles, not command
+identity evidence; (2) four libFuzzer61s runs: wire7567082,header3058737,chunk1323564,
+value7279294; four existing AFL bounded60s campaigns complete their own checks.
+(3) harnesses and input/timeout selection are unchanged; successful foundation
+campaigns do not certify new command fuzz targets, which remain CP7. Raw final
+CI/fuzz/mutation logs are retained. Expected protected squash tree for413 is
+5e5ec37ac17fc5b0d8b5ad32143193322f24a70f at reviewed6d0d8adc, mainca62b557.
+CP1 protected merge is fa0b95b138e6691489927a2b74d78bb05d9d869a at2026-10-21T16:40:32Z.
+Actual tree5e5ec37ac17fc5b0d8b5ad32143193322f24a70f matches the reviewed expected
+tree. Ordinary protected squash matched6d0d8adc; all current required/full checks
+pass and no review thread is unresolved. CP1 is merged, not published; package
+publication remains disabled until CP8. CP2/CP3 protected delivery remains pending.
+Resource maintenance: updated CP2 gate is live while the CP4 reader source/test is
+written but unexecuted. At513MiB free, retire only this goal's three obsolete CP0
+cross-target check caches, after saving their exact output paths and confirming
+zero referrers. Remove their owned temp roots and let nix-store --delete enforce
+liveness; no forced/global collection, shared dependencies or project source is
+removed. CP0 source/immutable raw evidence and merged delivery are retained.
+Current CP1/CP2/CP3 outputs keep their own roots; deleting cached bytes earns no
+new validation credit. CP4 tests wait for enough space to run honestly.
+
+CP2 parent-integration gate's fresh replay invocations receive three reviews each:
+(1) unchanged foundation CBOR/value/wire product oracles, not command/native laws;
+(2) three actual invocations2/1/1PASS,1.00s each, zero ignored/filtered, no database;
+(3) exact unchanged harnesses/selection/workload, with all typed error/custody and
+stronger parent assertions still required by pending workspace nextest. No cached
+output is counted twice. Raw cp2-integration-gate.log owns actual receipts.
+CP4 first public-reader consumer90f56341-a273-46ad-bec0-a4efe311d885 passes1test,
+0skipped,in0.010s. Three reviews: (1) actual processor emits a two-fact record and
+accepted no-op; existing Projection/CheckpointStore saves complete state with each
+physical version, reloads at2, resumes at3 without losing/repeating facts, and
+exact command retries retain original receipts with only three handler decisions.
+(2) one selected integration target runs through Nix; facts deliberately implement
+neither Clone, Eq nor Serialize. In-memory checkpoint survival across projection
+reload is shown, not disk/process/native durability or whole-package acceptance.
+(3) only public APIs are used; no copied parser/schema or invented per-fact
+positions. Exact request/receipt/name, intermediate persisted state/revision/
+position, no-op progress, final values and handler counts reject partial-record
+or missing/no-op checkpoints. Private Serde Record remains the validation owner;
+opaque public getters/codec add62 product lines/two root types. Source golden/
+reverse compatibility, corruption cases, full suite/lint and native work remain.
+CP4 first lint run rejects the test's111-line sequence and a suspicious-looking
+revision/version comparison. Preserve all assertions and lint policy: isolate
+prefix projection/checkpointing from fresh reload/resume, so returning drops the
+old projection and cursor; derive expected checkpoint revision from committed
+record count, independently of the expected physical position. No waiver or
+shortened workload. The initial passing consumer remains scoped evidence only.
+CP4 updated owning suite passes36 cases, one original ignored measurement,
+in1.426s. Three reviews: (1) the refactored public projection sequence retains
+all intermediate checkpoint/state/receipt assertions, with expected revisions
+now tied to record count; all35 prior race/uncertainty/fold/capacity laws pass.
+(2) all five package targets execute in debug, no filter/native service; both
+256-case generated suites retain their workloads. (3) returning from prefix
+projection drops the old cursor and projection before reload; no assertion is
+removed to satisfy lint. Clippy passes without a new waiver. Source golden/
+reverse compatibility, malformed-history checks and final CP4 gates remain open.
+
+CP4 original-source golden producer/rollback decoder executes1PASS,6filtered,
+0ignored under the destination Nix shell/Rust1.99 against the archive's unchanged
+locked kernel/store/inmemory0.4.0 and original four product modules. Three reviews:
+(1) the actual old Codec writes a fact acceptance and following accepted no-op,
+reads both and replays to state7/version2 with each original receipt; this is the
+old-format side of compatibility, not yet new-writer or native migration proof.
+(2) `cargo test --locked --manifest-path /tmp/mnesis-command-start-20261021/cp4-legacy/Cargo.toml
+-p labcast-controller --lib cp4_original_writer_and_rollback_reader` executes one
+disposable unit probe in7.11s build time,0.00s test time; no database/service or
+new project tool. Raw log cp4-legacy-test.log. (3) original production files and
+lock remain byte-identical, only the copied test gains the probe. Codec output
+is decoded and exactly compared before original aggregate replay/receipt checks.
+The new writer must still equal these complete bytes; neither hand-authored JSON
+nor the new codec alone is credited as an old-writer witness. Archive untouched.
+
+CP4 codec debug run8a480767-07cc-4486-ab66-4c3e4a0874eb passes9/9 in0.034s,
+zero skips. Three reviews: (1) actual public decoder rejects duplicate JSON fields
+at all three owned levels, unknown fields, truncated/type/zero-version inputs,
+unsupported schemas/types and metadata mismatches; existing byte-limit and lossy
+laws remain. The original writer's two fixture byte strings exactly equal fresh
+new Adapted decisions encoded by Codec; both replay with original receipts/state.
+(2) Nix `cargo nextest run --locked -p mnesis-command --lib` executes all nine
+library laws in one binary, build1.10s, no database; six unchanged/strengthened
+owners plus three new laws. Raw cp4-codec-debug.log. (3) malformed payloads must
+differ from the valid source and match the specific CodecError domain. Physical
+gap rejection leaves empty state/version unchanged; cumulative8 succeeds and9
+poisons integrity without applying its fact or recording its receipt. Byte equality
+ties the original decoder's successful inputs to actual new writer output, rather
+than comparing two new parsers. Full stream/no-repair and app evolution remain.
+
+CP4 adaptation runfbf81992-c048-412b-a135-9efb094a6a05 passes1/1 in0.011s,
+zero skips, build2.14s. Three reviews: (1) the existing serial consumer scenario
+now reopens an original two-fact acceptance using app enums retaining original
+command/fact representations and adding new variants; original request bytes,
+receipt and state survive without handler execution. Changed same-ID new content
+mismatches; a fresh new variant appends/folds, preserving the original prefix.
+Two real stored histories independently contain duplicate IDs or cumulative fact
+overflow; read/original/exact/fresh submission all return Corrupt, invoke no handler
+and leave stored records unchanged. (2) Nix nextest executes the actual adaptation
+integration binary and existing stores/public processor; no service/DB or skipped
+case. New phases run within its one canonical atomic handler-counter owner, so
+parallel tests cannot perturb the count. Raw cp4-adaptation-debug.log. (3) exact
+serialized identity, original prefix/state/receipt and before/after decisions
+reject event-only evolution, redeciding retries or implicit repair. Native process
+restart, SQL migrations and rollback of newly introduced app variants remain
+separate obligations; old application binaries cannot decode newly added variants.
+
+CP4 complete debug runaa722b11-889a-4d20-944b-3dbe6bd0fbaa passes39 cases in1.421s,
+one original ignored measurement. Three reviews: (1) golden/reverse bytes, public
+decoder boundaries, physical order/cumulative replay, app command+fact evolution,
+stored-corruption/no-repair and the whole-record checkpoint/reload/resume law pass
+alongside all prior identity/uncertainty/capacity/lifecycle laws. (2) all five owner
+binaries run through Nix with no filter, build1.13s; existing256 serial and256
+controlled generated histories and192 fixed races remain unchanged. No native
+database proof. Raw cp4-complete-debug.log. (3) exact old bytes, independent handler
+counts, complete checkpoint pairs/revisions and typed errors reject the named
+defects; no prior assertion/workload was weakened. Initial Clippy found only a
+shadowed test variable; renaming the outer optional batch preserves every check.
+Strict all-target/all-feature Clippy then passes0.50s without a new waiver.
+
+CP2 current-head mutation CI39640707082/artifact12365590607 is reviewed at exact
+26c5a334961bc421284d2c993a26151f157d13d7:78candidates,40caught,38unviable,
+0missed/timeout. Each of41 actual runtime invocations receives three reviews:
+(1) baseline and each mutated production owner exercise the retained canonical
+codec/identity/history, typed error, append uncertainty and admission laws;
+specific mutation diffs are compared with each first failed assertion. Missing
+write/send/receipt, erased rejection/encoding cause, changed request identity,
+incorrect queue/bounds, broken cumulative/duplicate replay and metadata/byte
+validation all fail their relevant product oracle. (2) baseline34PASS1original
+ignored in4.518s; each mutant runs nextest serially/all-features with the existing
+compile_fail exclusion, fails100 after1–29 of34 cases (exact summaries retained
+per log). All38 unviable candidates fail compilation with actual trait/constructor
+errors and execute no tests; they receive no runtime credit. Native Postgres was
+available in the workflow, but selected package laws use in-memory; no command-
+native credit. (3) every first failure was inspected in raw log against the actual
+production mutation, not just the status. Ordinary valid queue construction
+failing after a wrong queue comparator is itself the direct counterexample; no
+fixture poisoning or new exception. This changed-line sweep supplements CP1's
+full168 sweep and does not qualify later CP4/CP5 code. Raw artifact remains under
+/tmp/mnesis-command-start-20261021/cp2-final-mutants, to be retained with delivery.
+
+CP4 public-name negative control: cargo-mutants selects one real public reader
+law. Each of its two actual invocations receives three reviews: (1) baseline
+requires real two-fact/no-op writes, original names/receipts and atomic checkpoint
+progress; replacing Acceptance::name with empty must fail the same law. (2)
+baseline1PASS, mutant1FAIL,0skipped; four other binaries excluded by the owning
+reader selection. Builds16s then3s, campaign20s;
+no database. (3) actual first mutant failure is the exact event-name equality
+after successful command writes (`left:""`, `right:"controller.accepted.v2"`),
+not fixture setup or a compiler failure.0missed/unviable/timeout. Raw cp4-public-
+mutants/mutants.out retains diff, actual commands and both logs. Source untouched.
+CP4 empty-facts control executes1FAIL0skipped in0.010s. Three reviews:
+(1) the actual const-valid getter returning an empty slice must not let a real
+multi-fact acceptance checkpoint an empty model. (2) the public reader binary
+runs through Nix; no database, compile/setup succeeds and test fails100 at the
+first persisted checkpoint assertion. Raw cp4-empty-facts-control.log and exact
+pre-control source backup retained. (3) original writes succeed, then the saved
+state/position/revision pair disagrees with the independently expected two-fact
+model; this is the intended observable defect, not an invalid const mutation.
+Shell EXIT trap restores the exact source; cmp confirms byte identity. No control
+is retained, no compiler-only result is credited. Re-run normal optimized owners
+and whole-source checks after restoration before committing.
+CP4 restored-source optimized run passes39/39 in0.490s, one original ignored
+measurement. Three reviews: (1) complete golden/public decoder, evolution,
+corrupt-stream/no-repair, checkpoint, concurrency and uncertain-write owner laws
+remain valid with release assertions/arithmetic behavior. (2) Nix `cargo nextest
+run --locked --release -p mnesis-command` executes all five binaries, no filter or
+native database; unchanged192 fixed and both256 generated workloads. Raw cp4-
+complete-release.log. (3) source restored byte-for-byte after the intentional
+empty-facts failure; exact state/receipt/checkpoint/count assertions remain.
+This is package evidence, not the required whole-source/real-adapter/release gates.
+CP4 adversarial review found that the duplicate-ID stream fixture also violated
+the cumulative-fact limit, allowing one defect to mask the other. Before final
+qualification, change only its second acceptance to a valid no-op; the separate
+unique-ID overflow stream remains unchanged. The updated adaptation run35d0ed74-
+bde1-45cb-9325-a687ac206d59 passes1/1,0skipped,in0.025s,build11.02s. Three reviews:
+(1) duplicate rejection now has no competing fact-limit explanation; cumulative
+overflow remains independently observed, with all read/retry/new requests refused
+and no handlers/repair. Evolution and prior consumer laws remain. (2) actual Nix
+integration owner runs; in-memory only, no database/whole-gate claim. Raw cp4-
+independent-corruption-debug.log. (3) complete original histories and handler-count
+checks remain; only the masked fixture is corrected to strengthen the oracle.
+Earlier39-pass results predate this final fixture correction; final-source gate
+must include it. No product assertion, limit or workload was weakened.
+CP4 final debug suite passes39 cases/one original ignored in1.435s. Three reviews:
+(1) independent duplicate/no-op and unique-ID cumulative witnesses now accompany
+a raw receipt-ID mismatch: read/original/exact submission preserve the typed
+StoreError::Decode(CodecError::Acceptance), run no handler and leave history intact.
+All other compatibility/projection/identity/race/uncertainty laws remain. (2)
+all five owner binaries run without filter through Nix, unchanged192/256/256
+schedules; no native DB. Raw cp4-final-debug.log. (3) neither corruption fixture
+can mask the other's defect, and the codec failure is observed at its actual
+repository boundary; exact records/receipts/state/checkpoint checks remain.
+Final authored test delta626 lines within amended650; two fixtures and62 product
+lines/two roots remain within all other budgets. Full gate/protected delivery open.
+CP4 owner/control/provenance evidence bundle cp4-tests.tar.gz SHA256:
+5f531552a122a35f699f5b69e59f728aabc798e3a1ddcc47bb93ebe0d76c7640.
+It includes actual logs, both public-reader controls, original/copy module+lock
+hashes, original locked manifest and disposable golden probe, current-source
+hashes and exact commands. Source archive remains unchanged. Only generated
+goal-owned Cargo caches were cleaned to make room for the next full gate; logs,
+fixtures and original source are retained. No other project's caches or global
+collection/configuration changed. Later final-source checks remain mandatory.
+CP2 final push CI39640697507 at26c5a334 is complete. Each of74 actual test
+invocations receives three reviews: (1) compiler, isolated feature, foundation
+decoder, existing real-adapter and all34 typed/custody owner laws remain intact;
+these are not processor-native integration laws. (2) compiler2/1/1,27 isolated
+library invocations, workspace1628PASS109.756s/5existing exclusions, replay2/1/1,
+and40 native Postgres invocations across two actual PG18.6/x86_64-linux services,
+each startup/shutdown visible. Per service, seven complete profiles264/149/168/
+176/173/174/150 each zero skips and13 explicit one-law selections. One264 summary
+is echoed, so75 summary lines mean74 actual invocations. Zero-test libs get no
+coverage credit. (3) actual current head/source and existing selectors/assertions
+match reviewed CP2; native required-law availability checks execute, not guarded
+green skips. Raw cp2-final-ci-push.log/counts.txt retain each selection/result.
+PR CI39640707012 remains live on its required Nix job; no protected merge yet.
+CP2 final PR CI39640707012 completes at26c5a334 with42successful checks and one
+expected scheduled-only mutation job skipped. Each of74 actual runtime invocations
+receives three reviews: (1) unchanged compiler/feature/foundation/real adapter laws
+and34 typed command-owner laws execute, no processor-native composition claim;
+(2) compiler2/1/1,27 isolated library runs, replay2/1/1, workspace1628PASS144.917s/
+5existing exclusions and40 nativePG invocations across two actual PG18.6 services.
+Per-service full profiles264/149/168/176/173/174/150 have0skips, plus13 explicit
+one-law availability selections; startup/shutdown visible. One echoed264 summary
+does not add an invocation. Zero-test libraries do not establish coverage. (3)
+actual checkout/current source matches reviewed26c5a334 and existing assertions,
+filters/workloads; no old-head pass or guarded local service claim is substituted.
+Raw cp2-final-ci-pr.log/counts.txt retained.0 unresolved review threads; expected
+protected squash tree9291a8825e94dae927052f49f3a0c9d798b912ab againstmainfa0b95b1.
+CP2 fuzz CI39640707162: each of eight actual engine campaigns receives three
+reviews: (1) unchanged foundation wire/CBOR/value decode bodies retain panic/crash
+oracles; they do not exercise the processor's two future CP7 fuzz bodies. (2)
+four libFuzzer legs run61s each: wire7641255,header1735252,chunk1387257,value8049524;
+four existing AFL/CMPLOG legs end at their configured60s limit and pass their
+saved-crash verdict. No crash artifact from a failed leg is suppressed. (3)
+current26c5a334 source, inputs, engine limits and crash gates match existing owners;
+no changed corpus/input bound or test filter. These are bounded campaigns, not
+exhaustive proof or sustained processor/native recovery. Raw cp2-final-fuzz.log.
+CP2 protected delivery: PR414 reviewed26c5a334961bc421284d2c993a26151f157d13d7,
+merged10d1b3b31844bebe2a941ead80343eee592d8584 at2026-10-21T17:45:38Z. Actual
+tree9291a8825e94dae927052f49f3a0c9d798b912ab equals the pre-merge expected tree
+and reviewed head's tree. Ordinary protected exact-head squash,42successful
+checks/one expected scheduled-only skip and0unresolved threads. Source package
+remains unpublished/release-disabled; CP3–CP9 still required. Full raw current
+CI, fuzz, mutation and merge receipts are retained in evidence/cp2-delivery.tar.gz.
+CP4 parent integration preserves a complete binary patch/index receipt and named
+stash, then fast-forwards to signed7534d590 (all12 host outputs/normal hooks pass,
+PR415 current CI pending). Indexed stash application fails before changing files;
+normal three-way application succeeds with six history/status conflicts. Union
+unique research facts and keep current status. Exact diff against saved stash
+shows no CP4 source/fixture change except the inherited advertised-capacity
+assertion, which is retained. Earlier/user stash receipt remains in the reflog;
+the named reader stash is kept until delivery. No source/archive work is lost.
+Before the final gate, retire only this goal's six superseded CP1-repair/CP2-
+integration no_std/store-no_std/wasm caches: zero referrers verified and current
+CP3 replacements pass/rooted. Save exact old paths, let Nix enforce liveness;
+no forced/shared/global deletion. Raw historical evidence/Git source is preserved.
+This creates gate headroom without changing checks, threads, assertions or workload.
+CP4 final full host gate passes all12 outputs. Each of three fresh foundation
+replay invocations receives three reviews: (1) unchanged CBOR/value/wire parser
+oracles, no new command fuzz coverage; (2) actual2/1/1PASS,1.00s each,0ignored/
+filtered, no database; (3) same corpus/source/assertions and bounded replay
+selection, not a sustained campaign. Raw cp4-full-gate.log retains actual commands.
+Its workspace nextest49edff3d-233b-496a-b588-4ca69e41291b passes1633/1633 in485.577s,
+15slow/143binaries/five existing exclusions. Three reviews: (1) all39 command owner
+laws,192fixed/256concurrent/256serial schedules, public multi-fact/no-op checkpoint
+consumer, exact original golden/new-write bytes, command/fact evolution and all
+independent corruption/no-repair boundaries execute with inherited stronger tests.
+(2) complete release/instrumented workspace selection, no new exclusions or shorter
+workloads; guarded Darwin PG cases provide no processor-native credit. (3) cmp
+matches every CP4 code/fixture owner against source3kdzh5mqjr6n0z3kcmp6ffg00xzlkr2k-source;
+no assertion, filter or input was weakened. All original source/control failures
+remain retained. Final matching-source normal signed hook/PR/CI still required.
+CP4 now inherits signed repairedCP3c3a16f3c exactly. Its whole staged reader work
+was saved as a binary diff plus a named retained stash; all earlier/user stashes
+remain. Six record conflicts preserve both append-only histories and current
+status. All eight reader code/fixture owners equal the saved stash exactly.
+Only the inherited faults/races helpers change. A new all12 host gate is running
+on the combined source, serially with no other compilation; old1633PASS cannot
+qualify this source. Only goal-owned Cargo targets cleaned after exact CP5
+red/green/control evidence was retained; no global/other-project cache cleanup.
+Repaired CP3c3a16f3c final mutation job39659801781 selects no mutants/no baseline;
+zero actual test invocations and no mutation-runtime credit. Test-only diff has
+its explicit local production controls retained separately. Repaired-head fuzz
+39659801459 passes all eight engine legs; each receives three distinct reviews:
+(1) unchanged foundation parser/crash oracles, no command/native-DB qualification;
+(2) four61s libFuzzer campaigns: wire7575546/header3068784/chunk1535823/value5804451;
+four60s AFL/CMPLOG campaigns reach their time limits, independently pass saved-
+crash rejection and confirm CMPLOG engagement. (3) original selectors/corpus/
+engine limits/crash gates unchanged; no reduced workload or hidden failure. Raw
+cp3-repaired-final-{fuzz,mutants}.log retained. Current required CI/native adapter
+jobs remain running; no protected merge claim until all checks finish/reviewed.
+Evidence correction: the prior CP4 full log49edff3d explicitly says143 binaries,
+not142 as its prose summary recorded. Counts remain1633PASS/5existing exclusions/
+485.577s; original raw log is unchanged. Current combined source also selects143
+binaries, including the added reader integration target. Correct this bookkeeping
+without claiming any new execution or altering selection.
+Disk preservation during the combined gate: retire only the goal's three older
+CP4 cross-target output roots after all corresponding new outputs pass/root and
+queries show zero store referrers. Exact retired paths/deletion log retained;
+raw historical checks remain evidence. No global or other-project cleanup.
+Current CP4 combined gate's three fresh corpus replay invocations receive three
+reviews EACH: (1) unchanged foundation CBOR/value/wire decode oracles, not command
+fuzz acceptance; (2)2/1/1PASS,1.00s each,zero ignored/filtered,no database; (3) same
+source/inputs/selectors and actual fresh execution, no workload/assertion/gate
+change. Raw cp4-fixed-full-gate.log. Full nextest remains running, no green credit.
+Current shared dependency output xagzqq5... was actually rebuilt for this gate
+and now rooted as cp4-fixed-common-deps. Its earlier absent-root attempt remains
+failed historically; this successful root creates no additional test evidence.
+CP4 combined nextest fails honestly:1326/1633 executed,1315PASS/11FAIL,
+307notrun/five existing exclusions,143binaries,250.067s. Three reviews:
+(1) all39 command laws pass, but this full gate is RED. Ten first failures are
+actual storage-full database writes. The eleventh is the unchanged compiler audit:
+trybuild says its overflow fixture unexpectedly compiled. That cause is unresolved
+and must not be attributed to disk space without proof. No product correctness
+success is inferred from the partial result. (2) actual unchanged full selection,
+serial local build, no database service; raw authoritative nix log retained as
+cp4-fixed-nextest-failed.log, outer cp4-fixed-full-gate.log. Initial7GiB free was
+insufficient for instrumented artifacts and concurrent independent fixture disks.
+(3) exact source/inputs/filters/deadlines/assertions unchanged. Keep the failure;
+retire only superseded goal-owned artifacts before unchanged retry, with no
+reduced test/thread/workload/gate setting. All11 other current outputs pass.
+Before cleanup, query zero referrers for13 specifically recorded older command
+Clippy/cross outputs. Their current counterparts pass/rooted; retain all raw
+historical evidence and exact retired path receipt. Remove only those goal-owned
+outlinks and use ordinary Nix liveness-protected deletion, no global cleanup.
+CP3 repaired-head final CI is green. For EACH actual test invocation in push
+39659790301 and PR39659801603, perform and retain three reviews:
+(1) compiler/feature/foundation-parser/native-adapter laws and all35 processor
+laws remain the actual contract owners; fixed192/256concurrent/256serial race
+workloads and original uncertainty/receipt/order assertions are preserved.
+(2) EACH workflow has74 actual runtime invocations:3compiler(2/1/1),27library
+feature runs,40nativePG runs(two services,each seven zero-skip profiles264/149/
+168/176/173/174/150 and13explicit single-law selectors),one workspace1629PASS
+(push105.926s,PR116.890s,three slow/five original exclusions),three replays2/1/1.
+Every one of the75 printed result lines per workflow was inspected: the extra
+264 summary is an echoed receipt, not a75th invocation. Zero-test library runs
+provide no contract coverage; guarded non-native PG cases are not processor-native
+qualification. (3) checkout9f719311e9c3973e8dad66920f94417e1d015318 has the exact
+reviewedc3a16f3c tree680cbebd645ddf7c98894fc4dad847fffe36f217, verified locally.
+Original selectors, workloads, assertions, error sources and limits unchanged;
+no filtered/skipped case is credited as executed. Current local host source and
+forced-registration controls remain separately retained; no old7534 CI credit.
+Raw cp3-repaired-final-ci-{pr,push}.log/counts.txt, fuzz and mutation logs retained
+for protected-delivery evidence. Final protected merge still requires current
+head/base/required checks/zero unresolved threads and expected-tree verification.
+CP3 PR415 protected-merged2026-10-21T19:43:46Z. Reviewed signed head
+c3a16f3c2179e30cbfe0b11e22893aab95cd44f8; squash merge
+98abf662278c40a730b88fdbe6814481f1db108e. Expected/actual/reviewed-head tree
+680cbebd645ddf7c98894fc4dad847fffe36f217. Fresh42successful checks/one scheduled-only
+skip, all required gates green, zero unresolved threads, ordinary exact-head
+protected squash. No admin/direct-main/hook bypass. Both74-invocation workflows
+and eight fuzz legs three-reviewed; mutation selected0 and earns no runtime
+credit. Package remains unpublished/release-disabled. CP4–CP9 remain required;
+this merge does not claim native command persistence, telemetry or release.
+Final CP3 remote-delivery evidence cp3-delivery.tar.gz SHA256:
+914f642352278eeb6e7abe1cde95d8dd07a3440d801528a194a90e3c21cc5fa7.
+This includes both complete current workflows/count receipts, fuzz/mutation logs,
+final checks, exact premerge thread/head/base receipt and merged commit/tree.
+Compiler message limitation from locked trybuild1.0.118 source: compile-fail
+classification parses only stdout JSON and falls back to success=true when no
+recognized diagnostic matches the source. It does not use the selected build's
+status/stderr there. Therefore the old 'unexpectedly compiled' report does not
+prove rustc actually accepted the fixture. Original subprocess status/stderr are
+unavailable; cause remains unknown, not classified as another storage failure.
+No macro/framework/dependency/test change. Exact unchanged nextest derivation
+5ay07acsfij6bhsd24q0rwgdmys0mihj is now retrying with12GiB free; every reader/
+fixture owner byte-matches original ykg0amq...source. Current dependency cache and
+11 passed outputs retained/rooted. No filters/thread counts/workloads/deadlines
+changed. Retired13 old goal outputs finish ordinary liveness-protected deletion,
+5.2GiB; prior three CP4 outputs retired1.4GiB. Raw path/deletion receipts retained.
+CP4 exact unchanged retry completes1633PASS/15slow/five existing exclusions,
+143binaries,in496.681s. Three distinct reviews:
+(1) all39 command laws execute: actual public read/projection checkpoint/reload,
+original v2 bytes and retry compatibility, command+fact evolution, independent
+corruption/limits/no-repair laws and inherited192fixed/256concurrent/256serial
+schedules. The previously failing overflow compiler fixture now passes100.495s;
+old subprocess cause remains unknown, not rewritten as proven storage failure.
+(2) actual full workspace Nix invocation, identical5ay07acsf... derivation and
+source/selection, no native DB service; no command-native integration credit.
+Earlier three fresh2/1/1 corpus replays already reviewed, not rerun in this retry.
+(3) ten reader/fixture owners byte-match actual ykg0amq...source. Exact assertions,
+workloads, thread counts, limits, filters and deadlines unchanged. Local source
+controls reject wrong public name/empty facts; source writer receipt retained.
+All12 current host outputs now pass/rooted. Both original red full-gate logs and
+unknown compiler-cause limitation remain visible. Normal signed hook/current-
+head CI/protected merge still required; no package release/native claim.
+Final CP4 full-gate evidence cp4-gates.tar.gz SHA256:
+cafc8497f1efbe785012a9df649b3b696bc0b8a8e7745868555cd50dc42140eb.
+Includes exact original red, unchanged green retry, source hashes and specific
+artifact-retirement receipts. Nextest runb938c04e-b0da-4195-996c-674959d70f4e.

@@ -626,3 +626,13 @@ assertion, workload, filter or deadline changed; exact lock patch and output-onl
 flag are independently visible in diff. Raw serial log retained. Coverage output
 installed successfully with no compiled target archive. Remaining non-test Nix
 checks still determine the full-gate result.
+2026-10-21 compiler-report audit: local locked trybuild1.0.118 src/run.rs Test::run
+uses cargo::build_test output.stdout only, parse_cargo_json and fallback Stderr
+whose default.success=true. It does not inspect output.status/stderr for this
+compile-fail diagnostic. Thus 'unexpectedly compiled' is not proof of actual
+successful rustc execution if the selected case produced no recognized JSON.
+Source https://github.com/dtolnay/trybuild/blob/1.0.118/src/run.rs . Original
+failed subprocess stderr/status were not retained by that owner; exact CP4
+compiler cause remains unknown. Ten concurrent StorageFull failures are observed,
+not proof of this eleventh cause. No framework/source/dependency change selected;
+unchanged full retry with adequate space and current-source checks required.
