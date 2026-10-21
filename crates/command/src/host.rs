@@ -148,29 +148,13 @@ impl<A: Aggregate, C, I, E> Message<A, C, I, E> {
     }
 }
 impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
-    #[cfg(not(feature = "tracing"))]
-    const fn new(message: Message<A, C, I, E>) -> Self {
-        Self {
-            trace: Trace::request(message.operation()),
-            message,
-        }
-    }
-    #[cfg(feature = "tracing")]
     fn new(message: Message<A, C, I, E>) -> Self {
         Self {
             trace: Trace::request(message.operation()),
             message,
+            #[cfg(feature = "tracing")]
             queue: None,
         }
-    }
-    #[cfg(not(feature = "tracing"))]
-    fn admission(&self) -> Trace {
-        self.trace.child("admission")
-    }
-    #[cfg(feature = "tracing")]
-    fn admission(&mut self) -> Trace {
-        self.queue = Some(self.trace.child("queue"));
-        self.trace.child("admission")
     }
     const fn finish(&mut self, outcome: &'static str) {
         self.trace.finish(outcome);
@@ -473,7 +457,11 @@ where
 
     fn send(&self, message: Message<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
         let mut call = Call::new(message);
-        let mut stage = call.admission();
+        #[cfg(feature = "tracing")]
+        {
+            call.queue = Some(call.trace.child("queue"));
+        }
+        let mut stage = call.trace.child("admission");
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
             drop(admission);
@@ -530,7 +518,11 @@ where
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
         let mut call = Call::new(Message::Submit { request, reply });
-        let mut stage = call.admission();
+        #[cfg(feature = "tracing")]
+        {
+            call.queue = Some(call.trace.child("queue"));
+        }
+        let mut stage = call.trace.child("admission");
         let admission = self.admission.lock();
         if *admission.borrow() == Lifecycle::Stopping {
             drop(admission);

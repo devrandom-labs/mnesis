@@ -15,61 +15,56 @@ pub struct Scope {
     subscriber: Dispatch,
 }
 pub struct Trace {
-    #[cfg(feature = "tracing")]
     scope: Scope,
     #[cfg(feature = "tracing")]
     outcome: &'static str,
 }
-#[cfg(not(feature = "tracing"))]
-impl Trace {
-    pub const fn request(_: &'static str) -> Self {
-        Self {}
-    }
-    pub const fn worker() -> Self {
-        Self {}
-    }
-    pub const fn stage(_: &'static str) -> Self {
-        Self {}
-    }
-    pub const fn scope(&self) -> Scope {
-        let _ = self;
-        Scope {}
-    }
-}
-#[cfg(feature = "tracing")]
 impl Trace {
     pub fn request(operation: &'static str) -> Self {
+        #[cfg(not(feature = "tracing"))]
+        let _ = operation;
         Self {
-            scope: Scope {
+            scope: Scope::new(|| Scope {
+                #[cfg(feature = "tracing")]
                 span: info_span!(
                     "mnesis.command.request",
                     operation,
                     outcome = tracing::field::Empty
                 ),
+                #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
-            },
+            }),
+            #[cfg(feature = "tracing")]
             outcome: "interrupted",
         }
     }
     pub fn worker() -> Self {
         Self {
-            scope: Scope {
+            scope: Scope::new(|| Scope {
+                #[cfg(feature = "tracing")]
                 span: info_span!(parent: None, "mnesis.command.worker", outcome = tracing::field::Empty),
+                #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
-            },
+            }),
+            #[cfg(feature = "tracing")]
             outcome: "interrupted",
         }
     }
     pub fn stage(stage: &'static str) -> Self {
+        #[cfg(not(feature = "tracing"))]
+        let _ = stage;
         Self {
-            scope: Scope {
+            scope: Scope::new(|| Scope {
+                #[cfg(feature = "tracing")]
                 span: debug_span!(
                     "mnesis.command.stage",
                     stage,
                     outcome = tracing::field::Empty
                 ),
+                #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
-            },
+            }),
+            #[cfg(feature = "tracing")]
             outcome: "interrupted",
         }
     }
@@ -97,6 +92,17 @@ impl Drop for Trace {
     }
 }
 impl Scope {
+    fn new(factory: impl FnOnce() -> Self) -> Self {
+        #[cfg(feature = "tracing")]
+        {
+            factory()
+        }
+        #[cfg(not(feature = "tracing"))]
+        {
+            drop(factory);
+            Self {}
+        }
+    }
     pub fn sync<T>(&self, body: impl FnOnce() -> T) -> T {
         #[cfg(feature = "tracing")]
         {

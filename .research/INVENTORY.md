@@ -56,10 +56,12 @@ Engine owns the active pending original; its Drop transfers it to a per-worker
 handoff, read only after native completion. Shutdown retains typed JoinError and
 the original together. Caller callbacks/failed values run outside admission.
 Core lifecycle/resource PR417 is protected-merged with verified exact tree;
-the trace candidate is not yet merged. Current candidate has1643 physical product
-lines (+324net against signed1539509a) and597net new test/helper lines, within
+the trace candidate is not yet merged. Current candidate has1641 physical product
+lines (+322net against signed1539509a) and597net new test/helper lines, within
 amended trace387/649 and1750whole-product budgets. Trace adds no root export,
-collector, exporter or runtime; feature-off queue/span fields remain omitted.
+collector, exporter or runtime; disabled Scope remains zero sized. Native span
+factories and Call construction are shared across modes, removing duplicated
+cfg-disabled functions. Source/type/data/record contracts and all11roots unchanged.
 Current core is unpublished/release-disabled; CP5 telemetry,
 native/performance qualification, documentation and delivery remain required.
 [Feature research](../docs/prds/command/research.md#cp1a-mechanical-extraction)

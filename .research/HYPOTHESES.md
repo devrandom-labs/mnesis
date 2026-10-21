@@ -2073,3 +2073,25 @@ Fail on zero selected cases and use the exact locked dependencies. Required
 feature-isolation aggregate gate then owns this member. Future metrics adds its
 two remaining combinations when that feature is actually implemented. Rollback
 is signed e9a802fc; normal full Nix hook still required before push.
+
+PR418 mutation failure before edits: run39685062277 baseline49PASS,69mutants with
+23caught/5missed/41compiler-only/0timeout. All70outcomes,29actual nextest invocations
+and successful bounded children three-reviewed against raw artifact12386397339.
+Five survivors are cfg-disabled duplicates of Trace request/worker/stage/scope
+and Call admission, omitted by the all-feature compiler. Preserve actual failed
+gate; do not exclude mutants, weaken the command or add tests that assert an
+internal trait absence. Resolve duplicated implementations at their owner.
+
+Experiment rollback dc9882e8 (clean signed/pushed). Replace duplicate enabled/
+disabled trace factories with common constructors using one private Scope factory
+that invokes native span construction only when enabled; disabled Scope remains
+zero sized and its generic factory is discarded. Share scope cloning; preserve
+dispatch-bound final Span Drop and native context behavior. Keep one Call
+constructor and inline its two tiny admission preparations to remove redundant
+mutable/immutable helper variants. No new export/type/clock/dependency/framework/
+macro or source-visibility trick. Budget<=50net product lines in trace/host,
+within original trace387/649 and1750physical ceilings; tests unchanged. All
+meaningful on/off behavior stays under existing laws and exact original
+removed-Drop/invalid-request controls. Strict Clippy in both modes, feature tests,
+full normal source gate, unchanged mutation command and signed hook before push.
+Do not claim this change fixes CI until actual mutation results prove it.

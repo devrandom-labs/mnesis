@@ -2426,3 +2426,172 @@ requires this member. Actual CI counts/outcomes remain pending; do not infer
 success from authored workflow. Metrics-only/combined combinations follow their
 implemented feature. This closes the ordinary-CI trace selection gap without
 claiming the default Nix gate executed trace laws.
+
+PR418 initial mutation run39685062277 FAILED:69mutants23caught/5missed/
+41compiler-only/0timeout after49PASS baseline3.122s. All70outcomes and their
+29actual nextest invocations plus each successful bounded child independently
+three-reviewed against exact head dc9882e8. Actual named data/trace/lifecycle
+laws catch the23; five49PASS survivors replace functions whose cfg excludes
+those bodies under --all-features (disabled Call.admission and Trace request/
+worker/stage/scope). These are not credited as observed mutations or a green
+path; no skip/exclusion/waiver/gate change. All first compiler errors inspected.
+Raw artifact/logs/diffs and all reviews archived:
+evidence/cp5-trace-mutants-initial.tar.gz SHA256
+45f08222834504da9cbdf4b6c900a2fa0f30450f8e7fbace8353a0c2add60e69.
+
+Candidate removes duplicated constructors at the owner: one shared private
+Scope factory creates native spans only when enabled, otherwise discards the
+factory and retains the zero-sized Scope. Scope cloning and one Call constructor
+are shared; two small queue/admission preparations stay at the two actual send
+sites. Dispatch-bound final Drop and all operational/data laws unchanged. Four
+net production lines removed; no new type/export/dependency/runtime/framework or
+mutant filtering. All-feature/all-target strict lint passes12.95s; default lint,
+full on/off laws, controls/source gate and actual unchanged mutation job pending.
+Do not claim CI repaired from this source simplification alone.
+
+Shared-factory enabled owner run cp5-trace-ci-fix-on.log:49PASS/6binaries/
+1original ignored/1.658s, exit0. Three reviews:
+1. Contract/counterexamples: all four unchanged subscriber laws retain exact
+   caller parentage, cross-dispatch normal/abort/panic cleanup, panic73, invalid
+   request validation/released permit and exact actual persisted data. All45
+   existing identity/late-commit/custody/resource laws and property workloads pass.
+2. Execution/selection/services: actual unfiltered all-feature owning invocation,
+   all49enumerated PASS, six binaries, original performance ignore retained.
+   Both bounded children actually pass; no database needed or native CP6 claim.
+3. Source/assertion/false positives: only private trace factories and two admission
+   preparations changed; all test assertions/data/workloads remain byte-identical.
+   Enabled scope still creates one real native span/dispatcher and owns final
+   drop under captured dispatch. No mutation exclusion or gate changes. Disabled
+   behavior and the unchanged mutation command still need their own proof.
+Bounded child readiness release: (1) real reentrant native waker/stop and observed
+empty uncertainty; (2) actual parent PASS, exact one-child success checked within
+2seconds; (3) original exact helper/oracle rejects deadlock, process failure and
+zero selection, unchanged source.
+Bounded timer-disabled child: (1) exact native Tokio panic/uncertain identity/zero
+rows/closed admission; (2) actual parent PASS, exact one-child success checked
+within2seconds; (3) exact original payload and helper reject zero selection,
+wrong cause, process failure or hang; unchanged source.
+Final formatted accounting is322net trace product/1641physical (two lines fewer
+than dc9882e8), not the preformat four-line estimate;597net tests unchanged.
+Both strict feature lints pass (enabled12.95s/disabled1.34s), no waiver.
+
+Shared-factory disabled owner run cp5-trace-ci-fix-off.log:45PASS/6binaries/
+1original ignored/1.503s, exit0. Three distinct reviews:
+1. Contract/counterexamples: all original typed outcome/custody, exact retry/
+   late-commit, byte/history, stop/dequeue/reentrant-readiness and generated race/
+   history laws pass with tracing disabled. No trace-subscriber coverage inferred.
+2. Execution/selection/services: actual unfiltered --no-default-features45-case
+   run, six binaries (empty trace target), one original ignore. Both bounded
+   children actually pass. In-memory controlled faults; no native database claim.
+3. Source/assertion/false positives: unchanged fixture/workload/assertions; common
+   Scope factory discards the disabled native-span factory and Scope remains zero
+   sized. Existing command behavior, records and original native causes remain;
+   no mutation exclusion/lint waiver or synthetic count. Actual enabled49-case
+   evidence stays separate. Full source gate/mutation results still pending.
+Each bounded child separately reviewed: reentrant readiness (1) native callback
+may stop, actual join reports no uncertainty; (2) parent PASS plus exact-name/
+exactly-one-PASS/successful child status within2seconds; (3) unchanged oracle
+rejects deadlock/process failure/zero selection. Timer-disabled (1) exact native
+panic/unknown identity/zero rows/closed; (2) parent PASS plus same exact child
+selection/status/bound; (3) unchanged exact cause/helper rejects wrong panic,
+zero tests, failure or hang. Neither child is inferred from compiler success.
+
+Shared-factory local unchanged mutation command exits0: baseline49PASS3.345s,
+63mutants23caught/40compiler-only/0missed/timeout. All64outcomes,24actual nextest
+invocations and successful bounded children three-reviewed against log/diff and
+first errors in cp5-trace-ci-fix-mutants-reviews.md. The original23behavioral
+catches remain; no excluded mutant/skip attribute/gate/workload change. This
+local source result does not turn the old CI head green; normal source gate,
+signed incremental push and actual new-head CI remain required.
+
+Shared-factory current release owner run cp5-trace-ci-fix-release.log:
+49PASS/6binaries/1original ignored/0.509s, exit0. Three reviews:
+1. Contract/counterexamples: optimized current common constructors preserve all
+   four exact subscriber/data/closure laws and all original45typed retry,
+   uncertainty/custody/resource/property laws. Original panic73 and invalid
+   direct/Tower validation/usable admission assertions remain.
+2. Execution/selection/services: actual unfiltered release --all-features49-case
+   run with all49PASS, six binaries and original ignore; both bounded child
+   parents actually pass. No external database or native CP6 claim.
+3. Source/assertion/false positives: current shared factories and unchanged
+   dispatcher-bound final Drop; tests byte-identical to pre-refactor source.
+   No assertion/workload/filter/deadline changes. Current local unchanged mutation
+   command retains all23behavioral catches with zero survivors, separate from
+  40compiler-only outcomes. Full normal source gate and actual new-head CI pending.
+Bounded readiness child: (1) actual reentrant native callback/stop must join with
+empty uncertainty; (2) parent PASS plus exact-one-child/status/2second checks;
+(3) unchanged exact helper rejects zero selection, deadlock and process failure.
+Bounded timer child: (1) native exact timer panic, unknown ID, zero rows/closed;
+(2) parent PASS plus exact-one-child/status/2second checks; (3) unchanged exact
+cause/helper rejects wrong panic, empty selection, failure or stuck process.
+
+Shared-factory source gate fresh corpus replays, each three-reviewed separately:
+CBOR2PASS1.00s: (1) actual header/chunk corpus decoder boundaries; (2) actual2case
+executable/zero failures/ignored/filtered/no service; (3) unchanged corpus/oracles,
+no arbitrary-input/new-fuzz/command/native proof inferred. Value1PASS1.00s:
+(1) actual value/event-type decoding boundary; (2) actual1case/zero failures/
+ignored/filtered/no service; (3) unchanged source/assertion, nonzero selection,
+no command/native claim. Wire1PASS1.00s: (1) actual frame corpus boundaries;
+(2) actual1case/zero failures/ignored/filtered/no service; (3) unchanged source/
+oracles, nonzero selection, no new-fuzz or durability claim. Raw
+cp5-trace-ci-fix-flake.log. Workspace still live; no final source-gate claim yet.
+
+Initial PR418 head dc9882e8 CI workflows completed successfully despite the
+separate failed mutation gate: PR39685062323 and push39685054084 each79actual
+invocations (3compiler/30unit/2command integration/3replay/1workspace/40native).
+Both1639PASS/144binaries/five existing exclusions/4slow; PR138.697s and
+push116.843s. The existing required feature job actually runs default45 and
+enabled49command integration cases in each workflow, plus9/9/9lib cases.
+All79actual invocations/workflow and every reached bounded child independently
+three-reviewed. Twenty required/suite native profiles execute in BOTH native
+jobs in EACH workflow; plain echoed run.log summaries have no extra credit.
+Six zero-unit harnesses/workflow remain build-only evidence. All8fuzz campaigns
+three-reviewed (libFuzzer61s each:wire13546943/header1850651/chunk1725433/value5703320;
+AFL60s each/CMPLOG/0crashes/0timeouts/newitems0/2/13/0). Existing codec targets only,
+not command-specific fuzz or native command CP6 proof. Original CI mutation
+failure stays visible; new shared-factory source still awaits full gate/push/CI.
+
+Shared-factory full-source workspace d2f3fafc-9ec0-4576-bab2-d67f96155c2a:
+1639PASS/144binaries/five existing exclusions/15slow/511.733s. Three reviews:
+1. Contract/counterexamples:45actual default command laws preserve exact original
+   retry/late-commit barriers, typed custody/causes, forced concurrent histories,
+   resource/byte/history boundaries and compatibility. Whole workspace preserves
+   existing adapter/projection/concurrency contracts; no trace-mode/native-command
+   credit inferred from this default invocation.
+2. Execution/selection/services: actual1639enumerated PASS,144binaries including
+   empty trace target, five original exclusions, no selected database service.
+   Both bounded child parents actually pass. Four enabled subscriber laws and
+   real Postgres profiles have separate explicit execution records.
+3. Source/assertion/false positives: all ten actual source/manifests/test owners
+   cmp equal to /nix/store/igxhpl2wp0fbxy1cy9rr71xk4ksr4jjs-source. Source frozen;
+   assertions/workloads/deadlines/filters and normal gate unchanged. Current
+   local mutation proof23caught/40compiler-only/0missed/timeout remains distinct
+   from runtime baseline. Remaining cross-target checks still need terminal gate.
+Bounded readiness child separately: (1) native callback reenters stop, actual join
+retains empty uncertainty; (2) actual parent PASS with exact child-name/one-PASS/
+success status inside2seconds; (3) unchanged helper rejects zero selection,
+process failure or deadlock. Bounded timer child separately: (1) exact native
+Tokio panic/unknown ID/zero rows/closed admission; (2) actual parent PASS with
+same exact-one/status/bound; (3) original exact payload/helper rejects wrong
+cause, empty selection, failure or hang. Compiler success is not child evidence.
+
+Shared-factory normal nix flake check -L --max-jobs1 exits0: all12host checks
+accepted, with unchanged audit/toml formatting cached; all applicable fresh
+checks passed. Actual workspace1639PASS/144bins/5existing exclusions/15slow/
+511.733s plus fresh2/1/1corpus replay, every run and reached bounded child
+three-reviewed above. All ten owners cmp to igxhpl2wp0fbxy1cy9rr71xk4ksr4jjs-source.
+Enabled debug49PASS1.658s/release49PASS0.509s and disabled45PASS1.503s are explicit
+separate feature-mode evidence. Other host systems omitted; Linux CI still
+required. Source/mutation failure is not erased by local success; signed
+incremental commit and actual new-head checks remain before PR418 delivery.
+
+All repair/current gate outputs rooted and compared exactly to current check
+outPaths after source freeze. Repair code/gates/local63mutant outcomes/reviews,
+initial failed69mutation artifact reference, both successful79-invocation CI
+workflows and8codec fuzz campaigns retained in evidence/cp5-trace-ci-fix.tar.gz
+SHA256 ab7870b87e34fbdeeabd7e6fb2d1e31238e2a8b2f2c5cda0d9351a03b06a903c.
+Normal signed hook/incremental push/new-head CI remain required; no merged or
+released tracing claim. Audit of retained slice: no added normal dependency,
+root export, clock, queue/lock/field authority, custom Future/macro/runtime/tool;
+Scope stays zero sized when disabled, all11roots/record semantics unchanged,
+whole-workspace/no_std/wasm gates pass. Actual runtime overhead remains CP6 work.
