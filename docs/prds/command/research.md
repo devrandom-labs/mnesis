@@ -845,3 +845,10 @@ from02c8ac86. Parent stronger assertions and exact Debug policy survive conflict
 resolution. All12 outputs now pass and are rooted as cp2-integration-check*;
 normal signed hook still required. Same supported Darwin fallback preserves the
 unchanged macro law; no existing assertion/filter/lint is weakened.
+CP2 protected-main integration is content-preserving: mainfa0b95b1's complete tree
+is identical to already imported6d0d8adc (5e5ec37a). Squash ancestry creates
+add/add conflicts; select the already tested typed source/stronger tests and union
+records from signed149ff89c, after proving that exact tree equality. No incoming
+unique content exists to discard. Product source and Nix inputs remain byte-for-
+byte equal to the1628-pass integration gate. Normal signed hook still runs; cached
+outputs earn zero runtime credit. This merge records protected main ancestry.
