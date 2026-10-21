@@ -1578,3 +1578,47 @@ Falsifier: alias still fails, Cargo discards fallback, another platform changes,
 any tests skipped/softened, or full normal gate fails. The initial gate was already
 failing and was agent-interrupted when free space reached581MiB; preserve that
 failure and exact completed/unfinished counts, not partial green credit.
+## CI blocker: current rustls-webpki patch — 2026-10-21
+
+PR411's live cargo-deny job fails RUSTSEC-2026-0382 on rustls-webpki0.103.15.
+This is an observed delivery blocker, not an expanded audit. Primary advisory
+issued2026-10-20 selects fixed0.103.16. Isolated fix/command-ci worktree from main;
+budget root Cargo.lock and four existing research records only, <=100 authored
+record lines. Existing fuzz locks do not contain this package. Update precisely
+this patch, keep all checks/advisories blocking, normal gate/PR/protected merge.
+Preserve command extraction and unrelated releasePR410.
+CI-fix budget extension before editing: add one supported Crane setting in
+flake.nix, because nextest tests passed1594/1594 but archive installation failed
+ENOSPC. cargoNextest defaults doInstallCargoArtifacts=true; no project consumer
+reads its target.tar.zst. Keep coverage output, every test command/filter and
+all checks unchanged. Set this flag false only for the check-only nextest owner.
+Do not alter buildDepsOnly artifacts or the native Postgres executable archive.
+Raw failed gate retains exact test results and disk failure. This is an unused
+build-output reduction using Crane's supported API, not reduced verification.
+
+CP1 current-head mutation repair, before edit: CI169 mutants reports two genuine
+public-capacity coverage misses, one nonterminating call predicate and one
+private-State Debug rendering miss (three missed total, one timeout). Budget:
+existing recovery/model tests <=25 added lines, existing .cargo/mutants.toml <=6
+policy-registration lines, and owning records; zero production/dependency/API/
+format change. Exercise advertised capacity in its canonical exhaustion scenario;
+bound the existing worker-exit reply waits so the wrong call predicate fails an
+assertion rather than only the runner. Private State never escapes the crate's
+public API; its Debug rendering is incidental under the repository's existing
+diagnostic-only exclusion policy. Register only that exact private implementation;
+exclude no capacity, lifecycle or other behavioral mutant. Preserve failure and
+actual artifact counts; review the runtime catches/unviable cases before delivery.
+CP2 parent-integration gate prerequisite, before edit: reuse the proven five-line
+Darwin nextest fallback from the CP3 gate. This same repository toolchain failure
+can affect the updated typed-error gate; actual hard-link probe fails134 then
+passes0 with selected driver, and the unchanged macro test/full1629 suite now pass.
+Budget extension: one Nix owner (five lines) beyond eight source/test owners;
+zero additional product/API/dependency/format changes. Same supported setting,
+same owner, no duplicated configuration definition, wrapper or framework.
+Keep it identical across the pending branches so protected integration converges.
+CP3 parent integration preregistered in primary before the merge: preserve every
+forced race and imported stronger parent assertion, exact private Debug policy
+and both research histories. Product source must remain identical to CP2.
+No new product owner/API/package/format/workload/gate change; final combined full
+gate and normal signed hook are required. Following protected main integration
+must preserve the exact reviewed source and uses ordinary Git/protected workflow.

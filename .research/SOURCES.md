@@ -580,3 +580,49 @@ compiler/binary processes. Actual selected Rust1.99.0 compiler/driver are same
 Nix toolchain; executing its hard-linked .links alias reproduces dyld abort134,
 then selected toolchain/lib fallback yields0. Use existing lib.makeLibraryPath;
 no dependency or global setup change. Broader store-alias cause is not proven.
+CI blocker checked2026-10-21: https://rustsec.org/advisories/RUSTSEC-2026-0382.html
+issued2026-10-20; live PR411 cargo-deny identifies locked rustls-webpki0.103.15.
+Upstream fixed0.103.16 selected, existing requirement accepts it. Only the root
+lock contains this package; isolated fuzz locks do not. No waiver/check reduction.
+CI patch gate fuzz replay completed three targets2/1/1,1s each. Each invocation
+reviewed for decoder contract/counterexamples, exact selection/counts and source
+independence: unchanged shared parser bodies check panic freedom, not processor
+persistence or sustained fuzz coverage. No ignore/filter/deadline/source change;
+these are fresh executions, distinct from earlier planning records.
+Crane locked source44k6cm6lbjpfq3xnl9wg0jpqa5rpsvmf-source/lib/cargoNextest.nix:
+partitions1 delegates doInstallCargoArtifacts to mkCargoDerivation; its default
+true exports compiled target cache. withLlvmCov writes $out/coverage separately.
+Project consumers inspected: no check consumes nextest's target.tar.zst; native
+Postgres has a separate required executable archive, unchanged. Use supported
+false flag for nextest only. Test commands/filters and coverage output are intact.
+Failed-install gate workspace review1: all1594 source-owner tests passed, including
+actual model/version-conflict/corruption and lifecycle assertions; only dependency
+patch changed, so command processor acceptance is not inferred. Review2:601.259s,
+16slow,4 established compiler exclusions, no native database credit from guarded
+Darwin cases. Review3: raw first failure is zstd install archive ENOSPC after all
+tests and coverage, not a product assertion; no source/filter/workload/deadline
+changed. Preserve raw failure; retry full checks using supported storage flag.
+CI output-only retry failed before tests while unpacking the common Cargo cache
+(ENOSPC; raw ci-fix-gate-noarchive.log). Review1: no contract assertion ran;
+prior1594-pass result does not make this gate green. Review2: zero new tests,
+not a filtered/guarded pass; native database unavailable on this host gate.
+Review3: unchanged source/test command; failure is dependency extraction, not an
+assertion. No new runtime credit. Next retry serializes Nix derivations using
+--max-jobs 1 and removes only this goal's generated CP1 target cache (2.3GiB),
+whose debug/release logs are retained. No global GC or other project cleanup.
+Serial gate's three fresh fuzz invocations (replay2/1/1, each1s) reviewed after
+execution: (1) existing wire/CBOR panic-freedom invariants and corpus replay are
+unchanged; processor persistence/identity remain outside these bodies. (2) all
+four selected cases executed, zero ignored/filtered, native DB unavailable here;
+nextest is a separate still-running invocation. (3) source/filter/seed/workload
+unchanged from prior failed-install run; no sustained campaign or new processor
+fuzz coverage is inferred. Raw ci-fix-gate-serial.log preserves exact results.
+Serial gate nextest review1: unchanged actual workspace assertions exercise store
+ordering, conflicts, corruption and lifecycle; dependency patch introduces no
+processor acceptance claim. Review2: run da13a0b2-c674-495d-982c-5cde7e3902bb,
+1594/1594PASS489.678s14slow/138binaries, four existing compile-fail exclusions.
+Darwin guarded PG cases are not live-DB evidence. Review3: no executable source,
+assertion, workload, filter or deadline changed; exact lock patch and output-only
+flag are independently visible in diff. Raw serial log retained. Coverage output
+installed successfully with no compiled target archive. Remaining non-test Nix
+checks still determine the full-gate result.
