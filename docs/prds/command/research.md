@@ -537,3 +537,183 @@ logs and the audited CI repair results. SHA-256:
 731e8a8d1c42eeebe44473fa0eefa08596a408373fb9bbbeaaaed962128654c4.
 The earlier test bundle is unchanged. Normal signed hook/current-head protected
 checks still determine delivery; cached reuse gives no additional runtime credit.
+CP2a pre-change typed-cause consumer fails compilation with E0432 (Cause absent).
+Zero test bodies ran. Three reviews: (1) canonical lost-commit test now requires
+a directly matched StoreError adapter leaf plus unchanged ID/raw-row/receipt
+assertions; (2) exact selected test command reached compilation only, not a runtime
+failure; (3) the new public contract is absent and current source boxes dynamic
+errors, but this diagnostic alone is not a behavioral regression witness. Implement
+real typed reply propagation before executing the unchanged strengthened law.
+CP2a typed propagation passes32 owning tests (6model+1adaptation+1property+
+24recovery), one original ignored measurement. Three reviews: (1) original
+late-append/empty-read/retry-rejection/stream-scope laws persist; strengthened
+canonical cases directly match typed adapter and std::io decision leaves without
+downcasts or recursive processor errors. Pending success clears only after a
+validated receipt. (2) all owner targets execute, no filter, property256 cases;
+no new post-append fold or native adapter credit yet. (3) raw records/receipt/ID/
+state assertions and deadlines remain unchanged; error expectations are strictly
+more specific. Dedicated post-append panic/reconstruction and typed kernel-read
+witnesses follow before claiming CP2a qualified.
+CI repair complete checks: workflows39605915669(PR) and39605894953(push) pass
+at24317917. Three reviews after every logged actual invocation: (1) unchanged
+contract-owner assertions cover compile diagnostics, feature boundaries, native
+recovery/atomicity and decoder behavior; no command processor qualification.
+(2) each workflow has74 actual test invocations:3 compiler,27 lib-feature,
+20 dedicated nativePG,20 nativePG inside Nix,1 workspace nextest and3 replay.
+Each native group has seven complete zero-skip profiles and13 selected laws;
+final echoed native receipt excluded. Lib counts per default/no-default/all:
+kernel15/15/15,macros1/1/1,store217/217/217,store-testing0/0/0,wake17/17/17,
+wake-nostd0/0/0,inmemory25/25/30,Fjall131/131/131,PG11/11/11. Zero-test lib
+harnesses are not conformance evidence. Compiler2/1/1; workspace1594 each with
+four established compiler exclusions (PR150.282s,push134.285s); replay2/1/1 each.
+Real PG18.6 startup/operations/shutdown visible in all four native groups; guarded
+non-native harnesses provide no extra DB credit. (3) source/tests/filters/deadlines
+match the reviewed CI patch and original owners, without reduced workloads. This
+fix changes the lock patch and unused nextest output only; coverage stays present.
+Raw ci412-pr.log and ci412-push.log retain exact run IDs/counts and cached steps.
+All six current required push/PR contexts pass; zero unresolved review threads,
+main27de unchanged, expected squash tree3ab79ecda4af32faf7d8f016af4b02392df73729.
+Historical bootstrap cancellation-derived gate failure is not a current required
+check failure; gh pr checks --required passes and merge state is CLEAN.
+CP2a extended owning suite passes34 tests (6model+1adaptation+1property+
+26recovery), one original ignored measurement. Three reviews: (1) a real committed
+row survives a post-append application panic and failed fresh reconstruction;
+original panic payloads are observed through both joins. Healthy exact recovery
+returns receipt1/state7 with one total handler call and unchanged full raw row.
+A real4097-record append yields the exact public StoreError::Kernel rehydration
+limit4096 without repair writes. (2) all owner targets execute, no filter; existing
+256 histories/deadlines intact. The new full-history read has a2s operation profile
+chosen before its first execution. In-memory is the only backend in this run.
+(3) assertions compare exact typed causes/IDs/receipts/state/raw history, not logs;
+no fake repository or mirrored decision implementation. Failed completion retains
+the caller's original request in this witness; report handoff on abort/panic is
+still CP5 work. Codec/resource distinctions and final CP2 delivery remain pending.
+CP2a optimized suite passes34 owner tests, one original ignored measurement.
+Three reviews: (1) exact typed adapter/domain/kernel sources, delayed-commit
+custody and both actual fold failures recover one committed row with one handler
+call; (2) release binaries run all owner targets, property256 cases, no filter or
+native DB; (3) assertions/workloads/deadlines remain identical to the debug run,
+with raw history/receipt/state/handler-count oracles. No new release measurement
+credit is inferred from these correctness tests. Earlier Clippy rejected repeated
+expanded startup/reply types; aliases now derive domain/store errors from their
+owning types once, without weakening lint policy. Final lint/full gate pending.
+Complete CP2 diagnostics owning run passes34 tests, one original ignored
+measurement. Three reviews: (1) queue full/invalid capacity/zero deadline, history
+full and domain replay limits now have distinct outcomes; request versus record
+byte failures preserve the original WriteZero cause. Existing exact retry,
+late-write, commit-lost, panic/reconstruction and typed kernel laws still pass.
+(2) all owner targets/256 generated histories execute without filter; in-memory
+only. No old deadline, workload or gate changed. (3) canonical byte/lossy/schema/
+capacity assertions are more specific, and raw-row/state/receipt/no-redecision
+oracles remain intact. Checked fact totals replace saturation/unchecked addition;
+accepted JSON fields/order and format constants stay unchanged. One formatter
+parse error in the strengthened assertion was corrected before tests executed;
+its raw log is retained, not treated as a runtime defect. Clippy/full gate and
+final optimized diagnostics run remain required before CP2 qualification.
+The strengthened capacity witness passes1 selected test,26 filtered/zero ignored.
+Three reviews: (1) actual4096-record history still yields original receipt1 and
+state/version4096; a fresh request returns HistoryFull and writes nothing. An
+external4097th record then yields exact typed kernel limit4096 with no repair.
+(2) one canonical in-memory case executes with its preselected2s operation bound,
+not the full suite/native DB. (3) exact ID/version/fact-count/state/raw-row equality
+rejects missing duplicate precedence, wrong resource mapping or hidden append;
+the earlier kernel-read witness was extended rather than duplicated. Clippy had
+reported an unfulfilled lint expectation on constant evaluation; remove the
+unnecessary expectation, retaining compile-time checked nonzero construction and
+all global lint levels. No assertion or workload was weakened.
+Final optimized diagnostics suite passes34 tests, one original ignored measurement.
+Three reviews: (1) direct typed sources, distinct resource reasons and all prior
+uncertainty/fold/corruption laws pass; (2) all optimized owner targets execute,
+property256 cases, no filter/native service/performance claim; (3) original
+assertions remain and byte/lossy/schema diagnostics are more specific. This review
+finds one remaining counterexample in the capacity witness: constructing4096 rows
+externally would not reject an off-by-one admission threshold4095. Strengthen
+that same case to submit record4096 through the real processor from4095 before
+checking full history and the unsupported4097th row. Product source is unchanged;
+run only the strengthened case in both profiles, then the full workspace gate.
+The revised capacity case passes1 debug test,26 filtered/zero ignored. Three
+reviews: (1) the processor itself accepts physical record4096 from a4095-record
+history, then preserves old receipt1 and rejects a fresh request at capacity;
+unsupported external4097th data retains the typed kernel failure without repair.
+(2) only this strengthened case ran, with unchanged2s operation deadline and
+in-memory backend. (3) exact final receipt4096/events1 and before/after raw counts
+now reject threshold4095, in addition to duplicate-precedence/resource-mapping
+counterexamples. Adjacent error descriptions use processor/acceptance terminology;
+the persisted controller.accepted.v2 name and all format fields stay unchanged.
+The strengthened boundary case passes1 optimized test,26 filtered/zero ignored.
+Three reviews: (1) actual4095→4096 admission, old receipt, full-history rejection
+and typed unsupported-history failure hold in release; (2) this selected case
+executes on the final source, complementing the prior34-test release suite's
+unchanged other33 cases; no native/performance credit; (3) all new max-boundary
+assertions and2s deadline are identical to debug, with no source/workload weakening.
+The complete workspace gate follows on the same final source.
+
+CP2 host build exits0 with all12 standard outputs retained under cp2-check*.
+The actual nextest invocation0981e626-c8b8-4a41-a4bb-f723ed3f6135 passes1628
+tests in549.765s (142 binaries,15slow,five existing exclusions). Three reviews:
+(1) all34 command-owner cases execute, including actual4095→4096 admission,
+committed-fold/reconstruction failures, typed sources and retained uncertainty;
+forced multi-worker races and failed-completion report custody remain unqualified.
+(2) release/LLVM-instrumented workspace selection and exact counts are visible;
+four compiler cases remain delegated to existing checkout CI and the original
+measurement stays explicitly ignored. No real processor Postgres/Fjall credit
+comes from this host run. (3) cmp confirms every changed command source/test file
+matches /nix/store/7fj0dingxxhy1caqlq2azwway4hpfd77-source; no assertions, deadlines,
+property256 workload or selection were reduced. PR413's known capacity/lifecycle
+mutation misses remain visible and require repair; a green run does not close them.
+
+Each of the three fresh replay invocations also received three reviews:
+(1) CBOR header/chunk, value validation and wire decoder each exercise their
+existing fuzz-common product oracle; these are foundation laws, not command
+acceptance evidence. (2) cbor2PASS,value1PASS,wire1PASS,1.00s per invocation,
+no ignored/filtered cases or database service; these are bounded replay/smoke
+runs, not new long fuzz campaigns. (3) the harnesses remain unchanged and invoke
+the actual shared decoder checks rather than mirrored implementations. Raw log:
+/tmp/mnesis-command-start-20261021/cp2-full-gate.log.
+
+Important retained limitation: after the passing nextest checkPhase and coverage
+output, the Nix audit-tmpdir fixup shell subprocess logs Segmentation fault11.
+The derivation/build still exits0 and all outputs exist; this is not a failed test
+or evidence that the post-test scan completed. Investigate before calling the
+whole gate clean. The existing sandbox cargo-audit missing-index/yank lookup
+limitation is also unchanged. Neither diagnostic is suppressed or waived.
+
+CP0 foundation current head d88c6efa1b7ad04b6979ee35e1418f08f010ccfb is CLEAN
+with all checks complete and no failures or review threads. Its diff from protected
+main efec41a changes records/evidence only: no Rust/TOML/Nix/lock change. Actual
+CI39617097532(PR) and39617089755(push) each have74 runtime invocations (75 summary
+lines include one echoed native receipt). Three reviews for each invocation:
+(1) compiler diagnostics, library feature contracts, native persistence/recovery,
+workspace owners and existing decoder fuzz oracles remain unchanged; these runs
+qualify foundation delivery, not command implementation. (2) each executes three
+compiler2/1/1,27 feature-library invocations,40 nativePG invocations (two fresh
+PG18.6 services, each seven zero-skip profiles264/149/168/176/173/174/150 plus13
+selected laws), workspace1594 and three replay2/1/1. Nextest135.582s(PR) and
+131.335s(push), four established compiler exclusions. Zero-test library harnesses
+remain zero coverage credit. Server startup/shutdown visible in all four groups.
+(3) filtered product source matches the previously qualified protected CI repair;
+no changed assertions, selection, workload or source substituted by this PR.
+Raw cp0-final-ci-{pr,push}.log/counts.txt retain exact invocation receipts.
+
+CP0 deep-fuzz39617097385 also completes. Each of its eight campaigns received
+three reviews: (1) unchanged wire/header/chunk/value product oracles, not command
+identity/concurrency evidence; (2) four libFuzzer61s runs: wire10979052,header1854316,
+chunk2214683,value8458746; four bounded AFL runs retain their own final receipts;
+(3) no changed harness/filter/workload, no new decoder guarantee inferred beyond
+those campaigns. Logs remain cp0-final-fuzz.log. Mutation CI sees no Rust diff
+and runs zero mutants, which is not mutation coverage. Current required contexts
+all pass and there are zero unresolved review threads. Expected protected squash
+tree3ee54613c61226c317c63347c6bde81c7c04711e; merge must match d88c6efa exactly.
+CP0 protected merge is ca62b557ed870ec7ceb336ea9d08f21df0e664d5 at2026-10-21T15:37:01Z.
+Actual tree3ee54613c61226c317c63347c6bde81c7c04711e matches the expected tree;
+ordinary protected squash matched reviewed d88c6efa, with no bypass.
+
+CP2 raw logs/source receipt are retained in [cp2-gates.tar.gz](evidence/cp2-gates.tar.gz),
+SHA256342b85b86ff3b0120dcb315c5196352fbeb8ba659a58e247b074624300f5b61b.
+The post-test fixup diagnostic is scoped: ls/file/source inspection establishes
+that nextest's entire output is one ASCII LCOV coverage file, with no executable
+or wrapper. audit-tmpdir classifies ELF RPATHs and wrapped scripts; neither exists
+in this output. Its classifier still crashed and is not claimed complete. No
+hook/check is disabled, no assertion/workload changes, and normal signed hook
+still runs every declared check. This is a retained Nix-shell tooling limitation,
+not a reason to change the command processor or expand product scope.

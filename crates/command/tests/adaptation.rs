@@ -12,9 +12,9 @@ use std::time::Duration;
 
 use futures::TryStreamExt;
 use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
-use mnesis_command::{CommandProcessor, Error, Limits, Request};
+use mnesis_command::{Cause, CodecError, CommandProcessor, Error, Limits, Request};
 use mnesis_inmemory::InMemoryStore;
-use mnesis_store::{RawEventStore, Store, StreamKey};
+use mnesis_store::{RawEventStore, Store, StoreError, StreamKey};
 use serde::{Deserialize, Serialize};
 
 #[path = "support/finish.rs"]
@@ -184,7 +184,7 @@ async fn lossy_admission(store: &Store<InMemoryStore>) {
             },
         ))
         .await;
-    assert!(matches!(submitted, Err(Error::Json(_))));
+    assert!(matches!(submitted, Err(Error::Request(CodecError::Lossy))));
     assert_eq!(DECISIONS.load(Ordering::SeqCst), before);
     assert_eq!(
         raw(store.raw(), b"lossy").await,
@@ -204,7 +204,9 @@ async fn encoding_failures(store: &Store<InMemoryStore>) {
     let oversized_record = request(1, 0, Rename("x".repeat(2500)));
     assert!(oversized_record.encode().unwrap().len() < 4096);
     let failed_record = controller.submit(oversized_record).await;
-    assert!(matches!(failed_record, Err(Error::Store(_))));
+    assert!(
+        matches!(failed_record, Err(Error::Failed(cause)) if matches!(*cause, Cause::Store(StoreError::Encode(CodecError::Bytes { source:Some(_) }))))
+    );
     assert_eq!(
         raw(store.raw(), b"oversized").await,
         Vec::<serde_json::Value>::new()
@@ -214,7 +216,10 @@ async fn encoding_failures(store: &Store<InMemoryStore>) {
     let oversized_request = request(1, 0, Rename("x".repeat(4096)));
     let before = DECISIONS.load(Ordering::SeqCst);
     let failed_request = controller.submit(oversized_request).await;
-    assert!(matches!(failed_request, Err(Error::Json(_))));
+    assert!(matches!(
+        failed_request,
+        Err(Error::Request(CodecError::Bytes { source: Some(_) }))
+    ));
     assert_eq!(DECISIONS.load(Ordering::SeqCst), before);
     let accepted = controller
         .submit(request(1, 0, Rename(String::from("small"))))
@@ -265,7 +270,9 @@ async fn counter(store: &Store<InMemoryStore>) {
         serde_json::json!({"id": 2, "version": 2, "events": 0})
     );
     let rejected = controller.submit(request(3, 2, Count::Reject)).await;
-    assert!(matches!(rejected, Err(Error::Rejected(Rejected))));
+    assert!(
+        matches!(rejected, Err(Error::Failed(cause)) if matches!(*cause, Cause::Rejected(Rejected)))
+    );
     let changed = controller.submit(request(1, 0, Count::Ignore)).await;
     assert!(matches!(changed, Err(Error::Mismatch)));
     let metadata = controller.submit(request(1, 2, Count::Pair(2, 5))).await;
@@ -371,7 +378,9 @@ async fn domain_limit(store: &Store<InMemoryStore>) {
     )
     .unwrap();
     let denied = controller.submit(request(1, 0, Count::Pair(2, 5))).await;
-    assert!(matches!(denied, Err(Error::Capacity)));
+    assert!(
+        matches!(denied, Err(Error::Failed(cause)) if matches!(*cause, Cause::ReplayLimit { maximum:1 }))
+    );
     assert_eq!(
         raw(store.raw(), b"limited").await,
         Vec::<serde_json::Value>::new()
@@ -389,7 +398,9 @@ async fn domain_limit(store: &Store<InMemoryStore>) {
         .unwrap();
     assert_eq!((single.version.as_u64(), single.events), (2, 1));
     let cumulative = controller.submit(request(3, 2, Count::One(9))).await;
-    assert!(matches!(cumulative, Err(Error::Capacity)));
+    assert!(
+        matches!(cumulative, Err(Error::Failed(cause)) if matches!(*cause, Cause::ReplayLimit { maximum:1 }))
+    );
     assert_eq!(raw(store.raw(), b"limited").await.len(), 2);
     let without_facts = controller
         .submit(request(3, 2, Count::Ignore))

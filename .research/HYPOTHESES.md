@@ -1469,3 +1469,54 @@ are distinct from the Tokio-owned worker wake. Readiness itself does not enqueue
 so its check/poll may be separable from the enqueue/stop linearization gate.
 Use a bounded real-SUT witness before any change; no custom queue/waker runtime
 or gate weakening. This remains a hypothesis, not a reproduced defect.
+
+## CP2a: typed causes through the owned worker — pre-edit budget
+
+Threatened invariant: adapters/kernel/domain causes must survive every reply,
+including uncertain exact retries, without downcasting or recursive error chains.
+Carry S::Error as the handle/channel's trailing error parameter; keep start/resume
+inference through a factory returning the concrete typed handle. Use one public
+Cause union for definite failure and optional uncertain cause. The pure adapted
+aggregate retains a private decision error; promote it once at the engine edge.
+StoreError::Kernel after save remains uncertain; ExecuteError::Kernel before save
+is definite unless older pending custody exists. Keep pending until valid receipt
+observation. Preserve format, queue order, request identity, limits and runtime.
+Budget: four src owners and recovery/adaptation/history/model tests (eight files),
+<=250 net production lines, <=250 test lines, one new public Cause type. No new
+dependency/configuration/schema/runtime/tool. Resource/codec distinctions are the
+next CP2 slice. Falsifier: typed leaf cannot be matched externally, any previous
+pending request disappears on failed retry/read, a post-append failure becomes
+retry-safe, or original tests/workloads weaken. First replace the canonical lost-
+response test's downcast with typed matching; preserve original row/receipt laws.
+CP2a test budget refinement before adding missing acceptance witnesses: <=350
+new/changed test lines instead of250, still below the PRD's500-line ceiling.
+Keep the same eight owners and250-net-production budget. Add actual committed
+append followed by application fold panic, failed fresh reconstruction, healthy
+exact recovery with no second handler call, and a real over-limit history whose
+kernel source is matched through the public typed error. No synthetic repository
+or weakened cleanup/selection/assertions.
+CP2 scope refinement before further edits: finish codec/resource diagnostics in
+this same focused typed-error change, keeping one coherent public failure model.
+The same eight source/test owners, <=250 net production and <=350 changed test
+lines remain; public additions become Cause plus CodecError (two, within the PRD
+ceiling). No dependency/format/runtime change. Distinguish request/record bytes,
+lossy serialization, malformed/unsupported records, queue fullness/invalid limits,
+history exhaustion, domain replay limit and version overflow. Retain original
+codec sources where they exist; replace fabricated JSON errors for own invariants
+with typed variants. Compute fact totals once with checked arithmetic. Constant
+nonzero limits must be checked during compilation, with no runtime fallback.
+Falsifiers: changed accepted bytes, new false retry-safe outcome, old receipt
+unreadable at capacity, lost source, changed workload or >budget. Preserve all
+original tests and add/strengthen the owning diagnostic assertions before the
+full gate. Documentation/evidence/status updates remain mandatory project records.
+CP5 source audit follow-ups, not yet reproduced: the worker's biased select can
+poll stop pending, then dequeue a call and synchronously wake a waiting sender
+whose Waker calls stop. Check whether queued work then executes after stop was
+published. Force this with the existing delayed-active Gate, one queued call and
+a third readiness waiter's standard Wake implementation; no scheduler luck or
+production-only test hook. Also retain the recorded reentrant-wake/drop risk
+while Admission is locked. Test before selecting the smallest locking change.
+For failed-completion custody, compare supported Tokio join/abort facilities;
+a typed completion owner over the original join and one shared authoritative
+pending request may be necessary. Do not copy pending state or discard native
+terminal causes. Any public-surface budget extension needs this concrete proof.

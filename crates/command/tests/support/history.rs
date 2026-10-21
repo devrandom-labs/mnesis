@@ -10,9 +10,9 @@ use std::num::{NonZeroU64, NonZeroUsize};
 use std::time::Duration;
 
 use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
-use mnesis_command::{CommandProcessor, Error, Limits, Request};
+use mnesis_command::{Cause, CommandProcessor, Error, Limits, Request};
 use mnesis_inmemory::InMemoryStore;
-use mnesis_store::Store;
+use mnesis_store::{RawEventStore, Store};
 use serde::{Deserialize, Serialize};
 use tokio::task::JoinHandle;
 
@@ -114,10 +114,11 @@ impl Model {
         Answer::Accepted(version + 1, events)
     }
 }
-type Host = CommandProcessor<Counter, Operation>;
+type Factory = CommandProcessor<Counter, Operation>;
+type Host = CommandProcessor<Counter, Operation, NonZeroU64, 0, <Backend as RawEventStore>::Error>;
 type Task = JoinHandle<mnesis_command::Shutdown<Operation>>;
 fn start(store: &Store<Backend>) -> (Host, Task) {
-    Host::start(store, String::from("history"), limits()).unwrap()
+    Factory::start(store, String::from("history"), limits()).unwrap()
 }
 const fn limits() -> Limits {
     Limits {
@@ -130,7 +131,7 @@ async fn restart(store: &Store<Backend>, host: Host, task: Task, model: &Model) 
     let shutdown = finish(task).await;
     assert_eq!(shutdown.uncertain(), None);
     let (restored, observed) =
-        Host::resume(store, String::from("history"), limits(), &shutdown).unwrap();
+        Factory::resume(store, String::from("history"), limits(), &shutdown).unwrap();
     let state = restored.read().await.unwrap();
     assert_eq!(
         state.0.map_or(0, Version::as_u64),
@@ -155,7 +156,9 @@ async fn apply(host: &Host, model: &mut Model, id: u64, expected: u64, operation
         }
         Err(Error::Mismatch) => Answer::Mismatch,
         Err(Error::Conflict) => Answer::Conflict,
-        Err(Error::Rejected(Rejection)) => Answer::Rejected,
+        Err(Error::Failed(cause)) if matches!(*cause, Cause::Rejected(Rejection)) => {
+            Answer::Rejected
+        }
         Err(other) => panic!("unexpected controller error: {other:?}"),
     };
     assert_eq!(observed, predicted);
@@ -212,7 +215,7 @@ pub async fn history(inputs: &[(u8, u8, u8, u8)]) {
             command: Operation::Add(5)
         })
     );
-    (host, task) = Host::resume(&store, String::from("history"), limits(), &unsettled).unwrap();
+    (host, task) = Factory::resume(&store, String::from("history"), limits(), &unsettled).unwrap();
     let retried = host
         .retry(NonZeroU64::new(3).unwrap())
         .await

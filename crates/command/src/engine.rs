@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::time::Duration;
 
-use mnesis::{AggregateRoot, EventOf, Handle, Version};
+use mnesis::{AggregateRoot, EventOf, Handle, KernelError, Version};
 use mnesis_store::{
     CommandRepository, EventStore, ExecuteError, RawEventStore, Repository, Store, StoreError,
 };
@@ -9,8 +9,8 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tokio::time::timeout;
 
-use crate::model::{Adapted, Codec, Decision};
-use crate::{Error, Receipt, Request};
+use crate::model::{Adapted, Codec, Decision, Mismatch};
+use crate::{Cause, CodecError, Error, Receipt, Request};
 
 type Root<A, C, I, const N: usize> = AggregateRoot<Adapted<A, C, I, N>>;
 
@@ -54,18 +54,18 @@ where
         (self.id, self.pending)
     }
 
-    async fn load(&self) -> Result<Root<A, C, I, N>, Error<A::Error, I>> {
+    async fn load(&self) -> Result<Root<A, C, I, N>, Error<A::Error, I, S::Error>> {
         let root = timeout(self.timeout, self.repository.load(self.id.clone()))
             .await
             .map_err(|_| Error::Timeout)?
-            .map_err(|error| Error::Store(Box::new(error)))?;
-        if root.state().map_err(|_| Error::Corrupt)?.integrity.is_err() {
+            .map_err(Cause::Store)?;
+        if root.state().map_err(Cause::Kernel)?.integrity.is_err() {
             return Err(Error::Corrupt);
         }
         Ok(root)
     }
 
-    fn settle(&mut self, root: &Root<A, C, I, N>) -> Result<(), Error<A::Error, I>> {
+    fn settle(&mut self, root: &Root<A, C, I, N>) -> Result<(), Error<A::Error, I, S::Error>> {
         if let Some(pending) = &self.pending
             && root.version() <= pending.expected
         {
@@ -84,19 +84,16 @@ where
         &mut self,
         root: &mut Root<A, C, I, N>,
         request: Request<C, I>,
-    ) -> Result<(), Error<A::Error, I>> {
+    ) -> Result<(), Error<A::Error, I, S::Error>> {
         let version = root
             .version()
             .map_or(Some(Version::INITIAL), Version::next)
-            .ok_or(Error::Capacity)?;
+            .ok_or(Cause::Kernel(KernelError::VersionOverflow))?;
         let id = request.id.clone();
         let previous = self.pending.replace(request.clone());
         let decision = Decision { request, version };
         match timeout(self.timeout, self.repository.execute(root, decision)).await {
-            Ok(Ok(_)) => {
-                self.pending = None;
-                Ok(())
-            }
+            Ok(Ok(_)) => Ok(()),
             Err(_) => Err(Error::Uncertain {
                 command: id,
                 source: None,
@@ -105,10 +102,8 @@ where
                 self.pending = None;
                 Err(Error::Conflict)
             }
-            Ok(Err(ExecuteError::Decide(error))) => self.failure(previous, error),
-            Ok(Err(ExecuteError::Kernel(error))) => {
-                self.failure(previous, Error::Store(Box::new(error)))
-            }
+            Ok(Err(ExecuteError::Decide(error))) => self.failure(previous, error.into()),
+            Ok(Err(ExecuteError::Kernel(error))) => self.failure(previous, Cause::Kernel(error)),
             Ok(Err(ExecuteError::Store(error))) => self.store_failure(id, previous, error),
         }
     }
@@ -116,8 +111,8 @@ where
     fn failure(
         &mut self,
         previous: Option<Request<C, I>>,
-        error: Error<A::Error, I>,
-    ) -> Result<(), Error<A::Error, I>> {
+        error: Cause<A::Error, S::Error>,
+    ) -> Result<(), Error<A::Error, I, S::Error>> {
         self.pending = previous;
         match &self.pending {
             // A definite failure of this retry says nothing about the older
@@ -126,7 +121,7 @@ where
                 command: original.id.clone(),
                 source: Some(Box::new(error)),
             }),
-            None => Err(error),
+            None => Err(error.into()),
         }
     }
 
@@ -134,16 +129,16 @@ where
         &mut self,
         id: I,
         previous: Option<Request<C, I>>,
-        error: StoreError<S::Error, serde_json::Error, serde_json::Error>,
-    ) -> Result<(), Error<A::Error, I>> {
+        error: StoreError<S::Error, CodecError, CodecError>,
+    ) -> Result<(), Error<A::Error, I, S::Error>> {
         match error {
             StoreError::Encode(_) | StoreError::Envelope(_) | StoreError::VersionOverflow => {
-                self.failure(previous, Error::Store(Box::new(error)))
+                self.failure(previous, Cause::Store(error))
             }
             // Adapter errors in released Mnesis do not prove COMMIT failed.
             _ => Err(Error::Uncertain {
                 command: id,
-                source: Some(Box::new(error)),
+                source: Some(Box::new(Cause::Store(error))),
             }),
         }
     }
@@ -151,12 +146,13 @@ where
     pub(super) async fn submit(
         &mut self,
         request: Request<C, I>,
-    ) -> Result<Receipt<I>, Error<A::Error, I>> {
+    ) -> Result<Receipt<I>, Error<A::Error, I, S::Error>> {
         let mut root = self.load().await?;
         let existing = root
             .state()
-            .map_err(|_| Error::Corrupt)?
-            .receipt(&request)?;
+            .map_err(Cause::Kernel)?
+            .receipt(&request)
+            .map_err(|Mismatch| Error::Mismatch)?;
         let can_retry =
             self.pending.as_ref() == Some(&request) && request.expected == root.version();
         let settled = self.settle(&root);
@@ -183,32 +179,47 @@ where
                 let reloaded = self.load().await?;
                 reloaded
                     .state()
-                    .map_err(|_| Error::Corrupt)?
-                    .receipt(&request)?
+                    .map_err(Cause::Kernel)?
+                    .receipt(&request)
+                    .map_err(|Mismatch| Error::Mismatch)?
                     .ok_or(Error::Conflict)
             }
             Err(error) => Err(error),
-            Ok(()) => root
-                .state()
-                .map_err(|_| Error::Corrupt)?
-                .receipt(&request)?
-                .ok_or(Error::Corrupt),
+            Ok(()) => {
+                let observed = root
+                    .state()
+                    .map_err(Cause::Kernel)
+                    .and_then(|state| state.receipt(&request).map_err(|Mismatch| Cause::Corrupt))
+                    .and_then(|receipt| receipt.ok_or(Cause::Corrupt));
+                match observed {
+                    Ok(receipt) => {
+                        self.pending = None;
+                        Ok(receipt)
+                    }
+                    Err(cause) => Err(Error::Uncertain {
+                        command: request.id,
+                        source: Some(Box::new(cause)),
+                    }),
+                }
+            }
         }
     }
 
-    pub(super) async fn read(&mut self) -> Result<(Option<Version>, A::State), Error<A::Error, I>> {
+    pub(super) async fn read(
+        &mut self,
+    ) -> Result<(Option<Version>, A::State), Error<A::Error, I, S::Error>> {
         let root = self.load().await?;
         self.settle(&root)?;
-        let state = root.state().map_err(|_| Error::Corrupt)?;
+        let state = root.state().map_err(Cause::Kernel)?;
         Ok((root.version(), state.domain.clone()))
     }
 
     pub(super) async fn original(
         &mut self,
         id: &I,
-    ) -> Result<Option<Request<C, I>>, Error<A::Error, I>> {
+    ) -> Result<Option<Request<C, I>>, Error<A::Error, I, S::Error>> {
         let root = self.load().await?;
-        let original = root.state().map_err(|_| Error::Corrupt)?.original(id);
+        let original = root.state().map_err(Cause::Kernel)?.original(id);
         let settled = self.settle(&root);
         if original.is_some() {
             return Ok(original);
@@ -217,7 +228,10 @@ where
         Ok(None)
     }
 
-    pub(super) async fn retry(&mut self, id: &I) -> Result<Option<Receipt<I>>, Error<A::Error, I>> {
+    pub(super) async fn retry(
+        &mut self,
+        id: &I,
+    ) -> Result<Option<Receipt<I>>, Error<A::Error, I, S::Error>> {
         let pending = self
             .pending
             .as_ref()

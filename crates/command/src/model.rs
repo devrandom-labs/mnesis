@@ -2,21 +2,50 @@ use std::collections::BTreeMap;
 use std::convert::Infallible;
 use std::fmt::{self, Debug};
 use std::io::Cursor;
+use std::io::ErrorKind;
 use std::marker::PhantomData;
+use std::num::TryFromIntError;
 use std::num::{NonZeroU64, NonZeroUsize};
 
 use bytes::Bytes;
 use mnesis::{
-    Aggregate, AggregateState, DomainEvent, EventOf, Events, Handle, Message, Version, events,
+    Aggregate, AggregateState, DomainEvent, EventOf, Events, Handle, KernelError, Message, Version,
+    events,
 };
-use mnesis_store::{Decode, Encode, PersistedEnvelope};
+use mnesis_store::{Decode, Encode, PersistedEnvelope, StoreError};
 use serde::de::DeserializeOwned;
-use serde::ser::Error as _;
 use serde::{Deserialize, Serialize};
 
 pub const MAX_ACCEPTED: usize = 4096;
 const MAX_BYTES: usize = 4096;
 const EVENT_TYPE: &str = "controller.accepted.v2";
+
+/// Encoding, decoding or acceptance validation failure.
+#[derive(Debug, thiserror::Error)]
+pub enum CodecError {
+    /// The serialized request or record exceeds the supported 4 KiB bound.
+    #[error("encoded value exceeds 4 KiB")]
+    Bytes {
+        /// The original writer error; absent when input length was checked first.
+        #[source]
+        source: Option<serde_json::Error>,
+    },
+    /// The original JSON serialization or deserialization failure.
+    #[error("JSON codec failed: {0}")]
+    Json(#[from] serde_json::Error),
+    /// Serialization cannot reproduce the original typed value.
+    #[error("lossy serialization")]
+    Lossy,
+    /// The envelope has an unsupported event type or schema.
+    #[error("unsupported acceptance envelope")]
+    Envelope,
+    /// The acceptance's schema, request, receipt or fact metadata disagree.
+    #[error("invalid acceptance metadata")]
+    Acceptance,
+    /// The encoded length cannot be represented on this target.
+    #[error("encoded length overflow: {0}")]
+    Length(#[from] TryFromIntError),
+}
 
 #[cfg(test)]
 #[path = "../tests/unit/model.rs"]
@@ -24,7 +53,7 @@ mod tests;
 
 /// Exact retry identity, expected physical stream position and domain command.
 ///
-/// Application authorization runs before this request reaches the controller.
+/// Application authorization runs before this request reaches the processor.
 /// Use a validated identity type; the default rejects zero during decoding.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -42,7 +71,7 @@ impl<C: Serialize, I: Serialize> Request<C, I> {
     ///
     /// # Errors
     /// Rejects serialization failures and output larger than 4 KiB.
-    pub fn encode(&self) -> Result<Vec<u8>, serde_json::Error> {
+    pub fn encode(&self) -> Result<Vec<u8>, CodecError> {
         bounded(self)
     }
 }
@@ -51,19 +80,19 @@ impl<C: DeserializeOwned, I: DeserializeOwned> Request<C, I> {
     ///
     /// # Errors
     /// Rejects oversized, malformed and unsupported requests.
-    pub fn decode(bytes: &[u8]) -> Result<Self, serde_json::Error> {
+    pub fn decode(bytes: &[u8]) -> Result<Self, CodecError> {
         if bytes.len() > MAX_BYTES {
-            return Err(serde_json::Error::custom("request exceeds 4 KiB"));
+            return Err(CodecError::Bytes { source: None });
         }
-        serde_json::from_slice(bytes)
+        serde_json::from_slice(bytes).map_err(CodecError::Json)
     }
 }
 impl<C: Serialize + DeserializeOwned + Eq, I: Serialize + DeserializeOwned + Eq> Request<C, I> {
-    pub(super) fn validate(&self) -> Result<(), serde_json::Error> {
+    pub(super) fn validate(&self) -> Result<(), CodecError> {
         let encoded = self.encode()?;
         let decoded = Self::decode(&encoded)?;
         if &decoded != self {
-            return Err(serde_json::Error::custom("lossy request serialization"));
+            return Err(CodecError::Lossy);
         }
         Ok(())
     }
@@ -84,27 +113,38 @@ pub struct Receipt<I = NonZeroU64> {
 
 /// A rejected request, unavailable read or unresolved write, preserving sources.
 #[derive(Debug, thiserror::Error)]
-pub enum Error<D = Infallible, I = NonZeroU64> {
-    /// The domain rejected a new command; no append was issued.
-    #[error("domain rejected the command: {0}")]
-    Rejected(#[source] D),
+pub enum Error<D = Infallible, I = NonZeroU64, E = Infallible> {
+    /// A definite failure of this attempt. Earlier unresolved writes remain held.
+    #[error("command processing failed: {0}")]
+    Failed(#[source] Box<Cause<D, E>>),
     /// This ID already belongs to different request content.
     #[error("command identity has different content")]
     Mismatch,
     /// Confirmed version conflict without a matching existing receipt.
     #[error("expected version is stale")]
     Conflict,
-    /// Queue, retained history, batch or encoded record capacity was reached.
-    #[error("capacity reached")]
-    Capacity,
+    /// Waiting capacity is occupied by queued work or readiness reservations.
+    #[error("command queue is full")]
+    QueueFull,
+    /// The configured queue exceeds Tokio's supported capacity.
+    #[error("queue capacity {requested} exceeds {maximum}")]
+    QueueLimit {
+        /// The rejected capacity.
+        requested: usize,
+        /// Tokio's maximum supported capacity.
+        maximum: usize,
+    },
+    /// Store operations require a nonzero deadline.
+    #[error("operation deadline must be nonzero")]
+    DeadlineZero,
     /// Admission is closed.
-    #[error("controller closed")]
+    #[error("command processor is closed")]
     Closed,
     /// The observed shutdown belongs to a different stream.
     #[error("shutdown belongs to a different aggregate stream")]
     Scope,
     /// Startup was attempted outside a Tokio runtime.
-    #[error("controller requires a Tokio runtime: {0}")]
+    #[error("command processor requires a Tokio runtime: {0}")]
     Runtime(#[source] tokio::runtime::TryCurrentError),
     /// The append may still commit; retain the exact original request.
     #[error("command {command:?} has an uncertain write outcome")]
@@ -113,21 +153,76 @@ pub enum Error<D = Infallible, I = NonZeroU64> {
         command: I,
         /// Original typed source, absent for timeout or a dropped reply.
         #[source]
-        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        source: Option<Box<Cause<D, E>>>,
     },
-    /// A definite read, pre-append codec or kernel failure.
-    #[error("store operation failed: {0}")]
-    Store(#[source] Box<dyn std::error::Error + Send + Sync>),
     /// Request encoding/decoding failed before acceptance.
     #[error("invalid request: {0}")]
-    Json(#[source] serde_json::Error),
-    /// Persisted controller metadata violates its schema or replay laws.
-    #[error("invalid controller history")]
+    Request(#[source] CodecError),
+    /// Persisted acceptance metadata violates its schema or replay laws.
+    #[error("invalid acceptance history")]
     Corrupt,
     /// Read timeout; this does not settle any earlier write.
     #[error("read timed out")]
     Timeout,
 }
+
+/// The original failure, shared by definite and uncertain outcomes.
+///
+/// A store failure during append can be uncertain even when its source is a
+/// kernel error: the repository folds application state after persistence.
+#[derive(Debug, thiserror::Error)]
+pub enum Cause<D, E> {
+    /// The application rejected the decision before append.
+    #[error("domain rejected the command: {0}")]
+    Rejected(#[source] D),
+    /// The original typed repository failure.
+    #[error("store operation failed: {0}")]
+    Store(#[source] StoreError<E, CodecError, CodecError>),
+    /// The original kernel failure, with its execution phase held by the outcome.
+    #[error("aggregate integrity failed: {0}")]
+    Kernel(#[source] KernelError),
+    /// The physical accepted-record limit was reached before a new append.
+    #[error("accepted-record history is full")]
+    HistoryFull,
+    /// The decision would exceed the aggregate's cumulative domain-fact limit.
+    #[error("domain replay limit {maximum} exceeded")]
+    ReplayLimit {
+        /// The aggregate's maximum cumulative fact count.
+        maximum: usize,
+    },
+    /// Persisted acceptance metadata failed validation after append.
+    #[error("invalid committed acceptance")]
+    Corrupt,
+}
+impl<D, I, E> From<Cause<D, E>> for Error<D, I, E> {
+    fn from(cause: Cause<D, E>) -> Self {
+        // Keep large application/adapter causes out of the reply's inline error.
+        Self::Failed(Box::new(cause))
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum DecisionError<D> {
+    #[error("domain rejected the command: {0}")]
+    Rejected(#[source] D),
+    #[error("accepted-record history is full")]
+    HistoryFull,
+    #[error("domain replay limit {maximum} exceeded")]
+    ReplayLimit { maximum: usize },
+}
+impl<D, E> From<DecisionError<D>> for Cause<D, E> {
+    fn from(cause: DecisionError<D>) -> Self {
+        match cause {
+            DecisionError::Rejected(error) => Self::Rejected(error),
+            DecisionError::HistoryFull => Self::HistoryFull,
+            DecisionError::ReplayLimit { maximum } => Self::ReplayLimit { maximum },
+        }
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("command identity has different content")]
+pub struct Mismatch;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -173,25 +268,23 @@ impl<A: Aggregate, C: Debug, I: Debug, const N: usize> Debug for State<A, C, I, 
     }
 }
 impl<A: Aggregate, C: Clone + Eq, I: Clone + Ord, const N: usize> State<A, C, I, N> {
-    pub(super) fn receipt(
-        &self,
-        request: &Request<C, I>,
-    ) -> Result<Option<Receipt<I>>, Error<A::Error, I>> {
+    pub(super) fn receipt(&self, request: &Request<C, I>) -> Result<Option<Receipt<I>>, Mismatch> {
         match self.receipts.get(&request.id) {
             Some((original, receipt)) if original == request => Ok(Some(receipt.clone())),
-            Some(_) => Err(Error::Mismatch),
+            Some(_) => Err(Mismatch),
             None => Ok(None),
         }
     }
     pub(super) fn original(&self, id: &I) -> Option<Request<C, I>> {
         self.receipts.get(id).map(|(request, _)| request.clone())
     }
-    fn fits(&self, count: usize) -> bool {
-        count <= N.saturating_add(1)
-            && self
-                .facts
-                .checked_add(count)
-                .is_some_and(|total| total <= A::MAX_REHYDRATION_EVENTS.get())
+    fn total(&self, count: usize) -> Option<usize> {
+        if count.checked_sub(1).is_some_and(|tail| tail > N) {
+            return None;
+        }
+        self.facts
+            .checked_add(count)
+            .filter(|total| *total <= A::MAX_REHYDRATION_EVENTS.get())
     }
 }
 impl<A, C, I, const N: usize> AggregateState for State<A, C, I, N>
@@ -213,17 +306,18 @@ where
     fn apply(mut self, record: &Self::Event) -> Self {
         // The codec validates record metadata; the kernel validates physical
         // order and its replay limit. Only cross-record rules belong here.
-        if self.integrity.is_err()
-            || self.receipts.contains_key(&record.request.id)
-            || !self.fits(record.facts.len())
-        {
+        if self.integrity.is_err() || self.receipts.contains_key(&record.request.id) {
             self.integrity = Err(());
             return self;
         }
+        let Some(total) = self.total(record.facts.len()) else {
+            self.integrity = Err(());
+            return self;
+        };
         for fact in &record.facts {
             self.domain = self.domain.apply(fact);
         }
-        self.facts += record.facts.len();
+        self.facts = total;
         self.receipts.insert(
             record.request.id.clone(),
             (record.request.clone(), record.receipt.clone()),
@@ -242,9 +336,9 @@ where
     EventOf<A>: Clone,
 {
     type State = State<A, C, I, N>;
-    type Error = Error<A::Error, I>;
+    type Error = DecisionError<A::Error>;
     type Id = A::Id;
-    const MAX_REHYDRATION_EVENTS: NonZeroUsize = NonZeroUsize::MIN.saturating_add(MAX_ACCEPTED - 1);
+    const MAX_REHYDRATION_EVENTS: NonZeroUsize = NonZeroUsize::new(MAX_ACCEPTED).unwrap();
 }
 pub struct Decision<C, I> {
     pub(super) request: Request<C, I>,
@@ -264,15 +358,17 @@ where
         // Engine has already checked integrity, retry identity and expected
         // version on this exclusively owned root; no await can mutate it.
         if state.receipts.len() >= MAX_ACCEPTED {
-            return Err(Error::Capacity);
+            return Err(DecisionError::HistoryFull);
         }
         let facts = A::handle(&state.domain, decision.request.command.clone())
-            .map_err(Error::Rejected)?
+            .map_err(DecisionError::Rejected)?
             .into_iter()
             .flatten()
             .collect::<Vec<_>>();
-        if !state.fits(facts.len()) {
-            return Err(Error::Capacity);
+        if state.total(facts.len()).is_none() {
+            return Err(DecisionError::ReplayLimit {
+                maximum: A::MAX_REHYDRATION_EVENTS.get(),
+            });
         }
         let receipt = Receipt {
             id: decision.request.id.clone(),
@@ -295,12 +391,12 @@ where
     I: Serialize + DeserializeOwned + Eq,
     E: Serialize + DeserializeOwned + Eq,
 {
-    type Error = serde_json::Error;
+    type Error = CodecError;
     fn encode(&self, record: &Record<C, I, E>) -> Result<Bytes, Self::Error> {
         let bytes = bounded(record)?;
         let decoded: Record<C, I, E> = serde_json::from_slice(&bytes)?;
         if &decoded != record {
-            return Err(serde_json::Error::custom("lossy record serialization"));
+            return Err(CodecError::Lossy);
         }
         Ok(bytes.into())
     }
@@ -309,13 +405,13 @@ impl<C: DeserializeOwned + Eq, I: DeserializeOwned + Eq, E: DeserializeOwned>
     Decode<Record<C, I, E>> for Codec
 {
     type Output<'a> = Record<C, I, E>;
-    type Error = serde_json::Error;
+    type Error = CodecError;
     fn decode(&self, envelope: &PersistedEnvelope) -> Result<Record<C, I, E>, Self::Error> {
-        if envelope.payload().len() > MAX_BYTES
-            || envelope.schema_version() != 1
-            || envelope.event_type() != EVENT_TYPE
-        {
-            return Err(serde_json::Error::custom("unsupported controller envelope"));
+        if envelope.payload().len() > MAX_BYTES {
+            return Err(CodecError::Bytes { source: None });
+        }
+        if envelope.schema_version() != 1 || envelope.event_type() != EVENT_TYPE {
+            return Err(CodecError::Envelope);
         }
         let record: Record<C, I, E> = serde_json::from_slice(envelope.payload())?;
         let next = record
@@ -328,16 +424,24 @@ impl<C: DeserializeOwned + Eq, I: DeserializeOwned + Eq, E: DeserializeOwned>
             || record.receipt.id != record.request.id
             || record.receipt.events != record.facts.len()
         {
-            return Err(serde_json::Error::custom("invalid controller acceptance"));
+            return Err(CodecError::Acceptance);
         }
         Ok(record)
     }
 }
-fn bounded<T: Serialize>(value: &T) -> Result<Vec<u8>, serde_json::Error> {
+fn bounded<T: Serialize>(value: &T) -> Result<Vec<u8>, CodecError> {
     let mut buffer = [0; MAX_BYTES];
     let mut writer = Cursor::new(buffer.as_mut_slice());
-    serde_json::to_writer(&mut writer, value)?;
-    let length = usize::try_from(writer.position()).map_err(serde_json::Error::custom)?;
+    serde_json::to_writer(&mut writer, value).map_err(|error| {
+        if error.io_error_kind() == Some(ErrorKind::WriteZero) {
+            CodecError::Bytes {
+                source: Some(error),
+            }
+        } else {
+            CodecError::Json(error)
+        }
+    })?;
+    let length = usize::try_from(writer.position())?;
     Ok(buffer[..length].to_vec())
 }
 mod version {

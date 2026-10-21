@@ -27,7 +27,8 @@ or local pass does not establish whole-adapter delivery.
 CP0–CP9 are required for the new feature. The planning branch is
 `docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
 The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
-CP0 and CP1 are locally qualified; their protected merges are pending. Later requirements
+CP0 is protected-merged (PR411); CP1 mutation repair and protected delivery remain.
+CP2 is locally qualified, with protected delivery pending. Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing
 source tests and one separately executed in-memory measurement. No current
@@ -37,7 +38,7 @@ processor/Postgres, migration or new-package registry consumer is certified.
 | --- | --- | --- | --- | --- |
 | CP0 | Source provenance, contracts, compatibility prototypes and baseline | feature-complete | PG9 | CP1 |
 | CP1 | Extract `mnesis-command`, expose Tower Service and align dependencies | feature-complete | CP0 | CP2, CP3, CP4, CP5 |
-| CP2 | Typed outcomes and uncertain-write custody | candidate | CP1 | CP6, CP7 |
+| CP2 | Typed outcomes and uncertain-write custody | feature-complete | CP1 | CP6, CP7 |
 | CP3 | Identity, ordering and deterministic concurrent acceptance | candidate | CP1 | CP6 |
 | CP4 | Stored format compatibility and public accepted-fact consumption | candidate | CP1 | CP6, CP7 |
 | CP5 | Tower admission, observed shutdown, tracing and telemetry | candidate | CP1 | CP6, CP7 |

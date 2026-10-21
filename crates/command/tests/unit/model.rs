@@ -11,7 +11,9 @@ use mnesis_store::{Decode, Encode, PersistedEnvelope, SchemaVersion};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use super::{Adapted, Codec, Decision, Error, Record, Request, State};
+use super::{
+    Adapted, Codec, CodecError, Decision, DecisionError, Mismatch, Record, Request, State,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Fact(u8);
@@ -176,9 +178,9 @@ fn full_receipt_history_preserves_old_ids_including_noops() {
         version: Version::new(4097).unwrap(),
     };
     let rejected = Adapted::<Fixture, u8, NonZeroU64, 0>::handle(state, decision);
-    assert!(matches!(rejected, Err(Error::Capacity)));
+    assert!(matches!(rejected, Err(DecisionError::HistoryFull)));
     let changed = Request { command: 7, ..old };
-    assert!(matches!(state.receipt(&changed), Err(Error::Mismatch)));
+    assert!(matches!(state.receipt(&changed), Err(Mismatch)));
     replay_overflow(root);
 }
 
@@ -221,13 +223,13 @@ fn envelope_schema_and_exact_payload_limit_are_enforced_independently() {
         &payload,
         SchemaVersion::INITIAL,
     ));
-    assert!(exceeded.is_err());
+    assert!(matches!(exceeded, Err(CodecError::Bytes { source: None })));
     let wrong_schema: Result<TestRecord, _> = Codec.decode(&raw_envelope(
         "controller.accepted.v2",
         &serde_json::to_vec(&accepted()).unwrap(),
         SchemaVersion::from_u32(2).unwrap(),
     ));
-    assert!(wrong_schema.is_err());
+    assert!(matches!(wrong_schema, Err(CodecError::Envelope)));
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -245,7 +247,7 @@ fn lossy_request_and_fact_serialization_cannot_be_accepted() {
         command: Lossy { kept: 1, lost: 2 },
     };
     let rejected = request.validate();
-    assert!(rejected.is_err());
+    assert!(matches!(rejected, Err(CodecError::Lossy)));
     let record = Record {
         schema: 2,
         request: Request {
@@ -261,7 +263,7 @@ fn lossy_request_and_fact_serialization_cannot_be_accepted() {
         facts: vec![Lossy { kept: 3, lost: 4 }],
     };
     let encoded = Codec.encode(&record);
-    assert!(encoded.is_err());
+    assert!(matches!(encoded, Err(CodecError::Lossy)));
 }
 
 #[test]
@@ -284,8 +286,13 @@ fn bounded_request_bytes_accept_the_limit_and_reject_the_next_byte() {
         command: format!("{}x", edge.command),
         ..edge
     };
-    assert!(too_big.encode().is_err());
+    assert!(
+        matches!(too_big.encode(), Err(CodecError::Bytes { source: Some(error) }) if error.io_error_kind() == Some(std::io::ErrorKind::WriteZero))
+    );
     let mut oversized = encoded;
     oversized.push(b' ');
-    assert!(Request::<String>::decode(&oversized).is_err());
+    assert!(matches!(
+        Request::<String>::decode(&oversized),
+        Err(CodecError::Bytes { source: None })
+    ));
 }

@@ -7,18 +7,21 @@
 mod faults;
 
 use std::convert::Infallible;
-use std::error::Error as _;
 use std::num::{NonZeroU64, NonZeroUsize};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::task::{Context, Poll};
 use std::time::Duration;
 
 use futures::TryStreamExt;
-use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
-use mnesis_command::{CommandProcessor, Error, Limits, Request};
+use mnesis::{
+    Aggregate, AggregateState, DomainEvent, Events, Handle, KernelError, Message, Version, events,
+};
+use mnesis_command::{Cause, CodecError, CommandProcessor, Error, Limits, Request, Shutdown};
 use mnesis_inmemory::InMemoryStore;
-use mnesis_store::{RawEventStore, Store, StreamKey};
+use mnesis_store::{PendingBatch, RawEventStore, Store, StoreError, StreamKey, pending_envelope};
 use serde::{Deserialize, Serialize};
+use tokio::task::JoinHandle;
 use tower::{Service, ServiceExt};
 
 use faults::{Fault, FaultStore, Gate};
@@ -120,11 +123,15 @@ async fn a_confirmed_conflict_reloads_the_original_receipt() {
 }
 
 #[tokio::test]
+#[allow(
+    clippy::panic,
+    reason = "report an unexpected structured error in this negative test"
+)]
 async fn a_lost_commit_response_preserves_the_source_and_original_acceptance() {
     type Stored = mnesis_store::StoreError<
         faults::FaultError<<InMemoryStore as RawEventStore>::Error>,
-        serde_json::Error,
-        serde_json::Error,
+        CodecError,
+        CodecError,
     >;
     let store = Store::new(FaultStore::new(InMemoryStore::new()));
     store.raw().arm(Fault::CommitLost);
@@ -132,16 +139,20 @@ async fn a_lost_commit_response_preserves_the_source_and_original_acceptance() {
     let original = request(1, 0, 7);
     let observed = controller.submit(original.clone()).await;
     let failure = observed.unwrap_err();
+    let Error::Uncertain {
+        command,
+        source: Some(source),
+    } = failure
+    else {
+        panic!("lost commit response must preserve its typed cause");
+    };
+    assert_eq!(command, NonZeroU64::MIN);
+    let Cause::Store(retained) = *source else {
+        panic!("lost commit response must preserve the store failure");
+    };
+    let typed: Stored = retained;
     assert!(matches!(
-        failure,
-        Error::Uncertain {
-            source: Some(_),
-            ..
-        }
-    ));
-    let retained = failure.source().unwrap().downcast_ref::<Stored>().unwrap();
-    assert!(matches!(
-        retained,
+        typed,
         mnesis_store::StoreError::Adapter(faults::FaultError::Lost)
     ));
     let raw = records(&store.raw().inner).await;
@@ -281,7 +292,7 @@ async fn overload_and_shutdown_reject_queued_calls_before_acceptance() {
     let mut waiting = std::pin::pin!(queued);
     assert!(futures::poll!(waiting.as_mut()).is_pending());
     let overload = controller.submit(request(2, 0, 9)).await;
-    assert!(matches!(overload, Err(Error::Capacity)));
+    assert!(matches!(overload, Err(Error::QueueFull)));
     controller.stop();
     gate.release();
     let completed = in_flight.await.unwrap().unwrap();
@@ -393,7 +404,7 @@ fn invalid_limits_reject_before_creating_a_host() {
             ..limits()
         },
     );
-    assert!(matches!(zero_timeout, Err(Error::Capacity)));
+    assert!(matches!(zero_timeout, Err(Error::DeadlineZero)));
     let excessive_queue = Host::start(
         &store,
         String::from("counter"),
@@ -402,7 +413,9 @@ fn invalid_limits_reject_before_creating_a_host() {
             ..limits()
         },
     );
-    assert!(matches!(excessive_queue, Err(Error::Capacity)));
+    assert!(
+        matches!(excessive_queue, Err(Error::QueueLimit { requested,maximum }) if requested==tokio::sync::Semaphore::MAX_PERMITS+1 && maximum==tokio::sync::Semaphore::MAX_PERMITS)
+    );
 }
 
 #[tokio::test]
@@ -592,6 +605,10 @@ impl Handle<u8> for Transient {
     }
 }
 #[tokio::test]
+#[allow(
+    clippy::panic,
+    reason = "report an unexpected structured error in this negative test"
+)]
 async fn a_retry_rejection_cannot_erase_the_older_append_that_can_still_commit() {
     type TransientHost = CommandProcessor<Transient, u8>;
     let store = Store::new(FaultStore::new(InMemoryStore::new()));
@@ -604,19 +621,19 @@ async fn a_retry_rejection_cannot_erase_the_older_append_that_can_still_commit()
     assert!(matches!(first, Err(Error::Uncertain { .. })));
     server.entered().await;
     let failed = controller.submit(original.clone()).await.unwrap_err();
-    assert!(matches!(
-        failed,
-        Error::Uncertain {
-            source: Some(_),
-            ..
-        }
-    ));
-    let retained = failed
-        .source()
-        .unwrap()
-        .downcast_ref::<Error<std::io::Error>>()
-        .unwrap();
-    assert!(matches!(retained, Error::Rejected(_)));
+    let Error::Uncertain {
+        command,
+        source: Some(source),
+    } = failed
+    else {
+        panic!("failed exact retry must preserve the original uncertain request");
+    };
+    assert_eq!(command, NonZeroU64::MIN);
+    let Cause::Rejected(retained) = *source else {
+        panic!("failed exact retry must preserve its typed decision cause");
+    };
+    assert_eq!(retained.kind(), std::io::ErrorKind::Other);
+    assert_eq!(retained.to_string(), "controlled retry decision failure");
     let blocked = controller.read().await;
     assert!(matches!(blocked, Err(Error::Uncertain { .. })));
     controller.stop();
@@ -822,4 +839,174 @@ async fn tower_unpolled_reply_cancellation_preserves_persisted_order_and_receipt
     assert_eq!(records(&store.raw().inner).await, saved);
     processor.stop();
     finish(task).await;
+}
+
+static FOLD_DECISIONS: AtomicUsize = AtomicUsize::new(0);
+#[derive(Debug, PartialEq, Eq)]
+struct FoldFailure(u8);
+#[derive(Clone, Debug)]
+struct BrokenState;
+impl AggregateState for BrokenState {
+    type Event = Fact;
+    fn initial() -> Self {
+        Self
+    }
+    #[allow(
+        clippy::panic,
+        reason = "exercise a real application fold panic after append and during reconstruction"
+    )]
+    fn apply(self, fact: &Fact) -> Self {
+        std::panic::panic_any(FoldFailure(fact.0));
+    }
+}
+struct Fragile;
+impl Aggregate for Fragile {
+    type State = BrokenState;
+    type Error = Infallible;
+    type Id = String;
+}
+impl Handle<u8> for Fragile {
+    fn handle(_: &BrokenState, command: u8) -> Result<Option<Events<Fact>>, Infallible> {
+        FOLD_DECISIONS.fetch_add(1, Ordering::SeqCst);
+        Ok(Some(events![Fact(command)]))
+    }
+}
+struct Recovered;
+impl Aggregate for Recovered {
+    type State = Total;
+    type Error = Infallible;
+    type Id = String;
+}
+impl Handle<u8> for Recovered {
+    fn handle(_: &Total, command: u8) -> Result<Option<Events<Fact>>, Infallible> {
+        FOLD_DECISIONS.fetch_add(1, Ordering::SeqCst);
+        Ok(Some(events![Fact(command)]))
+    }
+}
+async fn assert_fold_failure(task: JoinHandle<Shutdown<u8>>) {
+    let failure = tokio::time::timeout(Duration::from_secs(2), task)
+        .await
+        .unwrap()
+        .unwrap_err();
+    assert!(failure.is_panic());
+    assert_eq!(
+        *failure.into_panic().downcast::<FoldFailure>().unwrap(),
+        FoldFailure(7)
+    );
+}
+
+#[tokio::test]
+async fn committed_acceptance_survives_fold_panic_and_failed_reconstruction() {
+    let store = Store::new(InMemoryStore::new());
+    let original = request(1, 0, 7);
+    let (broken, task) =
+        CommandProcessor::<Fragile, u8>::start(&store, "counter".into(), limits()).unwrap();
+    let response = broken.submit(original.clone()).await;
+    assert!(
+        matches!(response, Err(Error::Uncertain { command, source: None }) if command == NonZeroU64::MIN)
+    );
+    assert_fold_failure(task).await;
+    assert_eq!(FOLD_DECISIONS.load(Ordering::SeqCst), 1);
+    let committed = vec![serde_json::json!({
+        "schema":2,
+        "request":{"id":1,"expected":null,"command":7},
+        "receipt":{"id":1,"version":1,"events":1},
+        "facts":[7]
+    })];
+    assert_eq!(records(store.raw()).await, committed);
+
+    let (rebuilding, observed) =
+        CommandProcessor::<Fragile, u8>::start(&store, "counter".into(), limits()).unwrap();
+    assert!(matches!(rebuilding.read().await, Err(Error::Closed)));
+    assert_fold_failure(observed).await;
+    assert_eq!(records(store.raw()).await, committed);
+    assert_eq!(FOLD_DECISIONS.load(Ordering::SeqCst), 1);
+
+    let (healthy, completed) =
+        CommandProcessor::<Recovered, u8>::start(&store, "counter".into(), limits()).unwrap();
+    let receipt = healthy.submit(original.clone()).await.unwrap();
+    assert_eq!(receipt.id, original.id);
+    assert_eq!((receipt.version, receipt.events), (Version::INITIAL, 1));
+    assert_eq!(
+        healthy.read().await.unwrap(),
+        (Some(Version::INITIAL), Total(7))
+    );
+    assert_eq!(FOLD_DECISIONS.load(Ordering::SeqCst), 1);
+    assert_eq!(records(store.raw()).await, committed);
+    healthy.stop();
+    assert_eq!(finish(completed).await.uncertain(), None);
+}
+
+#[tokio::test]
+async fn history_capacity_preserves_old_receipts_and_typed_kernel_failures() {
+    let store = Store::new(InMemoryStore::new());
+    let batch = (1..=4097_u64)
+        .map(|number| {
+            let record = serde_json::json!({
+                "schema":2,
+                "request":{"id":number,"expected":Version::new(number - 1).map(Version::as_u64),"command":0},
+                "receipt":{"id":number,"version":number,"events":0},
+                "facts":[]
+            });
+            pending_envelope(Version::new(number).unwrap())
+                .event_type("controller.accepted.v2")
+                .payload(serde_json::to_vec(&record).unwrap())
+                .build()
+                .unwrap()
+        })
+        .collect::<Vec<_>>();
+    store
+        .raw()
+        .append(
+            &StreamKey::from_slice(b"counter"),
+            None,
+            PendingBatch::new(&batch[..4095]).unwrap(),
+        )
+        .await
+        .unwrap();
+    let mut profile = limits();
+    profile.operation = Duration::from_secs(2);
+    let (processor, task) = Host::start(&store, "counter".into(), profile).unwrap();
+    assert_eq!(
+        processor.read().await.unwrap(),
+        (Version::new(4095), Total(0))
+    );
+    let last = processor.submit(request(4096, 4095, 0)).await.unwrap();
+    assert_eq!(
+        (last.id.get(), last.version.as_u64(), last.events),
+        (4096, 4096, 1)
+    );
+    let before = records(store.raw()).await;
+    assert_eq!(before.len(), 4096);
+    assert_eq!(
+        processor.read().await.unwrap(),
+        (Version::new(4096), Total(0))
+    );
+    let old = processor.submit(request(1, 0, 0)).await.unwrap();
+    assert_eq!(
+        (old.id, old.version, old.events),
+        (NonZeroU64::MIN, Version::INITIAL, 0)
+    );
+    let exhausted = processor.submit(request(5000, 4096, 0)).await;
+    assert!(matches!(exhausted, Err(Error::Failed(cause)) if matches!(*cause, Cause::HistoryFull)));
+    assert_eq!(records(store.raw()).await, before);
+    store
+        .raw()
+        .append(
+            &StreamKey::from_slice(b"counter"),
+            Version::new(4096),
+            PendingBatch::new(&batch[4096..]).unwrap(),
+        )
+        .await
+        .unwrap();
+    let unsupported = records(store.raw()).await;
+    assert_eq!(unsupported.len(), 4097);
+    let failure = processor.read().await;
+    assert!(
+        matches!(failure, Err(Error::Failed(cause)) if matches!(*cause,
+        Cause::Store(StoreError::Kernel(KernelError::RehydrationLimitExceeded { max:4096 }))))
+    );
+    assert_eq!(records(store.raw()).await, unsupported);
+    processor.stop();
+    assert_eq!(finish(task).await.uncertain(), None);
 }
