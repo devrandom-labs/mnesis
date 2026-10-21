@@ -1353,3 +1353,21 @@ source105lines, before identity/publication receipts and required three-review
 records. Preserve these receipts rather than reduce verification. Delivery.md
 remains at most100lines. Normal signed hook and protected CI remain required;
 cached output gives no additional runtime credit.
+
+## CI blocker: current rustls-webpki patch — 2026-10-21
+
+PR411's live cargo-deny job fails RUSTSEC-2026-0382 on rustls-webpki0.103.15.
+This is an observed delivery blocker, not an expanded audit. Primary advisory
+issued2026-10-20 selects fixed0.103.16. Isolated fix/command-ci worktree from main;
+budget root Cargo.lock and four existing research records only, <=100 authored
+record lines. Existing fuzz locks do not contain this package. Update precisely
+this patch, keep all checks/advisories blocking, normal gate/PR/protected merge.
+Preserve command extraction and unrelated releasePR410.
+CI-fix budget extension before editing: add one supported Crane setting in
+flake.nix, because nextest tests passed1594/1594 but archive installation failed
+ENOSPC. cargoNextest defaults doInstallCargoArtifacts=true; no project consumer
+reads its target.tar.zst. Keep coverage output, every test command/filter and
+all checks unchanged. Set this flag false only for the check-only nextest owner.
+Do not alter buildDepsOnly artifacts or the native Postgres executable archive.
+Raw failed gate retains exact test results and disk failure. This is an unused
+build-output reduction using Crane's supported API, not reduced verification.

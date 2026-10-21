@@ -200,6 +200,8 @@
             commonArgs
             // {
               inherit cargoArtifacts;
+              # Consumers use coverage; no check consumes this target archive.
+              doInstallCargoArtifacts = false;
               withLlvmCov = true;
               partitions = 1;
               partitionType = "count";
