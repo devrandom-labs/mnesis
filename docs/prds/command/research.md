@@ -717,3 +717,167 @@ in this output. Its classifier still crashed and is not claimed complete. No
 hook/check is disabled, no assertion/workload changes, and normal signed hook
 still runs every declared check. This is a retained Nix-shell tooling limitation,
 not a reason to change the command processor or expand product scope.
+
+CP3 first selected run fails compilation before any test body: the new race
+fixture Total omitted Clone required by the existing processor read contract.
+Three reviews: (1) intended both-at-append/handler/raw-record assertions have not
+executed, so no concurrency qualification; (2) two selected owner tests, zero
+runtime executions; (3) failure belongs to the fixture trait bound, not a product
+counterexample. Add the required Clone derive without changing product bounds.
+Pre-execution review also retains the original race's nonempty-head coverage:
+the shared law must cover both an empty history and an actual accepted prefix,
+with unchanged prefix rows and handler accounting. Do not replace that workload
+with only empty-stream races. Same preregistered350-line test budget.
+CP3 targeted run d87ffbb1-d9ce-46be-a4a2-a754a424a810 passes2 tests in0.183s.
+Three reviews: (1) canonical race now forces48 schedules across three race kinds,
+both winner orders,1/u64MAX IDs,0/u8MAX bodies and empty/nonempty history. Both
+handlers reach real append before release; no new row lands while held. Exact
+record/receipt/state, two contender decisions, changed expected version, losing
+retry and observed joins are asserted. Existing serial history workload remains.
+(2) selected recovery case plus new256-case generated concurrent property execute,
+34 other cases excluded by this targeted selection; in-memory only, not a native
+DB or complete owning-suite claim. (3) no new product code/alternate CAS exists;
+the gate wraps actual inner append, and independent raw JSON/version comparisons
+verify the whole accepted record plus unchanged prefix. Counter isolation is
+structural: only this canonical case calls the helper in recovery; properties
+has its own integration binary/static and serially executes its generated inputs.
+No existing capacity/assertion/deadline/256-serial workload was weakened. The
+compile-only failure remains separately visible. Full owning suite, optimized
+execution, lint and complete gate remain pending.
+CP3 lint rejects fixture restructuring: moved helpers lost their existing test
+expect allowance, one gate binding shadows the delayed-fault gate, two Request
+struct-update clones are redundant, and the canonical helper exceeds the existing
+80-line limit. Preserve lint policy: retain helpers under history with only the
+parent visibility needed by the shared race consumer, rename the binding, remove
+redundant clones and separate final committed-history verification from the
+controlled schedule. No assertion/workload removal or new lint waiver.
+CP3 complete debug owner run passes35 cases, one original ignored measurement,
+in1.469s. Three reviews: (1) final canonical race expands to192 schedules including
+1,2,u64MAX-1,u64MAX identities and0,1,u8MAX-1,u8MAX bodies with empty/nonempty
+heads. New256 concurrent histories and unchanged256 serial histories all execute;
+raw records, original receipts, state, handler counts and observed worker joins
+remain asserted. Existing lost-commit/late-append/fold/capacity cases still pass.
+(2) all four package targets execute without selection; in-memory only, no native
+DB/performance credit. (3) immutable prefix rows plus full accepted JSON/version
+are compared independently of processor decisions; setup and final verification
+share one private History owner and all lint levels remain unchanged. Clippy
+passes after keeping test helpers below their original private owner, removing
+redundant copies and separating seeding, controlled scheduling and final history
+verification. No assertion/workload was discarded to satisfy lint limits.
+CP3 complete optimized owner run passes35 cases, one original ignored measurement,
+in0.513s. Three reviews: (1) the same192 forced schedules,256 concurrent and256
+serial generated histories plus all prior uncertainty/fold/capacity laws pass;
+(2) all four release package targets execute with no selection/native DB, and
+this correctness run is not performance qualification; (3) sources/assertions/
+workloads match the final lint-clean debug suite. No profile-specific weaker
+assertions or shorter inputs. Next negative controls deliberately remove conflict
+receipt reconciliation and accept mismatched original request metadata; the
+canonical race must reject both at product outcome assertions, not fixture setup.
+CP3 targeted negative controls complete: baseline canonical case1PASS, then both
+mutants caught,0missed/unviable/timeout. Three reviews for each of three actual
+invocations: (1) all192 baseline schedules pass; disabling confirmed-conflict
+classification makes the real duplicate contender return typed Uncertain instead
+of the original receipt. Accepting every original==request guard makes changed
+expected metadata falsely return success. Both violate the owning contract.
+(2) one canonical recovery case selected per invocation,35 other cases excluded;
+mutants each0PASS/1FAIL, baseline1PASS. These are controlled in-memory laws, not
+full mutation/native qualification. (3) actual first failures are receipt unwrap
+with the retained real CAS source and exact mismatch assertion respectively;
+no fixture setup, gate-entry timeout, runner kill or compiler error is credited.
+The maintained generator offered no conflict-arm-deletion candidate, so no test
+ran for that initial selection; the classifier mutation is the recorded reachable
+substitute. Actual outcomes/diffs/logs remain cp3-negative-controls/mutants.out.
+Historical CI review recovered during this audit: original PR413 head b711855
+workflows39609659589(PR) and39609560134(push) each execute74 actual test invocations,
+with75 summary lines because one native receipt is echoed. This late record is
+not a claim of prior/current-head delivery. Three reviews for each invocation:
+(1) unchanged compiler/feature/adapter/decoder laws plus all32 extracted command
+laws execute; original mutation misses remain separate and invalidate any broad
+mutation-green claim. (2) three compiler2/1/1,27 isolated library invocations,
+40 nativePG invocations (four actual PG18.6 services across both workflows, each
+startup/shutdown observed), workspace1626 and replay2/1/1 per workflow. Native
+full profiles264/149/168/176/173/174/150 have zero skips;13 single-law selections
+per group retain explicit filters. Workspace157.585s(PR),106.699s(push), five
+established exclusions. Zero-test library harnesses earn no coverage credit.
+(3) actual run logs match original b711855 owners/selections without workload or
+assertion reduction. These historical successes do not qualify repaired6d0d8adc;
+its current-head runs39630929335/39630918875 and mutation39630929359 remain pending.
+Raw cp1-original-ci-{pr,push}.log/counts.txt retain every actual invocation.
+CP3 full gate's three fresh replay invocations each received three reviews:
+(1) unchanged CBOR header/chunk, value and wire foundation oracles execute actual
+fuzz-common checks; no command/race coverage is inferred. (2) CBOR2PASS,value1PASS,
+wire1PASS,1.00s each, zero ignored/filtered, no native service; replay/smoke only.
+(3) harnesses, inputs and filters remain unchanged; the gate includes the staged
+new race helper, and no check is weakened. Complete workspace nextest/remaining
+outputs are still pending; cp3-full-gate.log is the live raw record.
+CP3 first full gate fails in unchanged macro reproduce_transform_overflow_diagnostic:
+its nested rustc aborts loading @rpath/librustc_driver from the hard-linked
+/nix/store/.links alias. The actual selected driver exists. Three reviews:
+(1) all35 command cases pass in the instrumented run; the macro's compiler never
+reaches its diagnostic oracle, so this is not a changed product assertion or
+passing gate. (2) exact log count654 completed passes,1 failure, no final summary;
+974 selected cases unfinished/not run plus five original exclusions. Agent sent
+SIGINT to the already-failing Nix build when free space fell to581MiB; no partial
+workspace success is claimed. (3) same source/assertions/filters/workloads; actual
+first failure is dyld SIGABRT, not a guessed flaky assertion. Logs remain intact.
+
+Direct executable-alias negative probe reproduces the same failure134 without
+DYLD fallback, then passes0 with only the selected toolchain/lib fallback. Cargo's
+supported environment documentation says it extends this path for child builds:
+https://doc.rust-lang.org/cargo/reference/environment-variables.html#dynamic-library-paths.
+Use Nix lib.makeLibraryPath from rustToolchain, Darwin-only at the existing
+nextest owner. No new tool/derivation/runtime, no global Nix configuration changes,
+no renamed/excluded macro test, and all1629 cases remain required. The causal
+reason that dyld selected the store alias during that nested invocation is not
+proven; the failed path and successful fallback probe are observed facts.
+Retry only after preserving evidence and freeing this goal's generated primary
+Cargo target cache; source/logs and other worktrees remain untouched.
+Current PR413 full mutation39630929359 at6d0d8adc succeeds:168 candidates,
+91caught,77unviable,0missed/timeout; artifact12359961832. Three reviews for each
+of92 actual runtime invocations (baseline plus91 viable mutants): (1) existing
+identity/uncertainty/codec/lifecycle oracles still reject every behavioral mutant.
+The only removed candidate versus failed169 is the disclosed exact private Debug;
+the only status changes are capacity0/1 missed→caught and call predicate timeout→
+caught. (2) baseline32PASS/1originalignored; caught invocations stop at actual first
+failure, with exact summaries retained.77 compile-unviable get no runtime credit.
+No processor-native DB law runs in this sweep. (3) all actual first failures are
+reviewed by owner; new capacity cases fail0/1 versus4096, stopped-call case fails
+its bounded response assertion, and88 prior behavioral catches remain catches.
+No fixture setup poisoning, weakened deadline/input or excluded behavioral mutant
+substitutes for a catch. cp1-final-first-failures.json records exact identities,
+phase statuses and first failures; raw current artifacts/logs are retained.
+CP3 full retry95724cfa-0ec7-4bd7-8dba-2c73572f71c2 passes1629 cases in439.141s,
+14slow,142binaries,five existing exclusions. Three reviews: (1) all35 command
+cases retain192 fixed/256 concurrent/256 serial histories, exact raw records,
+receipt identity, state, handler counts and observed joins. The formerly failing
+unchanged macro diagnostic test also passes58.024s with the supported fallback.
+(2) the entire original selection executes without new exclusions or shortened
+workloads; no processor-native DB/performance credit. Remaining output builds
+still determine whole-gate success. (3) cmp verifies all five changed test owners
+against source95y5xm17nwv7izl18s33183f3ifrxcfl-source; code/assertions match the
+prior failed run. Derivation id33yn stores the exact fallback used by the direct
+negative probe. Initial flake attribute-query failed because env is flattened
+into derivation variables; actual derivation JSON, not that failed query, proves
+the configuration. No test was skipped, renamed or altered for green.
+
+Current-head CP1 push CI39630918875 and original CP2 push CI39628097424 complete.
+Each of their74 actual runtime invocations received three reviews: (1) compiler,
+feature, decoder and existing native adapter laws are intact; workspace includes
+32command cases at6d0d8adc and34 at02c8ac86, respectively. These are not processor-
+native tests. (2) each has three compiler2/1/1,27 library-feature,40 nativePG,
+workspace1626(102.110s)/1628(143.758s), and replay2/1/1. Native services are real
+PG18.6, four startups/shutdowns across the two workflows; each group has seven
+zero-skip profiles264/149/168/176/173/174/150 plus13 explicitly selected laws.
+75 summary lines include one echoed native receipt, not another invocation.
+Zero-test libraries do not count as conformance coverage. (3) actual head/source,
+selection, assertions and full native receipts match their owning reviewed changes;
+no fixture-only success replaces runtime product laws. Logs/counts are retained as
+cp1-final-ci-push and cp2-original-ci. CP2's forthcoming parent integration needs
+fresh checks; these original-head passes are not transplanted to a changed tree.
+CP3 all12 host outputs now pass and are rooted under cp3-check*. Final local
+failure/probe/configuration/source receipts are in evidence/cp3-gates.tar.gz;
+original owner/control bundle remains unchanged. Normal signed hook follows,
+with cached outputs earning zero new runtime credit. No production code change;
+278 net test lines across five owners and five justified Nix lines. CP3 is locally
+qualified; protected delivery, real processor backends, telemetry/performance,
+publication and server consumption remain required under their owning CP rows.

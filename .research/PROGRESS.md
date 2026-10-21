@@ -1,65 +1,71 @@
-# Command processor delivery — current state, 2026-10-21
+# Command processor delivery — CP3 qualification, 2026-10-21
 
-Persistent CP0–CP9 goal is active without a token budget. Do not complete it until
-required source/CI is merged, publication and registry consumption are verified,
-and labcast-server consumption passes. PRD: docs/prds/command.md. Exact research,
-source receipt and test reviews: docs/prds/command/research.md and evidence/.
-Historical progress is preserved at signed b711855 and in the evidence-root
-progress-before-cp2.md snapshot; EXPERIMENTS remains append-only.
+Persistent CP0–CP9 goal remains active, no token budget. Full delivery still needs
+required merged changes, publication, clean registry and labcast-server consumer.
+PRD/backlog/feature research own acceptance. Do not mark complete from local checks.
 
-## Branches and delivery
+## Delivery
 
-- Primary /Users/joel/orca/workspaces/nexus/command-prd: feat/command-errors,
-  parent signed b71185568914f76fb06aff195c0d4268c239f186. CP2 is uncommitted.
-- CI repairPR412 protected-merged efec41afeab8138801fe034be1a60cbf4055848a;
-  reviewed24317917, exact tree3ab79ecda4af32faf7d8f016af4b02392df73729.
-- FoundationPR411 protected-merged ca62b557ed870ec7ceb336ea9d08f21df0e664d5,
-  reviewed d88c6efa; actual/expected tree3ee54613c61226c317c63347c6bde81c7c04711e.
-- ExtractionPR413 at b711855: all12 local checks pass (1626 workspace tests,
-  32 debug/release owner tests), but current merge is dirty after main advanced
-  and its mutation CI failed. Read cp1-ci-mutants-failed.log, resolve without
-  weakening gates, integrate protected foundation/main in an isolated worktree.
-- Preserve unrelated managed releasePR410 and the original dirty Postgres/main
-  worktree. Source controller-archive and the mobile repository are untouched.
+- CP0 PR411 protected-merged ca62b557ed870ec7ceb336ea9d08f21df0e664d5;
+  expected/actual tree3ee54613c61226c317c63347c6bde81c7c04711e.
+- CI repairPR412 protected-merged efec41a. No unrelated PR410/user-main/mobile work.
+- CP1 PR413 repair signed/pushed6d0d8adc300c9aaa542a5e94b3b53bc95e2199be,
+  two parents b711855 and protected ca62b557. All12 host outputs/normal hook pass,
+ 1626PASS479.112s; original mutation169 failed3missed/1timeout. Three targeted
+  behavioral controls now caught; exact private Debug follows existing policy.
+  Current-head mutation39630929359 passes168:91caught77unviable0missed/timeout,
+ three-reviewed from artifact12359961832; only one required Nix CI remains live
+ on last inspection. No premature protected merge claim.
+  Worktree /tmp/mnesis-command-extract is clean. Own repair stash retained alongside
+  unrelated pre-existing stash; do not drop unrelated entries.
+- CP2 signed02c8ac8645da731db6af05aad93ebc9e28a55852, draftPR414 stacked on413.
+  Typed errors/custody locally qualified, all12 outputs/normal hook pass1628tests.
+  Sole LCOV output's post-test Nix classifier crash is retained, not suppressed.
+  Current push CI has no failure; Nix check was still pending on last inspection.
+  Integrate protected extraction and retarget main before protected delivery.
 
-## CP2 qualification
+## Current source
 
-Typed domain/kernel/adapter causes now traverse the real handle, mailbox and Tower
-reply. Cause is flat; no dynamic error or per-retry recursive chain. CodecError
-preserves JSON/writer sources and distinguishes bounds/lossy/unsupported data.
-Queue/config/history/replay/version outcomes are distinct. Original pending
-custody survives failed exact retries; success clears it only after valid receipt.
-Stored v2 bytes/schema/constants and ordering remain unchanged.
+Primary /Users/joel/orca/workspaces/nexus/command-prd is feat/command-races,
+parent02c8ac86. CP3 changes are staged for the normal signed commit. Existing FaultStore gains one optional
+append gate. Canonical shared race helper forces both real handlers to append
+before any release;192 fixed schedules and256 generated concurrent histories.
+Original256 serial histories remain. Identity/metadata mismatch, exact receipt,
+whole raw record/prefix, state and exactly two contender decisions are asserted.
+Debug/release35PASS, one original ignored measurement; Clippy passes with no new
+lint waiver. Both meaningful negative controls fail product response assertions,
+not setup/compiler/runner timeouts. Source product modules remain unchanged.
+Five test owners,278 net test lines, under350 budget; one justified Nix owner
+adds the Darwin nextest fallback, without product code changes. All actual runs have
+three reviews, with raw failure/control logs retained in the feature evidence.
 
-34 owner tests pass in debug/release, plus the final strengthened capacity case
-in both profiles (4095→4096 via processor, old receipt, no append at full, typed
-4097th-row failure). Real committed-fold panic/reconstruction/exact recovery
-witness observes both native joins and one handler decision. All actual runs
-three-reviewed. All12 host check outputs now exist: workspace nextest1628PASS,
-549.765s,142 binaries,five established exclusions; fresh replay2/1/1PASS. The
-Nix build exits0, but nextest's post-test audit-tmpdir fixup subprocess logged a
-segmentation fault. That output contains only ASCII LCOV data, no executable or
-wrapper to inspect. Preserve this tooling limitation; do not claim the classifier
-completed. Normal signed commit hook remains required.
-Budget: eight source/test owners, +151 production
-lines (1181 total), two new root types Cause/CodecError; root total8. No dependency,
-framework, runtime, schema, project Python or development-tool addition.
+## Next actions and resources
 
-## Resources and next actions
+CP3 initial gate failed an unchanged macro nested-compiler lookup;654PASS1FAIL
+with no final summary, agent-interrupted at581MiBfree. All35command cases passed,
+but that partial run is not a green gate. A direct tool-alias probe fails134
+before and passes0 after the selected toolchain/lib fallback. Darwin-only
+nextest environment in flake.nix uses supported lib.makeLibraryPath;5lines,
+no changed test/filter/assertion/workload. The full retry passes all12 host outputs,1629PASS439.141s;
+raw cp3-full-gate-driver.log; actual derivation id33yn confirms fallback at
+/nix/store/85qgkjfkq3q4kcxzcf2sy2d3wn8d7z37-rust-1.99.0/lib. The prior failing
+macro now passes. Source was staged first so races.rs participates in Nix. Its test/control bundle
+cp3-tests.tar.gz SHA25618fa5d2d4ba47b255e8dbfa60e3004446594d48ff9558137291e608c4b6c3679.
+Final raw receipt cp3-gates.tar.gz retained. Finish normal signed hook;
+open focused stacked PR. No cached check earns new test credit. CI413 needs actual
+full mutation review, source/current-head checks and protected exact-head merge.
+CP2 parent integration is prepared in /tmp/mnesis-command-errors (uncommitted
+merge of6d0d8adc into02c8ac86). Product source unchanged; two test owners gain
+stronger parent assertions. It needs its serialized gate/hook before push.
+Then integrate protected main/retarget CP2 and CP3, preserving all evidence.
+Continue CP4 public validated acceptance/format/projection; CP5 completion custody,
+stop/dequeue/reentrant wake/drop, timers and telemetry; CP6 real Postgres/Fjall,
+performance/instrumentation/15min soak; CP7 docs/features/fuzz; CP8release; CP9server.
+CP5 concrete falsifiers/ownership distinction are in HYPOTHESES, not yet qualified.
 
-Raw logs: /tmp/mnesis-command-start-20261021. Twelve baseline Nix check outputs are
-rooted there as cp0-check*, and shell via standard --profile .../shell. Unrooted
-outputs were reclaimed between checks; a parallel hook hit disk exhaustion.
-Only this goal's generated Cargo target caches were removed; all code/logs remain.
-Use --max-jobs1 for Nix builds and append max-jobs=1 to NIX_CONFIG for normal hooks.
-Retain each fresh check result with standard --out-link; no global GC/config change.
-Serialize full gates; no cached output earns fresh runtime credit.
-
-Next: CP2 normal signed commit/focused PR; all output roots and raw evidence retained.
-Resolve PR413 mutation CI and merge conflicts. Finish current-head PR411/413
-protected delivery, then CP3 forced races/generated schedules and CP4 reader/
-format/projection. CP5 must qualify completion report custody, stop/dequeue and
-reentrant wake/drop behavior, timers/cancellation and tracing/metrics. HYPOTHESES
-records concrete falsifiers. CP6 real backends/performance/15min soak, CP7 package/
-CI/fuzz/docs, CP8 audits/protected release, CP9 registry server consumer remain.
-No real processor Postgres/Fjall, instrumentation, performance or publication claim.
+Raw logs/output roots /tmp/mnesis-command-start-20261021. All full local gates must
+serialize with --max-jobs1 and normal hooks append max-jobs=1 to NIX_CONFIG. Retain
+standard --out-link results to prevent background reclamation. Only goal-owned
+generated caches may be cleaned; no global GC/config or other projects touched.
+Persistent Nix shell session91477 avoids repeated environment startup; commands
+using nextest/mutants redirect stdin from /dev/null to preserve shell input.

@@ -67,6 +67,7 @@ pub struct FaultStore<S> {
     pub inner: Arc<S>,
     fault: Mutex<Fault>,
     pub read_gate: Mutex<Option<Arc<Gate>>>,
+    pub append_gate: Mutex<Option<Arc<Gate>>>,
     pub after_read: Mutex<Option<(usize, Arc<Gate>)>>,
 }
 impl<S> FaultStore<S> {
@@ -75,6 +76,7 @@ impl<S> FaultStore<S> {
             inner: Arc::new(inner),
             fault: Mutex::new(Fault::Normal),
             read_gate: Mutex::new(None),
+            append_gate: Mutex::new(None),
             after_read: Mutex::new(None),
         }
     }
@@ -119,6 +121,10 @@ impl<S: RawEventStore + 'static> RawEventStore for FaultStore<S> {
         expected: Option<Version>,
         envelopes: PendingBatch<'_>,
     ) -> Result<Self::AllPosition, AppendError<Self::Error>> {
+        let admission = self.append_gate.lock().clone();
+        if let Some(control) = admission {
+            control.wait().await;
+        }
         let fault = std::mem::take(&mut *self.fault.lock());
         match fault {
             Fault::Rollback => Err(AppendError::Store(FaultError::Lost)),

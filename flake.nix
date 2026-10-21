@@ -202,6 +202,11 @@
               inherit cargoArtifacts;
               # Consumers use coverage; no check consumes this target archive.
               doInstallCargoArtifacts = false;
+              # Nested Cargo invocations must also find the selected compiler's
+              # driver when Darwin resolves its hard-linked store alias.
+              env = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+                DYLD_FALLBACK_LIBRARY_PATH = lib.makeLibraryPath [ rustToolchain ];
+              };
               withLlvmCov = true;
               partitions = 1;
               partitionType = "count";

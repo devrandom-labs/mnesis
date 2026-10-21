@@ -573,3 +573,10 @@ rapidhash4.5.1; upstream commit043577f9914223e3e2d7165d5361e7e78ad75ed2 dated
 2026-10-16. Tokio-util0.7.20 PollSender's locked source and Tower0.5.3 contract
 establish handle-owned readiness reservations. Detailed decisions/evidence in
 command/research.md, CP0 seams. No ownership reservation or advisory claim.
+2026-10-21 CP3 gate prerequisite: official Cargo environment reference
+https://doc.rust-lang.org/cargo/reference/environment-variables.html#dynamic-library-paths
+says macOS uses DYLD_FALLBACK_LIBRARY_PATH and extends its existing value in child
+compiler/binary processes. Actual selected Rust1.99.0 compiler/driver are same
+Nix toolchain; executing its hard-linked .links alias reproduces dyld abort134,
+then selected toolchain/lib fallback yields0. Use existing lib.makeLibraryPath;
+no dependency or global setup change. Broader store-alias cause is not proven.
