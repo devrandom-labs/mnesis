@@ -26,7 +26,7 @@ type Backend = FaultStore<InMemoryStore>;
 type Host = CommandProcessor<Counter, u8, NonZeroU64, 0, <Backend as RawEventStore>::Error>;
 
 struct History {
-    store: Store<Backend>,
+    stores: [Store<Backend>; 2],
     before: Vec<(Version, serde_json::Value)>,
     prefix: Option<u8>,
 }
@@ -136,7 +136,9 @@ async fn seed(host: &Host, id: NonZeroU64, prefix: Option<u8>) -> Option<Version
 pub async fn run(kind: Kind, winner: Winner, id: NonZeroU64, amount: u8, prefix: Option<u8>) {
     DECISIONS.store(0, Ordering::SeqCst);
     let store = Store::new(FaultStore::new(InMemoryStore::new()));
-    let gate = Gate::new();
+    let rival = Store::new(FaultStore::shared(Arc::clone(&store.raw().inner)));
+    let first_gate = Gate::new();
+    let second_gate = Gate::new();
     let limits = Limits {
         queue: NonZeroUsize::MIN,
         operation: Duration::from_secs(2),
@@ -144,56 +146,41 @@ pub async fn run(kind: Kind, winner: Winner, id: NonZeroU64, amount: u8, prefix:
     let (one, first_worker) =
         CommandProcessor::<Counter, u8>::start(&store, String::from("race"), limits).unwrap();
     let (two, second_worker) =
-        CommandProcessor::<Counter, u8>::start(&store, String::from("race"), limits).unwrap();
+        CommandProcessor::<Counter, u8>::start(&rival, String::from("race"), limits).unwrap();
     let expected = seed(&one, id, prefix).await;
     let history = History {
         before: rows(&store.raw().inner).await,
-        store,
+        stores: [store, rival],
         prefix,
     };
     assert_eq!(history.before.len(), usize::from(prefix.is_some()));
     assert_eq!(DECISIONS.load(Ordering::SeqCst), history.before.len());
-    *history.store.raw().append_gate.lock() = Some(Arc::clone(&gate));
+    for (backend, gate) in history.stores.iter().zip([&first_gate, &second_gate]) {
+        *backend.raw().append_gate.lock() = Some(Arc::clone(gate));
+    }
     let [first, second] = requests(kind, id, amount, expected);
-    let (winning, losing) = match winner {
-        Winner::First => ((one.clone(), first), (two.clone(), second)),
-        Winner::Second => ((two.clone(), second), (one.clone(), first)),
+    let (winning, losing, gates) = match winner {
+        Winner::First => (
+            (one.clone(), first),
+            (two.clone(), second),
+            [first_gate, second_gate],
+        ),
+        Winner::Second => (
+            (two.clone(), second),
+            (one.clone(), first),
+            [second_gate, first_gate],
+        ),
     };
     let (accepted_by, accepted_request) = winning;
     let (rejected_by, rejected_request) = losing;
-    let winner_host = accepted_by.clone();
-    let original = accepted_request.clone();
-    let first_reply = tokio::spawn(async move { winner_host.submit(original).await });
-    gate.entered().await;
-    let loser_host = rejected_by.clone();
-    let losing_original = rejected_request.clone();
-    let second_reply = tokio::spawn(async move { loser_host.submit(losing_original).await });
-    gate.entered().await;
-
-    assert_eq!(DECISIONS.load(Ordering::SeqCst), history.before.len() + 2);
-    assert!(!first_reply.is_finished());
-    assert!(!second_reply.is_finished());
-    assert_eq!(rows(&history.store.raw().inner).await, history.before);
-
-    gate.release();
-    let receipt = timeout(Duration::from_secs(2), first_reply)
-        .await
-        .unwrap()
-        .unwrap()
-        .unwrap();
-    assert!(!second_reply.is_finished());
-    *history.store.raw().append_gate.lock() = None;
-    gate.release();
-    let loser = timeout(Duration::from_secs(2), second_reply)
-        .await
-        .unwrap()
-        .unwrap();
-    match kind {
-        Kind::Duplicate => assert_eq!(loser.unwrap(), receipt),
-        Kind::Conflict => assert!(matches!(loser, Err(Error::Conflict))),
-        Kind::Mismatch => assert!(matches!(loser, Err(Error::Mismatch))),
-    }
-
+    let receipt = compete(
+        &history,
+        [&accepted_by, &rejected_by],
+        [&accepted_request, &rejected_request],
+        gates,
+        kind,
+    )
+    .await;
     verify(
         &history,
         [&accepted_by, &rejected_by],
@@ -208,6 +195,54 @@ pub async fn run(kind: Kind, winner: Winner, id: NonZeroU64, amount: u8, prefix:
     assert_eq!(finish(second_worker).await.uncertain(), None);
 }
 
+async fn compete(
+    history: &History,
+    hosts: [&Host; 2],
+    originals: [&Request<u8>; 2],
+    gates: [Arc<Gate>; 2],
+    kind: Kind,
+) -> Receipt {
+    let [winner_host, loser_host] = hosts.map(Clone::clone);
+    let [original, losing_original] = originals.map(Clone::clone);
+    let [winning_gate, losing_gate] = gates;
+    let mut first_reply = tokio::spawn(async move { winner_host.submit(original).await });
+    winning_gate.entered().await;
+    let mut second_reply = tokio::spawn(async move { loser_host.submit(losing_original).await });
+    losing_gate.entered().await;
+
+    assert_eq!(DECISIONS.load(Ordering::SeqCst), history.before.len() + 2);
+    assert!(!first_reply.is_finished());
+    assert!(!second_reply.is_finished());
+    assert_eq!(rows(&history.stores[0].raw().inner).await, history.before);
+
+    winning_gate.release();
+    let completed = timeout(Duration::from_secs(2), async {
+        tokio::select! {
+            first = &mut first_reply => Ok(first),
+            second = &mut second_reply => Err(second),
+        }
+    })
+    .await
+    .unwrap();
+    let receipt = completed.unwrap().unwrap().unwrap();
+    assert!(!second_reply.is_finished());
+    for backend in &history.stores {
+        *backend.raw().append_gate.lock() = None;
+    }
+    losing_gate.release();
+    let loser = timeout(Duration::from_secs(2), second_reply)
+        .await
+        .unwrap()
+        .unwrap();
+    match kind {
+        Kind::Duplicate => assert_eq!(loser.unwrap(), receipt),
+        Kind::Conflict => assert!(matches!(loser, Err(Error::Conflict))),
+        Kind::Mismatch => assert!(matches!(loser, Err(Error::Mismatch))),
+    }
+
+    receipt
+}
+
 async fn verify(
     history: &History,
     hosts: [&Host; 2],
@@ -216,7 +251,7 @@ async fn verify(
     kind: Kind,
 ) {
     let History {
-        store,
+        stores,
         before,
         prefix,
     } = history;
@@ -226,7 +261,7 @@ async fn verify(
         (receipt.id, receipt.version, receipt.events),
         (accepted_request.id, version, 1)
     );
-    let committed = rows(&store.raw().inner).await;
+    let committed = rows(&stores[0].raw().inner).await;
     assert_eq!(committed.len(), before.len() + 1);
     assert_eq!(&committed[..before.len()], before.as_slice());
     let acceptance = &committed[before.len()];
@@ -262,5 +297,5 @@ async fn verify(
         Kind::Mismatch => assert!(matches!(repeated, Err(Error::Mismatch))),
     }
     assert_eq!(DECISIONS.load(Ordering::SeqCst), before.len() + 2);
-    assert_eq!(rows(&store.raw().inner).await, committed);
+    assert_eq!(rows(&stores[0].raw().inner).await, committed);
 }

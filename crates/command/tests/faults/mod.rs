@@ -72,8 +72,11 @@ pub struct FaultStore<S> {
 }
 impl<S> FaultStore<S> {
     pub fn new(inner: S) -> Self {
+        Self::shared(Arc::new(inner))
+    }
+    pub const fn shared(inner: Arc<S>) -> Self {
         Self {
-            inner: Arc::new(inner),
+            inner,
             fault: Mutex::new(Fault::Normal),
             read_gate: Mutex::new(None),
             append_gate: Mutex::new(None),

@@ -28,7 +28,8 @@ CP0–CP9 are required for the new feature. The planning branch is
 `docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
 The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
 CP0–CP2 are protected-merged (PR411/PR413/PR414).
-CP3's updated integration passes its full gate; current-head CI and protected delivery remain. Later requirements
+CP3's repaired race fixture passes all12 local gates and192 forced registration
+inversions; repaired-head CI and protected delivery remain. Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing
 source tests and one separately executed in-memory measurement. No current

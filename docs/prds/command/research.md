@@ -1073,3 +1073,169 @@ tree9291a882; all incoming facts are already present in6998d7fa. Keep the tested
 combined records/status and stronger source, after proving tree equality and zero
 automatic product/test/Nix diff. No unique incoming content is discarded. Normal
 signed hook runs again; unchanged cached outputs earn no new execution credit.
+CP3 first new-head Nix CI39649396688/job119393433782 fails at7534d590: workspace
+369/1629 executed,368PASS1FAIL,1260not run,five original exclusions,in4.688s.
+Three reviews: (1) actual canonical concurrent owner returns Uncertain{id:1,
+source:None} at the expected winner's receipt assertion after2.060s. This is a
+real failed qualification, not a green job or proven product defect. (2) full
+instrumented Linux selection stops at that first failure; no native command-
+database acceptance. (3) raw failure/selection/source retained in cp3-ci-first-
+failure.log. Source audit finds entered notification precedes semaphore waiter
+registration, so shared FIFO release may select the other contender. Reproduce
+that exact allowed interleaving before repairing the fixture; no timeout increase,
+reduced schedules, single-thread substitution or weakened receipt assertion.
+CP3 forced registration-order probe executes1FAIL/26skipped (25filtered/one
+original ignored) in2.023s. Three reviews: (1) actual old helper under a permitted
+preemption now cannot finish the selected winner; no product code changes.
+(2) Nix recovery target only, same two-thread canonical192-schedule law; first
+schedule fails at bounded expected reply, no native database. Raw cp3-order-probe-
+before.log and exact temporary gate patch retained. (3) both handlers reach actual
+append gates and prefix assertions first pass; first waiter is held until second
+has registered on release. Failure is outer Elapsed, consistent with a stolen
+release but not yet direct receipt evidence. Strengthen the existing completion
+observation to select both replies: an unreleased loser's completion must fail
+immediately with its actual response. Keep every later receipt/state/raw assertion
+and2s bound. Re-run this same controlled order before selecting the repair.
+CP3 direct observation of the same forced order executes1FAIL/26skipped in0.026s.
+Three reviews: (1) while both real handlers are at append, first release completes
+the supposedly unreleased loser with actual Ok(Receipt{id:1,version:1,events:1});
+the selected winner is still held. This proves the fixture's shared-release
+assumption, without blaming controller reconciliation or slow CI. (2) same Nix
+canonical recovery target, no workload/deadline change or native DB. Raw cp3-order-
+probe-direct-before.log. (3) actual first failure contains the loser's real receipt,
+not setup/clock expiry. Keep this stronger two-reply observation after repair;
+independent per-contender gates must reject neither valid winner nor loser phases.
+CP3 candidate under the SAME forced registration inversion passes1/1 in0.090s,
+26skipped (25filtered/one original ignored). Three reviews: (1) all192 schedules
+now release the selected contender's own gate even when its waiter registers
+second; both handlers must still reach actual append before either release. Both
+winner orders, raw prefix/record/receipt/state, decisions and joins remain checked.
+(2) actual Nix canonical recovery target, same two-thread runtime and2s bounds,
+no database. Raw cp3-order-probe-after.log. (3) two fault wrappers share one actual
+InMemoryStore Arc, so the real CAS authority is unchanged; separate gates remove
+release theft rather than mask it with a longer deadline. The retained two-reply
+observation directly fails an early loser completion. Remove only the disposable
+registration hook, preserve its red/green patch/logs, then qualify full owners.
+CP3 repaired-source full debug owner suite passes35/35,one original ignored,
+in1.341s. Three reviews: (1) all192 two-thread schedules,256 concurrent generated
+and256 unchanged serial histories plus baseline outcome/uncertainty/fold/capacity
+laws pass with independent per-contender release gates and early-loser detection.
+(2) all four package binaries run without filter via Nix; no native DB. Raw
+cp3-gates-fixed-debug.log. (3) disposable registration hook is removed exactly
+by reversing its saved patch; only FaultStore shared-Arc construction and the
+canonical race helper remain changed. No product source, deadline, workload or
+previous assertion removed. Total authored test delta316 within350; final strict
+lint, optimized owners, production negative controls, full gate and CI remain.
+The failed CI job's three actual foundation replay invocations each also receive
+three reviews: (1) unchanged CBOR/value/wire decoder oracles, not processor/native
+qualification; (2)2/1/1PASS,1.00s each,0ignored/filtered before the failed workspace
+run; (3) exact existing corpus/source/selection, no shortened campaign. Raw job
+log retains each invocation. Other workflow invocations require their own full
+run-log review and do not make the failing required job green.
+Clippy rejects only the new shared-Arc test constructor being eligible for const;
+make that constructor const, with no waiver or assertion/workload change. Strict
+all-target/all-feature Clippy then passes1.19s. The source/probe controls remain.
+CP3 corrected optimized owner suite passes35/35,one original ignored,in0.503s.
+Three reviews: (1) all192 fixed/256 concurrent/256 serial schedules and every
+baseline persistence/uncertainty/typed outcome law execute with independent
+per-contender gates and the stronger first-completion check. (2) all four release
+package binaries, no filter/native DB; raw cp3-gates-fixed-release.log. (3) final
+const constructor changes no runtime behavior; probe hooks are absent, exact
+stored record/state/receipt and handler/teardown assertions unchanged. Re-run the
+two original production mutation controls against this strengthened fixture before
+the complete gate; a previously passing weaker fixture is not sufficient evidence.
+CP3 repaired-fixture production controls: baseline1PASS; two mutants caught,
+0missed/unviable/timeout. Each of three actual invocations receives three reviews:
+(1) baseline completes all192 schedules; disabling confirmed-conflict recognition
+returns Uncertain for the actual duplicate loser; accepting any same-ID content
+wrongly succeeds on changed expected metadata. (2) actual canonical recovery law
+selected via Nix/cargo-mutants, all other targets/cases excluded as recorded in raw
+logs; no database. (3) each first failure is the intended receipt/mismatch oracle
+after real append, no fixture poisoning, compiler failure or clock expiry. Raw
+cp3-gates-fixed-controls/mutants.out retains exact commands/diffs/results. Independent
+gates preserve and strengthen the original two falsifiers. Final full gate/CI open.
+Correction evidence cp3-gates-fixed.tar.gz SHA256:
+a8559a645c8d06bdfa4059e029916b338091b67091bbc28a3047d1ddee39a10b.
+Before the full corrected gate, retain logs/source and clean only goal-generated
+local Cargo cache. Retire its three superseded integration cross-target caches
+after zero referrers verified; CP4's replacement outputs already pass/rooted.
+Exact paths/deletion log retained. No shared/global cleanup, thread/deadline or
+test change. C3 common dependency cache has a normal Nix root. The attempted C4
+root fails because its unrooted dependency output was already reclaimed; no test
+or source is lost and no rebuild is credited. Its final check outputs remain
+rooted; rebuild dependencies only when the next actual C4 gate needs them.
+Complete old-head CI review at7534d590: PR39649402288 has74 actual runtime
+invocations; push39649396688 has54. Each receives three reviews: (1) compiler,
+isolated library, foundation and existing adapter laws run; command owner35 passes
+in PR workspace but the push's canonical race fails, so this source is not qualified.
+(2) each has compiler2/1/1,27 library runs,replay2/1/1 and one workspace invocation.
+PR workspace1629PASS104.473s; push369executed/368PASS1FAIL4.688s,1260notrun. Both
+retain5existing exclusions. PR has40native PG invocations/two actual PG18.6 services;
+push has20/one service (its Nix-native branch canceled). Each service runs seven
+full profiles264/149/168/176/173/174/150 with0skips and13 explicit one-law selections;
+start/stop observed. One echoed264 receipt is not another invocation; the failed
+test's inner libtest print is not another workspace invocation. (3) raw exact
+commands/current source, real services and unchanged assertions/workloads match
+their owners. Zero-test libs earn no coverage; selected laws do not imply all
+unselected cases ran. Passing PR CI does not override the independently reproduced
+push failure, and these old-head passes cannot qualify the repaired source. Raw
+cp3-original-final-ci-{pr,push}.log/counts.txt retained for delivery.
+Forced-order scope clarification: the disposable global registration counter
+inverts the first two gate waits, so the first schedule is deliberately inverted;
+the remaining191 schedules execute unchanged. It proves the original permitted
+ordering defect and the candidate's first inverted witness, not192 separately
+forced inversions. Before final commit, repeat the disposable hook with pairwise
+counter indexing so all192 schedules see that inversion. Keep the normal full-gate
+source untouched while its build is active; restore/remove the probe and verify
+exact bytes after this additional check. No reduced schedule or longer deadline.
+Old-head fuzz39649402020: each of eight engine invocations receives three reviews:
+(1) unchanged foundation decode/crash oracles, not new command fuzz qualification;
+(2) four61s libFuzzer campaigns: wire10750110,header3042652,chunk1336857,value8361714;
+four existing AFL/CMPLOG60s campaigns reach their limits and pass saved-crash
+verdict, no native DB. (3) exact current7534d590 source/workloads/crash gates and
+uploaded failure handling unchanged; no reduced inputs or hidden engine failures.
+These bounded foundation campaigns cannot override the required race failure or
+qualify repaired source. Raw cp3-original-final-fuzz.log retained.
+Corrected full gate's three fresh replay invocations each receive three reviews:
+(1) unchanged CBOR/value/wire foundation parser oracles; (2)2/1/1PASS,1.00s each,
+0ignored/filtered, no database; (3) same source/corpus/selector, no new command
+campaign or cached runtime credit. Raw cp3-gates-fixed-full.log; full nextest is
+still running and receives no premature green credit.
+Corrected full nextest42955380-7383-437d-93ac-dc49650724a2 completes1629PASS,
+14slow,5existing exclusions,142binaries,in449.181s. Three reviews:
+(1) all35 command laws execute, including192 fixed race schedules and256 each
+generated concurrent/serial histories; late commits remain uncertain and exact
+receipts/order remain checked. (2) actual full workspace invocation, no database
+service and no native command-store credit; the three separate fresh replays
+were reviewed above. All12 host outputs pass/rooted as cp3-fixed-check-*.
+(3) four product modules and both repaired test owners byte-match the actual
+7zzzj1idnh6cql2qwjnb43aqn5ph34kd-source. No weakened assertions, filters, workload,
+deadlines or exclusions. Current source differs only in the two retained fixture
+owners. Pairwise disposable ordering probe and current-head CI still required.
+Pairwise disposable probe4b67548d-6490-435e-b041-2253dfcc83cf passes1/1 in0.080s,
+26excluded (25filtered/one original ignored). Three reviews: (1) the actual192-
+schedule owner still asserts both decisions, selected winner, held loser, complete
+rows, receipts/state/retries and observed teardown; registration inversion is now
+indexed modulo2. (2) actual recovery binary only in Nix, two-thread runtime, no
+database or reduced2s bounds. (3) probe changes only gate registration ordering;
+all product source is unchanged. Before retaining full192-inversion credit,
+strengthen the disposable probe to signal each registration exactly once (so a
+spurious repoll cannot leave a spare permit) and assert384 gate entries. This
+additional check changes no retained source or gate/workload.
+Counted pairwise probe b1cf41ad-040c-4a56-804d-27678c604441 passes1/1 in0.100s,
+26excluded. Three reviews: (1) all192 schedules force first-entered registration
+after second-entered registration; single-use registration signal prevents spare
+permits, and the actual owner asserts384 entries before passing. Every original
+receipt/CAS/whole-row/state/retry/handler/teardown oracle remains. (2) one actual
+Nix recovery invocation, two threads, unchanged192 schedules and2s bounds; no DB.
+(3) both disposable probe changes removed, repaired faults and unchanged recovery
+byte-match the already qualified7zzz source. No probe retained, no product edit.
+Raw cp3-pairwise-{probe,counted-probe}.log and final probe patch retained. The
+original shared-gate defect's direct red remains in cp3-order-probe-direct-before.log; current
+full gate and these forced positive witnesses qualify the selected repair locally,
+not protected CI or native processor integration.
+Final host/ordering and complete old-head CI raw evidence is preserved in
+cp3-final-gates.tar.gz, SHA256
+3fb393c55e4bc1359e3fc10512b8db4e166b5dc5fee07fc953677ccbfafd3b7a.
+Old CI is retained as historical evidence of the red/green discrepancy; only
+fresh repaired-head checks can establish protected delivery.

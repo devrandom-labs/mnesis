@@ -1622,3 +1622,21 @@ and both research histories. Product source must remain identical to CP2.
 No new product owner/API/package/format/workload/gate change; final combined full
 gate and normal signed hook are required. Following protected main integration
 must preserve the exact reviewed source and uses ordinary Git/protected workflow.
+CP3 current-head CI repair before edits: run39649396688/job119393433782 fails the
+canonical forced race at first winning receipt with Uncertain after2s. Gate::wait
+notifies entered BEFORE polling the shared release semaphore; entered-first need
+not enqueue-first on the two-thread runtime. Prove this permitted ordering using
+a disposable test-only hook: pause the first gate waiter until the second has
+actually polled its semaphore acquire; use poll_fn and a registration signal,
+not sleeps or longer deadlines. Run the actual canonical race. Preserve its red.
+Then use independent append gates per contender over two FaultStore wrappers
+sharing the SAME actual InMemoryStore; explicitly release the selected host's
+gate. Keep all192fixed/256concurrent/256serial schedules, both winner orders,
+response/raw-row/state/handler/teardown assertions and2s bounds unchanged. Reuse
+FaultStore with a shared-Arc constructor, no competing store/framework/runtime.
+Budget: existing faults and races test owners, <=100 net test lines (cumulative
+<=350), <=35 disposable probe lines, zero product/API/format/dependency/config
+change plus records. Falsifier: forced original ordering does not reproduce,
+candidate still times out, stores differ, any contender can steal another's
+release, reduced workload/deadline or wrong first-failure assertion. Remove the
+probe after red/green evidence; normal final gates and current-head CI required.
