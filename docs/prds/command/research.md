@@ -2417,3 +2417,12 @@ Final gate/reviews/check paths/source-preservation receipts archived at
 evidence/cp5-trace-gates.tar.gz SHA256
 8675719d5e2689b074c51d8667a4ef25db74090431030544617683b6a9a56134.
 Normal signed hook and protected PR remain before tracing delivery.
+
+Focused CI coverage before trace publication: add mnesis-command to the existing
+feature-isolation matrix and run its complete default and tracing integration
+laws through the existing Nix shell, locked dependencies and fail-on-no-tests.
+Five workflow lines, no new runner/job/tool/framework. Existing aggregate gate
+requires this member. Actual CI counts/outcomes remain pending; do not infer
+success from authored workflow. Metrics-only/combined combinations follow their
+implemented feature. This closes the ordinary-CI trace selection gap without
+claiming the default Nix gate executed trace laws.

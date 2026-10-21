@@ -49,6 +49,7 @@ jobs:
           - mnesis-macros
           - mnesis-store
           - mnesis-store-testing
+          - mnesis-command
           - mnesis-wake
           - mnesis-wake-nostd
           - mnesis-inmemory
@@ -81,6 +82,10 @@ jobs:
             cargo test -p "$PACKAGE" --lib --locked
             cargo test -p "$PACKAGE" --lib --locked --no-default-features
             cargo test -p "$PACKAGE" --lib --locked --all-features
+            if [ "$PACKAGE" = mnesis-command ]; then
+              cargo nextest run -p "$PACKAGE" --locked --no-default-features --no-tests=fail
+              cargo nextest run -p "$PACKAGE" --locked --no-default-features --features tracing --no-tests=fail
+            fi
           SH
 
   feature-isolation-gate:

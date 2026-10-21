@@ -2062,3 +2062,14 @@ source hashes and all evidence/status, union only append-only record conflicts
 if any. Full Nix source must remain byte-identical to the qualified candidate.
 This updates the focused PR's ancestry without changing product behavior or
 inventing a parent-only commit. Normal signed hook and protected CI still apply.
+
+Before opening trace PR: source gate runs defaults, and existing feature matrix
+omits mnesis-command. Local enabled49-law proof and mutation --all-features are
+not a substitute for an explicit ordinary CI regression run. Extend ONLY the
+existing checks.yml feature matrix by command and add default/tracing integration
+nextest invocations inside its existing Nix shell. Budget<=8workflow lines,
+no new job/runner/framework/tool, unchanged existing jobs/selection/workloads.
+Fail on zero selected cases and use the exact locked dependencies. Required
+feature-isolation aggregate gate then owns this member. Future metrics adds its
+two remaining combinations when that feature is actually implemented. Rollback
+is signed e9a802fc; normal full Nix hook still required before push.
