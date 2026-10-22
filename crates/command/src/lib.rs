@@ -7,6 +7,8 @@
 
 mod engine;
 mod host;
+#[cfg(feature = "metrics")]
+mod meter;
 mod model;
 mod trace;
 

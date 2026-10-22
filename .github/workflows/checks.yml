@@ -85,6 +85,8 @@ jobs:
             if [ "$PACKAGE" = mnesis-command ]; then
               cargo nextest run -p "$PACKAGE" --locked --no-default-features --no-tests=fail
               cargo nextest run -p "$PACKAGE" --locked --no-default-features --features tracing --no-tests=fail
+              cargo nextest run -p "$PACKAGE" --locked --no-default-features --features metrics --no-tests=fail
+              cargo nextest run -p "$PACKAGE" --locked --all-features --no-tests=fail
             fi
           SH
 

@@ -2595,3 +2595,462 @@ released tracing claim. Audit of retained slice: no added normal dependency,
 root export, clock, queue/lock/field authority, custom Future/macro/runtime/tool;
 Scope stays zero sized when disabled, all11roots/record semantics unchanged,
 whole-workspace/no_std/wasm gates pass. Actual runtime overhead remains CP6 work.
+Metrics dependency selection (2026-10-22): actual initial six-package lock and
+hakari graph archived in raw cp5-metrics-registry-candidate.patch/selected-graph.
+Rejected dev metrics-util0.20.4 registry because its mandatory storage bundle
+adds random/sketch packages and generated normal workspace-hack RNG edges.
+After removal, metadata and hakari regeneration restore workspace-hack exactly;
+minimal normal tree has optional metrics0.24.6+rapidhash4.5.1, portable-atomic1.15.0
+on32bit only. No unrelated lock upgrades. MIT/MIT-or-Apache supported toolchain
+floors1.71.1/1.71.0/1.34 fit pinned1.99.0. Passive test recorder uses facade-native
+atomic CounterFn/GaugeFn implementations, standard HashMap/parking_lot and a Vec
+histogram, without custom production observer API, collection or synchronization.
+Characterization is written but not executed; no compatibility/runtime claim yet.
+
+Metrics characterization red (before any metrics product implementation): owning
+--test metrics --features metrics --no-tests=fail run compiled and actually ran
+one law,0PASS/1FAIL/0SKIP/0.013s, exit100. Raw cp5-metrics-before.log; source hash
+cp5-metrics-characterization.sha256. Three distinct reviews before source edits:
+1. Contract/counterexamples: native active append is gated, one other handle
+   retains readiness, one queued response is dropped unpolled, overload rejects
+   exactly QueueFull. Repeated ready and cloning are exercised. Both actual
+   originals/facts persist in order, state16/physical2 and original receipt are
+   verified; worker stop/join and retained-permit release finish before the
+   intended missing-meter assertion. Thus failure is missing queued/reserved/
+   inflight/unresolved observations, not fabricated storage failure or deadlock.
+2. Execution/selection/services: actual1selected/1failed/0skipped, successful
+   compilation and global recorder installation, source metrics.rs249 failure.
+   Actual busy snapshot [None,None,None,None] versus exact [Some(1);4]. Real
+   in-memory backend/fault gate, no database service required or native claim.
+   The later reconciliation/abort/panic/invalid profiles were not reached and
+   receive no execution credit. No child process in this owning invocation.
+3. Source/assertion/false positives: before-product source is the exact frozen
+   trace candidate plus optional facade declaration. Recorder uses maintained
+   facade atomic CounterFn/GaugeFn handles and passive storage, not a processor
+   reimplementation. Independent persisted records and exact typed QueueFull
+   precede the failing metric oracle; missing measurements are not defaulted to
+   zero. Snapshot reads do not reset gauges/counters. Bounded genuine native
+   permit/queue overlap and final joined cleanup preclude empty/zero-work green.
+   No metric oracle, workload, gate or deadline was weakened to obtain this red.
+
+Metrics source parent integrated to signed tracing PR418 head dc9882e8 without
+reapplying stale trace records: retained full stash2537ee72bc94ac387730c836337a05c588617ea5
+and complete prior index/status/source/research snapshots, zero-commit rebase,
+exact four-owner metrics-only patch, metric-owned record appends. All twelve
+code/manifests/test hashes verify unchanged. Existing trace delivery facts remain
+authoritative; no source/assertion/API change from parent integration. Original
+work and every older stash remain recoverable. Tracing CI/merge still pending.
+
+Executed metrics red, exact fixture/source identity, rejected registry dependency
+cost, minimal graph, and source-preserving signed-parent update receipts archived
+in evidence/cp5-metrics-red.tar.gz SHA256
+7d7d5f1068ce81f9debe9c92c540997de5d7eab966bd4fe7ea76114af17f545f.
+This archive preserves an intended failure, not passing metrics acceptance.
+PR418 live head dc9882e8 currently11SUCCESS/one scheduled skip/28pending checks;
+no full CI/merge claim. Normal signed tracing hooks were cached, not new tests.
+
+First metrics implementation owning run d4d1a087-f468-4e92-8988-c0028bb6c889:
+1PASS/1binary/0SKIP/0.045s, compile2.29s, exit0. Raw cp5-metrics-after.log.
+Three distinct reviews completed before further edits or another test run:
+1. Contract/counterexamples: all five recorder profiles now execute. Exact native
+   busy queue/reservation/inflight/pending gauges, retained permit after worker
+   stop and final balanced zeros pass. Dropped unpolled work still persists its
+   exact original/facts in order. Late commit stays uncounted before observation,
+   counts once on reconciliation, and duplicate adds no acceptance. Actual abort/
+   panic preserve native cancellation/payload73 and original custody. Both invalid
+   APIs retain typed Bytes/WriteZero; mismatch/conflict/domain rejection and no-op
+   retain actual stored originals, receipts and facts. No rollback inferred.
+2. Execution/selection/services: actual owning one-test invocation, all five
+   awaited profiles reach their terminal assertions (including final5acceptances),
+   zero filtered/ignored. Real in-memory backend and existing controlled native
+   gates; no external database/native CP6 credit. No child invocations. The test
+   global recorder installed successfully; later profiles receive execution credit
+   only now, not retroactively in the earlier red.
+3. Source/assertion/false positives: fixture and exact missing-gauge oracle remain
+   unchanged from the executed red. Product moves gauge custody with native
+   permits/Call resources and derives unresolved changes from Engine.pending;
+   no second protocol flag or global zeroing. Native worker error counts happen
+   only after JoinHandle completes. Empty/no-op work cannot fake ordered data,
+   active overlap, accepted count5, duplicate count1 or exact native failures.
+   Histogram/finite-label/unknown-count strength, precise shutdown timing and
+   whole-owner/feature/lint checks remain open. No complete CP5/metrics claim.
+
+Strengthened metrics accounting d7a649cb-6380-4954-93fb-dde05b8d8c93:
+1PASS/1binary/0SKIP/0.058s, compile1.88s, exit0. Three distinct reviews:
+1. Contract/counterexamples: all five unchanged data/lifecycle profiles plus exact
+   submitted/admitted/unknown totals submit15/12/3 and read4/4/1. Exact16queue
+   samples,11submit/4read execution samples and each definite rejection reason
+   pass. Independent real20ms held append compares queue/execution/append seconds
+   to measured held/whole-profile wall clocks; initial sample counts3/2/2 and
+   finite nonnegative durations pass. Earlier receipt/state/original/fact and
+   gauge assertions remain, including native panic73/cancel and final zeros.
+2. Execution/selection/services: actual one owning case, five awaited profiles,
+   no filtered/ignored or child invocations. Each profile now has an outer2second
+   Tokio bound as well as existing fault/operation bounds. In-memory controlled
+   store work only; no native database/performance or publication credit.
+3. Source/assertion/false positives: exact counter totals derive from the explicit
+   19calls/16admissions and real native outcomes, not product-computed expectations.
+   Histogram unit check rejects fabricated zero, nonfinite, negative, millisecond
+   or microsecond timing. Function-size fixes moved unchanged data/final counters
+   into owning helpers; no waiver, assertion removal or workload reduction. Strict
+   all-feature/all-target lint now passes0.81s; original diagnostic failures stay
+   visible. Finite-label and accurate first-stop duration still need evidence.
+
+Histogram unit negative control c6c11210-de10-406a-87ab-989907a4acc1:
+only Slot recording scaled seconds by1000, fixture/data/gates unchanged. Actual
+1FAIL/0PASS/0SKIP/0.037s, exit100, compiling1.37s. Three reviews:
+1. Contract/counterexample: original ordered originals/facts/receipts/state16,
+   admitted/overload behavior, native busy/reserved cleanup and observed stop
+   complete before the independent wall-clock histogram bound rejects mislabeled
+   milliseconds. This is the intended missing-seconds invariant, not setup failure.
+2. Execution/selection/services: actual owning one-test execution, failure at
+   metrics.rs546 (samples exceed whole joined profile duration). No child/native
+   database. Later reconciliation/abort/panic/invalid profiles not reached; no
+   execution credit for this control. Raw cp5-metrics-unit-control.log retained.
+3. Source/assertion/false positives: exact fixture and prior passing expectations
+   unchanged; only multiplication1000 in Slot altered. Restored original source
+   immediately per preregistered control protocol and verified SHA against
+   cp5-metrics-before-unit-control.sha256. Control cannot pass by zero selection,
+   fake zero duration or relaxed thresholds; no arbitrary fixed speed SLA used.
+
+First-stop duration characterization red0c392364-5f08-48a5-8417-e590a54a87bd:
+1FAIL/0PASS/0SKIP/0.083s, compile1.69s, exit100. Raw cp5-metrics-shutdown-before.log.
+Three reviews BEFORE lifecycle edits:
+1. Contract/counterexamples: all prior five real data/recovery/abort/panic profiles
+   and complete registered metric kind/name/field/value audit pass. New sixth
+   profile holds a real append, admits another call, stops twice20ms apart,
+   releases/observes actual committed first original/fact/receipt, rejects queued
+   call as Closed, joins normally and balances every gauge. Only then missing
+   shutdown histogram fails (None vs expected three prior explicit stops).
+2. Execution/selection/services: actual one selected case, all six profiles reach
+   the intended assertion at metrics.rs745; failure is not compilation or service
+   setup. The printed native panic is the earlier expected payload73 profile,
+   already successfully downcast/asserted. No child/database service. Final
+  21-call aggregate table is after this failure and receives no execution credit.
+3. Source/assertion/false positives: production clock remains absent. All exact
+   earlier data/gauge/unit assertions retained; two added calls and corresponding
+   future totals explicitly preregistered. Missing telemetry stays None, not a
+   fabricated zero/sample. Real delayed work, repeated stop, native join and
+   independent wall-clock bounds will reject cleanup-only or reset clocks. No
+   assertion/workload/deadline/gate relaxation or source-selection shortcut.
+
+First-stop implementation green5a9e4b2d-7683-46e7-a154-47ab60aa216a:
+1PASS/0SKIP/0.079s, compile2.29s, exit0. Three distinct reviews:
+1. Contract/counterexamples: all six profiles now reach final accounting. Existing
+   data/typed errors/native panic73/cancel and balanced gauges remain. Exact
+   bounded registered kind/name/field/value audit passes. Explicit-stop histogram
+   has3prior/4total samples (no fabricated abort/panic origins), repeated stop
+   preserves the first interval, and last duration lies within independent
+   actual held/whole joined wall clocks. Final21calls/18admissions, submit17/14/3,
+   read4/4/1,18queue/12submit+4read samples,6acceptances and2closed rejections pass.
+2. Execution/selection/services: actual one selected case, all six bounded
+   workloads and final table execute; no ignored/filtered/child/database. No
+   native CP6, full feature/multi-host/performance or publication credit.
+3. Source/assertion/false positives: same750line fixture as executed shutdown red;
+   clock now belongs to existing Lifecycle::Stopping as optional known origin.
+   Only first explicit stop records Some(Instant); native cleanup without it
+   records None. Worker copies that state after actual JoinHandle completion and
+   emits outside Admission. No parallel flag, invented zero, runtime or report
+   rewrite. Two unused-mut compiler warnings remain visible and must be fixed
+   before strict lint; this pass is behavioral evidence, not a clean full gate.
+
+Signed trace-parent integration57c42e60-1c59-47af-a65f-b8bdb874691c:
+1PASS/1binary/0SKIP/0.078s, compile2.36s, exit0. Three distinct reviews:
+1. Contract/counterexamples: all six bounded admission/reconciliation/abort/panic/
+   invalid/stopping profiles and final21calls18admissions pass, retaining exact
+   records/original requests/facts/receipts and native failure custody. Busy and
+   final gauges, finite metric key audit, duration units and first-stop bounds
+   pass after merging the shared trace factories; no protocol change intended.
+2. Execution/selection/services: actual all-feature one-case metrics integration
+   binary, no child invocations or skips. Actual Nix shell cwd metrics confirmed.
+   Controlled in-memory faults only, not real Postgres/Fjall/performance evidence.
+3. Source/assertion/false positives: new signed parent c13ef43f, untouched fixture
+   SHA58fdf4b7f2158e070b0661469ec16a7a02b32fdd7f0188136bc72b6f1ea5fb0f.
+   Manifest/lock/engine/lib/meter/fixture and SOURCES diff against retained stash
+   is empty; host/trace explicitly resolved to preserve one factory/constructor.
+   Original missing-gauge/clock and scale1000 controls retained. This run does not
+   resolve two-host gauge reset, repeated-stop or extra-label negative controls.
+
+Preservation: retained preintegration stash98f75361a373d7f004480637fa27ed7758100704,
+full/index/unstaged binary patches and sources snapshot under raw
+cp5-metrics-parent-integration. Note original ls-files -m hashes cover unstaged
+owners, not every staged-only file; full stash-tree byte comparison above covers
+all seven named source/manifest/test owners and SOURCES without relying on that
+partial list. No existing stash, archive source or unrelated worktree discarded.
+
+Repeated-stop negative control ef7cc0cc-7430-42c1-8439-28676ce5f5d3:
+1FAIL/0PASS/0SKIP/0.094s, compile0.78s, exit100. Three reviews:
+1. Contract/counterexample: all original six data/recovery/abort/panic/invalid/
+   shutdown workloads execute, including actual committed original/fact/receipt,
+   queued Closed, normal joined cleanup and balanced gauges. Resetting the
+   first explicit stop timestamp at the second stop then fails the independently
+   held-duration lower bound at metrics.rs748, exactly the threatened contract.
+2. Execution/selection/services: actual one selected integration case in Nix,
+   no children or database. Earlier expected native panic payload73 is asserted
+   in its own profile, not the failure. Final aggregate table is not reached.
+3. Source/assertions/false positives: fixture unchanged SHA58fdf4b7...ea5fb0f;
+   only public-stop condition temporarily made unconditional, original setter
+   and all assertions/20ms held workload unchanged. Full temporary source/patch
+   retained. Restore exact precontrol host before any next experiment; no weaker
+   timing threshold/test selection or lost first-stop gate retained.
+
+Extra-label-series negative control4482d97c-4d94-4d85-bcf2-d2c57522b0a1:
+1FAIL/0PASS/0SKIP/0.058s, compile0.92s, exit100. Three reviews:
+1. Contract/counterexample: original correctly labeled submitted series remains,
+   all first five data/lifecycle and existing numeric checks pass; the extra
+   request_id series fails exact whole-registration key audit at metrics.rs674
+   with [operation,request_id] versus [operation]. No normal series is replaced.
+2. Execution/selection/services: actual one-case Nix integration invocation, no
+   children/native database. Earlier expected native panic73 is not the cause.
+   Failure precedes stopping/final accounting, which get no execution credit.
+3. Source/assertions/false positives: fixture unchanged and restored host exact
+   SHAffe1fef1...750afee7. Only one added counter registration/increment in
+   Observation::request; full temporary source/patch saved. Full-key audit rejects
+   additional unbounded series even if expected counters remain correct. Restore
+   original meter hash before any next edit; no weakened assertion/label gate.
+
+Two-host pending/resume green ed9c608f-ce9d-48fe-ba5b-f7f847c65bf5:
+1PASS/1binary/0SKIP/0.131s, compile1.90s, exit0. Three reviews:
+1. Contract/counterexamples: unchanged six profiles/final21-call table pass;
+   seventh profile forces two independent backend gates simultaneously on one
+   actual shared store, different streams. Both exact-ID outcomes are Uncertain,
+   gauge2 survives third-host startup/normal close, first exact reconciliation and
+   duplicate leave1, second observed native abort retains original and leaves0,
+   resume leaves1 until actual commit/reconciliation0. Both single decoded records,
+   originals/facts/receipts/state and final gauges pass. Final27calls24admissions,
+   submit21/18/5/read6/6/1,24queue/16submit+6read,8acceptances/3duplicates and
+   7explicit stops/2native cancelled observations pass. Whole-key audit runs again.
+2. Execution/selection/services: actual all-feature owning integration one-case
+   invocation, seven bounded awaited workloads, no skips/children. Both native
+   workers own requests before gates release; server work is joined by each
+   Gate.done, worker shutdown/abort observed. Controlled shared in-memory backend,
+   not native database, soak or performance evidence.
+3. Source/assertions/false positives: fixture914physical lines within preregistered
+   amended950 budget; product unchanged. All earlier assertions and thresholds
+   retained. Idle now waits for every nonzero active count, not just1. Snapshots
+   inspect actual facade atomic handles; no resets or product-computed expected
+   values. Missing global-reset counterexample remains until next control.
+
+Global pending-gauge reset control c2b4f5a3-be38-4aaf-a403-70c80613f1ca:
+1FAIL/0PASS/0SKIP/0.138s, compile1.68s, exit100. Three reviews:
+1. Contract/counterexample: unchanged six profiles and21-call table execute.
+   Seventh forces both independent actual writes past timeout and first asserts
+   idle unresolved2. Starting fresh third host then fails at metrics.rs786,
+   actual0 versus expected2. This isolates global startup reset while two
+   different workers still retain unresolved originals; no write is released.
+2. Execution/selection/services: actual one selected case, no skipped/child or
+   native database. Both gates entered and both exact IDs returned Uncertain
+   before intended assertion. Later settle/abort/resume/final table not reached;
+   outstanding temporary server tasks are terminated by test-runtime teardown,
+   not credited as successful native cleanup. Expected earlier panic73 retained.
+3. Source/assertions/false positives: one temporary unresolved.set(0) at Engine
+   construction; fixture and all other product owners unchanged. Real native
+   recorder counters/data remain; no fabricated observation injected in test.
+   Full source/patch saved. Restore exact engine hash, rerun owning feature modes;
+   never retain global reset or treat this intentional failure as a green gate.
+
+Integrated feature-none owner run3ca7945a-fbd5-43d0-80d3-e89a0001b516:
+45PASS/7binaries/1existing ignored measurement/1.551s, compile2.79s, exit0.
+Three reviews:
+1. Contract/counterexamples: complete original model/reader/adaptation/recovery/
+   generated history and deterministic concurrency laws pass with both optional
+   features disabled. Exact accepted bytes, original CAS identity, typed kernel/
+   codec errors, postcommit uncertainty, capacity and native lifecycle stay intact.
+2. Execution/selection/services: actual45cases,9model cases plus36integration
+   cases; metric/trace cfg-disabled binaries have no selected tests (no credit).
+   Existing ignored optimized workload remains visibly ignored. Both native
+   bounded subprocess parent cases execute/pass; no real database service used.
+3. Source/assertions/false positives: current shared c13ef43f factories plus
+   metrics modifications, exact engine restored after reset control. No filters,
+   assertions or deadlines changed. Passing disabled mode does not prove metric
+   callbacks/trace behavior; three enabled combinations follow separately.
+Child timer-disabled-runtime: (1) enabled native missing-timer panic retains
+original JoinError/empty custody; (2) parent passed after exact one-test child
+exit/status/2s checks; (3) exact test-name/onePASS/native payload assertions reject
+zero selection or substituted success. Child readiness reentrant-stop: (1) ready
+permit release must allow actual waker.stop without Admission deadlock; (2) parent
+passed same exact-one-child/status/2s guard; (3) final closed/row/cause assertions
+and unchanged source reject a suppressed wake or unfinished child. Each three-
+reviewed independently; child cases are not added to nextest45case count.
+Strict allfeature/alltarget Clippy passes1.81s; compiler gate, not a test run.
+
+Integrated tracing-only owner run (cp5-metrics-features-tracing.log):
+49PASS/7binaries/1existing ignored/1.714s, exit0. Three reviews:
+1. Contract/counterexamples: original45laws plus all4subscriber laws pass. Exact
+   independent dispatch/parentage, stage outcomes/counts, every span close,
+   invalid-request observation and native abort/panic causes remain alongside
+   ordered data/receipts. Metrics disabled; no metric execution claim.
+2. Execution/selection/services: actual49cases, original ignore retained, no
+   filters or missing-test success; both bounded child parents PASS. In-memory
+   controlled backend, no real native database. Trace subscriber supplied by
+   each owning test; other binary cases run without application setup.
+3. Source/assertions/false positives: integrated shared factories/unchanged native
+   dispatcher Drop, no assertions/deadlines/CI gates weakened. Original two trace
+   negative controls and now-green exact-head Linux mutation gate remain distinct
+   evidence; mutation artifact requires individual review before merge.
+Timer child independently: (1) exact native missing-timer panic, uncertain caller
+ID, zero rows/Closed and empty report; (2) parent PASS after exact-one-test child
+status/2s checks; (3) exact payload/summary/name reject false selection. Reentrant
+child independently: (1) native callback stop and exact one wake, Closed readiness,
+normal native join/empty pending; (2) parent PASS with same bounded exact child
+check; (3) actual notification count and observed task completion reject a hidden
+wake/deadlock. Earlier feature-none review's generic row wording for reentrant
+child was too broad: that child asserts exact wake/closed/join, not stored rows.
+
+Metrics-only owner run ef635264-cf53-43ae-b921-ab235f7158d8:
+46PASS/7binaries/1existing ignored/1.740s, compile3.06s, exit0. Three reviews:
+1. Contract/counterexamples: original45model/consumer/protocol/property laws plus
+   seven-profile metrics case pass without tracing. Exact27calls24admissions,
+   finite labels, independent time bounds, two pending engines/newhost/resume,
+   actual native causes and final cleanup assertions all execute. No recorder
+   is installed in the other integration binary processes, proving ordinary
+   submitted/read/retry/stop/abort/error contracts with metrics but no collector.
+2. Execution/selection/services: actual46cases, nonzero selection, original
+   optimized measurement ignore retained. Trace cfg-disabled cases get no credit.
+   Both bounded subprocess parents pass; in-memory only, not native CP6 evidence.
+3. Source/assertions/false positives: original restored engine/meter/host after
+   allthree runtime controls, no metric protocol flags/global reset, unchanged
+   outer limits/data/assertions. Native collectors are application/test-installed
+   only; process separation prevents one fixture recorder masking no-collector
+   operation. Full normal Nix/release/overhead/exporter verification still open.
+Timer child: (1) exact native timer panic/caller uncertainty/zero rows/Closed and
+empty custody; (2) actual parent PASS after exact-one-test/status/2s checks;
+(3) unchanged helper and payload assertions reject zero selection or hidden
+failure. Reentrant child: (1) native ready-release callback stop, exact wake1,
+Closed readiness and normal empty-report join; (2) parent PASS with same exact
+bounded child check; (3) real notification count/join reject skipped wake/deadlock.
+Each child separately three-reviewed, not inflated into nextest46case count.
+
+Combined features owner runf0ae1754-1630-43d8-8ffb-490b63c4ba24:
+50PASS/7binaries/1existing ignored/1.686s, compile2.97s, exit0. Three reviews:
+1. Contract/counterexamples: original45laws plus4trace laws and7profile metrics
+   case all execute. Independent captured dispatch, native panic/abort cleanup,
+   exact data/identity/recovery, bounded labels and duration units, overlapping
+   gauges and resume remain correct with both features enabled. Four feature
+   modes now have distinct actual45/49/46/50passing executions.
+2. Execution/selection/services: actual unfiltered50cases; original optimized
+   measurement ignore remains; no no-test shortcut. Both bounded child parents
+   PASS; actual metric recorder exists only in owning metrics binary process,
+   trace subscriber only in subscriber tests. Other original binary workloads
+   exercise both enabled without collectors. No native database/overhead claim.
+3. Source/assertions/false positives: strict alltarget/allfeature lint accepted
+   exact integrated candidate; temporary clock/label/reset controls restored and
+   allthree intended runtime failures preserved. Original test workloads, payload/
+   record and source fixture guarantees retained; no weak counter-only pass.
+Timer child: (1) exact native timer cause/caller Uncertain/zero rows/Closed and
+empty report; (2) actual PASS parent checks exact-one-child/status/2s;
+(3) exact name/payload/summary reject zero selection and wrong panic. Reentrant
+child: (1) actual native callback stop/exact wake1/Closed readiness/normal empty
+join; (2) actual PASS parent checks exact-one-child/status/2s; (3) native notification
+and completion assertions reject swallowed callback/deadlock. Both separately
+three-reviewed, excluded from inflated top-level case totals.
+
+Optimized combined owner run (cp5-metrics-release-owners.log):
+50PASS/7binaries/1existing ignored/0.541s, exit0. Three reviews:
+1. Contract/counterexamples: all45original,4subscriber and7profile metrics laws
+   pass optimized, retaining runtime byte/count bounds, exact pending custody and
+   receipt semantics. Actual20ms/50ms gates retain timeouts/held-duration checks;
+   native panic/cancel, overlapping gauges and source-restored controls apply.
+2. Execution/selection/services: actual full50cases, zero failures and original
+   optimized measurement ignored; no filter/no-test shortcut. Both bounded native
+   child parents PASS; no database/performance/soak evidence inferred from speed.
+3. Source/assertions/false positives: exact integrated source, original tests and
+   new914line owning fixture unchanged after debug passes; release safety does
+   not depend on debug assertions. Strict metric-only alltarget lint1.60sPASS,
+   original allfeature strict1.81sPASS, compiler checks distinct from runtime.
+Timer child: (1) exact timer-driver panic/caller Uncertain/zero rows/Closed/empty
+custody; (2) actual parent PASS after exact-one-child/status/2s checks; (3) original
+helper/native payload assertions reject zero selection or substituted success.
+Reentrant child: (1) actual callback stop/exact wake1/Closed/normal empty report;
+(2) actual parent PASS exact-one-child/status/2s; (3) native notification and join
+assertions reject skipped callback/stuck process. Both separately three-reviewed.
+
+First integrated full Nix gate exits1 before any actual test invocation:
+cp5-metrics-full-gate.log. Rustfmt accepted; Taplo rejects root Cargo.toml
+alphabetical dependency order (metrics inserted after minicbor). No nextest or
+corpus replay start/summary exists; no runtime test credit or fabricated three-
+review run. Keep original failure. Use existing Nix-shell taplo formatter on
+root/command manifests, inspect exact diff for ordering only, then rerun complete
+unchanged gate. No gate/config/dependency version/assertion waiver.
+
+## CP5 metrics library qualification (2026-10-22)
+
+Current private meter owner105lines; all product1907physical/+266net against
+c13ef43f, within amended2000/350.914line recorder suite within preregistered950;
+11public roots unchanged. Minimal normal optional metrics0.24.6 graph retained;
+metrics-util production/development registry candidate rejected earlier. No new
+runtime/framework/observer interface or normal exporter SDK. Event bytes/identity,
+aggregate/store ownership and external effects remain unchanged.
+
+Normal full Nix gate passes all12host checks at actual source
+/nix/store/bdpfd5zzpjipi0x7bch88q2wy3fqh4ga-source.13manifest/source/fixture
+owners cmp exactly; current hashes unchanged after tests/mutation. Workspace
+c3601b1e-1742-40a6-a877-b134cd53b085:1639PASS/145binaries/5original exclusions/
+16slow/615.302s; actual default command45, no disabled trace/metric-case credit.
+Three corpus invocations2/1/1PASS1.00seach separately three-reviewed. Full
+workspace, source identity and both command bounded child reviews are in raw
+cp5-metrics-fixed-gate-workspace-reviews.md; corpus reviews separate. Other-host
+execution is not claimed. Allfour explicit command modes45/49/46/50PASS and
+optimized50PASS0.541s are separate enabled evidence; every actual run and bounded
+command child individually three-reviewed above.
+
+Original full-gate Taplo ordering failure is retained. Only sorted the new root
+metrics entry before minicbor via existing formatter. No test ran in the failed
+attempt. Initial optional root-receipt helper wrongly expected objects from Nix
+JSON, which coerced outPath values to strings; its empty pipeline falsely returned
+0 without pipefail. It was not test/gate evidence. Corrected parser plus pipefail
+creates all12actual Nix output roots and verifies every exact output path in raw
+cp5-metrics-root-comparison.txt. No fresh tests during that metadata operation.
+
+Unchanged local cargo-mutants27.1.0 command on actual metrics diff:69mutants,
+37caught/32compiler-only/0missed/timeout; unmodified50PASS baseline3.625s.
+All70outcomes/38actual nextest invocations plus2successful bounded children
+three-reviewed separately in cp5-metrics-mutants-reviews.md. Exact source hashes
+match after completion. Catches include real typed error/CAS/custody/liveness and
+exact metric counts, presence, resource balance and duration origins; not every
+catch is numeric metric proof. Wrong-ready mutant produces the native missing-
+permit programmer-contract panic; wrong-call admission fails the unchanged2s
+actual append gate; deleted stop fails observed join3s. These are lifecycle
+counterexamples, not service/setup failures. Compiler-only defaults/invalid let-
+chain operator receive no runtime credit. No exclusion/skip/assertion/deadline
+or standard adaptive mutation timeout was changed.
+
+Source/feature/mutation qualification does not finish CP5: application-owned
+exporter demonstration/unavailability remains, and CP6 must measure off,
+uncollected and collected overhead. Native command Postgres/Fjall/recovery/
+migration/capacity/soak, final consumers/docs/package/fuzz, protected release and
+registry/server consumption remain CP6–CP9. Publication stays disabled.
+
+Focused metrics qualification archive cp5-metrics-qualified.tar.gz SHA
+abe3d2a9e5158d5b0b28ef74853973e18ce3af383ecfce63b4b4ec7f4b034cb3 retains
+actual source/index preservation, initial and strengthened workloads, genuine
+failed controls, four-mode/release/lint results, original formatting failure,
+all12source gate/roots,38mutation run reviews and raw outcome/diff/log evidence.
+No native command or exporter/performance/release claim.
+
+Tracing current PR418 exact-head CI: push39692638604 SUCCESS,79actual harness
+outcomes including6zero-case compilation-only/73nonzero invocations. Original
+PR39692645748attempt1 FAILED with77harness outcomes/6zero-case/71nonzero; the
+snapshot suite executed76/174:75PASS1FAIL then98notrun. Subsequent tracing smoke/
+full native runs did not execute. Failure is healthy PgPoolOptions.connect_with
+100ms setup before PostgresStore::from_pool at lifecycle_tests.rs134. Underlying
+reason for that connection delay is unproven. Native service/earlier cases passed;
+this was not target listener recovery evidence. Failed snapshots and entire gate
+remain failed, not replaced by successful push checks. Whole outcome lists and
+all children separately three-reviewed. Attempt2 reruns only failed Nix job
+119556953600 on same signed head/tree; no source/assertion/workload/deadline/
+selector/gate edits. Original failure retained, not claimed repaired. Rerun must
+be actually inspected; recurrence requires deeper fixture/SQLx diagnosis.
+
+Delivery choice: prepare focused metrics draft against feat/command-observe
+(PR418), enabling review and application-owned exporter work while parent CI
+reruns. After protected parent merge, ordinary signed merge of main into metrics
+and change PR base to main; no force/rewrite of published work. Byte-compare
+qualified code/manifests/tests/CI/README afterward and run normal checks/hook.
+No merge to main before required exact-head checks and thread/tree verification.
+
+Current tracing CI archive cp5-trace-current-ci.tar.gz SHA
+8608920eb449f8f859f1953342d5836233163b1a2717cfc7b07a7b3d16d176ae retains
+actual signed/current virtual head, complete successful push, failed PRattempt1,
+all77/79outcome reviews, fixed63mutation/24actual-run evidence and8fuzz reviews.
+Attempt2 is live and receives no completion credit or overwrite of attempt1.

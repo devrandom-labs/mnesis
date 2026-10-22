@@ -37,6 +37,13 @@ abort-custody loss and resource boundaries pass all12local gates/1639tests;
 focused PR417 protected-merged as972d2a696e021603dd9a03471c6c3fa36878933a,
 verified tree29d5408e7c9eb59eec31cdc0731011c37828c65a and42successful checks.
 Required tracing/metrics acceptance stays open.
+The metrics library candidate passes all12host checks, four command feature
+modes45/49/46/50 and release50, with37caught/32compiler-only mutations and no
+survivors. Its actual two-host accounting and three failed control experiments
+are recorded in the feature research. Tracing PR418's required CI encountered
+a100ms healthy Postgres fixture setup timeout before adapter construction;
+the unchanged failed-job rerun is pending. App-owned exporter qualification,
+CP6 overhead/native command composition and CP7–CP9 delivery remain required.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing

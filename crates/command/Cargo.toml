@@ -13,10 +13,12 @@ publish = false
 
 [features]
 default = []
+metrics = ["dep:metrics"]
 tracing = ["dep:tracing"]
 
 [dependencies]
 bytes = { workspace = true, features = ["std"] }
+metrics = { workspace = true, optional = true }
 mnesis = { version = "0.5.3", path = "../mnesis", default-features = false }
 mnesis-store = { version = "0.5.3", path = "../store", default-features = false }
 parking_lot = { workspace = true }
