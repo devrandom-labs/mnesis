@@ -1,7 +1,7 @@
 # Command processor extraction and delivery
 
-Status: CP0–CP4 and CP5 lifecycle/resource PR417 protected-merged; tracing/metrics qualification in progress.
-Updated: 2026-10-21. Owners: Mnesis command maintainers and the Labcast consumer owner.
+Status: CP0–CP4 and CP5 lifecycle/resource PR417 plus tracing PR418 protected-merged; qualified metrics PR419 awaiting protected delivery. Exporter and CP6–CP9 remain.
+Updated: 2026-10-22. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.
 Source: `/Users/joel/Code/labcast/controller-archive/crates/controller`.

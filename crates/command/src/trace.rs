@@ -6,6 +6,8 @@ use tracing::instrument::WithSubscriber;
 use tracing::{Dispatch, Instrument, Span, debug_span, dispatcher, info, info_span};
 
 use crate::Error;
+#[cfg(feature = "metrics")]
+use crate::meter::{self, Observation};
 
 #[derive(Clone)]
 pub struct Scope {
@@ -16,14 +18,18 @@ pub struct Scope {
 }
 pub struct Trace {
     scope: Scope,
-    #[cfg(feature = "tracing")]
+    #[cfg(any(feature = "tracing", feature = "metrics"))]
     outcome: &'static str,
+    #[cfg(feature = "metrics")]
+    metric: Observation,
 }
 impl Trace {
     pub fn request(operation: &'static str) -> Self {
         #[cfg(not(feature = "tracing"))]
         let _ = operation;
         Self {
+            #[cfg(feature = "metrics")]
+            metric: Observation::request(operation),
             scope: Scope::new(|| Scope {
                 #[cfg(feature = "tracing")]
                 span: info_span!(
@@ -34,19 +40,21 @@ impl Trace {
                 #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
             }),
-            #[cfg(feature = "tracing")]
+            #[cfg(any(feature = "tracing", feature = "metrics"))]
             outcome: "interrupted",
         }
     }
     pub fn worker() -> Self {
         Self {
+            #[cfg(feature = "metrics")]
+            metric: Observation::Worker,
             scope: Scope::new(|| Scope {
                 #[cfg(feature = "tracing")]
                 span: info_span!(parent: None, "mnesis.command.worker", outcome = tracing::field::Empty),
                 #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
             }),
-            #[cfg(feature = "tracing")]
+            #[cfg(any(feature = "tracing", feature = "metrics"))]
             outcome: "interrupted",
         }
     }
@@ -54,6 +62,8 @@ impl Trace {
         #[cfg(not(feature = "tracing"))]
         let _ = stage;
         Self {
+            #[cfg(feature = "metrics")]
+            metric: Observation::stage(stage),
             scope: Scope::new(|| Scope {
                 #[cfg(feature = "tracing")]
                 span: debug_span!(
@@ -64,7 +74,7 @@ impl Trace {
                 #[cfg(feature = "tracing")]
                 subscriber: dispatcher::get_default(Clone::clone),
             }),
-            #[cfg(feature = "tracing")]
+            #[cfg(any(feature = "tracing", feature = "metrics"))]
             outcome: "interrupted",
         }
     }
@@ -77,11 +87,11 @@ impl Trace {
         self.scope().sync(|| Self::stage(stage))
     }
     pub const fn finish(&mut self, outcome: &'static str) {
-        #[cfg(feature = "tracing")]
+        #[cfg(any(feature = "tracing", feature = "metrics"))]
         {
             self.outcome = outcome;
         }
-        #[cfg(not(feature = "tracing"))]
+        #[cfg(not(any(feature = "tracing", feature = "metrics")))]
         let _ = (self, outcome);
     }
 }
@@ -89,6 +99,8 @@ impl Drop for Trace {
     fn drop(&mut self) {
         #[cfg(feature = "tracing")]
         self.scope.span.record("outcome", self.outcome);
+        #[cfg(feature = "metrics")]
+        self.metric.finish(self.outcome);
     }
 }
 impl Scope {
@@ -186,21 +198,27 @@ pub const fn outcome<T, D, I, E>(result: &Result<T, Error<D, I, E>>) -> &'static
         },
     }
 }
-#[cfg(feature = "tracing")]
+#[cfg(any(feature = "tracing", feature = "metrics"))]
 pub fn accepted() {
+    #[cfg(feature = "metrics")]
+    meter::count("mnesis_command_acceptances_total");
+    #[cfg(feature = "tracing")]
     info!(name: "mnesis.command.accepted", outcome = "ok");
 }
-#[cfg(feature = "tracing")]
+#[cfg(any(feature = "tracing", feature = "metrics"))]
 pub fn duplicate() {
+    #[cfg(feature = "metrics")]
+    meter::count("mnesis_command_duplicates_total");
+    #[cfg(feature = "tracing")]
     info!(name: "mnesis.command.duplicate", outcome = "ok");
 }
 #[cfg(feature = "tracing")]
 pub fn reply_dropped() {
     info!(name: "mnesis.command.reply_dropped", outcome = "cancelled");
 }
-#[cfg(not(feature = "tracing"))]
+#[cfg(not(any(feature = "tracing", feature = "metrics")))]
 pub const fn accepted() {}
-#[cfg(not(feature = "tracing"))]
+#[cfg(not(any(feature = "tracing", feature = "metrics")))]
 pub const fn duplicate() {}
 #[cfg(not(feature = "tracing"))]
 pub const fn reply_dropped() {}

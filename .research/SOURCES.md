@@ -698,3 +698,11 @@ admission and use supported Instrument/WithSubscriber wrappers if confirmed by
 actual recording tests. Source
 https://github.com/tokio-rs/tracing/blob/tracing-0.1.44/tracing/src/instrument.rs .
 No entered guard across await; no caller payload/ID/error string metric labels.
+2026-10-21 metrics follow-up verified current official version pages:
+https://docs.rs/metrics/0.24.6/metrics/ and
+https://docs.rs/metrics-util/0.20.4/metrics_util/registry/struct.Registry.html.
+Facade separates emitting library from application Recorder; Registry documents
+supported atomic handles and non-destructive individual lookups. Actual local
+published manifests/source remain dependency authority. No global collector or
+network/export task belongs in mnesis-command. Dependency graph cost is still
+pending actual Cargo resolution; no unexecuted compatibility/performance claim.

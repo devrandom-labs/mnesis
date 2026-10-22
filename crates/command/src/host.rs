@@ -6,6 +6,8 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::time::Duration;
+#[cfg(feature = "metrics")]
+use std::time::Instant;
 
 use mnesis::{Aggregate, EventOf, Handle, Version};
 use mnesis_store::{RawEventStore, Store, StreamKey};
@@ -18,6 +20,8 @@ use tokio_util::sync::PollSender;
 use tower_service::Service;
 
 use crate::engine::{Engine, Handoff};
+#[cfg(feature = "metrics")]
+use crate::meter::{self, Slot};
 use crate::trace::{self, Trace};
 use crate::{Error, Receipt, Request};
 
@@ -78,6 +82,8 @@ pub struct Worker<C, I = NonZeroU64> {
     task: JoinHandle<()>,
     stream: StreamKey,
     handoff: Handoff<C, I>,
+    #[cfg(feature = "metrics")]
+    admission: Arc<Admission>,
 }
 impl<C, I> Worker<C, I> {
     /// Request task cancellation. Await this worker to observe completion.
@@ -90,10 +96,26 @@ impl<C, I> Future for Worker<C, I> {
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let worker = self.get_mut();
-        Pin::new(&mut worker.task).poll(cx).map(|result| Shutdown {
-            stream: worker.stream.clone(),
-            uncertain: worker.handoff.lock().take(),
-            cause: result.err(),
+        Pin::new(&mut worker.task).poll(cx).map(|result| {
+            #[cfg(feature = "metrics")]
+            if let Err(error) = &result {
+                meter::failure(error);
+            }
+            #[cfg(feature = "metrics")]
+            {
+                let lifecycle = *worker.admission.lock().borrow();
+                if let Lifecycle::Stopping {
+                    since: Some(started),
+                } = lifecycle
+                {
+                    meter::shutdown(started);
+                }
+            }
+            Shutdown {
+                stream: worker.stream.clone(),
+                uncertain: worker.handoff.lock().take(),
+                cause: result.err(),
+            }
         })
     }
 }
@@ -103,6 +125,8 @@ struct Call<A: Aggregate, C, I, E> {
     trace: Trace,
     #[cfg(feature = "tracing")]
     queue: Option<Trace>,
+    #[cfg(feature = "metrics")]
+    waiting: Option<Slot>,
 }
 enum Message<A: Aggregate, C, I, E> {
     Retry {
@@ -154,6 +178,8 @@ impl<A: Aggregate, C, I, E> Call<A, C, I, E> {
             message,
             #[cfg(feature = "tracing")]
             queue: None,
+            #[cfg(feature = "metrics")]
+            waiting: None,
         }
     }
     const fn finish(&mut self, outcome: &'static str) {
@@ -195,6 +221,10 @@ where
         self.trace
             .scope()
             .run(async move {
+                #[cfg(feature = "metrics")]
+                drop(self.waiting.take());
+                #[cfg(feature = "metrics")]
+                let _active = Slot::active(self.message.operation());
                 #[cfg(feature = "tracing")]
                 if let Some(mut queue) = self.queue.take() {
                     queue.finish("ok");
@@ -218,7 +248,10 @@ where
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Lifecycle {
     Running,
-    Stopping,
+    Stopping {
+        #[cfg(feature = "metrics")]
+        since: Option<Instant>,
+    },
 }
 
 struct Admission(Mutex<watch::Sender<Lifecycle>>);
@@ -236,7 +269,15 @@ impl<A: Aggregate, C, I, E> Drop for Inbox<A, C, I, E> {
     fn drop(&mut self) {
         self.trace.scope().sync(|| {
             let mut cleanup = Trace::stage("shutdown");
-            self.admission.lock().send_replace(Lifecycle::Stopping);
+            let admission = self.admission.lock();
+            let lifecycle = *admission.borrow();
+            if lifecycle == Lifecycle::Running {
+                admission.send_replace(Lifecycle::Stopping {
+                    #[cfg(feature = "metrics")]
+                    since: None,
+                });
+            }
+            drop(admission);
             self.receiver.close();
             // Ready permits may outlive the worker. Never wait for them to be used.
             while let Ok(call) = self.receiver.try_recv() {
@@ -257,6 +298,8 @@ pub struct CommandProcessor<A: Aggregate, C, I = NonZeroU64, const N: usize = 0,
     sender: mpsc::Sender<Call<A, C, I, E>>,
     service: PollSender<Call<A, C, I, E>>,
     admission: Arc<Admission>,
+    #[cfg(feature = "metrics")]
+    reserved: Option<Slot>,
 }
 impl<A: Aggregate, C, I, const N: usize, E> Clone for CommandProcessor<A, C, I, N, E> {
     fn clone(&self) -> Self {
@@ -265,6 +308,8 @@ impl<A: Aggregate, C, I, const N: usize, E> Clone for CommandProcessor<A, C, I, 
             sender: self.sender.clone(),
             service: self.service.clone(),
             admission: Arc::clone(&self.admission),
+            #[cfg(feature = "metrics")]
+            reserved: None,
         }
     }
 }
@@ -363,6 +408,8 @@ where
             task: runtime.spawn(scope.run(run(engine, worker, stopping))),
             stream,
             handoff,
+            #[cfg(feature = "metrics")]
+            admission: Arc::clone(&admission),
         };
         let service = PollSender::new(sender.clone());
         Ok((
@@ -371,6 +418,8 @@ where
                 sender,
                 service,
                 admission,
+                #[cfg(feature = "metrics")]
+                reserved: None,
             },
             task,
         ))
@@ -399,9 +448,13 @@ where
             id: id.clone(),
             reply,
         })?;
-        response.await.map_err(|_| Error::Uncertain {
-            command: id,
-            source: None,
+        response.await.map_err(|_| {
+            #[cfg(feature = "metrics")]
+            meter::unknown("retry");
+            Error::Uncertain {
+                command: id,
+                source: None,
+            }
         })?
     }
 
@@ -423,9 +476,13 @@ where
         let id = request.id.clone();
         let (reply, response) = oneshot::channel();
         self.send(Message::Submit { request, reply })?;
-        response.await.map_err(|_| Error::Uncertain {
-            command: id,
-            source: None,
+        response.await.map_err(|_| {
+            #[cfg(feature = "metrics")]
+            meter::unknown("submit");
+            Error::Uncertain {
+                command: id,
+                source: None,
+            }
         })?
     }
 
@@ -452,24 +509,47 @@ where
 
     /// Stop admission; await the observed task to retain unresolved work.
     pub fn stop(&self) {
-        self.admission.lock().send_replace(Lifecycle::Stopping);
+        let admission = self.admission.lock();
+        let lifecycle = *admission.borrow();
+        if lifecycle == Lifecycle::Running {
+            admission.send_replace(Lifecycle::Stopping {
+                #[cfg(feature = "metrics")]
+                since: Some(Instant::now()),
+            });
+        }
     }
 
     fn send(&self, message: Message<A, C, I, E>) -> Result<(), Error<A::Error, I, E>> {
+        #[cfg(feature = "metrics")]
+        let operation = message.operation();
         let mut call = Call::new(message);
         #[cfg(feature = "tracing")]
         {
             call.queue = Some(call.trace.child("queue"));
         }
         let mut stage = call.trace.child("admission");
+        let capacity = self.sender.try_reserve();
+        #[cfg(feature = "metrics")]
+        if capacity.is_ok() {
+            call.waiting = Some(Slot::queued());
+        }
         let admission = self.admission.lock();
-        if *admission.borrow() == Lifecycle::Stopping {
+        if *admission.borrow() != Lifecycle::Running {
             drop(admission);
             call.finish("closed");
             stage.finish("closed");
             return Err(Error::Closed);
         }
-        let sent = self.sender.try_send(call);
+        let sent = match capacity {
+            Ok(permit) => {
+                permit.send(call);
+                Ok(())
+            }
+            Err(mpsc::error::TrySendError::Full(())) => Err(mpsc::error::TrySendError::Full(call)),
+            Err(mpsc::error::TrySendError::Closed(())) => {
+                Err(mpsc::error::TrySendError::Closed(call))
+            }
+        };
         drop(admission);
         let result = sent.map_err(|error| match error {
             mpsc::error::TrySendError::Full(mut queued) => {
@@ -482,6 +562,10 @@ where
             }
         });
         stage.finish(trace::outcome(&result));
+        #[cfg(feature = "metrics")]
+        if result.is_ok() {
+            meter::admitted(operation);
+        }
         result
     }
 }
@@ -501,11 +585,22 @@ where
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         let lifecycle = *self.admission.lock().borrow();
-        if lifecycle == Lifecycle::Stopping {
+        if lifecycle != Lifecycle::Running {
             self.service.close();
             self.service.abort_send();
+            #[cfg(feature = "metrics")]
+            drop(self.reserved.take());
             return Poll::Ready(Err(Error::Closed));
         }
+        #[cfg(feature = "metrics")]
+        {
+            let ready = self.service.poll_reserve(cx).map_err(|_| Error::Closed);
+            if matches!(ready, Poll::Ready(Ok(()))) {
+                self.reserved.get_or_insert_with(Slot::reserved);
+            }
+            ready
+        }
+        #[cfg(not(feature = "metrics"))]
         self.service.poll_reserve(cx).map_err(|_| Error::Closed)
     }
 
@@ -513,6 +608,8 @@ where
         if let Err(error) = request.validate() {
             trace::invalid_request();
             self.service.abort_send();
+            #[cfg(feature = "metrics")]
+            drop(self.reserved.take());
             return Box::pin(async { Err(Error::Request(error)) });
         }
         let id = request.id.clone();
@@ -523,8 +620,13 @@ where
             call.queue = Some(call.trace.child("queue"));
         }
         let mut stage = call.trace.child("admission");
+        #[cfg(feature = "metrics")]
+        {
+            drop(self.reserved.take());
+            call.waiting = Some(Slot::queued());
+        }
         let admission = self.admission.lock();
-        if *admission.borrow() == Lifecycle::Stopping {
+        if *admission.borrow() != Lifecycle::Running {
             drop(admission);
             call.finish("closed");
             stage.finish("closed");
@@ -542,10 +644,16 @@ where
             return Box::pin(async { Err(Error::Closed) });
         }
         stage.finish("ok");
+        #[cfg(feature = "metrics")]
+        meter::admitted("submit");
         Box::pin(async move {
-            response.await.map_err(|_| Error::Uncertain {
-                command: id,
-                source: None,
+            response.await.map_err(|_| {
+                #[cfg(feature = "metrics")]
+                meter::unknown("submit");
+                Error::Uncertain {
+                    command: id,
+                    source: None,
+                }
             })?
         })
     }
@@ -564,7 +672,7 @@ async fn run<S, A, C, I, const N: usize>(
     EventOf<A>: Clone + Eq + Serialize + DeserializeOwned,
 {
     loop {
-        if *stopping.borrow() == Lifecycle::Stopping {
+        if *stopping.borrow() != Lifecycle::Running {
             break;
         }
         let call = tokio::select! {
@@ -576,7 +684,7 @@ async fn run<S, A, C, I, const N: usize>(
             }
         };
         let lifecycle = *stopping.borrow();
-        if lifecycle == Lifecycle::Stopping {
+        if lifecycle != Lifecycle::Running {
             call.reject();
             break;
         }

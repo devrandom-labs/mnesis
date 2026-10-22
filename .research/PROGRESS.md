@@ -1,90 +1,129 @@
-# Command processor delivery — trace CI repair, 2026-10-22
+# Command processor delivery
 
-Persistent CP0–CP9 goal ACTIVE/no token budget. Completion requires every required
-criterion, protected merges, verified publication and clean registry/native plus
-labcast-server consumers. Preserve source archive, all user/goal work/stashes,
-dirty main/release and unrelated PR410. No subagents/framework/runtime/SDK/tool/
-Python or mobile. Canonical research skill/full protocol; after every actual test
-run and bounded child record three distinct reviews. No weakened oracle/gate.
+Active persistent goal, no token budget: complete CP0–CP9 in docs/prds/command.md,
+protected merges/publication and actual clean registry/server consumer. Preserve
+all user work, archive source and existing stashes; mobile out. No new framework,
+runtime, custom development tools or project Python. Every actual test invocation
+gets three separate contract/execution/assertion-source reviews. Use canonical
+Devrandom Research skill/protocol and Nix/Cargo owners; never weaken gates/tests.
 
-CP0–CP4 merged; lifecycle/resource PR417 merged972d2a696e021603dd9a03471c6c3fa36878933a
-(tree29d5408e), exact42successful checks/zero threads, protected normal squash.
-Delivery evidence SHA5c1b5717b19f46aa8a280249762fd52162bb2aafe9168b5fe07af62813fd645a.
-All prior source/negative controls/failed runs remain in feature evidence.
+CP0–CP4 and lifecycle/resource PR417 are protected-merged. Authoritative exact
+receipts and source archives in docs/prds/command/research.md and evidence/.
+CP5 is incomplete; CP6–CP9 remain. Publication disabled until CP8.
 
-CURRENT /tmp/mnesis-command-observe feat/command-observe, published PR418 DRAFT
-head dc9882e82a3b6377d4daf636ed6a20d72e7174f4. Initial PR39685062323/push39685054084
-CI workflows BOTH successful: each79actual invocations (3compiler/30unit/2command
-integration/3replay/1workspace/40native adapter) with1639PASS144bins5exclusions,
-138.697s/116.843s. Actual command default45 and trace49 feature runs included;
-9/9/9lib cases; six zero-case unit harnesses are build-only. Every actual run/
-child and all8codec fuzz campaigns independently three-reviewed.
-BUT initial mutation39685062277 FAILED:69mutants23caught/5missed/41compiler-only.
-Five cfg-disabled duplicate helpers omitted by all-feature compile. No waiver,
-exclusion or gate change. Original failure archived SHA
-45f08222834504da9cbdf4b6c900a2fa0f30450f8e7fbace8353a0c2add60e69.
+## Tracing PR418
 
-DIRTY repair now qualified: common native Scope factory, shared Trace/Call
-constructors, two small preparations at actual admission sites. Dispatcher-bound
-final Span Drop and all tests unchanged.322net product/1641physical (two fewer
-than published),597net tests,11root exports; amended387/649/1750budgets unchanged.
-No new type/dependency/macro/framework/clock/runtime/exporter. Strict all-target
-Clippy feature on12.95s/off1.34s pass. Enabled owner415b526b49PASS1.658s,
-disabled5d137ecb45PASS1.503s, release6909c47149PASS0.509s; each6bins/one original
-ignore. Local UNCHANGED cargo-mutants27.1.0 command63mutants23caught/40compiler-
-only/0missed/timeout,49baseline3.345s; all64outcomes/24actual invocations and every
-reached bounded child three-reviewed. Not a claim old GitHub checks changed.
+Clean published branch /tmp/mnesis-command-observe feat/command-observe at signed
+c13ef43fe4e60cdfacb3f747b5f00d867b412aee. Expected merge tree
+f2036076a73a862d11cebeee45eee1f81ca541d2; GHvirtual779e5877f0acf3d40b31d7c7a97b
+efeb5c1a5cd1 has exact base972d2a69/headc13 and same tree. Zero unresolved threads.
+Do not mistake the earlier multiple-fetch FETCH_HEAD main output for this proof;
+correct single-ref receipt cp5-trace-final-virtual-merge.txt retained.
 
-Normal full source gate4577 TERMINAL exit0, all12host accepted (audit/toml cached),
-workspace d2f3fafc1639PASS/144bins/5original exclusions/15slow/511.733s plus fresh
-2/1/1corpus replays. Every run/child three-reviewed. All10actual owners cmp to
-igxhpl2wp0fbxy1cy9rr71xk4ksr4jjs-source. Twelve cached outputs rooted and compare
-exactly to current flake outPaths. Other systems explicitly omitted; Linux CI
-still required. Only own observe Cargo target cleaned after archived source/
-release evidence (2.8GiB), no user/global cleanup. No local source gate active.
-All repair source/gates/mutants/reviews and original successful CI/fuzz archived
-cp5-trace-ci-fix.tar.gz SHA
-ab7870b87e34fbdeeabd7e6fb2d1e31238e2a8b2f2c5cda0d9351a03b06a903c.
-NEXT normal signed hook/commit then incremental push/update focused PR418 body.
-No force/admin/bypass. Verify new-head CI/mutants and every actual invocation,
-fresh head/base/threads/merge tree before protected normal delivery.
+Local trace normal12gates/1639cases and49enabled/45disabled,63mutants23caught/
+40compiler-only0missed passed. Original failed mutation5uncompiled helpers
+retained; fixed common factories/one Call constructor, captured final Span Drop
+preserved. New CI mutation39692645711/artifact12390115765 baseline49PASS,
+63mutants23caught40compiler-only0missed, all64outcomes/24actual runs/26successful
+bounded children three-reviewed. New fuzz39692645752all8campaigns three-reviewed.
+Current pushCI39692638604 SUCCESS:79harness outcomes (6zero-case compilation-only),
+actual73nonzero runs, default1639/144binaries/5exclusions/142.678s; command45/49,
+3compiler+30unit+3replay+40fresh native adapter runs. Plain native264echo excluded.
+Raw full reviews include each outcome/child. PRCI39692645748attempt1 FAILED in
+native snapshot healthy fixture connect100ms before adapter construction, actual
+76/174cases75PASS1FAIL;98notrun and following tracing native suites unexecuted.
+All77harness outcomes (6zero-case) and children separately reviewed. Attempt2
+unchanged failed-job rerun119556953600 LIVE, no source/test/gate changes. Do not
+infer root cause of initial delay or claim fixture repaired. Recheck actual
+remote state and every rerun before ready/exact-head normal squash; recurrence
+requires focused diagnosis. Verify actual tree, no admin/bypass/CP6 credit.
 
-DEPENDENT dirty /tmp/mnesis-command-metrics feat/command-metrics from dc9882e8.
-All work/source preserved in retained stash2537ee72 and raw patches/hashes. Private
-optional metrics facade0.24.6+rapidhash4.5.1(+32bit portable-atomic) only; rejected
-metrics-util graph/hakari normal RNG edges, hack EXACTLY unchanged. Native
-reservation/queued/active gauges, pending Option-derived unresolved count, actual
-late acceptance once, separate typed worker causes/caller-channel unknowns,
-bounded names/labels and duration samples implemented. No record/API/runtime or
-app rules moved. Source~1933physical (<=2000), test750lines (budget760), product
-350net/10owner ceiling. All examples/export/perf/native/multi-host still required.
+## Metrics library candidate
 
-Metrics first red26dc39fd missing busy gauges then green d4d1a0871PASS0.045s;
-stronger d7a649cb1PASS0.058s, unit-scale1000 controlc6c11210 intended1FAIL0.037s,
-restored/hash verified. Shutdown red0c3923641FAIL0.083s AFTER all actual data/join
-and finite-label audit; green5a9e4b2d1PASS0.079s after existing Lifecycle::Stopping
-retains optional FIRST explicit stop time and observed Worker.poll emits outside
-Admission. Six profiles/21calls18admissions,submit17/14/3/read4/4/1,18queue/12submit
-+4read samples/6acceptances/closed2/shutdown3prior4total, actual held wall bounds.
-Every run three-reviewed; existing raw/native panic73 is expected and asserted.
-Two unused-mut warnings fixed, all-feature strict lint passes1.49s. Default lint
-found helper could be const only when disabled; standard Option.take/assign fix
-(no duplicate implementation/waiver) now being checked via shell91477 cwd METRICS.
-Raw cp5-metrics-disabled-clippy-fixed.log. No current whole-owner/4mode/native/
-performance/package/publication claim. BEFORE more work poll same shell/check
-actual default lint. Later controls: repeated stop must not reset first clock,
-extra label series must fail audit; deterministic two-host pending gauges must
-reject global zeroing. Keep original SourceScope signatures/data on parent update.
+/tmp/mnesis-command-metrics feat/command-metrics, qualified source atop c13,
+preparing normal signed implementation commit and focused dependent draft PR.
+All staged/unstaged work preserved before parent integration in retained stash
+98f75361a373d7f004480637fa27ed7758100704 and raw binary patches/source snapshot.
+No other worktree or stash changed. Shared trace factories/one Call ctor retained;
+minimal optional metrics0.24.6, no exporter SDK normal dependency. Private meter105,
+product1907physical/+266net,914line fixture within preregistered350/2000/950,
+11rootexports. Event identity/CAS/format/typed uncertainty unchanged.
 
-After signed trace repair, preserve metrics exact patch/index/status/source and
-all records, fast-forward dc9882e8 to new trace head, integrate common factories
-with metrics fields (no resurrected cfg duplicates), union histories and verify
-all unaffected owners. Normal project workflow only. Raw evidence root
-/tmp/mnesis-command-start-20261021; Nix shell91477 alive, tests stdin/devnull,
-no overlapping local compilations. Archive immutable, primary command-prd clean.
+Verified7bounded profiles/27calls24admissions: submit21/18/5 and read6/6/1,
+24queue/16submit+6read samples,8acceptances3duplicates,7known explicit stops,
+2native cancelled observations. True two-host pending gauge2 survives fresh
+third-host startup/stop; settleone1, abortother0/exactoriginal, resume1, late
+commit/reconcile0. Exact data/receipts/facts/identity, finite registered kind/key/
+label audit and independent20ms held-versus-wall duration bounds retained.
 
-Then finish CP5 exporter/no-collector/four combinations/controls; CP6 real PG/
-Fjall command integration/recovery/migration/capacity/perf/15min soak; CP7 docs/
-package/features/fuzz; CP8 two fresh whole audits/protected release/registry;
-CP9 neutral server consumption. No rebuilt abandoned backend. publish=false
-remains intentional; no command release. PG0–PG9 complete,PG10conditional.
+Runtime negative controls, each intended failure/three reviews/exact restore:
+unit-scale1000 c6c11210; repeated stop ef7cc0cc; extra request-ID series4482d97c;
+global pending resetc2b4f5a3. Original missing-gauge and missing-clock reds retained.
+Allfour whole-owner modes45/49/46/50PASS (one existing ignore); release50PASS
+0.541s. Allfour strict alltarget Clippy modes PASS; Hakari unchanged. Every run
+and two command bounded children separately three-reviewed in research.md.
+
+Normal full Nix gate TERMINAL EXIT0: all12host checks. Workspacec3601b1e-1742-
+40a6-a877-b134cd53b0851639PASS/145binaries/5existing exclusions/16slow/615.302s;
+3actual corpus replays2/1/1PASS. Reviews raw cp5-metrics-fixed-gate-{workspace,
+corpus}-reviews.md. Default gate does not execute trace/metrics enabled cases.
+13owners cmp exactly /nix/store/bdpfd5zzpjipi0x7bch88q2wy3fqh4ga-source. Current
+source hashes unchanged. All12accepted outputs rooted and paths compared; failed
+root JSON/pipeline helper not treated as proof, fixed parser/pipefail receipt kept.
+Original Taplo ordering failure before any tests retained; formatter only moved
+new metrics dependency alphabetically. No gate change/waiver.
+
+Local unchanged cargo-mutants27.1.0 TERMINAL EXIT0:69mutants37caught32compiler-only,
+0missed/timeout;50baselinePASS3.625s,38actual nextest runs and2successful bounded
+children separately three-reviewed in raw cp5-metrics-mutants-reviews.md. Some
+catches are native typed outcome/custody/readiness/liveness, not numeric metric
+proof. All original source hashes match afterward; no in-place mutation retained.
+README actual names/units/finite vocabulary/custody limits and existing CI all4
+command integration modes authored; no new workflow/runtime/tool.
+
+## Next actions
+
+1. Finish unchanged current PR418 CI rerun review and protected exact-head merge,
+   verify tree; preserve original failed attempt rather than overwriting logs.
+2. Publish qualified signed metrics commit and draft PR against tracing branch;
+   after parent protected merge, ordinary signed main merge into metrics and
+   update base to main. No force or published history rewrite. Preserve any
+   working changes first; byte-compare code/tests/manifests/CI/README afterward.
+3. Metrics archives now recorded: qualified SHAabe3d2a9...b034cb3, original red
+   SHA7d7d5f10...f545f; current tracing CI archive SHA8608920e...d176ae retains
+   successful push and failed PR attempt1 with every reviewed result. Update
+   PRD/backlog actual status and normal signed hook; cached repeats are0new tests.
+4. App-owned exporter example with actual tracing-opentelemetry export and
+   metrics collection/unavailable exporter bounded queue proof. Verify exact
+   dependencies/compatibility/cost before adding; SDK stays outside library.
+5. CP6 real command Postgres/Fjall/recovery/migration/capacity/performance/15min
+   soak and measured off/uncollected/collected overhead; CP7public consumers/
+   docs/package/fuzz/featureCI; CP8two final audits/protected publication;
+   CP9actual clean registry and neutral server consumer. Empty server workspace
+   does not authorize invented backend or business workflows. Do not complete
+   goal without every acceptance/delivery artifact verified.
+
+Raw root /tmp/mnesis-command-start-20261021. Nix shell91477 alive IDLE cwdmetrics;
+full gate done. Mutation handle6943 terminal0; outputs copied raw. Cargo clean
+89521 terminal0 (only task metrics target/debug,4GiB removed via Nix/Cargo);
+release artifacts preserved. All source snapshotted SHA316a19ea915b5c28d6f66f671f
+3770ae393db2aaf44cbdfd58d0ac6654fe78f0. Earlier rm-f attempt automatically rejected
+and did not execute; supported Cargo cleanup succeeded, no approval needed.
+No user/global cleanup. Disk about12GiB last seen. No current local test/build.
+
+LATEST DELIVERY2026-10-22: tracing418 protected-merged5498d439 at00:37:51Z,
+expected/actual/virtual treef2036076;44SUCCESS1scheduledskip0threads. Unchanged
+Nix job attempt2 SUCCESS24fresh invocations (3corpus/default1639/20native), each
+3-reviewed. Original healthy fixture connect100ms failure preserved/unexplained,
+not claimed fixed. Delivery archive95c1c33f...88c706.
+
+Metrics PR419 initial3dfcd96a passes all14pushCIjobs39697914083;81harness outcomes
+(6zero-case), four modes45/49/46/50, all actual runs/10children separately reviewed.
+First-CI archive758cabaf...0a7aef. Ordinary signed merge4fe9d57e includes protected
+main5498d439, entire tree remains qualifieddf7b81f8. Squash ancestry conflicts
+resolved only after proving incoming main equals c13entire tree; task-owned path
+restoration and13hashes/whole-tree comparison prevent dropping any incoming work.
+Normal signed hook12cached/0new tests. Next publish delivery records, change419
+base main BEFORE pushing to trigger required PR sync, ordinary nonforce push;
+inspect new exact-head CI before merge. Exporter worktree separate from3dfbase;
+preserve all staged/unstaged/untracked before later integrating published parent.

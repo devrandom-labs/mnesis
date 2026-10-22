@@ -2095,3 +2095,287 @@ meaningful on/off behavior stays under existing laws and exact original
 removed-Drop/invalid-request controls. Strict Clippy in both modes, feature tests,
 full normal source gate, unchanged mutation command and signed hook before push.
 Do not claim this change fixes CI until actual mutation results prove it.
+CP5 metrics experiment before edits (2026-10-21): isolated ordinary worktree
+/tmp/mnesis-command-metrics, feat/command-metrics from signed1539509a plus the
+exact frozen tracing patch. Trace source remains frozen in observe for its live
+Nix gate91717. This is a dependent metrics slice, not another runtime/workflow.
+Budget: <=300 net production lines, <=500 test/helper lines, <=10 authored
+source/manifest owners plus existing research/docs; generated lock/workspace-hack
+changes measured separately. Whole processor checkpoint <=1950 physical product
+lines from the trace candidate's1637. No extra public export, framework, runtime,
+SDK, tooling or Python. If real requirements exceed this budget, record evidence
+and amend before edits rather than omit required behavior.
+
+First verify actual resolved optional metrics0.24.6 graph and dev-only
+metrics-util0.20.4 registry storage cost. Record both new normal packages and new
+dev packages, licenses/toolchain/maintenance and exact supported feature graph.
+A thin Recorder adapter over upstream Registry/AtomicStorage is preferred to
+handwritten synchronized maps, atomics and histogram storage if its measured
+cost is proportionate. Do not use DebuggingRecorder's resetting snapshots.
+Then write a recorder characterization that forces actual active+queued+reserved
+native states, dropped callers/handles, invalid admission, duplicate and delayed
+commit reconciliation, abort/panic/stop, and exact final counters/gauges. Run it
+red before instrumenting, preserving original actual data/receipt assertions.
+Readiness clones/repeated polls cannot duplicate a native permit, queue gauges
+cannot briefly go negative from enqueue/dequeue reversal, callbacks remain
+outside admission, and pending Option remains the sole unresolved authority.
+Metrics source work may proceed while the trace gate builds; all local Cargo
+compilation remains serial. Rollback is the exact frozen trace patch and ten
+verified code/manifest/test hashes. All actual runs/children get three reviews.
+
+Metrics storage qualification before product instrumentation: actual resolution
+adds six lock packages (metrics0.24.6, rapidhash4.5.1, portable-atomic1.15.0,
+metrics-util0.20.4, rand_xoshiro0.7.0, sketches-ddsketch0.3.1). Native optional
+facade adds metrics+rapidhash; portable-atomic is 32-bit only. However supported
+metrics-util registry implies its storage bundle, and actual hakari generation
+then adds rand/rand_chacha/ppv-lite86 normal workspace-hack edges (six generated
+manifest lines). This imports unused sketch/random machinery for passive test
+observations. Compare saved before/after normal trees and generated manifest.
+Reject metrics-util for this bounded recorder fixture; retain the facade's own
+supported CounterFn/GaugeFn atomic handles, standard HashMap and parking_lot
+for test registration, and a passive Vec histogram under parking_lot. No custom
+production collection, atomics, observer interface or development tool. About
+30 additional fixture lines removes four new dev packages and normal RNG edges;
+actual regenerated lock/tree/hakari evidence must confirm this before retention.
+Keep initial candidate graph/manifests in raw evidence, not an unrecorded pivot.
+
+Before strengthening the new metrics characterization: formatted fixture is477
+physical lines. The String-ID invalid/mismatch/domain/no-op profile currently
+checks state/receipts but must also assert its actual persisted originals and
+zero-fact acceptance. Amend test budget500to550 before adding these data checks;
+this is stronger independent persistence evidence, not relaxing a metric oracle.
+Preserve exact typed domain rejection instead of matching any Failed cause.
+Histogram/finite-label/export and overhead evidence remain required later slices;
+this initial counter/gauge characterization does not establish complete metrics.
+
+Dependent metrics parent update before edits: tracing is signed/pushed as
+PR418 head dc9882e82a3b6377d4daf636ed6a20d72e7174f4, clean observe tree. Preserve
+all metrics binary/index patches/status/source hashes and retain its full stash.
+Save an exact metrics-only patch against that signed parent for the four owning
+Cargo/manifest/lock/new-test files, plus complete original research records and
+their metric-owned append sections. Rebase zero unpublished metrics commits
+from1539509a to dc9882e8; apply that exact four-owner patch with index, append
+metric-owned hypotheses/sources/experiment/research to the authoritative incoming
+records, and rewrite only this goal's progress checkpoint. Verify every source
+hash; original staged/unstaged records stay recoverable in retained stash/raw
+snapshots. Do not reapply the older trace patch over the newer delivery records.
+No source/API/assertion/workload change or new implementation is part of this
+parent update. Publication/merge status remains pending actual CI.
+
+Metrics implementation design/budget before product edits: the executed red
+26dc39fd proves missing native queue/reservation/inflight/pending observations
+AFTER ordered acceptance and joined cleanup. Amend production ceiling300to350
+and whole physical checkpoint1950to2000 (actual baseline1643) before edits:
+accurate native permit handoff, first-stop timing and original native task causes
+need changes in their actual owners, not only a facade wrapper. Test ceiling550
+and10authored owners remain; no new public export/runtime/framework/SDK/tool.
+Rollback remains the exact trace source plus four-owner facade/characterization
+patch, with all twelve source hashes verified on signed dc9882e8 parent.
+
+Use private meter.rs and existing trace terminal outcome as the shared outcome
+fact where useful; do not duplicate the protocol as meter flags. Native capacity
+is authoritative. Prepare convenience queue gauges only AFTER try_reserve owns
+capacity, BEFORE enqueue; callbacks happen outside Admission. Preserve closed
+precedence and serialized stop/enqueue, and retain failed Call values until the
+lock is released. Tower reserved guard is created once on real Ready, not on
+cloning or repeated polls, and released on native use/abort/drop outside locks.
+Queued and active guards balance through dequeue/reject/abort/panic. Execution
+and queue clocks start at those actual stages, not at initial request creation.
+
+Engine.pending Option is the sole unresolved authority. Derive meter deltas from
+None/Some transitions, including restored previous originals and Drop; use a
+fixed registered gauge handle, no second bool/ledger. No global gauge set(0),
+which would erase other hosts. On successful settlement, compare the retained
+exact pending request to the loaded receipt: count a newly observed acceptance
+once if it matches; an advancing unrelated competitor is not an acceptance.
+Ordinary replay/duplicate responses must not count another acceptance. Existing
+source keeps identity/base and conservative commit uncertainty unchanged.
+
+Native Worker.poll after actual JoinHandle completion owns typed worker failure
+counts (panic/cancelled) exactly once. Unknown-outcome counts must distinguish
+worker Error::Uncertain from response-channel loss observed by submit/retry/
+Tower caller; do not count both for one result. An unadmitted programmer panic
+or an abandoned caller is not proof of an uncertain append. Trace request-drop
+interrupted alone cannot classify whether it had entered execution. Any metric
+scope/limits are explicit observational facts, not a global command ledger.
+
+Shutdown duration starts at the FIRST explicit stop in the existing Lifecycle
+Stopping variant and ends at observed native completion; keep that clock at the
+existing owner, no parallel stopping flag. Preserve the first time on repeated
+stop. Worker may retain existing Admission only under metrics for observation;
+copy clock outside its mutex before callbacks. No known stop origin on abort/
+panic/last-handle loss means omit that duration, never fabricate zero. Existing
+shutdown trace measures cleanup only and remains correctly named/documented.
+
+Use finite static operation/outcome/stage/cause labels, seconds for durations,
+and application-owned recorder/exporter. Extend the current fixture with exact
+counter/histogram/finite-label and missing-collector laws in later focused slices;
+never claim its unreachable later profiles ran in the red. The four feature
+combinations and CP6 disabled/uncollected/collected overhead remain required.
+
+Before strengthening meter accounting: first five-profile green proves the four
+busy gauges, final balance, late acceptance once and native failures, but does
+not assert every unknown/result counter or histogram selection/units. Current
+fixture496lines, product254net/1897physical. Amend fixture budget550to650 before
+adding exact full-workload counters, finite metric names/label values, queue/
+execution/stage histograms, and bounded profile waits. This strengthens required
+operational acceptance; no assertion, workload or existing gate is weakened.
+Add no recorder framework or public seam. Use actual stored measurements and
+native completion, not generated expectations from the implementation. Preserve
+first red/green logs and source before independent accounting negative controls.
+Actual timing shutdown requires its own controlled red before lifecycle change.
+
+Metric histogram unit falsifier before edits: hold the existing real append gate
+for20ms after native busy gauges are captured. Compare actual queue, submit
+execution and append-ok histogram samples against independently measured wall
+clock bounds (max>=actual held interval; every sample<=whole joined profile).
+This rejects milliseconds/microseconds mislabeled as seconds without fixed
+machine-speed assertions. Exact initial counts3queue/2submit/2append and finite
+nonnegative samples remain. Add full-workload submitted/admitted/unknown totals
+(submit15/12/3;read4/4/1), native worker causes and existing acceptance/duplicate/
+conflict/reconciliation laws. Temporarily scale ONLY Slot's recorded duration
+by1000, require actual time-unit assertion failure after real persistence/cleanup,
+restore exact source/hash. No source gate weakening or expected-value relaxation.
+
+Before the remaining observability characterizations: current expanded suite598
+lines proves counts/gauges/seconds but does not inspect every registered name/
+label or distinguish first explicit stop from worker cleanup. Amend test ceiling
+650to750 before adding bounded-vocabulary/metric-kind checks and a controlled
+shutdown profile; production350/whole2000 and ten-owner budgets unchanged.
+Use passive actual registered keys, exact field shape and finite literal values,
+not expected data generated by product code. A delayed real append holds the
+worker while first stop and repeated stop occur; observed shutdown duration must
+include the interval before the second stop and cannot be cleanup-only/zero.
+Aborted/panicked hosts without an explicit stop must not fabricate that histogram.
+Capture missing histogram without failing until data/typed replies/join cleanup
+have been checked. Run this characterization red before altering lifecycle clocks.
+Adding two explicit calls changes final suite totals transparently (submit17/14/3,
+read4/4/1;18queue,12submit/4read executions,6acceptances;closed rejection2).
+Existing first-profile counts/records/unknowns/duplicate/reconciliation remain.
+No old oracle/workload/gate is weakened; outer2second profile bounds stay.
+
+Formatted new fixture is749lines, with its all-key schema/value audit at91lines.
+Before splitting that audit to satisfy the unchanged80line function lint, amend
+fixture ceiling750to760 (no new behavioral scope). Recorder owns key snapshots;
+expose that passive snapshot alongside its existing counter/gauge/sample reads
+rather than having the audit inspect three storage maps directly. Assertions,
+registered kind/name/field/value checks and workload remain unchanged.
+
+Remaining metrics falsifiers before feature completion: single-host clone/cleanup
+proof does not alone reject a global gauge set(0) when another host is pending.
+Add deterministic two-host pending overlap and opening a fresh host without
+resetting the existing count; settle one and observe the other still counted.
+Keep observational counters distinct from a global receipt ledger. After the
+first-stop implementation passes its real red, temporarily reset the first
+clock on repeated stop and require the measured held interval to fail. Add one
+extra metric series with an unapproved label while leaving normal series/data
+unchanged; the full registered-kind/name/field/value audit must reject it.
+Capture control source/diff/hash before restoring it. No shadow observer, counter
+cache, global dedup state or weakened fields/workload/gates to manufacture green.
+
+Default-mode strict lint found replace_pending could be const only with metrics
+disabled; a separate mode-specific implementation would recreate the cfg duplicate
+problem. Before editing, retain the diagnostic and use standard Option::take
+followed by assigning next, returning the one owned previous original. Exclusive
+&mut Engine has no await/callback between these operations; the replaced field is
+known None, and meter deltas still derive only from previous/current Options.
+No extra flag/state/helper, constant-mode duplicate, waiver or gate change. Verify
+both feature lints and the full owning laws; measure costs in CP6 rather than
+claiming equivalent performance from source alone.
+
+## CP5 signed tracing-parent integration (2026-10-22)
+
+Threatened invariant: metrics must preserve caller dispatch ownership and the
+single shared trace factories qualified in c13ef43fe4e60cdfacb3f747b5f00d867b412aee.
+Before editing preserve full staged/unstaged binary patches, index, status, owner
+hashes and worktree sources, plus a retained stash. Fast-forward the unpublished
+metrics branch from dc9882e8 to that signed descendant; reapply metrics and union
+records without dropping either history. Resolve only host/trace constructor
+conflicts using the new shared Scope factory and one Call constructor. Keep
+metric fields/outcomes, first-stop clock, actual gauges and exact pending custody.
+Budget: existing350net metric product/2000physical,760line owning fixture; no
+new public interface/dependency/runtime/tool or changed test workload. Falsifier:
+owner/fixture hash loss, feature-mode failure or any changed data/lifecycle
+outcome. Rollback: retained preintegration stash and full source/index snapshot;
+never reset another worktree or discard prior stashes. Record three reviews of
+each actual subsequent test invocation before further changes.
+
+## CP5 metrics negative controls (2026-10-22)
+
+Before mutation preserve current host/meter/test sources and hashes. Change one
+causal variable per temporary experiment; never change test workload/assertions.
+First remove first-stop guard ONLY in public stop so a repeated stop resets its
+clock. Expected owning test failure AFTER actual data/join at independent held
+shutdown-duration lower bound. Restore exact host hash after three reviews.
+Then register one additional submitted counter series with a request_id label
+while retaining the original correctly labeled series. Expected failure at full
+metric key audit AFTER prior five data/lifecycle profiles; normal counters/data
+must remain correct. Restore exact meter hash after three reviews. Compiler or
+setup failure is not intended evidence. Budget≤5temporary product lines each,
+no test changes/public surface/dependency/tool. Original baseline rollback is
+integrated57c42e60 source; controls never retained in published product.
+
+## CP5 simultaneous-host unresolved gauge and resume (2026-10-22)
+
+Threat: clone-only tests cannot reject a fresh engine resetting global gauges or
+losing a different host's pending contribution. Extend the existing recorder case
+AFTER its unchanged21-call table. Two independent FaultStores share one actual
+InMemoryStore with independent delayed gates on distinct streams; submit both
+before either reply completes and hold both actual backend writes. Both calls
+must return Uncertain with exact IDs; after inactive engine slots gauge=2. Open
+and normally close a fresh third host; gauge remains2. Commit/reconcile first:
+1. Abort/observe second native worker retaining exact original:0. Resume report:
+1; release second actual write/reconcile:0. Assert both exact records/facts/states/
+receipts/duplicates and total counters, finite labels and all resource cleanup.
+Negative control: add global unresolved.set(0) at Engine::new; unchanged workload
+must fail at actual two-host gauge invariant. Preserve temporary source/hash and
+three reviews then restore. No global reset retained. Amend fixture budget from
+760 to950physical lines BEFORE extension; product budget350net/2000physical,
+public/dependency/tool limits unchanged. Separate helpers≤80lines/5parameters,
+no new harness/recorder/API. Falsifier includes correct data with wrong gauge,
+missing simultaneous gates or report losing original. Existing earlier profiles,
+20ms stop/time-unit holds, counts, deadlines and assertions remain intact.
+Expected six added requests:4submit/2read, all6admitted,2unknown submits; total
+submit21/18/5/read6/6/1,24queue/16submit+6read,8acceptance observations/3duplicates,
+7explicit shutdown samples and2cancelled worker failures. New profile operation
+budget50ms/outer2s; both writes independently forced past timeout, no later write
+needed to observe committed data. Inflight idle waits generalize to any nonzero
+value so two active workers must both finish before resource snapshots.
+
+## CP5 metrics supported documentation and CI (2026-10-22)
+
+Before editing add≤110README lines defining actual stable names/units/finite
+labels, observations versus durable outcomes, native resource scope and first
+known-stop duration; no exporter installed by library. Extend existing command
+feature matrix with metrics-only and combined owning nextest runs (2lines,
+existing Nix/runtime/gates). No new tool/job/test selector, normal dependency or
+public interface. Exporter example/CP6 overhead remain explicit separate required
+work; do not claim CP5complete on the focused metrics library slice alone.
+Falsifier: docs differ from actual meter/Trace/host source or CI omits owning
+integration execution. RollbackREADME and checks.yml source delta only. Existing
+350net product/2000physical and950test budget unchanged.
+
+## CP5 metrics mutation qualification (2026-10-22)
+
+Threat: exact positive accounting can still miss a broken branch or resource
+cleanup. Run the established cargo-mutants27.1.0 command on the exact metrics
+PR diff against signed c13ef43f, all features, nextest serial with unchanged
+existing compile_fail exclusion. Baseline must execute50owning cases; compile-
+only outcomes get no runtime credit, every actual subrun/child three-reviewed.
+No new exclusion, skip attribute, assertion relaxation or changed workload.
+Current product/test source is frozen while normal full Nix gate runs in a
+separate isolated source. Mutants use native disposable copied worktree/build;
+no in-place mutation or custom framework. Budget: no retained product/test edits
+in this experiment; document any survivor before proposing a focused fix under
+existing350net/2000physical/950test limits. Falsifier: any missed mutant, failed
+baseline, wrong source or no-test run. Keep every failed result; do not adjust
+mutant gates to green. Rollback boundary is current source archive and hashes;
+all temporary mutation output belongs to this task and is retained as evidence.
+
+Metrics delivery budget unchanged: focused signed implementation commit/draft
+PR against tracing feature parent. Source all13owners remains identical to actual
+qualified Nix input; record/archive changes only after gate. Parent PR's healthy
+fixture setup failure is separately retained with unchanged exact-head rerun.
+Use ordinary signed main merge and base update after parent protected merge;
+no force or published history rewrite. This enables a separate exporter example
+branch from a concrete metrics implementation without duplicating working code.

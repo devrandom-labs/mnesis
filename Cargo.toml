@@ -46,6 +46,7 @@ http-body-util = "0.1.4"
 hyper = "1.10.1"
 hyper-util = { version = "0.1.20", features = ["client", "http1", "client-legacy"] }
 insta = "1.47.2"
+metrics = "0.24.6"
 minicbor = { version = "2.2.2", features = ["alloc"] }
 parking_lot = "0.12.5"
 proptest = "1.11.0"

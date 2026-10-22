@@ -2,6 +2,8 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
 
+#[cfg(feature = "metrics")]
+use metrics::{Gauge, gauge};
 use mnesis::{AggregateRoot, EventOf, Handle, KernelError, Version};
 use mnesis_store::{
     CommandRepository, EventStore, ExecuteError, RawEventStore, Repository, Store, StoreError,
@@ -29,6 +31,8 @@ where
     id: A::Id,
     timeout: Duration,
     pending: Option<Request<C, I>>,
+    #[cfg(feature = "metrics")]
+    unresolved: Gauge,
     handoff: Handoff<C, I>,
 }
 
@@ -40,6 +44,10 @@ where
     EventOf<A>: Clone,
 {
     fn drop(&mut self) {
+        #[cfg(feature = "metrics")]
+        if self.pending.is_some() {
+            self.unresolved.decrement(1.0);
+        }
         let previous = std::mem::replace(&mut *self.handoff.lock(), self.pending.take());
         drop(previous);
     }
@@ -61,13 +69,33 @@ where
         pending: Option<Request<C, I>>,
         handoff: Handoff<C, I>,
     ) -> Self {
+        #[cfg(feature = "metrics")]
+        let unresolved = gauge!("mnesis_command_unresolved");
+        #[cfg(feature = "metrics")]
+        if pending.is_some() {
+            unresolved.increment(1.0);
+        }
         Self {
             repository: store.repository().codec(Codec).build(),
             id,
             timeout,
             pending,
+            #[cfg(feature = "metrics")]
+            unresolved,
             handoff,
         }
+    }
+
+    fn replace_pending(&mut self, next: Option<Request<C, I>>) -> Option<Request<C, I>> {
+        let previous = self.pending.take();
+        self.pending = next;
+        #[cfg(feature = "metrics")]
+        match (&previous, &self.pending) {
+            (None, Some(_)) => self.unresolved.increment(1.0),
+            (Some(_), None) => self.unresolved.decrement(1.0),
+            _ => (),
+        }
+        previous
     }
 
     async fn load(&self) -> Result<Root<A, C, I, N>, Error<A::Error, I, S::Error>> {
@@ -102,7 +130,12 @@ where
                 source: None,
             });
         }
-        self.pending = None;
+        if let Some(pending) = &self.pending
+            && let Ok(Some(_)) = root.state().map_err(Cause::Kernel)?.receipt(pending)
+        {
+            trace::accepted();
+        }
+        drop(self.replace_pending(None));
         if let Some(trace) = &mut stage {
             trace.finish("ok");
         }
@@ -119,7 +152,7 @@ where
             .map_or(Some(Version::INITIAL), Version::next)
             .ok_or(Cause::Kernel(KernelError::VersionOverflow))?;
         let id = request.id.clone();
-        let previous = self.pending.replace(request.clone());
+        let previous = self.replace_pending(Some(request.clone()));
         let decision = Decision { request, version };
         match timeout(self.timeout, self.repository.execute(root, decision)).await {
             Ok(Ok(_)) => Ok(()),
@@ -128,7 +161,7 @@ where
                 source: None,
             }),
             Ok(Err(ExecuteError::Store(error))) if error.is_conflict() => {
-                self.pending = None;
+                drop(self.replace_pending(None));
                 Err(Error::Conflict)
             }
             Ok(Err(ExecuteError::Decide(error))) => self.failure(previous, error.into()),
@@ -142,7 +175,7 @@ where
         previous: Option<Request<C, I>>,
         error: Cause<A::Error, S::Error>,
     ) -> Result<(), Error<A::Error, I, S::Error>> {
-        self.pending = previous;
+        drop(self.replace_pending(previous));
         match &self.pending {
             // A definite failure of this retry says nothing about the older
             // append. Keep its original identity/base and the new typed cause.
@@ -224,7 +257,7 @@ where
                     .and_then(|receipt| receipt.ok_or(Cause::Corrupt));
                 match observed {
                     Ok(receipt) => {
-                        self.pending = None;
+                        drop(self.replace_pending(None));
                         trace::accepted();
                         Ok(receipt)
                     }

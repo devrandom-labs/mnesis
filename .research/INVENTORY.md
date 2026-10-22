@@ -68,3 +68,14 @@ native/performance qualification, documentation and delivery remain required.
 records extraction provenance; later sections own typed outcome, forced-race,
 format/reader and lifecycle/resource evidence. Local qualification is not merged,
 native or published delivery. No normal exporter SDK or new runtime is selected.
+
+Metrics dependent candidate against c13ef43f: five private modules/six source
+files,1907physical product/+266net; meter.rs105 owns native facade registration,
+finite labels and resource RAII. Trace owns one outcome mapping for both optional
+outputs. Engine derives pending gauge transitions from its sole original Option;
+worker reads first known stop origin from existing Lifecycle only after native
+completion. No second protocol ledger, collector/runtime/framework/public root.
+11exports unchanged. Actual four modes45/49/46/50 and release50,69mutants37caught/
+32compiler-only, all12host checks pass;13source owners cmp. Full workspace default
+1639/145binaries does not execute cfg-disabled instrumentation cases. Metrics
+app exporter and instrumentation overhead remain unqualified; no full CP5 claim.
