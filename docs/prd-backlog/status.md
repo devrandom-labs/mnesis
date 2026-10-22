@@ -27,13 +27,16 @@ or local pass does not establish whole-adapter delivery.
 CP0–CP9 are required for the new feature. The planning branch is
 `docs/command-prd`, based on `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`.
 The user authorized full CP0–CP9 implementation and delivery on 2026-10-21.
-CP0–CP3 are protected-merged (PR411/PR413/PR414/PR415).
+CP0–CP4 are protected-merged (PR411/PR413/PR414/PR415/PR416).
 CP3's repaired race fixture passes all12 local gates,192 forced registration
 inversions and full current-head CI. CP4 inherits that repair and passes all12
 host gates/1633tests on an unchanged retry; original failures remain recorded.
-Current-head PR/CI/protected delivery remain. Two CP5
-lifecycle defects and abort-custody loss are repaired in a separate branch;
-remaining resource/tracing/metrics acceptance remains open.
+PR416 has42successful checks, reviewed mutation/fuzz evidence and verified
+merged tree24680399552aca8b52f383bcc3c79862669401b3. Two CP5 lifecycle defects,
+abort-custody loss and resource boundaries pass all12local gates/1639tests;
+focused PR417 protected-merged as972d2a696e021603dd9a03471c6c3fa36878933a,
+verified tree29d5408e7c9eb59eec31cdc0731011c37828c65a and42successful checks.
+Required tracing/metrics acceptance stays open.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing

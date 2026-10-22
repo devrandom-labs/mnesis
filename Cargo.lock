@@ -1696,6 +1696,8 @@ dependencies = [
  "tokio-util",
  "tower",
  "tower-service",
+ "tracing",
+ "tracing-subscriber",
  "workspace-hack",
 ]
 

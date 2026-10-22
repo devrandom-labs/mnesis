@@ -12,6 +12,7 @@ use serde::de::DeserializeOwned;
 use tokio::time::timeout;
 
 use crate::model::{Adapted, Codec, Decision, Mismatch};
+use crate::trace;
 use crate::{Cause, CodecError, Error, Receipt, Request};
 
 type Root<A, C, I, const N: usize> = AggregateRoot<Adapted<A, C, I, N>>;
@@ -70,28 +71,41 @@ where
     }
 
     async fn load(&self) -> Result<Root<A, C, I, N>, Error<A::Error, I, S::Error>> {
-        let root = timeout(self.timeout, self.repository.load(self.id.clone()))
-            .await
-            .map_err(|_| Error::Timeout)?
-            .map_err(Cause::Store)?;
-        if root.state().map_err(Cause::Kernel)?.integrity.is_err() {
-            return Err(Error::Corrupt);
-        }
-        Ok(root)
+        trace::step("load", async {
+            let root = timeout(self.timeout, self.repository.load(self.id.clone()))
+                .await
+                .map_err(|_| Error::Timeout)?
+                .map_err(Cause::Store)?;
+            if root.state().map_err(Cause::Kernel)?.integrity.is_err() {
+                return Err(Error::Corrupt);
+            }
+            Ok(root)
+        })
+        .await
     }
 
     fn settle(&mut self, root: &Root<A, C, I, N>) -> Result<(), Error<A::Error, I, S::Error>> {
+        let mut stage = self
+            .pending
+            .as_ref()
+            .map(|_| trace::Trace::stage("reconcile"));
         if let Some(pending) = &self.pending
             && root.version() <= pending.expected
         {
             // Empty/stale reads cannot settle a write. A later physical version
             // proves the original CAS committed or can no longer win.
+            if let Some(trace) = &mut stage {
+                trace.finish("uncertain");
+            }
             return Err(Error::Uncertain {
                 command: pending.id.clone(),
                 source: None,
             });
         }
         self.pending = None;
+        if let Some(trace) = &mut stage {
+            trace.finish("ok");
+        }
         Ok(())
     }
 
@@ -172,6 +186,7 @@ where
             self.pending.as_ref() == Some(&request) && request.expected == root.version();
         let settled = self.settle(&root);
         if let Some(receipt) = existing {
+            trace::duplicate();
             return Ok(receipt);
         }
         if self
@@ -189,7 +204,7 @@ where
         if request.expected != root.version() {
             return Err(Error::Conflict);
         }
-        match self.write(&mut root, request.clone()).await {
+        match trace::step("append", self.write(&mut root, request.clone())).await {
             Err(Error::Conflict) => {
                 let reloaded = self.load().await?;
                 reloaded
@@ -198,6 +213,7 @@ where
                     .receipt(&request)
                     .map_err(|Mismatch| Error::Mismatch)?
                     .ok_or(Error::Conflict)
+                    .inspect(|_| trace::duplicate())
             }
             Err(error) => Err(error),
             Ok(()) => {
@@ -209,6 +225,7 @@ where
                 match observed {
                     Ok(receipt) => {
                         self.pending = None;
+                        trace::accepted();
                         Ok(receipt)
                     }
                     Err(cause) => Err(Error::Uncertain {

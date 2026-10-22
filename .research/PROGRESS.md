@@ -1,77 +1,90 @@
-# Command processor delivery — CP5 parent integration, 2026-10-21
+# Command processor delivery — trace CI repair, 2026-10-22
 
-Persistent CP0–CP9 goal ACTIVE/no budget. Complete only after every required
-acceptance/protected merge/publication/native registry/server consumer. Preserve
-source archive/mobile/unrelated main/releasePR410 and all older/user work/stashes.
-No subagents, new framework/runtime/custom dev tool or project Python.
+Persistent CP0–CP9 goal ACTIVE/no token budget. Completion requires every required
+criterion, protected merges, verified publication and clean registry/native plus
+labcast-server consumers. Preserve source archive, all user/goal work/stashes,
+dirty main/release and unrelated PR410. No subagents/framework/runtime/SDK/tool/
+Python or mobile. Canonical research skill/full protocol; after every actual test
+run and bounded child record three distinct reviews. No weakened oracle/gate.
 
-CP0–CP3 protected-merged; latest PR415 merge98abf662278c40a730b88fdbe6814481f1db108e,
-reviewedc3a16f3c, tree680cbebd645ddf7c98894fc4dad847fffe36f217.42checks pass/one
-scheduled skip/0threads. All actual CI and fuzz invocations three-reviewed; zero
-selected mutations give no runtime credit. Exact receipts in cp3-delivery.tar.gz
-SHA914f642352278eeb6e7abe1cde95d8dd07a3440d801528a194a90e3c21cc5fa7.
+CP0–CP4 merged; lifecycle/resource PR417 merged972d2a696e021603dd9a03471c6c3fa36878933a
+(tree29d5408e), exact42successful checks/zero threads, protected normal squash.
+Delivery evidence SHA5c1b5717b19f46aa8a280249762fd52162bb2aafe9168b5fe07af62813fd645a.
+All prior source/negative controls/failed runs remain in feature evidence.
 
-CP4 is draft PR416/main, clean primary /Users/joel/orca/workspaces/nexus/command-prd
-feat/command-reader, signed featureb9b89ab80329a79b2844527cb6e9a598c1e39803 and
-protected-parent integration786dce713004cf90e8e3c943c0f7ee6eb3d38425. Both normal
-signed hooks pass all12 cached outputs; no new runtime credit. Current full
-nextestb938c04e1633PASS/143binaries/five exclusions/15slow/496.681s,39command laws.
-Prior10OS28+one UNKNOWN compiler-report failure retained, unchanged retry passes
-that compiler fixture100.495s. All reader/source owners cmp against ykg0amq.
-Public Acceptance/AcceptanceCodec +62product,626tests under650; original v2 bytes,
-public projection physical checkpoint/resume, both command+fact evolution and
-independent corruption/no-repair controls. Native proof/release still future.
-Final gates evidence SHA cafc8497f1efbe785012a9df649b3b696bc0b8a8e7745868555cd50dc42140eb.
+CURRENT /tmp/mnesis-command-observe feat/command-observe, published PR418 DRAFT
+head dc9882e82a3b6377d4daf636ed6a20d72e7174f4. Initial PR39685062323/push39685054084
+CI workflows BOTH successful: each79actual invocations (3compiler/30unit/2command
+integration/3replay/1workspace/40native adapter) with1639PASS144bins5exclusions,
+138.697s/116.843s. Actual command default45 and trace49 feature runs included;
+9/9/9lib cases; six zero-case unit harnesses are build-only. Every actual run/
+child and all8codec fuzz campaigns independently three-reviewed.
+BUT initial mutation39685062277 FAILED:69mutants23caught/5missed/41compiler-only.
+Five cfg-disabled duplicate helpers omitted by all-feature compile. No waiver,
+exclusion or gate change. Original failure archived SHA
+45f08222834504da9cbdf4b6c900a2fa0f30450f8e7fbace8353a0c2add60e69.
 
-This /tmp/mnesis-command-lifecycle, feat/command-lifecycle, now at786dce7130 after
-fast-forwarding saved26c5a334 work via EXACT named retained stash. Binary patch/
-status/hashes/stash ID in cp5-before-reader-parent* / cp5-reader-parent-stash.sha.
-All older/user stashes retained. Metadata union preserves unique parent+CP5
-histories; lib exports BOTH reader roots and Worker. Engine/host/README exactly
-match saved CP5 work; incoming model/manifest/reader/fixtures untouched. Recovery
-now inherits correct192-race owner; history gains parent's visibility; unit/model
-inherits all golden/metadata/cumulative cases while retaining new byte boundaries.
-No product behavior added during integration. Combined source45PASS debug1.409s/
-release0.502s,one original ignored,five binaries and both bounded children; each
-run three-reviewed. Strict all-target/all-feature Clippy passes7.82s. Exact
-integration archive SHA45fe643488fde25e60ecfcc9c2cc464109de9e3b85faa3c93f346e74a2eb3d13.
+DIRTY repair now qualified: common native Scope factory, shared Trace/Call
+constructors, two small preparations at actual admission sites. Dispatcher-bound
+final Span Drop and all tests unchanged.322net product/1641physical (two fewer
+than published),597net tests,11root exports; amended387/649/1750budgets unchanged.
+No new type/dependency/macro/framework/clock/runtime/exporter. Strict all-target
+Clippy feature on12.95s/off1.34s pass. Enabled owner415b526b49PASS1.658s,
+disabled5d137ecb45PASS1.503s, release6909c47149PASS0.509s; each6bins/one original
+ignore. Local UNCHANGED cargo-mutants27.1.0 command63mutants23caught/40compiler-
+only/0missed/timeout,49baseline3.345s; all64outcomes/24actual invocations and every
+reached bounded child three-reviewed. Not a claim old GitHub checks changed.
 
-CP5 core work: reentrant assigned-readiness cancellation deadlock and stop at
-dequeue accepting work reproduced/fixed; initial weak close-only child retracted.
-Abort/report-loss red after observed late commit reproduced/fixed. Engine keeps
-one owned pending, hands it off on Drop; public Worker waits native completion
-then returns Shutdown retaining original JoinError AND exact unresolved original.
-No per-request Arc/lock/detached monitor. Original panic73/fold7 and failed
-reconstruction/resume/borrowed-wait/pre-poll-abort custody asserted. Controls
-baseline4PASS/two caught0missed/unviable/timeout. Old isolated full debug/release
-40PASS/1originalignored (1.528s/0.476s), strict all-target/all-feature lint0.60s.
-Resource150nettests: UTF8/escapes4095/4096/4097; complete-record encode failure
-leaves ID usable; exact receipt/row/state/count; queue/deadline extrema; disabled
-timer native panic in bounded child. Each child asserts one selected passing
-case; original2s kill+wait retained. Every actual run/child has three reviews.
-Raw evidence cp5-{lifecycle,custody,resources}.tar.gz; resourceSHA
-9ef5dfac00207c9bd7e4a50d550baa5fc7839bcd3fc3778fe0c358773206dfb6.
+Normal full source gate4577 TERMINAL exit0, all12host accepted (audit/toml cached),
+workspace d2f3fafc1639PASS/144bins/5original exclusions/15slow/511.733s plus fresh
+2/1/1corpus replays. Every run/child three-reviewed. All10actual owners cmp to
+igxhpl2wp0fbxy1cy9rr71xk4ksr4jjs-source. Twelve cached outputs rooted and compare
+exactly to current flake outPaths. Other systems explicitly omitted; Linux CI
+still required. Only own observe Cargo target cleaned after archived source/
+release evidence (2.8GiB), no user/global cleanup. No local source gate active.
+All repair source/gates/mutants/reviews and original successful CI/fuzz archived
+cp5-trace-ci-fix.tar.gz SHA
+ab7870b87e34fbdeeabd7e6fb2d1e31238e2a8b2f2c5cda0d9351a03b06a903c.
+NEXT normal signed hook/commit then incremental push/update focused PR418 body.
+No force/admin/bypass. Verify new-head CI/mutants and every actual invocation,
+fresh head/base/threads/merge tree before protected normal delivery.
 
-All12 source gates PASS/session1166 completed0, logcp5-core-full-gate.log. Full
-nextest2a80b609:1639PASS/15slow/143bins/five exclusions/458.854s,45command laws;
-three fresh replays2/1/1 separately three-reviewed. Ten source/test owners cmp
-actual1pmd3kfb...; README excluded from filtered source, packaging still CP7.
-Gate archive SHA6c06675547b52701561d282971a44c7f04e075ba9f7668792d4a651ed976c60e.
-Next normal signed focused lifecycle PR. Full CP5 remains
-OPEN: required tracing/metrics/export,
-four feature combinations/no collector and measured overhead. Pre-edit telemetry
-budget/causality/label/workload requirements in HYPOTHESES; metrics-util debugging
-snapshots RESET gauges and cannot support intermediate observations. Registry/
-AtomicStorage candidate source inspected; no dependency/product change yet.
-Continue telemetry in a separate focused slice, not omitted from acceptance.
-Then CP6 native PG/Fjall/recovery/performance/soak, CP7 docs/features/packaging,
-CP8 audits/protected release, CP9 registry/server. Package still publish=false.
+DEPENDENT dirty /tmp/mnesis-command-metrics feat/command-metrics from dc9882e8.
+All work/source preserved in retained stash2537ee72 and raw patches/hashes. Private
+optional metrics facade0.24.6+rapidhash4.5.1(+32bit portable-atomic) only; rejected
+metrics-util graph/hakari normal RNG edges, hack EXACTLY unchanged. Native
+reservation/queued/active gauges, pending Option-derived unresolved count, actual
+late acceptance once, separate typed worker causes/caller-channel unknowns,
+bounded names/labels and duration samples implemented. No record/API/runtime or
+app rules moved. Source~1933physical (<=2000), test750lines (budget760), product
+350net/10owner ceiling. All examples/export/perf/native/multi-host still required.
 
-Tools: shell91477 cwd this worktree, idle; tests stdin/dev/null. Only local build
-active now. Observability candidate /tmp/mnesis-command-observe was copied from
-exact core patch, then gained optional tracing metadata/shared counter fixture/
-recording trace characterization; NO trace test run or product implementation
-yet. Core source remains frozen. Only goal-owned caches retired after raw/source evidence; specific paths/
-logs retained, normal Nix liveness/no global cleanup. CP4 current outputs and
-common cache xagzqq5 rooted. Old outlinks retired; don't assume every historical
-root exists. Wait actual handles, never restart just because observation expired.
+Metrics first red26dc39fd missing busy gauges then green d4d1a0871PASS0.045s;
+stronger d7a649cb1PASS0.058s, unit-scale1000 controlc6c11210 intended1FAIL0.037s,
+restored/hash verified. Shutdown red0c3923641FAIL0.083s AFTER all actual data/join
+and finite-label audit; green5a9e4b2d1PASS0.079s after existing Lifecycle::Stopping
+retains optional FIRST explicit stop time and observed Worker.poll emits outside
+Admission. Six profiles/21calls18admissions,submit17/14/3/read4/4/1,18queue/12submit
++4read samples/6acceptances/closed2/shutdown3prior4total, actual held wall bounds.
+Every run three-reviewed; existing raw/native panic73 is expected and asserted.
+Two unused-mut warnings fixed, all-feature strict lint passes1.49s. Default lint
+found helper could be const only when disabled; standard Option.take/assign fix
+(no duplicate implementation/waiver) now being checked via shell91477 cwd METRICS.
+Raw cp5-metrics-disabled-clippy-fixed.log. No current whole-owner/4mode/native/
+performance/package/publication claim. BEFORE more work poll same shell/check
+actual default lint. Later controls: repeated stop must not reset first clock,
+extra label series must fail audit; deterministic two-host pending gauges must
+reject global zeroing. Keep original SourceScope signatures/data on parent update.
+
+After signed trace repair, preserve metrics exact patch/index/status/source and
+all records, fast-forward dc9882e8 to new trace head, integrate common factories
+with metrics fields (no resurrected cfg duplicates), union histories and verify
+all unaffected owners. Normal project workflow only. Raw evidence root
+/tmp/mnesis-command-start-20261021; Nix shell91477 alive, tests stdin/devnull,
+no overlapping local compilations. Archive immutable, primary command-prd clean.
+
+Then finish CP5 exporter/no-collector/four combinations/controls; CP6 real PG/
+Fjall command integration/recovery/migration/capacity/perf/15min soak; CP7 docs/
+package/features/fuzz; CP8 two fresh whole audits/protected release/registry;
+CP9 neutral server consumption. No rebuilt abandoned backend. publish=false
+remains intentional; no command release. PG0–PG9 complete,PG10conditional.

@@ -9,60 +9,23 @@
 use std::num::{NonZeroU64, NonZeroUsize};
 use std::time::Duration;
 
-use mnesis::{Aggregate, AggregateState, DomainEvent, Events, Handle, Message, Version, events};
+use mnesis::Version;
 use mnesis_command::{Cause, CommandProcessor, Error, Limits, Request};
 use mnesis_inmemory::InMemoryStore;
 use mnesis_store::{RawEventStore, Store};
-use serde::{Deserialize, Serialize};
 
-#[path = "operation.rs"]
-mod operation;
+#[path = "counter.rs"]
+mod counter;
+use counter::{Counter, Rejection, Sum};
 #[path = "finish.rs"]
 pub mod shutdown;
 use shutdown::finish;
 #[path = "../faults/mod.rs"]
 pub mod faults;
+pub use counter::Operation;
 use faults::{Fault, FaultStore};
-pub use operation::Operation;
 
 type Backend = FaultStore<InMemoryStore>;
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-struct Increment(u8);
-impl Message for Increment {}
-impl DomainEvent for Increment {
-    fn name(&self) -> &'static str {
-        "increment"
-    }
-}
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct Sum(u64);
-impl AggregateState for Sum {
-    type Event = Increment;
-    fn initial() -> Self {
-        Self(0)
-    }
-    fn apply(self, event: &Increment) -> Self {
-        Self(self.0 + u64::from(event.0))
-    }
-}
-#[derive(Debug, thiserror::Error)]
-#[error("rejected fixture command")]
-struct Rejection;
-struct Counter;
-impl Aggregate for Counter {
-    type State = Sum;
-    type Error = Rejection;
-    type Id = String;
-}
-impl Handle<Operation> for Counter {
-    fn handle(_: &Sum, command: Operation) -> Result<Option<Events<Increment>>, Rejection> {
-        match command {
-            Operation::Add(amount) => Ok(Some(events![Increment(amount)])),
-            Operation::Ignore => Ok(None),
-            Operation::Reject => Err(Rejection),
-        }
-    }
-}
 struct Seen {
     id: u64,
     expected: u64,

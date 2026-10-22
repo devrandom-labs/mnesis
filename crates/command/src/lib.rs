@@ -8,6 +8,7 @@
 mod engine;
 mod host;
 mod model;
+mod trace;
 
 pub use host::{CommandProcessor, Limits, Shutdown, Worker};
 pub use model::{Acceptance, AcceptanceCodec, Cause, CodecError, Error, Receipt, Request};
