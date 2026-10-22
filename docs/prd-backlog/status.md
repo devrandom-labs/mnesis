@@ -36,8 +36,8 @@ merged tree24680399552aca8b52f383bcc3c79862669401b3. Two CP5 lifecycle defects,
 abort-custody loss and resource boundaries pass all12local gates/1639tests;
 focused PR417 protected-merged as972d2a696e021603dd9a03471c6c3fa36878933a,
 verified tree29d5408e7c9eb59eec31cdc0731011c37828c65a and42successful checks.
-Required tracing/metrics acceptance stays open.
-The metrics library candidate passes all12host checks, four command feature
+Exporter and CP6 instrumentation acceptance stay open.
+The metrics library passes all12host checks, four command feature
 modes45/49/46/50 and release50, with37caught/32compiler-only mutations and no
 survivors. Its actual two-host accounting and three failed control experiments
 are recorded in the feature research. Tracing PR418's required CI encountered
@@ -45,8 +45,13 @@ a100ms healthy Postgres fixture setup timeout before adapter construction;
 the unchanged failed-job rerun passed and PR418 is protected-merged as
 5498d439d10d70ed8f4ffa2e35778c198ced078a with exact tree
 f2036076a73a862d11cebeee45eee1f81ca541d2,44successful checks and0threads.
-Metrics draft PR419 passes its initial14CIjobs and allfour command feature modes.
-App-owned exporter qualification,
+Metrics PR419 protected-merged as533c1f5db4c487753d996e548c315013e69f5b1c,
+exact tree7bd3c7495a23052177f05189d569f02a224a0dfa,44successful checks/0threads.
+The application-owned exporter candidate passes both default and telemetry
+executables/tests, strict Clippy and all12host gates (1641workspace tests).
+Native SDK context/Prometheus collection, explicit exporter failure and optimized
+execution are qualified locally; library SDK edges are absent. DraftPR420
+main-base CI and protected delivery,
 CP6 overhead/native command composition and CP7–CP9 delivery remain required.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.

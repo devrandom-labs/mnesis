@@ -706,3 +706,31 @@ supported atomic handles and non-destructive individual lookups. Actual local
 published manifests/source remain dependency authority. No global collector or
 network/export task belongs in mnesis-command. Dependency graph cost is still
 pending actual Cargo resolution; no unexecuted compatibility/performance claim.
+
+Application exporter candidates,2026-10-22,actual published Cargo sources and
+Nix-shell cargo info logs cp5-exporter-{tracing,sdk,metrics}-info.log: tracing-
+opentelemetry0.34.0 MIT/Rust1.75 supports tracing^0.1.35,subscriber^0.3.22 and
+opentelemetry^0.33; SDK0.33.1Apache2/Rust1.75; Prometheus0.18.3MIT AND Apache2/
+Rust1.71.1 supports facade^0.24.5. Official
+https://docs.rs/tracing-opentelemetry/0.34.0/tracing_opentelemetry/ and
+https://docs.rs/metrics-exporter-prometheus/0.18.3/metrics_exporter_prometheus/struct.PrometheusBuilder.html
+establish supported layer/recorder APIs. Published SDK trace/span_processor.rs
+lines789-790 use blocking export on dedicated worker; max-export-timeout setter
+is gated to experimental async processor. Standard batch alone does not establish
+finite exporter completion. Testing feature additionally enables trace/metrics/
+logs; keep it development-only if used. Final graph/cost/native behavior not yet
+qualified; no SDK dependency added to processor. Exact locks before acceptance.
+### Application telemetry graph isolation (2026-10-22)
+
+Official cargo-hakari0.9.39 configuration:
+https://docs.rs/cargo-hakari/0.9.39/cargo_hakari/config/index.html
+and builder:
+https://docs.rs/hakari/latest/hakari/struct.HakariBuilder.html
+Traversal exclusions omit the named workspace member's build simulations and
+remove its direct workspace-hack edge; final exclusions retain transitive
+features and would not solve the observed exporter/RNG feature leakage.
+This excludes only an example from unification, not compilation, runtime tests
+or dependency policy. Native generate/manage-deps/verify must confirm the graph.
+SDK0.33.1 native Cargo.toml testing enables trace+metrics+logs+Tokio sync. Keep
+that test-only capability on its standard dev-dependency; ordinary exporter
+builds require only trace. Isolated application/default tests remain distinct.

@@ -3097,3 +3097,322 @@ No incoming change lost and no code reinterpreted. First unresolved commit attem
 failed; corrected normal signed hook accepts all12cached checks/0new tests. No
 force/rewrite/published history loss. New PR base/main exact-head CI still needed;
 parent merge alone does not complete metrics/CP5 or publication.
+Exporter example initial alltarget/allfeature compiler check FAILED before any
+runtime: a concrete processor alias with backend error cannot name default-error
+factory start/resume (E0599, derivative E0308). Use the supported public
+CommandProcessor::<Register,u64>::start/resume constructors and let backend type
+infer, removing unused alias. No library/API change or weakened assertion.
+
+First actual external example run85e03adc-ad88-4781-bcc1-c104cfd7d301:
+1PASS/1binary/0SKIP/0.021s, compile6.09s, exit0. Three reviews:
+1. Contract/counterexamples: application-owned assignment aggregate, actual Tower
+   ready/call, exact repeated receipt, accepted no-op, read, observed native
+   stop/resume/retry. Exact two decoded acceptance records/originals/receipts,
+   facts[Changed7]/[], physical versions1/2 and state7before/after all asserted.
+2. Actual execution/selection/services: one selected bounded3s default/no-collector
+   app case, no children or database. SDK feature disabled and not runtime credit.
+   Both app-created workers are explicitly stopped and observed; source preserves
+   original requests and reports on failure. Not server/registry/native CP6 proof.
+3. Assertions/source/false positives: actual exported Mnesis API and real in-memory
+   adapter; no private processor imports, fake decoder/checkpoint or mirrored
+   decision algorithm. Original receipts/rows compared independently, no assertion/
+   deadline weakening or new actor/runtime/tool. New app source not yet qualified
+   by strict lint/full Nix; compiler/API failure retained separately.
+
+SDK source finding rejects a naive closed-InMemoryExporter fault: published
+SDK0.33.1 InMemorySpanExporter sets its shutdown marker but export still appends;
+shutdown alone does NOT inject an unavailable exporter. Do not advertise it as a
+failure counterexample. Use a thin standard SpanExporter test implementation
+that delegates healthy export to the native exporter and returns a concrete
+OTelSdkError on its unavailable enum branch. Native bounded batch still owns
+queue/execution; no custom queue, recorder or exporter framework. Both callbacks
+are finite; native force_flush observes the actual failure before/after the same
+real command script, rather than claiming default batch export timeout enforcement.
+
+SDK integration3579c7a5-56aa-402a-857e-52e758430f34:
+1PASS/1binary/0SKIP/0.226s, compile3.79s, exit0. Three reviews:
+1. Contract/counterexamples: two complete identical real command workflows, each
+   exact two original records/facts/receipts/versions1/2/no-op and state7before/
+   after, stop/resume/native completion. Positive native SDK exports6requests
+   under one application parent, exact operations submit3/read2/retry1, outcomeok
+   and2separate root workers. Native Prometheus output exact counts/gauges checks
+   first3/1/2submissions/2acceptances2duplicates and totals6/2/4/4/4, all4gauges0.
+   Standard exporter test implementation's unavailable branch returns concrete
+   SDK error; native force_flush observes failure before/after second real flow,
+   whose receipts/data remain identical. Native SDK shutdown is acknowledged and
+   delegated exporter shutdown marker asserted; no claim of observed OS-thread
+   join beyond the SDK API or network failure.
+2. Execution/selection/services: actual one telemetry-enabled app binary case,
+   two3s-bounded command flows, no ignored/filtered/child/database. Global SDK/
+   recorder installed by application only. SDK callbacks in this controlled
+   profile are finite immediately, bounded batch128; queue overflow/stalled-I/O
+   and native command Postgres evidence are not inferred. Resolution exploratory
+   command lacked --locked after adding an existing test dependency; final frozen
+   locked graph/strict checks remain required.
+3. Assertions/source/false positives: actual tracing-opentelemetry0.34.0/SDK0.33.1
+   export and Prometheus0.18.3, no mirrored persistence decoder/recorder. Original
+   requests/receipts/rows and exact SDK attributes checked, no output-only pass.
+   Fault is a standard SpanExporter test implementation, not claimed physical
+   collector outage. Native InMemory shutdown was explicitly rejected as fault
+   injection because actual source continues accepting exports. App/library
+   source identity retained; no assertion/workload/deadline/gate weakening.
+
+Next control preregistration: preserve exact telemetry/main/tests sources and
+hashes, add native LevelFilter::OFF to application subscriber ONLY. Same SDK test
+must fail empty exported root/requests AFTER actual first data/receipt/cleanup
+assertions. Keep full control source/diff/log, three-review failure, then restore
+exact hash. No test/core changes, no new dependency, budget1temporary configline.
+Compiler failure or zero tests is not intended evidence. Native finite exporter
+error control is already directly observed by force_flush twice; additional
+producer blocking/overflow not claimed by current profile.
+
+Exporter filtering control0fc5b9cc-8614-41d9-962f-0304a9c424e8:
+1FAIL/0PASS/0SKIP/0.210s, compile0.56s, exit100. Three reviews:
+1. Contract/counterexample: unchanged first real command workflow completes,
+   both native workers stopped/observed and exact records/originals/facts/receipts/
+   no-op/state pass. Native SDK flush returns normally, then exported root count
+   is0 instead of1 at tests.rs154. Correct data alone cannot fake trace export.
+2. Actual execution/selection/services: actual one locked telemetry app case;
+   failure occurs at expected SDK absence assertion, not compilation/service or
+   zero selection. Native metric table and second unavailable profile occur
+   later and receive no control-run credit. No child/database. SDK shutdown
+   assertion is not reached; no claim of acknowledged SDK cleanup on this failed
+   control. Command-worker completion already observed before failure.
+3. Assertions/source/false positives: only native LevelFilter::OFF added to app
+   subscriber; no test/core/data/gate/deadline change. Full temporary source saved.
+   Restore exact precontrol file/hash before lint or further runs. This rejects
+   missing exporter wiring while preserving typed command outcomes; does not
+   claim network or finite-I/O fault evidence.
+
+SDK rerun after strict-lint fixes6c69a1ff-e195-451d-8fb3-b37f03b1552f:
+1PASS/1binary/0SKIP/0.214s, compile1.75s, exit0. Three reviews:
+1. Contract/counterexamples: exact same positive/unavailable two-profile SDK
+   workload and all original data/receipt/no-op/state/native completion checks.
+   Actual exported6request parent contexts/outcomeok,2rootworkers and native
+   Prometheus exact counts/finalzero gauges remain. Native exporter failure
+   observed before/after unchanged second flow; SDK shutdown acknowledged.
+2. Actual execution/selection/services: actual one locked allfeature app case,
+   two3s-bounded command scripts; zero children/ignored/filtered/database. No
+   real network/queue-overflow/native command/performance evidence inferred.
+3. Assertions/source/false positives: exact test file retained after control
+   restoration; only fixed constfactory/shadow names and boxed rare error-path
+   native reports (all originals/cause fields retained), plus runnable main now
+   creates application root under installed subscriber. No native command or
+   assertion/workload/deadline/gate changes. Strict alltarget/allfeature Clippy
+   nowPASS1.05s; original six diagnostics remain in raw log, no waiver. Main
+   executable, generated dependency graph/Hakari, full gates and native CI remain.
+
+Runnable exporter example3ba51807-2f2f-4d67-b924-c5e0bf3341fb:
+2PASS/2binaries/0SKIP/0.624s, compile1.49s, exit0. Three reviews:
+1. Contract/counterexamples: unchanged SDK positive/unavailable case and exact
+   native data/receipt/custody/export/metric assertions pass. New integration
+   case runs actual Cargo binary, requires exact first/duplicate/no-op/retry
+   receipt summary with state7→7, successful exit/empty stderr and actual native
+   stdout-exported application span. An empty successful main cannot pass.
+2. Actual execution/selection/services: actual2cases, no filter/ignore/database.
+   CLI case0.623s launches one native child and concurrently drains both pipes
+   via Tokio output under3s with kill_on_drop. Child exits successfully; it is
+   not another Cargo test suite. SDK case0.225s retains two bounded real command
+   profiles; app SDK shutdown and both script worker completions observed.
+3. Assertions/source/false positives: only public APIs and actual compiled binary;
+   native stdout0.33.1span-name grammar checked in published source, exact receipt
+   values independently established by two decoded records. Native command/model
+   assertions unchanged. No fake stdout-only driver, timeout/gate relaxation or
+   new harness binary. SDK unavailable fault is interface-level, not network proof.
+CLI child independently: (1) actual main must execute the documented flow and
+export SDK application scope; (2) actual successful child status, exact output
+and empty stderr, output drained concurrently within3s; (3) exact receipt line
+and native span field reject skipped/empty main or SDK setup omission. This
+child is not inflated into the two nextest cases.
+
+CLI source formats to57lines,2above preregistered55line file estimate; disclose
+that overrun rather than minify/remove assertions. Aggregate authored budget650
+still holds (source/manifests575+root6 before docs/CI). Set next CLI edit estimate
+60before further changes. No acceptance/workload change. Broad default-mode/
+strict lint/dependency/Hakari/native CI/full Nix evidence remains open.
+
+Default executable qualification eac8de70-3dd6-4438-b608-7f24d77fd746:
+2 PASS / 2 binaries / 0 skipped / 0.340s; compile 1.28s. Three reviews:
+1. Contract and counterexamples: the no-collector case checks the actual Tower
+   workflow, exact receipts, decoded acceptance records, no-op, state and
+   observed stop/resume. The CLI case requires the actual executable's exact
+   receipt/state summary and rejects an empty successful main. This profile
+   establishes no SDK export or unavailable-collector behavior.
+2. Execution and selection: locked no-default-features invocation selected both
+   cases, with no filters or database. Unit case passed in 0.016s; CLI case in
+   0.339s, including one real binary child with concurrently drained output,
+   a three-second bound and successful observed exit. Two harness cases and
+   one child are distinct observations, not three test cases.
+3. Assertions and source: same application and test sources as the preceding
+   all-feature run, with native feature selection only; no assertions, workloads,
+   deadlines or gates weakened. The absent SDK in this profile is intentional;
+   its success does not qualify the optional dependency graph or broad gates.
+CLI child separately reviewed: (1) the exact receipt/state output requires the
+documented command flow; (2) actual success, empty stderr and bounded concurrent
+pipe collection establish executed completion; (3) exact summary values reject
+skipping the flow, while optional SDK assertions correctly do not run here.
+
+Dependency qualification: initial native Hakari preview exit1 would add base64,
+futures-executor, indexmap and rand0.9/ChaCha/SIMD to workspace-hack consumers.
+Rejected that generated graph. Native supported traversal exclusion for the
+single example plus manage-deps removes its direct hack edge; generate --diff
+then exits0 with the existing hack byte-for-byte unchanged. Normal processor
+tree before/after cmp succeeds exactly. Both that tree and the default normal
+application tree have no OpenTelemetry/Prometheus/metrics-util/rand0.9 entries.
+Application telemetry normal/features tree has SDK trace and no SDK testing,
+logs or metrics feature. Testing moves to a standard dev-dependency and can
+increase default test compilation; this is not default executable initialization.
+18 new locked registry packages, no old package version/checksum changed; lock
+adds one unpublished example. Generated lock219lines, no generated hack edits.
+Authored source/manifests/README624+root6+Hakari4+CI1=635lines in10owners,
+within the preregistered650. README50lines, CLI57within amended60. Existing CI
+command-feature owner adds actual enabled example execution; normal workspace
+tests retain both default cases. No new job, tool, runtime or library API.
+
+Strict final alltarget/allfeature Clippy stops on one CLI diagnostic before any
+runtime: uninlined format arguments at cli.rs24. Fix only formatting to the
+native suggested `{output:?}`; retain exact success/output assertions and bounds.
+Format check and diff whitespace check pass. No test credit from these checks.
+
+Empty-main control5176b1db-3fe7-44c1-baa3-457c16779f95:1FAIL/0PASS/
+1 intentionally filtered SDK case/0.471s, compile1.25s, exit100. Three reviews:
+1. Contract/counterexample: temporary native black_box(true) early successful
+   return bypasses the whole documented executable flow. The actual child exits
+   successfully with empty stderr, then cli.rs41 rejects zero summary lines
+   against the exact expected receipts/state. Successful process exit alone
+   cannot fake the working example; SDK assertions later are not reached.
+2. Execution/selection/services: one explicitly selected CLI integration case,
+   one actual bounded native binary child; SDK unit case deliberately skipped
+   and receives no credit. CLI0.466s, no database/SDK initialization or processor
+   execution occurs in this control child. Failure is the intended output
+   assertion, not compilation, unavailable service or zero selection.
+3. Assertion/source/false positives: only three temporary lines at main entry;
+   all driver/test/bounds/dependencies unchanged apart from separately recorded
+   strict format fix in the diagnostic message. Save control source, then
+   restore exact main SHA2d29b95415b7727073a8aca04fe672261af617d1e65b98ac9b47a2f9de441504.
+Child reviews separately: (1) skipped command behavior is rejected; (2) actual
+success/empty stderr/output within3s observed, no worker or SDK activity claimed;
+(3) exact required output fails even for a valid successful process. Restore
+before any final runtime/lint qualification; no test or gate weakened.
+
+Isolated SDK final4f0cadb8-7d2e-41b6-ab3e-ccd534ad03f4:
+2PASS/2binaries/0SKIP/0.621s, compile0.66s, exit0. Three reviews:
+1. Contract/counterexamples: original SDK positive/unavailable case checks
+   six parented request spans, two root workers, exact receipts/records/no-op/
+   state, native Prometheus counts and released gauges. Concrete failed flushes
+   surround the same successful second command flow and SDK shutdown is
+   acknowledged. CLI exact summary and exported application span pass again.
+2. Execution/selection/services: both locked allfeature cases actually execute;
+   SDK0.230s, CLI0.621s with one real bounded executable child. No filters,
+   ignored cases or database. SDK interface fault is not a network outage or
+   overflow measurement. All command workers stopped and observed by driver.
+3. Assertions/source/false positives: exact restored main hash verified before
+   run; diagnostic-only CLI format fix, SDK test capability on dev-dependency,
+   supported Hakari exclusion and docs/CI registration. No core/assertion/
+   workload/bound/gate changes. Empty-main and filter-off controls remain red.
+Child separately: (1) exact command outcome and native exported application
+scope required; (2) successful actual exit/empty stderr and concurrent output
+within3s; (3) exact independently checked receipt/state values reject empty main,
+while SDK span assertion rejects uninstalled export wiring. Not an extra suite.
+Strict alltarget/allfeature Clippy nowPASS0.22s without waivers.
+
+Exporter parent integration: saved full authored snapshot
+SHA9ad3432b37c93db4aded17f78478cf910749045b3e44e6bade4e2310170ff77b,
+tracked patch and retained stash e54c34fe50cc8703cdcb468d73da6b49bedfc038.
+Fast-forward unpublished example branch from3dfcd96a to signed metrics head
+9c8c95ccb61a11561cdee8c5e6b180a0e0c4f973. Native stash apply restores all
+source/config/untracked work; sole conflict is append-only research history.
+Preserve all three stages, resolve that file with native merge-file --union,
+retaining protected tracing and metrics delivery plus every exporter review.
+No source/lock/config conflict or production library change. Retain stash and
+raw stages for inspection; normal final source checks still required.
+
+Exporter default full-workspace649547e1-525f-4160-a2b0-55be3ad739c1:
+1641PASS/147binaries/5original exclusions/15slow/484.430s. Three distinct
+reviews and three actual command/example children separately recorded in raw
+cp5-exporter-full-gate-workspace-reviews.md; corpus2/1/1 independently reviewed.
+18owning sources/manifests/tests cmp exactly to actual Nix input
+/nix/store/ivh6hx8qf9qzsqvivl59phfxywh4bzss-source. Default does not execute SDK,
+trace/metric integration or native absent-service Postgres behavior. Unchanged
+slow Fjall properties finished normally. Full Nix process94697 still finishing
+compile-only checks here, not yet claimed all12PASS. No assertion, bound, case,
+workload or gate changed to get green.
+
+Full exporter Nix process94697 TERMINAL EXIT0: all12aarch64-darwin checks pass.
+Other systems omitted by normal host gate; Linux remains CI-owned. Raw gate and
+native check-output map retained; source18owners already compared exactly.
+
+Release exporter2c4690c3-232e-4414-b870-b116ee9f2775:
+2PASS/2binaries/0SKIP/0.466s, compile17.67s. Three reviews:
+1. Contract/counterexamples: same SDK positive/unavailable profiles, exact two
+   acceptance records per store, original requests/receipts/no-op/state and
+   observed command completion. Six request parent contexts/two worker roots,
+   native Prometheus counters/released gauges, concrete failed flushes and
+   acknowledged SDK shutdown pass under optimized code. CLI exact summary and
+   native exported application scope remain required.
+2. Execution/selection/services: actual locked --release --all-features two
+   cases, SDK0.209s/CLI0.466s. One actual binary child, no database/filter/ignore.
+   SDK fault is interface-level; neither network failure nor uncertain append
+   under SDK failure is established by this workload. No performance claim
+   from the test duration.
+3. Assertions/source/false positives: same source/lock/test/assertions/bounds as
+   isolated debug run and restored negative controls; build mode only changes.
+   Default feature run and explicit enabled run remain distinct evidence. No
+   weakening or additional public core API/dependency.
+CLI child separately: (1) exact independent receipt/state summary and exported
+application span; (2) actual success/empty stderr with concurrently drained
+pipes within3s; (3) empty-main and filter-off controls reject omitted flow/wiring.
+Not counted as a third nextest case.
+
+All12accepted host outputs are rooted under raw cp5-exporter-roots; each native
+offline realization and readlink equals its accepted check-output map (exit0,
+12comparisons, no new runtime tests). Qualified evidence archive
+`evidence/cp5-exporter-qualified.tar.gz`, SHA256
+e2d3ffa7dcb303d65c1adbf7fb3617065033828ab1d3484b4a4f612826046711,
+retains original compiler/lint failures, SDK-filter/empty-main runtime controls,
+restored source snapshots, debug/default/release logs, three reviews per actual
+run/child, graph/Hakari rejection and exact18source comparisons/full Nix results.
+635authored lines in10source/config owners;18new locked registry packages,
+0old version/checksum updates,0generated hack changes,0core Rust edits/API roots.
+Protected exporter PR/current-head native CI remain; CP6–CP9 are not complete.
+
+## Metrics protected delivery and exporter parent integration
+
+PR419 protected-merged2026-10-22T01:38:21Z as
+533c1f5db4c487753d996e548c315013e69f5b1c, parent5498d439; reviewed signed head
+9c8c95ccb61a11561cdee8c5e6b180a0e0c4f973,44SUCCESS/1scheduled-only skip/
+0unresolved threads. Ordinary exact-head squash, no admin/force/bypass. Expected
+local and GitHub virtual97329756758e8ee68bfac430fb9e57dcd564ab4c and actual merge
+trees all7bd3c7495a23052177f05189d569f02a224a0dfa. GitHub verifies merge
+signature as valid; local unavailable GitHub key is not reported as local GPG
+verification. Both current push39702379943 and PR39702385112 terminalSUCCESS.
+
+Actual execution accounting and three reviews:61push/81PR harness outcomes,
+6zero-case compiler-only each;55/75nonzero invocations. Push standalone Postgres
+output is cached run-log echo and not another runtime run. Each Nix job executes
+24fresh invocations (3corpus/1workspace/20native); PR standalone executes20more.
+Workspace1639/145bins/5original exclusions/4slow,142.723s push and140.645s PR.
+Four feature modes45/49/46/50 remain and10command children per workflow are
+separately three-reviewed. Native adapter full profiles264/149/168/176/173/174/
+150 and exact smoke laws retain original limits/guards. These do not certify
+processor/Postgres composition, which remains CP6.
+
+Current native mutation artifact12393562495:69mutants37caught32compiler-only/
+0missed/timeout; baseline50PASS3.504s and38actual runtime runs with2children,
+each reviewed from its actual first failure/diagnostic. Eight existing codec
+fuzz campaigns terminalSUCCESS, each separately reviewed; not command fuzz.
+Exact raw logs, metadata, reviews and merge/signature evidence archived in
+`evidence/cp5-metrics-delivery.tar.gz`, SHA256
+8dc2bcf0a1b47180ee56ac2288e331a9870c3ed89551b9c2e0f0c3787a68d7f3.
+
+Exporter signed7998b3430e6dac9706c8133273b9b987e0f35f22 (localGPGG),
+tree7a3320ab86913cd4de60fdeda93ecb3f8cca9af4 published as draftPR420. Its normal
+signed hook reuses accepted12outputs/0fresh runtime tests. Parent integration
+pre-edit hypothesis retained in stashcb935c49a54ece1393ade9551b766fe78f156d0d.
+Incoming main ENTIRE tree equals signed9c8c95cc, an ancestor of7998. Ordinary
+no-commit merge produces squash-ancestry conflicts; save index/path receipts,
+restore only ten task-owned conflicted paths from qualified7998, then verify
+ENTIRE final tree7a3320ab before adding any new records. No source/config/lock/
+assertion/workload/gate change. Restore pre-edit hypothesis afterward. This
+preserves protected incoming work exactly; normal signed merge/hook/push and
+main-base PR synchronization remain required.

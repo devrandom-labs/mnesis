@@ -1,6 +1,6 @@
 # Command processor extraction and delivery
 
-Status: CP0–CP4 and CP5 lifecycle/resource PR417 plus tracing PR418 protected-merged; qualified metrics PR419 awaiting protected delivery. Exporter and CP6–CP9 remain.
+Status: CP0–CP4 and CP5 lifecycle/resource PR417, tracing PR418 and metrics PR419 protected-merged. Exporter PR420 passes local default/telemetry and host gates; main-base CI and CP6–CP9 remain.
 Updated: 2026-10-22. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.
@@ -609,7 +609,7 @@ per slice, including untracked files. Explain a required extension before edits.
 | CP1 | `crates/command`, root manifest/lock/Hakari, necessary build registration | Copy existing production/tests with provenance; at most 150 net new production lines beyond the 937-line baseline; six public responsibility types. |
 | CP2–CP5 | Processor error/model/host/engine and owning tests | Each focused change: at most 8 files, 250 net new production lines, 500 test lines; at most two added public types per slice with consumer justification. |
 | CP6 | Owning integration tests/benches and existing Nix Postgres setup | At most 10 files and 900 test/benchmark/Nix lines; no new normal dependency or framework. |
-| CP7 | README/rustdoc/examples, existing CI/fuzz/package/stability owners | At most 14 files and 500 authored lines, plus moved corpus/fixtures. Generated lock changes measured separately. |
+| CP7 | README/rustdoc/examples, existing CI/fuzz/package/stability owners | Initial 14 files/500 authored lines plus moved corpus/fixtures. The application exporter slice is amended to 10 source/config owners and 650 authored lines for executable, SDK failure tests and CI; other slices need their own budgets. Generated lock/Hakari changes measured separately. |
 | CP8–CP9 | Delivery records, release-generated files, server consumer and archive status | Focused PRs; server at most 10 files and 350 new consumer/config lines. No mobile changes or destruction of the archive. |
 
 Cumulative checkpoint: target at most 1,600 production lines and eleven root-exported
