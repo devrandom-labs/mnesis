@@ -53,6 +53,10 @@ Native SDK context/Prometheus collection, explicit exporter failure and optimize
 execution are qualified locally; library SDK edges are absent. DraftPR420
 main-base CI and protected delivery,
 CP6 overhead/native command composition and CP7–CP9 delivery remain required.
+The first native Fjall processor candidate passes graceful disk reopen/corrupt
+tail and two actual SIGKILL recovery boundaries, four modes47/51/48/52, release52
+and all12host gates/1643workspace cases. Its focused PR/Linux delivery remains;
+Postgres command composition and performance/soak are not certified by this.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.
 [Source audit and actual baseline](../prds/command/research.md) record 27 passing

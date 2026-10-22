@@ -2478,3 +2478,139 @@ This is ancestry reconciliation with0source behavior change, not accepting
 unknown incoming edits. No force/rewrite/admin/hook bypass. Normal signed merge
 commit and same12gates; cached hook results mean0fresh runtime tests. Then
 change PR420 base main before push to trigger actual main-base synchronization.
+## CP6 first native Fjall composition (2026-10-22)
+
+Base signed exporter7998b343 over metrics9c8c95cc. Separate feat/command-native
+worktree; source/archive/main/exporter work preserved. Native Fjall3 from current
+locked workspace already supplies bounded async worker, safe SyncAll default,
+RawEventStore and explicit consuming close. Reuse its existing supported API
+and existing command Counter/Operation/finish test owners; no new implementation,
+runtime or normal dependency. Read native adapter/processor/codec owners before
+editing. These first witnesses are not complete CP6 or process-crash proof.
+
+Threatened invariant: processor acceptance/receipt identity and physical versions
+must survive actual disk close/reopen; a malformed later stored record must not
+be hidden by an earlier receipt/cache. Workload: accept Add7, exact repeat,
+accepted Ignore, mismatch and stale-CAS attempts, typed domain rejection, read;
+observe command shutdown, release Store and close Fjall; reopen SAME path and
+resume report, replay originals/receipts, compare raw accepted bytes/order/facts;
+append malformed physical version3 through public raw API and require typed
+JSON decode failure on read/retry, not a false successful cached receipt. Observe
+completion and close all backing handles. Use safe default durability explicitly
+checked in fixture. No environment green skip and no project tooling.
+
+Budget BEFORE edits: one processor-owned native integration test<=180Rustlines,
+two existing workspace dev edges (mnesis-fjall/tempfile), generated lock updates
+only to command's package entry, <=3code/manifest owners. Reuse existing helper
+files by test-module path; do not duplicate domain or create observer/store API.
+Run through existing Nix shell and actual Cargo target; three reviews after each
+actual run. Confirm normal processor tree/feature isolation and generated Hakari
+remain unchanged. Falsifiers: wrong/missing/duplicated acceptance, lost exact
+receipt, payload/order change after reopen, corruption ignored on retry, leftover
+backing worker preventing explicit close/reopen, erased native error or required
+service absence producing green. Rollback only this test/dev registration.
+Postgres transport/restart, Fjall process loss, fact consumer, full capacity/
+15min soak and instrumentation performance remain separate required slices.
+
+Pre-execution source review: rustfmt yields190native test lines,10over the
+initial180estimate. Disclose that overrun; extend next-edit ceiling to220before
+changes rather than delete data/byte/error/cleanup assertions. Still one native
+test owner and two dev manifest edges, within aggregate CP6 planning scope.
+The initial corrupt byte `{` yields JSON EOF, while the oracle deliberately
+requires a syntax source. Before any runtime run, use `!` as the actual invalid
+syntax byte and require that same byte in native observations. This preserves
+the typed-source assertion, not a passing oracle for an incorrectly classified
+fixture. Make fixed originals const before strict lint; no product change.
+
+Strict native alltarget/allfeature lint identifies expect() in the reused
+support/finish.rs module: its existing callers opt into test-only expectation
+diagnostics, this new target allowed only unwrap. Before edit, apply the same
+permission narrowly to that imported test module with an explicit reason. Do
+not change shared deadline/expect diagnostic, assertions, global lints or any
+production waiver. Native runtime source/oracles remain otherwise identical.
+
+## CP6 Fjall process-loss boundaries before edits
+
+Graceful reopen cannot prove process-loss recovery or caller-original custody.
+Use the existing native Fjall plus command FaultStore/Gate boundary owner and
+Tokio process kill_on_drop, async pipe reader, explicit SIGKILL and observed
+child wait. No new runtime/helper binary or external fault tool. One test runs
+itself as a child twice via the normal Rust test executable and exact selector.
+Parent retains the same original request outside both child processes.
+
+Boundary Before holds the existing raw append gate before actual Fjall work;
+Committed uses one added fault variant to hold the response only AFTER the real
+native append completes. In each child, Gate.entered plus actual independent
+native raw rows must prove respectively0or1complete acceptance before emitting
+the exact pipe marker. Parent waits at most30s (existing native process fixture
+budget), kills and observes SIGKILL9, then reopens SAME directory without a
+shutdown report, checks actual0or1 rows/state/receipt, submits exact original and
+requires one final complete record/state7/original receipt. Stop/observe new
+worker and explicitly close adapter. Safe SyncAll default retained. This proves
+process loss, not device power loss or a syscall write/sync failure.
+
+Budget before code: one additional native test<=220lines plus<=12lines in
+existing FaultStore; no new manifest/dependency/public API. First native190plus
+this slice remains within CP6 initial900aggregate test/benchmark/Nix allowance;
+later native Postgres/performance budgets must account for the combined cost.
+Falsifiers: marker emitted before actual boundary proof, child panics/exits
+normally or isn't reaped, different originals/path on restart, missing/duplicate/
+partial acceptance, wrong before/after state/receipt, leaked backing handles or
+retry rebase/newID. Three reviews for parent AND each actual killed child after
+every run. Tests must execute in ordinary checks on supported Unix hosts; no
+environment green skip except the explicit same-executable child dispatch.
+
+First crash run fails exact-marker wait, not native assertions. Before changing
+handshake, retain last observed line in one bounded Option<String> and include
+it in the unchanged timeout assertion. Hypothesis is libtest's no-newline test
+prefix under --test-threads1; actual bytes needed. No weaker marker/deadline or
+product change. Diagnostic-only rerun, then select minimal fix from observations.
+
+Actual diagnostic rerun confirms libtest prefixes the marker on the same line.
+Before edit: emit one leading newline at marker writer only. Preserve exact
+line equality, native row checks,30s wait,3s kill/wait and child selectors. Keep
+bounded last-line diagnostic for future failures. No processor/backend change.
+
+Strict crash lint catches non-Send StdoutLock considered across pending.await
+despite explicit drop(output). Before edit, enclose marker writer/flush in a
+lexical scope so the native guard cannot cross await. Preserve exact bytes and
+marker/deadlines; no Send waiver. Runtime behavior/oracles unchanged; full
+enabled owner run will execute the retained crash profile after this fix.
+
+Before parent integration: exporter signedc4fed5f9 includes protected metrics
+533c1f5d with whole-source identity to qualified7998; differences are delivery
+records/merge ancestry only. Preserve native's complete dirty/untracked work in
+snapshot, patch, five source hashes and retained stash. Fast-forward unpublished
+native branch, apply stash, union only append-only hypothesis/research conflicts.
+Require all five source/manifest/lock hashes unchanged before any qualification;
+do not lose original failed-run records or incoming protected delivery evidence.
+
+## Next CP6 Postgres owner decision (planning, no code yet)
+
+Existing outcome_tests.rs owns a bounded Unix protocol Proxy with DropBegin,
+DropInsert, DropCommit, HoldCommit and actual native COMMIT observation. Reuse
+it by a mechanical extraction into that adapter's private tests/support module,
+not by copying a protocol engine or adding a public probe API/framework/crate.
+Place command acceptance laws in the existing Postgres native test archive:
+they remain processor acceptance tests, separate from adapter conformance.
+Cross-crate relative test-helper paths would break packaged Cargo tests; avoid
+them. Use existing public mnesis-test-domains where suitable. No normal reverse
+adapter-to-command dependency: a test-only dependency must be explicitly owned.
+
+New required native cases must fail if DATABASE_URL/service is absent. Ordinary
+host checks can explicitly ignore these native-only cases, but existing Nix
+Postgres hook MUST select the command binary with run-ignored and no-tests=fail
+under a verified disposable server. An ignored ordinary run is not native proof.
+Freeze exact source/line/file budget before editing that slice; record mechanical
+moves separately from authored cost and keep current415native lines in totals.
+
+Required witnesses: migration/open and independent SQL bytes/counts; two-host
+duplicates/content/CAS (force both decisions at same empty head, not join alone);
+before-append read/pool failure, real transport loss before/during transaction,
+real committed reply loss/hold preserving typed CommitUnknown/timeout and exact
+original retry; process/database restart and cleanup. Engine source confirms
+adapter append errors remain Uncertain and do not auto-reconcile except Conflict;
+do not assert that missing rows alone resolve older uncertainty. Existing private
+Cluster supports restart. Public accepted-fact subscription/projection/checkpoint
+and lost-final-notification/no-later-write, full capacity/performance/15min soak,
+uncertain writes with SDK collection and CP7–CP9 all remain required afterward.
