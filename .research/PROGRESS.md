@@ -81,49 +81,71 @@ proof. All original source hashes match afterward; no in-place mutation retained
 README actual names/units/finite vocabulary/custody limits and existing CI all4
 command integration modes authored; no new workflow/runtime/tool.
 
-## Next actions
+## Current work and next actions
 
-1. Finish unchanged current PR418 CI rerun review and protected exact-head merge,
-   verify tree; preserve original failed attempt rather than overwriting logs.
-2. Publish qualified signed metrics commit and draft PR against tracing branch;
-   after parent protected merge, ordinary signed main merge into metrics and
-   update base to main. No force or published history rewrite. Preserve any
-   working changes first; byte-compare code/tests/manifests/CI/README afterward.
-3. Metrics archives now recorded: qualified SHAabe3d2a9...b034cb3, original red
-   SHA7d7d5f10...f545f; current tracing CI archive SHA8608920e...d176ae retains
-   successful push and failed PR attempt1 with every reviewed result. Update
-   PRD/backlog actual status and normal signed hook; cached repeats are0new tests.
-4. App-owned exporter example with actual tracing-opentelemetry export and
-   metrics collection/unavailable exporter bounded queue proof. Verify exact
-   dependencies/compatibility/cost before adding; SDK stays outside library.
-5. CP6 real command Postgres/Fjall/recovery/migration/capacity/performance/15min
-   soak and measured off/uncollected/collected overhead; CP7public consumers/
-   docs/package/fuzz/featureCI; CP8two final audits/protected publication;
-   CP9actual clean registry and neutral server consumer. Empty server workspace
-   does not authorize invented backend or business workflows. Do not complete
-   goal without every acceptance/delivery artifact verified.
+Tracing PR418 protected-merged5498d439 (44 successful checks); exact delivery
+archive95c1c33f...88c706. Metrics signed9c8c95cc pushed without force, PR419 now
+bases main; push39702379943 and PR39702385112 are live. Initial metrics CI14jobs
+passed and all actual runs/children were reviewed. Do not infer new-head CI
+completion from that earlier result.
 
-Raw root /tmp/mnesis-command-start-20261021. Nix shell91477 alive IDLE cwdmetrics;
-full gate done. Mutation handle6943 terminal0; outputs copied raw. Cargo clean
-89521 terminal0 (only task metrics target/debug,4GiB removed via Nix/Cargo);
-release artifacts preserved. All source snapshotted SHA316a19ea915b5c28d6f66f671f
-3770ae393db2aaf44cbdfd58d0ac6654fe78f0. Earlier rm-f attempt automatically rejected
-and did not execute; supported Cargo cleanup succeeded, no approval needed.
-No user/global cleanup. Disk about12GiB last seen. No current local test/build.
+Exporter branch feat/command-exporter in /tmp/mnesis-command-exporter now starts
+from9c8c95cc. Full snapshot9ad3432b...0ff77b and retained stashe54c34fe preserve
+all work before parent integration; native union retained both research histories.
+No library production change. Native Hakari traversal exclusion for this example
+keeps generated hack and the normal processor tree unchanged. SDK testing stays
+dev-only; default executable tree has no SDK or exporter. Authored635lines in
+10source/config owners, below650. New README and existing CI enabled-example
+invocation included. Normal signed commit/PR and broad gates remain.
 
-LATEST DELIVERY2026-10-22: tracing418 protected-merged5498d439 at00:37:51Z,
-expected/actual/virtual treef2036076;44SUCCESS1scheduledskip0threads. Unchanged
-Nix job attempt2 SUCCESS24fresh invocations (3corpus/default1639/20native), each
-3-reviewed. Original healthy fixture connect100ms failure preserved/unexplained,
-not claimed fixed. Delivery archive95c1c33f...88c706.
+Runtime evidence: default2PASS/2bins/0skip eac8de70; isolated telemetry2PASS/
+2bins/0skip4f0cadb8, including actual binary child. Exported six request contexts,
+two worker roots, exact Prometheus counters/zero gauges, two successful command
+flows across concrete exporter-interface failures and observed SDK shutdown.
+Strict alltarget Clippy PASS0.22s, no waivers. Native SDK batch does not enforce
+a timeout on arbitrary exporter callbacks: app transport owns its finite deadline.
+Filter-off and empty-main controls fail their intended assertions; exact source
+restored. Every actual run and child separately three-reviewed in research.md.
+No network-outage/overflow/CP6 performance proof inferred.
 
-Metrics PR419 initial3dfcd96a passes all14pushCIjobs39697914083;81harness outcomes
-(6zero-case), four modes45/49/46/50, all actual runs/10children separately reviewed.
-First-CI archive758cabaf...0a7aef. Ordinary signed merge4fe9d57e includes protected
-main5498d439, entire tree remains qualifieddf7b81f8. Squash ancestry conflicts
-resolved only after proving incoming main equals c13entire tree; task-owned path
-restoration and13hashes/whole-tree comparison prevent dropping any incoming work.
-Normal signed hook12cached/0new tests. Next publish delivery records, change419
-base main BEFORE pushing to trigger required PR sync, ordinary nonforce push;
-inspect new exact-head CI before merge. Exporter worktree separate from3dfbase;
-preserve all staged/unstaged/untracked before later integrating published parent.
+1. Stage new example for normal Nix source inclusion; run unchanged full Nix gate,
+   inspect every actual execution and three-review before changes. Qualify
+   release telemetry execution, source identity and dependency policy.
+2. Inspect exact-head metrics CI/mutants/fuzz and required protected merge after
+   all actual results/threads are reviewed. Retain original failures.
+3. Commit exporter with normal signed hook, push focused draft PR, qualify CI,
+   merge through ordinary protected workflow after metrics delivery.
+4. CP6 real command Postgres/Fjall recovery/migration/capacity/performance/15min
+   soak and measured off/uncollected/collected overhead; CP7 public fact consumer,
+   docs/packaging/fuzz; CP8 two audits/publication; CP9 clean registry and neutral
+   server consumer. All acceptance still required, no invented server business.
+
+Raw root /tmp/mnesis-command-start-20261021. Nix shell91477 is alive in exporter;
+last SDK release run2c4690c3 terminal0:2PASS/2bins/0skip0.466s. Full Nix gate94697
+TERMINAL0, all12host checks. Workspace run
+649547e1-525f-4160-a2b0-55be3ad739c1 selects1641/147binaries/5original exclusions.
+1641PASS/147bins/5original exclusions/15slow484.430s.18source/manifest/test owners
+cmp exactly to actual derivation input
+/nix/store/ivh6hx8qf9qzsqvivl59phfxywh4bzss-source; raw comparison and derivation
+saved. Three actual corpus harnesses2/1/1PASS separately reviewed in raw
+cp5-exporter-full-gate-corpus-reviews.md; workspace and3command/example children
+separately three-reviewed in cp5-exporter-full-gate-workspace-reviews.md.
+All12accepted outputs rooted and compared via offline realization/readlink,
+0newruntime tests. Qualified archivee2d3ffa7...046711 checked in. Next normal
+signed hook/commit/push/focused draft PR against metrics, then current-headCI.
+
+Exact metrics CI mutation artifact12393562495 reviewed:69mutants37caught32compiler-
+only,0survivors;70outcomes/38actual test runs and2children separately three-
+reviewed in cp5-metrics-main-mutants-reviews.md, full facts/logs retained. Actual
+baseline50PASS3.504s; native PG starts/stops but command laws are in-memory.
+All8existing fuzz campaigns reviewed in cp5-metrics-main-fuzz-reviews.md; none
+proves command-history fuzz. Metrics CI still has push Nix and PR Nix/Postgres
+jobs live. No retry/restart or premature merge.
+
+Evidence limit for next CP6 slice: SDK unavailable example currently checks
+successful durable receipts, not an uncertain append under unavailable SDK.
+Include actual late/unknown-write custody in collected instrumentation workload;
+do not infer it from successful writes or from facade-only recorder tests.
+Server inspection confirms empty members with substantial existing staged setup
+and untracked architecture documents; preserve all and re-read its current
+instructions before CP9. Disk about16GiB; no global/user cleanup. Goal active.

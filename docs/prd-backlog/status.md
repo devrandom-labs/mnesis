@@ -46,7 +46,10 @@ the unchanged failed-job rerun passed and PR418 is protected-merged as
 5498d439d10d70ed8f4ffa2e35778c198ced078a with exact tree
 f2036076a73a862d11cebeee45eee1f81ca541d2,44successful checks and0threads.
 Metrics draft PR419 passes its initial14CIjobs and allfour command feature modes.
-App-owned exporter qualification,
+The application-owned exporter candidate passes both default and telemetry
+executables/tests, strict Clippy and all12host gates (1641workspace tests).
+Native SDK context/Prometheus collection, explicit exporter failure and optimized
+execution are qualified locally; library SDK edges are absent. Protected PR/CI,
 CP6 overhead/native command composition and CP7–CP9 delivery remain required.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.

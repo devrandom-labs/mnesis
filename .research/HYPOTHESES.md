@@ -2379,3 +2379,89 @@ fixture setup failure is separately retained with unchanged exact-head rerun.
 Use ordinary signed main merge and base update after parent protected merge;
 no force or published history rewrite. This enables a separate exporter example
 branch from a concrete metrics implementation without duplicating working code.
+
+## CP5/CP7 application-owned exporter example (2026-10-22)
+
+Base signed metrics3dfcd96a, draftPR419 dependent on tracing418. New isolated
+/tmp/mnesis-command-exporter feat/command-exporter preserves both clean published
+parents. Read full canonical skill/protocol and root/global instructions; existing
+examples have no nested instruction owner. Candidate sources: downloaded actual
+tracing-opentelemetry0.34.0 MIT/Rust1.75, opentelemetry_sdk0.33.1Apache2/Rust1.75,
+metrics-exporter-prometheus0.18.3MIT AND Apache2/Rust1.71.1, compatible metrics^0.24.5
+and tracing^0.1.35/subscriber^0.3.22. Exact full graph/toolchain compilation still
+required. No SDK/exporter normal edge may enter mnesis-command; app owns them.
+Use existing Cargo workspace example pattern and optional telemetry feature;
+standard Prometheus build_recorder/render avoids HTTP server/runtime. Standard
+SDK bounded batch owns its exporter thread; supplied app Tokio remains processor
+runtime. No new actor/runtime/dev tool or project Python.
+
+Important native source finding: SDK default BatchSpanProcessor calls
+futures_executor::block_on(exporter.export(...)); with_max_export_timeout is
+cfg-experimental async-processor only. Never claim default batch config bounds
+exporter completion. Application exporter must honor its own finite timeout;
+shutdown/flush are blocking and belong outside processor worker.
+
+Workload before edits: neutral application-owned scalar register (assignment
+facts, no unchecked sum) demonstrates Tower ready/call, exact repeated receipt,
+accepted no-op, read, observed stop/resume and original retry. Use only public
+Mnesis APIs. Preserve typed outcomes, native completion and caller originals on
+errors; do not create another command framework. Normal example/default tests
+and telemetry-enabled tests run through existing checks. Positive SDK exporter
+asserts actual exported request context/outcome and exact native data/receipts;
+native Prometheus recorder asserts exact rendered core counters and final gauges.
+Unavailable-exporter case uses standard SpanExporter implementation only in the
+owning test, bounded native SDK queue and finite exporter deadline. Force actual
+export callback to remain unavailable while same command script completes and
+joins; assert callback was reached, receipts/data unchanged and release/observe
+SDK cleanup. No unbounded mock wait or hidden global collector in library.
+
+Amend CP7 focused example allowance BEFORE implementation: at most10source/config
+owners and650authored lines for app domain/flow/setup/tests/docs/CI registration;
+locks/Hakari generated graph counted separately and qualification must reject
+unwanted core edges. Original500total planning estimate did not cover SDK failure
+custody/finite export proof plus runnable consumer. Keep source minimal; other
+CP7 consumers/fuzz will have independent explicit budgets. No public library root
+or core behavior edits. Falsifiers: invalid parent/exported context, wrong metrics,
+SDK failure changes admission/receipts, detached/unobserved command worker, lost
+original/JoinError, blocked request callbacks, unexplained dependency growth,
+missing execution/false no-collector pass. Record actual graph/license/cost and
+three distinct reviews after every runtime run before further edits. Rollback:
+new example/root registration/SDK deps only, preserving signed metric source.
+
+Exporter strict lint found real152byte error variants, nonconst request factory
+and unrelated resumed worker/result shadow names. Before edits: keep exact
+reports and both originals, box only rare error-path Shutdown payloads rather
+than erase errors/drop custody or waive lint. Rename resumed bindings and make
+fixed originals factory const. Same data/SDK tests unchanged after restoration.
+Also align runnable main with SDK context characterization: create application
+span under installed global subscriber, instrument run future, preserve default
+no-collector branch. Existing library/context behavior unchanged; budget+8lines.
+
+Runnability gap before final qualification: unit test calls actual driver/setup,
+but not main entry point. Add one ordinary Cargo integration test invoking
+CARGO_BIN_EXE through Tokio process.output with kill_on_drop and3s bound (pipes
+read concurrently). Exact exit/stderr/receipt-summary output required; telemetry
+mode additionally requires actual native stdout application's exported span.
+No new binary/tool/framework. This rejects an empty successful main that unit
+helper tests could miss. Budget≤55test lines within10owners/650authored; current
+source/manifest518+root6, leaving126for CLI/docs/CI. Root native SDK output grammar
+checked in published stdout0.33.1source, not guessed. No data/SDK assertions or
+bounds weakened. Source mutations for a main-return-Ok control, if needed, remain
+temporary and independently reviewed/restored. Compiler checks are not runtime.
+
+Dependency experiment before edits: Hakari preview adds base64, futures-executor,
+indexmap and rand0.9/ChaCha/SIMD edges to every workspace-hack consumer. Reject
+that graph, not the required application exporter. Native cargo-hakari0.9.39
+documents traversal-excludes as omitting a member's simulation and removing its
+workspace-hack edge through manage-deps. Exclude only this standalone telemetry
+application from unification, keep it a workspace member and run both its modes
+in the established checks. Compare generated hack bytes and core normal trees;
+falsifier is any new SDK/exporter/RNG edge in the processor or waived check.
+Add one existing config owner (ten source/config owners total), at most five
+config lines; generated lock bookkeeping measured separately. Move SDK testing
+feature from application telemetry to the standard dev-dependency so ordinary
+application builds use trace only. Default test compilation may include SDK test
+support; default application execution still installs no collectors. Record that
+distinction, not a claim that default test dependencies are absent. README at
+most55lines, existing CI one enabled-example invocation, aggregate650 retained.
+CLI next edit budget60lines; no source change presently required.

@@ -17,6 +17,7 @@ members = [
     "crates/workspace-hack",
     "examples/axum-todos",
     "examples/closing-the-books",
+    "examples/command",
     "examples/fjall-end-to-end",
     "examples/inmemory",
     "examples/projection-tokio",
@@ -47,7 +48,11 @@ hyper = "1.10.1"
 hyper-util = { version = "0.1.20", features = ["client", "http1", "client-legacy"] }
 insta = "1.47.2"
 metrics = "0.24.6"
+metrics-exporter-prometheus = { version = "0.18.3", default-features = false }
 minicbor = { version = "2.2.2", features = ["alloc"] }
+opentelemetry = { version = "0.33.1", default-features = false, features = ["trace"] }
+opentelemetry-stdout = { version = "0.33.1", default-features = false, features = ["trace"] }
+opentelemetry_sdk = { version = "0.33.1", default-features = false, features = ["trace"] }
 parking_lot = "0.12.5"
 proptest = "1.11.0"
 proptest-state-machine = "0.8.0"
@@ -65,6 +70,7 @@ tower = { version = "0.5.3", features = ["util", "timeout"] }
 tower-http = { version = "0.7.0", features = ["trace"] }
 tower-service = "0.3.3"
 tracing = { version = "0.1.44", default-features = false }
+tracing-opentelemetry = { version = "0.34.0", default-features = false }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.24.0", features = ["serde", "v4"] }
 
