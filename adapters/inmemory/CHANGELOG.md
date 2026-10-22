@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4](https://github.com/devrandom-labs/mnesis/compare/mnesis-inmemory-v0.5.3...mnesis-inmemory-v0.5.4) - 2026-10-22
+
+### Other
+
+- release v0.5.3 ([#408](https://github.com/devrandom-labs/mnesis/pull/408))
+
 ## [0.5.3](https://github.com/devrandom-labs/mnesis/compare/mnesis-inmemory-v0.5.2...mnesis-inmemory-v0.5.3) - 2026-10-20
 
 ### Other

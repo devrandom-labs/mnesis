@@ -178,7 +178,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "arrayvec",
  "thiserror",
@@ -194,7 +194,7 @@ dependencies = [
 
 [[package]]
 name = "mnesis-store"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "aligned-vec",
  "arrayvec",

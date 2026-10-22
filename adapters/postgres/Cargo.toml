@@ -22,9 +22,9 @@ tracing = ["dep:tracing"]
 [dependencies]
 bytes = { workspace = true, features = ["std"] }
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-mnesis = { version = "0.5.3", path = "../../crates/mnesis" }
-mnesis-store = { version = "0.5.3", path = "../../crates/store", features = ["subscription"] }
-mnesis-wake = { version = "0.5.3", path = "../../crates/wake" }
+mnesis = { version = "0.5.4", path = "../../crates/mnesis" }
+mnesis-store = { version = "0.5.4", path = "../../crates/store", features = ["subscription"] }
+mnesis-wake = { version = "0.5.4", path = "../../crates/wake" }
 sqlx = { workspace = true, features = ["migrate", "tls-rustls-ring-native-roots"] }
 thiserror = { workspace = true, features = ["std"] }
 tokio = { workspace = true, features = ["rt", "sync", "time"] }

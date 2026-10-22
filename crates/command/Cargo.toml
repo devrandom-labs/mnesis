@@ -19,8 +19,8 @@ tracing = ["dep:tracing"]
 [dependencies]
 bytes = { workspace = true, features = ["std"] }
 metrics = { workspace = true, optional = true }
-mnesis = { version = "0.5.3", path = "../mnesis", default-features = false }
-mnesis-store = { version = "0.5.3", path = "../store", default-features = false }
+mnesis = { version = "0.5.4", path = "../mnesis", default-features = false }
+mnesis-store = { version = "0.5.4", path = "../store", default-features = false }
 parking_lot = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -33,9 +33,9 @@ workspace-hack = { version = "0.1", path = "../workspace-hack" }
 
 [dev-dependencies]
 futures = { workspace = true, features = ["std", "async-await", "executor"] }
-mnesis-fjall = { version = "0.5.3", path = "../../adapters/fjall" }
-mnesis-inmemory = { version = "0.5.3", path = "../../adapters/inmemory" }
-mnesis-store = { version = "0.5.3", path = "../store", default-features = false, features = ["projection"] }
+mnesis-fjall = { version = "0.5.4", path = "../../adapters/fjall" }
+mnesis-inmemory = { version = "0.5.4", path = "../../adapters/inmemory" }
+mnesis-store = { version = "0.5.4", path = "../store", default-features = false, features = ["projection"] }
 proptest = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
