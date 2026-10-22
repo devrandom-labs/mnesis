@@ -2465,3 +2465,16 @@ support; default application execution still installs no collectors. Record that
 distinction, not a claim that default test dependencies are absent. README at
 most55lines, existing CI one enabled-example invocation, aggregate650 retained.
 CLI next edit budget60lines; no source change presently required.
+
+Protected metrics integration before edits: PR419 merged533c1f5d with all44
+checks/0threads. Incoming main's ENTIRE tree7bd3c749 equals signed9c8c95cc,
+an ancestor of qualified exporter7998b343. Normal merge preview reports source/
+record conflicts because protected squash history lacks the feature commits.
+Preserve pre-edit hypothesis in a retained stash, perform ordinary no-commit
+merge and save conflict/index evidence. Resolve only task-owned conflicted paths
+from qualified7998 after verifying incoming whole-tree identity. Before adding
+new delivery records, require ENTIRE final tree7a3320ab equal exporter7998.
+This is ancestry reconciliation with0source behavior change, not accepting
+unknown incoming edits. No force/rewrite/admin/hook bypass. Normal signed merge
+commit and same12gates; cached hook results mean0fresh runtime tests. Then
+change PR420 base main before push to trigger actual main-base synchronization.

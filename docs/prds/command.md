@@ -1,6 +1,6 @@
 # Command processor extraction and delivery
 
-Status: CP0–CP4 and CP5 lifecycle/resource PR417 plus tracing PR418 protected-merged; metrics PR419 awaiting protected delivery. Application exporter passes local default/telemetry execution; broad gates and CP6–CP9 remain.
+Status: CP0–CP4 and CP5 lifecycle/resource PR417, tracing PR418 and metrics PR419 protected-merged. Exporter PR420 passes local default/telemetry and host gates; main-base CI and CP6–CP9 remain.
 Updated: 2026-10-22. Owners: Mnesis command maintainers and the Labcast consumer owner.
 Planning branch: `docs/command-prd`.
 Mnesis baseline: `27de3b4a4aad59909ffaccdf6fa83e8b256ccca6`, version 0.5.3.

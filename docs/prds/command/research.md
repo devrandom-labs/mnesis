@@ -3375,3 +3375,44 @@ run/child, graph/Hakari rejection and exact18source comparisons/full Nix results
 635authored lines in10source/config owners;18new locked registry packages,
 0old version/checksum updates,0generated hack changes,0core Rust edits/API roots.
 Protected exporter PR/current-head native CI remain; CP6–CP9 are not complete.
+
+## Metrics protected delivery and exporter parent integration
+
+PR419 protected-merged2026-10-22T01:38:21Z as
+533c1f5db4c487753d996e548c315013e69f5b1c, parent5498d439; reviewed signed head
+9c8c95ccb61a11561cdee8c5e6b180a0e0c4f973,44SUCCESS/1scheduled-only skip/
+0unresolved threads. Ordinary exact-head squash, no admin/force/bypass. Expected
+local and GitHub virtual97329756758e8ee68bfac430fb9e57dcd564ab4c and actual merge
+trees all7bd3c7495a23052177f05189d569f02a224a0dfa. GitHub verifies merge
+signature as valid; local unavailable GitHub key is not reported as local GPG
+verification. Both current push39702379943 and PR39702385112 terminalSUCCESS.
+
+Actual execution accounting and three reviews:61push/81PR harness outcomes,
+6zero-case compiler-only each;55/75nonzero invocations. Push standalone Postgres
+output is cached run-log echo and not another runtime run. Each Nix job executes
+24fresh invocations (3corpus/1workspace/20native); PR standalone executes20more.
+Workspace1639/145bins/5original exclusions/4slow,142.723s push and140.645s PR.
+Four feature modes45/49/46/50 remain and10command children per workflow are
+separately three-reviewed. Native adapter full profiles264/149/168/176/173/174/
+150 and exact smoke laws retain original limits/guards. These do not certify
+processor/Postgres composition, which remains CP6.
+
+Current native mutation artifact12393562495:69mutants37caught32compiler-only/
+0missed/timeout; baseline50PASS3.504s and38actual runtime runs with2children,
+each reviewed from its actual first failure/diagnostic. Eight existing codec
+fuzz campaigns terminalSUCCESS, each separately reviewed; not command fuzz.
+Exact raw logs, metadata, reviews and merge/signature evidence archived in
+`evidence/cp5-metrics-delivery.tar.gz`, SHA256
+8dc2bcf0a1b47180ee56ac2288e331a9870c3ed89551b9c2e0f0c3787a68d7f3.
+
+Exporter signed7998b3430e6dac9706c8133273b9b987e0f35f22 (localGPGG),
+tree7a3320ab86913cd4de60fdeda93ecb3f8cca9af4 published as draftPR420. Its normal
+signed hook reuses accepted12outputs/0fresh runtime tests. Parent integration
+pre-edit hypothesis retained in stashcb935c49a54ece1393ade9551b766fe78f156d0d.
+Incoming main ENTIRE tree equals signed9c8c95cc, an ancestor of7998. Ordinary
+no-commit merge produces squash-ancestry conflicts; save index/path receipts,
+restore only ten task-owned conflicted paths from qualified7998, then verify
+ENTIRE final tree7a3320ab before adding any new records. No source/config/lock/
+assertion/workload/gate change. Restore pre-edit hypothesis afterward. This
+preserves protected incoming work exactly; normal signed merge/hook/push and
+main-base PR synchronization remain required.
