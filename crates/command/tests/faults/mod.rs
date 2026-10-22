@@ -55,6 +55,7 @@ pub enum Fault {
     Rollback,
     CompetingCommit,
     Delayed(Arc<Gate>),
+    HoldCommitted(Arc<Gate>),
 }
 #[derive(Debug, thiserror::Error)]
 pub enum FaultError<E> {
@@ -136,6 +137,15 @@ impl<S: RawEventStore + 'static> RawEventStore for FaultStore<S> {
                 .append(id, expected, envelopes)
                 .await
                 .map_err(append_error),
+            Fault::HoldCommitted(gate) => {
+                let position = self
+                    .inner
+                    .append(id, expected, envelopes)
+                    .await
+                    .map_err(append_error)?;
+                gate.wait().await;
+                Ok(position)
+            }
             Fault::CompetingCommit => {
                 self.inner
                     .append(id, expected, envelopes)

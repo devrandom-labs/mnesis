@@ -3416,3 +3416,315 @@ ENTIRE final tree7a3320ab before adding any new records. No source/config/lock/
 assertion/workload/gate change. Restore pre-edit hypothesis afterward. This
 preserves protected incoming work exactly; normal signed merge/hook/push and
 main-base PR synchronization remain required.
+## CP6 native Fjall composition
+
+Isolated feat/command-native starts from signed exporter7998b343 (draftPR420,
+metrics dependencyPR419). Existing command Counter/Operation/finish owners are
+reused; two existing workspace dev dependencies add only two command lock-entry
+edges, no package/version/checksum or normal dependency change. Native Hakari
+preview exits0 with unchanged generated output. Canonical research initializer
+resumes existing records without replacing them. Before execution, native test
+formats to190lines (initial180estimate overrun10 disclosed; next edit ceiling220).
+Pre-execution fixture review changes invalid `{` EOF to invalid `!` syntax to
+match the strong typed JSON source oracle. No runtime failure hidden or weakened.
+
+First native run2032eebe-bf9d-407d-8907-d079d12ea2ff:
+1PASS/1binary/0SKIP/0.414s, compile6.72s, locked actual fjall target. Three reviews:
+1. Contract/counterexamples: real safe-default SyncAll Fjall on a temporary disk
+   path accepts Add7, exact duplicate and accepted Ignore; mismatch/stale CAS/
+   typed rejection produce no third acceptance. Exact physical receipts, state7,
+   two decoded original v2 records/envelope schema/facts pass. Both processor
+   completions are observed, Store clones released and native adapters explicitly
+   closed. Reopen SAME path, resume shutdown report and repeat both originals/
+   receipts; raw payloads remain byte-identical. Append real malformed physical
+   version3 and require typed syntax JSON source on read AND old-ID retry; raw
+   prefix stays unchanged and only the injected `!` tail exists.
+2. Execution/selection/services: actual one native disk integration case, no
+   filters/ignore/child/environment skip/database service. Explicit native
+   close succeeds twice; driver observes both command joins. This is graceful
+   close/reopen, not abrupt process loss/power-loss or Postgres evidence.
+3. Assertions/source/false positives: new processor-owned test calls actual
+   public processor/store/codec and native Fjall; no copied acceptance engine,
+   new production seam or assertion/workload/deadline/gate change. Wrong/empty
+   reopened history cannot satisfy receipt/state/byte checks; skipped corruption
+   validation cannot satisfy both exact error assertions. Native default-only
+   evidence; broader features/strict lint/process loss/native CI still required.
+
+Strict alltarget/allfeature Clippy fails before runtime only because shared
+finish.rs uses its existing diagnostic expect(). This target opted into unwrap
+but lacked the test-only expectation permission its other callers supply. Keep
+the shared3s deadline and diagnostic unchanged; apply permission narrowly to the
+imported test module with reason, not global lints or a production waiver.
+
+First crash-boundary run87f5fa9d-ccc0-4d26-9383-655aafa7c46d:
+1FAIL/0PASS/0SKIP/30.025s, compile1.89s, exit100. Three reviews:
+1. Contract/counterexamples: parent does not receive the exact native boundary
+   line within30s. No graceful or process-loss recovery guarantee is certified;
+   after-kill/reopen assertions and second boundary are not reached. This is a
+   fixture handshake failure, not evidence of a processor commit defect.
+2. Execution/selection: actual one native crash target and first actual child
+   spawn. Parent fails at fjall_crash.rs146 on timeout; no environment green skip.
+   Explicit kill/wait assertions are not reached. Tokio kill_on_drop is enabled
+   for failure cleanup, but no observed child reap or SIGKILL credit from this
+   failed run. No second child or database execution claimed.
+3. Assertion/source: strong exact-line marker and30s bound retained. Initial
+   source does not retain the last observed pipe line, so precise root cause
+   remains unproven. Hypothesis: single-thread libtest prints its test prefix
+   without a newline before the marker. Add bounded one-line diagnostics only,
+   rerun unchanged marker/bound, inspect actual bytes before selecting a fix.
+First child separately: (1) boundary not acknowledged, no native row guarantee
+claimed; (2) actual spawned child with pending pipe reader, explicit completion
+unobserved; (3) parent rejects missing exact marker rather than proceeding with
+an unproven crash boundary. Preserve original failed log/source.
+
+Diagnostic crash runac620891-75ef-4ec4-af46-0c3aa8ed71a6:
+1FAIL/0PASS/0SKIP/30.026s, compile1.64s, exit100. Three reviews:
+1. Contract/counterexamples: unchanged parent exact-marker assertion fails,
+   now retaining actual line `test exact_original_recovers_after_killed_process_on_both_sides_of_commit ... MNESIS_COMMAND_NATIVE_BOUNDARY`.
+   Native child reaches the before-append row assertion and marker, but libtest
+   prefixes that line. Kill/reopen/second boundary remain unexecuted/no credit.
+2. Execution/selection: one actual nextest case and one child; timeout at native
+   diagnostic assertion148. No second child, explicit kill/reap or recovery
+   credit. Same30s bound, same child exact test selector and service resources.
+3. Assertions/source: only one retained last-line diagnostic added; original
+   marker equality and deadlines unchanged. Actual bytes confirm the prefix
+   hypothesis. Fix by emitting a leading newline before marker; keep exact-line
+   matching and assertions rather than accepting arbitrary substring output.
+First child separately: (1) actual row0/native gate proof precedes observed marker
+bytes; (2) child still pending, no completed Rust child case or explicit reap
+claimed; (3) exact parent handshake rejects prefixed marker instead of silently
+proceeding. This is fixture evidence, not a caught product mutation.
+
+Fixed crash runc1acca09-3fa9-46a9-a0dc-be354711ce4a:
+1PASS/1binary/0SKIP/0.796s, compile1.61s, exit0. Three reviews:
+1. Contract/counterexamples: two actual hard-kill boundaries now execute. Before
+   raw append, real native rows0; after actual SyncAll append but withheld caller
+   response, real complete row1/original receipt/fact7. Exact marker emitted only
+   after those checks. Both actual children terminate with observed SIGKILL9.
+   Reopen SAME paths without process-local shutdown reports, retain exact caller
+   original, require respectively absent/existing receipt and state0/7, submit
+   exact original and finish with exactly one complete acceptance/state7. Parent
+   stops/observes recovered command workers and closes both native adapters.
+2. Execution/selection: one actual locked native Rust case plus two actual killed
+   child processes (not three nextest cases). No filters/ignore/database/green
+   environment skip. Both30s handshakes and3s kill/wait bounds unchanged; observed
+   exit signal9 excludes a child panic or graceful close. No power-loss/syscall
+   failure or Postgres proof inferred from SIGKILL process loss.
+3. Assertions/source: only writer adds a leading newline, exact parent marker
+   equality retained; bounded last-line diagnostic remains. Original row/error/
+   receipt/order assertions and deadlines unchanged. FaultStore adds one shared
+   held-after-real-commit branch, no processor production change or new runtime.
+Before child separately: (1) actual gate proves append not started and native
+rows0; (2) selected exact child reaches marker then parent observes kill/reap9;
+(3) native row check/marker equality and signal reject premature/normal exit.
+Committed child separately: (1) actual native completed append yields exactly
+one decoded original acceptance before response is held; (2) actual second
+child reaches exact marker and observed kill/reap9; (3) original receipt/facts
+and reopened state7 reject skipped/partial/duplicate commit or fake boundary.
+Neither killed child is claimed as a normally completed Rust test case.
+
+Earlier graceful native target strict allfeature/alltarget Clippy nowPASS0.97s
+after narrow shared-test permission. New crash target lint and whole feature
+owner runs remain to execute. Native source194+crash210+fault10 at this checkpoint remains within
+the preregistered focused budgets; no normal dependency/API or package updates.
+
+Strict crash lint rejects StdoutLock across pending.await despite explicit drop.
+Keep marker bytes and flush unchanged, use lexical scope to release the guard
+before awaiting. No Send waiver, deadline or assertion change. Initial lint
+diagnostic retained; full enabled-owner runtime will re-execute the crash law.
+
+Whole enabled ownerb56c8c79-cd94-40cc-809e-3ef1bc941cab:
+52PASS/9binaries/1original ignored measurement/1.636s, compile3.33s, locked
+--all-features, exit0. Strict alltarget/allfeature ClippyPASS1.19s. Three reviews:
+1. Contract/counterexamples: original45laws,4trace context/lifecycle laws and
+   seven-profile metrics case retained, plus graceful native Fjall/corrupt tail
+   and two-boundary SIGKILL recovery laws. Exact originals, physical receipts,
+   typed errors, CAS, late-write barriers, native task custody, metric counts/
+   labels/gauges and trace context still pass. Both native paths release adapter
+   handles; each recovered worker is stopped and observed. No Postgres/power-loss
+   or measured overhead claim.
+2. Execution/selection/services: actual52selected/9bins,1unchanged ignored
+   benchmark, no environment skip for either native Fjall law. Native graceful
+   case0.678s and crash0.984s; four command-owned children actually execute:
+   two existing successful bounded subprocesses plus two intentionally killed
+   native processes. No collector installed in the separate Fjall targets;
+   metric/subscriber fixtures own their recording globals in separate processes.
+3. Assertions/source/false positives: exact source after lexical StdoutLock fix
+   and unchanged strong marker/deadlines/row checks. Existing assertions/workloads/
+   feature selection/gates unchanged. Original handshake failures retained; no
+   fixture timeout counted as a caught processor defect. Enabled compile does
+   not replace default/feature-isolation or whole Nix/native CI proof.
+Reentrant child separately: (1) callback stop/exact wake1/Closed/normal empty join;
+(2) parentPASS0.023s checks exact-one-child/status/2s; (3) native callback/results
+reject skipped notification or stuck process. Timer child: (1) native disabled-
+timer panic/original uncertain ID/zero rows/Closed/empty report; (2) parentPASS
+0.018s checks exact-one-child/status/2s; (3) exact native payload/result rejects
+wrong or missing execution. Before-append killed child: (1) real gate+rows0;
+(2) exact marker then observed SIGKILL9/reap before reopen; (3) absent initial
+receipt/state0 followed by exact original and one final record rejects skipped
+or premature append. Committed killed child: (1) real SyncAll append/complete
+original receipt/fact before held reply; (2) exact marker and observed kill/reap9;
+(3) reopened original receipt/state7 and final exactly-one record reject missing,
+partial or duplicate commit. These are not additional top-level test cases.
+
+Native parent update preserves full snapshot
+45149aa991a61ad53cd859b10f8e8bb8f63683a8922d5e6dabb710574fb145d8,
+patch and retained stash4d703e6004503cd6ed3fb1130e3c41b5b838f0b3. Fast-forward
+to signedc4fed5f9; only hypothesis/research append conflicts, all three stages
+retained and native union preserves both histories. All five native source/
+manifest/lock hashes match exactly afterward. Normal processor tree also cmp
+matches the pre-native exporter tree after path normalization: no native adapter,
+SDK/exporter or RNG edge leaked into normal dependencies. New dev edges only.
+Current authored native files194+211 and shared fault10=415lines, within limits.
+
+Default ownerb84b4233-a2e2-452d-a81c-740fb6c0a1fe:
+47PASS/9binaries/1original ignored measurement/1.434s, compile3.28s. Three reviews:
+1. Contract/counterexamples: original45command laws and both new actual Fjall
+   laws pass. Graceful byte/receipt/no-op/corruption checks and two exact native
+   SIGKILL boundary recoveries remain; typed failures, CAS and late-write custody
+   unchanged. No enabled metric/trace/SDK runtime claim from default selection.
+2. Execution/selection: actual locked --no-default-features47cases, no native
+   Fjall environment skip. Four actual command children: original2bounded
+   successful processes plus2observed SIGKILL9 processes. No database or collector.
+3. Assertions/source: five exact hashes after parent integration and normalized
+   normal dependency tree equality; unchanged assertions/workloads/selector/
+   marker/deadlines/gates. Disabled integration harnesses get no enabled credit.
+Reentrant child separately: (1) callback stop/wake1/Closed/normal observed join;
+(2) actual successful parent checks exact-one-child/status/2s; (3) exact results
+reject skipped/stuck child. Timer child: (1) exact native panic/original uncertain
+ID/zero rows/Closed/empty report; (2) successful parent checks exact-one/status/2s;
+(3) native cause/summary rejects wrong or missing child. Before killed child:
+(1) actual append gate and rows0; (2) exact marker/observed kill+reap9; (3) absent
+receipt/state0 then exact-original one final record. Committed killed child:
+(1) actual SyncAll complete acceptance before held response; (2) exact marker/
+kill+reap9; (3) reopened original receipt/state7 and exactly-one final acceptance.
+No killed child is inflated into another completed Rust case.
+
+Tracing ownerbf53e0d7-d4f6-4d0c-9d93-64816f1cb1ec:
+51PASS/9bins/1original ignored measurement/1.606s, compile3.49s. Three reviews:
+1. Contract: original45laws plus4actual recording-subscriber laws and2native
+   Fjall laws; queue-carried caller context, native causes, cleanup/reentrancy,
+   invalid request/no payload observations remain. Native disk bytes/corruption
+   and both SIGKILL boundaries retain exact receipts/state/record counts.
+2. Execution: locked tracing-only51selected, actual native graceful0.657s/crash
+   0.956s; four actual command children. No metrics case, database or SDK exporter
+   credited; separate native binaries have no installed subscriber/recorder.
+3. Source/assertions: same five native hashes and protected parent, no source,
+   workload/marker/deadline/selector/gate changes; tracing feature only changes.
+   Default passing cases do not substitute for the four selected tracing laws.
+Children separately: reentrant (1) callback stop/wake1/Closed/normal join,
+(2) actual parent exact-one/status/2s, (3) exact outcomes reject skipped/deadlock;
+timer (1) native timer panic/original uncertain ID/zero rows/Closed/empty report,
+(2) actual parent exact-one/status/2s, (3) native cause rejects wrong/missing test;
+before (1) real gate/rows0, (2) exact marker/observed SIGKILL+reap9, (3) original
+absent then exactly-one record/state7; committed (1) actual SyncAll row1/original
+receipt/fact before held reply, (2) exact marker/observed kill+reap9, (3) persisted
+receipt/state7 and one final record reject lost/duplicate commit. No extra suites.
+
+Metrics owner10fe57ab-7343-42a1-87a0-684b5b3da639:
+48PASS/9bins/1original ignored measurement/1.440s, compile3.48s. Three reviews:
+1. Contract: original45laws, seven-profile native-facade metric accounting law
+   and2Fjall laws execute. Exact native data/receipts/resources, two-host pending
+   gauges, finite labels, unknown response counts and first-stop durations stay
+   checked. Disk corrupt-tail and both actual SIGKILL recoveries remain intact.
+2. Execution: actual locked metrics-only48selected, native graceful0.599s/crash
+   0.932s;4command children reached. No tracing integration, database or SDK
+   exporter credit; recording globals stay in the owning metric process.
+3. Source/assertions: same qualified five hashes, original selectors/limits/
+   marker/workloads/gates, feature selection only. No disabled tracing harness
+   credited or fixture failure misclassified as caught product mutation.
+Children separately: reentrant (1) exact wake1/stop/Closed/normal join,
+(2) actual parent exact-one/status/2s, (3) missing callback/deadlock rejected;
+timer (1) exact native panic/uncertain ID/zero rows/Closed/empty report,
+(2) actual parent exact-one/status/2s, (3) native cause/result rejects wrong child;
+before (1) actual append gate/rows0, (2) marker/SIGKILL9/reap, (3) absent receipt/
+state0 then original yields one record/state7; committed (1) actual SyncAll row1/
+original receipt/fact, (2) marker/kill9/reap, (3) exact reopened and final original
+receipt/state/count reject loss, fake boundary or duplicate. Not extra suites.
+
+Optimized owner57849fda-2a69-4787-83e4-505c22772ce0:
+52PASS/9bins/1original ignored measurement/0.930s, compile23.47s. Three reviews:
+1. Contract: same original45laws,4recording-subscriber laws, seven-profile metric
+   fixture and2native Fjall laws under optimized code. Exact identity/receipt/
+   byte/corruption/typed-cause/barrier/resource assertions retained. Graceful
+   native0.635s and both process-loss boundaries0.929s pass with observed cleanup.
+2. Execution: actual locked --release --all-features52cases and4command children,
+   no database/environment skip or extra measurement credit. These test times
+   are not CP6 latency distributions or a performance comparison.
+3. Source/assertions: same five qualified hashes after parent integration;
+   build profile only changes. No bound, workload, marker, test selection, source
+   assertion or gate weakened. All four feature counts47/51/48/52 and this release
+   run remain separate from full Nix/Linux CI qualification.
+Reentrant child: (1) actual wake1/stop/Closed/normal observed join; (2) parentPASS
+0.019s with exact-one/status/2s; (3) exact outcomes reject deadlock/skipped callback.
+Timer child: (1) native timer panic/original uncertain ID/zero rows/Closed/empty
+report; (2) parentPASS0.020s with exact-one/status/2s; (3) exact native cause/result
+reject wrong/missing child. Before child: (1) native gate/rows0 before append;
+(2) exact marker plus observed kill/reap9; (3) absent receipt/state0 then exactly
+one original acceptance/state7. Committed child: (1) actual SyncAll complete row1
+and original receipt/fact before held reply; (2) exact marker and kill/reap9;
+(3) reopened original receipt/state7 and one final record reject fake boundary,
+loss, partial publication or duplicate retry. Killed cases not counted as extra
+completed Rust cases.
+
+Disk preparation used native Cargo metadata to prove the cleanup target was
+only /tmp/mnesis-command-exporter/target, then existing cargo clean --profile dev
+removed11239files/1.9GiB after its evidence/commit. Source, archives, Nix roots,
+release artifacts, native target and user work preserved. No runtime test credit
+from cleanup or metadata. Available disk about11GiB before native full gate.
+
+Native full host gate process5244 live, workspace
+6463036f-6521-448a-ab3c-282814c01fe1 selects1643/149binaries/5original exclusions.
+Three actual corpus harnesses2/1/1PASS/1s each independently three-reviewed in
+raw cp6-fjall-full-gate-corpus-reviews.md. Both native command cases pass within
+the still-running workspace (graceful3.806s/crash7.915s); no whole-run/all12pass
+claim before terminal status and source/output qualification. Retain same live
+handle; existing slow native property cases are not stopped/restarted.
+
+Native full workspace6463036f completes1643PASS/149bins/5original exclusions/
+15slow/501.813s. Three reviews and five actual command/example children separately
+recorded in raw cp6-fjall-full-gate-workspace-reviews.md.16source/manifest/helper/
+test owners cmp exactly actual input /nix/store/wd4msqx8kbygqybnklrzwfvbnmjv19k0-source;
+16valid checksum entries verified. Feature-specific runtime and native database
+claims remain separate. Nix process5244 still finishes compile-only checks at
+this observation; whole12output result not yet certified.
+
+Native full host process5244 TERMINAL EXIT0: all12aarch64-darwin outputs pass.
+All12accepted paths rooted via supported native offline realization/readlink
+and compared to the check map,0new runtime invocations. Qualified archive
+`evidence/cp6-fjall-qualified.tar.gz`, SHA256
+0b219663c72df6ee3cf3c01e959e63761fffc80cd68be472b1c35a0de4669fe0,
+retains original marker failures/diagnostic bytes, five-source hashes, parent
+stages/snapshot/stash proof, four feature modes/release,16input comparisons,
+actual full gate and distinct reviews for every run/five workspace children.
+No processor production/API/normal dependency change;415authored native test/
+shared-fault lines,2dev manifest edges and2generated lock lines. Protected PR/
+Linux native qualification and all remaining CP6–CP9 criteria stay required.
+
+## CP6 first Fjall Linux qualification and protected parent integration
+
+Signed feeab8df draftPR421 has14SUCCESS jobs in39711312051. Actual82harness
+outcomes/6zero-case compiler-only/76nonzero. Nix24fresh outcomes include3corpus,
+1643workspace cases/149bins/5original exclusions/3slow97.379s and20native adapter
+invocations. Standalone20more native invocations; later plain264echo excluded.
+Four core feature modes47/51/48/52 and SDK2PASS. Every actual invocation plus
+22command/example children independently three-reviewed. The two killed native
+children are observed signal9/reaped, not two extra successful Rust cases.
+No processor/Postgres/15min-soak/capacity/overhead/publication credit.
+
+PR420 now protected-merged as60e7edb239ed66e7d119c5ecf7a2b8904fbb8998;
+44SUCCESS/0threads, valid GitHub signature, exact expected/virtual/actual tree
+410edb749e0332e0e99cd2bf7db17d94a7b5b4e8. Exporter delivery archive SHA256
+ a3507e9c2a70e68ecf00d8595cead8e24758dd9b0d58b7fce482f5208940433f.
+CP5 implementation delivered; remaining CP6–CP9 stay required.
+
+Main60e7edb ENTIREtree equals qualified native ancestorc4fed5f9, so incoming
+ancestry has no unique source/record beyond that already inherited parent.
+Before ordinary merge retained tree/index/three conflict stages and hypothesis
+stashcd0d9d297d945a901ad9174928143d1d522bfdc2. Four ancestry-only record conflicts
+resolved from native HEAD only after that proof. Entire merged tree BEFORE new
+records equals feeab8df tree091b292dae6495f4fc4745b153939088614d98d0.
+All product/tests/manifests/lock/limits/assertions byte-identical; no runtime proof
+inferred from merge. New main-base current-head workflow/protected merge remains.
+First native CI/integration evidence: `evidence/cp6-fjall-first-ci.tar.gz`, SHA256
+f48b1a88b8aba9651e79fc823c128c38606dff3811fc73334e6d950bcf0dc9dd.
