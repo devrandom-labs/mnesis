@@ -36,7 +36,7 @@ merged tree24680399552aca8b52f383bcc3c79862669401b3. Two CP5 lifecycle defects,
 abort-custody loss and resource boundaries pass all12local gates/1639tests;
 focused PR417 protected-merged as972d2a696e021603dd9a03471c6c3fa36878933a,
 verified tree29d5408e7c9eb59eec31cdc0731011c37828c65a and42successful checks.
-Exporter and CP6 instrumentation acceptance stay open.
+CP5 implementation is delivered; CP6 instrumentation measurements stay open.
 The metrics library passes all12host checks, four command feature
 modes45/49/46/50 and release50, with37caught/32compiler-only mutations and no
 survivors. Its actual two-host accounting and three failed control experiments
@@ -47,15 +47,17 @@ the unchanged failed-job rerun passed and PR418 is protected-merged as
 f2036076a73a862d11cebeee45eee1f81ca541d2,44successful checks and0threads.
 Metrics PR419 protected-merged as533c1f5db4c487753d996e548c315013e69f5b1c,
 exact tree7bd3c7495a23052177f05189d569f02a224a0dfa,44successful checks/0threads.
-The application-owned exporter candidate passes both default and telemetry
+The application-owned exporter passes both default and telemetry
 executables/tests, strict Clippy and all12host gates (1641workspace tests).
 Native SDK context/Prometheus collection, explicit exporter failure and optimized
-execution are qualified locally; library SDK edges are absent. DraftPR420
-main-base CI and protected delivery,
+execution are qualified; library SDK edges are absent. PR420 protected-merged as
+60e7edb239ed66e7d119c5ecf7a2b8904fbb8998 with44successful checks/0threads;
+expected/virtual/actual tree410edb749e0332e0e99cd2bf7db17d94a7b5b4e8.
 CP6 overhead/native command composition and CP7–CP9 delivery remain required.
 The first native Fjall processor candidate passes graceful disk reopen/corrupt
 tail and two actual SIGKILL recovery boundaries, four modes47/51/48/52, release52
-and all12host gates/1643workspace cases. Its focused PR/Linux delivery remains;
+and all12host gates/1643workspace cases. PR421's14first Linux jobs pass;
+its main ancestry update/current-head protected delivery remains.
 Postgres command composition and performance/soak are not certified by this.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.
@@ -70,7 +72,7 @@ processor/Postgres, migration or new-package registry consumer is certified.
 | CP2 | Typed outcomes and uncertain-write custody | feature-complete | CP1 | CP6, CP7 |
 | CP3 | Identity, ordering and deterministic concurrent acceptance | feature-complete | CP1 | CP6 |
 | CP4 | Stored format compatibility and public accepted-fact consumption | feature-complete | CP1 | CP6, CP7 |
-| CP5 | Tower admission, observed shutdown, tracing and telemetry | candidate | CP1 | CP6, CP7 |
+| CP5 | Tower admission, observed shutdown, tracing and telemetry | feature-complete | CP1 | CP6, CP7 |
 | CP6 | Real adapter recovery, capacity and instrumentation overhead | candidate | CP2, CP3, CP4, CP5 | CP8 |
 | CP7 | Public consumers, documentation, packaging and existing CI | candidate | CP2, CP4, CP5 | CP8 |
 | CP8 | Final audits, protected merges and verified publication | candidate | CP6, CP7 | CP9 |

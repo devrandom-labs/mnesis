@@ -3700,3 +3700,31 @@ actual full gate and distinct reviews for every run/five workspace children.
 No processor production/API/normal dependency change;415authored native test/
 shared-fault lines,2dev manifest edges and2generated lock lines. Protected PR/
 Linux native qualification and all remaining CP6–CP9 criteria stay required.
+
+## CP6 first Fjall Linux qualification and protected parent integration
+
+Signed feeab8df draftPR421 has14SUCCESS jobs in39711312051. Actual82harness
+outcomes/6zero-case compiler-only/76nonzero. Nix24fresh outcomes include3corpus,
+1643workspace cases/149bins/5original exclusions/3slow97.379s and20native adapter
+invocations. Standalone20more native invocations; later plain264echo excluded.
+Four core feature modes47/51/48/52 and SDK2PASS. Every actual invocation plus
+22command/example children independently three-reviewed. The two killed native
+children are observed signal9/reaped, not two extra successful Rust cases.
+No processor/Postgres/15min-soak/capacity/overhead/publication credit.
+
+PR420 now protected-merged as60e7edb239ed66e7d119c5ecf7a2b8904fbb8998;
+44SUCCESS/0threads, valid GitHub signature, exact expected/virtual/actual tree
+410edb749e0332e0e99cd2bf7db17d94a7b5b4e8. Exporter delivery archive SHA256
+ a3507e9c2a70e68ecf00d8595cead8e24758dd9b0d58b7fce482f5208940433f.
+CP5 implementation delivered; remaining CP6–CP9 stay required.
+
+Main60e7edb ENTIREtree equals qualified native ancestorc4fed5f9, so incoming
+ancestry has no unique source/record beyond that already inherited parent.
+Before ordinary merge retained tree/index/three conflict stages and hypothesis
+stashcd0d9d297d945a901ad9174928143d1d522bfdc2. Four ancestry-only record conflicts
+resolved from native HEAD only after that proof. Entire merged tree BEFORE new
+records equals feeab8df tree091b292dae6495f4fc4745b153939088614d98d0.
+All product/tests/manifests/lock/limits/assertions byte-identical; no runtime proof
+inferred from merge. New main-base current-head workflow/protected merge remains.
+First native CI/integration evidence: `evidence/cp6-fjall-first-ci.tar.gz`, SHA256
+f48b1a88b8aba9651e79fc823c128c38606dff3811fc73334e6d950bcf0dc9dd.

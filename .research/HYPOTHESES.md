@@ -2614,3 +2614,19 @@ do not assert that missing rows alone resolve older uncertainty. Existing privat
 Cluster supports restart. Public accepted-fact subscription/projection/checkpoint
 and lost-final-notification/no-later-write, full capacity/performance/15min soak,
 uncertain writes with SDK collection and CP7–CP9 all remain required afterward.
+
+## CP6 native protected exporter-parent integration before edits
+
+PR421 old-headfeeab8df first Linux39711312051 now14SUCCESS; actual82harness
+outcomes/6zero-case/76nonzero and22command/example children independently
+three-reviewed in RAW/cp6-fjall-first-ci-reviews.md. Cached plain264 echo excluded.
+Main60e7edb has ENTIRE tree equal qualified ancestorc4fed5f9; no unique incoming
+source/records beyond the existing native parent. Preserve initial whole tree,
+patch and this hypothesis in a retained named stash, then ordinary no-commit
+main merge. Resolve ancestry-only conflicts from qualified native HEAD only
+AFTER whole incoming tree equality proof; resulting entire tree must equal
+feeab8df before delivery records. No source/assertion/workload/dependency change.
+Record original protected exporter delivery and actual native first CI in <=7
+record owners/160authored lines plus one compressed evidence archive. Normal
+all12gate/signed hook/nonforcepush; require fresh main-base full workflows,
+review and exact-head protected merge. No cached-runtime inflation or bypass.
