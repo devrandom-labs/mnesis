@@ -110,3 +110,20 @@ release artifacts preserved. All source snapshotted SHA316a19ea915b5c28d6f66f671
 3770ae393db2aaf44cbdfd58d0ac6654fe78f0. Earlier rm-f attempt automatically rejected
 and did not execute; supported Cargo cleanup succeeded, no approval needed.
 No user/global cleanup. Disk about12GiB last seen. No current local test/build.
+
+LATEST DELIVERY2026-10-22: tracing418 protected-merged5498d439 at00:37:51Z,
+expected/actual/virtual treef2036076;44SUCCESS1scheduledskip0threads. Unchanged
+Nix job attempt2 SUCCESS24fresh invocations (3corpus/default1639/20native), each
+3-reviewed. Original healthy fixture connect100ms failure preserved/unexplained,
+not claimed fixed. Delivery archive95c1c33f...88c706.
+
+Metrics PR419 initial3dfcd96a passes all14pushCIjobs39697914083;81harness outcomes
+(6zero-case), four modes45/49/46/50, all actual runs/10children separately reviewed.
+First-CI archive758cabaf...0a7aef. Ordinary signed merge4fe9d57e includes protected
+main5498d439, entire tree remains qualifieddf7b81f8. Squash ancestry conflicts
+resolved only after proving incoming main equals c13entire tree; task-owned path
+restoration and13hashes/whole-tree comparison prevent dropping any incoming work.
+Normal signed hook12cached/0new tests. Next publish delivery records, change419
+base main BEFORE pushing to trigger required PR sync, ordinary nonforce push;
+inspect new exact-head CI before merge. Exporter worktree separate from3dfbase;
+preserve all staged/unstaged/untracked before later integrating published parent.

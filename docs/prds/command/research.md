@@ -3054,3 +3054,46 @@ Current tracing CI archive cp5-trace-current-ci.tar.gz SHA
 actual signed/current virtual head, complete successful push, failed PRattempt1,
 all77/79outcome reviews, fixed63mutation/24actual-run evidence and8fuzz reviews.
 Attempt2 is live and receives no completion credit or overwrite of attempt1.
+
+## Protected tracing delivery and metrics parent (2026-10-22)
+
+PR418 normal exact-head squash merged at00:37:51Z as
+5498d439d10d70ed8f4ffa2e35778c198ced078a, reviewed signed head
+c13ef43fe4e60cdfacb3f747b5f00d867b412aee. Expected/virtual779e5877/actual
+merge tree allf2036076a73a862d11cebeee45eee1f81ca541d2; actual parent972d2a69.
+44SUCCESS/1scheduled skip/0unresolved threads, CLEAN, no admin/bypass. Original
+failed PRattempt1 retained. Unchanged failed Nix job attempt2 freshly runs24
+invocations:3corpus,1639default workspace140.644s and20native adapter runs;
+allincluding previously failing snapshot law pass without deadline/assertion/
+workload changes. Old combined-log UNKNOWN STEP entries are previous jobs and
+not reruns. Every fresh invocation/command child separately three-reviewed.
+Original healthy fixture delay remains unexplained, not claimed repaired.
+
+Exact delivery archive cp5-trace-delivery.tar.gz SHA
+95c1c33febc1994374020b84a114b5f503fb6eb81f26deb1b4dcd79f6d88c706 retains
+signed/virtual/main fingerprints, allcheck/thread receipts and full rerun evidence.
+Initial archive command referenced a nonexistent shorthand head filename; it
+failed and was replaced with the actual preserved signed-head receipt before
+hashing. No incomplete archive or failed helper receives verification credit.
+
+Metrics PR419 initially signed3dfcd96ae974d10bc98444c25be2935b04409ee2,
+qualified treedf7b81f8060fc6dc84161620bcdbe59437338b68, passes all14initial push
+CIjobs39697914083.81native harness outcomes (6zero-case compilation-only,
+75nonzero):3compiler/30unit/4command/3replay/1workspace/40nativeadapter. Actual
+four command modes45/49/46/50PASS, one original ignore each. All outcomes and
+10reached command subprocess invocations independently three-reviewed. Default
+1639cases/145binaries does not execute enabled telemetry laws. No exporter or
+native command CP6/performance credit. Archive cp5-metrics-first-ci.tar.gz SHA
+758cabaf42e6ceae81430b4c8cb00cac8c1cfa2142725874549b72e57c0a7aef retains
+CI/source/signature/hook and initial parent integration receipts.
+
+Ordinary signed parent merge4fe9d57eb340f0523224bea0cb9c42d3e7d3c860 has parents
+3dfcd96a/5498d439 and SAME qualified treedf7b81f8060fc6dc84161620bcdbe59437338b68.
+Git squash ancestry produced overlapping/add-add conflicts despite identical
+incoming main/c13trees. Preserve conflict/index evidence, prove git diff c13 main
+is empty, restore only task-owned conflicted paths from qualified3dfhead, then
+verify entire write-tree equals3df and all13source/manifest/fixture hashes.
+No incoming change lost and no code reinterpreted. First unresolved commit attempt
+failed; corrected normal signed hook accepts all12cached checks/0new tests. No
+force/rewrite/published history loss. New PR base/main exact-head CI still needed;
+parent merge alone does not complete metrics/CP5 or publication.

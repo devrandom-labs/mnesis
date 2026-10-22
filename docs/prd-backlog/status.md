@@ -42,7 +42,11 @@ modes45/49/46/50 and release50, with37caught/32compiler-only mutations and no
 survivors. Its actual two-host accounting and three failed control experiments
 are recorded in the feature research. Tracing PR418's required CI encountered
 a100ms healthy Postgres fixture setup timeout before adapter construction;
-the unchanged failed-job rerun is pending. App-owned exporter qualification,
+the unchanged failed-job rerun passed and PR418 is protected-merged as
+5498d439d10d70ed8f4ffa2e35778c198ced078a with exact tree
+f2036076a73a862d11cebeee45eee1f81ca541d2,44successful checks and0threads.
+Metrics draft PR419 passes its initial14CIjobs and allfour command feature modes.
+App-owned exporter qualification,
 CP6 overhead/native command composition and CP7–CP9 delivery remain required.
 Later requirements
 retain their unverified status until their own acceptance evidence exists.
